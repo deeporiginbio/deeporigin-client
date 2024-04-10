@@ -6,7 +6,7 @@ import pytest
 import requests_mock
 from deeporigin import read_cached_do_api_tokens
 from deeporigin.config import get_value
-from deeporigin.managed_data import _api as api
+from deeporigin.managed_data import _api
 
 # constants
 row_description_keys = {
@@ -16,10 +16,15 @@ row_description_keys = {
     "name",
     "dateCreated",
     "dateUpdated",
+    "createdByUserDrn",
     "editedByUserDrn",
+    "submissionStatus",
     "hid",
+    "hidNum",
     "validationStatus",
+    "cols",
     "parent",
+    "rowJsonSchema",
 }
 
 
@@ -30,8 +35,10 @@ AUTH_DOMAIN = get_value()["auth_domain"]
 
 
 @pytest.fixture
-def mocker():
+def mocker(pytestconfig):
     """mock endpoints of nucleus service"""
+
+    no_mock = pytestconfig.getoption("nomock")
 
     data = dict()
     for key in row_description_keys:
@@ -39,24 +46,51 @@ def mocker():
 
     tokens = read_cached_do_api_tokens()
 
-    print(API_URL)
+    if no_mock:
+        print("NO MOCKING! RuNNING LIVe")
+        with requests_mock.Mocker(real_http=True) as m:
+            yield m
+    else:
+        print("Mocking..")
 
-    with requests_mock.Mocker() as m:
-        m.post(
-            f"{API_URL}DescribeRow",
-            json={"data": data},
-        )
-        m.post(
-            f"{AUTH_DOMAIN}/oauth/token",
-            json=dict(access_token=tokens["access"]),
-        )
-        yield m
+        with requests_mock.Mocker() as m:
+            m.post(
+                f"{API_URL}DescribeRow",
+                json={"data": data},
+            )
+            m.post(
+                f"{AUTH_DOMAIN}/oauth/token",
+                json=dict(access_token=tokens["access"]),
+            )
+
+            # file download
+            m.post(
+                f"{API_URL}CreateFileDownloadUrl",
+                json=dict(
+                    data=dict(downloadUrl="https://deeporigin-amazonaws-GetObject")
+                ),
+            )
+
+            yield m
 
 
 def test_describe_row(mocker):
     """test describe_row, using mocked response"""
 
-    print(sys.executable)
-
-    row = api.describe_row(ROW_NAME)
+    row = _api.describe_row(ROW_NAME)
     assert set(row.keys()) == row_description_keys
+
+
+def test_create_file_download_url(mocker):
+    """test create_file_download_url"""
+
+    data = _api.create_file_download_url("_file:4Jii3X9t7PF3IcG6SDmo4")
+
+    assert "downloadUrl" in data.keys(), "Expected to find `downloadUrl` in response"
+
+    expected_strings = ["deeporigin", "amazonaws", "GetObject"]
+
+    for string in expected_strings:
+        assert (
+            string in data["downloadUrl"]
+        ), f"Expected to find {string} in returned downloadUrl"
