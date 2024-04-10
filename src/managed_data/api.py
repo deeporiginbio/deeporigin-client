@@ -117,7 +117,7 @@ def get_workspaces() -> list[dict]:
     return [obj for obj in objects if obj["type"] == "workspace"]
 
 
-@beartype
+# @beartype
 def get_dataframe(
     database_id: str,
     *,
@@ -163,9 +163,13 @@ def get_dataframe(
                 file_ids,
                 use_file_names,
             )
-            data[column["id"]].extend(value)
+            if column["cardinality"] == "many":
+                data[column["id"]].append(value)
+            else:
+                data[column["id"]].extend(value)
 
     # make the dataframe
+
     df = pd.DataFrame(data)
     df.attrs["file_ids"] = file_ids
 
@@ -217,7 +221,7 @@ def _type_and_cleanup_dataframe(
     for column in columns:
         col_id = column["id"]
 
-        if column["type"] == "select":
+        if column["type"] == "select" and column["cardinality"] == "one":
             categories = column["configSelect"]["options"]
             df[col_id] = pd.Categorical(df[col_id], categories=categories)
 

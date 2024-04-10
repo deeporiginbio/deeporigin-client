@@ -26,11 +26,12 @@ row_description_keys = {
 API_URL = get_value()["nucleus_api_endpoint"]
 DB_NAME = "db-dna"
 ROW_NAME = "dna-1"
+AUTH_DOMAIN = get_value()["auth_domain"]
 
 
 @pytest.fixture
-def mock_describe_rows():
-    """mock endpoint to mimic what ListRows would return"""
+def mocker():
+    """mock endpoints of nucleus service"""
 
     data = dict()
     for key in row_description_keys:
@@ -38,19 +39,21 @@ def mock_describe_rows():
 
     tokens = read_cached_do_api_tokens()
 
+    print(API_URL)
+
     with requests_mock.Mocker() as m:
         m.post(
             f"{API_URL}DescribeRow",
             json={"data": data},
         )
         m.post(
-            "https://formicbio-dev.us.auth0.com/oauth/token",
+            f"{AUTH_DOMAIN}/oauth/token",
             json=dict(access_token=tokens["access"]),
         )
         yield m
 
 
-def test_describe_row(mock_describe_rows):
+def test_describe_row(mocker):
     """test describe_row, using mocked response"""
 
     print(sys.executable)

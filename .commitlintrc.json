@@ -1,0 +1,32 @@
+{
+  "extends": [
+    "@commitlint/config-conventional"
+  ],
+  "rules": {
+    "body-max-line-length": [
+      1,
+      "always",
+      100
+    ],
+    "footer-max-line-length": [
+      1,
+      "always",
+      100
+    ],
+    "header-max-length": [
+      1,
+      "always",
+      100
+    ],
+    "scope-enum": [
+      1,
+      "always",
+      [
+        "testing",
+        "managed-data",
+        "feature-flags",
+        "cli"
+      ]
+    ]
+  }
+}

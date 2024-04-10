@@ -33,6 +33,7 @@ test = [
     "parameterized",
     "requests-mock",
 ]
+jupyter = ["ipykernel"]
 
 [tool.setuptools]
 package-dir = {"deeporigin" = "src"}
