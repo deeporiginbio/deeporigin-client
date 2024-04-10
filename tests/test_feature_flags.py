@@ -1,7 +1,7 @@
 import unittest
 import unittest.mock
 
-from deep_origin import config, context, feature_flags
+from deeporigin import config, context, feature_flags
 
 
 class TestCase(unittest.TestCase):

@@ -31,12 +31,14 @@ def get_do_api_tokens() -> tuple[str, str]:
     config = get_config()
 
     if os.path.isfile(config.api_tokens_filename):
+        print(f"file exists @ {config.api_tokens_filename}")
         tokens = read_cached_do_api_tokens()
         refresh_token = tokens["refresh"]
 
         access_token = refresh_access_to_do_platform(refresh_token)
 
     else:
+        print("No cached file, signing in...")
         access_token, refresh_token = sign_into_do_platform()
 
     return access_token, refresh_token

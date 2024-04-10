@@ -4,8 +4,8 @@ import unittest
 import unittest.mock
 
 import yaml
-from deep_origin import config
-from deep_origin.exceptions import DeepOriginException
+from deeporigin import config
+from deeporigin.exceptions import DeepOriginException
 
 
 class TestCase(unittest.TestCase):

@@ -4,9 +4,9 @@ import unittest.mock
 import warnings
 
 import capturer
-from deep_origin import __version__, cli
-from deep_origin.exceptions import DeepOriginException
-from deep_origin.warnings import DeepOriginWarning
+from deeporigin import __version__, cli
+from deeporigin.exceptions import DeepOriginException
+from deeporigin.warnings import DeepOriginWarning
 
 
 class TestCase(unittest.TestCase):

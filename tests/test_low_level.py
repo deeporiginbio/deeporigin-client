@@ -1,10 +1,12 @@
 """this tests low level functions in the data API"""
 
+import sys
+
 import pytest
 import requests_mock
-from deep_origin import sign_into_do_platform
-from deep_origin.config import get_value
-from deep_origin.data_api import low_level as ll
+from deeporigin import read_cached_do_api_tokens
+from deeporigin.config import get_value
+from deeporigin.managed_data import _api as api
 
 # constants
 row_description_keys = {
@@ -34,10 +36,16 @@ def mock_describe_rows():
     for key in row_description_keys:
         data[key] = "placeholder"
 
+    tokens = read_cached_do_api_tokens()
+
     with requests_mock.Mocker() as m:
         m.post(
             f"{API_URL}DescribeRow",
             json={"data": data},
+        )
+        m.post(
+            "https://formicbio-dev.us.auth0.com/oauth/token",
+            json=dict(access_token=tokens["access"]),
         )
         yield m
 
@@ -45,7 +53,7 @@ def mock_describe_rows():
 def test_describe_row(mock_describe_rows):
     """test describe_row, using mocked response"""
 
-    sign_into_do_platform(mock=True)
+    print(sys.executable)
 
-    row = ll.describe_row(ROW_NAME)
+    row = api.describe_row(ROW_NAME)
     assert set(row.keys()) == row_description_keys
