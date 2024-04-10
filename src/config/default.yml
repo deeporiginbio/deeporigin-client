@@ -1,0 +1,65 @@
+env: local
+organization_id: null
+bench_id: null
+api_endpoint: null
+nucleus_api_endpoint: null
+auth_domain: null
+auth_device_code_endpoint: /oauth/device/code
+auth_token_endpoint: /oauth/token
+auth_audience: null
+auth_grant_type: urn:ietf:params:oauth:grant-type:device_code
+auth_client_id: null
+auth_client_secret: null
+list_bench_variables_query_template: |
+  query {
+    listBenchSecrets(drn: "${bench_drn}") {
+      ... on EnvironmentValueOutput {
+        drn
+        type
+        name
+        key
+        value
+      }
+      ... on ConfigurationValueOutput {
+        drn
+        type
+        name
+        filename
+        value
+      }
+      ... on AwsSecretOutput {
+        drn
+        type
+        name
+        profileName
+        accessKey
+        secretKey
+        defaultRegion
+      }
+      ... on GitSecretOutput {
+        drn
+        type
+        name
+        repository
+        username
+        password
+      }
+      ... on GPGSecretOutput {
+        drn
+        type
+        name
+        value
+      }
+      ... on SshSecretOutput {
+        drn
+        type
+        name
+        filename
+        value
+      }
+    }
+  }
+api_tokens_filename: ~/.deep-origin/api_tokens
+variables_cache_filename: ~/.deep-origin/variables.yml
+auto_install_variables_filename: ~/.deep-origin/auto-install-variables.sh
+feature_flags: null

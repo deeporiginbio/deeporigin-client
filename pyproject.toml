@@ -1,0 +1,50 @@
+[project]
+name = "deeporigin"
+description = "Tool for managing Deep Origin ComputeBenches"
+authors = [
+    {name = "Deep Origin", email = "support@deeporigin.com"},
+]
+classifiers = [
+    "Environment :: Console",
+    "Intended Audience :: End Users/Desktop",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3",
+    "Topic :: Utilities",
+]
+dependencies = [
+    "cement >= 3",
+    "confuse",
+    "pydantic >= 2.5.0",
+    "python-crontab",
+    "python-dotenv",
+    "pyyaml",
+    "requests",
+    "termcolor",
+    "validators",
+    "pandas",
+    "beartype",
+]
+dynamic = ["version"]
+
+[project.optional-dependencies]
+test = [
+    "capturer",
+    "parameterized",
+    "requests-mock",
+]
+
+[tool.setuptools]
+package-dir = {"deeporigin" = "src"}
+include-package-data = true
+
+[tool.setuptools.dynamic]
+version = {file = ["src/VERSION"]}
+
+[project.scripts]
+deeporigin = "deeporigin.cli:main"
+
+[build-system]
+requires = [
+  "setuptools >= 40.9.0",
+]
+build-backend = "setuptools.build_meta"

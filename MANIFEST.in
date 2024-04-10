@@ -1,0 +1,2 @@
+include src/VERSION
+include src/config/default.yml
