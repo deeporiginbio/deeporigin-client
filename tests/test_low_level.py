@@ -57,7 +57,7 @@ list_database_rows_keys = {
     "validationStatus",
 }
 
-MOCK_URL = "https://deeporigin.mock/"
+MOCK_URL = "https://deeporigin.mock/nucleus-api/api/"
 DB_NAME = "db-dna"
 ROW_NAME = "dna-1"
 AUTH_DOMAIN = get_value()["auth_domain"]
@@ -71,9 +71,11 @@ if API_URL != MOCK_URL:
         raise RuntimeError("No files in database, cannot run tests")
     FILE_ID = file_ids[0]
     being_mocked = False
+    print("Testing against live instance")
 else:
     FILE_ID = "_file:placeholder"
     being_mocked = True
+    print("Using mocked responses")
 
 
 @pytest.fixture
@@ -90,7 +92,7 @@ def mocker():
 
     tokens = read_cached_do_api_tokens()
 
-    with requests_mock.Mocker(real_http=True) as m:
+    with requests_mock.Mocker(real_http=False) as m:
         m.post(
             f"{MOCK_URL}DescribeRow",
             json={"data": data},
