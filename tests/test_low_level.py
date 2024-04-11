@@ -1,6 +1,7 @@
 """this tests low level functions in the data API"""
 
 import os
+from urllib.parse import urljoin
 
 import pytest
 import requests_mock
@@ -94,11 +95,11 @@ def mocker():
 
     with requests_mock.Mocker(real_http=False) as m:
         m.post(
-            f"{MOCK_URL}DescribeRow",
+            urljoin(MOCK_URL, "DescribeRow"),
             json={"data": data},
         )
         m.post(
-            f"{AUTH_DOMAIN}/oauth/token/",
+            urljoin(AUTH_DOMAIN, "/oauth/token/"),
             json=dict(access_token=tokens["access"]),
         )
 
@@ -107,11 +108,11 @@ def mocker():
         for key in list_database_rows_keys:
             row[key] = "placeholder"
         data = [row for _ in range(10)]
-        m.post(f"{MOCK_URL}ListDatabaseRows", json=dict(data=data))
+        m.post(urljoin(MOCK_URL, "ListDatabaseRows"), json=dict(data=data))
 
         # convert ID formats
         data = [{"id": "_row:3352QeWzQab5nxmvLQwvo", "hid": "db-dna"}]
-        m.post(f"{MOCK_URL}ConvertIdFormat", json=dict(data=data))
+        m.post(urljoin(MOCK_URL, "ConvertIdFormat"), json=dict(data=data))
 
         # list rows
         data = [
@@ -134,7 +135,7 @@ def mocker():
                 "name": "fddsf",
             },
         ]
-        m.post(f"{MOCK_URL}ListRows", json=dict(data=data))
+        m.post(urljoin(MOCK_URL, "ListRows"), json=dict(data=data))
 
         # describe file
         data = {
@@ -145,11 +146,11 @@ def mocker():
             "contentLength": 554588,
             "contentType": "image/png",
         }
-        m.post(f"{MOCK_URL}DescribeFile", json=dict(data=data))
+        m.post(urljoin(MOCK_URL, "DescribeFile"), json=dict(data=data))
 
         # file download
         m.post(
-            f"{MOCK_URL}CreateFileDownloadUrl",
+            urljoin(MOCK_URL, "CreateFileDownloadUrl"),
             json=dict(data=dict(downloadUrl="https://deeporigin-amazonaws-GetObject")),
         )
 
