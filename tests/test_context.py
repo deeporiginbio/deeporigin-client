@@ -3,7 +3,7 @@ import unittest
 import unittest.mock
 
 import capturer
-from deep_origin import cli, context
+from deeporigin import cli, context
 
 
 class TestCase(unittest.TestCase):

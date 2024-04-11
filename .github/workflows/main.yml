@@ -1,0 +1,66 @@
+name: Pre merge checks
+
+on:
+  pull_request:
+    branches: [ main ]
+
+
+jobs:
+  inital_checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+
+      - name: Check code formatting using ruff
+        uses: chartboost/ruff-action@v1
+        with:
+          version: 0.3.1
+          args: format --check
+
+      - name: Check import order
+        uses: chartboost/ruff-action@v1
+        with:
+          version: 0.3.1
+          args: check --select I
+
+
+  standard_tests:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
+
+    needs: [inital_checks]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - run: 'mkdir /home/runner/.deep-origin/'
+        shell: bash
+
+      - run: 'cp tests/config.yml /home/runner/.deep-origin/config.yml'
+        shell: bash
+
+      - run: 'cp tests/api_tokens /home/runner/.deep-origin/api_tokens'
+        shell: bash
+
+
+
+      - name: run tests
+        run: |
+          pip install --upgrade pip
+          pip install --upgrade setuptools
+          pip install -e .[test]
+          make test
+
+
+
+
+  
+

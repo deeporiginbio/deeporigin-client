@@ -4,6 +4,7 @@ import pathlib
 from .do_api import (  # noqa: F401
     cache_do_api_tokens,
     get_do_api_tokens,
+    read_cached_do_api_tokens,
     sign_into_do_platform,
 )
 
@@ -12,6 +13,7 @@ __all__ = [
     "get_do_api_tokens",
     "sign_into_do_platform",
     "cache_do_api_tokens",
+    "read_cached_do_api_tokens",
 ]
 
 SRC_DIR = pathlib.Path(__file__).parent

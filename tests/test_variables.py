@@ -9,11 +9,11 @@ import unittest.mock
 import capturer
 import crontab
 import pydantic
-from deep_origin import cli, config, do_api, feature_flags, utils, variables
-from deep_origin.exceptions import DeepOriginException
-from deep_origin.variables import core as variables_core
-from deep_origin.variables import types as variables_types
-from deep_origin.warnings import DeepOriginWarning
+from deeporigin import cli, config, do_api, feature_flags, utils, variables
+from deeporigin.exceptions import DeepOriginException
+from deeporigin.variables import core as variables_core
+from deeporigin.variables import types as variables_types
+from deeporigin.warnings import DeepOriginWarning
 
 
 class TestCase(unittest.TestCase):
