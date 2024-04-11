@@ -1,6 +1,6 @@
 [project]
 name = "deeporigin"
-description = "Tool for managing Deep Origin ComputeBenches"
+description = "Command line tool for working with Deep Origin"
 authors = [
     {name = "Deep Origin", email = "support@deeporigin.com"},
 ]
@@ -51,3 +51,25 @@ requires = [
   "setuptools >= 40.9.0",
 ]
 build-backend = "setuptools.build_meta"
+
+
+[tool.ruff]
+include = [
+    "**/src/**/*.py",
+    "**/tests/**/*.py",
+]
+exclude = [
+    "**/template/**",
+]
+
+
+[tool.ruff.lint]
+ignore = ["E203", "E266", "E501"]
+exclude = [
+    "bench-software-blueprints/**/tests/**",
+    "notebooks/**/tests/**",
+]
+
+
+[tool.ruff.lint.isort]
+case-sensitive = true
