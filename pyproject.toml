@@ -58,17 +58,12 @@ include = [
     "**/src/**/*.py",
     "**/tests/**/*.py",
 ]
-exclude = [
-    "**/template/**",
-]
+
 
 
 [tool.ruff.lint]
 ignore = ["E203", "E266", "E501"]
-exclude = [
-    "bench-software-blueprints/**/tests/**",
-    "notebooks/**/tests/**",
-]
+
 
 
 [tool.ruff.lint.isort]

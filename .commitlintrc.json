@@ -26,7 +26,8 @@
         "managed-data",
         "feature-flags",
         "cli",
-        "docs"
+        "docs",
+        "infra"
       ]
     ]
   }
