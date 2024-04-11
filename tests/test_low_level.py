@@ -98,7 +98,7 @@ def mocker():
             json={"data": data},
         )
         m.post(
-            f"{AUTH_DOMAIN}/oauth/token",
+            f"{AUTH_DOMAIN}/oauth/token/",
             json=dict(access_token=tokens["access"]),
         )
 
