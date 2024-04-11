@@ -1,7 +1,8 @@
-# deeporigin CLI
+# deeporigin 
 
-This repository contains the `deeporigin` CLI, which allows you
-to interact with Deep Origin from the command line. 
+This repository contains the `deeporigin` CLI and 
+python client, which allows you to interact with 
+Deep Origin from the command line. 
 
 ## Installation 
 
