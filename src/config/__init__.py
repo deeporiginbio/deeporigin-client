@@ -8,6 +8,13 @@ import confuse
 from ..exceptions import DeepOriginException
 
 CONFIG_DIR = pathlib.Path(__file__).parent
+CONFIG_YML_LOCATION = os.path.expanduser(
+    os.path.join(
+        "~",
+        ".deep-origin",
+        "config.yml",
+    )
+)
 
 __all__ = ["get_value"]
 
@@ -15,7 +22,7 @@ __all__ = ["get_value"]
 @functools.cache
 def get_value(
     user_config_filenames: collections.abc.Iterable[str] = (
-        os.path.expanduser(os.path.join("~", ".deep-origin", "config.yml")),
+        CONFIG_YML_LOCATION,
         os.path.join(".deep-origin", "config.yml"),
     ),
 ) -> confuse.templates.AttrDict:
@@ -47,8 +54,9 @@ def get_value(
         "organization_id": confuse.String(),
         "bench_id": confuse.String(),
         "env": confuse.String(),
-        "nucleus_api_endpoint": confuse.String(),
-        "api_endpoint": confuse.String(),
+        "api_endpoint": confuse.Optional(confuse.String()),
+        "nucleus_api_route": confuse.String(),
+        "graphql_api_route": confuse.String(),
         "auth_domain": confuse.String(),
         "auth_device_code_endpoint": confuse.String(),
         "auth_token_endpoint": confuse.String(),

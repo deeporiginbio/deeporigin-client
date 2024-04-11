@@ -9,9 +9,10 @@ from beartype import beartype
 from deeporigin import cache_do_api_tokens, get_do_api_tokens
 from deeporigin.config import get_value
 from deeporigin.exceptions import DeepOriginException
+from deeporigin.utils import _nucleus_url
 
-API_URL = get_value()["nucleus_api_endpoint"]
 ORG_ID = get_value()["organization_id"]
+API_URL = _nucleus_url()
 
 
 @beartype

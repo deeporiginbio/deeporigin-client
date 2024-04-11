@@ -8,7 +8,9 @@ from deeporigin import read_cached_do_api_tokens
 from deeporigin.config import get_value
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.managed_data import _api, api
+from deeporigin.utils import _nucleus_url
 
+API_URL = _nucleus_url()
 # constants
 row_description_keys = {
     "id",
@@ -62,7 +64,7 @@ AUTH_DOMAIN = get_value()["auth_domain"]
 
 # if we're running against a real instance, determine
 # if the database has any files in it
-if get_value()["nucleus_api_endpoint"] != MOCK_URL:
+if API_URL != MOCK_URL:
     df = api.get_dataframe(DB_NAME)
     file_ids = df.attrs["file_ids"]
     if len(file_ids) == 0:
