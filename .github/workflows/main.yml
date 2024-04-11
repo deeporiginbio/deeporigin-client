@@ -47,6 +47,9 @@ jobs:
       - run: 'cp tests/config.yml /home/runner/.deep-origin/config.yml'
         shell: bash
 
+      - run: 'cp tests/api_tokens /home/runner/.deep-origin/api_tokens'
+        shell: bash
+
 
 
       - name: run tests
