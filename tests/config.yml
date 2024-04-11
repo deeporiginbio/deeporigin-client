@@ -1,10 +1,11 @@
 organization_id: rainy-goat-rhs
 bench_id: respective-eagle-ray
-nucleus_api_endpoint: https://deeporigin.mock/
 api_endpoint: https://deeporigin.mock/
+nucleus_api_route: nucleus-api/api/
+graphql_api_route: api/graphql/
 auth_domain: https://deeporigin.mock
-auth_device_code_endpoint: /oauth/device/code
-auth_token_endpoint: /oauth/token
+auth_device_code_endpoint: oauth/device/code/
+auth_token_endpoint: oauth/token/
 auth_audience: https://os.deeporigin.io/api
 auth_grant_type: urn:ietf:params:oauth:grant-type:device_code
 auth_client_id: secret
