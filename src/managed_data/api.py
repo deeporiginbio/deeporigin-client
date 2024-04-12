@@ -205,6 +205,8 @@ def _parse_column_value(
 
         if use_file_names:
             value = [describe_file(file_id)["name"] for file_id in value]
+    elif column["type"] == "reference" and len(value) == 1:
+        value = value[0]["rowIds"]
 
     # if there is no item
     if len(value) == 0:
