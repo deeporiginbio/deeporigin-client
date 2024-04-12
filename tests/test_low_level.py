@@ -1,6 +1,7 @@
 """this tests low level functions in the data API"""
 
 import os
+from urllib.parse import urljoin
 
 import pytest
 import requests_mock
@@ -8,7 +9,9 @@ from deeporigin import read_cached_do_api_tokens
 from deeporigin.config import get_value
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.managed_data import _api, api
+from deeporigin.utils import _nucleus_url
 
+API_URL = _nucleus_url()
 # constants
 row_description_keys = {
     "id",
@@ -55,23 +58,25 @@ list_database_rows_keys = {
     "validationStatus",
 }
 
-MOCK_URL = "https://deeporigin.mock/"
+MOCK_URL = "https://deeporigin.mock/nucleus-api/api/"
 DB_NAME = "db-dna"
 ROW_NAME = "dna-1"
 AUTH_DOMAIN = get_value()["auth_domain"]
 
 # if we're running against a real instance, determine
 # if the database has any files in it
-if get_value()["nucleus_api_endpoint"] != MOCK_URL:
+if API_URL != MOCK_URL:
     df = api.get_dataframe(DB_NAME)
     file_ids = df.attrs["file_ids"]
     if len(file_ids) == 0:
         raise RuntimeError("No files in database, cannot run tests")
     FILE_ID = file_ids[0]
     being_mocked = False
+    print("Testing against live instance")
 else:
     FILE_ID = "_file:placeholder"
     being_mocked = True
+    print("Using mocked responses")
 
 
 @pytest.fixture
@@ -88,13 +93,13 @@ def mocker():
 
     tokens = read_cached_do_api_tokens()
 
-    with requests_mock.Mocker(real_http=True) as m:
+    with requests_mock.Mocker(real_http=False) as m:
         m.post(
-            f"{MOCK_URL}DescribeRow",
+            urljoin(MOCK_URL, "DescribeRow"),
             json={"data": data},
         )
         m.post(
-            f"{AUTH_DOMAIN}/oauth/token",
+            urljoin(AUTH_DOMAIN, "/oauth/token/"),
             json=dict(access_token=tokens["access"]),
         )
 
@@ -103,11 +108,11 @@ def mocker():
         for key in list_database_rows_keys:
             row[key] = "placeholder"
         data = [row for _ in range(10)]
-        m.post(f"{MOCK_URL}ListDatabaseRows", json=dict(data=data))
+        m.post(urljoin(MOCK_URL, "ListDatabaseRows"), json=dict(data=data))
 
         # convert ID formats
         data = [{"id": "_row:3352QeWzQab5nxmvLQwvo", "hid": "db-dna"}]
-        m.post(f"{MOCK_URL}ConvertIdFormat", json=dict(data=data))
+        m.post(urljoin(MOCK_URL, "ConvertIdFormat"), json=dict(data=data))
 
         # list rows
         data = [
@@ -130,7 +135,7 @@ def mocker():
                 "name": "fddsf",
             },
         ]
-        m.post(f"{MOCK_URL}ListRows", json=dict(data=data))
+        m.post(urljoin(MOCK_URL, "ListRows"), json=dict(data=data))
 
         # describe file
         data = {
@@ -141,11 +146,11 @@ def mocker():
             "contentLength": 554588,
             "contentType": "image/png",
         }
-        m.post(f"{MOCK_URL}DescribeFile", json=dict(data=data))
+        m.post(urljoin(MOCK_URL, "DescribeFile"), json=dict(data=data))
 
         # file download
         m.post(
-            f"{MOCK_URL}CreateFileDownloadUrl",
+            urljoin(MOCK_URL, "CreateFileDownloadUrl"),
             json=dict(data=dict(downloadUrl="https://deeporigin-amazonaws-GetObject")),
         )
 

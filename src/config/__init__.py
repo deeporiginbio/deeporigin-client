@@ -8,6 +8,13 @@ import confuse
 from ..exceptions import DeepOriginException
 
 CONFIG_DIR = pathlib.Path(__file__).parent
+CONFIG_YML_LOCATION = os.path.expanduser(
+    os.path.join(
+        "~",
+        ".deeporigin",
+        "config.yml",
+    )
+)
 
 __all__ = ["get_value"]
 
@@ -15,14 +22,14 @@ __all__ = ["get_value"]
 @functools.cache
 def get_value(
     user_config_filenames: collections.abc.Iterable[str] = (
-        os.path.expanduser(os.path.join("~", ".deep-origin", "config.yml")),
-        os.path.join(".deep-origin", "config.yml"),
+        CONFIG_YML_LOCATION,
+        os.path.join(".deeporigin", "config.yml"),
     ),
 ) -> confuse.templates.AttrDict:
     """Get the configuration for the Deep Origin CLI
 
     Args:
-        user_config_filenames (:obj:`list`, optional): paths to the user's configuration files [default: :obj:`['~/.deep-origin/config.yml', './.deep-origin/config.yml']`]
+        user_config_filenames (:obj:`list`, optional): paths to the user's configuration files [default: :obj:`['~/.deeporigin/config.yml', './.deeporigin/config.yml']`]
 
     Returns:
         :obj:`confuse.templates.AttrDict`: configuration for the Deep Origin CLI
@@ -47,8 +54,9 @@ def get_value(
         "organization_id": confuse.String(),
         "bench_id": confuse.String(),
         "env": confuse.String(),
-        "nucleus_api_endpoint": confuse.String(),
-        "api_endpoint": confuse.String(),
+        "api_endpoint": confuse.Optional(confuse.String()),
+        "nucleus_api_route": confuse.String(),
+        "graphql_api_route": confuse.String(),
         "auth_domain": confuse.String(),
         "auth_device_code_endpoint": confuse.String(),
         "auth_token_endpoint": confuse.String(),

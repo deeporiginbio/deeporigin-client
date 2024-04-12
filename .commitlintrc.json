@@ -25,7 +25,9 @@
         "testing",
         "managed-data",
         "feature-flags",
-        "cli"
+        "cli",
+        "docs",
+        "infra"
       ]
     ]
   }

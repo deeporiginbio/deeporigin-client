@@ -6,7 +6,7 @@ on:
 
 
 jobs:
-  inital_checks:
+  code-formatting-and-syntax:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -26,28 +26,28 @@ jobs:
           args: check --select I
 
 
-  standard_tests:
+  functionality-tests:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: true
       matrix:
         python-version: ["3.9", "3.10", "3.11", "3.12"]
 
-    needs: [inital_checks]
+    needs: [code-formatting-and-syntax]
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
 
-      - run: 'mkdir /home/runner/.deep-origin/'
+      - run: 'mkdir /home/runner/.deeporigin/'
         shell: bash
 
-      - run: 'cp tests/config.yml /home/runner/.deep-origin/config.yml'
+      - run: 'cp tests/config.yml /home/runner/.deeporigin/config.yml'
         shell: bash
 
-      - run: 'cp tests/api_tokens /home/runner/.deep-origin/api_tokens'
+      - run: 'cp tests/api_tokens /home/runner/.deeporigin/api_tokens'
         shell: bash
 
 
