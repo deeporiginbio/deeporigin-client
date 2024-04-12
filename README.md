@@ -68,3 +68,5 @@ make test
 ### Tests on Github Actions
 
 ## License 
+
+MIT
