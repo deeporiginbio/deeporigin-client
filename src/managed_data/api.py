@@ -19,6 +19,15 @@ from deeporigin.utils import PREFIX
 
 
 @beartype
+def get_cell_data(*, row_id: str, column_name: str):
+    """extract data from a cell in a database, referenced
+    by row_id and column_name"""
+
+    data = get_row_data(row_id)
+    return data[column_name]
+
+
+@beartype
 def download(
     source: str,
     destination: str,
@@ -117,7 +126,7 @@ def get_workspaces() -> list[dict]:
     return [obj for obj in objects if obj["type"] == "workspace"]
 
 
-# @beartype
+@beartype
 def get_dataframe(
     database_id: str,
     *,
@@ -169,7 +178,6 @@ def get_dataframe(
                 data[column["id"]].extend(value)
 
     # make the dataframe
-
     df = pd.DataFrame(data)
     df.attrs["file_ids"] = file_ids
 
@@ -246,7 +254,7 @@ def get_columns(row_id: str) -> list[dict]:
     if row_id is a database, then column metadata and names are returned.
     if row_id is a row, then a dictionary of hids and values are returned"""
 
-    response = describe_row(row_id)
+    response = describe_row(row_id, fields=True)
 
     assert response["type"] in [
         "row",
@@ -272,7 +280,7 @@ def get_row_data(row_id: str) -> dict:
 
     if response["type"] != "row":
         raise ValueError(
-            f"Expected `row_id` to resolve to a row, instead, it resolves to a {response['type']}"
+            f"Expected `row_id` to resolve to a row, instead, it resolves to a `{response['type']}`"
         )
 
     # ask parent for column names
@@ -280,20 +288,30 @@ def get_row_data(row_id: str) -> dict:
 
     if parent_response["type"] != "database":
         raise ValueError(
-            f"Expected parent of {row_id} to resolve to a database, instead, it resolves to a {parent_response['type']}"
+            f"Expected parent of `{row_id}` to resolve to a database, instead, it resolves to a `{parent_response['type']}`"
         )
 
     # make a dictionary from column IDs to column names
-    columns = dict()
+    column_name_mapper = dict()
+    column_cardinality_mapper = dict()
     for col in parent_response["cols"]:
-        columns[col["id"]] = col["name"]
+        column_name_mapper[col["id"]] = col["name"]
+        column_cardinality_mapper[col["id"]] = col["cardinality"]
 
     # now use this to construct the required dictionary
     row_data = dict()
     for field in response["fields"]:
+        column_id = field["columnId"]
         value = field["value"]
-        if isinstance(value, dict) and "selectedOptions" in value.keys():
-            value = value["selectedOptions"]
-        row_data[columns[field["columnId"]]] = value
+        if isinstance(value, dict):
+            if "selectedOptions" in value.keys():
+                value = value["selectedOptions"]
+            elif "fileIds" in value.keys():
+                value = value["fileIds"]
+
+        if column_cardinality_mapper[column_id] == "one" and isinstance(value, list):
+            value = value[0]
+
+        row_data[column_name_mapper[column_id]] = value
 
     return row_data

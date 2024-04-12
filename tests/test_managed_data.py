@@ -93,7 +93,7 @@ def mocker():
 
     tokens = read_cached_do_api_tokens()
 
-    with requests_mock.Mocker(real_http=False) as m:
+    with requests_mock.Mocker(real_http=True) as m:
         m.post(
             urljoin(MOCK_URL, "DescribeRow"),
             json={"data": data},
@@ -221,3 +221,11 @@ def test_download_file(mocker):
 
     # clean up
     os.remove(file_path)
+
+
+def test_test_get_cell_data(mocker):
+    if being_mocked:
+        return
+    data = api.get_cell_data(row_id="dna-1", column_name="Base Sequence")
+
+    assert data == "AAA"
