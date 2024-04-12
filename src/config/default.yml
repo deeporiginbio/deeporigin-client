@@ -60,7 +60,7 @@ list_bench_variables_query_template: |
       }
     }
   }
-api_tokens_filename: ~/.deep-origin/api_tokens
-variables_cache_filename: ~/.deep-origin/variables.yml
-auto_install_variables_filename: ~/.deep-origin/auto-install-variables.sh
+api_tokens_filename: ~/.deeporigin/api_tokens
+variables_cache_filename: ~/.deeporigin/variables.yml
+auto_install_variables_filename: ~/.deeporigin/auto-install-variables.sh
 feature_flags: null

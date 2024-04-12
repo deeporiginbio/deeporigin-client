@@ -11,7 +11,7 @@ CONFIG_DIR = pathlib.Path(__file__).parent
 CONFIG_YML_LOCATION = os.path.expanduser(
     os.path.join(
         "~",
-        ".deep-origin",
+        ".deeporigin",
         "config.yml",
     )
 )
@@ -23,13 +23,13 @@ __all__ = ["get_value"]
 def get_value(
     user_config_filenames: collections.abc.Iterable[str] = (
         CONFIG_YML_LOCATION,
-        os.path.join(".deep-origin", "config.yml"),
+        os.path.join(".deeporigin", "config.yml"),
     ),
 ) -> confuse.templates.AttrDict:
     """Get the configuration for the Deep Origin CLI
 
     Args:
-        user_config_filenames (:obj:`list`, optional): paths to the user's configuration files [default: :obj:`['~/.deep-origin/config.yml', './.deep-origin/config.yml']`]
+        user_config_filenames (:obj:`list`, optional): paths to the user's configuration files [default: :obj:`['~/.deeporigin/config.yml', './.deeporigin/config.yml']`]
 
     Returns:
         :obj:`confuse.templates.AttrDict`: configuration for the Deep Origin CLI
