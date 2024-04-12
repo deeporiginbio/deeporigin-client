@@ -75,8 +75,8 @@ def list_database_rows(row_id: str) -> list[dict]:
 @beartype
 def convert_id_format(
     *,
-    hids: Optional[list[str]] = None,
-    ids: Optional[list[str]] = None,
+    hids: Optional[Union[list[str], set[str]]] = None,
+    ids: Optional[Union[list[str], set[str]]] = None,
 ) -> list[dict]:
     """convert a list of HIDs to IDs or vice versa"""
 
