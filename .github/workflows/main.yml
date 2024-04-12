@@ -6,7 +6,7 @@ on:
 
 
 jobs:
-  Code formatting & syntax:
+  code-formatting-and-syntax:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -26,7 +26,7 @@ jobs:
           args: check --select I
 
 
-  Functionality tests:
+  functionality-tests:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: true
