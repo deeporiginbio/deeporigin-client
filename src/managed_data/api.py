@@ -170,6 +170,8 @@ def get_dataframe(
 
         fields = row["fields"]
 
+        print(row["id"])
+
         for column in columns:
             value = _parse_column_value(
                 column=column,

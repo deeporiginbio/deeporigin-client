@@ -37,6 +37,21 @@ def download_file(file_id: str, destination: str) -> None:
 
 
 @beartype
+def describe_database_stats(database_id: str):
+    return _invoke("DescribeDatabaseStats", dict(databaseId=database_id))
+
+
+@beartype
+def list_mentions(query: str):
+    return _invoke("ListMentions", dict(query=query))
+
+
+@beartype
+def list_row_back_references(row_id: str):
+    return _invoke("ListRowBackReferences", dict(rowId=row_id))
+
+
+@beartype
 def create_file_download_url(file_id: str) -> dict:
     """low-level API call to CreateFileDownloadUrl"""
     return _invoke("CreateFileDownloadUrl", dict(fileId=file_id))
@@ -136,6 +151,9 @@ def _check_response(response: requests.models.Response) -> Union[dict, list]:
 
     if response.status_code == 404:
         raise DeepOriginException("[Error 404] The requested resource was not found.")
+
+    elif response.status_code == 400:
+        print(response.json())
 
     response.raise_for_status()
     response = response.json()
