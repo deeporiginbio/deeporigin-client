@@ -152,9 +152,6 @@ def _check_response(response: requests.models.Response) -> Union[dict, list]:
     if response.status_code == 404:
         raise DeepOriginException("[Error 404] The requested resource was not found.")
 
-    elif response.status_code == 400:
-        print(response.json())
-
     response.raise_for_status()
     response = response.json()
 
