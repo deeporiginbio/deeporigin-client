@@ -1,1 +1,3 @@
-* @jonrkarr @sg-s
+* @formiclabs/catalog-developers
+src/managed_data/ @formiclabs/data-management-developers
+src/variables/ @formiclabs/platform-developers

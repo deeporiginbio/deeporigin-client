@@ -37,6 +37,21 @@ def download_file(file_id: str, destination: str) -> None:
 
 
 @beartype
+def describe_database_stats(database_id: str):
+    return _invoke("DescribeDatabaseStats", dict(databaseId=database_id))
+
+
+@beartype
+def list_mentions(query: str):
+    return _invoke("ListMentions", dict(query=query))
+
+
+@beartype
+def list_row_back_references(row_id: str):
+    return _invoke("ListRowBackReferences", dict(rowId=row_id))
+
+
+@beartype
 def create_file_download_url(file_id: str) -> dict:
     """low-level API call to CreateFileDownloadUrl"""
     return _invoke("CreateFileDownloadUrl", dict(fileId=file_id))
@@ -75,8 +90,8 @@ def list_database_rows(row_id: str) -> list[dict]:
 @beartype
 def convert_id_format(
     *,
-    hids: Optional[list[str]] = None,
-    ids: Optional[list[str]] = None,
+    hids: Optional[Union[list[str], set[str]]] = None,
+    ids: Optional[Union[list[str], set[str]]] = None,
 ) -> list[dict]:
     """convert a list of HIDs to IDs or vice versa"""
 

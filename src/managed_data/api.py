@@ -2,13 +2,14 @@
 interact with the data product"""
 
 import os
-from typing import Optional, Union
+from typing import Literal, Optional, Union
 
 import pandas as pd
 from beartype import beartype
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.managed_data._api import (
     _invoke,
+    convert_id_format,
     describe_file,
     describe_row,
     download_file,
@@ -16,6 +17,8 @@ from deeporigin.managed_data._api import (
     list_rows,
 )
 from deeporigin.utils import PREFIX
+
+id_format = Literal["human-id", "system-id"]
 
 
 @beartype
@@ -131,6 +134,7 @@ def get_dataframe(
     database_id: str,
     *,
     use_file_names: bool = True,
+    reference_format: id_format = "human-id",
 ) -> pd.DataFrame:
     """return a dataframe of all rows in a database
 
@@ -153,8 +157,9 @@ def get_dataframe(
     data["validation_status"] = []
     data["row"] = []
 
-    # keep track of all files in this database
+    # keep track of all files and references in this database
     file_ids = []
+    reference_ids = []
 
     for column in columns:
         data[column["id"]] = []
@@ -167,10 +172,12 @@ def get_dataframe(
 
         for column in columns:
             value = _parse_column_value(
-                column,
-                fields,
-                file_ids,
-                use_file_names,
+                column=column,
+                fields=fields,
+                file_ids=file_ids,
+                reference_ids=reference_ids,
+                use_file_names=use_file_names,
+                reference_format=reference_format,
             )
             if column["cardinality"] == "many":
                 data[column["id"]].append(value)
@@ -179,17 +186,21 @@ def get_dataframe(
 
     # make the dataframe
     df = pd.DataFrame(data)
-    df.attrs["file_ids"] = file_ids
+    df.attrs["file_ids"] = list(set(file_ids))
+    df.attrs["reference_ids"] = list(set(reference_ids))
 
     return _type_and_cleanup_dataframe(df, columns)
 
 
 @beartype
 def _parse_column_value(
+    *,
     column: dict,
     fields: list[dict],
     file_ids: list,
+    reference_ids: list,
     use_file_names: bool,
+    reference_format: id_format,
 ):
     """utility function to parse value of a column"""
 
@@ -205,6 +216,13 @@ def _parse_column_value(
 
         if use_file_names:
             value = [describe_file(file_id)["name"] for file_id in value]
+    elif column["type"] == "reference" and len(value) == 1:
+        value = value[0]["rowIds"]
+        reference_ids.extend(value)
+
+        if reference_format == "human-id":
+            value = convert_id_format(ids=value)
+            value = [thing["hid"] for thing in value]
 
     # if there is no item
     if len(value) == 0:
