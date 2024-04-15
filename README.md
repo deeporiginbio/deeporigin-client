@@ -20,8 +20,8 @@ pip install deeporigin
 First, download from Github:
 
 ```bash
-git clone git@github.com:formiclabs/cli.git
-cd cli
+git clone git@github.com:formiclabs/deeporigin-client.git
+cd deeporigin-client
 ```
 Set up your virtual environment using your preferred method. 
 Then,
