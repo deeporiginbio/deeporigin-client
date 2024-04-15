@@ -102,7 +102,6 @@ def get_children(
     objects: Optional[Union[list[dict], str]] = None,
 ) -> list[dict]:
     """recursively find all workspaces, databases, rows"""
-    print("called with:")
 
     if objects is None:
         objects = list_rows(parent_is_root=True)
@@ -112,10 +111,14 @@ def get_children(
         obj = {key: obj[key] for key in ["id", "name", "type", "hid"]}
         objects = [obj]
 
+    # TODO parallelize this using async/await
     for obj in objects:
-        print(obj["hid"])
+        if obj["type"] == "row":
+            # this object is a row, and we assume that
+            # rows cannot have children, so we're going to
+            # skip this and assume this is a leaf node
+            continue
 
-    for obj in objects:
         children = list_rows(parent_id=obj["id"])
         if len(children) == 0:
             continue
