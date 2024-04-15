@@ -44,7 +44,7 @@ network response.
 To run using mocking, set the following in your `~/.deeporigin/config.yml` file:
 
 ```bash
-nucleus_api_endpoint: https://deeporigin.mock/
+api_endpoint: https://deeporigin.mock/
 ```
 
 and then run tests using:
@@ -57,7 +57,7 @@ make test
 
 Tests can be run against a live instance of Deep Origin. Point
 the CLI to a URL that resolves to a live instance of Deep Origin
-using the `nucleus_api_endpoint` field in your `~/.deeporigin/config.yml` file.
+using the `api_endpoint` field in your `~/.deeporigin/config.yml` file.
 
 Then, run tests using:
 
