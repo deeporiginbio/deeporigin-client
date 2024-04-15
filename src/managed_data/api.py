@@ -8,7 +8,6 @@ import pandas as pd
 from beartype import beartype
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.managed_data._api import (
-    _invoke,
     convert_id_format,
     describe_file,
     describe_row,
@@ -103,8 +102,10 @@ def get_children(
     objects: Optional[Union[list[dict], str]] = None,
 ) -> list[dict]:
     """recursively find all workspaces, databases, rows"""
+    print("called with:")
+
     if objects is None:
-        objects = get_workspaces()
+        objects = list_rows(parent_is_root=True)
     elif isinstance(objects, str):
         # need to convert a string to a object
         obj = describe_row(objects)
@@ -112,21 +113,15 @@ def get_children(
         objects = [obj]
 
     for obj in objects:
-        children = list_rows(obj["id"])
+        print(obj["hid"])
+
+    for obj in objects:
+        children = list_rows(parent_id=obj["id"])
         if len(children) == 0:
             continue
         obj["children"] = get_children(children)
 
     return objects
-
-
-@beartype
-def get_workspaces() -> list[dict]:
-    """list workspaces in root"""
-
-    data = dict(filters=[dict(parent=dict(isRoot=True))])
-    objects = _invoke("ListRows", data)
-    return [obj for obj in objects if obj["type"] == "workspace"]
 
 
 @beartype
