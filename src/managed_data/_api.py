@@ -2,7 +2,7 @@
 with the data API. functions here simply wrap API endpoints."""
 
 import os
-from typing import Optional, Union
+from typing import Literal, Optional, Union
 
 import requests
 from beartype import beartype
@@ -13,6 +13,9 @@ from deeporigin.utils import _nucleus_url
 
 ORG_ID = get_value()["organization_id"]
 API_URL = _nucleus_url()
+
+# types of rows
+RowType = Literal["row", "workspace", "database"]
 
 
 @beartype
@@ -72,10 +75,26 @@ def describe_row(row_id: str, *, fields: bool = False) -> dict:
 
 
 @beartype
-def list_rows(row_id: str) -> list[dict]:
+def list_rows(
+    *,
+    parent_id: Optional[str] = None,
+    row_type: Optional[RowType] = None,
+    parent_is_root: Optional[bool] = None,
+) -> list[dict]:
     """low level API that wraps the ListRows endpoint"""
 
-    data = dict(filters=[dict(parent=dict(id=row_id))])
+    filters = []
+
+    if parent_is_root is not None:
+        filters.append(dict(parent=dict(isRoot=parent_is_root)))
+
+    if parent_id:
+        filters.append(dict(parent=dict(id=parent_id)))
+
+    if row_type:
+        filters.append(dict(rowType=row_type))
+
+    data = dict(filters=filters)
     return _invoke("ListRows", data)
 
 
