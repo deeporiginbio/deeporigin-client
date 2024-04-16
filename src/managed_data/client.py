@@ -35,11 +35,19 @@ class DeepOriginClient:
     ) -> Union[dict, list]:
         """core call to API endpoint"""
 
+        print("<<<<<<<<<<<-------->>>>>>>>>>>>>>.")
+        print(f"endpoint = {endpoint}")
+        print(data)
+
         response = requests.post(
             f"{self.api_url}{endpoint}",
             headers=self.headers,
             json=data,
         )
+
+        print("----------RESPONSE:--------")
+        print(response.json())
+        print("----------RESPONSE:--------")
 
         return _check_response(response)
 

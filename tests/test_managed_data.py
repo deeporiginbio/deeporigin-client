@@ -78,22 +78,137 @@ class MockClient(DeepOriginClient):
                 ]
 
         elif endpoint == "DescribeRow":
-            return {
-                "id": "_row:W6DjtaCrZ201EGLpmZtGO",
-                "parentId": "_row:J5FiZ1Z202GuiF78dxhMr",
-                "type": "row",
-                "dateCreated": "2024-04-05 19:04:04.094428",
-                "dateUpdated": "2024-04-08 14:58:18.376",
-                "createdByUserDrn": "drn:identity::user:auth0|65ca7d6f5a130b87df994e5c",
-                "editedByUserDrn": "drn:identity::user:auth0|65ca7d6f5a130b87df994e5c",
-                "submissionStatus": "draft",
-                "hid": "sample-1",
-                "hidNum": 1,
-                "validationStatus": "valid",
-                "cols": [],
-                "parent": {"id": "_row:J5FiZ1Z202GuiF78dxhMr"},
-                "rowJsonSchema": {"type": "object", "required": [], "properties": {}},
-            }
+            if data["fields"]:
+                return {
+                    "id": "_row:J5FiZ1Z202GuiF78dxhMr",
+                    "parentId": "_row:sWOOkUQ3GEUPH3NzKt2f1",
+                    "type": "database",
+                    "name": "Sample",
+                    "dateCreated": "2024-04-04 17:03:33.033115",
+                    "dateUpdated": "2024-04-04 17:03:33.033115",
+                    "createdByUserDrn": "drn:identity::user:auth0|65ca7d6f5a130b87df994e5c",
+                    "hid": "db-sample",
+                    "hidPrefix": "sample",
+                    "cols": [
+                        {
+                            "id": "_col:2uMlXWSjvBaeYCiR2znkP",
+                            "name": "Order ID",
+                            "parentId": "_row:J5FiZ1Z202GuiF78dxhMr",
+                            "type": "reference",
+                            "dateCreated": "2024-04-04T17:03:33.033115",
+                            "cardinality": "one",
+                            "referenceDatabaseRowId": "_row:Zl8k9fwC47gf3q4846CLe",
+                        },
+                        {
+                            "id": "_col:rFfMhRDSgiQuaY55roMIy",
+                            "name": "Status",
+                            "parentId": "_row:J5FiZ1Z202GuiF78dxhMr",
+                            "type": "select",
+                            "dateCreated": "2024-04-04T17:03:33.033115",
+                            "cardinality": "one",
+                            "configSelect": {
+                                "options": [
+                                    "Report sent to client",
+                                    "Clinical interpretation completed",
+                                    "Secondary analysis completed",
+                                    "Primary analysis completed",
+                                    "Sample processed by CRO",
+                                    "Ordered",
+                                ],
+                                "canCreate": False,
+                            },
+                        },
+                        {
+                            "id": "_col:MYIsZA1z5K5pD7s2o4ouY",
+                            "name": "To client tracking",
+                            "parentId": "_row:J5FiZ1Z202GuiF78dxhMr",
+                            "type": "text",
+                            "dateCreated": "2024-04-04T17:03:33.033115",
+                            "cardinality": "one",
+                        },
+                        {
+                            "id": "_col:3Ge9GS0eej8cuHZ26uISb",
+                            "name": "From client tracking",
+                            "parentId": "_row:J5FiZ1Z202GuiF78dxhMr",
+                            "type": "text",
+                            "dateCreated": "2024-04-04T17:03:33.033115",
+                            "cardinality": "one",
+                        },
+                        {
+                            "id": "_col:qb9qXa5BNEMekKVMMJ0XX",
+                            "name": "Sent to client",
+                            "parentId": "_row:J5FiZ1Z202GuiF78dxhMr",
+                            "type": "date",
+                            "dateCreated": "2024-04-04T17:03:33.033115",
+                            "cardinality": "one",
+                        },
+                        {
+                            "id": "_col:zAuCgEf0hvFF7dvXBaNqc",
+                            "name": "Received by client",
+                            "parentId": "_row:J5FiZ1Z202GuiF78dxhMr",
+                            "type": "date",
+                            "dateCreated": "2024-04-04T17:03:33.033115",
+                            "cardinality": "one",
+                        },
+                        {
+                            "id": "_col:qX4AVHymgjlCtoaBRPIB8",
+                            "name": "Sent by client",
+                            "parentId": "_row:J5FiZ1Z202GuiF78dxhMr",
+                            "type": "date",
+                            "dateCreated": "2024-04-04T17:03:33.033115",
+                            "cardinality": "one",
+                        },
+                        {
+                            "id": "_col:nKwL8ZnbBDV1RHo9Blo7j",
+                            "name": "Received by CRO",
+                            "parentId": "_row:J5FiZ1Z202GuiF78dxhMr",
+                            "type": "date",
+                            "dateCreated": "2024-04-04T17:03:33.033115",
+                            "cardinality": "one",
+                        },
+                        {
+                            "id": "_col:yOmqi9mS6GkBQgiQj5Quw",
+                            "name": "Raw reads",
+                            "parentId": "_row:J5FiZ1Z202GuiF78dxhMr",
+                            "type": "file",
+                            "dateCreated": "2024-04-04T17:03:33.033115",
+                            "cardinality": "many",
+                        },
+                        {
+                            "id": "_col:BEnvy9dtTujYTsgHVIWjo",
+                            "name": "Processed date",
+                            "parentId": "_row:J5FiZ1Z202GuiF78dxhMr",
+                            "type": "date",
+                            "dateCreated": "2024-04-04T17:03:33.033115",
+                            "cardinality": "one",
+                        },
+                    ],
+                    "parent": {"id": "_row:sWOOkUQ3GEUPH3NzKt2f1"},
+                    "fields": [],
+                    "rowJsonSchema": {},
+                }
+
+            else:
+                return {
+                    "id": "_row:W6DjtaCrZ201EGLpmZtGO",
+                    "parentId": "_row:J5FiZ1Z202GuiF78dxhMr",
+                    "type": "row",
+                    "dateCreated": "2024-04-05 19:04:04.094428",
+                    "dateUpdated": "2024-04-08 14:58:18.376",
+                    "createdByUserDrn": "drn:identity::user:auth0|65ca7d6f5a130b87df994e5c",
+                    "editedByUserDrn": "drn:identity::user:auth0|65ca7d6f5a130b87df994e5c",
+                    "submissionStatus": "draft",
+                    "hid": "sample-1",
+                    "hidNum": 1,
+                    "validationStatus": "valid",
+                    "cols": [],
+                    "parent": {"id": "_row:J5FiZ1Z202GuiF78dxhMr"},
+                    "rowJsonSchema": {
+                        "type": "object",
+                        "required": [],
+                        "properties": {},
+                    },
+                }
 
         elif endpoint == "ConvertIdFormat":
             return [{"id": "_row:W6DjtaCrZ201EGLpmZtGO", "hid": "sample-1"}]
