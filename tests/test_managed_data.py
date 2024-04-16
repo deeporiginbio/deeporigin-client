@@ -1,14 +1,10 @@
 """this tests low level functions in the data API"""
 
-import os
 
 import pytest
-from deeporigin.config import get_value
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.managed_data import _api, api
 from deeporigin.managed_data._api import DeepOriginClient
-
-FILE_ID = "_file:V08GBdErNGqynC3O7bill"
 
 # constants
 row_description_keys = {
@@ -145,26 +141,61 @@ class MockClient(DeepOriginClient):
             }
 
 
-mock_client = MockClient()
+@pytest.fixture(scope="session", autouse=True)
+def config(pytestconfig):
+    """this fixture performs some setup tasks
+    before all tests are run, and runs only once"""
+
+    config = dict()
+
+    # set up client
+    if pytestconfig.getoption("client") == "mock":
+        config["client"] = MockClient()
+
+        config["databases"] = ["db-sample"]
+        config["rows"] = ["sample-1"]
+    else:
+        config["client"] = DeepOriginClient()
+
+        # if we're going to be making requests to a live
+        # instance, we need to make sensible requests
+        databases = _api.list_rows(row_type="database")
+        config["databases"] = [db["hid"] for db in databases]
+        rows = _api.list_rows(row_type="row")
+        config["rows"] = [row["hid"] for row in rows]
+
+    # tests run on yield
+    yield config
+
+    # teardown tasks, if any
 
 
-def test_list_rows():
-    rows = _api.list_rows(parent_id="db-sample", client=mock_client)
+def test_list_rows(config):
+    rows = _api.list_rows(
+        parent_id=config["databases"][0],
+        client=config["client"],
+    )
 
     for row in rows:
         assert set(row.keys()) == list_row_keys
         assert row["type"] == "row"
 
 
-def test_describe_row():
+def test_describe_row(config):
     """test describe_row, using mocked response"""
 
-    row = _api.describe_row("sample-1", client=mock_client)
+    row = _api.describe_row(
+        config["rows"][0],
+        client=config["client"],
+    )
     assert set(row.keys()) == row_description_keys
 
 
-def test_convert_id_format():
-    conversions = _api.convert_id_format(hids=["sample-1"], client=mock_client)
+def test_convert_id_format(config):
+    conversions = _api.convert_id_format(
+        hids=[config["rows"][0]],
+        client=config["client"],
+    )
     for conversion in conversions:
         assert {"id", "hid"} == set(conversion.keys())
 
@@ -172,49 +203,25 @@ def test_convert_id_format():
         _api.convert_id_format()
 
 
-def test_list_database_rows():
-    rows = _api.list_database_rows("db-sample")
+def test_list_database_rows(config):
+    rows = _api.list_database_rows(
+        config["databases"][0],
+        client=config["client"],
+    )
 
     for row in rows:
         assert set(row.keys()).difference({"name"}) == list_database_rows_keys
 
 
-# def test_download_file():
-#     if being_mocked:
-#         return
-#     _api.download_file(FILE_ID, os.getcwd())
+def test_get_dataframe(config):
+    df = api.get_dataframe(config["databases"][0])
 
-#     file_name = _api.describe_file(FILE_ID)["name"]
+    assert (
+        set(df.attrs.keys()) == {"file_ids", "reference_ids"}
+    ), "Expected to find a dictionary in `df.attrs` with keys called `file_ids` and `reference_ids`"
 
-#     file_path = os.path.join(os.getcwd(), file_name)
-#     assert os.path.exists(file_path)
+    assert (
+        "validation_status" in df.columns
+    ), f"Expected to find a column called `validaton_status` in the dataframe. Instead, the columns in this dataframe are: {df.columns}"
 
-#     # clean up
-#     os.remove(file_path)
-
-
-# def test_get_cell_data():
-#     data = api.get_cell_data(row_id="dna-1", column_name="Base Sequence")
-
-#     assert data == "AAA"
-
-
-def test_describe_file():
-    data = _api.describe_file(FILE_ID, client=mock_client)
-
-    assert set(data.keys()) == describe_file_keys
-
-
-# def test_create_file_download_url():
-#     """test create_file_download_url"""
-
-#     data = _api.create_file_download_url(FILE_ID)
-
-#     assert "downloadUrl" in data.keys(), "Expected to find `downloadUrl` in response"
-
-#     expected_strings = ["deeporigin", "amazonaws", "GetObject"]
-
-#     for string in expected_strings:
-#         assert (
-#             string in data["downloadUrl"]
-#         ), f"Expected to find {string} in returned downloadUrl"
+    assert df.index.name == "row", "Expected the index to be called `row`"

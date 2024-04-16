@@ -15,7 +15,11 @@ from deeporigin.managed_data._api import (
     list_database_rows,
     list_rows,
 )
+from deeporigin.managed_data.client import DeepOriginClient
 from deeporigin.utils import PREFIX
+
+# default client
+CLIENT = DeepOriginClient()
 
 id_format = Literal["human-id", "system-id"]
 
@@ -98,19 +102,23 @@ def upload(source: str, destination: str) -> None:
 
 
 @beartype
-def get_tree(*, include_rows: bool = True) -> dict:
+def get_tree(
+    *,
+    include_rows: bool = True,
+    client: DeepOriginClient = CLIENT,
+) -> dict:
     """construct a tree of workspaces, databases, and optionally,
     all rows"""
 
     if include_rows:
         # we need to fetch everything, so use a single call
-        objects = list_rows()
+        objects = list_rows(client=client)
         rows = [obj for obj in objects if obj["type"] == "row"]
         workspaces = [obj for obj in objects if obj["type"] == "workspace"]
         databases = [obj for obj in objects if obj["type"] == "database"]
     else:
-        workspaces = list_rows(row_type="workspace")
-        databases = list_rows(row_type="database")
+        workspaces = list_rows(row_type="workspace", client=client)
+        databases = list_rows(row_type="database", client=client)
         objects = workspaces + databases
 
     for obj in workspaces + databases:
@@ -181,6 +189,7 @@ def get_dataframe(
     *,
     use_file_names: bool = True,
     reference_format: id_format = "human-id",
+    client: DeepOriginClient = CLIENT,
 ) -> pd.DataFrame:
     """return a dataframe of all rows in a database
 
@@ -193,10 +202,10 @@ def get_dataframe(
     """
 
     # figure out the rows
-    rows = list_database_rows(database_id)
+    rows = list_database_rows(database_id, client=client)
 
     # figure out the columns
-    columns = get_columns(database_id)
+    columns = get_columns(database_id, client=client)
 
     # make a dictionary with all data in the database
     data = dict()
@@ -312,13 +321,17 @@ def _type_and_cleanup_dataframe(
 
 
 @beartype
-def get_columns(row_id: str) -> list[dict]:
+def get_columns(
+    row_id: str,
+    *,
+    client: DeepOriginClient = CLIENT,
+) -> list[dict]:
     """return column information.
 
     if row_id is a database, then column metadata and names are returned.
     if row_id is a row, then a dictionary of hids and values are returned"""
 
-    response = describe_row(row_id, fields=True)
+    response = describe_row(row_id, fields=True, client=client)
 
     assert response["type"] in [
         "row",
@@ -333,14 +346,18 @@ def get_columns(row_id: str) -> list[dict]:
 
 
 @beartype
-def get_row_data(row_id: str) -> dict:
+def get_row_data(
+    row_id: str,
+    *,
+    client: DeepOriginClient = CLIENT,
+) -> dict:
     """name needs improving? this returns fields in this
     row as a dictionary, where keys are HIDs
 
     if row_id is not a row, an error is raised.
     """
 
-    response = describe_row(row_id, fields=True)
+    response = describe_row(row_id, fields=True, client=client)
 
     if response["type"] != "row":
         raise ValueError(
@@ -348,7 +365,7 @@ def get_row_data(row_id: str) -> dict:
         )
 
     # ask parent for column names
-    parent_response = describe_row(response["parentId"])
+    parent_response = describe_row(response["parentId"], client=client)
 
     if parent_response["type"] != "database":
         raise ValueError(

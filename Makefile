@@ -1,17 +1,10 @@
 .PHONY:  test
 
 repo=$(shell basename $(CURDIR))
-
+client="mock"
 
 test: 
-	#python -m coverage run -m pytest -s -x -k test_cli
-	python -m coverage run -m pytest -s -x -k test_managed_data
-
-	#python -m coverage run -m pytest -s -x -k "test_config or test_feature_flags or test_managed_data"
-	#python -m coverage run -m pytest -s -x -k test_context
-	#python -m coverage run -m pytest -s -x -k test_variables
-
-
+	python -m coverage run -m pytest -s -x -k test_managed_data --client $(client)
 
 	python -m coverage html
 	-open htmlcov/index.html
