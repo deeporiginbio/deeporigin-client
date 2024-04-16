@@ -31,7 +31,6 @@ test = [
     "pytest",
     "capturer",
     "parameterized",
-    "requests-mock",
     "coverage",
 ]
 jupyter = ["ipykernel"]
