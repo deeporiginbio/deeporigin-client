@@ -5,6 +5,7 @@ import requests
 from beartype import beartype
 from deeporigin import cache_do_api_tokens, get_do_api_tokens
 from deeporigin.config import get_value
+from deeporigin.do_api import read_cached_do_api_tokens
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.utils import _nucleus_url
 
@@ -16,9 +17,13 @@ class DeepOriginClient:
 
     headers = dict()
 
-    def authenticate(self):
-        api_access_token, api_refresh_token = get_do_api_tokens()
-        cache_do_api_tokens(api_access_token, api_refresh_token)
+    def authenticate(self, refresh_tokens=True):
+        if refresh_tokens:
+            api_access_token, api_refresh_token = get_do_api_tokens()
+            cache_do_api_tokens(api_access_token, api_refresh_token)
+        else:
+            tokens = read_cached_do_api_tokens()
+            api_access_token = tokens["access"]
 
         self.headers = {
             "accept": "application/json",
@@ -35,19 +40,11 @@ class DeepOriginClient:
     ) -> Union[dict, list]:
         """core call to API endpoint"""
 
-        print("<<<<<<<<<<<-------->>>>>>>>>>>>>>.")
-        print(f"endpoint = {endpoint}")
-        print(data)
-
         response = requests.post(
             f"{self.api_url}{endpoint}",
             headers=self.headers,
             json=data,
         )
-
-        print("----------RESPONSE:--------")
-        print(response.json())
-        print("----------RESPONSE:--------")
 
         return _check_response(response)
 

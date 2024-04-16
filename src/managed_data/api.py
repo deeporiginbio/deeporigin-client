@@ -4,7 +4,7 @@ interact with the data product"""
 import os
 from typing import Literal, Optional, Union
 
-import pandas as pd
+# import pandas as pd
 from beartype import beartype
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.managed_data._api import (
@@ -19,6 +19,57 @@ from deeporigin.managed_data.client import DeepOriginClient
 from deeporigin.utils import PREFIX
 
 id_format = Literal["human-id", "system-id"]
+
+
+@beartype
+def get_tree(
+    *,
+    include_rows: bool = True,
+    client: Optional[DeepOriginClient] = None,
+) -> dict:
+    """construct a tree of workspaces, databases, and optionally,
+    all rows"""
+
+    if include_rows:
+        # we need to fetch everything, so use a single call
+        objects = list_rows(client=client)
+        rows = [obj for obj in objects if obj["type"] == "row"]
+        workspaces = [obj for obj in objects if obj["type"] == "workspace"]
+        databases = [obj for obj in objects if obj["type"] == "database"]
+    else:
+        workspaces = list_rows(row_type="workspace", client=client)
+        databases = list_rows(row_type="database", client=client)
+        objects = workspaces + databases
+
+    for obj in workspaces + databases:
+        obj["children"] = []
+
+    root_object = [obj for obj in objects if obj["parentId"] is None]
+
+    # check that there is exactly one root
+    if len(root_object) != 1:
+        raise DeepOriginException(
+            f"Expected there to be exactly one root object. Instead, there were {len(root_object)}"
+        )
+
+    tree = root_object[0]
+
+    _add_children(tree, workspaces)
+    for workspace in workspaces:
+        _add_children(workspace, workspaces + databases)
+
+    if include_rows:
+        for database in databases:
+            _add_children(database, rows)
+
+    return tree
+
+
+@beartype
+def _add_children(node: dict, objects: list[dict]) -> None:
+    """helper function to add children to a node from a list
+    of objects"""
+    node["children"] = [obj for obj in objects if obj["parentId"] == node["id"]]
 
 
 @beartype
@@ -99,58 +150,6 @@ def upload(source: str, destination: str) -> None:
 
 
 @beartype
-def get_tree(
-    *,
-    include_rows: bool = True,
-    client: Optional[DeepOriginClient] = None,
-) -> dict:
-    """construct a tree of workspaces, databases, and optionally,
-    all rows"""
-
-    if include_rows:
-        # we need to fetch everything, so use a single call
-        objects = list_rows(client=client)
-        rows = [obj for obj in objects if obj["type"] == "row"]
-        workspaces = [obj for obj in objects if obj["type"] == "workspace"]
-        databases = [obj for obj in objects if obj["type"] == "database"]
-    else:
-        workspaces = list_rows(row_type="workspace", client=client)
-        databases = list_rows(row_type="database", client=client)
-        objects = workspaces + databases
-
-    for obj in workspaces + databases:
-        obj["children"] = []
-
-    root_object = [obj for obj in objects if obj["parentId"] is None]
-
-    # check that there is exactly one root
-
-    if len(root_object) != 1:
-        raise DeepOriginException(
-            f"Expected there to be exactly one root object. Instead, there were {len(root_object)}"
-        )
-
-    tree = root_object[0]
-
-    _add_children(tree, workspaces)
-    for workspace in workspaces:
-        _add_children(workspace, workspaces + databases)
-
-    if include_rows:
-        for database in databases:
-            _add_children(database, rows)
-
-    return tree
-
-
-@beartype
-def _add_children(node: dict, objects: list[dict]) -> None:
-    """helper function to add children to a node from a list
-    of objects"""
-    node["children"] = [obj for obj in objects if obj["parentId"] == node["id"]]
-
-
-@beartype
 def get_children(
     objects: Optional[Union[list[dict], str]] = None,
 ) -> list[dict]:
@@ -187,7 +186,7 @@ def get_dataframe(
     use_file_names: bool = True,
     reference_format: id_format = "human-id",
     client: Optional[DeepOriginClient] = None,
-) -> pd.DataFrame:
+):
     """return a dataframe of all rows in a database
 
     Arguments:
@@ -197,6 +196,10 @@ def get_dataframe(
         if False, fileIDs are used
 
     """
+
+    # this import is here because we don't want to
+    # import pandas unless we actually use this function
+    import pandas as pd
 
     # figure out the rows
     rows = list_database_rows(database_id, client=client)
@@ -285,11 +288,15 @@ def _parse_column_value(
 
 @beartype
 def _type_and_cleanup_dataframe(
-    df: pd.DataFrame,
+    df,  # pd.Dataframe, not typed to avoid pandas import
     columns: list[dict],
-) -> pd.DataFrame:
+):
     """utility function to clean up the dataframe and
     make it more usable"""
+
+    # this import is here because we don't want to
+    # import pandas unless we actually use this function
+    import pandas as pd
 
     column_mapper = dict()
     for column in columns:
@@ -381,15 +388,15 @@ def get_row_data(
     for field in response["fields"]:
         column_id = field["columnId"]
         value = field["value"]
-        if isinstance(value, dict):
-            if "selectedOptions" in value.keys():
-                value = value["selectedOptions"]
-            elif "fileIds" in value.keys():
-                value = value["fileIds"]
+    if isinstance(value, dict):
+        if "selectedOptions" in value.keys():
+            value = value["selectedOptions"]
+        elif "fileIds" in value.keys():
+            value = value["fileIds"]
 
-        if column_cardinality_mapper[column_id] == "one" and isinstance(value, list):
-            value = value[0]
+    if column_cardinality_mapper[column_id] == "one" and isinstance(value, list):
+        value = value[0]
 
-        row_data[column_name_mapper[column_id]] = value
+    row_data[column_name_mapper[column_id]] = value
 
     return row_data

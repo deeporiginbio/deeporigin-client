@@ -2,7 +2,6 @@
 managed_data.py"""
 
 import json
-import time
 from typing import Union
 
 import cement
@@ -10,6 +9,7 @@ from beartype import beartype
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.managed_data import _api
 from deeporigin.managed_data.api import download, get_row_data, get_tree, upload
+from deeporigin.managed_data.client import DeepOriginClient
 from deeporigin.utils import PREFIX
 
 
@@ -104,11 +104,11 @@ databases to CSV files.
     def ls(self):
         """list rows in db"""
 
-        t0 = time.time()
-        tree = get_tree()
-        t1 = time.time()
+        client = DeepOriginClient()
+        client.authenticate(refresh_tokens=False)
+
+        tree = get_tree(client=client)
         _print_tree(tree)
-        print(t1 - t0)
 
     @cement.ex(
         help="Show column names and values for a given row",

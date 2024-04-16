@@ -1,1 +1,1 @@
-from deeporigin.managed_data.api import *  # noqa: F403
+# from deeporigin.managed_data.api import get_dataframe  # noqa: F401
