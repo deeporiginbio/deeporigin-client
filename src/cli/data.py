@@ -2,14 +2,26 @@
 managed_data.py"""
 
 import json
+import time
 from typing import Union
 
 import cement
 from beartype import beartype
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.managed_data import _api
-from deeporigin.managed_data.api import download, get_children, get_row_data, upload
+from deeporigin.managed_data.api import download, get_row_data, get_tree, upload
 from deeporigin.utils import PREFIX
+
+
+@beartype
+def _print_tree(tree: dict, offset: int = 0) -> None:
+    """helper function to pretty print a tree"""
+    print(" " * offset + tree["hid"])
+
+    if "children" not in tree.keys():
+        return
+    for child in tree["children"]:
+        _print_tree(child, offset + 2)
 
 
 class DataController(cement.Controller):
@@ -91,7 +103,12 @@ databases to CSV files.
     )
     def ls(self):
         """list rows in db"""
-        _show_json(get_children(self.app.pargs.object_id))
+
+        t0 = time.time()
+        tree = get_tree()
+        t1 = time.time()
+        _print_tree(tree)
+        print(t1 - t0)
 
     @cement.ex(
         help="Show column names and values for a given row",

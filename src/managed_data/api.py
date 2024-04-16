@@ -98,6 +98,54 @@ def upload(source: str, destination: str) -> None:
 
 
 @beartype
+def get_tree(*, include_rows: bool = True) -> dict:
+    """construct a tree of workspaces, databases, and optionally,
+    all rows"""
+
+    if include_rows:
+        # we need to fetch everything, so use a single call
+        objects = list_rows()
+        rows = [obj for obj in objects if obj["type"] == "row"]
+        workspaces = [obj for obj in objects if obj["type"] == "workspace"]
+        databases = [obj for obj in objects if obj["type"] == "database"]
+    else:
+        workspaces = list_rows(row_type="workspace")
+        databases = list_rows(row_type="database")
+        objects = workspaces + databases
+
+    for obj in workspaces + databases:
+        obj["children"] = []
+
+    root_object = [obj for obj in objects if obj["parentId"] is None]
+
+    # check that there is exactly one root
+
+    if len(root_object) != 1:
+        raise DeepOriginException(
+            f"Expected there to be exactly one root object. Instead, there were {len(root_object)}"
+        )
+
+    tree = root_object[0]
+
+    _add_children(tree, workspaces)
+    for workspace in workspaces:
+        _add_children(workspace, workspaces + databases)
+
+    if include_rows:
+        for database in databases:
+            _add_children(database, rows)
+
+    return tree
+
+
+@beartype
+def _add_children(node: dict, objects: list[dict]) -> None:
+    """helper function to add children to a node from a list
+    of objects"""
+    node["children"] = [obj for obj in objects if obj["parentId"] == node["id"]]
+
+
+@beartype
 def get_children(
     objects: Optional[Union[list[dict], str]] = None,
 ) -> list[dict]:
