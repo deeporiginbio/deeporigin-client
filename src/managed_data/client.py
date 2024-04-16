@@ -14,15 +14,18 @@ class DeepOriginClient:
     api_url = _nucleus_url()
     org_id = get_value()["organization_id"]
 
-    api_access_token, api_refresh_token = get_do_api_tokens()
-    cache_do_api_tokens(api_access_token, api_refresh_token)
+    headers = dict()
 
-    headers = {
-        "accept": "application/json",
-        "authorization": f"Bearer {api_access_token}",
-        "content-type": "application/json",
-        "x-org-id": org_id,
-    }
+    def authenticate(self):
+        api_access_token, api_refresh_token = get_do_api_tokens()
+        cache_do_api_tokens(api_access_token, api_refresh_token)
+
+        self.headers = {
+            "accept": "application/json",
+            "authorization": f"Bearer {api_access_token}",
+            "content-type": "application/json",
+            "x-org-id": self.org_id,
+        }
 
     @beartype
     def invoke(

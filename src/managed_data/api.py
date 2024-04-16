@@ -18,9 +18,6 @@ from deeporigin.managed_data._api import (
 from deeporigin.managed_data.client import DeepOriginClient
 from deeporigin.utils import PREFIX
 
-# default client
-CLIENT = DeepOriginClient()
-
 id_format = Literal["human-id", "system-id"]
 
 
@@ -105,7 +102,7 @@ def upload(source: str, destination: str) -> None:
 def get_tree(
     *,
     include_rows: bool = True,
-    client: DeepOriginClient = CLIENT,
+    client: Optional[DeepOriginClient] = None,
 ) -> dict:
     """construct a tree of workspaces, databases, and optionally,
     all rows"""
@@ -189,7 +186,7 @@ def get_dataframe(
     *,
     use_file_names: bool = True,
     reference_format: id_format = "human-id",
-    client: DeepOriginClient = CLIENT,
+    client: Optional[DeepOriginClient] = None,
 ) -> pd.DataFrame:
     """return a dataframe of all rows in a database
 
@@ -324,7 +321,7 @@ def _type_and_cleanup_dataframe(
 def get_columns(
     row_id: str,
     *,
-    client: DeepOriginClient = CLIENT,
+    client: Optional[DeepOriginClient] = None,
 ) -> list[dict]:
     """return column information.
 
@@ -349,7 +346,7 @@ def get_columns(
 def get_row_data(
     row_id: str,
     *,
-    client: DeepOriginClient = CLIENT,
+    client: Optional[DeepOriginClient] = None,
 ) -> dict:
     """name needs improving? this returns fields in this
     row as a dictionary, where keys are HIDs

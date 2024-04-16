@@ -13,8 +13,11 @@ from deeporigin.managed_data.client import DeepOriginClient
 RowType = Literal["row", "workspace", "database"]
 
 
-# default client
-CLIENT = DeepOriginClient()
+def _get_default_client(client):
+    if client is None:
+        client = DeepOriginClient()
+        client.authenticate()
+    return client
 
 
 @beartype
@@ -23,10 +26,11 @@ def list_rows(
     parent_id: Optional[str] = None,
     row_type: Optional[RowType] = None,
     parent_is_root: Optional[bool] = None,
-    client: DeepOriginClient = CLIENT,
+    client: Optional[DeepOriginClient] = None,
 ) -> list[dict]:
     """low level API that wraps the ListRows endpoint"""
 
+    client = _get_default_client(client)
     filters = []
 
     if parent_is_root is not None:
@@ -47,8 +51,10 @@ def list_files(
     *,
     assigned_row_ids: Optional[list[str]] = None,
     is_unassigned: Optional[bool] = None,
-    client: DeepOriginClient = CLIENT,
+    client: Optional[DeepOriginClient] = None,
 ):
+    client = _get_default_client(client)
+
     filters = []
 
     if is_unassigned is not None:
@@ -64,8 +70,10 @@ def list_files(
 def describe_database_stats(
     database_id: str,
     *,
-    client: DeepOriginClient = CLIENT,
+    client: Optional[DeepOriginClient] = None,
 ):
+    client = _get_default_client(client)
+
     return client.invoke("DescribeDatabaseStats", dict(databaseId=database_id))
 
 
@@ -73,8 +81,10 @@ def describe_database_stats(
 def list_mentions(
     query: str,
     *,
-    client: DeepOriginClient = CLIENT,
+    client: Optional[DeepOriginClient] = None,
 ):
+    client = _get_default_client(client)
+
     return client.invoke("ListMentions", dict(query=query))
 
 
@@ -82,8 +92,10 @@ def list_mentions(
 def list_row_back_references(
     row_id: str,
     *,
-    client: DeepOriginClient = CLIENT,
+    client: Optional[DeepOriginClient] = None,
 ):
+    client = _get_default_client(client)
+
     return client.invoke("ListRowBackReferences", dict(rowId=row_id))
 
 
@@ -91,9 +103,12 @@ def list_row_back_references(
 def create_file_download_url(
     file_id: str,
     *,
-    client: DeepOriginClient = CLIENT,
+    client: Optional[DeepOriginClient] = None,
 ) -> dict:
     """low-level API call to CreateFileDownloadUrl"""
+
+    client = _get_default_client(client)
+
     return client.invoke("CreateFileDownloadUrl", dict(fileId=file_id))
 
 
@@ -101,9 +116,12 @@ def create_file_download_url(
 def describe_file(
     file_id: str,
     *,
-    client: DeepOriginClient = CLIENT,
+    client: Optional[DeepOriginClient] = None,
 ) -> dict:
     """low-level API call to DescribeFile"""
+
+    client = _get_default_client(client)
+
     return client.invoke("DescribeFile", dict(fileId=file_id))
 
 
@@ -112,11 +130,14 @@ def describe_row(
     row_id: str,
     *,
     fields: bool = False,
-    client: DeepOriginClient = CLIENT,
+    client: Optional[DeepOriginClient] = None,
 ) -> dict:
     """low-level API that wraps the DescribeRow endpoint."""
 
+    client = _get_default_client(client)
+
     data = dict(rowId=row_id, fields=fields)
+
     return client.invoke("DescribeRow", data)
 
 
@@ -124,9 +145,11 @@ def describe_row(
 def list_database_rows(
     row_id: str,
     *,
-    client: DeepOriginClient = CLIENT,
+    client: Optional[DeepOriginClient] = None,
 ) -> list[dict]:
     """low level API that wraps the ListDatabaseRows endpoint"""
+
+    client = _get_default_client(client)
 
     data = dict(databaseRowId=row_id)
     return client.invoke("ListDatabaseRows", data)
@@ -137,9 +160,11 @@ def download_file(
     file_id: str,
     destination: str,
     *,
-    client: DeepOriginClient = CLIENT,
+    client: Optional[DeepOriginClient] = None,
 ) -> None:
     """download the file to the destination folder"""
+
+    client = _get_default_client(client)
 
     if not os.path.isdir(destination):
         raise DeepOriginException(f"{destination} should be a path to a folder.")
@@ -163,7 +188,7 @@ def convert_id_format(
     *,
     hids: Optional[Union[list[str], set[str]]] = None,
     ids: Optional[Union[list[str], set[str]]] = None,
-    client: DeepOriginClient = CLIENT,
+    client: Optional[DeepOriginClient] = None,
 ) -> list[dict]:
     """convert a list of HIDs to IDs or vice versa"""
 
@@ -171,6 +196,10 @@ def convert_id_format(
         raise DeepOriginException(
             "Either `hids` or `ids` should be non-None and a list of strings"
         )
+
+    if client is None:
+        client = DeepOriginClient()
+        client.authenticate()
 
     conversions = []
 

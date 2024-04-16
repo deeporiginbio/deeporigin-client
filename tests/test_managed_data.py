@@ -145,26 +145,28 @@ def config(pytestconfig):
     """this fixture performs some setup tasks
     before all tests are run, and runs only once"""
 
-    config = dict()
+    data = dict()
 
     # set up client
     if pytestconfig.getoption("client") == "mock":
-        config["client"] = MockClient()
+        data["client"] = MockClient()
 
-        config["databases"] = ["db-sample"]
-        config["rows"] = ["sample-1"]
+        data["databases"] = ["db-sample"]
+        data["rows"] = ["sample-1"]
     else:
-        config["client"] = DeepOriginClient()
+        client = DeepOriginClient()
+        client.authenticate()
+        data["client"] = client
 
         # if we're going to be making requests to a live
         # instance, we need to make sensible requests
         databases = _api.list_rows(row_type="database")
-        config["databases"] = [db["hid"] for db in databases]
+        data["databases"] = [db["hid"] for db in databases]
         rows = _api.list_rows(row_type="row")
-        config["rows"] = [row["hid"] for row in rows]
+        data["rows"] = [row["hid"] for row in rows]
 
     # tests run on yield
-    yield config
+    yield data
 
     # teardown tasks, if any
 
