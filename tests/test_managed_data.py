@@ -215,7 +215,10 @@ def test_list_database_rows(config):
 
 
 def test_get_dataframe(config):
-    df = api.get_dataframe(config["databases"][0])
+    df = api.get_dataframe(
+        config["databases"][0],
+        client=config["client"],
+    )
 
     assert (
         set(df.attrs.keys()) == {"file_ids", "reference_ids"}
