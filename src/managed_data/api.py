@@ -202,13 +202,20 @@ def get_dataframe(
     # figure out the rows
     rows = list_database_rows(database_id, client=client)
 
-    # figure out the columns
-    columns = get_columns(database_id, client=client)
+    # figure out the column names and ID of the database
+    response = describe_row(database_id, fields=True, client=client)
+    assert (
+        response["type"] == "database"
+    ), "Expected database_id to resolve to a database"
+
+    columns = response["cols"]
+    database_id = response["id"]
+    row_id = response["hidPrefix"] + "-id"
 
     # make a dictionary with all data in the database
     data = dict()
-    data["validation_status"] = []
-    data["row"] = []
+    data["Validation Status"] = []
+    data[row_id] = []
 
     # keep track of all files and references in this database
     file_ids = []
@@ -218,8 +225,8 @@ def get_dataframe(
         data[column["id"]] = []
 
     for row in rows:
-        data["row"].append(row["hid"])
-        data["validation_status"].append(row["validationStatus"])
+        data[row_id].append(row["hid"])
+        data["Validation Status"].append(row["validationStatus"])
 
         fields = row["fields"]
 
@@ -247,6 +254,8 @@ def get_dataframe(
         df = pd.DataFrame(data)
         df.attrs["file_ids"] = list(set(file_ids))
         df.attrs["reference_ids"] = list(set(reference_ids))
+        df.attrs["id"] = database_id
+        df.attrs["primary_key"] = row_id
 
         return _type_and_cleanup_dataframe(df, columns)
 
@@ -328,15 +337,18 @@ def _type_and_cleanup_dataframe(
 
     # rename columns
     df = df.rename(columns=column_mapper)
-    df = df.set_index("row")
+
+    # wipe metadata from columns
+    for column in df.columns:
+        df[column].attrs = dict()
 
     # attach metadata to columns
     for column in columns:
         df[column["name"]].attrs = column
 
-    # add a type to validation_status because this column
+    # add a type to Validation Status because this column
     # doesn't actually exist in the database
-    df["validation_status"].attrs = dict(type="validation_status")
+    df["Validation Status"].attrs = dict(type="Validation Status")
     return df
 
 
@@ -416,3 +428,42 @@ def get_row_data(
         row_data[column_name_mapper[column_id]] = value
 
     return row_data
+
+
+@beartype
+def merge_databases(dfs: list):
+    """merge a list of databases into a single database,
+    uniting keys across databases"""
+
+    import pandas as pd
+
+    for df in dfs:
+        assert isinstance(df, pd.DataFrame), "Expected a list of dataframes to merge"
+
+    assert len(dfs) == 2, "For now we only support merging 2 databases"
+
+    # make a cross reference mapper that converts
+    # system IDs to column names
+    cross_reference_mapper = dict()
+
+    for df in dfs:
+        cross_reference_mapper[df.attrs["id"]] = df.attrs["primary_key"]
+
+    # rename columns that contain cross-references (foreign keys)
+    # so that the pandas merge works correctly
+
+    for df in dfs:
+        column_mapper = dict()
+
+        for column in df.columns:
+            attrs = df[column].attrs
+
+            if "referenceDatabaseRowId" in attrs.keys():
+                column_mapper[column] = cross_reference_mapper[
+                    attrs["referenceDatabaseRowId"]
+                ]
+
+        df = df.rename(columns=column_mapper)
+
+    # for now we only support merging 2 DBs
+    return dfs[0].merge(dfs[1], how="outer")
