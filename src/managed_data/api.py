@@ -4,7 +4,6 @@ interact with the data product"""
 import os
 from typing import Literal, Optional, Union
 
-# import pandas as pd
 from beartype import beartype
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.managed_data._api import (
