@@ -63,7 +63,7 @@ def list_files(
     if assigned_row_ids:
         filters.append(dict(assignedRowIds=assigned_row_ids))
 
-    return client.invoke("ListFiles", data=dict(filters=[]))
+    return client.invoke("ListFiles", data=dict(filters=filters))
 
 
 @beartype
@@ -197,9 +197,7 @@ def convert_id_format(
             "Either `hids` or `ids` should be non-None and a list of strings"
         )
 
-    if client is None:
-        client = DeepOriginClient()
-        client.authenticate()
+    client = _get_default_client(client)
 
     conversions = []
 

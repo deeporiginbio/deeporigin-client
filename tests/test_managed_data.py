@@ -76,6 +76,26 @@ class MockClient(DeepOriginClient):
                         "name": None,
                     },
                 ]
+            elif data == dict(filters=[dict(parent=dict(isRoot=True))]):
+                return [
+                    {
+                        "id": "_row:0u3UkKFs2Km0mYEbm1Rt2",
+                        "parentId": None,
+                        "hid": "sandbox",
+                        "type": "workspace",
+                        "name": "Demo Sandbox",
+                    }
+                ]
+            elif data == dict(filters=[dict(rowType="workspace")]):
+                return [
+                    {
+                        "id": "_row:0u3UkKFs2Km0mYEbm1Rt2",
+                        "parentId": None,
+                        "hid": "sandbox",
+                        "type": "workspace",
+                        "name": "Demo Sandbox",
+                    },
+                ]
 
         elif endpoint == "DescribeRow":
             if data["fields"]:
@@ -254,6 +274,42 @@ class MockClient(DeepOriginClient):
                 "contentType": "",
             }
 
+        elif endpoint == "DescribeDatabaseStats":
+            return {"rowCount": 5}
+        elif endpoint == "ListFiles":
+            if data == dict(filters=[dict(isUnassigned=True)]):
+                return [
+                    {
+                        "file": {
+                            "id": "_file:2n5jHmnbLC4tJShNrk6Df",
+                            "uri": "s3://deeporigin-nucleus-local-uploads/files/_file:2n5jHmnbLC4tJShNrk6Df",
+                            "name": "QC report (1).pdf",
+                            "status": "archived",
+                            "contentLength": 237478,
+                            "contentType": "application/pdf",
+                        }
+                    },
+                ]
+            elif dict(filters=[dict(isUnassigned=False)]):
+                return [
+                    {
+                        "file": {
+                            "id": "_file:Fi7dHZJHgA3nqT1y1Ro5u",
+                            "uri": "s3://deeporigin-nucleus-local-uploads/files/_file:Fi7dHZJHgA3nqT1y1Ro5u",
+                            "name": "sequence_preprocessing.pdf",
+                            "status": "ready",
+                            "contentLength": 698255,
+                            "contentType": "application/pdf",
+                        },
+                        "assignments": [
+                            {"rowId": "_row:ZEaEUIgsbHmGLVlgnxfvU"},
+                            {"rowId": "_row:aCWxUxumDFDnu8ZhmhQ0X"},
+                            {"rowId": "_row:WZVb1jsebafhfLgrHtz2l"},
+                            {"rowId": "_row:3A3okCbvuaZvEkOZLqLwY"},
+                        ],
+                    },
+                ]
+
 
 @pytest.fixture(scope="session", autouse=True)
 def config(pytestconfig):
@@ -295,6 +351,82 @@ def test_list_rows(config):
     for row in rows:
         assert set(row.keys()) == list_row_keys
         assert row["type"] == "row"
+
+
+def test_list_rows_root_parent(config):
+    root = _api.list_rows(
+        parent_is_root=True,
+        client=config["client"],
+    )
+
+    assert len(root) == 1, "Expected there to be exactly one root"
+
+    assert root[0]["parentId"] is None, "Expected root to have no parent"
+
+
+def test_list_rows_by_type(config):
+    rows = _api.list_rows(
+        row_type="workspace",
+        client=config["client"],
+    )
+
+    assert len(rows) > 0, "Expected at least one workspace"
+
+    for row in rows:
+        assert (
+            row["type"] == "workspace"
+        ), f"Expected to get a list of workspaces, but {row} is not a worksapce"
+
+
+def test_list_files_unassigned(config):
+    files = _api.list_files(
+        is_unassigned=True,
+        client=config["client"],
+    )
+
+    assert len(files) > 0, "Expected to find at least 1 unassigned files"
+
+    for file in files:
+        assert (
+            "assignments" not in file.keys()
+        ), f"Expected not to see an assignments key for this file, but instead found {file}"
+
+
+def test_list_files_assigned(config):
+    files = _api.list_files(
+        is_unassigned=False,
+        client=config["client"],
+    )
+
+    assert len(files) > 0, "Expected to find at least 1 assigned files"
+
+    for file in files:
+        assert (
+            "assignments" in file.keys()
+        ), f"Expected to see an assignments key for this file, but instead found {file}"
+
+        assignments = file["assignments"]
+        assert (
+            len(assignments) > 0
+        ), "Expected assignments to be a list with at least 1 element"
+
+        for assignment in assignments:
+            assert (
+                "rowId" in assignment.keys()
+            ), f"Expected to find a rowId in assignments, but instead found {assignment}"
+
+
+def test_describe_database_stats(config):
+    stats = _api.describe_database_stats(
+        config["databases"][0],
+        client=config["client"],
+    )
+
+    assert (
+        "rowCount" in stats.keys()
+    ), f"Expected stats to be a dictionary with a key called `rowCount`, instead got {stats}"
+
+    assert stats["rowCount"] >= 0, "Expected a positive number of rows"
 
 
 def test_describe_row(config):
