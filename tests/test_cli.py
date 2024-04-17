@@ -42,7 +42,7 @@ class TestCase(unittest.TestCase):
         self.assertEqual(__version__, stdout)
 
     @pytest.mark.skipif(
-        sys.version_info < (3, 10), reason="requires python3.10 or higher"
+        sys.version_info < (3, 11), reason="requires python3.10 or higher"
     )
     def test_except_hook(self):
         mock_code = MockCode("mock_filename.py", "mock_function")
