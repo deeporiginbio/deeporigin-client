@@ -388,15 +388,15 @@ def get_row_data(
     for field in response["fields"]:
         column_id = field["columnId"]
         value = field["value"]
-    if isinstance(value, dict):
-        if "selectedOptions" in value.keys():
-            value = value["selectedOptions"]
-        elif "fileIds" in value.keys():
-            value = value["fileIds"]
+        if isinstance(value, dict):
+            if "selectedOptions" in value.keys():
+                value = value["selectedOptions"]
+            elif "fileIds" in value.keys():
+                value = value["fileIds"]
 
-    if column_cardinality_mapper[column_id] == "one" and isinstance(value, list):
-        value = value[0]
+        if column_cardinality_mapper[column_id] == "one" and isinstance(value, list):
+            value = value[0]
 
-    row_data[column_name_mapper[column_id]] = value
+        row_data[column_name_mapper[column_id]] = value
 
     return row_data

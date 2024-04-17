@@ -11,6 +11,10 @@ from deeporigin.managed_data import _api
 from deeporigin.managed_data.api import download, get_row_data, get_tree, upload
 from deeporigin.managed_data.client import DeepOriginClient
 from deeporigin.utils import PREFIX
+from tabulate import tabulate
+
+client = DeepOriginClient()
+client.authenticate(refresh_tokens=False)
 
 
 @beartype
@@ -67,12 +71,35 @@ databases to CSV files.
             (
                 ["row_id"],
                 {"help": "Row or Database ID", "action": "store"},
-            )
+            ),
+            (
+                ["--json"],
+                {
+                    "action": "store_true",
+                    "help": "Whether to return JSON formatted data [default: False]",
+                },
+            ),
         ],
     )
     def list_rows(self):
-        """describe row"""
-        _show_json(_api.list_rows(self.app.pargs.row_id))
+        """list rows"""
+
+        rows = _api.list_rows(
+            parent_id=self.app.pargs.row_id,
+            client=client,
+        )
+
+        if self.app.pargs.json:
+            _show_json(rows)
+            return
+
+        # convert a list of dicts to a dict of lists
+        data = {}
+        keys = rows[0].keys()
+        for key in keys:
+            data[key] = [row[key] for row in rows]
+
+        print(tabulate(data, headers="keys", tablefmt="rounded_outline"))
 
     @cement.ex(
         help="List rows in a database",
@@ -84,8 +111,22 @@ databases to CSV files.
         ],
     )
     def list_database_rows(self):
-        """describe row"""
-        _show_json(_api.list_database_rows(self.app.pargs.db_id))
+        """list database row"""
+        rows = _api.list_database_rows(
+            self.app.pargs.db_id,
+            client=client,
+        )
+
+        _show_json(rows)
+
+        return
+
+        data = {}
+        keys = rows[0].keys()
+        for key in keys:
+            data[key] = [row[key] for row in rows]
+
+        print(tabulate(data, headers="keys", tablefmt="rounded_outline"))
 
     @cement.ex(
         help="List child workspaces and databases in given workspace",
@@ -104,9 +145,6 @@ databases to CSV files.
     def ls(self):
         """list rows in db"""
 
-        client = DeepOriginClient()
-        client.authenticate(refresh_tokens=False)
-
         tree = get_tree(client=client)
         _print_tree(tree)
 
@@ -117,12 +155,28 @@ databases to CSV files.
                 ["row_id"],
                 {"help": "Row ID", "action": "store"},
             ),
+            (
+                ["--json"],
+                {
+                    "action": "store_true",
+                    "help": "Whether to return JSON formatted data [default: False]",
+                },
+            ),
         ],
     )
     def row(self):
         """list the columns of the row and their values, where applicable"""
-        row_data = get_row_data(self.app.pargs.row_id)
-        _show_json(row_data)
+        row_data = get_row_data(self.app.pargs.row_id, client=client)
+
+        if self.app.pargs.json:
+            _show_json(row_data)
+            return
+
+        print(
+            tabulate(
+                row_data.items(), headers=["Name", "Value"], tablefmt="rounded_outline"
+            )
+        )
 
 
 class CopyController(cement.Controller):

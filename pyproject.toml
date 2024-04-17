@@ -23,6 +23,7 @@ dependencies = [
     "validators",
     "pandas",
     "beartype",
+    "tabulate",
 ]
 dynamic = ["version"]
 
