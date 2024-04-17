@@ -1,12 +1,13 @@
 import copy
+import io
 import os
 import pathlib
 import shutil
 import tempfile
 import unittest
 import unittest.mock
+from contextlib import redirect_stderr, redirect_stdout
 
-import capturer
 import crontab
 import pydantic
 from deeporigin import cli, config, do_api, feature_flags, utils, variables
@@ -1198,11 +1199,15 @@ class TestCase(unittest.TestCase):
         do_api.get_do_api_tokens.cache_clear()
         if os.path.isfile(self.api_tokens_filename):
             os.remove(self.api_tokens_filename)
-        with cli.App(argv=["variables", "install"]) as app:
-            with capturer.CaptureOutput(merged=False, relay=False) as captured:
+
+        stdout_capture = io.StringIO()
+        stderr_capture = io.StringIO()
+
+        with redirect_stdout(stdout_capture), redirect_stderr(stderr_capture):
+            with cli.App(argv=["variables", "install"]) as app:
                 with unittest.mock.patch("requests.post", side_effect=api_responses):
                     app.run()
-                    stdout = captured.stdout.get_text()
+                stdout = stdout_capture.getvalue().strip()
 
         self.assertIn("No variables were modified", stdout)
 
@@ -1233,11 +1238,14 @@ class TestCase(unittest.TestCase):
             },
         )
 
-        with cli.App(argv=["variables", "install"]) as app:
-            with capturer.CaptureOutput(merged=False, relay=False) as captured:
+        stdout_capture = io.StringIO()
+        stderr_capture = io.StringIO()
+
+        with redirect_stdout(stdout_capture), redirect_stderr(stderr_capture):
+            with cli.App(argv=["variables", "install"]) as app:
                 with unittest.mock.patch("requests.post", side_effect=api_responses):
                     app.run()
-                    stdout = captured.stdout.get_text()
+                stdout = stdout_capture.getvalue().strip()
 
         self.assertIn("2 variables were modified", stdout)
 
@@ -1268,11 +1276,14 @@ class TestCase(unittest.TestCase):
             },
         )
 
-        with cli.App(argv=["variables", "install"]) as app:
-            with capturer.CaptureOutput(merged=False, relay=False) as captured:
+        stdout_capture = io.StringIO()
+        stderr_capture = io.StringIO()
+
+        with redirect_stdout(stdout_capture), redirect_stderr(stderr_capture):
+            with cli.App(argv=["variables", "install"]) as app:
                 with unittest.mock.patch("requests.post", side_effect=api_responses):
                     app.run()
-                    stdout = captured.stdout.get_text()
+                stdout = stdout_capture.getvalue().strip()
 
         self.assertIn("1 variables were modified", stdout)
         self.assertIn("1 variables were unmodified", stdout)
@@ -1304,11 +1315,14 @@ class TestCase(unittest.TestCase):
             },
         )
 
-        with cli.App(argv=["variables", "install"]) as app:
-            with capturer.CaptureOutput(merged=False, relay=False) as captured:
+        stdout_capture = io.StringIO()
+        stderr_capture = io.StringIO()
+
+        with redirect_stdout(stdout_capture), redirect_stderr(stderr_capture):
+            with cli.App(argv=["variables", "install"]) as app:
                 with unittest.mock.patch("requests.post", side_effect=api_responses):
                     app.run()
-                    stdout = captured.stdout.get_text()
+                stdout = stdout_capture.getvalue().strip()
 
         self.assertIn("No variables were modified", stdout)
         self.assertIn("1 variables were added", stdout)

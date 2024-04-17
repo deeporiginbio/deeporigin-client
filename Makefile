@@ -4,7 +4,7 @@ SHELL := /bin/bash
 
 repo=$(shell basename $(CURDIR))
 client="mock"
-chosen_tests="test_cli or managed_data"
+chosen_tests="not key and not test_deserialize_variable"
 
 test: 
 	source $(CURDIR)/venv/bin/activate && \

@@ -1,8 +1,9 @@
+import io
 import json
 import unittest
 import unittest.mock
+from contextlib import redirect_stderr, redirect_stdout
 
-import capturer
 from deeporigin import cli, context
 
 
@@ -79,10 +80,13 @@ class TestCase(unittest.TestCase):
         )
         self.assertEqual(expected_value, value)
 
-        with cli.App(argv=["context"]) as app:
-            with capturer.CaptureOutput(merged=False, relay=False) as captured:
+        stdout_capture = io.StringIO()
+        stderr_capture = io.StringIO()
+
+        with redirect_stdout(stdout_capture), redirect_stderr(stderr_capture):
+            with cli.App(argv=["context"]) as app:
                 app.run()
-                stdout = captured.stdout.get_text()
+            stdout = stdout_capture.getvalue().strip()
         expected_stdout = "\n".join(
             [
                 "Bench ID: cute-bear-123",
@@ -161,10 +165,15 @@ class TestCase(unittest.TestCase):
         )
         self.assertEqual(expected_value, value)
 
-        with cli.App(argv=["context"]) as app:
-            with capturer.CaptureOutput(merged=False, relay=False) as captured:
+        stdout_capture = io.StringIO()
+        stderr_capture = io.StringIO()
+
+        with redirect_stdout(stdout_capture), redirect_stderr(stderr_capture):
+            with cli.App(argv=["context"]) as app:
                 app.run()
-                stdout = captured.stdout.get_text()
+
+            stdout = stdout_capture.getvalue().strip()
+
         expected_stdout = "\n".join(
             [
                 "Bench ID: None",
@@ -214,10 +223,14 @@ class TestCase(unittest.TestCase):
         )
         self.assertEqual(expected_value, value)
 
-        with cli.App(argv=["context"]) as app:
-            with capturer.CaptureOutput(merged=False, relay=False) as captured:
+        stdout_capture = io.StringIO()
+        stderr_capture = io.StringIO()
+
+        with redirect_stdout(stdout_capture), redirect_stderr(stderr_capture):
+            with cli.App(argv=["context"]) as app:
                 app.run()
-                stdout = captured.stdout.get_text()
+
+            stdout = stdout_capture.getvalue().strip()
         expected_stdout = "\n".join(
             [
                 "Bench ID: None",
@@ -249,10 +262,15 @@ class TestCase(unittest.TestCase):
         )
         self.assertEqual(expected_value, value)
 
-        with cli.App(argv=["context"]) as app:
-            with capturer.CaptureOutput(merged=False, relay=False) as captured:
+        stdout_capture = io.StringIO()
+        stderr_capture = io.StringIO()
+
+        with redirect_stdout(stdout_capture), redirect_stderr(stderr_capture):
+            with cli.App(argv=["context"]) as app:
                 app.run()
-                stdout = captured.stdout.get_text()
+
+            stdout = stdout_capture.getvalue().strip()
+
         expected_stdout = "\n".join(
             [
                 "Bench ID: None",
