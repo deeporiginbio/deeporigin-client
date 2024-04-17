@@ -6,6 +6,14 @@ from deeporigin.managed_data import _api, api
 from deeporigin.managed_data._api import DeepOriginClient
 
 # constants
+dataframe_attr_keys = {
+    "file_ids",
+    "id",
+    "primary_key",
+    "reference_ids",
+}
+
+
 row_description_keys = {
     "id",
     "parentId",
@@ -468,11 +476,13 @@ def test_get_dataframe(config):
     )
 
     assert (
-        set(df.attrs.keys()) == {"file_ids", "reference_ids"}
-    ), "Expected to find a dictionary in `df.attrs` with keys called `file_ids` and `reference_ids`"
+        set(df.attrs.keys()) == dataframe_attr_keys
+    ), f"Expected to find a dictionary in `df.attrs` with these keys: {dataframe_attr_keys}, instead found a dictionary with these keys: {df.attrs.keys()}"
 
     assert (
-        "validation_status" in df.columns
-    ), f"Expected to find a column called `validaton_status` in the dataframe. Instead, the columns in this dataframe are: {df.columns}"
+        "Validation Status" in df.columns
+    ), f"Expected to find a column called `Validation Status` in the dataframe. Instead, the columns in this dataframe are: {df.columns}"
 
-    assert df.index.name == "row", "Expected the index to be called `row`"
+    assert (
+        df.attrs["primary_key"] in df.columns
+    ), "Expected to find the primary key as a column"
