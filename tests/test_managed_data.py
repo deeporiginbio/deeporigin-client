@@ -80,10 +80,10 @@ def _row_object(
 
 
 def _database_row_object(
-    submissionStatus: str = "draft",
+    submission_status: str = "draft",
     hid: str = "sample-1",
     hidNum: int = 1,
-    validationStatus: str = "valid",
+    validation_status: str = "valid",
 ):
     return {
         "id": "_row:W6DjtaCrZ201EGLpmZtGO",
@@ -93,10 +93,10 @@ def _database_row_object(
         "dateUpdated": "2024-04-08 14:58:18.376",
         "createdByUserDrn": "drn:identity::user:auth0|65ca7d6fb87df994e5c",
         "editedByUserDrn": "drn:identity::user:auth0|65ca787df994e5c",
-        "submissionStatus": submissionStatus,
+        "submissionStatus": submission_status,
         "hid": hid,
         "hidNum": hidNum,
-        "validationStatus": validationStatus,
+        "validationStatus": validation_status,
         "fields": [],
     }
 
@@ -114,14 +114,9 @@ class MockClient(DeepOriginClient):
                     _row_object(hid="sample-1"),
                     _row_object(hid="sample-2"),
                 ]
-            elif data == dict(filters=[dict(parent=dict(isRoot=True))]):
-                return [
-                    _row_object(
-                        type="workspace",
-                        parentId=None,
-                    )
-                ]
-            elif data == dict(filters=[dict(rowType="workspace")]):
+            elif data == dict(filters=[dict(parent=dict(isRoot=True))]) or data == dict(
+                filters=[dict(rowType="workspace")]
+            ):
                 return [
                     _row_object(
                         type="workspace",
@@ -333,7 +328,7 @@ def test_list_rows_by_type(config):
     for row in rows:
         assert (
             row["type"] == "workspace"
-        ), f"Expected to get a list of workspaces, but {row} is not a worksapce"
+        ), f"Expected to get a list of workspaces, but {row} is not a workspace"
 
 
 def test_list_files_unassigned(config):
