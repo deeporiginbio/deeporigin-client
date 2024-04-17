@@ -1,5 +1,7 @@
 """this tests low level functions in the data API"""
 
+from typing import Optional
+
 import pytest
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.managed_data import _api, api
@@ -59,6 +61,46 @@ list_database_rows_keys = {
 }
 
 
+def _row_object(
+    *,
+    parentId: Optional[str] = "_row:placeholder",
+    id: str = "row:placeholder",
+    type: str = "row",
+    name: Optional[str] = None,
+    hid: str = "placeholder-1",
+) -> dict:
+    """helper function to create dummy responses"""
+    return dict(
+        id=id,
+        parentId=parentId,
+        type=type,
+        name=name,
+        hid=hid,
+    )
+
+
+def _database_row_object(
+    submissionStatus: str = "draft",
+    hid: str = "sample-1",
+    hidNum: int = 1,
+    validationStatus: str = "valid",
+):
+    return {
+        "id": "_row:W6DjtaCrZ201EGLpmZtGO",
+        "parentId": "_row:J5FiZ1Z202GuiF78dxhMr",
+        "type": "row",
+        "dateCreated": "2024-04-05 19:04:04.094428",
+        "dateUpdated": "2024-04-08 14:58:18.376",
+        "createdByUserDrn": "drn:identity::user:auth0|65ca7d6fb87df994e5c",
+        "editedByUserDrn": "drn:identity::user:auth0|65ca787df994e5c",
+        "submissionStatus": submissionStatus,
+        "hid": hid,
+        "hidNum": hidNum,
+        "validationStatus": validationStatus,
+        "fields": [],
+    }
+
+
 class MockClient(DeepOriginClient):
     """mock client to respond with static data"""
 
@@ -69,40 +111,22 @@ class MockClient(DeepOriginClient):
         if endpoint == "ListRows":
             if data == dict(filters=[dict(parent=dict(id="db-sample"))]):
                 return [
-                    {
-                        "id": "_row:0sJjiHf18ZtdzRyt1uKY5",
-                        "parentId": "_row:J5FiZ1Z202GuiF78dxhMr",
-                        "hid": "sample-2",
-                        "type": "row",
-                        "name": None,
-                    },
-                    {
-                        "id": "_row:W6DjtaCrZ201EGLpmZtGO",
-                        "parentId": "_row:J5FiZ1Z202GuiF78dxhMr",
-                        "hid": "sample-1",
-                        "type": "row",
-                        "name": None,
-                    },
+                    _row_object(hid="sample-1"),
+                    _row_object(hid="sample-2"),
                 ]
             elif data == dict(filters=[dict(parent=dict(isRoot=True))]):
                 return [
-                    {
-                        "id": "_row:0u3UkKFs2Km0mYEbm1Rt2",
-                        "parentId": None,
-                        "hid": "sandbox",
-                        "type": "workspace",
-                        "name": "Demo Sandbox",
-                    }
+                    _row_object(
+                        type="workspace",
+                        parentId=None,
+                    )
                 ]
             elif data == dict(filters=[dict(rowType="workspace")]):
                 return [
-                    {
-                        "id": "_row:0u3UkKFs2Km0mYEbm1Rt2",
-                        "parentId": None,
-                        "hid": "sandbox",
-                        "type": "workspace",
-                        "name": "Demo Sandbox",
-                    },
+                    _row_object(
+                        type="workspace",
+                        parentId=None,
+                    )
                 ]
 
         elif endpoint == "DescribeRow":
@@ -162,54 +186,6 @@ class MockClient(DeepOriginClient):
                             "dateCreated": "2024-04-04T17:03:33.033115",
                             "cardinality": "one",
                         },
-                        {
-                            "id": "_col:qb9qXa5BNEMekKVMMJ0XX",
-                            "name": "Sent to client",
-                            "parentId": "_row:J5FiZ1Z202GuiF78dxhMr",
-                            "type": "date",
-                            "dateCreated": "2024-04-04T17:03:33.033115",
-                            "cardinality": "one",
-                        },
-                        {
-                            "id": "_col:zAuCgEf0hvFF7dvXBaNqc",
-                            "name": "Received by client",
-                            "parentId": "_row:J5FiZ1Z202GuiF78dxhMr",
-                            "type": "date",
-                            "dateCreated": "2024-04-04T17:03:33.033115",
-                            "cardinality": "one",
-                        },
-                        {
-                            "id": "_col:qX4AVHymgjlCtoaBRPIB8",
-                            "name": "Sent by client",
-                            "parentId": "_row:J5FiZ1Z202GuiF78dxhMr",
-                            "type": "date",
-                            "dateCreated": "2024-04-04T17:03:33.033115",
-                            "cardinality": "one",
-                        },
-                        {
-                            "id": "_col:nKwL8ZnbBDV1RHo9Blo7j",
-                            "name": "Received by CRO",
-                            "parentId": "_row:J5FiZ1Z202GuiF78dxhMr",
-                            "type": "date",
-                            "dateCreated": "2024-04-04T17:03:33.033115",
-                            "cardinality": "one",
-                        },
-                        {
-                            "id": "_col:yOmqi9mS6GkBQgiQj5Quw",
-                            "name": "Raw reads",
-                            "parentId": "_row:J5FiZ1Z202GuiF78dxhMr",
-                            "type": "file",
-                            "dateCreated": "2024-04-04T17:03:33.033115",
-                            "cardinality": "many",
-                        },
-                        {
-                            "id": "_col:BEnvy9dtTujYTsgHVIWjo",
-                            "name": "Processed date",
-                            "parentId": "_row:J5FiZ1Z202GuiF78dxhMr",
-                            "type": "date",
-                            "dateCreated": "2024-04-04T17:03:33.033115",
-                            "cardinality": "one",
-                        },
                     ],
                     "parent": {"id": "_row:sWOOkUQ3GEUPH3NzKt2f1"},
                     "fields": [],
@@ -243,34 +219,8 @@ class MockClient(DeepOriginClient):
 
         elif endpoint == "ListDatabaseRows":
             return [
-                {
-                    "id": "_row:W6DjtaCrZ201EGLpmZtGO",
-                    "parentId": "_row:J5FiZ1Z202GuiF78dxhMr",
-                    "type": "row",
-                    "dateCreated": "2024-04-05 19:04:04.094428",
-                    "dateUpdated": "2024-04-08 14:58:18.376",
-                    "createdByUserDrn": "drn:identity::user:auth0|65ca7d6f5a130b87df994e5c",
-                    "editedByUserDrn": "drn:identity::user:auth0|65ca7d6f5a130b87df994e5c",
-                    "submissionStatus": "draft",
-                    "hid": "sample-1",
-                    "hidNum": 1,
-                    "validationStatus": "valid",
-                    "fields": [],
-                },
-                {
-                    "id": "_row:0sJjiHf18ZtdzRyt1uKY5",
-                    "parentId": "_row:J5FiZ1Z202GuiF78dxhMr",
-                    "type": "row",
-                    "dateCreated": "2024-04-08 15:23:26.530019",
-                    "dateUpdated": "2024-04-08 15:23:40.748",
-                    "createdByUserDrn": "drn:identity::user:auth0|65ca7d6f5a130b87df994e5c",
-                    "editedByUserDrn": "drn:identity::user:auth0|65ca7d6f5a130b87df994e5c",
-                    "submissionStatus": "draft",
-                    "hid": "sample-2",
-                    "hidNum": 2,
-                    "validationStatus": "valid",
-                    "fields": [],
-                },
+                _database_row_object(),
+                _database_row_object(),
             ]
         elif endpoint == "DescribeFile":
             return {
