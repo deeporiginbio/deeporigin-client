@@ -5,6 +5,7 @@ import unittest.mock
 import warnings
 from contextlib import redirect_stderr, redirect_stdout
 
+import pytest
 from deeporigin import __version__, cli
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.warnings import DeepOriginWarning
@@ -40,6 +41,9 @@ class TestCase(unittest.TestCase):
 
         self.assertEqual(__version__, stdout)
 
+    @pytest.mark.skipif(
+        sys.version_info < (3, 10), reason="requires python3.10 or higher"
+    )
     def test_except_hook(self):
         mock_code = MockCode("mock_filename.py", "mock_function")
         mock_frame = MockFrame(mock_code, {})
