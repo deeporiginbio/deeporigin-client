@@ -31,4 +31,4 @@ install:
 		deactivate
 
 test-github:
-	python3 -m coverage run -m pytest -k $(chosen_tests)--client $(client)
+	python3 -m coverage run -m pytest -k $(chosen_tests) --client $(client)
