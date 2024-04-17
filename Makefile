@@ -4,7 +4,7 @@ repo=$(shell basename $(CURDIR))
 client="mock"
 
 test: 
-	python -m coverage run -m pytest -s -x -k test_managed_data --client $(client)
+	python -m coverage run -m pytest -s --client $(client)
 
 	python -m coverage html
 	-open htmlcov/index.html
