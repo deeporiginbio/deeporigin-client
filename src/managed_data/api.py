@@ -20,6 +20,8 @@ from deeporigin.utils import PREFIX
 
 id_format = Literal["human-id", "system-id"]
 
+DatabaseReturnType = Literal["dataframe", "dict"]
+
 
 @beartype
 def get_tree(
@@ -186,6 +188,7 @@ def get_dataframe(
     use_file_names: bool = True,
     reference_format: id_format = "human-id",
     client: Optional[DeepOriginClient] = None,
+    return_type: DatabaseReturnType = "dataframe",
 ):
     """return a dataframe of all rows in a database
 
@@ -196,10 +199,6 @@ def get_dataframe(
         if False, fileIDs are used
 
     """
-
-    # this import is here because we don't want to
-    # import pandas unless we actually use this function
-    import pandas as pd
 
     # figure out the rows
     rows = list_database_rows(database_id, client=client)
@@ -239,12 +238,30 @@ def get_dataframe(
             else:
                 data[column["id"]].extend(value)
 
-    # make the dataframe
-    df = pd.DataFrame(data)
-    df.attrs["file_ids"] = list(set(file_ids))
-    df.attrs["reference_ids"] = list(set(reference_ids))
+    if return_type == "dataframe":
+        # make the dataframe
 
-    return _type_and_cleanup_dataframe(df, columns)
+        # this import is here because we don't want to
+        # import pandas unless we actually use this function
+        import pandas as pd
+
+        df = pd.DataFrame(data)
+        df.attrs["file_ids"] = list(set(file_ids))
+        df.attrs["reference_ids"] = list(set(reference_ids))
+
+        return _type_and_cleanup_dataframe(df, columns)
+
+    else:
+        # rename keys
+        column_mapper = dict()
+        for column in columns:
+            column_mapper[column["id"]] = column["name"]
+        renamed_data = data.copy()
+        for key in column_mapper.keys():
+            new_key = column_mapper[key]
+            renamed_data[new_key] = data[key]
+            renamed_data.pop(key, None)
+        return renamed_data
 
 
 @beartype

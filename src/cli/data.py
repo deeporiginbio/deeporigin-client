@@ -8,7 +8,13 @@ import cement
 from beartype import beartype
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.managed_data import _api
-from deeporigin.managed_data.api import download, get_row_data, get_tree, upload
+from deeporigin.managed_data.api import (
+    download,
+    get_dataframe,
+    get_row_data,
+    get_tree,
+    upload,
+)
 from deeporigin.managed_data.client import DeepOriginClient
 from deeporigin.utils import PREFIX
 from tabulate import tabulate
@@ -28,16 +34,26 @@ def _print_tree(tree: dict, offset: int = 0) -> None:
         _print_tree(child, offset + 2)
 
 
-def _print_dict(data: dict, *, json: bool = True) -> None:
+def _print_dict(
+    data: dict,
+    *,
+    json: bool = True,
+    transpose: bool = True,
+) -> None:
     """helper function to pretty print a dict as a table"""
 
     if json:
         _show_json(data)
     else:
+        if transpose:
+            data = data.items()
+            headers = ["Name", "Value"]
+        else:
+            headers = "keys"
         print(
             tabulate(
-                data.items(),
-                headers=["Name", "Value"],
+                data,
+                headers=headers,
                 tablefmt="rounded_outline",
             )
         )
@@ -132,9 +148,12 @@ databases to CSV files.
         data = {}
         keys = rows[0].keys()
         for key in keys:
+            if key == "parentId" or key == "type":
+                continue
             data[key] = [row[key] for row in rows]
 
-        print(tabulate(data, headers="keys", tablefmt="rounded_outline"))
+        _print_dict({"Parent ID": rows[0]["parentId"]}, json=False)
+        _print_dict(data, json=False, transpose=False)
 
     @cement.ex(
         help="List rows in a database",
@@ -142,26 +161,22 @@ databases to CSV files.
             (
                 ["db_id"],
                 {"help": "Database ID", "action": "store"},
-            )
+            ),
+            (
+                ["--json"],
+                {
+                    "action": "store_true",
+                    "help": "Whether to return JSON formatted data [default: False]",
+                },
+            ),
         ],
     )
-    def list_database_rows(self):
+    def show_db(self):
         """list database row"""
-        rows = _api.list_database_rows(
-            self.app.pargs.db_id,
-            client=client,
-        )
 
-        _show_json(rows)
+        data = get_dataframe(self.app.pargs.db_id, return_type="dict")
 
-        return
-
-        data = {}
-        keys = rows[0].keys()
-        for key in keys:
-            data[key] = [row[key] for row in rows]
-
-        print(tabulate(data, headers="keys", tablefmt="rounded_outline"))
+        _print_dict(data, json=self.app.pargs.json, transpose=False)
 
     @cement.ex(
         help="List child workspaces and databases in given workspace",
