@@ -28,6 +28,21 @@ def _print_tree(tree: dict, offset: int = 0) -> None:
         _print_tree(child, offset + 2)
 
 
+def _print_dict(data: dict, *, json: bool = True) -> None:
+    """helper function to pretty print a dict as a table"""
+
+    if json:
+        _show_json(data)
+    else:
+        print(
+            tabulate(
+                data.items(),
+                headers=["Name", "Value"],
+                tablefmt="rounded_outline",
+            )
+        )
+
+
 class DataController(cement.Controller):
     class Meta:
         label = "data"
@@ -45,12 +60,22 @@ databases to CSV files.
             (
                 ["file_id"],
                 {"help": "File ID", "action": "store"},
-            )
+            ),
+            (
+                ["--json"],
+                {
+                    "action": "store_true",
+                    "help": "Whether to return JSON formatted data [default: False]",
+                },
+            ),
         ],
     )
     def describe_file(self):
         """describe row"""
-        _show_json(_api.describe_file(self.app.pargs.file_id))
+
+        data = _api.describe_file(self.app.pargs.file_id, client=client)
+
+        _print_dict(data, json=self.app.pargs.json)
 
     @cement.ex(
         help="Describe row",
@@ -58,12 +83,22 @@ databases to CSV files.
             (
                 ["row_id"],
                 {"help": "Row or Database ID", "action": "store"},
-            )
+            ),
+            (
+                ["--json"],
+                {
+                    "action": "store_true",
+                    "help": "Whether to return JSON formatted data [default: False]",
+                },
+            ),
         ],
     )
     def describe_row(self):
         """describe row"""
-        _show_json(_api.describe_row(self.app.pargs.row_id))
+
+        data = _api.describe_row(self.app.pargs.row_id, client=client)
+
+        _print_dict(data, json=self.app.pargs.json)
 
     @cement.ex(
         help="List rows in a database or row",
@@ -168,15 +203,7 @@ databases to CSV files.
         """list the columns of the row and their values, where applicable"""
         row_data = get_row_data(self.app.pargs.row_id, client=client)
 
-        if self.app.pargs.json:
-            _show_json(row_data)
-            return
-
-        print(
-            tabulate(
-                row_data.items(), headers=["Name", "Value"], tablefmt="rounded_outline"
-            )
-        )
+        _print_dict(row_data, json=self.app.pargs.json)
 
 
 class CopyController(cement.Controller):
