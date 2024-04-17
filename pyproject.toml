@@ -30,7 +30,6 @@ dynamic = ["version"]
 [project.optional-dependencies]
 test = [
     "pytest",
-    "capturer",
     "parameterized",
     "coverage",
 ]

@@ -1,3 +1,4 @@
+venv/*
 github_token
 bench.pid
 
