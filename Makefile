@@ -1,13 +1,14 @@
-.PHONY:  test
+.PHONY:  test test-github jupyter install
 
 SHELL := /bin/bash
 
 repo=$(shell basename $(CURDIR))
 client="mock"
+chosen_tests="test_cli or managed_data"
 
 test: 
 	source $(CURDIR)/venv/bin/activate && \
-		python3 -m coverage run -m pytest -k "test_cli or managed_data" --client $(client) && \
+		python3 -m coverage run -m pytest -k $(chosen_tests) --client $(client) && \
 		python3 -m coverage html && \
 		deactivate
 	-open htmlcov/index.html
@@ -29,4 +30,5 @@ install:
 		pip install -e .[test,jupyter] && \
 		deactivate
 
-
+test-github:
+	python3 -m coverage run -m pytest -k $(chosen_tests)--client $(client)

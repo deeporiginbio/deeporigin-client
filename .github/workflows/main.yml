@@ -57,7 +57,7 @@ jobs:
           pip install --upgrade pip
           pip install --upgrade setuptools
           pip install -e .[test]
-          make test
+          make test-github
 
 
 
