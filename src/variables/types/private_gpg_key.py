@@ -51,9 +51,12 @@ class PrivateGpgKey(Variable):
         gpg_dirname = os.path.join(user_home_dirname, ".gnupg")
 
         cmd = []
-        cmd.extend(["mkdir", "--mode", "700", "--parents", gpg_dirname])
+        cmd.extend(["mkdir", "-p", gpg_dirname])
 
         cmd.append("&&")
+        cmd.extend(["chmod", "700", gpg_dirname])
+        cmd.append("&&")
+
         cmd.extend(["gpg", "--batch", "--import", "--dry-run", key_filename])
 
         completed_process = subprocess.run(
