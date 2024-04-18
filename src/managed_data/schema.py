@@ -1,4 +1,4 @@
-"""this module contains classes to generate data that 
+"""this module contains classes to generate data that
 matches the schema of real responses"""
 
 from dataclasses import dataclass, field

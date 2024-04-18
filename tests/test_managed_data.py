@@ -1,6 +1,5 @@
 """this tests low level functions in the data API"""
 
-
 from dataclasses import asdict
 from typing import Optional
 
