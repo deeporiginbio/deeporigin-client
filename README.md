@@ -4,6 +4,10 @@ This repository contains the `deeporigin` CLI and
 python client, which allows you to interact with 
 Deep Origin from the command line. 
 
+> [!WARNING]  
+> The `deeporigin` client is under active development. Features
+> may change, or be removed. 
+
 ## Installation 
 
 > [!CAUTION]
@@ -39,38 +43,24 @@ make install
 
 ## Testing 
 
-### Running tests locally using mocked responses
+### Running tests locally 
 
-Tests can be run against a fully mocked service. This allows
-you to test the CLI without requiring a connection to Deep Origin,
-and tests run much faster because they're not waiting for a 
-network response. 
-
-To run using mocking, set the following in your `~/.deeporigin/config.yml` file:
-
-```bash
-api_endpoint: https://deeporigin.mock/
-```
-
-and then run tests using:
+By default, tests are run using mocked responses. To run tests locally:
 
 ```bash
 make test
 ```
 
-### Running tests locally against a live instance
-
-Tests can be run against a live instance of Deep Origin. Point
-the CLI to a URL that resolves to a live instance of Deep Origin
-using the `api_endpoint` field in your `~/.deeporigin/config.yml` file.
-
-Then, run tests using:
+If you want to run tests against a live instance:
 
 ```bash
-make test
+make test client=default
 ```
 
-### Tests on Github Actions
+### Tests on GitHub Actions
+
+Tests are run on GitHub Actions on every commit to every pull request. 
+
 
 ## License 
 
