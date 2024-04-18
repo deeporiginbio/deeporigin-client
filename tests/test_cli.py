@@ -1,9 +1,11 @@
+import io
 import sys
 import unittest
 import unittest.mock
 import warnings
+from contextlib import redirect_stderr, redirect_stdout
 
-import capturer
+import pytest
 from deeporigin import __version__, cli
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.warnings import DeepOriginWarning
@@ -28,13 +30,20 @@ class TestCase(unittest.TestCase):
                 self.assertRegex(context.Exception, "usage: deep-origin")
 
     def test_version(self):
-        with cli.App(argv=["--version"]) as app:
-            with capturer.CaptureOutput(merged=False, relay=False) as captured:
-                app.run()
-                stdout = captured.stdout.get_text()
-        expected_stdout = __version__
-        self.assertEqual(expected_stdout, stdout)
+        stdout_capture = io.StringIO()
+        stderr_capture = io.StringIO()
 
+        with redirect_stdout(stdout_capture), redirect_stderr(stderr_capture):
+            with cli.App(argv=["--version"]) as app:
+                app.run()
+
+        stdout = stdout_capture.getvalue().strip()
+
+        self.assertEqual(__version__, stdout)
+
+    @pytest.mark.skipif(
+        sys.version_info < (3, 11), reason="requires python3.10 or higher"
+    )
     def test_except_hook(self):
         mock_code = MockCode("mock_filename.py", "mock_function")
         mock_frame = MockFrame(mock_code, {})

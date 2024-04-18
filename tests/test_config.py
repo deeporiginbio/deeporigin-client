@@ -21,6 +21,7 @@ class TestCase(unittest.TestCase):
             "DEEP_ORIGIN_BENCH_ID": "b123",
             "DEEP_ORIGIN_ENV": "env123",
             "DEEP_ORIGIN_API_ENDPOINT": "abc",
+            "DEEP_ORIGIN_NUCLEUS_API_ROUTE": "nar",
             "DEEP_ORIGIN_AUTH_DOMAIN": "def",
             "DEEP_ORIGIN_AUTH_DEVICE_CODE_ENDPOINT": "def",
             "DEEP_ORIGIN_AUTH_TOKEN_ENDPOINT": "def",
@@ -32,6 +33,7 @@ class TestCase(unittest.TestCase):
             "DEEP_ORIGIN_API_TOKENS_FILENAME": "mnopq",
             "DEEP_ORIGIN_VARIABLES_CACHE_FILENAME": "vwx",
             "DEEP_ORIGIN_AUTO_INSTALL_VARIABLES_FILENAME": "vwx",
+            "DEEP_ORIGIN_GRAPHQL_API_ROUTE": "foo",
         }
         config.get_value.cache_clear()
         with unittest.mock.patch.dict("os.environ", env):
@@ -41,10 +43,12 @@ class TestCase(unittest.TestCase):
             "bench_id": "b123",
             "env": "env123",
             "api_endpoint": "abc",
+            "nucleus_api_route": "nar",
             "auth_domain": "def",
             "auth_device_code_endpoint": "def",
             "auth_token_endpoint": "def",
             "auth_audience": "ghi",
+            "graphql_api_route": "foo",
             "auth_grant_type": "jklm",
             "auth_client_id": "mno",
             "auth_client_secret": "mnop1",
@@ -54,6 +58,7 @@ class TestCase(unittest.TestCase):
             "auto_install_variables_filename": os.path.abspath("vwx"),
             "feature_flags": None,
         }
+
         self.assertEqual(expected_value, value)
 
         env["DEEP_ORIGIN_FEATURE_FLAGS__VARIABLES"] = "false"
@@ -78,6 +83,8 @@ class TestCase(unittest.TestCase):
             "bench_id": "b123",
             "env": "env123",
             "api_endpoint": "abc",
+            "nucleus_api_route": "nar",
+            "graphql_api_route": "foo",
             "auth_domain": "def",
             "auth_device_code_endpoint": "def",
             "auth_token_endpoint": "def",

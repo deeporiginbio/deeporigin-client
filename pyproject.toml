@@ -23,15 +23,14 @@ dependencies = [
     "validators",
     "pandas",
     "beartype",
+    "tabulate",
 ]
 dynamic = ["version"]
 
 [project.optional-dependencies]
 test = [
     "pytest",
-    "capturer",
     "parameterized",
-    "requests-mock",
     "coverage",
 ]
 jupyter = ["ipykernel"]

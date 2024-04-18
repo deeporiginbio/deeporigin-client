@@ -20,14 +20,19 @@ pip install deeporigin
 First, download from Github:
 
 ```bash
-git clone git@github.com:formiclabs/cli.git
-cd cli
+git clone git@github.com:formiclabs/deeporigin-client.git
+cd deeporigin-client
 ```
-Set up your virtual environment using your preferred method. 
-Then,
+Using `make > v4.4`, e.g.:
 
 ```bash
-pip install -e .[test,jupyter]
+make --version # 4.4.1
+```
+
+Install in a virtual env using:
+
+```bash
+make install
 ```
 
 ## Configuration
@@ -44,7 +49,7 @@ network response.
 To run using mocking, set the following in your `~/.deeporigin/config.yml` file:
 
 ```bash
-nucleus_api_endpoint: https://deeporigin.mock/
+api_endpoint: https://deeporigin.mock/
 ```
 
 and then run tests using:
@@ -57,7 +62,7 @@ make test
 
 Tests can be run against a live instance of Deep Origin. Point
 the CLI to a URL that resolves to a live instance of Deep Origin
-using the `nucleus_api_endpoint` field in your `~/.deeporigin/config.yml` file.
+using the `api_endpoint` field in your `~/.deeporigin/config.yml` file.
 
 Then, run tests using:
 

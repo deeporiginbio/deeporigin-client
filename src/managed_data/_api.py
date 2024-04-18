@@ -2,29 +2,176 @@
 with the data API. functions here simply wrap API endpoints."""
 
 import os
-from typing import Optional, Union
+from typing import Literal, Optional, Union
 
 import requests
 from beartype import beartype
-from deeporigin import cache_do_api_tokens, get_do_api_tokens
-from deeporigin.config import get_value
 from deeporigin.exceptions import DeepOriginException
-from deeporigin.utils import _nucleus_url
+from deeporigin.managed_data.client import DeepOriginClient
 
-ORG_ID = get_value()["organization_id"]
-API_URL = _nucleus_url()
+# types of rows
+RowType = Literal["row", "workspace", "database"]
+
+
+def _get_default_client(client):
+    if client is None:
+        client = DeepOriginClient()
+        client.authenticate()
+    return client
 
 
 @beartype
-def download_file(file_id: str, destination: str) -> None:
+def list_rows(
+    *,
+    parent_id: Optional[str] = None,
+    row_type: Optional[RowType] = None,
+    parent_is_root: Optional[bool] = None,
+    client: Optional[DeepOriginClient] = None,
+) -> list[dict]:
+    """low level API that wraps the ListRows endpoint"""
+
+    client = _get_default_client(client)
+    filters = []
+
+    if parent_is_root is not None:
+        filters.append(dict(parent=dict(isRoot=parent_is_root)))
+
+    if parent_id:
+        filters.append(dict(parent=dict(id=parent_id)))
+
+    if row_type:
+        filters.append(dict(rowType=row_type))
+
+    data = dict(filters=filters)
+    return client.invoke("ListRows", data)
+
+
+@beartype
+def list_files(
+    *,
+    assigned_row_ids: Optional[list[str]] = None,
+    is_unassigned: Optional[bool] = None,
+    client: Optional[DeepOriginClient] = None,
+):
+    client = _get_default_client(client)
+
+    filters = []
+
+    if is_unassigned is not None:
+        filters.append(dict(isUnassigned=is_unassigned))
+
+    if assigned_row_ids:
+        filters.append(dict(assignedRowIds=assigned_row_ids))
+
+    return client.invoke("ListFiles", data=dict(filters=filters))
+
+
+@beartype
+def describe_database_stats(
+    database_id: str,
+    *,
+    client: Optional[DeepOriginClient] = None,
+):
+    client = _get_default_client(client)
+
+    return client.invoke("DescribeDatabaseStats", dict(databaseId=database_id))
+
+
+@beartype
+def list_mentions(
+    query: str,
+    *,
+    client: Optional[DeepOriginClient] = None,
+):
+    client = _get_default_client(client)
+
+    return client.invoke("ListMentions", dict(query=query))
+
+
+@beartype
+def list_row_back_references(
+    row_id: str,
+    *,
+    client: Optional[DeepOriginClient] = None,
+):
+    client = _get_default_client(client)
+
+    return client.invoke("ListRowBackReferences", dict(rowId=row_id))
+
+
+@beartype
+def create_file_download_url(
+    file_id: str,
+    *,
+    client: Optional[DeepOriginClient] = None,
+) -> dict:
+    """low-level API call to CreateFileDownloadUrl"""
+
+    client = _get_default_client(client)
+
+    return client.invoke("CreateFileDownloadUrl", dict(fileId=file_id))
+
+
+@beartype
+def describe_file(
+    file_id: str,
+    *,
+    client: Optional[DeepOriginClient] = None,
+) -> dict:
+    """low-level API call to DescribeFile"""
+
+    client = _get_default_client(client)
+
+    return client.invoke("DescribeFile", dict(fileId=file_id))
+
+
+@beartype
+def describe_row(
+    row_id: str,
+    *,
+    fields: bool = False,
+    client: Optional[DeepOriginClient] = None,
+) -> dict:
+    """low-level API that wraps the DescribeRow endpoint."""
+
+    client = _get_default_client(client)
+
+    data = dict(rowId=row_id, fields=fields)
+
+    return client.invoke("DescribeRow", data)
+
+
+@beartype
+def list_database_rows(
+    row_id: str,
+    *,
+    client: Optional[DeepOriginClient] = None,
+) -> list[dict]:
+    """low level API that wraps the ListDatabaseRows endpoint"""
+
+    client = _get_default_client(client)
+
+    data = dict(databaseRowId=row_id)
+    return client.invoke("ListDatabaseRows", data)
+
+
+@beartype
+def download_file(
+    file_id: str,
+    destination: str,
+    *,
+    client: Optional[DeepOriginClient] = None,
+) -> None:
     """download the file to the destination folder"""
+
+    client = _get_default_client(client)
 
     if not os.path.isdir(destination):
         raise DeepOriginException(f"{destination} should be a path to a folder.")
 
-    file_name = describe_file(file_id)["name"]
+    file_name = describe_file(file_id, client=client)["name"]
 
-    url = create_file_download_url(file_id)["downloadUrl"]
+    url = create_file_download_url(file_id, client=client)["downloadUrl"]
 
     save_path = os.path.join(destination, file_name)
 
@@ -37,61 +184,11 @@ def download_file(file_id: str, destination: str) -> None:
 
 
 @beartype
-def describe_database_stats(database_id: str):
-    return _invoke("DescribeDatabaseStats", dict(databaseId=database_id))
-
-
-@beartype
-def list_mentions(query: str):
-    return _invoke("ListMentions", dict(query=query))
-
-
-@beartype
-def list_row_back_references(row_id: str):
-    return _invoke("ListRowBackReferences", dict(rowId=row_id))
-
-
-@beartype
-def create_file_download_url(file_id: str) -> dict:
-    """low-level API call to CreateFileDownloadUrl"""
-    return _invoke("CreateFileDownloadUrl", dict(fileId=file_id))
-
-
-@beartype
-def describe_file(file_id: str) -> dict:
-    """low-level API call to DescribeFile"""
-    return _invoke("DescribeFile", dict(fileId=file_id))
-
-
-@beartype
-def describe_row(row_id: str, *, fields: bool = False) -> dict:
-    """low-level API that wraps the DescribeRow endpoint."""
-
-    data = dict(rowId=row_id, fields=fields)
-    return _invoke("DescribeRow", data)
-
-
-@beartype
-def list_rows(row_id: str) -> list[dict]:
-    """low level API that wraps the ListRows endpoint"""
-
-    data = dict(filters=[dict(parent=dict(id=row_id))])
-    return _invoke("ListRows", data)
-
-
-@beartype
-def list_database_rows(row_id: str) -> list[dict]:
-    """low level API that wraps the ListDatabaseRows endpoint"""
-
-    data = dict(databaseRowId=row_id)
-    return _invoke("ListDatabaseRows", data)
-
-
-@beartype
 def convert_id_format(
     *,
     hids: Optional[Union[list[str], set[str]]] = None,
     ids: Optional[Union[list[str], set[str]]] = None,
+    client: Optional[DeepOriginClient] = None,
 ) -> list[dict]:
     """convert a list of HIDs to IDs or vice versa"""
 
@@ -99,6 +196,8 @@ def convert_id_format(
         raise DeepOriginException(
             "Either `hids` or `ids` should be non-None and a list of strings"
         )
+
+    client = _get_default_client(client)
 
     conversions = []
 
@@ -112,53 +211,4 @@ def convert_id_format(
 
     data = dict(conversions=conversions)
 
-    return _invoke("ConvertIdFormat", data)
-
-
-@beartype
-def _invoke(endpoint: str, data: dict) -> Union[dict, list]:
-    """core call to API endpoint"""
-
-    response = requests.post(
-        f"{API_URL}{endpoint}",
-        headers=_generate_headers(),
-        json=data,
-    )
-
-    return _check_response(response)
-
-
-@beartype
-def _generate_headers() -> dict:
-    """generate headers used for requests to the API"""
-
-    api_access_token, api_refresh_token = get_do_api_tokens()
-    cache_do_api_tokens(api_access_token, api_refresh_token)
-
-    headers = {
-        "accept": "application/json",
-        "authorization": f"Bearer {api_access_token}",
-        "content-type": "application/json",
-        "x-org-id": ORG_ID,
-    }
-
-    return headers
-
-
-@beartype
-def _check_response(response: requests.models.Response) -> Union[dict, list]:
-    """utility function to check responses"""
-
-    if response.status_code == 404:
-        raise DeepOriginException("[Error 404] The requested resource was not found.")
-
-    response.raise_for_status()
-    response = response.json()
-
-    if "error" in response:
-        raise DeepOriginException(response["error"])
-
-    if "data" in response:
-        return response["data"]
-    else:
-        raise KeyError("`data` not in response")
+    return client.invoke("ConvertIdFormat", data)

@@ -4,11 +4,9 @@ interact with the data product"""
 import os
 from typing import Literal, Optional, Union
 
-import pandas as pd
 from beartype import beartype
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.managed_data._api import (
-    _invoke,
     convert_id_format,
     describe_file,
     describe_row,
@@ -16,9 +14,63 @@ from deeporigin.managed_data._api import (
     list_database_rows,
     list_rows,
 )
+from deeporigin.managed_data.client import DeepOriginClient
 from deeporigin.utils import PREFIX
 
 id_format = Literal["human-id", "system-id"]
+
+DatabaseReturnType = Literal["dataframe", "dict"]
+
+
+@beartype
+def get_tree(
+    *,
+    include_rows: bool = True,
+    client: Optional[DeepOriginClient] = None,
+) -> dict:
+    """construct a tree of workspaces, databases, and optionally,
+    all rows"""
+
+    if include_rows:
+        # we need to fetch everything, so use a single call
+        objects = list_rows(client=client)
+        rows = [obj for obj in objects if obj["type"] == "row"]
+        workspaces = [obj for obj in objects if obj["type"] == "workspace"]
+        databases = [obj for obj in objects if obj["type"] == "database"]
+    else:
+        workspaces = list_rows(row_type="workspace", client=client)
+        databases = list_rows(row_type="database", client=client)
+        objects = workspaces + databases
+
+    for obj in workspaces + databases:
+        obj["children"] = []
+
+    root_object = [obj for obj in objects if obj["parentId"] is None]
+
+    # check that there is exactly one root
+    if len(root_object) != 1:
+        raise DeepOriginException(
+            f"Expected there to be exactly one root object. Instead, there were {len(root_object)}"
+        )
+
+    tree = root_object[0]
+
+    _add_children(tree, workspaces)
+    for workspace in workspaces:
+        _add_children(workspace, workspaces + databases)
+
+    if include_rows:
+        for database in databases:
+            _add_children(database, rows)
+
+    return tree
+
+
+@beartype
+def _add_children(node: dict, objects: list[dict]) -> None:
+    """helper function to add children to a node from a list
+    of objects"""
+    node["children"] = [obj for obj in objects if obj["parentId"] == node["id"]]
 
 
 @beartype
@@ -103,16 +155,24 @@ def get_children(
     objects: Optional[Union[list[dict], str]] = None,
 ) -> list[dict]:
     """recursively find all workspaces, databases, rows"""
+
     if objects is None:
-        objects = get_workspaces()
+        objects = list_rows(parent_is_root=True)
     elif isinstance(objects, str):
         # need to convert a string to a object
         obj = describe_row(objects)
         obj = {key: obj[key] for key in ["id", "name", "type", "hid"]}
         objects = [obj]
 
+    # TODO parallelize this using async/await
     for obj in objects:
-        children = list_rows(obj["id"])
+        if obj["type"] == "row":
+            # this object is a row, and we assume that
+            # rows cannot have children, so we're going to
+            # skip this and assume this is a leaf node
+            continue
+
+        children = list_rows(parent_id=obj["id"])
         if len(children) == 0:
             continue
         obj["children"] = get_children(children)
@@ -121,21 +181,14 @@ def get_children(
 
 
 @beartype
-def get_workspaces() -> list[dict]:
-    """list workspaces in root"""
-
-    data = dict(filters=[dict(parent=dict(isRoot=True))])
-    objects = _invoke("ListRows", data)
-    return [obj for obj in objects if obj["type"] == "workspace"]
-
-
-@beartype
 def get_dataframe(
     database_id: str,
     *,
     use_file_names: bool = True,
     reference_format: id_format = "human-id",
-) -> pd.DataFrame:
+    client: Optional[DeepOriginClient] = None,
+    return_type: DatabaseReturnType = "dataframe",
+):
     """return a dataframe of all rows in a database
 
     Arguments:
@@ -147,15 +200,22 @@ def get_dataframe(
     """
 
     # figure out the rows
-    rows = list_database_rows(database_id)
+    rows = list_database_rows(database_id, client=client)
 
-    # figure out the columns
-    columns = get_columns(database_id)
+    # figure out the column names and ID of the database
+    response = describe_row(database_id, fields=True, client=client)
+    assert (
+        response["type"] == "database"
+    ), "Expected database_id to resolve to a database"
+
+    columns = response["cols"]
+    database_id = response["id"]
+    row_id = response["hidPrefix"] + "-id"
 
     # make a dictionary with all data in the database
     data = dict()
-    data["validation_status"] = []
-    data["row"] = []
+    data["Validation Status"] = []
+    data[row_id] = []
 
     # keep track of all files and references in this database
     file_ids = []
@@ -165,8 +225,8 @@ def get_dataframe(
         data[column["id"]] = []
 
     for row in rows:
-        data["row"].append(row["hid"])
-        data["validation_status"].append(row["validationStatus"])
+        data[row_id].append(row["hid"])
+        data["Validation Status"].append(row["validationStatus"])
 
         fields = row["fields"]
 
@@ -184,12 +244,32 @@ def get_dataframe(
             else:
                 data[column["id"]].extend(value)
 
-    # make the dataframe
-    df = pd.DataFrame(data)
-    df.attrs["file_ids"] = list(set(file_ids))
-    df.attrs["reference_ids"] = list(set(reference_ids))
+    if return_type == "dataframe":
+        # make the dataframe
 
-    return _type_and_cleanup_dataframe(df, columns)
+        # this import is here because we don't want to
+        # import pandas unless we actually use this function
+        import pandas as pd
+
+        df = pd.DataFrame(data)
+        df.attrs["file_ids"] = list(set(file_ids))
+        df.attrs["reference_ids"] = list(set(reference_ids))
+        df.attrs["id"] = database_id
+        df.attrs["primary_key"] = row_id
+
+        return _type_and_cleanup_dataframe(df, columns)
+
+    else:
+        # rename keys
+        column_mapper = dict()
+        for column in columns:
+            column_mapper[column["id"]] = column["name"]
+        renamed_data = data.copy()
+        for key in column_mapper.keys():
+            new_key = column_mapper[key]
+            renamed_data[new_key] = data[key]
+            renamed_data.pop(key, None)
+        return renamed_data
 
 
 @beartype
@@ -233,11 +313,15 @@ def _parse_column_value(
 
 @beartype
 def _type_and_cleanup_dataframe(
-    df: pd.DataFrame,
+    df,  # pd.Dataframe, not typed to avoid pandas import
     columns: list[dict],
-) -> pd.DataFrame:
+):
     """utility function to clean up the dataframe and
     make it more usable"""
+
+    # this import is here because we don't want to
+    # import pandas unless we actually use this function
+    import pandas as pd
 
     column_mapper = dict()
     for column in columns:
@@ -253,26 +337,33 @@ def _type_and_cleanup_dataframe(
 
     # rename columns
     df = df.rename(columns=column_mapper)
-    df = df.set_index("row")
+
+    # wipe metadata from columns
+    for column in df.columns:
+        df[column].attrs = dict()
 
     # attach metadata to columns
     for column in columns:
         df[column["name"]].attrs = column
 
-    # add a type to validation_status because this column
+    # add a type to Validation Status because this column
     # doesn't actually exist in the database
-    df["validation_status"].attrs = dict(type="validation_status")
+    df["Validation Status"].attrs = dict(type="Validation Status")
     return df
 
 
 @beartype
-def get_columns(row_id: str) -> list[dict]:
+def get_columns(
+    row_id: str,
+    *,
+    client: Optional[DeepOriginClient] = None,
+) -> list[dict]:
     """return column information.
 
     if row_id is a database, then column metadata and names are returned.
     if row_id is a row, then a dictionary of hids and values are returned"""
 
-    response = describe_row(row_id, fields=True)
+    response = describe_row(row_id, fields=True, client=client)
 
     assert response["type"] in [
         "row",
@@ -287,14 +378,18 @@ def get_columns(row_id: str) -> list[dict]:
 
 
 @beartype
-def get_row_data(row_id: str) -> dict:
+def get_row_data(
+    row_id: str,
+    *,
+    client: Optional[DeepOriginClient] = None,
+) -> dict:
     """name needs improving? this returns fields in this
     row as a dictionary, where keys are HIDs
 
     if row_id is not a row, an error is raised.
     """
 
-    response = describe_row(row_id, fields=True)
+    response = describe_row(row_id, fields=True, client=client)
 
     if response["type"] != "row":
         raise ValueError(
@@ -302,7 +397,7 @@ def get_row_data(row_id: str) -> dict:
         )
 
     # ask parent for column names
-    parent_response = describe_row(response["parentId"])
+    parent_response = describe_row(response["parentId"], client=client)
 
     if parent_response["type"] != "database":
         raise ValueError(
@@ -333,3 +428,42 @@ def get_row_data(row_id: str) -> dict:
         row_data[column_name_mapper[column_id]] = value
 
     return row_data
+
+
+@beartype
+def merge_databases(dfs: list):
+    """merge a list of databases into a single database,
+    uniting keys across databases"""
+
+    import pandas as pd
+
+    for df in dfs:
+        assert isinstance(df, pd.DataFrame), "Expected a list of dataframes to merge"
+
+    assert len(dfs) == 2, "For now we only support merging 2 databases"
+
+    # make a cross reference mapper that converts
+    # system IDs to column names
+    cross_reference_mapper = dict()
+
+    for df in dfs:
+        cross_reference_mapper[df.attrs["id"]] = df.attrs["primary_key"]
+
+    # rename columns that contain cross-references (foreign keys)
+    # so that the pandas merge works correctly
+
+    for df in dfs:
+        column_mapper = dict()
+
+        for column in df.columns:
+            attrs = df[column].attrs
+
+            if "referenceDatabaseRowId" in attrs.keys():
+                column_mapper[column] = cross_reference_mapper[
+                    attrs["referenceDatabaseRowId"]
+                ]
+
+        df = df.rename(columns=column_mapper)
+
+    # for now we only support merging 2 DBs
+    return dfs[0].merge(dfs[1], how="outer")
