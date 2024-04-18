@@ -1,10 +1,12 @@
 """this tests low level functions in the data API"""
 
+
+from dataclasses import asdict
 from typing import Optional
 
 import pytest
 from deeporigin.exceptions import DeepOriginException
-from deeporigin.managed_data import _api, api
+from deeporigin.managed_data import _api, api, schema
 from deeporigin.managed_data._api import DeepOriginClient
 
 # constants
@@ -13,24 +15,6 @@ dataframe_attr_keys = {
     "id",
     "primary_key",
     "reference_ids",
-}
-
-
-row_description_keys = {
-    "id",
-    "parentId",
-    "type",
-    "dateCreated",
-    "dateUpdated",
-    "createdByUserDrn",
-    "editedByUserDrn",
-    "submissionStatus",
-    "hid",
-    "hidNum",
-    "validationStatus",
-    "cols",
-    "parent",
-    "rowJsonSchema",
 }
 
 
@@ -79,28 +63,6 @@ def _row_object(
     )
 
 
-def _database_row_object(
-    submission_status: str = "draft",
-    hid: str = "sample-1",
-    hidNum: int = 1,
-    validation_status: str = "valid",
-):
-    return {
-        "id": "_row:W6DjtaCrZ201EGLpmZtGO",
-        "parentId": "_row:J5FiZ1Z202GuiF78dxhMr",
-        "type": "row",
-        "dateCreated": "2024-04-05 19:04:04.094428",
-        "dateUpdated": "2024-04-08 14:58:18.376",
-        "createdByUserDrn": "drn:identity::user:auth0|65ca7d6fb87df994e5c",
-        "editedByUserDrn": "drn:identity::user:auth0|65ca787df994e5c",
-        "submissionStatus": submission_status,
-        "hid": hid,
-        "hidNum": hidNum,
-        "validationStatus": validation_status,
-        "fields": [],
-    }
-
-
 class MockClient(DeepOriginClient):
     """mock client to respond with static data"""
 
@@ -125,98 +87,30 @@ class MockClient(DeepOriginClient):
                 ]
 
         elif endpoint == "DescribeRow":
-            if data["fields"]:
-                return {
-                    "id": "_row:J5FiZ1Z202GuiF78dxhMr",
-                    "parentId": "_row:sWOOkUQ3GEUPH3NzKt2f1",
-                    "type": "database",
-                    "name": "Sample",
-                    "dateCreated": "2024-04-04 17:03:33.033115",
-                    "dateUpdated": "2024-04-04 17:03:33.033115",
-                    "createdByUserDrn": "drn:identity::user:auth0|65ca7d6f5a130b87df994e5c",
-                    "hid": "db-sample",
-                    "hidPrefix": "sample",
-                    "cols": [
-                        {
-                            "id": "_col:2uMlXWSjvBaeYCiR2znkP",
-                            "name": "Order ID",
-                            "parentId": "_row:J5FiZ1Z202GuiF78dxhMr",
-                            "type": "reference",
-                            "dateCreated": "2024-04-04T17:03:33.033115",
-                            "cardinality": "one",
-                            "referenceDatabaseRowId": "_row:Zl8k9fwC47gf3q4846CLe",
-                        },
-                        {
-                            "id": "_col:rFfMhRDSgiQuaY55roMIy",
-                            "name": "Status",
-                            "parentId": "_row:J5FiZ1Z202GuiF78dxhMr",
-                            "type": "select",
-                            "dateCreated": "2024-04-04T17:03:33.033115",
-                            "cardinality": "one",
-                            "configSelect": {
-                                "options": [
-                                    "Report sent to client",
-                                    "Clinical interpretation completed",
-                                    "Secondary analysis completed",
-                                    "Primary analysis completed",
-                                    "Sample processed by CRO",
-                                    "Ordered",
-                                ],
-                                "canCreate": False,
-                            },
-                        },
-                        {
-                            "id": "_col:MYIsZA1z5K5pD7s2o4ouY",
-                            "name": "To client tracking",
-                            "parentId": "_row:J5FiZ1Z202GuiF78dxhMr",
-                            "type": "text",
-                            "dateCreated": "2024-04-04T17:03:33.033115",
-                            "cardinality": "one",
-                        },
-                        {
-                            "id": "_col:3Ge9GS0eej8cuHZ26uISb",
-                            "name": "From client tracking",
-                            "parentId": "_row:J5FiZ1Z202GuiF78dxhMr",
-                            "type": "text",
-                            "dateCreated": "2024-04-04T17:03:33.033115",
-                            "cardinality": "one",
-                        },
-                    ],
-                    "parent": {"id": "_row:sWOOkUQ3GEUPH3NzKt2f1"},
-                    "fields": [],
-                    "rowJsonSchema": {},
-                }
+            if data["rowId"].startswith("db-"):
+                # we are likely asking for a database
+                row = asdict(schema.DatabaseRowDescription())
 
             else:
-                return {
-                    "id": "_row:W6DjtaCrZ201EGLpmZtGO",
-                    "parentId": "_row:J5FiZ1Z202GuiF78dxhMr",
-                    "type": "row",
-                    "dateCreated": "2024-04-05 19:04:04.094428",
-                    "dateUpdated": "2024-04-08 14:58:18.376",
-                    "createdByUserDrn": "drn:identity::user:auth0|65ca7d6f5a130b87df994e5c",
-                    "editedByUserDrn": "drn:identity::user:auth0|65ca7d6f5a130b87df994e5c",
-                    "submissionStatus": "draft",
-                    "hid": "sample-1",
-                    "hidNum": 1,
-                    "validationStatus": "valid",
-                    "cols": [],
-                    "parent": {"id": "_row:J5FiZ1Z202GuiF78dxhMr"},
-                    "rowJsonSchema": {
-                        "type": "object",
-                        "required": [],
-                        "properties": {},
-                    },
-                }
+                # we are asking for a row in a database
+                row = asdict(schema.RowDescription())
+
+                if not data["fields"]:
+                    row.pop("fields", None)
+
+            return row
 
         elif endpoint == "ConvertIdFormat":
             return [{"id": "_row:W6DjtaCrZ201EGLpmZtGO", "hid": "sample-1"}]
 
         elif endpoint == "ListDatabaseRows":
-            return [
-                _database_row_object(),
-                _database_row_object(),
-            ]
+            row = asdict(schema.RowDescription())
+            row.pop("cols", None)
+            row.pop("parent", None)
+            row.pop("rowJsonSchema", None)
+
+            return [row for _ in range(5)]
+
         elif endpoint == "DescribeFile":
             return {
                 "id": "_file:V08GBdErNGqynC3O7bill",
@@ -388,8 +282,20 @@ def test_describe_row(config):
     row = _api.describe_row(
         config["rows"][0],
         client=config["client"],
+        fields=True,
     )
-    assert set(row.keys()) == row_description_keys
+
+    keys_with_fields = set(asdict(schema.RowDescription()).keys())
+
+    assert set(row.keys()) == keys_with_fields
+
+    row = _api.describe_row(
+        config["rows"][0],
+        client=config["client"],
+        fields=False,
+    )
+
+    assert set(row.keys()) == keys_with_fields.difference({"fields"})
 
 
 def test_convert_id_format(config):

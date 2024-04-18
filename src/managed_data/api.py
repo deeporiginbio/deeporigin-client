@@ -203,7 +203,7 @@ def get_dataframe(
     rows = list_database_rows(database_id, client=client)
 
     # figure out the column names and ID of the database
-    response = describe_row(database_id, fields=True, client=client)
+    response = describe_row(database_id, client=client)
     assert (
         response["type"] == "database"
     ), "Expected database_id to resolve to a database"
@@ -381,6 +381,7 @@ def get_columns(
 def get_row_data(
     row_id: str,
     *,
+    use_column_keys: bool = False,
     client: Optional[DeepOriginClient] = None,
 ) -> dict:
     """name needs improving? this returns fields in this
@@ -408,7 +409,10 @@ def get_row_data(
     column_name_mapper = dict()
     column_cardinality_mapper = dict()
     for col in parent_response["cols"]:
-        column_name_mapper[col["id"]] = col["name"]
+        if use_column_keys:
+            column_name_mapper[col["id"]] = col["key"]
+        else:
+            column_name_mapper[col["id"]] = col["name"]
         column_cardinality_mapper[col["id"]] = col["cardinality"]
 
     # now use this to construct the required dictionary
