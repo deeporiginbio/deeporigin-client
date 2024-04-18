@@ -11,21 +11,21 @@ RowType = Literal["row", "database"]
 class FieldItem:
     """item in fields in DescribeRow"""
 
-    columnId: str = "_col:Q2mLSmW4LNGDXAXCUUa1j"
-    cellId: str = "_cell:a6rAF44Xfyf9nwaGfo6oG"
+    columnId: str = "_col:placeholder"
+    cellId: str = "_cell:placeholder"
     validationStatus: str = "valid"
     type: str = "text"
-    value: str = "12356789"
+    value: str = "placeholder-text"
 
 
 @dataclass
 class ColumnItem:
     """item in cols in DescribeRow"""
 
-    id: str = "_col:generated"
-    name: str = "Order ID"
-    key: str = "order_id"
-    parentId: str = "_row:J5FiZ1Z202GuiF78dxhMr"
+    id: str = "_col:placeholder"
+    name: str = "Placeholder Naem"
+    key: str = "placeholder_key"
+    parentId: str = "_row:placeholder_row"
     type: str = "text"
     dateCreated: str = "2024-04-04T17:03:33.033115"
     cardinality: str = "one"
@@ -33,8 +33,8 @@ class ColumnItem:
 
 @dataclass
 class GenericRowDescription:
-    id: str = "_row: foo"
-    parentId: str = "_row: bar"
+    id: str = "_row:placeholder"
+    parentId: str = "_row:placeholder"
     type: RowType = "row"
     dateCreated: str = "2024-04-04 16:34:19.968737"
     dateUpdated: str = "2024-04-04 16:34:19.968737"
@@ -45,7 +45,7 @@ class GenericRowDescription:
     hidNum: int = 1
     validationStatus: str = "valid"
 
-    parent: dict = field(default_factory=lambda: {"wow": 412})
+    parent: dict = field(default_factory=lambda: {"placeholder": 42})
     rowJsonSchema: dict = field(default_factory=dict)
 
 
@@ -57,7 +57,7 @@ class RowDescription(GenericRowDescription):
 @dataclass
 class DatabaseRowDescription(GenericRowDescription):
     type: RowType = "database"
-    hidPrefix: str = "prefix"
+    hidPrefix: str = "placeholder"
     cols: list = field(
         default_factory=lambda: [
             ColumnItem(id=f"_col:column-{col}") for col in range(5)
