@@ -51,9 +51,12 @@ class PrivateGpgKey(Variable):
         gpg_dirname = os.path.join(user_home_dirname, ".gnupg")
 
         cmd = []
-        cmd.extend(["mkdir", "--mode", "700", "--parents", gpg_dirname])
+        cmd.extend(["mkdir", "-p", gpg_dirname])
 
         cmd.append("&&")
+        cmd.extend(["chmod", "700", gpg_dirname])
+        cmd.append("&&")
+
         cmd.extend(["gpg", "--batch", "--import", "--dry-run", key_filename])
 
         completed_process = subprocess.run(
@@ -67,6 +70,7 @@ class PrivateGpgKey(Variable):
         os.remove(key_filename)
 
         if completed_process.returncode not in [0, 130]:
+            print(completed_process.returncode)
             raise ValueError(
                 f"Value must be a GPG private key. {value} is not a GPG private key."
             )
