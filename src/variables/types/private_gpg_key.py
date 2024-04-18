@@ -70,7 +70,6 @@ class PrivateGpgKey(Variable):
         os.remove(key_filename)
 
         if completed_process.returncode not in [0, 130]:
-            print(completed_process.returncode)
             raise ValueError(
                 f"Value must be a GPG private key. {value} is not a GPG private key."
             )
