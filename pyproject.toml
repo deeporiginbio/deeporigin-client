@@ -67,3 +67,6 @@ ignore = ["E203", "E266", "E501"]
 
 [tool.ruff.lint.isort]
 case-sensitive = true
+
+[tool.distutils.bdist_wheel]
+universal = true
