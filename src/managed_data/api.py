@@ -74,11 +74,16 @@ def _add_children(node: dict, objects: list[dict]) -> None:
 
 
 @beartype
-def get_cell_data(*, row_id: str, column_name: str):
+def get_cell_data(
+    *,
+    row_id: str,
+    column_name: str,
+    client: Optional[DeepOriginClient] = None,
+):
     """extract data from a cell in a database, referenced
     by row_id and column_name"""
 
-    data = get_row_data(row_id)
+    data = get_row_data(row_id, client=client)
     return data[column_name]
 
 
