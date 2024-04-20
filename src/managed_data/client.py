@@ -14,11 +14,11 @@ from deeporigin.utils import _nucleus_url
 @dataclass
 class Client(ABC):
     @abstractmethod
-    def authenticate():
+    def authenticate(self):
         pass
 
     @abstractmethod
-    def invoke():
+    def invoke(self):
         pass
 
 
