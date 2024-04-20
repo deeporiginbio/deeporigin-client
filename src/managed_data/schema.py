@@ -1,10 +1,41 @@
 """this module contains classes to generate data that
 matches the schema of real responses"""
 
-from dataclasses import dataclass, field
-from typing import Literal
 
-RowType = Literal["row", "database"]
+from abc import ABC
+from dataclasses import dataclass, field
+from typing import Literal, Optional
+
+RowType = Literal["row", "database", "workspace"]
+
+
+@dataclass
+class GenericRowListing(ABC):
+    name: str
+    id: str = "_row:placeholder"
+    parentId: Optional[str] = None
+
+
+@dataclass
+class WorkspaceListing(GenericRowListing):
+    hid: str = "workspace"
+    type: RowType = "workspace"
+    name: str = "Placeholder Workspace"
+
+
+@dataclass
+class DatabaseListing(GenericRowListing):
+    hid: str = "database"
+    type: RowType = "database"
+    type: RowType = "database"
+    name: str = "Placeholder DB"
+
+
+@dataclass
+class RowListing(GenericRowListing):
+    hid: str = "row"
+    type: RowType = "row"
+    name: str = "Placeholder row"
 
 
 @dataclass
