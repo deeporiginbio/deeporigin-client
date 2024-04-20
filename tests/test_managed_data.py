@@ -51,24 +51,6 @@ list_database_rows_keys = {
 }
 
 
-def _row_object(
-    *,
-    parentId: Optional[str] = "_row:placeholder",
-    id: str = "row:placeholder",
-    type: str = "row",
-    name: Optional[str] = None,
-    hid: str = "placeholder-1",
-) -> dict:
-    """helper function to create dummy responses"""
-    return dict(
-        id=id,
-        parentId=parentId,
-        type=type,
-        name=name,
-        hid=hid,
-    )
-
-
 class MockClient(Client):
     """mock client to respond with static data"""
 
@@ -82,18 +64,14 @@ class MockClient(Client):
         if endpoint == "ListRows":
             if data == dict(filters=[dict(parent=dict(id="db-sample"))]):
                 return [
-                    _row_object(hid="sample-1"),
-                    _row_object(hid="sample-2"),
+                    asdict(RowListing(hid="sample-1")),
+                    asdict(RowListing(hid="sample-2")),
                 ]
             elif data == dict(filters=[dict(parent=dict(isRoot=True))]) or data == dict(
                 filters=[dict(rowType="workspace")]
             ):
-                return [
-                    _row_object(
-                        type="workspace",
-                        parentId=None,
-                    )
-                ]
+                # return the root workspace
+                return [asdict(WorkspaceListing())]
             elif data == dict(filters=[]):
                 # list_rows called with no filters. return
                 # a workspace, a database, and some rows
