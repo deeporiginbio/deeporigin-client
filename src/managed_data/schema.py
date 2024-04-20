@@ -53,7 +53,7 @@ class ColumnItem:
     """item in cols in DescribeRow"""
 
     id: str = "_col:placeholder"
-    name: str = "Placeholder Naem"
+    name: str = "Placeholder Name"
     key: str = "placeholder_key"
     parentId: str = "_row:placeholder_row"
     type: str = "text"
@@ -63,8 +63,8 @@ class ColumnItem:
 
 @dataclass
 class GenericRowDescription:
-    id: str = "_row:placeholder"
-    parentId: str = "_row:placeholder"
+    id: str = "_row:placeholder-id"
+    parentId: str = "_row:placeholder-parent"
     type: RowType = "row"
     dateCreated: str = "2024-04-04 16:34:19.968737"
     dateUpdated: str = "2024-04-04 16:34:19.968737"
