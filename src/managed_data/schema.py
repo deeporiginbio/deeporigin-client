@@ -1,7 +1,6 @@
 """this module contains classes to generate data that
 matches the schema of real responses"""
 
-
 from abc import ABC
 from dataclasses import dataclass, field
 from typing import Literal, Optional
