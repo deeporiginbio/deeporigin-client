@@ -2,15 +2,13 @@
 with the data API. functions here simply wrap API endpoints."""
 
 import os
-from typing import Literal, Optional, Union
+from typing import Optional, Union
 
 import requests
 from beartype import beartype
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.managed_data.client import Client, DeepOriginClient
-
-# types of rows
-RowType = Literal["row", "workspace", "database"]
+from deeporigin.managed_data.schema import RowType
 
 
 def _get_default_client(client):

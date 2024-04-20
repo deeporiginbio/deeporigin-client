@@ -10,6 +10,8 @@ RowType = Literal["row", "database", "workspace"]
 
 @dataclass
 class GenericRowListing(ABC):
+    """abstract class for a generic row listing"""
+
     name: str
     id: str = "_row:placeholder"
     parentId: Optional[str] = None
@@ -17,6 +19,8 @@ class GenericRowListing(ABC):
 
 @dataclass
 class WorkspaceListing(GenericRowListing):
+    """response for a workspace listing"""
+
     hid: str = "workspace"
     type: RowType = "workspace"
     name: str = "Placeholder Workspace"
@@ -24,6 +28,8 @@ class WorkspaceListing(GenericRowListing):
 
 @dataclass
 class DatabaseListing(GenericRowListing):
+    """response for a database listing"""
+
     hid: str = "database"
     type: RowType = "database"
     type: RowType = "database"
@@ -32,6 +38,8 @@ class DatabaseListing(GenericRowListing):
 
 @dataclass
 class RowListing(GenericRowListing):
+    """response for a true row (leaf node) listing"""
+
     hid: str = "row"
     type: RowType = "row"
     name: str = "Placeholder row"
@@ -62,7 +70,7 @@ class ColumnItem:
 
 
 @dataclass
-class GenericRowDescription:
+class GenericRowDescription(ABC):
     id: str = "_row:placeholder-id"
     parentId: str = "_row:placeholder-parent"
     type: RowType = "row"
