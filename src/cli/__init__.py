@@ -4,7 +4,6 @@ import warnings
 
 import cement
 import termcolor
-from deeporigin.managed_data.client import DeepOriginClient
 
 from .. import __version__
 from ..exceptions import DeepOriginException

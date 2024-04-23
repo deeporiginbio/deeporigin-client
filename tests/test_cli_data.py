@@ -32,8 +32,8 @@ def config(pytestconfig):
     if pytestconfig.getoption("client") == "mock":
         data["client"] = MockClient()
 
-        data["databases"] = ["_row:placeholder-id"]
-        data["rows"] = ["_row:placeholder-id"]
+        data["databases"] = ["db-sample"]
+        data["rows"] = ["row-1"]
         data["file"] = file_description()
     else:
         client = DeepOriginClient()
@@ -98,6 +98,26 @@ def test_describe_row(config):
     assert isinstance(data, dict), "Expected data to be a dictionary"
 
     assert data["id"] == row_id, "Expected row ID to match"
+
+
+def test_list_rows(config):
+    db_id = config["databases"][0]
+
+    stdout = _run_cli_command(
+        ["data", "list-rows", db_id],
+        config["client"],
+    )
+    assert "Parent ID" in stdout, "Unexpected output"
+
+    # JSON
+
+    stdout = _run_cli_command(
+        ["data", "list-rows", db_id, "--json"],
+        config["client"],
+    )
+    # check that we can parse into JSON
+    data = json.loads(stdout)
+    assert isinstance(data, list), "Expected data to be a list"
 
 
 @beartype

@@ -84,8 +84,8 @@ class MockClient(Client):
         if endpoint == "ListRows":
             if data == dict(filters=[dict(parent=dict(id="db-sample"))]):
                 return [
-                    asdict(RowListing(hid="sample-1")),
-                    asdict(RowListing(hid="sample-2")),
+                    asdict(RowListing(hid="sample-1", id="row-1")),
+                    asdict(RowListing(hid="sample-2", id="row-2")),
                 ]
             elif data == dict(filters=[dict(parent=dict(isRoot=True))]) or data == dict(
                 filters=[dict(rowType="workspace")]

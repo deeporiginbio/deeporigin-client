@@ -89,7 +89,7 @@ class ColumnItem:
 
 @dataclass
 class GenericRowDescription(ABC):
-    id: str = "_row:placeholder-id"
+    id: str = "row-1"
     parentId: str = "_row:placeholder-parent"
     type: RowType = "row"
     dateCreated: str = "2024-04-04 16:34:19.968737"
