@@ -5,7 +5,25 @@ from abc import ABC
 from dataclasses import dataclass, field
 from typing import Literal, Optional
 
+from pydantic import BaseModel
+
 RowType = Literal["row", "database", "workspace"]
+FileStatus = Literal["ready", "archived"]
+
+
+class DescribeFileResponse(BaseModel):
+    """schema for file description, as returned by
+    DescribeFile"""
+
+    id: str
+    uri: str
+    name: str
+    status: FileStatus
+    contentLength: int
+    contentType: str
+
+    class Config:
+        extra = "forbid"
 
 
 @dataclass

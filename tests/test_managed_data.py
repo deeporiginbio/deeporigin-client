@@ -1,7 +1,8 @@
 """this tests low level functions in the data API"""
 
+import random
+import string
 from dataclasses import asdict
-from typing import Optional
 
 import pytest
 from deeporigin.exceptions import DeepOriginException
@@ -10,6 +11,7 @@ from deeporigin.managed_data._api import Client, DeepOriginClient
 from deeporigin.managed_data.schema import (
     DatabaseListing,
     DatabaseRowDescription,
+    DescribeFileResponse,
     RowDescription,
     RowListing,
     WorkspaceListing,
@@ -51,10 +53,28 @@ list_database_rows_keys = {
 }
 
 
+def _generate_random_string(length: int = 21):
+    """helper function to generate mock data"""
+    characters = string.ascii_letters + string.digits
+    return "".join(random.choice(characters) for _ in range(length))
+
+
+def file_description():
+    return dict(
+        id=f"_file:{_generate_random_string()}",
+        uri="s3://placeholder/uri",
+        name="placeholder",
+        status="ready",
+        contentLength=123,
+        contentType="application/foo",
+    )
+
+
 class MockClient(Client):
     """mock client to respond with static data"""
 
     def authenticate():
+        """no need to do anything here"""
         pass
 
     def invoke(self, endpoint, data):
@@ -114,17 +134,13 @@ class MockClient(Client):
             return [row for _ in range(5)]
 
         elif endpoint == "DescribeFile":
-            return {
-                "id": "_file:V08GBdErNGqynC3O7bill",
-                "uri": "s3://deeporigin-nucleus-local-uploads/files/_file:V08GBdErNGqynC3O7bill",
-                "name": "pbr322_egfr (1).gb",
-                "status": "ready",
-                "contentLength": 9757,
-                "contentType": "",
-            }
+            return dict(data=file_description())
 
         elif endpoint == "DescribeDatabaseStats":
             return {"rowCount": 5}
+
+        elif endpoint == "CreateFileDownloadUrl":
+            return {"downloadUrl": "https://local/data"}
 
         elif endpoint == "ListMentions":
             return {
@@ -138,29 +154,11 @@ class MockClient(Client):
             }
         elif endpoint == "ListFiles":
             if data == dict(filters=[dict(isUnassigned=True)]):
-                return [
-                    {
-                        "file": {
-                            "id": "_file:2n5jHmnbLC4tJShNrk6Df",
-                            "uri": "s3://deeporigin-nucleus-local-uploads/files/_file:2n5jHmnbLC4tJShNrk6Df",
-                            "name": "QC report (1).pdf",
-                            "status": "archived",
-                            "contentLength": 237478,
-                            "contentType": "application/pdf",
-                        }
-                    },
-                ]
+                return [{"file": file_description()}]
             elif dict(filters=[dict(isUnassigned=False)]):
                 return [
                     {
-                        "file": {
-                            "id": "_file:Fi7dHZJHgA3nqT1y1Ro5u",
-                            "uri": "s3://deeporigin-nucleus-local-uploads/files/_file:Fi7dHZJHgA3nqT1y1Ro5u",
-                            "name": "sequence_preprocessing.pdf",
-                            "status": "ready",
-                            "contentLength": 698255,
-                            "contentType": "application/pdf",
-                        },
+                        "file": file_description(),
                         "assignments": [
                             {"rowId": "_row:ZEaEUIgsbHmGLVlgnxfvU"},
                             {"rowId": "_row:aCWxUxumDFDnu8ZhmhQ0X"},
@@ -184,6 +182,7 @@ def config(pytestconfig):
 
         data["databases"] = ["db-sample"]
         data["rows"] = ["sample-1"]
+        data["file"] = file_description()
     else:
         client = DeepOriginClient()
         client.authenticate()
@@ -195,6 +194,11 @@ def config(pytestconfig):
         data["databases"] = [db["hid"] for db in databases]
         rows = _api.list_rows(row_type="row")
         data["rows"] = [row["hid"] for row in rows]
+
+        # get a list of all files
+        files = _api.list_files()
+        if len(files) > 0:
+            data["file"] = files[0]["file"]
 
     # tests run on yield
     yield data
@@ -371,3 +375,32 @@ def test_get_tree(config):
     assert tree["parentId"] is None, "Expected the root of the tree to have no parent"
 
     assert set(tree.keys()) == set(asdict(RowListing()).keys()) | {"children"}
+
+
+def test_create_file_download_url(config):
+    file_id = config["file"]["id"]
+    data = _api.create_file_download_url(
+        file_id,
+        client=config["client"],
+    )
+
+    assert (
+        "downloadUrl" in data.keys()
+    ), "Expected to find `downloadUrl` in data response"
+
+
+def test_download_file(config):
+    file_id = config["file"]["id"]
+
+    if config["file"]["name"] != "placeholder":
+        _api.download_file(file_id)
+
+
+def test_describe_file(config):
+    file_id = config["file"]["id"]
+
+    data = _api.describe_file(file_id, client=config["client"])
+
+    assert isinstance(data, dict), "Expected response to be a dict"
+
+    DescribeFileResponse(**data)

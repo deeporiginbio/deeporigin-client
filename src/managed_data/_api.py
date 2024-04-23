@@ -8,13 +8,13 @@ import requests
 from beartype import beartype
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.managed_data.client import Client, DeepOriginClient
-from deeporigin.managed_data.schema import RowType
+from deeporigin.managed_data.schema import DescribeFileResponse, RowType
 
 
 def _get_default_client(client):
     if client is None:
-        client = DeepOriginClient()
-        client.authenticate()
+        client = DeepOriginClient()  # pragma: no cover
+        client.authenticate()  # pragma: no cover
     return client
 
 
@@ -156,8 +156,8 @@ def list_database_rows(
 @beartype
 def download_file(
     file_id: str,
-    destination: str,
     *,
+    destination: str = os.getcwd(),
     client: Optional[Client] = None,
 ) -> None:
     """download the file to the destination folder"""
