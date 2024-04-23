@@ -1,5 +1,7 @@
+import random
+import string
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from typing import Union
 
 import requests
@@ -8,6 +10,13 @@ from deeporigin import cache_do_api_tokens, get_do_api_tokens
 from deeporigin.config import get_value
 from deeporigin.do_api import read_cached_do_api_tokens
 from deeporigin.exceptions import DeepOriginException
+from deeporigin.managed_data.schema import (
+    DatabaseListing,
+    DatabaseRowDescription,
+    RowDescription,
+    RowListing,
+    WorkspaceListing,
+)
 from deeporigin.utils import _nucleus_url
 
 
@@ -15,11 +24,11 @@ from deeporigin.utils import _nucleus_url
 class Client(ABC):
     @abstractmethod
     def authenticate(self):
-        pass
+        pass  # pragma: no cover
 
     @abstractmethod
     def invoke(self):
-        pass
+        pass  # pragma: no cover
 
 
 @dataclass
@@ -61,6 +70,105 @@ class DeepOriginClient(Client):
         return _check_response(response)
 
 
+class MockClient(Client):
+    """mock client to respond with static data"""
+
+    def authenticate():
+        """no need to do anything here"""
+        pass
+
+    def invoke(self, endpoint, data):
+        """overload this function so that we can return
+        static data"""
+
+        if endpoint == "ListRows":
+            if data == dict(filters=[dict(parent=dict(id="db-sample"))]):
+                return [
+                    asdict(RowListing(hid="sample-1")),
+                    asdict(RowListing(hid="sample-2")),
+                ]
+            elif data == dict(filters=[dict(parent=dict(isRoot=True))]) or data == dict(
+                filters=[dict(rowType="workspace")]
+            ):
+                # return the root workspace
+                return [asdict(WorkspaceListing())]
+            elif data == dict(filters=[]):
+                # list_rows called with no filters. return
+                # a workspace, a database, and some rows
+                rows = []
+                rows += [asdict(WorkspaceListing(id="_row:workspace"))]
+                rows += [
+                    asdict(
+                        DatabaseListing(parentId="_row:workspace", id="_row:database")
+                    )
+                ]
+                rows += [
+                    asdict(RowListing(parentId="_row:database", id=f"_row:{row}"))
+                    for row in range(10)
+                ]
+                return rows
+
+        elif endpoint == "DescribeRow":
+            if data["rowId"].startswith("db-"):
+                # we are likely asking for a database
+                row = asdict(DatabaseRowDescription())
+
+            else:
+                # we are asking for a row in a database
+                row = asdict(RowDescription())
+
+                if not data["fields"]:
+                    row.pop("fields", None)
+
+            return row
+
+        elif endpoint == "ConvertIdFormat":
+            return [{"id": "_row:W6DjtaCrZ201EGLpmZtGO", "hid": "sample-1"}]
+
+        elif endpoint == "ListDatabaseRows":
+            row = asdict(RowDescription())
+            row.pop("cols", None)
+            row.pop("parent", None)
+            row.pop("rowJsonSchema", None)
+
+            return [row for _ in range(5)]
+
+        elif endpoint == "DescribeFile":
+            return file_description()
+
+        elif endpoint == "DescribeDatabaseStats":
+            return {"rowCount": 5}
+
+        elif endpoint == "CreateFileDownloadUrl":
+            return {"downloadUrl": "https://local/data"}
+
+        elif endpoint == "ListMentions":
+            return {
+                "mentions": [
+                    {
+                        "type": "row",
+                        "id": "_row:W6DjtaCrZ201EGLpmZtGO",
+                        "hid": "sample-1",
+                    }
+                ]
+            }
+        elif endpoint == "ListFiles":
+            if data == dict(filters=[dict(isUnassigned=True)]):
+                return [{"file": file_description()}]
+            elif dict(filters=[dict(isUnassigned=False)]):
+                return [
+                    {
+                        "file": file_description(),
+                        "assignments": [
+                            {"rowId": "_row:ZEaEUIgsbHmGLVlgnxfvU"},
+                            {"rowId": "_row:aCWxUxumDFDnu8ZhmhQ0X"},
+                            {"rowId": "_row:WZVb1jsebafhfLgrHtz2l"},
+                            {"rowId": "_row:3A3okCbvuaZvEkOZLqLwY"},
+                        ],
+                    },
+                ]
+
+
 @beartype
 def _check_response(response: requests.models.Response) -> Union[dict, list]:
     """utility function to check responses"""
@@ -78,3 +186,20 @@ def _check_response(response: requests.models.Response) -> Union[dict, list]:
         return response["data"]
     else:
         raise KeyError("`data` not in response")
+
+
+def file_description():
+    return dict(
+        id=f"_file:{_generate_random_string()}",
+        uri="s3://placeholder/uri",
+        name="placeholder",
+        status="ready",
+        contentLength=123,
+        contentType="application/foo",
+    )
+
+
+def _generate_random_string(length: int = 21):
+    """helper function to generate mock data"""
+    characters = string.ascii_letters + string.digits
+    return "".join(random.choice(characters) for _ in range(length))

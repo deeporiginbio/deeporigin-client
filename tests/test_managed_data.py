@@ -1,20 +1,20 @@
 """this tests low level functions in the data API"""
 
-import random
-import string
 from dataclasses import asdict
 
+import pandas as pd
 import pytest
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.managed_data import _api, api
-from deeporigin.managed_data._api import Client, DeepOriginClient
+from deeporigin.managed_data.client import (
+    DeepOriginClient,
+    MockClient,
+    file_description,
+)
 from deeporigin.managed_data.schema import (
-    DatabaseListing,
-    DatabaseRowDescription,
     DescribeFileResponse,
     RowDescription,
     RowListing,
-    WorkspaceListing,
 )
 
 # constants
@@ -51,122 +51,6 @@ list_database_rows_keys = {
     "type",
     "validationStatus",
 }
-
-
-def _generate_random_string(length: int = 21):
-    """helper function to generate mock data"""
-    characters = string.ascii_letters + string.digits
-    return "".join(random.choice(characters) for _ in range(length))
-
-
-def file_description():
-    return dict(
-        id=f"_file:{_generate_random_string()}",
-        uri="s3://placeholder/uri",
-        name="placeholder",
-        status="ready",
-        contentLength=123,
-        contentType="application/foo",
-    )
-
-
-class MockClient(Client):
-    """mock client to respond with static data"""
-
-    def authenticate():
-        """no need to do anything here"""
-        pass
-
-    def invoke(self, endpoint, data):
-        """overload this function so that we can return
-        static data"""
-
-        if endpoint == "ListRows":
-            if data == dict(filters=[dict(parent=dict(id="db-sample"))]):
-                return [
-                    asdict(RowListing(hid="sample-1")),
-                    asdict(RowListing(hid="sample-2")),
-                ]
-            elif data == dict(filters=[dict(parent=dict(isRoot=True))]) or data == dict(
-                filters=[dict(rowType="workspace")]
-            ):
-                # return the root workspace
-                return [asdict(WorkspaceListing())]
-            elif data == dict(filters=[]):
-                # list_rows called with no filters. return
-                # a workspace, a database, and some rows
-                rows = []
-                rows += [asdict(WorkspaceListing(id="_row:workspace"))]
-                rows += [
-                    asdict(
-                        DatabaseListing(parentId="_row:workspace", id="_row:database")
-                    )
-                ]
-                rows += [
-                    asdict(RowListing(parentId="_row:database", id=f"_row:{row}"))
-                    for row in range(10)
-                ]
-                return rows
-
-        elif endpoint == "DescribeRow":
-            if data["rowId"].startswith("db-"):
-                # we are likely asking for a database
-                row = asdict(DatabaseRowDescription())
-
-            else:
-                # we are asking for a row in a database
-                row = asdict(RowDescription())
-
-                if not data["fields"]:
-                    row.pop("fields", None)
-
-            return row
-
-        elif endpoint == "ConvertIdFormat":
-            return [{"id": "_row:W6DjtaCrZ201EGLpmZtGO", "hid": "sample-1"}]
-
-        elif endpoint == "ListDatabaseRows":
-            row = asdict(RowDescription())
-            row.pop("cols", None)
-            row.pop("parent", None)
-            row.pop("rowJsonSchema", None)
-
-            return [row for _ in range(5)]
-
-        elif endpoint == "DescribeFile":
-            return dict(data=file_description())
-
-        elif endpoint == "DescribeDatabaseStats":
-            return {"rowCount": 5}
-
-        elif endpoint == "CreateFileDownloadUrl":
-            return {"downloadUrl": "https://local/data"}
-
-        elif endpoint == "ListMentions":
-            return {
-                "mentions": [
-                    {
-                        "type": "row",
-                        "id": "_row:W6DjtaCrZ201EGLpmZtGO",
-                        "hid": "sample-1",
-                    }
-                ]
-            }
-        elif endpoint == "ListFiles":
-            if data == dict(filters=[dict(isUnassigned=True)]):
-                return [{"file": file_description()}]
-            elif dict(filters=[dict(isUnassigned=False)]):
-                return [
-                    {
-                        "file": file_description(),
-                        "assignments": [
-                            {"rowId": "_row:ZEaEUIgsbHmGLVlgnxfvU"},
-                            {"rowId": "_row:aCWxUxumDFDnu8ZhmhQ0X"},
-                            {"rowId": "_row:WZVb1jsebafhfLgrHtz2l"},
-                            {"rowId": "_row:3A3okCbvuaZvEkOZLqLwY"},
-                        ],
-                    },
-                ]
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -343,6 +227,8 @@ def test_get_dataframe(config):
         client=config["client"],
     )
 
+    assert isinstance(df, pd.DataFrame), "Expected return type to be a pandas Dataframe"
+
     assert (
         set(df.attrs.keys()) == dataframe_attr_keys
     ), f"Expected to find a dictionary in `df.attrs` with these keys: {dataframe_attr_keys}, instead found a dictionary with these keys: {df.attrs.keys()}"
@@ -354,6 +240,14 @@ def test_get_dataframe(config):
     assert (
         df.attrs["primary_key"] in df.columns
     ), "Expected to find the primary key as a column"
+
+    data = api.get_dataframe(
+        config["databases"][0],
+        client=config["client"],
+        return_type="dict",
+    )
+
+    assert isinstance(data, dict), "Expected return type to be a dict"
 
 
 def test_list_mentions(config):

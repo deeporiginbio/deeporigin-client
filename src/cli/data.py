@@ -19,9 +19,6 @@ from deeporigin.managed_data.client import DeepOriginClient
 from deeporigin.utils import PREFIX
 from tabulate import tabulate
 
-client = DeepOriginClient()
-client.authenticate(refresh_tokens=False)
-
 
 @beartype
 def _print_tree(tree: dict, offset: int = 0) -> None:
@@ -60,6 +57,8 @@ def _print_dict(
 
 
 class DataController(cement.Controller):
+    # client = None
+
     class Meta:
         label = "data"
         stacked_on = "base"
@@ -69,6 +68,17 @@ class DataController(cement.Controller):
 List data in managed data on Deep Origin, and save
 databases to CSV files. 
             """
+
+    def _get_client(self):
+        """helper method that returns an authenticated
+        client if the app has no client configured"""
+        try:
+            return self.app.client
+        except Exception:
+            client = DeepOriginClient()
+            client.authenticate(refresh_tokens=False)
+
+            return client
 
     @cement.ex(
         help="Describe and get metadata of file uploaded to database in your Deep Origin data management system",
@@ -87,9 +97,12 @@ databases to CSV files.
         ],
     )
     def describe_file(self):
-        """describe row"""
+        """describe file"""
 
-        data = _api.describe_file(self.app.pargs.file_id, client=client)
+        data = _api.describe_file(
+            self.app.pargs.file_id,
+            client=self._get_client(),
+        )
 
         _print_dict(data, json=self.app.pargs.json)
 
@@ -112,7 +125,10 @@ databases to CSV files.
     def describe_row(self):
         """describe row"""
 
-        data = _api.describe_row(self.app.pargs.row_id, client=client)
+        data = _api.describe_row(
+            self.app.pargs.row_id,
+            client=self._get_client(),
+        )
 
         _print_dict(data, json=self.app.pargs.json)
 
@@ -137,7 +153,7 @@ databases to CSV files.
 
         rows = _api.list_rows(
             parent_id=self.app.pargs.row_id,
-            client=client,
+            client=self._get_client(),
         )
 
         if self.app.pargs.json:
@@ -195,7 +211,9 @@ databases to CSV files.
     def ls(self):
         """list rows in db"""
 
-        tree = get_tree(client=client)
+        tree = get_tree(
+            client=self._get_client(),
+        )
         _print_tree(tree)
 
     @cement.ex(
@@ -216,7 +234,10 @@ databases to CSV files.
     )
     def row(self):
         """list the columns of the row and their values, where applicable"""
-        row_data = get_row_data(self.app.pargs.row_id, client=client)
+        row_data = get_row_data(
+            self.app.pargs.row_id,
+            client=self._get_client(),
+        )
 
         _print_dict(row_data, json=self.app.pargs.json)
 

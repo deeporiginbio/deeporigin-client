@@ -41,8 +41,20 @@ class TestCase(unittest.TestCase):
 
         self.assertEqual(__version__, stdout)
 
+    def test_data(self):
+        stdout_capture = io.StringIO()
+        stderr_capture = io.StringIO()
+
+        with redirect_stdout(stdout_capture), redirect_stderr(stderr_capture):
+            with cli.App(argv=["data"]) as app:
+                app.run()
+
+        stdout = stdout_capture.getvalue().strip()
+
+        self.assertRegex(stdout, "List data in managed data on Deep Origin")
+
     @pytest.mark.skipif(
-        sys.version_info < (3, 11), reason="requires python3.10 or higher"
+        sys.version_info < (3, 11), reason="requires python 3.10 or higher"
     )
     def test_except_hook(self):
         mock_code = MockCode("mock_filename.py", "mock_function")
