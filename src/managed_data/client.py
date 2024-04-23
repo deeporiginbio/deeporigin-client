@@ -1,5 +1,3 @@
-import random
-import string
 from abc import ABC, abstractmethod
 from dataclasses import asdict, dataclass
 from typing import Union
@@ -11,11 +9,9 @@ from deeporigin.config import get_value
 from deeporigin.do_api import read_cached_do_api_tokens
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.managed_data.schema import (
-    DatabaseListing,
     DatabaseRowDescription,
+    ListRowsResponse,
     RowDescription,
-    RowListing,
-    WorkspaceListing,
 )
 from deeporigin.utils import _nucleus_url
 
@@ -84,26 +80,62 @@ class MockClient(Client):
         if endpoint == "ListRows":
             if data == dict(filters=[dict(parent=dict(id="db-sample"))]):
                 return [
-                    asdict(RowListing(hid="sample-1", id="row-1")),
-                    asdict(RowListing(hid="sample-2", id="row-2")),
+                    dict(
+                        ListRowsResponse(
+                            hid="sample-1",
+                            id="row-1",
+                            type="row",
+                            parentId="db-sample",
+                        )
+                    )
                 ]
             elif data == dict(filters=[dict(parent=dict(isRoot=True))]) or data == dict(
                 filters=[dict(rowType="workspace")]
             ):
                 # return the root workspace
-                return [asdict(WorkspaceListing())]
+                return [
+                    dict(
+                        ListRowsResponse(
+                            hid="workspace-1",
+                            id="row-1",
+                            type="workspace",
+                            parentId=None,
+                        )
+                    )
+                ]
             elif data == dict(filters=[]):
                 # list_rows called with no filters. return
                 # a workspace, a database, and some rows
                 rows = []
-                rows += [asdict(WorkspaceListing(id="_row:workspace"))]
                 rows += [
-                    asdict(
-                        DatabaseListing(parentId="_row:workspace", id="_row:database")
+                    dict(
+                        ListRowsResponse(
+                            hid="workspace-1",
+                            id="workspace-1",
+                            type="workspace",
+                            parentId=None,
+                        )
                     )
                 ]
                 rows += [
-                    asdict(RowListing(parentId="_row:database", id=f"_row:{row}"))
+                    dict(
+                        ListRowsResponse(
+                            hid="database-1",
+                            id="database-1",
+                            type="database",
+                            parentId="workspace-1",
+                        )
+                    )
+                ]
+                rows += [
+                    dict(
+                        ListRowsResponse(
+                            hid=f"row-{row}",
+                            id=f"row-{row}",
+                            type="row",
+                            parentId="database-1",
+                        )
+                    )
                     for row in range(10)
                 ]
                 return rows

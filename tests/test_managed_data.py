@@ -13,8 +13,8 @@ from deeporigin.managed_data.client import (
 )
 from deeporigin.managed_data.schema import (
     DescribeFileResponse,
+    ListRowsResponse,
     RowDescription,
-    RowListing,
 )
 
 # constants
@@ -268,7 +268,8 @@ def test_get_tree(config):
 
     assert tree["parentId"] is None, "Expected the root of the tree to have no parent"
 
-    assert set(tree.keys()) == set(asdict(RowListing()).keys()) | {"children"}
+    tree.pop("children")
+    ListRowsResponse(**tree)
 
 
 def test_create_file_download_url(config):

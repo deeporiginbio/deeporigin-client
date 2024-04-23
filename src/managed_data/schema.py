@@ -17,7 +17,7 @@ class DescribeFileResponse(BaseModel):
 
     id: str
     uri: str
-    name: str
+    name: str = "placeholder"
     status: FileStatus
     contentLength: int
     contentType: str
@@ -26,41 +26,17 @@ class DescribeFileResponse(BaseModel):
         extra = "forbid"
 
 
-@dataclass
-class GenericRowListing(ABC):
-    """abstract class for a generic row listing"""
+class ListRowsResponse(BaseModel):
+    """response schema for ListRows"""
 
-    name: str
-    id: str = "_row:placeholder"
-    parentId: Optional[str] = None
+    id: str
+    parentId: Optional[str]
+    hid: str
+    name: str = "placeholder"
+    type: RowType
 
-
-@dataclass
-class WorkspaceListing(GenericRowListing):
-    """response for a workspace listing"""
-
-    hid: str = "workspace"
-    type: RowType = "workspace"
-    name: str = "Placeholder Workspace"
-
-
-@dataclass
-class DatabaseListing(GenericRowListing):
-    """response for a database listing"""
-
-    hid: str = "database"
-    type: RowType = "database"
-    type: RowType = "database"
-    name: str = "Placeholder DB"
-
-
-@dataclass
-class RowListing(GenericRowListing):
-    """response for a true row (leaf node) listing"""
-
-    hid: str = "row"
-    type: RowType = "row"
-    name: str = "Placeholder row"
+    class Config:
+        extra = "forbid"
 
 
 @dataclass
