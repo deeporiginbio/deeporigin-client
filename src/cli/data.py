@@ -57,8 +57,6 @@ def _print_dict(
 
 
 class DataController(cement.Controller):
-    # client = None
-
     class Meta:
         label = "data"
         stacked_on = "base"

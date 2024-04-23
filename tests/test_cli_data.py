@@ -1,10 +1,13 @@
 import io
+import json
 from contextlib import redirect_stderr, redirect_stdout
 
 import pytest
+from beartype import beartype
 from deeporigin import cli
 from deeporigin.managed_data import _api
 from deeporigin.managed_data.client import (
+    Client,
     DeepOriginClient,
     MockClient,
     file_description,
@@ -29,8 +32,8 @@ def config(pytestconfig):
     if pytestconfig.getoption("client") == "mock":
         data["client"] = MockClient()
 
-        data["databases"] = ["db-sample"]
-        data["rows"] = ["sample-1"]
+        data["databases"] = ["_row:placeholder-id"]
+        data["rows"] = ["_row:placeholder-id"]
         data["file"] = file_description()
     else:
         client = DeepOriginClient()
@@ -42,7 +45,7 @@ def config(pytestconfig):
         databases = _api.list_rows(row_type="database")
         data["databases"] = [db["hid"] for db in databases]
         rows = _api.list_rows(row_type="row")
-        data["rows"] = [row["hid"] for row in rows]
+        data["rows"] = [row["id"] for row in rows]
 
         # get a list of all files
         files = _api.list_files()
@@ -55,26 +58,58 @@ def config(pytestconfig):
     # teardown tasks, if any
 
 
-def test_data():
-    stdout = io.StringIO()
-    stderr = io.StringIO()
-
-    with redirect_stdout(stdout), redirect_stderr(stderr):
-        with cli.App(argv=["data"]) as app:
-            app.run()
-
-    stdout = stdout.getvalue().strip()
+def test_data(config):
+    stdout = _run_cli_command(
+        ["data"],
+        config["client"],
+    )
 
     assert "List data in managed data on Deep Origin" in stdout, "Unexpected output"
 
 
 def test_describe_file(config):
+    file_id = config["file"]["id"]
+
+    stdout = _run_cli_command(
+        ["data", "describe-file", file_id],
+        config["client"],
+    )
+    assert file_id in stdout, "Expected to see file_id in output"
+
+
+def test_describe_row(config):
+    row_id = config["rows"][0]
+
+    stdout = _run_cli_command(
+        ["data", "describe-row", row_id],
+        config["client"],
+    )
+    assert row_id in stdout, "Expected to see row_id in output"
+
+    # try JSON output
+    stdout = _run_cli_command(
+        ["data", "describe-row", row_id, "--json"],
+        config["client"],
+    )
+
+    # check that we can parse into JSON
+    data = json.loads(stdout)
+
+    assert isinstance(data, dict), "Expected data to be a dictionary"
+
+    assert data["id"] == row_id, "Expected row ID to match"
+
+
+@beartype
+def _run_cli_command(argv: list[str], client: Client) -> str:
+    """helper function to run a CLI command, parse output and return"""
     stdout = io.StringIO()
     stderr = io.StringIO()
 
-    file_id = config["file"]["id"]
-
     with redirect_stdout(stdout), redirect_stderr(stderr):
-        with cli.App(argv=["data", "describe-file", file_id]) as app:
-            app.client = config["client"]
+        with cli.App(argv=argv) as app:
+            app.client = client
             app.run()
+
+    stdout = stdout.getvalue().strip()
+    return stdout

@@ -190,16 +190,10 @@ def _check_response(response: requests.models.Response) -> Union[dict, list]:
 
 def file_description():
     return dict(
-        id=f"_file:{_generate_random_string()}",
+        id="_file:placeholder-file",
         uri="s3://placeholder/uri",
         name="placeholder",
         status="ready",
         contentLength=123,
         contentType="application/foo",
     )
-
-
-def _generate_random_string(length: int = 21):
-    """helper function to generate mock data"""
-    characters = string.ascii_letters + string.digits
-    return "".join(random.choice(characters) for _ in range(length))
