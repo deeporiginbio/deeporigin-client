@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Union
 
@@ -11,7 +12,18 @@ from deeporigin.utils import _nucleus_url
 
 
 @dataclass
-class DeepOriginClient:
+class Client(ABC):
+    @abstractmethod
+    def authenticate(self):
+        pass
+
+    @abstractmethod
+    def invoke(self):
+        pass
+
+
+@dataclass
+class DeepOriginClient(Client):
     api_url = _nucleus_url()
     org_id = get_value()["organization_id"]
 

@@ -2,15 +2,13 @@
 with the data API. functions here simply wrap API endpoints."""
 
 import os
-from typing import Literal, Optional, Union
+from typing import Optional, Union
 
 import requests
 from beartype import beartype
 from deeporigin.exceptions import DeepOriginException
-from deeporigin.managed_data.client import DeepOriginClient
-
-# types of rows
-RowType = Literal["row", "workspace", "database"]
+from deeporigin.managed_data.client import Client, DeepOriginClient
+from deeporigin.managed_data.schema import RowType
 
 
 def _get_default_client(client):
@@ -26,7 +24,7 @@ def list_rows(
     parent_id: Optional[str] = None,
     row_type: Optional[RowType] = None,
     parent_is_root: Optional[bool] = None,
-    client: Optional[DeepOriginClient] = None,
+    client: Optional[Client] = None,
 ) -> list[dict]:
     """low level API that wraps the ListRows endpoint"""
 
@@ -51,7 +49,7 @@ def list_files(
     *,
     assigned_row_ids: Optional[list[str]] = None,
     is_unassigned: Optional[bool] = None,
-    client: Optional[DeepOriginClient] = None,
+    client: Optional[Client] = None,
 ):
     client = _get_default_client(client)
 
@@ -70,7 +68,7 @@ def list_files(
 def describe_database_stats(
     database_id: str,
     *,
-    client: Optional[DeepOriginClient] = None,
+    client: Optional[Client] = None,
 ):
     client = _get_default_client(client)
 
@@ -81,7 +79,7 @@ def describe_database_stats(
 def list_mentions(
     query: str,
     *,
-    client: Optional[DeepOriginClient] = None,
+    client: Optional[Client] = None,
 ):
     client = _get_default_client(client)
 
@@ -92,7 +90,7 @@ def list_mentions(
 def list_row_back_references(
     row_id: str,
     *,
-    client: Optional[DeepOriginClient] = None,
+    client: Optional[Client] = None,
 ):
     client = _get_default_client(client)
 
@@ -103,7 +101,7 @@ def list_row_back_references(
 def create_file_download_url(
     file_id: str,
     *,
-    client: Optional[DeepOriginClient] = None,
+    client: Optional[Client] = None,
 ) -> dict:
     """low-level API call to CreateFileDownloadUrl"""
 
@@ -116,7 +114,7 @@ def create_file_download_url(
 def describe_file(
     file_id: str,
     *,
-    client: Optional[DeepOriginClient] = None,
+    client: Optional[Client] = None,
 ) -> dict:
     """low-level API call to DescribeFile"""
 
@@ -130,7 +128,7 @@ def describe_row(
     row_id: str,
     *,
     fields: bool = False,
-    client: Optional[DeepOriginClient] = None,
+    client: Optional[Client] = None,
 ) -> dict:
     """low-level API that wraps the DescribeRow endpoint."""
 
@@ -145,7 +143,7 @@ def describe_row(
 def list_database_rows(
     row_id: str,
     *,
-    client: Optional[DeepOriginClient] = None,
+    client: Optional[Client] = None,
 ) -> list[dict]:
     """low level API that wraps the ListDatabaseRows endpoint"""
 
@@ -160,7 +158,7 @@ def download_file(
     file_id: str,
     destination: str,
     *,
-    client: Optional[DeepOriginClient] = None,
+    client: Optional[Client] = None,
 ) -> None:
     """download the file to the destination folder"""
 
@@ -188,7 +186,7 @@ def convert_id_format(
     *,
     hids: Optional[Union[list[str], set[str]]] = None,
     ids: Optional[Union[list[str], set[str]]] = None,
-    client: Optional[DeepOriginClient] = None,
+    client: Optional[Client] = None,
 ) -> list[dict]:
     """convert a list of HIDs to IDs or vice versa"""
 

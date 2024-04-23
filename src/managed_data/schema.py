@@ -1,10 +1,48 @@
 """this module contains classes to generate data that
 matches the schema of real responses"""
 
+from abc import ABC
 from dataclasses import dataclass, field
-from typing import Literal
+from typing import Literal, Optional
 
-RowType = Literal["row", "database"]
+RowType = Literal["row", "database", "workspace"]
+
+
+@dataclass
+class GenericRowListing(ABC):
+    """abstract class for a generic row listing"""
+
+    name: str
+    id: str = "_row:placeholder"
+    parentId: Optional[str] = None
+
+
+@dataclass
+class WorkspaceListing(GenericRowListing):
+    """response for a workspace listing"""
+
+    hid: str = "workspace"
+    type: RowType = "workspace"
+    name: str = "Placeholder Workspace"
+
+
+@dataclass
+class DatabaseListing(GenericRowListing):
+    """response for a database listing"""
+
+    hid: str = "database"
+    type: RowType = "database"
+    type: RowType = "database"
+    name: str = "Placeholder DB"
+
+
+@dataclass
+class RowListing(GenericRowListing):
+    """response for a true row (leaf node) listing"""
+
+    hid: str = "row"
+    type: RowType = "row"
+    name: str = "Placeholder row"
 
 
 @dataclass
@@ -23,7 +61,7 @@ class ColumnItem:
     """item in cols in DescribeRow"""
 
     id: str = "_col:placeholder"
-    name: str = "Placeholder Naem"
+    name: str = "Placeholder Name"
     key: str = "placeholder_key"
     parentId: str = "_row:placeholder_row"
     type: str = "text"
@@ -32,9 +70,9 @@ class ColumnItem:
 
 
 @dataclass
-class GenericRowDescription:
-    id: str = "_row:placeholder"
-    parentId: str = "_row:placeholder"
+class GenericRowDescription(ABC):
+    id: str = "_row:placeholder-id"
+    parentId: str = "_row:placeholder-parent"
     type: RowType = "row"
     dateCreated: str = "2024-04-04 16:34:19.968737"
     dateUpdated: str = "2024-04-04 16:34:19.968737"

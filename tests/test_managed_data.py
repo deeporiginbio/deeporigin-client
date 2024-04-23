@@ -5,8 +5,15 @@ from typing import Optional
 
 import pytest
 from deeporigin.exceptions import DeepOriginException
-from deeporigin.managed_data import _api, api, schema
-from deeporigin.managed_data._api import DeepOriginClient
+from deeporigin.managed_data import _api, api
+from deeporigin.managed_data._api import Client, DeepOriginClient
+from deeporigin.managed_data.schema import (
+    DatabaseListing,
+    DatabaseRowDescription,
+    RowDescription,
+    RowListing,
+    WorkspaceListing,
+)
 
 # constants
 dataframe_attr_keys = {
@@ -44,26 +51,11 @@ list_database_rows_keys = {
 }
 
 
-def _row_object(
-    *,
-    parentId: Optional[str] = "_row:placeholder",
-    id: str = "row:placeholder",
-    type: str = "row",
-    name: Optional[str] = None,
-    hid: str = "placeholder-1",
-) -> dict:
-    """helper function to create dummy responses"""
-    return dict(
-        id=id,
-        parentId=parentId,
-        type=type,
-        name=name,
-        hid=hid,
-    )
-
-
-class MockClient(DeepOriginClient):
+class MockClient(Client):
     """mock client to respond with static data"""
+
+    def authenticate():
+        pass
 
     def invoke(self, endpoint, data):
         """overload this function so that we can return
@@ -72,27 +64,38 @@ class MockClient(DeepOriginClient):
         if endpoint == "ListRows":
             if data == dict(filters=[dict(parent=dict(id="db-sample"))]):
                 return [
-                    _row_object(hid="sample-1"),
-                    _row_object(hid="sample-2"),
+                    asdict(RowListing(hid="sample-1")),
+                    asdict(RowListing(hid="sample-2")),
                 ]
             elif data == dict(filters=[dict(parent=dict(isRoot=True))]) or data == dict(
                 filters=[dict(rowType="workspace")]
             ):
-                return [
-                    _row_object(
-                        type="workspace",
-                        parentId=None,
+                # return the root workspace
+                return [asdict(WorkspaceListing())]
+            elif data == dict(filters=[]):
+                # list_rows called with no filters. return
+                # a workspace, a database, and some rows
+                rows = []
+                rows += [asdict(WorkspaceListing(id="_row:workspace"))]
+                rows += [
+                    asdict(
+                        DatabaseListing(parentId="_row:workspace", id="_row:database")
                     )
                 ]
+                rows += [
+                    asdict(RowListing(parentId="_row:database", id=f"_row:{row}"))
+                    for row in range(10)
+                ]
+                return rows
 
         elif endpoint == "DescribeRow":
             if data["rowId"].startswith("db-"):
                 # we are likely asking for a database
-                row = asdict(schema.DatabaseRowDescription())
+                row = asdict(DatabaseRowDescription())
 
             else:
                 # we are asking for a row in a database
-                row = asdict(schema.RowDescription())
+                row = asdict(RowDescription())
 
                 if not data["fields"]:
                     row.pop("fields", None)
@@ -103,7 +106,7 @@ class MockClient(DeepOriginClient):
             return [{"id": "_row:W6DjtaCrZ201EGLpmZtGO", "hid": "sample-1"}]
 
         elif endpoint == "ListDatabaseRows":
-            row = asdict(schema.RowDescription())
+            row = asdict(RowDescription())
             row.pop("cols", None)
             row.pop("parent", None)
             row.pop("rowJsonSchema", None)
@@ -122,6 +125,17 @@ class MockClient(DeepOriginClient):
 
         elif endpoint == "DescribeDatabaseStats":
             return {"rowCount": 5}
+
+        elif endpoint == "ListMentions":
+            return {
+                "mentions": [
+                    {
+                        "type": "row",
+                        "id": "_row:W6DjtaCrZ201EGLpmZtGO",
+                        "hid": "sample-1",
+                    }
+                ]
+            }
         elif endpoint == "ListFiles":
             if data == dict(filters=[dict(isUnassigned=True)]):
                 return [
@@ -284,7 +298,7 @@ def test_describe_row(config):
         fields=True,
     )
 
-    keys_with_fields = set(asdict(schema.RowDescription()).keys())
+    keys_with_fields = set(asdict(RowDescription()).keys())
 
     assert set(row.keys()) == keys_with_fields
 
@@ -336,3 +350,24 @@ def test_get_dataframe(config):
     assert (
         df.attrs["primary_key"] in df.columns
     ), "Expected to find the primary key as a column"
+
+
+def test_list_mentions(config):
+    data = _api.list_mentions(
+        config["rows"][0],
+        client=config["client"],
+    )
+
+    assert (
+        "mentions" in data.keys()
+    ), "Expected to find a dictionary with the key `mentions`"
+
+    assert isinstance(data["mentions"], list), "Expected `mentions` to be a list"
+
+
+def test_get_tree(config):
+    tree = api.get_tree(client=config["client"])
+
+    assert tree["parentId"] is None, "Expected the root of the tree to have no parent"
+
+    assert set(tree.keys()) == set(asdict(RowListing()).keys()) | {"children"}

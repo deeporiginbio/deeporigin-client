@@ -14,7 +14,7 @@ from deeporigin.managed_data._api import (
     list_database_rows,
     list_rows,
 )
-from deeporigin.managed_data.client import DeepOriginClient
+from deeporigin.managed_data.client import Client
 from deeporigin.utils import PREFIX
 
 id_format = Literal["human-id", "system-id"]
@@ -26,7 +26,7 @@ DatabaseReturnType = Literal["dataframe", "dict"]
 def get_tree(
     *,
     include_rows: bool = True,
-    client: Optional[DeepOriginClient] = None,
+    client: Optional[Client] = None,
 ) -> dict:
     """construct a tree of workspaces, databases, and optionally,
     all rows"""
@@ -74,11 +74,16 @@ def _add_children(node: dict, objects: list[dict]) -> None:
 
 
 @beartype
-def get_cell_data(*, row_id: str, column_name: str):
+def get_cell_data(
+    *,
+    row_id: str,
+    column_name: str,
+    client: Optional[Client] = None,
+):
     """extract data from a cell in a database, referenced
     by row_id and column_name"""
 
-    data = get_row_data(row_id)
+    data = get_row_data(row_id, client=client)
     return data[column_name]
 
 
@@ -186,7 +191,7 @@ def get_dataframe(
     *,
     use_file_names: bool = True,
     reference_format: id_format = "human-id",
-    client: Optional[DeepOriginClient] = None,
+    client: Optional[Client] = None,
     return_type: DatabaseReturnType = "dataframe",
 ):
     """return a dataframe of all rows in a database
@@ -356,7 +361,7 @@ def _type_and_cleanup_dataframe(
 def get_columns(
     row_id: str,
     *,
-    client: Optional[DeepOriginClient] = None,
+    client: Optional[Client] = None,
 ) -> list[dict]:
     """return column information.
 
@@ -382,7 +387,7 @@ def get_row_data(
     row_id: str,
     *,
     use_column_keys: bool = False,
-    client: Optional[DeepOriginClient] = None,
+    client: Optional[Client] = None,
 ) -> dict:
     """name needs improving? this returns fields in this
     row as a dictionary, where keys are HIDs
