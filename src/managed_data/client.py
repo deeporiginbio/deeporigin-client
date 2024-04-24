@@ -142,6 +142,16 @@ class MockClient(Client):
                     parentId=None,
                 ).dict()
             ]
+        elif data == dict(filters=[dict(rowType="database")]):
+            # return the example database
+            return [
+                ListRowsResponse(
+                    hid=self.databases[0],
+                    id=self.databases[0],
+                    type="database",
+                    parentId=self.workspaces[0],
+                ).dict()
+            ]
 
     def invoke_describe_row(self, data):
         if data["rowId"].startswith("db-"):

@@ -73,5 +73,5 @@ universal = true
 
 [tool.coverage.run]
 omit = [
-    "src/managed_data/clent.py"
+    "src/managed_data/client.py"
 ]

@@ -260,6 +260,12 @@ def test_get_tree(config):
     tree.pop("children")
     ListRowsResponse(**tree)
 
+    tree = api.get_tree(client=config["client"], include_rows=False)
+    assert tree["parentId"] is None, "Expected the root of the tree to have no parent"
+
+    tree.pop("children")
+    ListRowsResponse(**tree)
+
 
 def test_create_file_download_url(config):
     file_id = config["file"]["id"]
