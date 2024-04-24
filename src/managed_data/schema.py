@@ -11,6 +11,13 @@ RowType = Literal["row", "database", "workspace"]
 FileStatus = Literal["ready", "archived"]
 DataType = Literal["integer", "str", "select", "date", "text", "file"]
 
+DATAFRAME_ATTRIBUTE_KEYS = {
+    "file_ids",
+    "id",
+    "primary_key",
+    "reference_ids",
+}
+
 
 class DescribeFileResponse(BaseModel):
     """schema for file description, as returned by

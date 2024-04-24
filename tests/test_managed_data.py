@@ -11,46 +11,12 @@ from deeporigin.managed_data.client import (
     file_description,
 )
 from deeporigin.managed_data.schema import (
+    DATAFRAME_ATTRIBUTE_KEYS,
     DescribeFileResponse,
     DescribeRowResponseDatabase,
     DescribeRowResponseRow,
     ListRowsResponse,
 )
-
-# constants
-dataframe_attr_keys = {
-    "file_ids",
-    "id",
-    "primary_key",
-    "reference_ids",
-}
-
-
-describe_file_keys = {
-    "id",
-    "uri",
-    "name",
-    "status",
-    "contentLength",
-    "contentType",
-}
-
-list_row_keys = {"id", "hid", "type", "name", "parentId"}
-
-list_database_rows_keys = {
-    "createdByUserDrn",
-    "dateCreated",
-    "dateUpdated",
-    "editedByUserDrn",
-    "fields",
-    "hid",
-    "hidNum",
-    "id",
-    "parentId",
-    "submissionStatus",
-    "type",
-    "validationStatus",
-}
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -98,8 +64,10 @@ def test_list_rows(config):
     )
 
     for row in rows:
-        assert set(row.keys()) == list_row_keys
         assert row["type"] == "row"
+
+        # check type
+        ListRowsResponse(**row)
 
 
 def test_list_rows_root_parent(config):
@@ -109,8 +77,12 @@ def test_list_rows_root_parent(config):
     )
 
     assert len(root) == 1, "Expected there to be exactly one root"
+    root = root[0]
 
-    assert root[0]["parentId"] is None, "Expected root to have no parent"
+    assert root["parentId"] is None, "Expected root to have no parent"
+
+    # check type
+    ListRowsResponse(**root)
 
 
 def test_list_rows_by_type(config):
@@ -125,6 +97,9 @@ def test_list_rows_by_type(config):
         assert (
             row["type"] == "workspace"
         ), f"Expected to get a list of workspaces, but {row} is not a workspace"
+
+        # check type
+        ListRowsResponse(**row)
 
 
 def test_list_files_unassigned(config):
@@ -203,6 +178,15 @@ def test_describe_row(config):
     # check if we can coerce into response type
     DescribeRowResponseRow(**row)
 
+    # database
+    row = _api.describe_row(
+        config["databases"][0],
+        client=config["client"],
+    )
+
+    # check if we can coerce into response type
+    DescribeRowResponseDatabase(**row)
+
 
 def test_convert_id_format(config):
     conversions = _api.convert_id_format(
@@ -236,8 +220,8 @@ def test_get_dataframe(config):
     assert isinstance(df, pd.DataFrame), "Expected return type to be a pandas Dataframe"
 
     assert (
-        set(df.attrs.keys()) == dataframe_attr_keys
-    ), f"Expected to find a dictionary in `df.attrs` with these keys: {dataframe_attr_keys}, instead found a dictionary with these keys: {df.attrs.keys()}"
+        set(df.attrs.keys()) == DATAFRAME_ATTRIBUTE_KEYS
+    ), f"Expected to find a dictionary in `df.attrs` with these keys: {DATAFRAME_ATTRIBUTE_KEYS}, instead found a dictionary with these keys: {df.attrs.keys()}"
 
     assert (
         "Validation Status" in df.columns
