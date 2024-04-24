@@ -21,11 +21,11 @@ from deeporigin.utils import _nucleus_url
 @dataclass
 class Client(ABC):
     @abstractmethod
-    def authenticate(self):
+    def authenticate(self, refresh_tokens: bool = True):
         pass  # pragma: no cover
 
     @abstractmethod
-    def invoke(self):
+    def invoke(self, endpoint: str, data: dict):
         pass  # pragma: no cover
 
 
@@ -36,7 +36,7 @@ class DeepOriginClient(Client):
 
     headers = dict()
 
-    def authenticate(self, refresh_tokens=True):
+    def authenticate(self, refresh_tokens: bool = True):
         if refresh_tokens:
             api_access_token, api_refresh_token = get_do_api_tokens()
             cache_do_api_tokens(api_access_token, api_refresh_token)
@@ -76,123 +76,98 @@ class MockClient(Client):
     databases = ["db-placeholder"]
     rows = [f"row-placeholder-{idx}" for idx in range(10)]
 
-    def authenticate():
+    def authenticate(self, refresh_tokens: bool = True):
         """no need to do anything here"""
         pass
 
-    def invoke(self, endpoint, data):
-        """simple returns data without making any network requests"""
-
-        if endpoint == "ListRows":
-            if data == dict(filters=[]):
-                # list_rows called with no filters. return
-                # a workspace, a database, and some rows
-                rows = []
-                rows += [
-                    ListRowsResponse(
-                        hid=self.workspaces[0],
-                        id=self.workspaces[0],
-                        type="workspace",
-                        parentId=None,
-                    ).dict()
-                ]
-                rows += [
-                    ListRowsResponse(
-                        hid=self.databases[0],
-                        id=self.databases[0],
-                        type="database",
-                        parentId=self.workspaces[0],
-                    ).dict()
-                ]
-                rows += [
-                    ListRowsResponse(
-                        hid=f"row-placeholder-{idx}",
-                        id=f"row-placeholder-{idx}",
-                        type="row",
-                        parentId=self.databases[0],
-                    ).dict()
-                    for idx in range(10)
-                ]
-                return rows
-
-            elif (
-                "parent" in data["filters"][0].keys()
-                and "id" in data["filters"][0]["parent"].keys()
-                and data["filters"][0]["parent"]["id"].startswith("db-")
-            ):
-                # we're asking for rows that belong to a database
-
-                return [
-                    ListRowsResponse(
-                        hid=f"row-placeholder-{idx}",
-                        id=f"row-placeholder-{idx}",
-                        type="row",
-                        parentId=data["filters"][0]["parent"]["id"],
-                    ).dict()
-                    for idx in range(10)
-                ]
-
-            elif data == dict(filters=[dict(parent=dict(isRoot=True))]) or data == dict(
-                filters=[dict(rowType="workspace")]
-            ):
-                # return the root workspace
-                return [
-                    ListRowsResponse(
-                        hid=self.workspaces[0],
-                        id=self.workspaces[0],
-                        type="workspace",
-                        parentId=None,
-                    ).dict()
-                ]
-
-        elif endpoint == "DescribeRow":
-            if data["rowId"].startswith("db-"):
-                # we are likely asking for a database
-                name = self.databases[0]
-                return DescribeRowResponseDatabase(
-                    id=name,
-                    hid=name,
-                    name=name,
-                    type="database",
-                    parentId="ws-placeholder",
-                    cols=[
-                        dict(
-                            ColumnItem(
-                                id=f"column-{idx}",
-                                key=f"column-{idx}",
-                            )
-                        )
-                        for idx in range(5)
-                    ],
-                    hidPrefix="placeholder",
+    def invoke_list_rows(self, data: dict):
+        """callback when we invoke ListRows"""
+        if data == dict(filters=[]):
+            # list_rows called with no filters. return
+            # a workspace, a database, and some rows
+            rows = []
+            rows += [
+                ListRowsResponse(
+                    hid=self.workspaces[0],
+                    id=self.workspaces[0],
+                    type="workspace",
+                    parentId=None,
                 ).dict()
+            ]
+            rows += [
+                ListRowsResponse(
+                    hid=self.databases[0],
+                    id=self.databases[0],
+                    type="database",
+                    parentId=self.workspaces[0],
+                ).dict()
+            ]
+            rows += [
+                ListRowsResponse(
+                    hid=f"row-placeholder-{idx}",
+                    id=f"row-placeholder-{idx}",
+                    type="row",
+                    parentId=self.databases[0],
+                ).dict()
+                for idx in range(10)
+            ]
+            return rows
 
-            else:
-                # we are asking for a row in a database
-                name = data["rowId"]
-                fields = [
-                    FieldItem(
-                        columnId=f"column-{idx}",
-                        cellId=f"column-{idx}",
+        elif (
+            "parent" in data["filters"][0].keys()
+            and "id" in data["filters"][0]["parent"].keys()
+            and data["filters"][0]["parent"]["id"].startswith("db-")
+        ):
+            # we're asking for rows that belong to a database
+
+            return [
+                ListRowsResponse(
+                    hid=f"row-placeholder-{idx}",
+                    id=f"row-placeholder-{idx}",
+                    type="row",
+                    parentId=data["filters"][0]["parent"]["id"],
+                ).dict()
+                for idx in range(10)
+            ]
+
+        elif data == dict(filters=[dict(parent=dict(isRoot=True))]) or data == dict(
+            filters=[dict(rowType="workspace")]
+        ):
+            # return the root workspace
+            return [
+                ListRowsResponse(
+                    hid=self.workspaces[0],
+                    id=self.workspaces[0],
+                    type="workspace",
+                    parentId=None,
+                ).dict()
+            ]
+
+    def invoke_describe_row(self, data):
+        if data["rowId"].startswith("db-"):
+            # we are likely asking for a database
+            name = self.databases[0]
+            return DescribeRowResponseDatabase(
+                id=name,
+                hid=name,
+                name=name,
+                type="database",
+                parentId="ws-placeholder",
+                cols=[
+                    dict(
+                        ColumnItem(
+                            id=f"column-{idx}",
+                            key=f"column-{idx}",
+                        )
                     )
                     for idx in range(5)
-                ]
-                row = DescribeRowResponseRow(
-                    id=name,
-                    hid=name,
-                    parentId=self.databases[0],
-                    fields=fields,
-                ).dict()
+                ],
+                hidPrefix="placeholder",
+            ).dict()
 
-                if not data["fields"]:
-                    row.pop("fields", None)
-
-            return row
-
-        elif endpoint == "ConvertIdFormat":
-            return [{"id": "_row:W6DjtaCrZ201EGLpmZtGO", "hid": "sample-1"}]
-
-        elif endpoint == "ListDatabaseRows":
+        else:
+            # we are asking for a row in a database
+            name = data["rowId"]
             fields = [
                 FieldItem(
                     columnId=f"column-{idx}",
@@ -200,15 +175,50 @@ class MockClient(Client):
                 )
                 for idx in range(5)
             ]
-            return [
-                DescribeRowResponseRow(
-                    id=f"row-placeholder-{idx}",
-                    hid=f"row-placeholder-{idx}",
-                    parentId=data["databaseRowId"],
-                    fields=fields,
-                ).dict()
-                for idx in range(5)
-            ]
+            row = DescribeRowResponseRow(
+                id=name,
+                hid=name,
+                parentId=self.databases[0],
+                fields=fields,
+            ).dict()
+
+            if not data["fields"]:
+                row.pop("fields", None)
+
+        return row
+
+    def invoke_list_database_rows(self, data):
+        fields = [
+            FieldItem(
+                columnId=f"column-{idx}",
+                cellId=f"column-{idx}",
+            )
+            for idx in range(5)
+        ]
+        return [
+            DescribeRowResponseRow(
+                id=f"row-placeholder-{idx}",
+                hid=f"row-placeholder-{idx}",
+                parentId=data["databaseRowId"],
+                fields=fields,
+            ).dict()
+            for idx in range(5)
+        ]
+
+    def invoke(self, endpoint: str, data: dict):
+        """simple returns data without making any network requests"""
+
+        if endpoint == "ListRows":
+            return self.invoke_list_rows(data)
+
+        elif endpoint == "DescribeRow":
+            return self.invoke_describe_row(data)
+
+        elif endpoint == "ConvertIdFormat":
+            return [{"id": "_row:W6DjtaCrZ201EGLpmZtGO", "hid": "sample-1"}]
+
+        elif endpoint == "ListDatabaseRows":
+            return self.invoke_list_database_rows(data)
 
         elif endpoint == "DescribeFile":
             return file_description()
