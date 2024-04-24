@@ -187,7 +187,11 @@ databases to CSV files.
     def show_db(self):
         """list database row"""
 
-        data = get_dataframe(self.app.pargs.db_id, return_type="dict")
+        data = get_dataframe(
+            self.app.pargs.db_id,
+            return_type="dict",
+            client=self._get_client(),
+        )
 
         _print_dict(data, json=self.app.pargs.json, transpose=False)
 
