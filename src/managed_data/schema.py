@@ -2,7 +2,7 @@
 matches the schema of real responses"""
 
 from datetime import datetime
-from typing import Literal, Optional
+from typing import Literal, Optional, Union
 
 from pydantic import BaseModel
 
@@ -53,7 +53,7 @@ class FieldItem(BaseModel):
     cellId: str
     validationStatus: str = "valid"
     type: DataType = "text"
-    value: str | dict | int = "placeholder-text"
+    value: Union[str, dict, int] = "placeholder-text"
 
     class Config:
         extra = "forbid"
