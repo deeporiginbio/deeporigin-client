@@ -12,7 +12,7 @@ chosen_tests=""
 
 test: 
 	source $(CURDIR)/venv/bin/activate && \
-		python3 -m coverage run -m pytest -x -s -k $(chosen_tests) --client $(client) && \
+		python3 -m coverage run -m pytest -k $(chosen_tests) --client $(client) && \
 		python3 -m coverage html && \
 		deactivate
 	-open htmlcov/index.html
