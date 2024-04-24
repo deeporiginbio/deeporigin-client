@@ -290,7 +290,7 @@ as-is. """
                 include_files=args.include_files,
             )
         elif PREFIX in args.destination and PREFIX not in args.source:
-            pass
+            raise NotImplementedError("Uploading has not been implemented yet")
             # upload(args.source, args.destination)
         else:
             raise DeepOriginException(

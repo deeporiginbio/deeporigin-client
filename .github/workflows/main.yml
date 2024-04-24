@@ -54,6 +54,16 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
+      - run: 'mkdir /home/runner/.deeporigin/'
+        shell: bash
+
+      - run: 'cp tests/config.yml /home/runner/.deeporigin/config.yml'
+        shell: bash
+
+      - run: 'cp tests/api_tokens /home/runner/.deeporigin/api_tokens'
+        shell: bash
+
+
       - name: run tests
         run: |
           pip install --upgrade pip

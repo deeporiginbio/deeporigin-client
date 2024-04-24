@@ -1,7 +1,7 @@
 """this module contains classes to generate data that
 matches the schema of real responses"""
 
-from datetime import datetime
+
 from typing import Literal, Optional, Union
 
 from pydantic import BaseModel
@@ -86,8 +86,8 @@ class DescribeRowResponse(BaseModel):
 
     parentId: str
     type: RowType = "row"
-    dateCreated: datetime = "2024-04-04 16:33:58.622469"
-    dateUpdated: datetime = "2024-04-04 16:33:58.622469"
+    dateCreated: str = "2024-04-04 16:33:58.622469"
+    dateUpdated: str = "2024-04-04 16:33:58.622469"
     createdByUserDrn: str = "placeholder"
     rowJsonSchema: dict = {"type": "object", "required": [], "properties": {}}
 
