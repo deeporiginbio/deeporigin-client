@@ -1,7 +1,6 @@
 """this module contains classes to generate data that
 matches the schema of real responses"""
 
-
 from typing import Literal, Optional, Union
 
 from pydantic import BaseModel
