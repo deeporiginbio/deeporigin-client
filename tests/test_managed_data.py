@@ -1,4 +1,5 @@
 """this tests low level functions in the data API"""
+import os
 
 import pandas as pd
 import pytest
@@ -28,12 +29,13 @@ def config(pytestconfig):
     # set up client
     if pytestconfig.getoption("client") == "mock":
         data["client"] = MockClient()
-
+        data["mock"] = True
         data["workspaces"] = data["client"].workspaces
         data["databases"] = data["client"].databases
         data["rows"] = data["client"].rows
         data["file"] = file_description()
     else:
+        data["mock"] = False
         client = DeepOriginClient()
         client.authenticate()
         data["client"] = client
@@ -189,9 +191,20 @@ def test_describe_row(config):
 
 def test_convert_id_format(config):
     conversions = _api.convert_id_format(
-        hids=[config["rows"][0]],
+        hids=config["rows"],
         client=config["client"],
     )
+
+    system_ids = []
+    for conversion in conversions:
+        system_ids.append(conversion["id"])
+        assert {"id", "hid"} == set(conversion.keys())
+
+    conversions = _api.convert_id_format(
+        ids=system_ids,
+        client=config["client"],
+    )
+
     for conversion in conversions:
         assert {"id", "hid"} == set(conversion.keys())
 
@@ -280,10 +293,24 @@ def test_create_file_download_url(config):
 
 
 def test_download_file(config):
+    if "file" not in config.keys():
+        return
+
     file_id = config["file"]["id"]
 
-    if config["file"]["name"] != "placeholder":
-        _api.download_file(file_id)
+    if config["mock"]:
+        _api.download_file(file_id, client=config["client"])
+        os.remove("placeholder")
+
+        with pytest.raises(DeepOriginException, match="should be a path to a folder"):
+            _api.download_file(
+                file_id,
+                client=config["client"],
+                destination="non-existent-path",
+            )
+
+    else:
+        _api.download_file(file_id, client=config["client"])
 
 
 def test_describe_file(config):
@@ -298,6 +325,24 @@ def test_describe_file(config):
 
 def test_get_row_data(config):
     row_id = config["rows"][0]
-    data = api.get_row_data(row_id, client=config["client"])
 
+    data = api.get_row_data(row_id, client=config["client"])
     assert isinstance(data, dict), "Expected response to be a dict"
+
+    data = api.get_row_data(
+        row_id,
+        client=config["client"],
+        use_column_keys=True,
+    )
+    assert isinstance(data, dict), "Expected response to be a dict"
+
+
+def test_get_cell_data(config):
+    row_id = config["rows"][0]
+    data = api.get_row_data(row_id, client=config["client"])
+    column_name = list(data.keys())[0]
+    data = api.get_cell_data(
+        row_id=row_id,
+        column_name=column_name,
+        client=config["client"],
+    )

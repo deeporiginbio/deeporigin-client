@@ -7,7 +7,16 @@ from pydantic import BaseModel
 
 RowType = Literal["row", "database", "workspace"]
 FileStatus = Literal["ready", "archived"]
-DataType = Literal["integer", "str", "select", "date", "text", "file"]
+DataType = Literal[
+    "integer",
+    "str",
+    "select",
+    "date",
+    "text",
+    "file",
+    "reference",
+    "editor",
+]
 
 DATAFRAME_ATTRIBUTE_KEYS = {
     "file_ids",
@@ -38,7 +47,7 @@ class ListRowsResponse(BaseModel):
     id: str
     parentId: Optional[str]
     hid: str
-    name: str = "placeholder"
+    name: Optional[str] = "placeholder"
     type: RowType
 
     class Config:
@@ -53,6 +62,7 @@ class FieldItem(BaseModel):
     validationStatus: str = "valid"
     type: DataType = "text"
     value: Union[str, dict, int] = "placeholder-text"
+    systemType: Optional[str] = None
 
     class Config:
         extra = "forbid"

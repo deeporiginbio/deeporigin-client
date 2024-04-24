@@ -75,6 +75,7 @@ class MockClient(Client):
     workspaces = ["ws-placeholder"]
     databases = ["db-placeholder"]
     rows = [f"row-placeholder-{idx}" for idx in range(10)]
+    columns = [f"column-{idx}" for idx in range(5)]
 
     def authenticate(self, refresh_tokens: bool = True):
         """no need to do anything here"""
@@ -237,7 +238,9 @@ class MockClient(Client):
             return {"rowCount": 5}
 
         elif endpoint == "CreateFileDownloadUrl":
-            return {"downloadUrl": "https://local/data"}
+            return {
+                "downloadUrl": "https://github.com/formiclabs/deeporigin-client/archive/refs/tags/0.0.3.zip"
+            }
 
         elif endpoint == "ListMentions":
             return {
