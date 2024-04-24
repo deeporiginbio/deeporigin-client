@@ -174,7 +174,7 @@ def get_dataframe(
     response = describe_row(database_id, client=client)
     assert (
         response["type"] == "database"
-    ), f"Expected {database_id=} to resolve to a database, but instead, it resolved to a {response["type"]}"
+    ), f"Expected database_id: {database_id} to resolve to a database, but instead, it resolved to a {response["type"]}"
 
     columns = response["cols"]
     database_id = response["id"]
