@@ -146,7 +146,6 @@ class MockClient(Client):
                 ]
 
         elif endpoint == "DescribeRow":
-            print(data)
             if data["rowId"].startswith("db-"):
                 # we are likely asking for a database
                 name = self.databases[0]
