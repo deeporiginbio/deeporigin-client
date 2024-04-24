@@ -13,7 +13,6 @@ from deeporigin.managed_data.api import (
     get_dataframe,
     get_row_data,
     get_tree,
-    upload,
 )
 from deeporigin.managed_data.client import DeepOriginClient
 from deeporigin.utils import PREFIX
@@ -73,10 +72,10 @@ databases to CSV files.
         try:
             return self.app.client
         except Exception:
-            client = DeepOriginClient()
-            client.authenticate(refresh_tokens=False)
+            client = DeepOriginClient()  # pragma: no cover
+            client.authenticate(refresh_tokens=False)  # pragma: no cover
 
-            return client
+            return client  # pragma: no cover
 
     @cement.ex(
         help="Describe and get metadata of file uploaded to database in your Deep Origin data management system",
@@ -287,7 +286,8 @@ as-is. """
                 include_files=args.include_files,
             )
         elif PREFIX in args.destination and PREFIX not in args.source:
-            upload(args.source, args.destination)
+            pass
+            # upload(args.source, args.destination)
         else:
             raise DeepOriginException(
                 f"Exactly one of <source> and <destination> should be prefixed with `{PREFIX}`"

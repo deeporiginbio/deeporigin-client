@@ -8,7 +8,7 @@ import requests
 from beartype import beartype
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.managed_data.client import Client, DeepOriginClient
-from deeporigin.managed_data.schema import DescribeFileResponse, RowType
+from deeporigin.managed_data.schema import RowType
 
 
 def _get_default_client(client):

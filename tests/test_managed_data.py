@@ -1,6 +1,5 @@
 """this tests low level functions in the data API"""
 
-from dataclasses import asdict
 
 import pandas as pd
 import pytest
@@ -13,8 +12,9 @@ from deeporigin.managed_data.client import (
 )
 from deeporigin.managed_data.schema import (
     DescribeFileResponse,
+    DescribeRowResponseDatabase,
+    DescribeRowResponseRow,
     ListRowsResponse,
-    RowDescription,
 )
 
 # constants
@@ -64,8 +64,9 @@ def config(pytestconfig):
     if pytestconfig.getoption("client") == "mock":
         data["client"] = MockClient()
 
-        data["databases"] = ["db-sample"]
-        data["rows"] = ["sample-1"]
+        data["workspaces"] = data["client"].workspaces
+        data["databases"] = data["client"].databases
+        data["rows"] = data["client"].rows
         data["file"] = file_description()
     else:
         client = DeepOriginClient()
@@ -77,7 +78,7 @@ def config(pytestconfig):
         databases = _api.list_rows(row_type="database")
         data["databases"] = [db["hid"] for db in databases]
         rows = _api.list_rows(row_type="row")
-        data["rows"] = [row["hid"] for row in rows]
+        data["rows"] = [row["hid"] for row in rows if row["type"] == "row"]
 
         # get a list of all files
         files = _api.list_files()
@@ -186,9 +187,10 @@ def test_describe_row(config):
         fields=True,
     )
 
-    keys_with_fields = set(asdict(RowDescription()).keys())
+    assert "fields" in row.keys(), "Expected to find fields in response"
 
-    assert set(row.keys()) == keys_with_fields
+    # check if we can coerce into response type
+    DescribeRowResponseRow(**row)
 
     row = _api.describe_row(
         config["rows"][0],
@@ -196,7 +198,10 @@ def test_describe_row(config):
         fields=False,
     )
 
-    assert set(row.keys()) == keys_with_fields.difference({"fields"})
+    assert "fields" not in row.keys(), "Expected to NOT find fields in response"
+
+    # check if we can coerce into response type
+    DescribeRowResponseRow(**row)
 
 
 def test_convert_id_format(config):
@@ -217,8 +222,9 @@ def test_list_database_rows(config):
         client=config["client"],
     )
 
+    # coerce into type
     for row in rows:
-        assert set(row.keys()).difference({"name"}) == list_database_rows_keys
+        DescribeRowResponseRow(**row)
 
 
 def test_get_dataframe(config):
@@ -299,3 +305,10 @@ def test_describe_file(config):
     assert isinstance(data, dict), "Expected response to be a dict"
 
     DescribeFileResponse(**data)
+
+
+def test_get_row_data(config):
+    row_id = config["rows"][0]
+    data = api.get_row_data(row_id, client=config["client"])
+
+    assert isinstance(data, dict), "Expected response to be a dict"

@@ -1,14 +1,15 @@
 """this module contains classes to generate data that
 matches the schema of real responses"""
 
-from abc import ABC
-from dataclasses import dataclass, field
+
+from datetime import datetime
 from typing import Literal, Optional
 
 from pydantic import BaseModel
 
 RowType = Literal["row", "database", "workspace"]
 FileStatus = Literal["ready", "archived"]
+DataType = Literal["integer", "str", "select", "date", "text", "file"]
 
 
 class DescribeFileResponse(BaseModel):
@@ -39,59 +40,72 @@ class ListRowsResponse(BaseModel):
         extra = "forbid"
 
 
-@dataclass
-class FieldItem:
+class FieldItem(BaseModel):
     """item in fields in DescribeRow"""
 
-    columnId: str = "_col:placeholder"
-    cellId: str = "_cell:placeholder"
+    columnId: str
+    cellId: str
     validationStatus: str = "valid"
-    type: str = "text"
-    value: str = "placeholder-text"
+    type: DataType = "text"
+    value: str | dict | int = "placeholder-text"
+
+    class Config:
+        extra = "forbid"
 
 
-@dataclass
-class ColumnItem:
-    """item in cols in DescribeRow"""
+class ColumnItem(BaseModel):
+    """item in cols in DescribeRow called on a database"""
 
-    id: str = "_col:placeholder"
+    id: str
     name: str = "Placeholder Name"
-    key: str = "placeholder_key"
-    parentId: str = "_row:placeholder_row"
-    type: str = "text"
+    key: str
+    parentId: str = "db-placeholder-1"
+    type: DataType = "text"
     dateCreated: str = "2024-04-04T17:03:33.033115"
     cardinality: str = "one"
+    canCreate: Optional[bool] = False
+    configSelect: Optional[dict] = None
+
+    class Config:
+        extra = "forbid"
 
 
-@dataclass
-class GenericRowDescription(ABC):
-    id: str = "row-1"
-    parentId: str = "_row:placeholder-parent"
+class DescribeRowResponse(BaseModel):
+    """response schema for DescribeRow. This is complex because
+    the response schema differs based on whether you call
+    DescribeRow on a normal row or a database."""
+
+    id: str
+    hid: str
+
+    parentId: str
     type: RowType = "row"
-    dateCreated: str = "2024-04-04 16:34:19.968737"
-    dateUpdated: str = "2024-04-04 16:34:19.968737"
-    createdByUserDrn: str = "drn:identity::user:auth0|65ca1d6f5a130b87df994e5c"
-    editedByUserDrn: str = "drn:identity::user:auth0|65ca1d6f5a130b87df994e5c"
-    submissionStatus: str = "valid"
-    hid: str = "row-1"
+    dateCreated: datetime = "2024-04-04 16:33:58.622469"
+    dateUpdated: datetime = "2024-04-04 16:33:58.622469"
+    createdByUserDrn: str = "placeholder"
+    rowJsonSchema: dict = {"type": "object", "required": [], "properties": {}}
+
+
+class DescribeRowResponseRow(DescribeRowResponse):
+    """schema for responses for DescribeRow called on a row
+    this schema also works for DescribeDatabaseRows"""
+
+    fields: Optional[list[FieldItem]] = None
+    editedByUserDrn: str = "placeholder"
     hidNum: int = 1
+    submissionStatus: str = "draft"
     validationStatus: str = "valid"
 
-    parent: dict = field(default_factory=lambda: {"placeholder": 42})
-    rowJsonSchema: dict = field(default_factory=dict)
+    class Config:
+        extra = "forbid"
 
 
-@dataclass
-class RowDescription(GenericRowDescription):
-    fields: list = field(default_factory=lambda: [FieldItem() for _ in range(5)])
+class DescribeRowResponseDatabase(DescribeRowResponse):
+    """schema for responses for DescribeRow called on a database"""
 
+    cols: list
+    hidPrefix: str
+    name: str
 
-@dataclass
-class DatabaseRowDescription(GenericRowDescription):
-    type: RowType = "database"
-    hidPrefix: str = "placeholder"
-    cols: list = field(
-        default_factory=lambda: [
-            ColumnItem(id=f"_col:column-{col}") for col in range(5)
-        ]
-    )
+    class Config:
+        extra = "forbid"
