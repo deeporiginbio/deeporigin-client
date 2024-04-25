@@ -1,4 +1,4 @@
-"""this module contains low-level functions to interact
+"""This module contains low-level functions to interact
 with Deep Origin's Managed Data API. Functions here 
 simply wrap API endpoints."""
 
@@ -113,6 +113,18 @@ def describe_database_stats(
     *,
     client: Optional[Client] = None,
 ):
+    """Low level API that wraps the DescribeDatabaseStats endpoint
+
+    Returns a dictionary of statistics about a database.
+
+
+    Args:
+        database_id: ID (or Human ID) of the database
+
+    Returns:
+        A dictionary that contains statistics about the database
+
+    """
     client = _get_default_client(client)
 
     return client.invoke("DescribeDatabaseStats", dict(databaseId=database_id))
@@ -123,7 +135,20 @@ def list_mentions(
     query: str,
     *,
     client: Optional[Client] = None,
-):
+) -> dict:
+    """Low level API that wraps the ListMentions endpoint
+
+    Returns a dictionary of mentions (cross references)
+    of the requested object
+
+
+    Args:
+        query: ID (or Human ID) of row, database, workspace, or file
+
+    Returns:
+        A dictionary that contains a field called `mentions`, which is a list of dictionaries that each refer to a row
+
+    """
     client = _get_default_client(client)
 
     return client.invoke("ListMentions", dict(query=query))
@@ -134,7 +159,19 @@ def list_row_back_references(
     row_id: str,
     *,
     client: Optional[Client] = None,
-):
+) -> dict:
+    """Low level API that wraps the ListRowBackReferences endpoint
+
+    Returns a dictionary of back references from the queried row
+
+
+    Args:
+        row_id: ID (or Human ID) of row
+
+    Returns:
+        A dictionary that contains a field called `rows`, which is a list of dictionaries that each refer to a database row
+
+    """
     client = _get_default_client(client)
 
     return client.invoke("ListRowBackReferences", dict(rowId=row_id))
@@ -146,7 +183,20 @@ def create_file_download_url(
     *,
     client: Optional[Client] = None,
 ) -> dict:
-    """low-level API call to CreateFileDownloadUrl"""
+    """Low level API that wraps the CreateFileDownloadUrl endpoint
+
+    Returns a pre-signed URL that allows you to download a
+    file .
+
+
+    Args:
+        file_id: ID of file
+
+    Returns:
+        A dictionary that contains a field `downloadUrl`, that
+        contains a AWs pre-signed URL
+
+    """
 
     client = _get_default_client(client)
 
@@ -159,7 +209,19 @@ def describe_file(
     *,
     client: Optional[Client] = None,
 ) -> dict:
-    """low-level API call to DescribeFile"""
+    """Low level API that wraps the DescribeFile endpoint
+
+    Returns a description of file, including S3 URI, name,
+    status, content length, and type.
+
+
+    Args:
+        file_id: ID of file
+
+    Returns:
+        A dictionary that contains a file description, that conforms to [DescribeFileResponse][src.managed_data.schema.DescribeFileResponse]
+
+    """
 
     client = _get_default_client(client)
 
@@ -173,7 +235,20 @@ def describe_row(
     fields: bool = False,
     client: Optional[Client] = None,
 ) -> dict:
-    """low-level API that wraps the DescribeRow endpoint."""
+    """Low level API that wraps the DescribeRow endpoint
+
+    Returns a description of a row or a database
+
+
+    Args:
+        row_id: ID or (Human ID) or row or database
+        fields: if True, a fields item is returned in the response
+
+    Returns:
+        A dictionary that contains a row description, that
+        conforms to [DescribeRowResponse][src.managed_data.schema.DescribeRowResponse]
+
+    """
 
     client = _get_default_client(client)
 

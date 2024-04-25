@@ -83,21 +83,21 @@ plugins:
           options:
             paths: ["src"]
             annotations_path: brief
-            show_source: true
+            show_source: false
             docstring_options:
               ignore_init_summary: true
             docstring_section_style: table
-            filters: ["!Config"]
             heading_level: 2
             inherited_members: true
             merge_init_into_class: false
-            separate_signature: false
+            separate_signature: true
             show_root_heading: true
-            show_root_full_path: false
+            show_root_full_path: true
             show_signature_annotations: true
             signature_crossrefs: true
             show_symbol_type_heading: true
             line_length: 60
-            show_signature: false
+            show_signature: true
+            members: true  
 
 
