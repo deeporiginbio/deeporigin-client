@@ -33,7 +33,7 @@ theme:
  
 nav:
 - Get Started:
-  - Welcome to Deeporigin Client and API: index.md
+  - Welcome to Deep Origin Client and API: index.md
   - Installation: install.md
 - API Documentation:
   - Managed Data:
@@ -41,16 +41,27 @@ nav:
     - Functions: ref/data/functions.md
     - Schema: ref/data/schema.md
 - How to:
-  - Managed Data: how-to/data.md
+  - Authenticate into Deep Origin: auth.md
+  - Set up config file: config.md
+  - Managed Data: 
+    - Explore data: explore-data.md
+    - Download data: download-data.md
+    - Upload data: upload-data.md 
 
 
+validation:
+  omitted_files: warn
+  absolute_links: warn
+  unrecognized_links: warn
 
 use_directory_urls: false
 
 markdown_extensions:
+  - tables
+  - abbr
   - admonition
   - pymdownx.emoji:
-      emoji_index: !!python/name:material.extensions.emoji.twemoji 
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
       emoji_generator: !!python/name:material.extensions.emoji.to_svg
   - codehilite
   - footnotes
@@ -58,15 +69,18 @@ markdown_extensions:
   - md_in_html
   - toc:
       permalink: true
+      title: Page contents
   - pymdownx.details
   - pymdownx.superfences
   - pymdownx.arithmatex:
       generic: true
-  - abbr
   - pymdownx.snippets
-  - pymdownx.superfences
+  - pymdownx.extra
+  - pymdownx.highlight:
+      pygments_lang_class: true
   - pymdownx.tabbed:
       alternate_style: true
+
 
 
 plugins:
@@ -98,6 +112,6 @@ plugins:
             show_symbol_type_heading: true
             line_length: 60
             show_signature: true
-            members: true  
+
 
 

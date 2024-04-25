@@ -33,6 +33,11 @@ DATAFRAME_ATTRIBUTE_KEYS = {
 }
 
 
+IDFormat = Literal["human-id", "system-id"]
+
+DatabaseReturnType = Literal["dataframe", "dict"]
+
+
 class DescribeFileResponse(BaseModel):
     """Schema for responses from queries to the
     DescribeFile endpoint"""
