@@ -44,9 +44,9 @@ nav:
     - Upload data: how-to/managed-data/upload-data.md
 - API reference:
   - Managed data:
-    - API: ref/managed-data/api.md
-    - Functions: ref/managed-data/functions.md
-    - Schema: ref/managed-data/schema.md
+    - High-level API: ref/managed-data/api.md
+    - Low-level API: ref/managed-data/functions.md
+    - Low-level response schemas: ref/managed-data/schema.md
 
 validation:
   omitted_files: warn
