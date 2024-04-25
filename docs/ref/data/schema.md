@@ -1,4 +1,17 @@
-## Literals
+## Schemas for responses from Deep Origin's managed data API
+
+::: src.managed_data.schema
+    options:
+      show_root_toc_entry: false
+      show_root_heading: false
+      show_category_heading: false
+      show_object_full_path: true
+      show_source: true
+      heading_level: 3
+
+## Literal types
+
+This package uses [Python literal types](https://typing.readthedocs.io/en/latest/spec/literal.html#literal-types) to restrict selections to one of a few options. The following literal types are defined here:
 
 ::: src.managed_data.schema.RowType
     options:
@@ -12,26 +25,10 @@
     options:
       heading_level: 3
 
-## Response classes
-
-These response classes are pydantic models that allow us to validate responses.
-
-::: src.managed_data.schema.ListRowsResponse
+::: src.managed_data.schema.DatabaseReturnType
     options:
-      members:
-        true
+      heading_level: 3
 
-::: src.managed_data.schema.DescribeFileResponse
+::: src.managed_data.schema.IDFormat
     options:
-      members:
-        true
-
-::: src.managed_data.schema.DescribeFileResponse
-    options:
-      members:
-        true
-
-::: src.managed_data.schema.DescribeRowResponse
-    options:
-      members:
-        true
+      heading_level: 3

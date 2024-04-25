@@ -1,8 +1,12 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 """This module contains low-level functions to interact
 with Deep Origin's Managed Data API. Functions here
 =======
 """this module contains low-level functions to interact
+=======
+"""This module contains low-level functions to interact
+>>>>>>> fix(docs): wrote docs for _api
 with Deep Origin's Managed Data API. Functions here 
 >>>>>>> feat(docs): started work on docs
 simply wrap API endpoints."""
