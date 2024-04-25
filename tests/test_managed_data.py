@@ -18,6 +18,7 @@ from deeporigin.managed_data.schema import (
     DescribeRowResponseRow,
     ListRowsResponse,
 )
+from deeporigin.utils import PREFIX
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -347,3 +348,39 @@ def test_get_cell_data(config):
         column_name=column_name,
         client=config["client"],
     )
+
+
+def test_download_database(config):
+    db_id = config["databases"][0]
+    api.download_database(
+        db_id,
+        include_files=False,
+        client=config["client"],
+    )
+
+    file_name = db_id + ".csv"
+    assert os.path.exists(file_name), f"Expected to find a CSV file called {file_name}"
+    os.remove(file_name)
+
+
+def test_download(config):
+    db_id = config["databases"][0]
+    api.download(
+        db_id,
+        destination=os.getcwd(),
+        client=config["client"],
+    )
+
+    file_name = db_id + ".csv"
+    assert os.path.exists(file_name), f"Expected to find a CSV file called {file_name}"
+    os.remove(file_name)
+
+    api.download(
+        f"{PREFIX}{db_id}",
+        destination=os.getcwd(),
+        client=config["client"],
+    )
+
+    file_name = db_id + ".csv"
+    assert os.path.exists(file_name), f"Expected to find a CSV file called {file_name}"
+    os.remove(file_name)

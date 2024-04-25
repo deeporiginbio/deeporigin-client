@@ -128,6 +128,7 @@ def download(
     destination: str,
     *,
     include_files: bool = False,
+    client: Optional[Client] = None,
 ) -> None:
     """Download resources from Deep Origin and save to
     local destination
@@ -152,12 +153,13 @@ def download(
     source = source.replace(PREFIX, "")
 
     # first, need to determine what this is.
-    obj = describe_row(source)
+    obj = describe_row(source, client=client)
     if obj["type"] == "database":
         download_database(
             obj,
             destination,
             include_files=include_files,
+            client=client,
         )
     else:
         raise NotImplementedError(
@@ -171,6 +173,7 @@ def download_database(
     destination: str = os.getcwd(),
     *,
     include_files: bool = False,
+    client: Optional[Client] = None,
 ) -> None:
     """Download a database and save it to a CSV on local disk
 
@@ -188,7 +191,7 @@ def download_database(
         raise DeepOriginException(f"{destination} should be a path to a folder.")
 
     if isinstance(source, str):
-        source = describe_row(source)
+        source = describe_row(source, client=client)
     elif not {"hid", "id"}.issubset(set(list(source.keys()))):
         raise DeepOriginException(
             f"If `source` is a dictionary, expected it contain the `hid` and `id` keys. These keys were not found. Instead, the keys are: {source.keys()}"
@@ -196,14 +199,18 @@ def download_database(
 
     database_id = source["id"]
     database_hid = source["hid"]
-    df = get_dataframe(database_id, use_file_names=True)
+    df = get_dataframe(
+        database_id,
+        use_file_names=True,
+        client=client,
+    )
 
     # now download all files in the database
     if include_files:
         file_ids = df.attrs["file_ids"]
 
         for file_id in file_ids:
-            download_file(file_id, destination)
+            download_file(file_id, destination, client=client)
 
     df.to_csv(os.path.join(destination, database_hid + ".csv"))
 
