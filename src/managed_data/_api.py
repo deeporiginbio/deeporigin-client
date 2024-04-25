@@ -1,5 +1,5 @@
 """This module contains low-level functions to interact
-with Deep Origin's Managed Data API. Functions here 
+with Deep Origin's Managed Data API. Functions here
 simply wrap API endpoints."""
 
 import os
