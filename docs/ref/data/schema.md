@@ -9,7 +9,7 @@
       show_source: true
       heading_level: 3
 
-## Literal types
+## Literal Types
 
 This package uses [Python literal types](https://typing.readthedocs.io/en/latest/spec/literal.html#literal-types) to restrict selections to one of a few options. The following literal types are defined here:
 

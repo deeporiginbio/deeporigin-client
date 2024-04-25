@@ -1,5 +1,7 @@
-The Deep Origin CLI and Python Client allows you to programmatically 
-interact with the Deep Origin platform.
+# Overview
+
+The Deep Origin CLI and Python client allow you to programmatically
+interact with the [Deep Origin platform](https://os.deeporigin.io/).
 
 ```python
 from deeporigin.managed_data import api
