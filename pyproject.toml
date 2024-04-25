@@ -70,3 +70,8 @@ case-sensitive = true
 
 [tool.distutils.bdist_wheel]
 universal = true
+
+[tool.coverage.run]
+omit = [
+    "src/managed_data/client.py"
+]

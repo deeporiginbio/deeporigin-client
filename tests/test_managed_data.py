@@ -1,174 +1,23 @@
 """this tests low level functions in the data API"""
 
-from dataclasses import asdict
-from typing import Optional
+import os
 
+import pandas as pd
 import pytest
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.managed_data import _api, api
-from deeporigin.managed_data._api import Client, DeepOriginClient
-from deeporigin.managed_data.schema import (
-    DatabaseListing,
-    DatabaseRowDescription,
-    RowDescription,
-    RowListing,
-    WorkspaceListing,
+from deeporigin.managed_data.client import (
+    DeepOriginClient,
+    MockClient,
+    file_description,
 )
-
-# constants
-dataframe_attr_keys = {
-    "file_ids",
-    "id",
-    "primary_key",
-    "reference_ids",
-}
-
-
-describe_file_keys = {
-    "id",
-    "uri",
-    "name",
-    "status",
-    "contentLength",
-    "contentType",
-}
-
-list_row_keys = {"id", "hid", "type", "name", "parentId"}
-
-list_database_rows_keys = {
-    "createdByUserDrn",
-    "dateCreated",
-    "dateUpdated",
-    "editedByUserDrn",
-    "fields",
-    "hid",
-    "hidNum",
-    "id",
-    "parentId",
-    "submissionStatus",
-    "type",
-    "validationStatus",
-}
-
-
-class MockClient(Client):
-    """mock client to respond with static data"""
-
-    def authenticate():
-        pass
-
-    def invoke(self, endpoint, data):
-        """overload this function so that we can return
-        static data"""
-
-        if endpoint == "ListRows":
-            if data == dict(filters=[dict(parent=dict(id="db-sample"))]):
-                return [
-                    asdict(RowListing(hid="sample-1")),
-                    asdict(RowListing(hid="sample-2")),
-                ]
-            elif data == dict(filters=[dict(parent=dict(isRoot=True))]) or data == dict(
-                filters=[dict(rowType="workspace")]
-            ):
-                # return the root workspace
-                return [asdict(WorkspaceListing())]
-            elif data == dict(filters=[]):
-                # list_rows called with no filters. return
-                # a workspace, a database, and some rows
-                rows = []
-                rows += [asdict(WorkspaceListing(id="_row:workspace"))]
-                rows += [
-                    asdict(
-                        DatabaseListing(parentId="_row:workspace", id="_row:database")
-                    )
-                ]
-                rows += [
-                    asdict(RowListing(parentId="_row:database", id=f"_row:{row}"))
-                    for row in range(10)
-                ]
-                return rows
-
-        elif endpoint == "DescribeRow":
-            if data["rowId"].startswith("db-"):
-                # we are likely asking for a database
-                row = asdict(DatabaseRowDescription())
-
-            else:
-                # we are asking for a row in a database
-                row = asdict(RowDescription())
-
-                if not data["fields"]:
-                    row.pop("fields", None)
-
-            return row
-
-        elif endpoint == "ConvertIdFormat":
-            return [{"id": "_row:W6DjtaCrZ201EGLpmZtGO", "hid": "sample-1"}]
-
-        elif endpoint == "ListDatabaseRows":
-            row = asdict(RowDescription())
-            row.pop("cols", None)
-            row.pop("parent", None)
-            row.pop("rowJsonSchema", None)
-
-            return [row for _ in range(5)]
-
-        elif endpoint == "DescribeFile":
-            return {
-                "id": "_file:V08GBdErNGqynC3O7bill",
-                "uri": "s3://deeporigin-nucleus-local-uploads/files/_file:V08GBdErNGqynC3O7bill",
-                "name": "pbr322_egfr (1).gb",
-                "status": "ready",
-                "contentLength": 9757,
-                "contentType": "",
-            }
-
-        elif endpoint == "DescribeDatabaseStats":
-            return {"rowCount": 5}
-
-        elif endpoint == "ListMentions":
-            return {
-                "mentions": [
-                    {
-                        "type": "row",
-                        "id": "_row:W6DjtaCrZ201EGLpmZtGO",
-                        "hid": "sample-1",
-                    }
-                ]
-            }
-        elif endpoint == "ListFiles":
-            if data == dict(filters=[dict(isUnassigned=True)]):
-                return [
-                    {
-                        "file": {
-                            "id": "_file:2n5jHmnbLC4tJShNrk6Df",
-                            "uri": "s3://deeporigin-nucleus-local-uploads/files/_file:2n5jHmnbLC4tJShNrk6Df",
-                            "name": "QC report (1).pdf",
-                            "status": "archived",
-                            "contentLength": 237478,
-                            "contentType": "application/pdf",
-                        }
-                    },
-                ]
-            elif dict(filters=[dict(isUnassigned=False)]):
-                return [
-                    {
-                        "file": {
-                            "id": "_file:Fi7dHZJHgA3nqT1y1Ro5u",
-                            "uri": "s3://deeporigin-nucleus-local-uploads/files/_file:Fi7dHZJHgA3nqT1y1Ro5u",
-                            "name": "sequence_preprocessing.pdf",
-                            "status": "ready",
-                            "contentLength": 698255,
-                            "contentType": "application/pdf",
-                        },
-                        "assignments": [
-                            {"rowId": "_row:ZEaEUIgsbHmGLVlgnxfvU"},
-                            {"rowId": "_row:aCWxUxumDFDnu8ZhmhQ0X"},
-                            {"rowId": "_row:WZVb1jsebafhfLgrHtz2l"},
-                            {"rowId": "_row:3A3okCbvuaZvEkOZLqLwY"},
-                        ],
-                    },
-                ]
+from deeporigin.managed_data.schema import (
+    DATAFRAME_ATTRIBUTE_KEYS,
+    DescribeFileResponse,
+    DescribeRowResponseDatabase,
+    DescribeRowResponseRow,
+    ListRowsResponse,
+)
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -181,10 +30,13 @@ def config(pytestconfig):
     # set up client
     if pytestconfig.getoption("client") == "mock":
         data["client"] = MockClient()
-
-        data["databases"] = ["db-sample"]
-        data["rows"] = ["sample-1"]
+        data["mock"] = True
+        data["workspaces"] = data["client"].workspaces
+        data["databases"] = data["client"].databases
+        data["rows"] = data["client"].rows
+        data["file"] = file_description()
     else:
+        data["mock"] = False
         client = DeepOriginClient()
         client.authenticate()
         data["client"] = client
@@ -194,7 +46,12 @@ def config(pytestconfig):
         databases = _api.list_rows(row_type="database")
         data["databases"] = [db["hid"] for db in databases]
         rows = _api.list_rows(row_type="row")
-        data["rows"] = [row["hid"] for row in rows]
+        data["rows"] = [row["hid"] for row in rows if row["type"] == "row"]
+
+        # get a list of all files
+        files = _api.list_files()
+        if len(files) > 0:
+            data["file"] = files[0]["file"]
 
     # tests run on yield
     yield data
@@ -209,8 +66,10 @@ def test_list_rows(config):
     )
 
     for row in rows:
-        assert set(row.keys()) == list_row_keys
         assert row["type"] == "row"
+
+        # check type
+        ListRowsResponse(**row)
 
 
 def test_list_rows_root_parent(config):
@@ -220,8 +79,12 @@ def test_list_rows_root_parent(config):
     )
 
     assert len(root) == 1, "Expected there to be exactly one root"
+    root = root[0]
 
-    assert root[0]["parentId"] is None, "Expected root to have no parent"
+    assert root["parentId"] is None, "Expected root to have no parent"
+
+    # check type
+    ListRowsResponse(**root)
 
 
 def test_list_rows_by_type(config):
@@ -236,6 +99,9 @@ def test_list_rows_by_type(config):
         assert (
             row["type"] == "workspace"
         ), f"Expected to get a list of workspaces, but {row} is not a workspace"
+
+        # check type
+        ListRowsResponse(**row)
 
 
 def test_list_files_unassigned(config):
@@ -298,9 +164,10 @@ def test_describe_row(config):
         fields=True,
     )
 
-    keys_with_fields = set(asdict(RowDescription()).keys())
+    assert "fields" in row.keys(), "Expected to find fields in response"
 
-    assert set(row.keys()) == keys_with_fields
+    # check if we can coerce into response type
+    DescribeRowResponseRow(**row)
 
     row = _api.describe_row(
         config["rows"][0],
@@ -308,14 +175,37 @@ def test_describe_row(config):
         fields=False,
     )
 
-    assert set(row.keys()) == keys_with_fields.difference({"fields"})
+    assert "fields" not in row.keys(), "Expected to NOT find fields in response"
+
+    # check if we can coerce into response type
+    DescribeRowResponseRow(**row)
+
+    # database
+    row = _api.describe_row(
+        config["databases"][0],
+        client=config["client"],
+    )
+
+    # check if we can coerce into response type
+    DescribeRowResponseDatabase(**row)
 
 
 def test_convert_id_format(config):
     conversions = _api.convert_id_format(
-        hids=[config["rows"][0]],
+        hids=config["rows"],
         client=config["client"],
     )
+
+    system_ids = []
+    for conversion in conversions:
+        system_ids.append(conversion["id"])
+        assert {"id", "hid"} == set(conversion.keys())
+
+    conversions = _api.convert_id_format(
+        ids=system_ids,
+        client=config["client"],
+    )
+
     for conversion in conversions:
         assert {"id", "hid"} == set(conversion.keys())
 
@@ -329,8 +219,9 @@ def test_list_database_rows(config):
         client=config["client"],
     )
 
+    # coerce into type
     for row in rows:
-        assert set(row.keys()).difference({"name"}) == list_database_rows_keys
+        DescribeRowResponseRow(**row)
 
 
 def test_get_dataframe(config):
@@ -339,9 +230,11 @@ def test_get_dataframe(config):
         client=config["client"],
     )
 
+    assert isinstance(df, pd.DataFrame), "Expected return type to be a pandas Dataframe"
+
     assert (
-        set(df.attrs.keys()) == dataframe_attr_keys
-    ), f"Expected to find a dictionary in `df.attrs` with these keys: {dataframe_attr_keys}, instead found a dictionary with these keys: {df.attrs.keys()}"
+        set(df.attrs.keys()) == DATAFRAME_ATTRIBUTE_KEYS
+    ), f"Expected to find a dictionary in `df.attrs` with these keys: {DATAFRAME_ATTRIBUTE_KEYS}, instead found a dictionary with these keys: {df.attrs.keys()}"
 
     assert (
         "Validation Status" in df.columns
@@ -350,6 +243,14 @@ def test_get_dataframe(config):
     assert (
         df.attrs["primary_key"] in df.columns
     ), "Expected to find the primary key as a column"
+
+    data = api.get_dataframe(
+        config["databases"][0],
+        client=config["client"],
+        return_type="dict",
+    )
+
+    assert isinstance(data, dict), "Expected return type to be a dict"
 
 
 def test_list_mentions(config):
@@ -370,4 +271,79 @@ def test_get_tree(config):
 
     assert tree["parentId"] is None, "Expected the root of the tree to have no parent"
 
-    assert set(tree.keys()) == set(asdict(RowListing()).keys()) | {"children"}
+    tree.pop("children")
+    ListRowsResponse(**tree)
+
+    tree = api.get_tree(client=config["client"], include_rows=False)
+    assert tree["parentId"] is None, "Expected the root of the tree to have no parent"
+
+    tree.pop("children")
+    ListRowsResponse(**tree)
+
+
+def test_create_file_download_url(config):
+    file_id = config["file"]["id"]
+    data = _api.create_file_download_url(
+        file_id,
+        client=config["client"],
+    )
+
+    assert (
+        "downloadUrl" in data.keys()
+    ), "Expected to find `downloadUrl` in data response"
+
+
+def test_download_file(config):
+    if "file" not in config.keys():
+        return
+
+    file_id = config["file"]["id"]
+
+    if config["mock"]:
+        _api.download_file(file_id, client=config["client"])
+        os.remove("placeholder")
+
+        with pytest.raises(DeepOriginException, match="should be a path to a folder"):
+            _api.download_file(
+                file_id,
+                client=config["client"],
+                destination="non-existent-path",
+            )
+
+    else:
+        _api.download_file(file_id, client=config["client"])
+
+
+def test_describe_file(config):
+    file_id = config["file"]["id"]
+
+    data = _api.describe_file(file_id, client=config["client"])
+
+    assert isinstance(data, dict), "Expected response to be a dict"
+
+    DescribeFileResponse(**data)
+
+
+def test_get_row_data(config):
+    row_id = config["rows"][0]
+
+    data = api.get_row_data(row_id, client=config["client"])
+    assert isinstance(data, dict), "Expected response to be a dict"
+
+    data = api.get_row_data(
+        row_id,
+        client=config["client"],
+        use_column_keys=True,
+    )
+    assert isinstance(data, dict), "Expected response to be a dict"
+
+
+def test_get_cell_data(config):
+    row_id = config["rows"][0]
+    data = api.get_row_data(row_id, client=config["client"])
+    column_name = list(data.keys())[0]
+    data = api.get_cell_data(
+        row_id=row_id,
+        column_name=column_name,
+        client=config["client"],
+    )

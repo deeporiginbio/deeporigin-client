@@ -13,14 +13,10 @@ from deeporigin.managed_data.api import (
     get_dataframe,
     get_row_data,
     get_tree,
-    upload,
 )
 from deeporigin.managed_data.client import DeepOriginClient
 from deeporigin.utils import PREFIX
 from tabulate import tabulate
-
-client = DeepOriginClient()
-client.authenticate(refresh_tokens=False)
 
 
 @beartype
@@ -70,6 +66,17 @@ List data in managed data on Deep Origin, and save
 databases to CSV files. 
             """
 
+    def _get_client(self):
+        """helper method that returns an authenticated
+        client if the app has no client configured"""
+        try:
+            return self.app.client
+        except Exception:
+            client = DeepOriginClient()  # pragma: no cover
+            client.authenticate(refresh_tokens=False)  # pragma: no cover
+
+            return client  # pragma: no cover
+
     @cement.ex(
         help="Describe and get metadata of file uploaded to database in your Deep Origin data management system",
         arguments=[
@@ -87,9 +94,12 @@ databases to CSV files.
         ],
     )
     def describe_file(self):
-        """describe row"""
+        """describe file"""
 
-        data = _api.describe_file(self.app.pargs.file_id, client=client)
+        data = _api.describe_file(
+            self.app.pargs.file_id,
+            client=self._get_client(),
+        )
 
         _print_dict(data, json=self.app.pargs.json)
 
@@ -112,7 +122,10 @@ databases to CSV files.
     def describe_row(self):
         """describe row"""
 
-        data = _api.describe_row(self.app.pargs.row_id, client=client)
+        data = _api.describe_row(
+            self.app.pargs.row_id,
+            client=self._get_client(),
+        )
 
         _print_dict(data, json=self.app.pargs.json)
 
@@ -137,7 +150,7 @@ databases to CSV files.
 
         rows = _api.list_rows(
             parent_id=self.app.pargs.row_id,
-            client=client,
+            client=self._get_client(),
         )
 
         if self.app.pargs.json:
@@ -174,7 +187,11 @@ databases to CSV files.
     def show_db(self):
         """list database row"""
 
-        data = get_dataframe(self.app.pargs.db_id, return_type="dict")
+        data = get_dataframe(
+            self.app.pargs.db_id,
+            return_type="dict",
+            client=self._get_client(),
+        )
 
         _print_dict(data, json=self.app.pargs.json, transpose=False)
 
@@ -195,7 +212,9 @@ databases to CSV files.
     def ls(self):
         """list rows in db"""
 
-        tree = get_tree(client=client)
+        tree = get_tree(
+            client=self._get_client(),
+        )
         _print_tree(tree)
 
     @cement.ex(
@@ -216,7 +235,10 @@ databases to CSV files.
     )
     def row(self):
         """list the columns of the row and their values, where applicable"""
-        row_data = get_row_data(self.app.pargs.row_id, client=client)
+        row_data = get_row_data(
+            self.app.pargs.row_id,
+            client=self._get_client(),
+        )
 
         _print_dict(row_data, json=self.app.pargs.json)
 
@@ -268,7 +290,8 @@ as-is. """
                 include_files=args.include_files,
             )
         elif PREFIX in args.destination and PREFIX not in args.source:
-            upload(args.source, args.destination)
+            raise NotImplementedError("Uploading has not been implemented yet")
+            # upload(args.source, args.destination)
         else:
             raise DeepOriginException(
                 f"Exactly one of <source> and <destination> should be prefixed with `{PREFIX}`"

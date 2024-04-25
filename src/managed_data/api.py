@@ -149,43 +149,6 @@ def download_database(
 
 
 @beartype
-def upload(source: str, destination: str) -> None:
-    """upload resources from source to destination"""
-
-    pass
-
-
-@beartype
-def get_children(
-    objects: Optional[Union[list[dict], str]] = None,
-) -> list[dict]:
-    """recursively find all workspaces, databases, rows"""
-
-    if objects is None:
-        objects = list_rows(parent_is_root=True)
-    elif isinstance(objects, str):
-        # need to convert a string to a object
-        obj = describe_row(objects)
-        obj = {key: obj[key] for key in ["id", "name", "type", "hid"]}
-        objects = [obj]
-
-    # TODO parallelize this using async/await
-    for obj in objects:
-        if obj["type"] == "row":
-            # this object is a row, and we assume that
-            # rows cannot have children, so we're going to
-            # skip this and assume this is a leaf node
-            continue
-
-        children = list_rows(parent_id=obj["id"])
-        if len(children) == 0:
-            continue
-        obj["children"] = get_children(children)
-
-    return objects
-
-
-@beartype
 def get_dataframe(
     database_id: str,
     *,
@@ -211,7 +174,7 @@ def get_dataframe(
     response = describe_row(database_id, client=client)
     assert (
         response["type"] == "database"
-    ), "Expected database_id to resolve to a database"
+    ), f"Expected database_id: {database_id} to resolve to a database, but instead, it resolved to a {response['type']}"
 
     columns = response["cols"]
     database_id = response["id"]
@@ -398,7 +361,7 @@ def get_row_data(
     response = describe_row(row_id, fields=True, client=client)
 
     if response["type"] != "row":
-        raise ValueError(
+        raise DeepOriginException(
             f"Expected `row_id` to resolve to a row, instead, it resolves to a `{response['type']}`"
         )
 
@@ -406,7 +369,7 @@ def get_row_data(
     parent_response = describe_row(response["parentId"], client=client)
 
     if parent_response["type"] != "database":
-        raise ValueError(
+        raise DeepOriginException(
             f"Expected parent of `{row_id}` to resolve to a database, instead, it resolves to a `{parent_response['type']}`"
         )
 
@@ -424,6 +387,10 @@ def get_row_data(
     row_data = dict()
     for field in response["fields"]:
         column_id = field["columnId"]
+
+        if "value" not in field:
+            continue
+
         value = field["value"]
         if isinstance(value, dict):
             if "selectedOptions" in value.keys():
