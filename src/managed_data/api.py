@@ -534,7 +534,7 @@ def merge_databases(dfs: list):
                     attrs["referenceDatabaseRowId"]
                 ]
 
-        df = df.rename(columns=column_mapper)
+        df.rename(columns=column_mapper, inplace=True)
 
     # for now we only support merging 2 DBs
     return dfs[0].merge(dfs[1], how="outer")
