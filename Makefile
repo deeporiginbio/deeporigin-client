@@ -27,15 +27,23 @@ jupyter:
 		python3 -m ipykernel install --user --name $(repo) && \
 		deactivate
 
-# install in a virtual env
+# install in a virtual env with all extras
 install:
 	@python3 -m venv venv
 	@source $(CURDIR)/venv/bin/activate && \
-		pip install -e .[test,jupyter] && \
-		deactivate
+	    pip install -e .[test,jupyter,docs] && \
+	    deactivate
 	@-mkdir ~/.deeporigin
 	@-ln -s $(CURDIR)/venv/bin/deeporigin ~/.deeporigin/deeporigin
 	@echo 'export PATH="$$HOME/.deeporigin:$$PATH"' >> ~/.bash_profile
+
+
+serve:
+	@echo "Serving docs locally..."
+	@source $(CURDIR)/venv/bin/activate && \
+	    mkdocs serve && \
+	    deactivate
+
 
 test-github:
 	python3 -m coverage run -m pytest -k $(chosen_tests) --client $(client)
