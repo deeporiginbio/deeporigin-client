@@ -1,18 +1,8 @@
-
-
-::: src.managed_data.schema
-    options:
-      show_source: true
-    
-
-## Literal Types
-
-This package uses [Python Literal Types](https://typing.readthedocs.io/en/latest/spec/literal.html#literal-types) to restrict selections to one of a few options. The following Literal Types are defined here:
+## Literals
 
 ::: src.managed_data.schema.RowType
     options:
       heading_level: 3
-
 
 ::: src.managed_data.schema.FileStatus
     options:
@@ -22,15 +12,26 @@ This package uses [Python Literal Types](https://typing.readthedocs.io/en/latest
     options:
       heading_level: 3
 
-::: src.managed_data.schema.DatabaseReturnType
+## Response classes
+
+These response classes are pydantic models that allow us to validate responses.
+
+::: src.managed_data.schema.ListRowsResponse
     options:
-      heading_level: 3
+      members:
+        true
 
-::: src.managed_data.schema.IDFormat
+::: src.managed_data.schema.DescribeFileResponse
     options:
-      heading_level: 3
+      members:
+        true
 
-      
+::: src.managed_data.schema.DescribeFileResponse
+    options:
+      members:
+        true
 
-
-      
+::: src.managed_data.schema.DescribeRowResponse
+    options:
+      members:
+        true

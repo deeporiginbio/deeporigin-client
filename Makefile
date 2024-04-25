@@ -44,6 +44,5 @@ serve-docs:
 	    mkdocs serve && \
 	    deactivate
 
-
 test-github:
 	python3 -m coverage run -m pytest -k $(chosen_tests) --client $(client)

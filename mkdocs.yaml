@@ -35,19 +35,18 @@ nav:
 - Get Started:
   - Welcome to Deep Origin Client and API: index.md
   - Installation: install.md
-- API Documentation:
-  - Managed Data:
-    - API: ref/data/api.md
-    - Functions: ref/data/functions.md
-    - Schema: ref/data/schema.md
 - How to:
-  - Authenticate into Deep Origin: auth.md
-  - Set up config file: config.md
-  - Managed Data: 
-    - Explore data: explore-data.md
-    - Download data: download-data.md
-    - Upload data: upload-data.md 
-
+  - Authenticate into Deep Origin: how-to/auth.md
+  - Set up config file: how-to/config.md
+  - Managed data: 
+    - Explore data: how-to/managed-data/explore-data.md
+    - Download data: how-to/managed-data/download-data.md
+    - Upload data: how-to/managed-data/upload-data.md
+- API reference:
+  - Managed data:
+    - API: ref/managed-data/api.md
+    - Functions: ref/managed-data/functions.md
+    - Schema: ref/managed-data/schema.md
 
 validation:
   omitted_files: warn
@@ -81,8 +80,6 @@ markdown_extensions:
   - pymdownx.tabbed:
       alternate_style: true
 
-
-
 plugins:
   - search
   - git-committers:
@@ -112,6 +109,3 @@ plugins:
             show_symbol_type_heading: true
             line_length: 60
             show_signature: true
-
-
-
