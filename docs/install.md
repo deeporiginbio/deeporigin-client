@@ -1,12 +1,3 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
-## Quickstart
-
-Installation is as simple as running:
-=======
-
-=======
->>>>>>> feat(docs): refined docs
 # Installation
 
 ## For users
@@ -44,7 +35,6 @@ Run the commands below to use your favorite package manager to install the Deep 
     If you intend to contribute this package, we recommend installing this package via the instructions below. If you merely intend to use this package, we recommend following the instructions above.
 
 ### Get the code
->>>>>>> fix(docs): wrote docs for _api
 
 First, run the following command:
 ```bash
@@ -68,33 +58,14 @@ make --version
 
 ### Install this package locally
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-If you want to install this package to develop it further, run:
-=======
-You can then install the API locally by navigating to the directory you downloaded the code in, and running:
->>>>>>> fix(docs): wrote docs for _api
-=======
 Third, navigate to the directory you downloaded the code to, and run the following command:
->>>>>>> feat(docs): refined docs
 
 ```bash
 make install
 ```
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-This will create a virtual environment and install `deeporigin` in editable mode into the environment. These commands will also add the CLI your PATH so that it can be run
-without first activating the virtual environment.
-=======
-This installs in "editable" mode, so changes you made take effect
-immediately. 
-
->>>>>>> fix(docs): wrote docs for _api
-=======
 This will install this package in an "editable" mode. In this mode, your changes will take effect
 immediately.
->>>>>>> feat(docs): refined docs
 
 ### Running the tests for this package
 
@@ -102,12 +73,4 @@ Once installed, you can test this package by running the following command:
 
 ```bash
 make test
-<<<<<<< HEAD
-<<<<<<< HEAD
 ```
-=======
-```
->>>>>>> fix(docs): wrote docs for _api
-=======
-```
->>>>>>> feat(docs): refined docs

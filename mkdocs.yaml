@@ -50,7 +50,7 @@ nav:
   - Managed data:
     - High-level API: ref/managed-data/high-level-api.md
     - Low-level API: ref/managed-data/low-level-api.md
-    - Low-level response schemas: ref/managed-data/schema.md
+    - Low-level response schemas: ref/managed-data/low-level-schema.md
 
 validation:
   omitted_files: warn
@@ -95,8 +95,8 @@ plugins:
       default_handler: python
       handlers:
         python:
-          options:
-            paths: ["src"]
+          paths: ["."]
+          options:            
             annotations_path: brief
             show_source: false
             docstring_options:

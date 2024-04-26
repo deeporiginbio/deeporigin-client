@@ -1,20 +1,5 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-"""This module contains Pydantic BaseModels that describe
-responses from Deep Origin Managed Data, and literals that
-=======
-"""This module contains Pydantic BaseModels that describe 
-responses from Deep Origin Managed Data, and literals that 
->>>>>>> fix(docs): wrote docs for _api
-=======
-"""This module contains Pydantic BaseModels that describe
-responses from Deep Origin Managed Data, and literals that
->>>>>>> fix(docs): format
-=======
 """This module contains Pydantic `BaseModel`s that describe
 responses from Deep Origin's managed data API, and literals that
->>>>>>> feat(docs): refined docs
 describe possible values for certain queries.
 
 These models are used both to validate responses and to generate

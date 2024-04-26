@@ -1,24 +1,6 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-"""This module contains low-level functions to interact
-with Deep Origin's Managed Data API. Functions here
-<<<<<<< HEAD
-=======
-"""this module contains low-level functions to interact
-=======
-"""This module contains low-level functions to interact
->>>>>>> fix(docs): wrote docs for _api
-with Deep Origin's Managed Data API. Functions here 
->>>>>>> feat(docs): started work on docs
-=======
->>>>>>> fix(docs): format
-simply wrap API endpoints."""
-=======
 """This module contains low-level functions for interacting
 with Deep Origin's managed data API. The functions in this module
 simply provide Pythonic interfaces to individual API endpoints."""
->>>>>>> feat(docs): refined docs
 
 import os
 from typing import Optional, Union

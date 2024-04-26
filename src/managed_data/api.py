@@ -128,14 +128,7 @@ def download(
     destination: str,
     *,
     include_files: bool = False,
-<<<<<<< HEAD
-<<<<<<< HEAD
     client: Optional[Client] = None,
-=======
->>>>>>> feat(docs): wrote docs for api
-=======
-    client: Optional[Client] = None,
->>>>>>> feat(managed-data): better test coverage
 ) -> None:
     """Download resources from Deep Origin and save them to
     a local destination.
@@ -198,15 +191,7 @@ def download_database(
         raise DeepOriginException(f"{destination} should be a path to a folder.")
 
     if isinstance(source, str):
-<<<<<<< HEAD
-<<<<<<< HEAD
         source = describe_row(source, client=client)
-=======
-        source = describe_row(source)
->>>>>>> feat(docs): wrote docs for api
-=======
-        source = describe_row(source, client=client)
->>>>>>> feat(managed-data): better test coverage
     elif not {"hid", "id"}.issubset(set(list(source.keys()))):
         raise DeepOriginException(
             f"If `source` is a dictionary, expected it contain the `hid` and `id` keys. These keys were not found. Instead, the keys are: {source.keys()}"
