@@ -37,7 +37,7 @@ install:
 
 build-docs:
 	@source $(CURDIR)/venv/bin/activate && \
-	    mkdocs build && \
+	    mkdocs build --strict && \
 	    deactivate
 
 serve-docs:

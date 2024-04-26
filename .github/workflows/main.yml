@@ -7,6 +7,16 @@ on:
 
 jobs:
 
+  build-docs:
+    needs: [code-formatting-and-syntax]
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build docs and check for errors
+        run: bash build_docs.sh
+
   sonarcloud:
     runs-on: ubuntu-latest
     steps:
