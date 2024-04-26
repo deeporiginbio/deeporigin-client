@@ -1,8 +1,8 @@
-site_name: Deeporigin CLI and Python Client
+site_name: Deep Origin CLI and Python Client
 site_author: Deep Origin
-repo_url: https://github.com/formiclabs/deeporigin
-repo_name: formiclabs/deeporigin
-site_url: https://formiclabs.github.io/deeporigin/
+repo_url: https://github.com/formiclabs/deeporigin-client
+repo_name: formiclabs/deeporigin-client
+site_url: https://formiclabs.github.io/deeporigin-client/
 
 docs_dir: 'docs'
 theme:

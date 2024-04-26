@@ -38,7 +38,7 @@ install:
 	@echo 'export PATH="$$HOME/.deeporigin:$$PATH"' >> ~/.bash_profile
 
 
-serve:
+serve-docs:
 	@echo "Serving docs locally..."
 	@source $(CURDIR)/venv/bin/activate && \
 	    mkdocs serve && \
