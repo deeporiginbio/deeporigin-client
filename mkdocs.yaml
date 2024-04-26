@@ -1,4 +1,4 @@
-site_name: Deep Origin CLI and Python Client
+site_name: Deep Origin CLI and Python client
 site_author: Deep Origin
 repo_url: https://github.com/formiclabs/deeporigin-client
 repo_name: formiclabs/deeporigin-client
@@ -7,10 +7,12 @@ site_url: https://formiclabs.github.io/deeporigin-client/
 docs_dir: 'docs'
 theme:
   name: material
-  logo: 'images/logo.png'
+  logo: 'images/logo.svg'
   palette:
-    primary: 'black'
-    accent: '#3D97CD'
+    primary: custom
+  font:
+    text: Inter
+    code: Roboto Mono
   features:
     - announce.dismiss
     - content.code.annotate
@@ -29,25 +31,26 @@ theme:
     - navigation.tracking
     - search.suggest
     - toc.follow
-  favicon: favicon.png
- 
-nav:
-- Get Started:
-  - Welcome to Deep Origin Client and API: index.md
-  - Installation: install.md
-- API Documentation:
-  - Managed Data:
-    - API: ref/data/api.md
-    - Functions: ref/data/functions.md
-    - Schema: ref/data/schema.md
-- How to:
-  - Authenticate into Deep Origin: auth.md
-  - Set up config file: config.md
-  - Managed Data: 
-    - Explore data: explore-data.md
-    - Download data: download-data.md
-    - Upload data: upload-data.md 
+  favicon: images/favicon.png
+extra_css:
+  - stylesheets/extra.css
 
+nav:
+- Getting started:
+  - Overview: overview.md
+  - Installation: install.md
+- How to:
+  - Authenticate to Deep Origin: how-to/auth.md
+  - Set up a configuration file: how-to/config.md
+  - Managed data: 
+    - Explore data: how-to/managed-data/explore-data.md
+    - Download data: how-to/managed-data/download-data.md
+    - Upload data: how-to/managed-data/upload-data.md
+- API reference:
+  - Managed data:
+    - High-level API: ref/managed-data/high-level-api.md
+    - Low-level API: ref/managed-data/low-level-api.md
+    - Low-level response schemas: ref/managed-data/low-level-schema.md
 
 validation:
   omitted_files: warn
@@ -81,8 +84,6 @@ markdown_extensions:
   - pymdownx.tabbed:
       alternate_style: true
 
-
-
 plugins:
   - search
   - git-committers:
@@ -94,8 +95,8 @@ plugins:
       default_handler: python
       handlers:
         python:
-          options:
-            paths: ["src"]
+          paths: ["."]
+          options:            
             annotations_path: brief
             show_source: false
             docstring_options:
@@ -112,6 +113,3 @@ plugins:
             show_symbol_type_heading: true
             line_length: 60
             show_signature: true
-
-
-

@@ -1,47 +1,52 @@
-
 # Installation
 
-## For Users
+## For users
 
-### Install latest version of code 
-
-If you plan to use this in your own project, use your 
-favorite package manager to install this in your project.
-
-
+Run the commands below to use your favorite package manager to install the Deep Origin CLI and Python client.
 
 === "pip"
 
+    Run the following command:
+
     ```bash
-    # you are strongly encouraged to install in a virtual envrionment
     pip install deeporigin
     ```
 
-=== "poetry"
+    !!! warning
+        We recommend installing this package into a virtual environment, using a tool such as venv, pyenv, Pipenv, Poetry, or conda.
 
+=== "Pipenv"
+    Run the following command:
+
+    ```bash
+    pipenv install deeporigin
+    ```
+
+=== "Poetry"
+    Run the following command:
 
     ```bash
     poetry add deeporigin
     ```
 
+## For developers
 
-
-## For Developers
-
-!!! danger "Developers only"
-    The instructions below are only if you intend to develop `deeporigin`. If you merely want to use this API to read data, you do not have to do this.
+!!! warning "Developers only"
+    If you intend to contribute this package, we recommend installing this package via the instructions below. If you merely intend to use this package, we recommend following the instructions above.
 
 ### Get the code
 
+First, run the following command:
 ```bash
 git clone git@github.com:formiclabs/deeporigin-client.git
 ```
 
-### Prerequisites 
+### Install the development dependencies for this package
 
-Make sure you have Python 3.9+ and
-[make](https://www.gnu.org/software/make//) installed. 
-Verify that both are installed:
+Second, install Python 3.9+ and
+[make](https://www.gnu.org/software/make//).
+
+To verify that both are installed, run the following commands:
 
 ```bash
 python3 --version
@@ -51,21 +56,20 @@ make --version
 # GNU Make 4.4.1
 ```
 
-### Install locally
+### Install this package locally
 
-You can then install the API locally by navigating to the directory you downloaded the code in, and running:
+Third, navigate to the directory you downloaded the code to, and run the following command:
 
 ```bash
 make install
 ```
 
-This installs in "editable" mode, so changes you made take effect
-immediately. 
+This will install this package in an "editable" mode. In this mode, your changes will take effect
+immediately.
 
+### Running the tests for this package
 
-### Running tests
-
-Once installed, tests can be run using:
+Once installed, you can test this package by running the following command:
 
 ```bash
 make test
