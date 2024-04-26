@@ -15,11 +15,13 @@ if [ "$CI" = "true" ]; then
       echo "❌ mkdocs could not be found. Fatal"
       exit 2;
   fi
-
   MKDOCS_OUT="$(mkdocs build -s 2>&1)"
 
 else
   echo "Running Locally, will not install."
+  source ./venv/bin/activate && \
+      MKDOCS_OUT="$(mkdocs build -s 2>&1)" \
+      deactivate
 fi
 
 
@@ -30,7 +32,8 @@ if [ "$?" -gt 0 ]; then
 fi
 warnings=$(echo $MKDOCS_OUT | grep "WARNING" | wc -l)
 if [ "$warnings" -gt 0 ]; then
-  echo "WARNINGS were found when making docs; aborting.";
+  echo "WARNINGS were found when making docs; aborting. The output of `mkdocs build --strict` is:";
+  echo $MKDOCS_OUT
   exit 4;
 fi
 
