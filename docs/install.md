@@ -4,9 +4,10 @@
 
 Run the commands below to use your favorite package manager to install the Deep Origin CLI and Python client.
 
+Run the following command:
+
 === "pip"
 
-    Run the following command:
 
     ```bash
     pip install deeporigin
@@ -16,14 +17,12 @@ Run the commands below to use your favorite package manager to install the Deep 
         We recommend installing this package into a virtual environment, using a tool such as venv, pyenv, Pipenv, Poetry, or conda.
 
 === "Pipenv"
-    Run the following command:
 
     ```bash
     pipenv install deeporigin
     ```
 
 === "Poetry"
-    Run the following command:
 
     ```bash
     poetry add deeporigin

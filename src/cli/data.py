@@ -181,6 +181,67 @@ databases to CSV files.
         _print_dict(data, json=self.app.pargs.json)
 
     @cement.ex(
+        help="List files in a database or row",
+        arguments=[
+            (
+                ["--assigned_row_ids"],
+                {
+                    "help": "Row IDs that files are assigned to",
+                    "action": "store",
+                    "nargs": "*",
+                },
+            ),
+            (
+                ["--unassigned"],
+                {
+                    "action": "store_true",
+                    "help": "Whether to only find unassigned files: False]",
+                },
+            ),
+            (
+                ["--json"],
+                {
+                    "action": "store_true",
+                    "help": "Whether to return JSON formatted data [default: False]",
+                },
+            ),
+            (
+                ["--show-uri"],
+                {
+                    "action": "store_true",
+                    "help": "Whether to show the URI [default: False]",
+                },
+            ),
+        ],
+    )
+    def list_files(self):
+        """list rows"""
+
+        files = _api.list_files(
+            assigned_row_ids=self.app.pargs.assigned_row_ids,
+            is_unassigned=self.app.pargs.unassigned,
+            client=self._get_client(),
+        )
+
+        if len(files) == 0:
+            print("No files found")
+            return
+
+        if self.app.pargs.json:
+            _show_json(files)
+            return
+
+        # convert a list of dicts to a dict of lists
+        data = {}
+        keys = files[0]["file"].keys()
+        for key in keys:
+            if not self.app.pargs.show_uri and key == "uri":
+                continue
+            data[key] = [file["file"][key] for file in files]
+
+        _print_dict(data, json=False, transpose=False)
+
+    @cement.ex(
         help="List rows in a database or row",
         arguments=[
             (

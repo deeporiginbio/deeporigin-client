@@ -77,7 +77,7 @@ def list_files(
     assigned_row_ids: Optional[list[str]] = None,
     is_unassigned: Optional[bool] = None,
     client: Optional[Client] = None,
-):
+) -> list[dict]:
     """Low level function that wraps the `ListFiles` endpoint.
 
     Returns a list of files from databases and rows
@@ -86,7 +86,6 @@ def list_files(
     Args:
         assigned_row_ids: ID (or human ID) or the assigned row.
         is_unassigned: Whether file is assigned to any row.
-        parent_is_root: If `True` only rows that are children of the root will be returned.
 
     Returns:
         A list of dictionaries, where each entry corresponds to a file. Each dictionary contains a field called `file` that corresponds conforms to a [DescribeFileResponse][src.managed_data.schema.DescribeFileResponse].
@@ -110,7 +109,7 @@ def describe_database_stats(
     database_id: str,
     *,
     client: Optional[Client] = None,
-):
+) -> dict:
     """Low level function that wraps the `DescribeDatabaseStats` endpoint.
 
     Returns a dictionary of statistics about a database.
