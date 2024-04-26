@@ -29,7 +29,7 @@
     The `deeporigin://` prefix identifies a resource as
     existing on Deep Origin, and the `cp` command downloads 
     the database as a CSV and all included files are downloaded 
-    to the `<local-folder>`
+    to the `<local-folder>`.
 
 
 

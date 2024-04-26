@@ -17,7 +17,7 @@ jobs:
           fetch-depth: 0
 
       - name: Build docs and check for errors
-        run: bash build_docs.sh
+        run: bash scripts/build_docs.sh
 
   sonarcloud:
     runs-on: ubuntu-latest
