@@ -7,10 +7,12 @@ site_url: https://formiclabs.github.io/deeporigin-client/
 docs_dir: 'docs'
 theme:
   name: material
-  logo: 'images/logo.png'
+  logo: 'images/logo.svg'
   palette:
-    primary: 'black'
-    accent: '#6D2EB1'
+    primary: custom
+  font:
+    text: Inter
+    code: Roboto Mono
   features:
     - announce.dismiss
     - content.code.annotate
@@ -30,6 +32,8 @@ theme:
     - search.suggest
     - toc.follow
   favicon: images/favicon.png
+extra_css:
+  - stylesheets/extra.css
 
 nav:
 - Getting started:
