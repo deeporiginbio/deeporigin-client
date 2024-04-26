@@ -1,5 +1,6 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 """This module contains Pydantic BaseModels that describe
 responses from Deep Origin Managed Data, and literals that
 =======
@@ -10,11 +11,14 @@ responses from Deep Origin Managed Data, and literals that
 """This module contains Pydantic BaseModels that describe
 responses from Deep Origin Managed Data, and literals that
 >>>>>>> fix(docs): format
+=======
+"""This module contains Pydantic `BaseModel`s that describe
+responses from Deep Origin's managed data API, and literals that
+>>>>>>> feat(docs): refined docs
 describe possible values for certain queries.
 
 These models are used both to validate responses and to generate
-mock data during testing.
-
+mock data for testing.
 """
 
 from typing import Literal, Optional, Union
@@ -49,8 +53,8 @@ DatabaseReturnType = Literal["dataframe", "dict"]
 
 
 class DescribeFileResponse(BaseModel):
-    """Schema for responses from queries to the
-    DescribeFile endpoint"""
+    """Schema for responses from the
+    `DescribeFile` endpoint."""
 
     id: str
     uri: str
@@ -64,8 +68,8 @@ class DescribeFileResponse(BaseModel):
 
 
 class ListRowsResponse(BaseModel):
-    """Schema for responses from queries to the
-    ListRows endpoint"""
+    """Schema for responses from the
+    `ListRows` endpoint."""
 
     id: str
     parentId: Optional[str]
@@ -78,8 +82,8 @@ class ListRowsResponse(BaseModel):
 
 
 class FieldItem(BaseModel):
-    """Schema for items in `fields` in the responses from
-    queries to the DescribeRow endpoint"""
+    """Schema for items in the `fields` attribute of responses from
+    the `DescribeRow` endpoint."""
 
     columnId: str
     cellId: str
@@ -93,7 +97,7 @@ class FieldItem(BaseModel):
 
 
 class ColumnItem(BaseModel):
-    """item in cols in DescribeRow called on a database"""
+    """Schema for items in the `cols` attribute of responses from the `DescribeRow` endpoint for a database."""
 
     id: str
     name: str = "Placeholder Name"
@@ -110,9 +114,8 @@ class ColumnItem(BaseModel):
 
 
 class DescribeRowResponse(BaseModel):
-    """response schema for DescribeRow. This is complex because
-    the response schema differs based on whether you call
-    DescribeRow on a normal row or a database."""
+    """Schema for responses from the `DescribeRow` endpoint. This schema is complex because
+    the response schema depends on whether `DescribeRow` is called for a row or database."""
 
     id: str
     hid: str
@@ -126,8 +129,8 @@ class DescribeRowResponse(BaseModel):
 
 
 class DescribeRowResponseRow(DescribeRowResponse):
-    """schema for responses for DescribeRow called on a row
-    this schema also works for DescribeDatabaseRows"""
+    """Schema for responses from the `DescribeRow` endpoint for a row.
+    This is also the schema for responses from the `DescribeDatabaseRows` endpoint."""
 
     fields: Optional[list[FieldItem]] = None
     editedByUserDrn: str = "placeholder"
@@ -140,7 +143,7 @@ class DescribeRowResponseRow(DescribeRowResponse):
 
 
 class DescribeRowResponseDatabase(DescribeRowResponse):
-    """schema for responses for DescribeRow called on a database"""
+    """Schema for responses for the `DescribeRow` endpoint for a database."""
 
     cols: list
     hidPrefix: str

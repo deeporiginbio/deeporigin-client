@@ -16,8 +16,6 @@ test:
 		python3 -m coverage html && \
 		deactivate
 	-open htmlcov/index.html
-	
-
 
 # set up jupyter dev kernel
 jupyter:
@@ -36,7 +34,6 @@ install:
 	@-mkdir ~/.deeporigin
 	@-ln -s $(CURDIR)/venv/bin/deeporigin ~/.deeporigin/deeporigin
 	@echo 'export PATH="$$HOME/.deeporigin:$$PATH"' >> ~/.bash_profile
-
 
 serve-docs:
 	@echo "Serving docs locally..."

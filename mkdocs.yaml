@@ -1,4 +1,4 @@
-site_name: Deep Origin CLI and Python Client
+site_name: Deep Origin CLI and Python client
 site_author: Deep Origin
 repo_url: https://github.com/formiclabs/deeporigin-client
 repo_name: formiclabs/deeporigin-client
@@ -10,7 +10,7 @@ theme:
   logo: 'images/logo.png'
   palette:
     primary: 'black'
-    accent: '#3D97CD'
+    accent: '#6D2EB1'
   features:
     - announce.dismiss
     - content.code.annotate
@@ -29,23 +29,23 @@ theme:
     - navigation.tracking
     - search.suggest
     - toc.follow
-  favicon: favicon.png
- 
+  favicon: images/favicon.png
+
 nav:
-- Get Started:
-  - Welcome to Deep Origin Client and API: index.md
+- Getting started:
+  - Overview: overview.md
   - Installation: install.md
 - How to:
   - Authenticate to Deep Origin: how-to/auth.md
-  - Set up a config file: how-to/config.md
+  - Set up a configuration file: how-to/config.md
   - Managed data: 
     - Explore data: how-to/managed-data/explore-data.md
     - Download data: how-to/managed-data/download-data.md
     - Upload data: how-to/managed-data/upload-data.md
 - API reference:
   - Managed data:
-    - High-level API: ref/managed-data/api.md
-    - Low-level API: ref/managed-data/functions.md
+    - High-level API: ref/managed-data/high-level-api.md
+    - Low-level API: ref/managed-data/low-level-api.md
     - Low-level response schemas: ref/managed-data/schema.md
 
 validation:

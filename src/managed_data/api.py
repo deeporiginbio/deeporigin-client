@@ -1,5 +1,5 @@
-"""this module contains high-level functions used to
-interact with the data product"""
+"""This module contains high-level functions for
+interacting with Deep Origin managed data."""
 
 import os
 from typing import Optional, Union
@@ -25,7 +25,7 @@ def get_tree(
     include_rows: bool = True,
     client: Optional[Client] = None,
 ) -> dict:
-    """Construct a tree of all workspaces, databases and rows
+    """Construct a tree of all workspaces, databases and rows.
 
     Returns a tree that contains all workspaces, databases and
     (optionally) rows. The tree is returned as a dictionary,
@@ -34,7 +34,7 @@ def get_tree(
 
 
     Args:
-        include_rows: If True, rows are included in the tree.
+        include_rows: If `True`, rows are included in the tree.
 
     Returns:
         A dictionary describing the tree structure of all workspaces
@@ -97,7 +97,7 @@ def get_cell_data(
     client: Optional[Client] = None,
 ):
     """Extract data from a cell in a database, referenced
-    by `row_id` and `column_name`
+    by `row_id` and `column_name`.
 
     Returns the value in a single cell in a database.
 
@@ -110,8 +110,8 @@ def get_cell_data(
 
 
     Args:
-        row_id: ID (or Human ID) of a row
-        column_name: Name of column
+        row_id: ID (or human ID) of a row.
+        column_name: Name of column.
 
     Returns:
         Value of that cell.
@@ -137,20 +137,20 @@ def download(
     client: Optional[Client] = None,
 >>>>>>> feat(managed-data): better test coverage
 ) -> None:
-    """Download resources from Deep Origin and save to
-    local destination
+    """Download resources from Deep Origin and save them to
+    a local destination.
 
     Download databases, objects and other entities from
-    Deep Origin managed data and save to local disk.
+    Deep Origin managed data and save them to local disk.
 
     Info: Work in progress
         All features in this function have not been implemented yet.
 
 
     Args:
-        source: ID (or Human ID) of a resource on Deep Origin
-        destination: Path to local directory to save resources
-        include_files: if True, download files in database
+        source: ID (or human ID) of a resource on Deep Origin.
+        destination: Path to local directory to save resources.
+        include_files: if `True`, download files in database.
 
     """
 
@@ -182,15 +182,15 @@ def download_database(
     include_files: bool = False,
     client: Optional[Client] = None,
 ) -> None:
-    """Download a database and save it to a CSV on local disk
+    """Download a database and save it to a CSV file on the local disk.
 
     Download a database from Deep Origin managed data
-    and save to local disk as a CSV.
+    and save to local disk as a CSV file.
 
     Args:
-        source: ID (or Human ID) of a resource on Deep Origin
-        destination: Path to local directory to save resources
-        include_files: if True, download files in database
+        source: ID (or human ID) of a resource on Deep Origin.
+        destination: Path to local directory to save resources.
+        include_files: if `True`, download files in database.
 
     """
 
@@ -239,16 +239,16 @@ def get_dataframe(
     return_type: DatabaseReturnType = "dataframe",
     client: Optional[Client] = None,
 ):
-    """Generate a pandas.DataFrame from a database
+    """Generate a `pandas.DataFrame` or dictionary for a database.
 
     Download a database from Deep Origin managed data
-    and save to local disk as a CSV.
+    and return it as a data frame or dictionary.
 
     Args:
-        database_id: ID (or Human ID) of a database on Deep Origin
-        use_file_names: If True, refer to files by name rather than file_ID
-        reference_format: Refer to rows on Deep Origin using Human IDs or System IDs.
-        return_type: Whether to return a pandas.Dataframe or a dictionary
+        database_id: ID (or human ID) of a database on Deep Origin.
+        use_file_names: If `True`, refer to files by name rather than ID.
+        reference_format: Refer to rows on Deep Origin using human IDs or system IDs.
+        return_type: Whether to return a `pandas.Dataframe` or a dictionary.
     """
 
     # figure out the rows
@@ -417,14 +417,14 @@ def get_columns(
     *,
     client: Optional[Client] = None,
 ) -> list[dict]:
-    """Get column information for a row or a database.
+    """Get information about the columns of a row or database.
 
-    If row_id is a database, then column metadata and names
-    are returned. If row_id is a row, then a dictionary of
-    Human IDs and values are returned
+    If `row_id` is a database, then column metadata and names
+    are returned. If `row_id` is a row, then a dictionary of
+    human IDs and values are returned.
 
     Args:
-        row_id: ID (or Human ID) of a row or database on Deep Origin
+        row_id: ID (or human ID) of a row or database on Deep Origin.
     """
 
     response = describe_row(row_id, fields=True, client=client)
@@ -448,15 +448,15 @@ def get_row_data(
     use_column_keys: bool = False,
     client: Optional[Client] = None,
 ) -> dict:
-    """Get data in a row
+    """Get the data in a row.
 
-    Read data from a row, and return as a dictionary, where
-    keys are column names (or keys), and values are values of those
+    Read data from a row, and return it as a dictionary, where
+    the keys are column names (or keys), and the values are the values of those
     cells.
 
     Args:
-        row_id: ID (or Human ID) of a row or database on Deep Origin
-        use_column_keys: if True, keys of dictionary are column keys
+        row_id: ID (or human ID) of a row or database on Deep Origin.
+        use_column_keys: if `True`, keys of dictionary are column keys.
 
     Raises:
         DeepOriginException: If row_id is not a row
@@ -512,18 +512,18 @@ def get_row_data(
 
 @beartype
 def merge_databases(dfs: list):
-    """Merge dataframes into a single dataframes
+    """Merge dataframes for multiple databases into a single dataframes.
 
     Given a list of dataframes derived from Deep Origin databases,
     merge them into a single dataframe, resolving cross-references
-    across databases.
+    across the databases.
 
     Info: Work in progress
         All features in this function have not been implemented yet.
 
 
     Args:
-        dfs: List of pandas.DataFrames
+        dfs: List of `pandas.DataFrames`.
 
 
     """
