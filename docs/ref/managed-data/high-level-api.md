@@ -6,7 +6,8 @@
 ::: src.managed_data.api
     options:
       filters: ["!^_[^_]"]
+      members_order: alphabetical
       show_root_toc_entry: false
       show_root_heading: false
       show_category_heading: false
-      show_object_full_path: true
+      show_object_full_path: false

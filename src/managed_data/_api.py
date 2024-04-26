@@ -1,4 +1,4 @@
-"""This module contains low-level functions for interacting
+"""The `deeporigin.managed_data._api` module contains low-level functions for interacting
 with Deep Origin's managed data API. The functions in this module
 simply provide Pythonic interfaces to individual API endpoints."""
 

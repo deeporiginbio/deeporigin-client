@@ -1,4 +1,4 @@
-"""This module contains Pydantic `BaseModel`s that describe
+"""The `deeporigin.managed_data.schema` module contains Pydantic `BaseModel`s that describe
 responses from Deep Origin's managed data API, and literals that
 describe possible values for certain queries.
 
@@ -11,7 +11,11 @@ from typing import Literal, Optional, Union
 from pydantic import BaseModel
 
 RowType = Literal["row", "database", "workspace"]
+"""Type of a row"""
+
 FileStatus = Literal["ready", "archived"]
+"""Status of a file"""
+
 DataType = Literal[
     "integer",
     "str",
@@ -22,7 +26,7 @@ DataType = Literal[
     "reference",
     "editor",
 ]
-
+"""Type of a column"""
 
 DATAFRAME_ATTRIBUTE_KEYS = {
     "file_ids",
@@ -31,10 +35,11 @@ DATAFRAME_ATTRIBUTE_KEYS = {
     "reference_ids",
 }
 
-
 IDFormat = Literal["human-id", "system-id"]
+"""Format of an ID"""
 
 DatabaseReturnType = Literal["dataframe", "dict"]
+"""Return type of a database"""
 
 
 class DescribeFileResponse(BaseModel):

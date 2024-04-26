@@ -1,4 +1,4 @@
-"""This module contains high-level functions for
+"""The `deeporigin.managed_data.api` module contains high-level functions for
 interacting with Deep Origin managed data."""
 
 import os
