@@ -2,7 +2,7 @@
 interacting with Deep Origin managed data."""
 
 import os
-from typing import Optional, Union
+from typing import Any, Optional, Union
 
 from beartype import beartype
 from deeporigin.exceptions import DeepOriginException
@@ -95,7 +95,7 @@ def get_cell_data(
     row_id: str,
     column_name: str,
     client: Optional[Client] = None,
-):
+) -> Any:
     """Extract data from a cell in a database, referenced
     by `row_id` and `column_name`.
 

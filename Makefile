@@ -35,6 +35,11 @@ install:
 	@-ln -s $(CURDIR)/venv/bin/deeporigin ~/.deeporigin/deeporigin
 	@echo 'export PATH="$$HOME/.deeporigin:$$PATH"' >> ~/.bash_profile
 
+build-docs:
+	@source $(CURDIR)/venv/bin/activate && \
+	    mkdocs build && \
+	    deactivate
+
 serve-docs:
 	@echo "Serving docs locally..."
 	@source $(CURDIR)/venv/bin/activate && \
