@@ -274,7 +274,9 @@ def _check_response(response: requests.models.Response) -> Union[dict, list]:
     """utility function to check responses"""
 
     if response.status_code == 404:
-        raise DeepOriginException("[Error 404] The requested resource was not found.")
+        raise DeepOriginException(
+            f"[Error 404] The requested resource was not found. The response was: {response.json()}"
+        )
 
     response.raise_for_status()
     response = response.json()

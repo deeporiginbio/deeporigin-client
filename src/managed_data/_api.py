@@ -1,5 +1,6 @@
-"""this module contains low-level functions to interact
-with the data API. functions here simply wrap API endpoints."""
+"""This module contains low-level functions to interact
+with Deep Origin's Managed Data API. Functions here
+simply wrap API endpoints."""
 
 import os
 from typing import Optional, Union
@@ -11,7 +12,20 @@ from deeporigin.managed_data.client import Client, DeepOriginClient
 from deeporigin.managed_data.schema import RowType
 
 
-def _get_default_client(client):
+def _get_default_client(client: Optional[Client] = None):
+    """Internal function to instantiate client
+
+    Creates and returns an authenticated client if
+    not provided with one.
+
+    Warning: Internal function
+        Do not use this function
+
+    Args:
+        client: None, or a Client
+
+
+    """
     if client is None:
         client = DeepOriginClient()  # pragma: no cover
         client.authenticate()  # pragma: no cover
@@ -26,7 +40,21 @@ def list_rows(
     parent_is_root: Optional[bool] = None,
     client: Optional[Client] = None,
 ) -> list[dict]:
-    """low level API that wraps the ListRows endpoint"""
+    """Low level API that wraps the ListRows endpoint
+
+    Returns a list of rows from workspaces and databases,
+    based on parent, row type, or whether the parent is root.
+
+
+    Args:
+        parent_id: ID (or Human ID) or the parent
+        row_type: One of "row", "workspace", "database"
+        parent_is_root: If True only rows that are children of the root will be returned
+
+    Returns:
+        A list of dictionaries, where each entry corresponds to a row. Each dictionary conforms to a [ListRowsResponse][src.managed_data.schema.ListRowsResponse]
+
+    """
 
     client = _get_default_client(client)
     filters = []
@@ -51,6 +79,21 @@ def list_files(
     is_unassigned: Optional[bool] = None,
     client: Optional[Client] = None,
 ):
+    """Low level API function that wraps the ListFiles endpoint
+
+    Returns a list of files from databases and rows
+    based on row assigned to.
+
+
+    Args:
+        assigned_row_ids: ID (or Human ID) or the assigned row
+        is_unassigned: Whether file is assigned to any row
+        parent_is_root: If True only rows that are children of the root will be returned
+
+    Returns:
+        A list of dictionaries, where each entry corresponds to a file. Each dictionary contains a field called `file` that corresponds conforms to a [DescribeFileResponse][src.managed_data.schema.DescribeFileResponse]
+
+    """
     client = _get_default_client(client)
 
     filters = []
@@ -70,6 +113,18 @@ def describe_database_stats(
     *,
     client: Optional[Client] = None,
 ):
+    """Low level API that wraps the DescribeDatabaseStats endpoint
+
+    Returns a dictionary of statistics about a database.
+
+
+    Args:
+        database_id: ID (or Human ID) of the database
+
+    Returns:
+        A dictionary that contains statistics about the database
+
+    """
     client = _get_default_client(client)
 
     return client.invoke("DescribeDatabaseStats", dict(databaseId=database_id))
@@ -80,7 +135,20 @@ def list_mentions(
     query: str,
     *,
     client: Optional[Client] = None,
-):
+) -> dict:
+    """Low level API that wraps the ListMentions endpoint
+
+    Returns a dictionary of mentions (cross references)
+    of the requested object
+
+
+    Args:
+        query: ID (or Human ID) of row, database, workspace, or file
+
+    Returns:
+        A dictionary that contains a field called `mentions`, which is a list of dictionaries that each refer to a row
+
+    """
     client = _get_default_client(client)
 
     return client.invoke("ListMentions", dict(query=query))
@@ -91,7 +159,19 @@ def list_row_back_references(
     row_id: str,
     *,
     client: Optional[Client] = None,
-):
+) -> dict:
+    """Low level API that wraps the ListRowBackReferences endpoint
+
+    Returns a dictionary of back references from the queried row
+
+
+    Args:
+        row_id: ID (or Human ID) of row
+
+    Returns:
+        A dictionary that contains a field called `rows`, which is a list of dictionaries that each refer to a database row
+
+    """
     client = _get_default_client(client)
 
     return client.invoke("ListRowBackReferences", dict(rowId=row_id))
@@ -103,7 +183,20 @@ def create_file_download_url(
     *,
     client: Optional[Client] = None,
 ) -> dict:
-    """low-level API call to CreateFileDownloadUrl"""
+    """Low level API that wraps the CreateFileDownloadUrl endpoint
+
+    Returns a pre-signed URL that allows you to download a
+    file .
+
+
+    Args:
+        file_id: ID of file
+
+    Returns:
+        A dictionary that contains a field `downloadUrl`, that
+        contains a AWs pre-signed URL
+
+    """
 
     client = _get_default_client(client)
 
@@ -116,7 +209,19 @@ def describe_file(
     *,
     client: Optional[Client] = None,
 ) -> dict:
-    """low-level API call to DescribeFile"""
+    """Low level API that wraps the DescribeFile endpoint
+
+    Returns a description of file, including S3 URI, name,
+    status, content length, and type.
+
+
+    Args:
+        file_id: ID of file
+
+    Returns:
+        A dictionary that contains a file description, that conforms to [DescribeFileResponse][src.managed_data.schema.DescribeFileResponse]
+
+    """
 
     client = _get_default_client(client)
 
@@ -130,7 +235,20 @@ def describe_row(
     fields: bool = False,
     client: Optional[Client] = None,
 ) -> dict:
-    """low-level API that wraps the DescribeRow endpoint."""
+    """Low level API that wraps the DescribeRow endpoint
+
+    Returns a description of a row or a database
+
+
+    Args:
+        row_id: ID or (Human ID) or row or database
+        fields: if True, a fields item is returned in the response
+
+    Returns:
+        A dictionary that contains a row description, that
+        conforms to [DescribeRowResponse][src.managed_data.schema.DescribeRowResponse]
+
+    """
 
     client = _get_default_client(client)
 

@@ -1,0 +1,117 @@
+site_name: Deep Origin CLI and Python Client
+site_author: Deep Origin
+repo_url: https://github.com/formiclabs/deeporigin-client
+repo_name: formiclabs/deeporigin-client
+site_url: https://formiclabs.github.io/deeporigin-client/
+
+docs_dir: 'docs'
+theme:
+  name: material
+  logo: 'images/logo.png'
+  palette:
+    primary: 'black'
+    accent: '#3D97CD'
+  features:
+    - announce.dismiss
+    - content.code.annotate
+    - content.code.copy
+    - content.tabs.link
+    - content.tooltips
+    - navigation.footer
+    - navigation.indexes
+    - navigation.instant
+    - navigation.instant.prefetch
+    - navigation.instant.preview
+    - navigation.instant.progress
+    - navigation.path
+    - navigation.tabs
+    - navigation.top
+    - navigation.tracking
+    - search.suggest
+    - toc.follow
+  favicon: favicon.png
+ 
+nav:
+- Get Started:
+  - Welcome to Deep Origin Client and API: index.md
+  - Installation: install.md
+- API Documentation:
+  - Managed Data:
+    - API: ref/data/api.md
+    - Functions: ref/data/functions.md
+    - Schema: ref/data/schema.md
+- How to:
+  - Authenticate into Deep Origin: auth.md
+  - Set up config file: config.md
+  - Managed Data: 
+    - Explore data: explore-data.md
+    - Download data: download-data.md
+    - Upload data: upload-data.md 
+
+
+validation:
+  omitted_files: warn
+  absolute_links: warn
+  unrecognized_links: warn
+
+use_directory_urls: false
+
+markdown_extensions:
+  - tables
+  - abbr
+  - admonition
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - codehilite
+  - footnotes
+  - attr_list
+  - md_in_html
+  - toc:
+      permalink: true
+      title: Page contents
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.snippets
+  - pymdownx.extra
+  - pymdownx.highlight:
+      pygments_lang_class: true
+  - pymdownx.tabbed:
+      alternate_style: true
+
+
+
+plugins:
+  - search
+  - git-committers:
+      repository: formiclabs/deeporigin-client
+      branch: main
+  - git-revision-date-localized:
+      enable_creation_date: true
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          options:
+            paths: ["src"]
+            annotations_path: brief
+            show_source: false
+            docstring_options:
+              ignore_init_summary: true
+            docstring_section_style: table
+            heading_level: 2
+            inherited_members: true
+            merge_init_into_class: false
+            separate_signature: true
+            show_root_heading: true
+            show_root_full_path: true
+            show_signature_annotations: true
+            signature_crossrefs: true
+            show_symbol_type_heading: true
+            line_length: 60
+            show_signature: true
+
+
+

@@ -1,5 +1,11 @@
-"""this module contains classes to generate data that
-matches the schema of real responses"""
+"""This module contains Pydantic BaseModels that describe
+responses from Deep Origin Managed Data, and literals that
+describe possible values for certain queries.
+
+These models are used both to validate responses and to generate
+mock data during testing.
+
+"""
 
 from typing import Literal, Optional, Union
 
@@ -18,6 +24,7 @@ DataType = Literal[
     "editor",
 ]
 
+
 DATAFRAME_ATTRIBUTE_KEYS = {
     "file_ids",
     "id",
@@ -26,9 +33,14 @@ DATAFRAME_ATTRIBUTE_KEYS = {
 }
 
 
+IDFormat = Literal["human-id", "system-id"]
+
+DatabaseReturnType = Literal["dataframe", "dict"]
+
+
 class DescribeFileResponse(BaseModel):
-    """schema for file description, as returned by
-    DescribeFile"""
+    """Schema for responses from queries to the
+    DescribeFile endpoint"""
 
     id: str
     uri: str
@@ -42,7 +54,8 @@ class DescribeFileResponse(BaseModel):
 
 
 class ListRowsResponse(BaseModel):
-    """response schema for ListRows"""
+    """Schema for responses from queries to the
+    ListRows endpoint"""
 
     id: str
     parentId: Optional[str]
@@ -55,7 +68,8 @@ class ListRowsResponse(BaseModel):
 
 
 class FieldItem(BaseModel):
-    """item in fields in DescribeRow"""
+    """Schema for items in `fields` in the responses from
+    queries to the DescribeRow endpoint"""
 
     columnId: str
     cellId: str

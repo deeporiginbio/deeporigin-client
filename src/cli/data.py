@@ -2,18 +2,13 @@
 managed_data.py"""
 
 import json
+import os
 from typing import Union
 
 import cement
 from beartype import beartype
 from deeporigin.exceptions import DeepOriginException
-from deeporigin.managed_data import _api
-from deeporigin.managed_data.api import (
-    download,
-    get_dataframe,
-    get_row_data,
-    get_tree,
-)
+from deeporigin.managed_data import _api, api
 from deeporigin.managed_data.client import DeepOriginClient
 from deeporigin.utils import PREFIX
 from tabulate import tabulate
@@ -76,6 +71,62 @@ databases to CSV files.
             client.authenticate(refresh_tokens=False)  # pragma: no cover
 
             return client  # pragma: no cover
+
+    @cement.ex(
+        help="Merge to databases into a single one, integrating cross-references",
+        arguments=[
+            (
+                ["--databases"],
+                {
+                    "help": "List of databases to merge",
+                    "action": "store",
+                    "nargs": "*",
+                    "required": True,
+                },
+            ),
+            (
+                ["--destination"],
+                {
+                    "type": str,
+                    "required": True,
+                    "metavar": "<destination>",
+                    "help": "Folder on local disk to save to",
+                },
+            ),
+            (
+                ["--include-files"],
+                {
+                    "action": "store_true",
+                    "help": "Whether to download files in database [default: False]",
+                },
+            ),
+        ],
+    )
+    def merge_db(self):
+        """Merge databases and save as CSV"""
+
+        databases = self.app.pargs.databases
+        destination = self.app.pargs.destination
+        dfs = []
+        save_name = "-".join(databases)
+        for db in databases:
+            df = api.get_dataframe(
+                db,
+                client=self._get_client(),
+            )
+            dfs.append(df)
+        df = api.merge_databases(dfs)
+
+        # save to CSV
+        df.to_csv(os.path.join(destination, f"merged-{save_name}.csv"))
+
+        if not self.app.pargs.include_files:
+            return
+
+        for df in dfs:
+            files = df.attrs["file_ids"]
+            for file in files:
+                _api.download_file(file, destination=destination)
 
     @cement.ex(
         help="Describe and get metadata of file uploaded to database in your Deep Origin data management system",
@@ -187,7 +238,7 @@ databases to CSV files.
     def show_db(self):
         """list database row"""
 
-        data = get_dataframe(
+        data = api.get_dataframe(
             self.app.pargs.db_id,
             return_type="dict",
             client=self._get_client(),
@@ -212,7 +263,7 @@ databases to CSV files.
     def ls(self):
         """list rows in db"""
 
-        tree = get_tree(
+        tree = api.get_tree(
             client=self._get_client(),
         )
         _print_tree(tree)
@@ -235,7 +286,7 @@ databases to CSV files.
     )
     def row(self):
         """list the columns of the row and their values, where applicable"""
-        row_data = get_row_data(
+        row_data = api.get_row_data(
             self.app.pargs.row_id,
             client=self._get_client(),
         )
@@ -284,7 +335,7 @@ as-is. """
         args = self.app.pargs
 
         if PREFIX in args.source and PREFIX not in args.destination:
-            download(
+            api.download(
                 args.source,
                 args.destination,
                 include_files=args.include_files,
