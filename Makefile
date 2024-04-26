@@ -36,9 +36,7 @@ install:
 	@echo 'export PATH="$$HOME/.deeporigin:$$PATH"' >> ~/.bash_profile
 
 build-docs:
-	@source $(CURDIR)/venv/bin/activate && \
-	    mkdocs build --strict && \
-	    deactivate
+	bash scripts/build_docs.sh
 
 serve-docs:
 	@echo "Serving docs locally..."
