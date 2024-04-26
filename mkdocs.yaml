@@ -37,14 +37,14 @@ extra_css:
 
 nav:
 - Getting started:
-  - Overview: overview.md
+  - Overview: index.md
   - Installation: install.md
 - How to:
   - Authenticate to Deep Origin: how-to/auth.md
   - Set up a configuration file: how-to/config.md
   - Managed data: 
     - Explore data: how-to/managed-data/explore-data.md
-    - Download data: how-to/managed-data/download-data.md
+    - Fetch data: how-to/managed-data/fetch-data.md
     - Upload data: how-to/managed-data/upload-data.md
 - API reference:
   - Managed data:
