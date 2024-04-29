@@ -46,3 +46,10 @@ serve-docs:
 
 test-github:
 	python3 -m coverage run -m pytest -k $(chosen_tests) --client $(client)
+
+
+deploy-docs: 
+	@echo "Deploying to live environment..."
+	@source $(CURDIR)/venv/bin/activate && \
+	    mkdocs gh-deploy && \
+	    deactivate
