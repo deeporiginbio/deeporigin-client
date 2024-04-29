@@ -1,11 +1,24 @@
-You can sign into the Deep Origin platform using the Python Client.
+You can sign into the Deep Origin platform using the Python Client or the CLI. 
 
-```python
-from deeporigin import sign_into_do_platform
-sign_into_do_platform()
-```
 
-You will be presented with a prompt that looks like:
+=== "CLI"
+
+    To authenticate with Deep Origin:
+
+    ```bash
+    deeporigin authenticate
+    ```
+
+=== "Python Client"
+    
+
+    ```python
+    from deeporigin import sign_into_do_platform
+    sign_into_do_platform()
+    ```
+
+
+In either case, you will be presented with a prompt that looks like:
 
 ```
 To connect to the Deep Origin platform, navigate your browser to 

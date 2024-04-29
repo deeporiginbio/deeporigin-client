@@ -8,6 +8,7 @@ import termcolor
 from .. import __version__
 from ..exceptions import DeepOriginException
 from ..warnings import DeepOriginWarning
+from .auth import CONTROLLERS as AUTH_CONTROLLERS
 from .context import CONTROLLERS as CONTEXT_CONTROLLERS
 from .data import CONTROLLERS as DATA_CONTROLLERS
 from .variables import CONTROLLERS as VARIABLE_CONTROLLERS
@@ -51,6 +52,7 @@ class App(cement.App):
             + VARIABLE_CONTROLLERS
             + CONTEXT_CONTROLLERS
             + DATA_CONTROLLERS
+            + AUTH_CONTROLLERS
         )
 
 
