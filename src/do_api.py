@@ -2,6 +2,7 @@ import functools
 import json
 import os
 import time
+from urllib.parse import urljoin
 
 import requests
 
@@ -89,7 +90,7 @@ def sign_into_do_platform() -> tuple[str, str]:
     config = get_config()
 
     # Get a link for the user to sign into the Deep Origin platform
-    endpoint = f"{config.auth_domain}{config.auth_device_code_endpoint}"
+    endpoint = urljoin(config.auth_domain, config.auth_device_code_endpoint)
     body = {
         "client_id": config.auth_client_id,
         "scope": "offline_access",
@@ -115,7 +116,7 @@ def sign_into_do_platform() -> tuple[str, str]:
     )
 
     # Wait for the user to sign into the Deep Origin platform
-    endpoint = f"{config.auth_domain}{config.auth_token_endpoint}"
+    endpoint = urljoin(config.auth_domain, config.auth_token_endpoint)
     body = {
         "grant_type": config.auth_grant_type,
         "device_code": device_code,
@@ -152,7 +153,7 @@ def refresh_access_to_do_platform(api_refresh_token: str) -> str:
     """
     config = get_config()
 
-    endpoint = f"{config.auth_domain}{config.auth_token_endpoint}"
+    endpoint = urljoin(config.auth_domain, config.auth_token_endpoint)
     body = {
         "grant_type": "refresh_token",
         "client_id": config.auth_client_id,
