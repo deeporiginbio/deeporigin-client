@@ -35,8 +35,7 @@ On clicking the `Confirm` button, you are shown:
 
 ![](../images/auth-confirm.png)
 
-and the python client will now return an access and refresh 
-token. These tokens are also cached to disk and will automatically
+The authentication process is then complete and access tokens are cached to disk, and will automatically
 be used in subsequent interactions. 
 
 !!! info "Authenticating"
