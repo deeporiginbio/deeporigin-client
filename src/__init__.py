@@ -1,6 +1,7 @@
 import os
 import pathlib
 import subprocess
+from pathlib import Path
 
 from .do_api import (  # noqa: F401
     cache_do_api_tokens,
@@ -31,6 +32,7 @@ with open(version_filename, "r") as file:
             ["git", "describe", "--tags"],
             capture_output=True,
             universal_newlines=True,
+            cwd=Path(__file__).parent.parent,
         )
         if process.returncode == 0:
             __version__ = process.stdout.strip()
