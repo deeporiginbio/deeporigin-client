@@ -2,6 +2,7 @@ import functools
 import json
 import os
 import time
+from urllib.parse import urljoin
 
 import requests
 
@@ -19,7 +20,7 @@ __all__ = [
 
 
 @functools.cache
-def get_do_api_tokens() -> tuple[str, str]:
+def get_do_api_tokens(verbose: bool = False) -> tuple[str, str]:
     """Get a token for accessing the Deep Origin API
 
     If the user already has a token, refresh it. If not, sign into the Deep Origin platform.
@@ -31,13 +32,16 @@ def get_do_api_tokens() -> tuple[str, str]:
     config = get_config()
 
     if os.path.isfile(config.api_tokens_filename):
+        if verbose:
+            print("Refreshing existing tokens...")
         tokens = read_cached_do_api_tokens()
         refresh_token = tokens["refresh"]
 
         access_token = refresh_access_to_do_platform(refresh_token)
 
     else:
-        print("No cached file, signing in...")
+        if verbose:
+            print("No cached tokens. Signing into Deep Origin...")
         access_token, refresh_token = sign_into_do_platform()
 
     return access_token, refresh_token
@@ -89,7 +93,7 @@ def sign_into_do_platform() -> tuple[str, str]:
     config = get_config()
 
     # Get a link for the user to sign into the Deep Origin platform
-    endpoint = f"{config.auth_domain}{config.auth_device_code_endpoint}"
+    endpoint = urljoin(config.auth_domain, config.auth_device_code_endpoint)
     body = {
         "client_id": config.auth_client_id,
         "scope": "offline_access",
@@ -115,7 +119,7 @@ def sign_into_do_platform() -> tuple[str, str]:
     )
 
     # Wait for the user to sign into the Deep Origin platform
-    endpoint = f"{config.auth_domain}{config.auth_token_endpoint}"
+    endpoint = urljoin(config.auth_domain, config.auth_token_endpoint)
     body = {
         "grant_type": config.auth_grant_type,
         "device_code": device_code,
@@ -152,7 +156,7 @@ def refresh_access_to_do_platform(api_refresh_token: str) -> str:
     """
     config = get_config()
 
-    endpoint = f"{config.auth_domain}{config.auth_token_endpoint}"
+    endpoint = urljoin(config.auth_domain, config.auth_token_endpoint)
     body = {
         "grant_type": "refresh_token",
         "client_id": config.auth_client_id,
