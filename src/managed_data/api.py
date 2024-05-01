@@ -24,7 +24,7 @@ def get_tree(
     *,
     include_rows: bool = True,
     client: Optional[Client] = None,
-) -> dict:
+) -> list[dict]:
     """Construct a tree of all workspaces, databases and rows.
 
     Returns a tree that contains all workspaces, databases and
@@ -56,25 +56,18 @@ def get_tree(
     for obj in workspaces + databases:
         obj["children"] = []
 
-    root_object = [obj for obj in objects if obj["parentId"] is None]
+    root_objects = [obj for obj in objects if obj["parentId"] is None]
 
-    # check that there is exactly one root
-    if len(root_object) != 1:
-        raise DeepOriginException(
-            f"Expected there to be exactly one root object. Instead, there were {len(root_object)}"
-        )
+    for root_object in root_objects:
+        _add_children(root_object, workspaces)
+        for workspace in workspaces:
+            _add_children(workspace, workspaces + databases)
 
-    tree = root_object[0]
+        if include_rows:
+            for database in databases:
+                _add_children(database, rows)
 
-    _add_children(tree, workspaces)
-    for workspace in workspaces:
-        _add_children(workspace, workspaces + databases)
-
-    if include_rows:
-        for database in databases:
-            _add_children(database, rows)
-
-    return tree
+    return root_objects
 
 
 @beartype

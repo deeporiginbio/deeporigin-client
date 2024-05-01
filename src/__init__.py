@@ -29,7 +29,7 @@ with open(version_filename, "r") as file:
         # in dev mode. we use git to get a "version number"
         # that will change with tags and commits
         process = subprocess.run(
-            ["git", "describe", "--tags"],
+            ["git", "describe", "--tags", "--dirty", "--long"],
             capture_output=True,
             universal_newlines=True,
             cwd=Path(__file__).parent.parent,
