@@ -327,7 +327,8 @@ databases to CSV files.
         tree = api.get_tree(
             client=self._get_client(),
         )
-        _print_tree(tree)
+        for branch in tree:
+            _print_tree(branch)
 
     @cement.ex(
         help="Show column names and values for a given row",

@@ -270,12 +270,15 @@ def test_list_mentions(config):
 def test_get_tree(config):
     tree = api.get_tree(client=config["client"])
 
+    tree = tree[0]
+
     assert tree["parentId"] is None, "Expected the root of the tree to have no parent"
 
     tree.pop("children")
     ListRowsResponse(**tree)
 
     tree = api.get_tree(client=config["client"], include_rows=False)
+    tree = tree[0]
     assert tree["parentId"] is None, "Expected the root of the tree to have no parent"
 
     tree.pop("children")
