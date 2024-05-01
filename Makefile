@@ -31,8 +31,8 @@ install:
 	@source $(CURDIR)/venv/bin/activate && \
 	    pip install -e .[test,jupyter,docs] && \
 	    deactivate
-	@-mkdir ~/.deeporigin
-	@-ln -s $(CURDIR)/venv/bin/deeporigin ~/.deeporigin/deeporigin
+	@-mkdir -p ~/.deeporigin
+	@test -f ~/.deeporigin/deeporigin || ln -s $(CURDIR)/venv/bin/deeporigin ~/.deeporigin/deeporigin
 	@echo 'export PATH="$$HOME/.deeporigin:$$PATH"' >> ~/.bash_profile
 
 build-docs:
