@@ -31,7 +31,7 @@ install:
 	@source $(CURDIR)/venv/bin/activate && \
 	    pip install -e .[test,jupyter,docs] && \
 	    deactivate
-	@-mkdir --parents ~/.deeporigin
+	@-mkdir -p ~/.deeporigin
 	if [ ! -f ~/.deeporigin/deeporigin ]; then
 		@-ln -s $(CURDIR)/venv/bin/deeporigin ~/.deeporigin/deeporigin
 	fi
