@@ -1,7 +1,6 @@
 """this implements controllers and hooks to connect to
 managed_data.py"""
 
-
 import os
 
 import cement
