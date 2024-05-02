@@ -4,11 +4,13 @@ import warnings
 
 import cement
 import termcolor
+from deeporigin import cache_do_api_tokens, get_do_api_tokens
+from deeporigin.config import get_value
+from deeporigin.utils import _print_dict
 
 from .. import __version__
 from ..exceptions import DeepOriginException
 from ..warnings import DeepOriginWarning
-from .auth import CONTROLLERS as AUTH_CONTROLLERS
 from .context import CONTROLLERS as CONTEXT_CONTROLLERS
 from .data import CONTROLLERS as DATA_CONTROLLERS
 from .variables import CONTROLLERS as VARIABLE_CONTROLLERS
@@ -42,6 +44,36 @@ class BaseController(cement.Controller):
         else:
             raise SystemExit(self._parser.print_help())
 
+    @cement.ex(
+        help="Authenticate to the Deep Origin platform",
+    )
+    def authenticate(self):
+        """list the columns of the row and their values, where applicable"""
+        access_token, refresh_token = get_do_api_tokens(verbose=True)
+
+        cache_do_api_tokens(access_token, refresh_token)
+
+    @cement.ex(
+        help="Show configuration",
+        arguments=[
+            (
+                ["--json"],
+                {
+                    "action": "store_true",
+                    "help": "Whether to return JSON formatted data [default: False]",
+                },
+            ),
+        ],
+    )
+    def config(self):
+        """list the columns of the row and their values, where applicable"""
+
+        data = get_value()
+
+        data.pop("list_bench_variables_query_template", None)
+
+        _print_dict(data, json=self.app.pargs.json)
+
 
 class App(cement.App):
     class Meta:
@@ -52,7 +84,6 @@ class App(cement.App):
             + VARIABLE_CONTROLLERS
             + CONTEXT_CONTROLLERS
             + DATA_CONTROLLERS
-            + AUTH_CONTROLLERS
         )
 
 

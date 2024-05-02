@@ -316,6 +316,8 @@ def test_download_file(config):
 
     else:
         _api.download_file(file_id, client=config["client"])
+        data = _api.describe_file(file_id)
+        os.remove(data["name"])
 
 
 def test_describe_file(config):
