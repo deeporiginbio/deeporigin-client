@@ -11,7 +11,7 @@ Deep Origin from the command line.
 ## Installation 
 
 > [!CAUTION]
-> You are strongly advised to install this in a virtual environment. 
+> As a best practice, we recommend  installing this in a virtual environment. 
 
 ### For end users
 

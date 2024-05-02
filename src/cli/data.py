@@ -14,6 +14,16 @@ from deeporigin.utils import PREFIX
 from tabulate import tabulate
 
 
+def _truncate(txt: str) -> str:
+    TERMINAL_WIDTH, _ = os.get_terminal_size()
+    txt = (
+        (txt[: int(TERMINAL_WIDTH / 2)] + "…")
+        if len(txt) > int(TERMINAL_WIDTH / 2)
+        else txt
+    )
+    return txt
+
+
 @beartype
 def _print_tree(tree: dict, offset: int = 0) -> None:
     """helper function to pretty print a tree"""
@@ -73,7 +83,7 @@ databases to CSV files.
             return client  # pragma: no cover
 
     @cement.ex(
-        help="Merge to databases into a single one, integrating cross-references",
+        help="Merge two databases into a single one, integrating cross-references",
         arguments=[
             (
                 ["--databases"],
@@ -129,6 +139,23 @@ databases to CSV files.
                 _api.download_file(file, destination=destination)
 
     @cement.ex(
+        help="Download a file from Deep Origin",
+        arguments=[
+            (
+                ["file_id"],
+                {"help": "File ID", "action": "store"},
+            ),
+        ],
+    )
+    def download_file(self):
+        """download file"""
+
+        _api.download_file(
+            self.app.pargs.file_id,
+            client=self._get_client(),
+        )
+
+    @cement.ex(
         help="Describe and get metadata of file uploaded to database in your Deep Origin data management system",
         arguments=[
             (
@@ -177,6 +204,20 @@ databases to CSV files.
             self.app.pargs.row_id,
             client=self._get_client(),
         )
+        data.pop("rowJsonSchema", None)
+
+        if "cols" in data.keys():
+            col_names = [col["name"] for col in data["cols"]]
+            col_keys = [col["key"] for col in data["cols"]]
+
+            col_names = ", ".join(col_names)
+            col_keys = ", ".join(col_keys)
+
+            if data["type"] == "database" and not self.app.pargs.json:
+                data["Column Names"] = _truncate(col_names)
+                data["Column Keys"] = _truncate(col_keys)
+
+                data.pop("cols", None)
 
         _print_dict(data, json=self.app.pargs.json)
 
