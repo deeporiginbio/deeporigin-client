@@ -6,15 +6,22 @@ Run the commands below to use your favorite package manager to install the Deep 
 
 Run the following command:
 
+
+!!! warning
+    We recommend installing this package into a virtual environment. Some tools create their own virtual environments, like poetry.
+
+
 === "pip"
 
-
     ```bash
-    pip install deeporigin
+    pip install -q deeporigin
     ```
 
-    !!! warning
-        We recommend installing this package into a virtual environment, using a tool such as venv, pyenv, Pipenv, Poetry, or conda.
+=== "pipx"
+
+    ```bash
+    pipx install deeporigin
+    ```
 
 === "Pipenv"
 
@@ -27,6 +34,29 @@ Run the following command:
     ```bash
     poetry add deeporigin
     ```
+
+=== "uv"
+
+    ```bash
+    uv pip install deeporigin
+    ```
+
+
+
+=== "Flit"
+
+    ```bash
+    flit install deeporigin
+    ```
+
+## Supported Python versions
+
+`deeporigin` is [tested](https://github.com/formiclabs/deeporigin-client/actions/workflows/main.yml) against these versions of Python using GitHub Actions:
+
+- 3.9
+- 3.10
+- 3.11
+- 3.12
 
 ## For developers
 

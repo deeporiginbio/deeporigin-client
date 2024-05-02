@@ -1,63 +1,13 @@
 """this implements controllers and hooks to connect to
 managed_data.py"""
 
-import json
 import os
-from typing import Union
 
 import cement
-from beartype import beartype
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.managed_data import _api, api
 from deeporigin.managed_data.client import DeepOriginClient
-from deeporigin.utils import PREFIX
-from tabulate import tabulate
-
-
-def _truncate(txt: str) -> str:
-    TERMINAL_WIDTH, _ = os.get_terminal_size()
-    txt = (
-        (txt[: int(TERMINAL_WIDTH / 2)] + "…")
-        if len(txt) > int(TERMINAL_WIDTH / 2)
-        else txt
-    )
-    return txt
-
-
-@beartype
-def _print_tree(tree: dict, offset: int = 0) -> None:
-    """helper function to pretty print a tree"""
-    print(" " * offset + tree["hid"])
-
-    if "children" not in tree.keys():
-        return
-    for child in tree["children"]:
-        _print_tree(child, offset + 2)
-
-
-def _print_dict(
-    data: dict,
-    *,
-    json: bool = True,
-    transpose: bool = True,
-) -> None:
-    """helper function to pretty print a dict as a table"""
-
-    if json:
-        _show_json(data)
-    else:
-        if transpose:
-            data = data.items()
-            headers = ["Name", "Value"]
-        else:
-            headers = "keys"
-        print(
-            tabulate(
-                data,
-                headers=headers,
-                tablefmt="rounded_outline",
-            )
-        )
+from deeporigin.utils import PREFIX, _print_dict, _print_tree, _show_json, _truncate
 
 
 class DataController(cement.Controller):
@@ -450,12 +400,6 @@ as-is. """
             raise DeepOriginException(
                 f"Exactly one of <source> and <destination> should be prefixed with `{PREFIX}`"
             )
-
-
-@beartype
-def _show_json(data: Union[list, dict]) -> None:
-    """utility for pretty printing JSON"""
-    print(json.dumps(data, indent=2))
 
 
 CONTROLLERS = [

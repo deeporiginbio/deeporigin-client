@@ -1,8 +1,11 @@
+import json
 import os
+from typing import Union
 from urllib.parse import urljoin
 
 from beartype import beartype
 from deeporigin.config import get_value
+from tabulate import tabulate
 
 __all__ = [
     "expand_user",
@@ -10,6 +13,60 @@ __all__ = [
 
 
 PREFIX = "deeporigin://"
+
+
+@beartype
+def _print_tree(tree: dict, offset: int = 0) -> None:
+    """helper function to pretty print a tree"""
+    print(" " * offset + tree["hid"])
+
+    if "children" not in tree.keys():
+        return
+    for child in tree["children"]:
+        _print_tree(child, offset + 2)
+
+
+@beartype
+def _truncate(txt: str) -> str:
+    TERMINAL_WIDTH, _ = os.get_terminal_size()
+    txt = (
+        (txt[: int(TERMINAL_WIDTH / 2)] + "…")
+        if len(txt) > int(TERMINAL_WIDTH / 2)
+        else txt
+    )
+    return txt
+
+
+@beartype
+def _show_json(data: Union[list, dict]) -> None:
+    """utility for pretty printing JSON"""
+    print(json.dumps(data, indent=2))
+
+
+@beartype
+def _print_dict(
+    data: dict,
+    *,
+    json: bool = True,
+    transpose: bool = True,
+) -> None:
+    """helper function to pretty print a dict as a table"""
+
+    if json:
+        _show_json(data)
+    else:
+        if transpose:
+            data = data.items()
+            headers = ["Name", "Value"]
+        else:
+            headers = "keys"
+        print(
+            tabulate(
+                data,
+                headers=headers,
+                tablefmt="rounded_outline",
+            )
+        )
 
 
 @beartype

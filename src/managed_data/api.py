@@ -321,7 +321,14 @@ def _parse_column_value(
         Do not use this function.
     """
 
-    value = [field["value"] for field in fields if field["columnId"] == column["id"]]
+    field = [field for field in fields if field["columnId"] == column["id"]]
+
+    if len(field) == 0:
+        return [None]
+
+    if "value" not in field[0].keys():
+        return [None]
+    value = [field[0]["value"]]
 
     # special treatment for some column types
     if column["type"] == "select" and len(value) == 1:
@@ -332,7 +339,11 @@ def _parse_column_value(
         file_ids.extend(value)
 
         if use_file_names:
-            value = [describe_file(file_id)["name"] for file_id in value]
+            try:
+                value = [describe_file(file_id)["name"] for file_id in value]
+            except DeepOriginException:
+                # something went wrong, ignore
+                pass
     elif column["type"] == "reference" and len(value) == 1:
         value = value[0]["rowIds"]
         reference_ids.extend(value)
