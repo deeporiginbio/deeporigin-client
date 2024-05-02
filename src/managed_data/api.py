@@ -2,6 +2,7 @@
 interacting with Deep Origin managed data."""
 
 import os
+from pathlib import Path
 from typing import Any, Optional, Union
 
 from beartype import beartype
@@ -139,6 +140,8 @@ def download(
         include_files: if `True`, download files in database.
 
     """
+
+    Path(destination).mkdir(parents=True, exist_ok=True)
 
     if not os.path.isdir(destination):
         raise DeepOriginException(f"{destination} should be a path to a folder.")
