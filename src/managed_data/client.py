@@ -1,3 +1,4 @@
+import json
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Union
@@ -27,6 +28,30 @@ class Client(ABC):
     @abstractmethod
     def invoke(self, endpoint: str, data: dict):
         pass  # pragma: no cover
+
+    def __props__(self):
+        """helper method to show all properties of the client"""
+        props = dict()
+        for attribute in dir(self):
+            if attribute.startswith("_"):
+                continue
+
+            try:
+                if not callable(getattr(self, attribute)):
+                    props[str(attribute)] = getattr(self, attribute)
+            except Exception:
+                pass
+
+        return json.dumps(props, indent=4)
+
+    def __repr__(self):
+        return self.__props__()
+
+    def _repr_html_(self):
+        return self.__props__()
+
+    def __str__(self):
+        return self.__props__()
 
 
 @dataclass

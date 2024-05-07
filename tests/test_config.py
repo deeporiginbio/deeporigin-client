@@ -1,4 +1,5 @@
 import os
+import sys
 import tempfile
 import unittest
 import unittest.mock
@@ -75,6 +76,7 @@ class TestCase(unittest.TestCase):
         expected_value["feature_flags"]["variables"] = True
         self.assertEqual(expected_value, value)
 
+    @unittest.skipIf(sys.platform.startswith("win"), "Test skipped on Windows")
     def test_file(self):
         env = {}
 

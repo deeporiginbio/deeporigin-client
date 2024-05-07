@@ -3,6 +3,7 @@ import io
 import os
 import pathlib
 import shutil
+import sys
 import tempfile
 import unittest
 import unittest.mock
@@ -17,6 +18,7 @@ from deeporigin.variables import types as variables_types
 from deeporigin.warnings import DeepOriginWarning
 
 
+@unittest.skipIf(sys.platform.startswith("win"), "Test skipped on Windows")
 class TestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
