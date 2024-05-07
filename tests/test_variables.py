@@ -7,7 +7,7 @@ import tempfile
 import unittest
 import unittest.mock
 from contextlib import redirect_stderr, redirect_stdout
-
+import sys
 import crontab
 import pydantic
 from deeporigin import cli, config, do_api, feature_flags, utils, variables
@@ -16,7 +16,7 @@ from deeporigin.variables import core as variables_core
 from deeporigin.variables import types as variables_types
 from deeporigin.warnings import DeepOriginWarning
 
-
+@unittest.skipIf(sys.platform.startswith('win'), "Test skipped on Windows")
 class TestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

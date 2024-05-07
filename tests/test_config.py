@@ -2,7 +2,7 @@ import os
 import tempfile
 import unittest
 import unittest.mock
-
+import sys
 import yaml
 from deeporigin import config
 from deeporigin.exceptions import DeepOriginException
@@ -75,6 +75,7 @@ class TestCase(unittest.TestCase):
         expected_value["feature_flags"]["variables"] = True
         self.assertEqual(expected_value, value)
 
+    @unittest.skipIf(sys.platform.startswith('win'), "Test skipped on Windows")
     def test_file(self):
         env = {}
 
