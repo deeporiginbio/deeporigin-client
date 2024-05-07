@@ -52,10 +52,11 @@ jobs:
 
 
   functionality-tests:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: true
       matrix:
+        os: [ubuntu-latest, windows-latest]
         python-version: ["3.9", "3.10", "3.11", "3.12"]
 
     needs: [code-formatting-and-syntax]
