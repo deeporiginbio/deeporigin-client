@@ -36,6 +36,11 @@ def get_value(
     """
     value = confuse.Configuration("deep_origin", __name__)
 
+    # read configuration from environment variables
+    # we do this first so that environment variables can be 
+    # overridden by the user's configuration in the config file
+    value.set_env(sep="__")
+
     # read the default configuration
     default_config_filename = os.path.join(CONFIG_DIR, "default.yml")
     value.set_file(default_config_filename, base_for_paths=True)
@@ -46,8 +51,7 @@ def get_value(
             value.set_file(user_config_filename, base_for_paths=True)
             break
 
-    # read configuration from environment variables
-    value.set_env(sep="__")
+    
 
     # validate configuration
     template = {
