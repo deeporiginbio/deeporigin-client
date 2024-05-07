@@ -3,11 +3,12 @@ import io
 import os
 import pathlib
 import shutil
+import sys
 import tempfile
 import unittest
 import unittest.mock
 from contextlib import redirect_stderr, redirect_stdout
-import sys
+
 import crontab
 import pydantic
 from deeporigin import cli, config, do_api, feature_flags, utils, variables

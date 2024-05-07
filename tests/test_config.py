@@ -1,8 +1,9 @@
 import os
+import sys
 import tempfile
 import unittest
 import unittest.mock
-import sys
+
 import yaml
 from deeporigin import config
 from deeporigin.exceptions import DeepOriginException
