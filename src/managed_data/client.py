@@ -21,16 +21,22 @@ from deeporigin.utils import _nucleus_url
 
 @dataclass
 class Client(ABC):
+    """client abstract base class. Actual clients inherit from this base class. Actual clients need to implement a `authenticate` and `invoke` method"""
+
     @abstractmethod
     def authenticate(self, refresh_tokens: bool = True):
+        """authenticate method to be called before making any requests. This needs to be implemented in derived classes"""
+
         pass  # pragma: no cover
 
     @abstractmethod
     def invoke(self, endpoint: str, data: dict):
+        """invoke method to be called to make requests. This needs to be implemented in derived classes"""
+
         pass  # pragma: no cover
 
     def __props__(self):
-        """helper method to show all properties of the client"""
+        """helper method to show all properties of the client. Do not use."""
         props = dict()
         for attribute in dir(self):
             if attribute.startswith("_"):
@@ -45,23 +51,30 @@ class Client(ABC):
         return json.dumps(props, indent=4)
 
     def __repr__(self):
+        """helper method to show all properties of the client. Do not use."""
         return self.__props__()
 
     def _repr_html_(self):
+        """helper method to show all properties of the client. Do not use. This method is called when you invoke a variable in a Jupyter instance"""
         return self.__props__()
 
     def __str__(self):
+        """helper method to show all properties of the client. Do not use."""
         return self.__props__()
 
 
 @dataclass
 class DeepOriginClient(Client):
+    """client to interact with DeepOrigin API"""
+
     api_url = _nucleus_url()
     org_id = get_value()["organization_id"]
 
     headers = dict()
 
     def authenticate(self, refresh_tokens: bool = True):
+        """authenticate to DeepOrigin API"""
+
         if refresh_tokens:
             api_access_token, api_refresh_token = get_do_api_tokens()
             cache_do_api_tokens(api_access_token, api_refresh_token)
@@ -108,6 +121,7 @@ class MockClient(Client):
 
     def invoke_list_rows(self, data: dict):
         """callback when we invoke ListRows"""
+
         if data == dict(filters=[]):
             # list_rows called with no filters. return
             # a workspace, a database, and some rows
@@ -180,6 +194,8 @@ class MockClient(Client):
             ]
 
     def invoke_describe_row(self, data):
+        """callback when we invoke DescribeRow"""
+
         if data["rowId"].startswith("db-"):
             # we are likely asking for a database
             name = self.databases[0]
@@ -224,6 +240,8 @@ class MockClient(Client):
         return row
 
     def invoke_list_database_rows(self, data):
+        """callback when we invoke ListDatabaseRows"""
+
         fields = [
             FieldItem(
                 columnId=f"column-{idx}",
@@ -318,6 +336,8 @@ def _check_response(response: requests.models.Response) -> Union[dict, list]:
 
 
 def file_description():
+    """mock file description"""
+
     return dict(
         id="_file:placeholder-file",
         uri="s3://placeholder/uri",

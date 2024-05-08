@@ -4,6 +4,8 @@ from .secret_env_var_value import SecretEnvironmentVariableValue
 
 
 class OpenAiApiKey(SecretEnvironmentVariableValue):
+    """Open AI API key."""
+
     class Meta:
         platform_id = "Open AI API key"
 

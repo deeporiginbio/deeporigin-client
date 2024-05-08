@@ -11,6 +11,8 @@ from deeporigin.utils import PREFIX, _print_dict, _print_tree, _show_json, _trun
 
 
 class DataController(cement.Controller):
+    """Controller for data subcommand of CLI"""
+
     class Meta:
         label = "data"
         stacked_on = "base"
@@ -348,6 +350,8 @@ databases to CSV files.
 
 
 class CopyController(cement.Controller):
+    """Copy Controller for copy subcommand in data"""
+
     class Meta:
         label = "cp"
         stacked_on = "data"

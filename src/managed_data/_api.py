@@ -76,6 +76,20 @@ def create_database(
     parent_id: Optional[str] = None,
     client: Optional[Client] = None,
 ) -> dict:
+    """Low level function that wraps the `CreateDatabase` endpoint.
+
+    Creates a new database within a workspace.
+
+    Args:
+        hid: Human ID of the database.
+        name: Name of the database.
+        parent_id: ID of the parent workspace.
+        hid_prefix: Human ID prefix of the database. This prefix is used in every row.
+
+
+    Returns:
+        A dictionary that conforms to a [CreateDatabaseResponse][src.managed_data.schema.CreateDatabaseResponse]."""
+
     client = _get_default_client(client)
 
     data = dict(
@@ -98,6 +112,19 @@ def update_workspace(
     parent_id: Optional[str] = None,
     client: Optional[Client] = None,
 ) -> dict:
+    """Low level function that wraps the `UpdateWorkspace` endpoint.
+
+    Updates a workspace.
+
+    Args:
+        hid: Human ID of the workspace.
+        name: Name of the workspace.
+        parent_id: ID (or human ID) of the parent.
+
+    Returns:
+        A dictionary that conforms to a [UpdateWorkspaceResponse][src.managed_data.schema.UpdateWorkspaceResponse].
+
+    """
     client = _get_default_client(client)
 
     data = dict(id=id, workspace=dict())
@@ -119,6 +146,20 @@ def update_database(
     parent_id: Optional[str] = None,
     client: Optional[Client] = None,
 ) -> dict:
+    """Low level function that wraps the `UpdateDatabase` endpoint.
+
+    Updates a database.
+
+    Args:
+        hid: Human ID of the database.
+        name: Name of the database.
+        parent_id: ID (or human ID) of the parent.
+        hid_prefix: Human ID prefix of the database. This prefix is used in every row.
+
+    Returns:
+        A dictionary that conforms to a [UpdateDatabaseResponse][src.managed_data.schema.UpdateWorkspaceResponse].
+
+    """
     client = _get_default_client(client)
 
     data = dict(id=id, database=dict())
@@ -164,6 +205,20 @@ def add_database_column(
     cardinality: Cardinality = "one",
     client: Optional[Client] = None,
 ) -> dict:
+    """Low level function that wraps the `AddDatabaseColumn` endpoint.
+
+    Adds a new column to a database.
+
+    Args:
+        database_id: ID of the database.
+        name: Name of the column.
+        type: Type of the column.
+        key: Key of the column.
+        cardinality: Cardinality of the column.
+
+    Returns:
+        A dictionary that conforms to a [AddDatabaseColumnResponse][src.managed_data.schema.AddDatabaseColumnResponse].
+    """
     client = _get_default_client(client)
 
     if key is None:
@@ -196,6 +251,16 @@ def delete_database_column(
     *,
     client: Optional[Client] = None,
 ) -> None:
+    """Low level function that wraps the `DeleteDatabaseColumn` endpoint.
+
+    Deletes a column from a database.
+
+    Args:
+        column_id: ID of the column.
+
+    Returns:
+        None
+    """
     client = _get_default_client(client)
 
     client.invoke("DeleteDatabaseColumn", dict(columnId=column_id))

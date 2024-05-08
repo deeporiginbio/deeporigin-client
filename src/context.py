@@ -73,6 +73,7 @@ class Context:
 
 @functools.cache
 def get_value():
+    """returns a context from environment variables"""
     host_str = os.getenv("DEEP_ORIGIN_HOST", None)
     if host_str:
         host_dict = json.loads(host_str)

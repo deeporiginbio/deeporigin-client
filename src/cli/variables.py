@@ -29,6 +29,8 @@ __all__ = [
 
 
 class VariablesController(cement.Controller):
+    """controller to retrieve and install variables and secrets from the Deep Origin platform"""
+
     class Meta:
         label = "variables"
         stacked_on = "base"
@@ -44,6 +46,8 @@ class VariablesController(cement.Controller):
 
 
 class InstallVariablesController(cement.Controller):
+    """controller to retrieve and install variables and secrets from the Deep Origin platform"""
+
     class Meta:
         label = "variables-install"
         aliases = ["install"]
@@ -95,6 +99,8 @@ class InstallVariablesController(cement.Controller):
 
     @cement.ex(hide=True)
     def _default(self):
+        """default action when no sub-command is passed"""
+
         feature_flags = get_feature_flags()
         if not feature_flags.variables:
             msg = "Updating variables is not yet available. For beta access, please contact support at support@deeporigin.com."
@@ -204,6 +210,8 @@ class InstallVariablesController(cement.Controller):
 
 
 class AutoInstallVariablesController(cement.Controller):
+    """controller to automatically install variables and secrets from the Deep Origin platform"""
+
     class Meta:
         label = "variables-auto-install"
         aliases = ["auto-install"]
@@ -271,6 +279,8 @@ class AutoInstallVariablesController(cement.Controller):
 
     @cement.ex(hide=True)
     def _default(self):
+        """default action when no sub-command is passed"""
+
         feature_flags = get_feature_flags()
         if not feature_flags.variables:
             msg = "Updating variables is not yet available. For beta access, please contact support at support@deeporigin.com."
@@ -304,6 +314,8 @@ class AutoInstallVariablesController(cement.Controller):
 
 
 class UninstallVariablesController(cement.Controller):
+    """controller to uninstall variables and secrets from the Deep Origin platform"""
+
     class Meta:
         label = "variables-uninstall"
         aliases = ["uninstall"]
@@ -354,6 +366,8 @@ class UninstallVariablesController(cement.Controller):
 
     @cement.ex(hide=True)
     def _default(self):
+        """default action when no sub-command is passed"""
+
         feature_flags = get_feature_flags()
         if not feature_flags.variables:
             msg = "Updating variables is not yet available. For beta access, please contact support at support@deeporigin.com."

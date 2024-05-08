@@ -31,7 +31,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-  code-formatting-and-syntax:
+  code-formatting-syntax-and-docstrings:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code

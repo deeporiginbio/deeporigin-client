@@ -11,6 +11,8 @@ __all__ = [
 
 
 class ContextController(cement.Controller):
+    """Context controller"""
+
     class Meta:
         label = "context"
         stacked_on = "base"
@@ -21,6 +23,7 @@ class ContextController(cement.Controller):
 
     @cement.ex(hide=True)
     def _default(self):
+        """Default action. returns the context"""
         context = get_context()
 
         # bench id
