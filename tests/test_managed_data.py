@@ -71,6 +71,15 @@ def test_create_workspace(config):
     CreateWorkspaceResponse(**data)
 
 
+def test_delete_workspaces(config):
+    workspaces = _api.list_rows(row_type="workspace")
+
+    ws_ids = [ws["id"] for ws in workspaces if "test" in ws["hid"]]
+
+    if len(ws_ids) > 0:
+        _api.delete_rows(ws_ids, client=config["client"])
+
+
 def test_list_rows(config):
     rows = _api.list_rows(
         parent_id=config["databases"][0],
