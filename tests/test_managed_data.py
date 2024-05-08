@@ -90,7 +90,7 @@ def test_delete_rows(config):
     """delete workspaces and databases"""
 
     for row_type in ["workspace", "database"]:
-        rows = _api.list_rows(row_type=row_type)
+        rows = _api.list_rows(row_type=row_type, client=config["client"])
         row_ids = [row["id"] for row in rows if "test" in row["hid"]]
 
         if len(row_ids) > 0:

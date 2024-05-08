@@ -212,6 +212,9 @@ class MockClient(Client):
                     parentId=self.workspaces[0],
                 ).model_dump()
             ]
+        else:
+            print(data)
+            raise Exception()
 
     def invoke_describe_row(self, data):
         """callback when we invoke DescribeRow"""
@@ -295,6 +298,9 @@ class MockClient(Client):
                 dateUpdated="2024-05-08 19:16:09.26078",
                 createdByUserDrn="drn:identity::user:google-apps|foo@deeporigin.com",
             ).model_dump()
+
+        elif endpoint == "DeleteRows":
+            return dict(data=dict())
 
         elif endpoint == "CreateDatabase":
             name = data["database"]["name"]
