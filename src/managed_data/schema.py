@@ -25,6 +25,7 @@ DataType = Literal[
     "file",
     "reference",
     "editor",
+    "float",
 ]
 """Type of a column"""
 
@@ -91,6 +92,9 @@ class DescribeFileResponse(BaseModel):
     status: FileStatus
     contentLength: int
     contentType: str
+    dateCreated: str
+    dateUpdated: str
+    createdByUserDrn: str
 
     class Config:
         extra = "forbid"
@@ -118,7 +122,7 @@ class FieldItem(BaseModel):
     cellId: str
     validationStatus: str = "valid"
     type: DataType = "text"
-    value: Union[str, dict, int] = "placeholder-text"
+    value: Union[str, dict, int, float] = "placeholder-text"
     systemType: Optional[str] = None
 
     class Config:

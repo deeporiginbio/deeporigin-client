@@ -1,6 +1,7 @@
 """this tests low level functions in the data API"""
 
 import os
+import uuid
 
 import pandas as pd
 import pytest
@@ -13,6 +14,7 @@ from deeporigin.managed_data.client import (
 )
 from deeporigin.managed_data.schema import (
     DATAFRAME_ATTRIBUTE_KEYS,
+    CreateWorkspaceResponse,
     DescribeFileResponse,
     DescribeRowResponseDatabase,
     DescribeRowResponseRow,
@@ -60,6 +62,15 @@ def config(pytestconfig):
     # teardown tasks, if any
 
 
+def test_create_workspace(config):
+    data = _api.create_workspace(
+        name="test-" + str(uuid.uuid4())[:6],
+        client=config["client"],
+    )
+
+    CreateWorkspaceResponse(**data)
+
+
 def test_list_rows(config):
     rows = _api.list_rows(
         parent_id=config["databases"][0],
@@ -79,7 +90,6 @@ def test_list_rows_root_parent(config):
         client=config["client"],
     )
 
-    assert len(root) == 1, "Expected there to be exactly one root"
     root = root[0]
 
     assert root["parentId"] is None, "Expected root to have no parent"
