@@ -301,6 +301,7 @@ class MockClient(Client):
             return CreateDatabaseResponse(
                 id="_database:" + name,
                 hid="_database:" + name,
+                hidPrefix="placeholder",
                 name=name,
                 dateCreated="2024-05-08 19:16:09.26078",
                 dateUpdated="2024-05-08 19:16:09.26078",

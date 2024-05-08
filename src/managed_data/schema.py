@@ -51,13 +51,14 @@ class CreateDatabaseResponse(BaseModel):
     `CreateDatabase` endpoint."""
 
     id: str
-    parentId: str
     type: RowType = "database"
     name: str
+    parentId: str = "placeholder"  # sometimes not returned
     dateCreated: str
     dateUpdated: str
     createdByUserDrn: str
     hid: str
+    hidPrefix: str
     cols: list
     rowJsonSchema: dict = dict()
 

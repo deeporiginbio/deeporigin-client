@@ -48,9 +48,10 @@ def config(pytestconfig):
 
         # if we're going to be making requests to a live
         # instance, we need to make sensible requests
-        databases = _api.list_rows(row_type="database")
-        data["databases"] = [db["hid"] for db in databases]
-        rows = _api.list_rows(row_type="row")
+        rows = _api.list_rows()
+
+        data["databases"] = [row["hid"] for row in rows if row["type"] == "database"]
+        data["workspaces"] = [row["hid"] for row in rows if row["type"] == "workspace"]
         data["rows"] = [row["hid"] for row in rows if row["type"] == "row"]
 
         # get a list of all files
