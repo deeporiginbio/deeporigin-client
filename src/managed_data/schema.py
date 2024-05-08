@@ -35,11 +35,27 @@ DATAFRAME_ATTRIBUTE_KEYS = {
     "reference_ids",
 }
 
+
+Cardinality = Literal["one", "many"]
+
 IDFormat = Literal["human-id", "system-id"]
 """Format of an ID"""
 
 DatabaseReturnType = Literal["dataframe", "dict"]
 """Return type of a database"""
+
+
+class CreateWorkspaceResponse(BaseModel):
+    """Schema for responses from the
+    `CreateWorkspace` endpoint."""
+
+    id: str
+    hid: str
+    name: str
+    dateCreated: str
+    dateUpdated: str
+    createdByUserDrn: str
+    type: RowType
 
 
 class DescribeFileResponse(BaseModel):
@@ -95,7 +111,7 @@ class ColumnItem(BaseModel):
     parentId: str = "db-placeholder-1"
     type: DataType = "text"
     dateCreated: str = "2024-04-04T17:03:33.033115"
-    cardinality: str = "one"
+    cardinality: Cardinality = "one"
     canCreate: Optional[bool] = False
     configSelect: Optional[dict] = None
 

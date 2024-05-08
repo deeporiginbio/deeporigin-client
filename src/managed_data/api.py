@@ -7,17 +7,59 @@ from typing import Any, Optional, Union
 
 from beartype import beartype
 from deeporigin.exceptions import DeepOriginException
-from deeporigin.managed_data._api import (
-    convert_id_format,
-    describe_file,
-    describe_row,
-    download_file,
-    list_database_rows,
-    list_rows,
-)
+from deeporigin.managed_data import _api
 from deeporigin.managed_data.client import Client
 from deeporigin.managed_data.schema import DatabaseReturnType, IDFormat
 from deeporigin.utils import PREFIX
+
+
+@beartype
+def create_workspace(
+    *,
+    hid: str,
+    name: str,
+    parent_id: Optional[str] = None,
+    client: Optional[Client] = None,
+    ignore_existing: bool = False,
+) -> dict:
+    if ignore_existing:
+        rows = _api.list_rows(row_type="workspace", client=client)
+        row_ids = [row["hid"] for row in rows]
+
+        if hid in row_ids:
+            return [row for row in rows if row["hid"] == hid][0]
+
+    return _api.create_workspace(
+        hid=hid,
+        name=name,
+        parent_id=parent_id,
+        client=client,
+    )
+
+
+@beartype
+def create_database(
+    *,
+    hid: str,
+    name: str,
+    hid_prefix: str,
+    parent_id: Optional[str] = None,
+    client: Optional[Client] = None,
+    ignore_existing: bool = False,
+) -> dict:
+    if ignore_existing:
+        rows = _api.list_rows(row_type="workspace", client=client)
+        row_ids = [row["hid"] for row in rows]
+
+        if hid in row_ids:
+            return [row for row in rows if row["hid"] == hid][0]
+
+    return _api.create_workspace(
+        hid=hid,
+        name=name,
+        parent_id=parent_id,
+        client=client,
+    )
 
 
 @beartype
@@ -45,13 +87,13 @@ def get_tree(
 
     if include_rows:
         # we need to fetch everything, so use a single call
-        objects = list_rows(client=client)
+        objects = _api.list_rows(client=client)
         rows = [obj for obj in objects if obj["type"] == "row"]
         workspaces = [obj for obj in objects if obj["type"] == "workspace"]
         databases = [obj for obj in objects if obj["type"] == "database"]
     else:
-        workspaces = list_rows(row_type="workspace", client=client)
-        databases = list_rows(row_type="database", client=client)
+        workspaces = _api.list_rows(row_type="workspace", client=client)
+        databases = _api.list_rows(row_type="database", client=client)
         objects = workspaces + databases
 
     for obj in workspaces + databases:
@@ -149,7 +191,7 @@ def download(
     source = source.replace(PREFIX, "")
 
     # first, need to determine what this is.
-    obj = describe_row(source, client=client)
+    obj = _api.describe_row(source, client=client)
     if obj["type"] == "database":
         download_database(
             obj,
@@ -187,7 +229,7 @@ def download_database(
         raise DeepOriginException(f"{destination} should be a path to a folder.")
 
     if isinstance(source, str):
-        source = describe_row(source, client=client)
+        source = _api.describe_row(source, client=client)
     elif not {"hid", "id"}.issubset(set(list(source.keys()))):
         raise DeepOriginException(
             f"If `source` is a dictionary, expected it contain the `hid` and `id` keys. These keys were not found. Instead, the keys are: {source.keys()}"
@@ -206,7 +248,7 @@ def download_database(
         file_ids = df.attrs["file_ids"]
 
         for file_id in file_ids:
-            download_file(file_id, destination, client=client)
+            _api.download_file(file_id, destination, client=client)
 
     df.to_csv(os.path.join(destination, database_hid + ".csv"))
 
@@ -233,10 +275,10 @@ def get_dataframe(
     """
 
     # figure out the rows
-    rows = list_database_rows(database_id, client=client)
+    rows = _api.list_database_rows(database_id, client=client)
 
     # figure out the column names and ID of the database
-    response = describe_row(database_id, client=client)
+    response = _api.describe_row(database_id, client=client)
     assert (
         response["type"] == "database"
     ), f"Expected database_id: {database_id} to resolve to a database, but instead, it resolved to a {response['type']}"
@@ -340,7 +382,7 @@ def _parse_column_value(
 
         if use_file_names:
             try:
-                value = [describe_file(file_id)["name"] for file_id in value]
+                value = [_api.describe_file(file_id)["name"] for file_id in value]
             except DeepOriginException:
                 # something went wrong, ignore
                 pass
@@ -349,7 +391,7 @@ def _parse_column_value(
         reference_ids.extend(value)
 
         if reference_format == "human-id":
-            value = convert_id_format(ids=value)
+            value = _api.convert_id_format(ids=value)
             value = [thing["hid"] for thing in value]
 
     # if there is no item
@@ -419,7 +461,7 @@ def get_columns(
         row_id: ID (or human ID) of a row or database on Deep Origin.
     """
 
-    response = describe_row(row_id, fields=True, client=client)
+    response = _api.describe_row(row_id, fields=True, client=client)
 
     assert response["type"] in [
         "row",
@@ -454,7 +496,7 @@ def get_row_data(
         DeepOriginException: If row_id is not a row
     """
 
-    response = describe_row(row_id, fields=True, client=client)
+    response = _api.describe_row(row_id, fields=True, client=client)
 
     if response["type"] != "row":
         raise DeepOriginException(
@@ -462,7 +504,7 @@ def get_row_data(
         )
 
     # ask parent for column names
-    parent_response = describe_row(response["parentId"], client=client)
+    parent_response = _api.describe_row(response["parentId"], client=client)
 
     if parent_response["type"] != "database":
         raise DeepOriginException(
