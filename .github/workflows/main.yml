@@ -50,6 +50,15 @@ jobs:
           version: 0.3.1
           args: check --select I
 
+      - name: Check docstrings using interrogate
+        run: |
+          pip install interrogate
+          if [ $(interrogate -c pyproject.toml -v . -f 100 | grep "FAILED" | wc -l) = 1 ]; then
+             echo "necessary docstrings missing:"
+             interrogate -vv . -f 100 
+             exit 1
+          fi
+
 
   functionality-tests:
     runs-on: ${{ matrix.os }}

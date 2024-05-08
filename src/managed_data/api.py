@@ -14,55 +14,6 @@ from deeporigin.utils import PREFIX
 
 
 @beartype
-def create_workspace(
-    *,
-    hid: str,
-    name: str,
-    parent_id: Optional[str] = None,
-    client: Optional[Client] = None,
-    ignore_existing: bool = False,
-) -> dict:
-    if ignore_existing:
-        rows = _api.list_rows(row_type="workspace", client=client)
-        row_ids = [row["hid"] for row in rows]
-
-        if hid in row_ids:
-            return [row for row in rows if row["hid"] == hid][0]
-
-    return _api.create_workspace(
-        hid=hid,
-        name=name,
-        parent_id=parent_id,
-        client=client,
-    )
-
-
-@beartype
-def create_database(
-    *,
-    hid: str,
-    name: str,
-    hid_prefix: str,
-    parent_id: Optional[str] = None,
-    client: Optional[Client] = None,
-    ignore_existing: bool = False,
-) -> dict:
-    if ignore_existing:
-        rows = _api.list_rows(row_type="workspace", client=client)
-        row_ids = [row["hid"] for row in rows]
-
-        if hid in row_ids:
-            return [row for row in rows if row["hid"] == hid][0]
-
-    return _api.create_workspace(
-        hid=hid,
-        name=name,
-        parent_id=parent_id,
-        client=client,
-    )
-
-
-@beartype
 def get_tree(
     *,
     include_rows: bool = True,

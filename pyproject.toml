@@ -78,3 +78,20 @@ universal = true
 omit = [
     "src/managed_data/client.py"
 ]
+
+
+[tool.interrogate]
+fail-under = 100
+exclude = ["setup.py", "docs", "build","tests"]
+ignore-init-method = true
+ignore-init-module = true
+ignore-magic = true
+ignore-semiprivate = true
+ignore-private = true
+ignore-property-decorators = true
+ignore-module = true
+ignore-nested-functions = true
+ignore-nested-classes = true
+ignore-setters = false
+ignore-regex = ["^get$", "^mock_.*", ".*BaseClass.*"]
+color = true
