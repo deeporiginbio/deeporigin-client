@@ -45,6 +45,25 @@ DatabaseReturnType = Literal["dataframe", "dict"]
 """Return type of a database"""
 
 
+class CreateDatabaseResponse(BaseModel):
+    """Schema for responses from the
+    `CreateDatabase` endpoint."""
+
+    id: str
+    parentId: str
+    type: RowType = "database"
+    name: str
+    dateCreated: str
+    dateUpdated: str
+    createdByUserDrn: str
+    hid: str
+    cols: list
+    rowJsonSchema: dict
+
+    class Config:
+        extra = "forbid"
+
+
 class CreateWorkspaceResponse(BaseModel):
     """Schema for responses from the
     `CreateWorkspace` endpoint."""
@@ -56,6 +75,10 @@ class CreateWorkspaceResponse(BaseModel):
     dateUpdated: str
     createdByUserDrn: str
     type: RowType
+    rowJsonSchema: dict = dict()
+
+    class Config:
+        extra = "forbid"
 
 
 class DescribeFileResponse(BaseModel):
@@ -117,6 +140,14 @@ class ColumnItem(BaseModel):
 
     class Config:
         extra = "forbid"
+
+
+class AddDatabaseColumnResponse(BaseModel):
+    """Schema for responses from the
+    `AddDatabaseColumn` endpoint."""
+
+    column: ColumnItem
+    database: dict
 
 
 class DescribeRowResponse(BaseModel):

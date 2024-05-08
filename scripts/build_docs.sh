@@ -20,9 +20,10 @@ if [ "$CI" = "true" ]; then
 else
   echo "Running Locally, will not install."
   source ./venv/bin/activate && \
-      MKDOCS_OUT="$(mkdocs build -s 2>&1)" \
+      MKDOCS_OUT="$(mkdocs build -s 2>&1)" && \
       deactivate
 fi
+
 
 
 if [ "$?" -gt 0 ]; then

@@ -70,9 +70,9 @@ def create_workspace(
 @beartype
 def create_database(
     *,
-    hid: str,
     name: str,
     hid_prefix: str,
+    hid: Optional[str] = None,
     parent_id: Optional[str] = None,
     client: Optional[Client] = None,
 ) -> dict:
@@ -91,6 +91,9 @@ def create_database(
         A dictionary that conforms to a [CreateDatabaseResponse][src.managed_data.schema.CreateDatabaseResponse]."""
 
     client = _get_default_client(client)
+
+    if hid is None:
+        hid = name
 
     data = dict(
         database=dict(
@@ -122,7 +125,7 @@ def update_workspace(
         parent_id: ID (or human ID) of the parent.
 
     Returns:
-        A dictionary that conforms to a [UpdateWorkspaceResponse][src.managed_data.schema.UpdateWorkspaceResponse].
+        A dictionary that conforms to a [CreateWorkspaceResponse][src.managed_data.schema.CreateWorkspaceResponse].
 
     """
     client = _get_default_client(client)
@@ -157,7 +160,7 @@ def update_database(
         hid_prefix: Human ID prefix of the database. This prefix is used in every row.
 
     Returns:
-        A dictionary that conforms to a [UpdateDatabaseResponse][src.managed_data.schema.UpdateWorkspaceResponse].
+        A dictionary that conforms to a [CreateDatabaseResponse][src.managed_data.schema.CreateDatabaseResponse].
 
     """
     client = _get_default_client(client)
