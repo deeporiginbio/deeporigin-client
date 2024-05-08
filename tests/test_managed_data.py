@@ -10,10 +10,10 @@ from deeporigin.managed_data import _api, api
 from deeporigin.managed_data.client import (
     DeepOriginClient,
     MockClient,
-    file_description,
 )
 from deeporigin.managed_data.schema import (
     DATAFRAME_ATTRIBUTE_KEYS,
+    CreateDatabaseResponse,
     CreateWorkspaceResponse,
     DescribeFileResponse,
     DescribeRowResponseDatabase,
@@ -34,10 +34,12 @@ def config(pytestconfig):
     if pytestconfig.getoption("client") == "mock":
         data["client"] = MockClient()
         data["mock"] = True
+
+        # unpack mock data from client
         data["workspaces"] = data["client"].workspaces
         data["databases"] = data["client"].databases
         data["rows"] = data["client"].rows
-        data["file"] = file_description()
+        data["file"] = data["client"].file
     else:
         data["mock"] = False
         client = DeepOriginClient()
@@ -71,13 +73,27 @@ def test_create_workspace(config):
     CreateWorkspaceResponse(**data)
 
 
-def test_delete_workspaces(config):
-    workspaces = _api.list_rows(row_type="workspace")
+def test_create_database(config):
+    unique_id = str(uuid.uuid4())[:6]
+    data = _api.create_database(
+        name="test-" + unique_id,
+        hid_prefix="test" + unique_id,
+        client=config["client"],
+        parent_id=config["workspaces"][0],
+    )
 
-    ws_ids = [ws["id"] for ws in workspaces if "test" in ws["hid"]]
+    CreateDatabaseResponse(**data)
 
-    if len(ws_ids) > 0:
-        _api.delete_rows(ws_ids, client=config["client"])
+
+def test_delete_rows(config):
+    """delete workspaces and databases"""
+
+    for row_type in ["workspace", "database"]:
+        rows = _api.list_rows(row_type=row_type)
+        row_ids = [row["id"] for row in rows if "test" in row["hid"]]
+
+        if len(row_ids) > 0:
+            _api.delete_rows(row_ids, client=config["client"])
 
 
 def test_list_rows(config):

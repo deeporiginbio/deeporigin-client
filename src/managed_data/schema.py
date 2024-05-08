@@ -8,7 +8,7 @@ mock data for testing.
 
 from typing import Literal, Optional, Union
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 RowType = Literal["row", "database", "workspace"]
 """Type of a row"""
@@ -59,10 +59,9 @@ class CreateDatabaseResponse(BaseModel):
     createdByUserDrn: str
     hid: str
     cols: list
-    rowJsonSchema: dict
+    rowJsonSchema: dict = dict()
 
-    class Config:
-        extra = "forbid"
+    model_config = ConfigDict(extra="forbid")
 
 
 class CreateWorkspaceResponse(BaseModel):
@@ -75,11 +74,10 @@ class CreateWorkspaceResponse(BaseModel):
     dateCreated: str
     dateUpdated: str
     createdByUserDrn: str
-    type: RowType
+    type: RowType = "workspace"
     rowJsonSchema: dict = dict()
 
-    class Config:
-        extra = "forbid"
+    model_config = ConfigDict(extra="forbid")
 
 
 class DescribeFileResponse(BaseModel):
@@ -96,8 +94,7 @@ class DescribeFileResponse(BaseModel):
     dateUpdated: str
     createdByUserDrn: str
 
-    class Config:
-        extra = "forbid"
+    model_config = ConfigDict(extra="forbid")
 
 
 class ListRowsResponse(BaseModel):
@@ -110,8 +107,7 @@ class ListRowsResponse(BaseModel):
     name: Optional[str] = "placeholder"
     type: RowType
 
-    class Config:
-        extra = "forbid"
+    model_config = ConfigDict(extra="forbid")
 
 
 class FieldItem(BaseModel):
@@ -125,8 +121,7 @@ class FieldItem(BaseModel):
     value: Union[str, dict, int, float] = "placeholder-text"
     systemType: Optional[str] = None
 
-    class Config:
-        extra = "forbid"
+    model_config = ConfigDict(extra="forbid")
 
 
 class ColumnItem(BaseModel):
@@ -142,8 +137,7 @@ class ColumnItem(BaseModel):
     canCreate: Optional[bool] = False
     configSelect: Optional[dict] = None
 
-    class Config:
-        extra = "forbid"
+    model_config = ConfigDict(extra="forbid")
 
 
 class AddDatabaseColumnResponse(BaseModel):
@@ -179,8 +173,7 @@ class DescribeRowResponseRow(DescribeRowResponse):
     submissionStatus: str = "draft"
     validationStatus: str = "valid"
 
-    class Config:
-        extra = "forbid"
+    model_config = ConfigDict(extra="forbid")
 
 
 class DescribeRowResponseDatabase(DescribeRowResponse):
@@ -190,5 +183,4 @@ class DescribeRowResponseDatabase(DescribeRowResponse):
     hidPrefix: str
     name: str
 
-    class Config:
-        extra = "forbid"
+    model_config = ConfigDict(extra="forbid")

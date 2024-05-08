@@ -11,12 +11,31 @@ from deeporigin.do_api import read_cached_do_api_tokens
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.managed_data.schema import (
     ColumnItem,
+    CreateDatabaseResponse,
+    CreateWorkspaceResponse,
+    DescribeFileResponse,
     DescribeRowResponseDatabase,
     DescribeRowResponseRow,
     FieldItem,
     ListRowsResponse,
 )
 from deeporigin.utils import _nucleus_url
+
+
+def file_description():
+    """mock file description"""
+
+    return DescribeFileResponse(
+        id="_file:placeholder-file",
+        uri="s3://placeholder/uri",
+        name="placeholder",
+        status="ready",
+        contentLength=123,
+        contentType="application/foo",
+        dateCreated="2024-05-08 19:16:09.26078",
+        dateUpdated="2024-05-08 19:16:09.26078",
+        createdByUserDrn="drn:identity::user:google-apps|foo@deeporigin.com",
+    ).model_dump()
 
 
 @dataclass
@@ -114,6 +133,7 @@ class MockClient(Client):
     databases = ["db-placeholder"]
     rows = [f"row-placeholder-{idx}" for idx in range(10)]
     columns = [f"column-{idx}" for idx in range(5)]
+    file = file_description()
 
     def authenticate(self, refresh_tokens: bool = True):
         """no need to do anything here"""
@@ -132,7 +152,7 @@ class MockClient(Client):
                     id=self.workspaces[0],
                     type="workspace",
                     parentId=None,
-                ).dict()
+                ).model_dump()
             ]
             rows += [
                 ListRowsResponse(
@@ -140,7 +160,7 @@ class MockClient(Client):
                     id=self.databases[0],
                     type="database",
                     parentId=self.workspaces[0],
-                ).dict()
+                ).model_dump()
             ]
             rows += [
                 ListRowsResponse(
@@ -148,7 +168,7 @@ class MockClient(Client):
                     id=f"row-placeholder-{idx}",
                     type="row",
                     parentId=self.databases[0],
-                ).dict()
+                ).model_dump()
                 for idx in range(10)
             ]
             return rows
@@ -166,7 +186,7 @@ class MockClient(Client):
                     id=f"row-placeholder-{idx}",
                     type="row",
                     parentId=data["filters"][0]["parent"]["id"],
-                ).dict()
+                ).model_dump()
                 for idx in range(10)
             ]
 
@@ -180,7 +200,7 @@ class MockClient(Client):
                     id=self.workspaces[0],
                     type="workspace",
                     parentId=None,
-                ).dict()
+                ).model_dump()
             ]
         elif data == dict(filters=[dict(rowType="database")]):
             # return the example database
@@ -190,7 +210,7 @@ class MockClient(Client):
                     id=self.databases[0],
                     type="database",
                     parentId=self.workspaces[0],
-                ).dict()
+                ).model_dump()
             ]
 
     def invoke_describe_row(self, data):
@@ -215,7 +235,7 @@ class MockClient(Client):
                     for idx in range(5)
                 ],
                 hidPrefix="placeholder",
-            ).dict()
+            ).model_dump()
 
         else:
             # we are asking for a row in a database
@@ -232,7 +252,7 @@ class MockClient(Client):
                 hid=name,
                 parentId=self.databases[0],
                 fields=fields,
-            ).dict()
+            ).model_dump()
 
             if not data["fields"]:
                 row.pop("fields", None)
@@ -255,7 +275,7 @@ class MockClient(Client):
                 hid=f"row-placeholder-{idx}",
                 parentId=data["databaseRowId"],
                 fields=fields,
-            ).dict()
+            ).model_dump()
             for idx in range(5)
         ]
 
@@ -264,6 +284,30 @@ class MockClient(Client):
 
         if endpoint == "ListRows":
             return self.invoke_list_rows(data)
+
+        elif endpoint == "CreateWorkspace":
+            name = data["workspace"]["name"]
+            return CreateWorkspaceResponse(
+                id="_workspace:" + name,
+                hid="_workspace:" + name,
+                name=name,
+                dateCreated="2024-05-08 19:16:09.26078",
+                dateUpdated="2024-05-08 19:16:09.26078",
+                createdByUserDrn="drn:identity::user:google-apps|foo@deeporigin.com",
+            ).model_dump()
+
+        elif endpoint == "CreateDatabase":
+            name = data["database"]["name"]
+            return CreateDatabaseResponse(
+                id="_database:" + name,
+                hid="_database:" + name,
+                name=name,
+                dateCreated="2024-05-08 19:16:09.26078",
+                dateUpdated="2024-05-08 19:16:09.26078",
+                createdByUserDrn="drn:identity::user:google-apps|foo@deeporigin.com",
+                parentId=data["database"]["parentId"],
+                cols=[],
+            ).model_dump()
 
         elif endpoint == "DescribeRow":
             return self.invoke_describe_row(data)
@@ -333,16 +377,3 @@ def _check_response(response: requests.models.Response) -> Union[dict, list]:
         return response["data"]
     else:
         raise KeyError("`data` not in response")
-
-
-def file_description():
-    """mock file description"""
-
-    return dict(
-        id="_file:placeholder-file",
-        uri="s3://placeholder/uri",
-        name="placeholder",
-        status="ready",
-        contentLength=123,
-        contentType="application/foo",
-    )
