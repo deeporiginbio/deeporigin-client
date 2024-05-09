@@ -118,7 +118,8 @@ class TestCase(unittest.TestCase):
 
         self.assertEqual(user_config, value)
 
-        os.remove(user_config_filename)
+        if not sys.platform.startswith("win"):
+            os.remove(user_config_filename)
 
     def test_invalid(self):
         env = {}
