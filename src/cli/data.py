@@ -219,8 +219,8 @@ databases to CSV files.
         help="Describe and get metadata of file uploaded to database in your Deep Origin data management system",
         arguments=[
             (
-                ["file_id"],
-                {"help": "File ID", "action": "store"},
+                ["object_id"],
+                {"help": "File ID or Row ID", "action": "store"},
             ),
             (
                 ["--json"],
@@ -231,61 +231,42 @@ databases to CSV files.
             ),
         ],
     )
-    def describe_file(self):
-        """describe file"""
+    def describe(self):
+        """describe file or row"""
 
-        data = _api.describe_file(
-            self.app.pargs.file_id,
-            client=self._get_client(),
-        )
+        if "_file:" in self.app.pargs.object_id:
+            data = _api.describe_file(
+                self.app.pargs.object_id,
+                client=self._get_client(),
+            )
+        else:
+            data = _api.describe_row(
+                self.app.pargs.object_id,
+                client=self._get_client(),
+            )
 
-        _print_dict(data, json=self.app.pargs.json)
+            data.pop("rowJsonSchema", None)
 
-    @cement.ex(
-        help="Describe row",
-        arguments=[
-            (
-                ["row_id"],
-                {"help": "Row or Database ID", "action": "store"},
-            ),
-            (
-                ["--json"],
-                {
-                    "action": "store_true",
-                    "help": "Whether to return JSON formatted data [default: False]",
-                },
-            ),
-        ],
-    )
-    def describe_row(self):
-        """describe row"""
+            if "cols" in data.keys():
+                col_names = [col["name"] for col in data["cols"]]
+                col_keys = [col["key"] for col in data["cols"]]
 
-        data = _api.describe_row(
-            self.app.pargs.row_id,
-            client=self._get_client(),
-        )
-        data.pop("rowJsonSchema", None)
+                col_names = ", ".join(col_names)
+                col_keys = ", ".join(col_keys)
 
-        if "cols" in data.keys():
-            col_names = [col["name"] for col in data["cols"]]
-            col_keys = [col["key"] for col in data["cols"]]
+                if data["type"] == "database" and not self.app.pargs.json:
+                    data["Column Names"] = _truncate(col_names)
+                    data["Column Keys"] = _truncate(col_keys)
 
-            col_names = ", ".join(col_names)
-            col_keys = ", ".join(col_keys)
-
-            if data["type"] == "database" and not self.app.pargs.json:
-                data["Column Names"] = _truncate(col_names)
-                data["Column Keys"] = _truncate(col_keys)
-
-                data.pop("cols", None)
+                    data.pop("cols", None)
 
         _print_dict(data, json=self.app.pargs.json)
 
     @cement.ex(
-        help="List rows in a database",
+        help="Show database or row",
         arguments=[
             (
-                ["db_id"],
+                ["object_id"],
                 {"help": "Database ID", "action": "store"},
             ),
             (
@@ -297,41 +278,25 @@ databases to CSV files.
             ),
         ],
     )
-    def show_db(self):
-        """list database row"""
+    def show(self):
+        """show database or row in Deep Origin"""
 
-        data = api.get_dataframe(
-            self.app.pargs.db_id,
-            return_type="dict",
-            client=self._get_client(),
-        )
+        data = _api.describe_row(row_id=self.app.pargs.object_id)
+        row_type = data["type"]
 
-        _print_dict(data, json=self.app.pargs.json, transpose=False)
-
-    @cement.ex(
-        help="Show column names and values for a given row",
-        arguments=[
-            (
-                ["row_id"],
-                {"help": "Row ID", "action": "store"},
-            ),
-            (
-                ["--json"],
-                {
-                    "action": "store_true",
-                    "help": "Whether to return JSON formatted data [default: False]",
-                },
-            ),
-        ],
-    )
-    def row(self):
-        """list the columns of the row and their values, where applicable"""
-        row_data = api.get_row_data(
-            self.app.pargs.row_id,
-            client=self._get_client(),
-        )
-
-        _print_dict(row_data, json=self.app.pargs.json)
+        if row_type == "database":
+            data = api.get_dataframe(
+                self.app.pargs.object_id,
+                return_type="dict",
+                client=self._get_client(),
+            )
+            _print_dict(data, json=self.app.pargs.json, transpose=False)
+        elif row_type == "row":
+            data = api.get_row_data(
+                self.app.pargs.object_id,
+                client=self._get_client(),
+            )
+            _print_dict(data, json=self.app.pargs.json, transpose=True)
 
 
 class CopyController(cement.Controller):
