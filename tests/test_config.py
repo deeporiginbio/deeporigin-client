@@ -76,7 +76,6 @@ class TestCase(unittest.TestCase):
         expected_value["feature_flags"]["variables"] = True
         self.assertEqual(expected_value, value)
 
-    @unittest.skipIf(sys.platform.startswith("win"), "Test skipped on Windows")
     def test_file(self):
         env = {}
 
@@ -119,7 +118,8 @@ class TestCase(unittest.TestCase):
 
         self.assertEqual(user_config, value)
 
-        os.remove(user_config_filename)
+        if not sys.platform.startswith("win"):
+            os.remove(user_config_filename)
 
     def test_invalid(self):
         env = {}
