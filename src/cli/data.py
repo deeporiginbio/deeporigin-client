@@ -304,7 +304,10 @@ databases to CSV files.
     def show(self):
         """show database or row in Deep Origin"""
 
-        data = _api.describe_row(row_id=self.app.pargs.object_id)
+        data = _api.describe_row(
+            row_id=self.app.pargs.object_id,
+            client=self._get_client(),
+        )
         row_type = data["type"]
 
         if row_type == "database":

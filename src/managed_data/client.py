@@ -212,9 +212,21 @@ class MockClient(Client):
                     parentId=self.workspaces[0],
                 ).model_dump()
             ]
+        elif data == dict(filters=[dict(rowType="row")]):
+            # return the example row
+            return [
+                ListRowsResponse(
+                    hid=self.rows[0],
+                    id=self.rows[0],
+                    type="row",
+                    parentId=self.databases[0],
+                ).model_dump()
+            ]
         else:
             print(data)
-            raise Exception()
+            raise NotImplementedError(
+                "This specific request type hasn't been mocked yet"
+            )
 
     def invoke_describe_row(self, data):
         """callback when we invoke DescribeRow"""

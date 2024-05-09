@@ -20,7 +20,7 @@ from deeporigin.managed_data.schema import (
     DescribeRowResponseRow,
     ListRowsResponse,
 )
-from deeporigin.utils import PREFIX
+from deeporigin.utils import PREFIXES
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -417,7 +417,7 @@ def test_download(config):
     os.remove(file_name)
 
     api.download(
-        f"{PREFIX}{db_id}",
+        f"{PREFIXES.DO}{db_id}",
         destination=os.getcwd(),
         client=config["client"],
     )

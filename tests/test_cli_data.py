@@ -1,6 +1,7 @@
 import io
 import json
 from contextlib import redirect_stderr, redirect_stdout
+from typing import Union
 
 import pytest
 from beartype import beartype
@@ -10,15 +11,25 @@ from deeporigin.managed_data.client import (
     Client,
     DeepOriginClient,
     MockClient,
-    file_description,
 )
+from deeporigin.managed_data.schema import DescribeFileResponse, ListRowsResponse
 
-describe_file_inputs = [
-    dict(
-        file_id="_file:placeholder",
-        error="The requested resource was not found",
-    ),
-]
+# this allows us to try every CLI command with both
+# multiple options using pytest.mark.parametrize
+JSON_OPTIONS = (
+    ["--json"],
+    [],
+)
+LIST_OPTIONS = (
+    [],
+    ["--rows"],
+    ["--databases"],
+    ["--files"],
+    ["--workspaces"],
+    ["--workspaces", "--databases"],
+    ["--workspaces", "--rows"],
+    ["--databases", "--rows"],
+)
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -32,9 +43,11 @@ def config(pytestconfig):
     if pytestconfig.getoption("client") == "mock":
         data["client"] = MockClient()
 
-        data["databases"] = ["db-sample"]
-        data["rows"] = ["row-1"]
-        data["file"] = file_description()
+        # unpack mock data from client
+        data["workspaces"] = data["client"].workspaces
+        data["databases"] = data["client"].databases
+        data["rows"] = data["client"].rows
+        data["file"] = data["client"].file
     else:
         client = DeepOriginClient()
         client.authenticate()
@@ -67,78 +80,65 @@ def test_data(config):
     assert "List data in managed data on Deep Origin" in stdout, "Unexpected output"
 
 
-def test_describe_file(config):
+@pytest.mark.parametrize("json_option", JSON_OPTIONS)
+def test_describe_file(config, json_option):
     file_id = config["file"]["id"]
 
     stdout = _run_cli_command(
-        ["data", "describe-file", file_id],
+        ["data", "describe", file_id] + json_option,
         config["client"],
     )
-    assert file_id in stdout, "Expected to see file_id in output"
+
+    if json_option == ["--json"]:
+        data = _check_json(stdout)
+        assert data["id"] == file_id, "Expected file ID to match"
 
 
-def test_describe_row(config):
+@pytest.mark.parametrize("option", JSON_OPTIONS)
+def test_describe_row(config, option):
     row_id = config["rows"][0]
 
     stdout = _run_cli_command(
-        ["data", "describe-row", row_id],
+        ["data", "describe", row_id] + option,
         config["client"],
     )
     assert row_id in stdout, "Expected to see row_id in output"
 
-    # try JSON output
+    # check that we can parse into JSON
+    if option == ["--json"]:
+        data = _check_json(stdout)
+
+        assert data["id"] == row_id, "Expected row ID to match"
+
+
+@pytest.mark.parametrize("json_option", JSON_OPTIONS)
+@pytest.mark.parametrize("list_option", LIST_OPTIONS)
+def test_list(config, list_option, json_option):
     stdout = _run_cli_command(
-        ["data", "describe-row", row_id, "--json"],
+        ["data", "list"] + list_option + json_option,
         config["client"],
     )
 
     # check that we can parse into JSON
-    data = json.loads(stdout)
+    if json_option == ["--json"]:
+        data = _check_json(stdout)
 
-    assert isinstance(data, dict), "Expected data to be a dictionary"
+        for item in data:
+            if list_option == ["--files"]:
+                DescribeFileResponse(**(item["file"]))
+            else:
+                ListRowsResponse(**item)
 
-    assert data["id"] == row_id, "Expected row ID to match"
 
-
-def test_list_rows(config):
-    db_id = config["databases"][0]
-
+@pytest.mark.parametrize("json_option", JSON_OPTIONS)
+def test_show_db(config, json_option):
     stdout = _run_cli_command(
-        ["data", "list-rows", db_id],
-        config["client"],
-    )
-    assert "Parent ID" in stdout, "Unexpected output"
-
-    # JSON
-
-    stdout = _run_cli_command(
-        ["data", "list-rows", db_id, "--json"],
-        config["client"],
-    )
-    # check that we can parse into JSON
-    data = json.loads(stdout)
-    assert isinstance(data, list), "Expected data to be a list"
-
-
-def test_ls(config):
-    _run_cli_command(
-        ["data", "ls"],
+        ["data", "show", config["databases"][0]] + json_option,
         config["client"],
     )
 
-
-def test_show_db(config):
-    _run_cli_command(
-        ["data", "show-db", config["databases"][0]],
-        config["client"],
-    )
-
-
-def test_row(config):
-    _run_cli_command(
-        ["data", "row", config["rows"][0]],
-        config["client"],
-    )
+    if json_option == ["--json"]:
+        _check_json(stdout)
 
 
 @beartype
@@ -152,5 +152,12 @@ def _run_cli_command(argv: list[str], client: Client) -> str:
             app.client = client
             app.run()
 
-    stdout = stdout.getvalue().strip()
-    return stdout
+    return stdout.getvalue().strip()
+
+
+@beartype
+def _check_json(txt: str) -> Union[dict, list[dict]]:
+    """helper function to check that a string is valid JSON"""
+    data = json.loads(txt)
+
+    return data
