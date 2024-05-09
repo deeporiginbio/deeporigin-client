@@ -10,7 +10,7 @@ from deeporigin.exceptions import DeepOriginException
 from deeporigin.managed_data import _api
 from deeporigin.managed_data.client import Client
 from deeporigin.managed_data.schema import DatabaseReturnType, IDFormat
-from deeporigin.utils import PREFIX
+from deeporigin.utils import PREFIXES
 
 
 @beartype
@@ -139,9 +139,20 @@ def download(
     if not os.path.isdir(destination):
         raise DeepOriginException(f"{destination} should be a path to a folder.")
 
-    source = source.replace(PREFIX, "")
+    source = source.replace(PREFIXES.DO, "")
 
     # first, need to determine what this is.
+    if PREFIXES.FILE in source:
+        # this is a file
+
+        _api.download_file(
+            file_id=source,
+            destination=destination,
+            client=client,
+        )
+        return
+
+    # not a file, so need to determine what sort of row it is
     obj = _api.describe_row(source, client=client)
     if obj["type"] == "database":
         download_database(

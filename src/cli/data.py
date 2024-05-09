@@ -7,7 +7,7 @@ import cement
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.managed_data import _api, api
 from deeporigin.managed_data.client import DeepOriginClient
-from deeporigin.utils import PREFIX, _print_dict, _print_tree, _show_json, _truncate
+from deeporigin.utils import PREFIXES, _print_dict, _print_tree, _show_json, _truncate
 
 
 class DataController(cement.Controller):
@@ -91,21 +91,43 @@ databases to CSV files.
                 _api.download_file(file, destination=destination)
 
     @cement.ex(
-        help="Download a file from Deep Origin",
+        help="Copy files or databases from or to Deep Origin",
         arguments=[
             (
-                ["file_id"],
-                {"help": "File ID", "action": "store"},
+                ["source"],
+                {"help": "Source", "action": "store"},
+            ),
+            (
+                ["destination"],
+                {"help": "Destination", "action": "store"},
+            ),
+            (
+                ["--include-files"],
+                {
+                    "action": "store_true",
+                    "help": "Whether to also download files in a database: [False]",
+                },
             ),
         ],
     )
-    def download_file(self):
-        """download file"""
+    def copy(self):
+        """download or upload files or databases"""
 
-        _api.download_file(
-            self.app.pargs.file_id,
-            client=self._get_client(),
-        )
+        args = self.app.pargs
+
+        if PREFIXES.DO in args.source and PREFIXES.DO not in args.destination:
+            api.download(
+                args.source,
+                args.destination,
+                include_files=args.include_files,
+            )
+        elif PREFIXES.DO in args.destination and PREFIXES.DO not in args.source:
+            raise NotImplementedError("Uploading has not been implemented yet")
+            # upload(args.source, args.destination)
+        else:
+            raise DeepOriginException(
+                f"Exactly one of <source> and <destination> should be prefixed with `{PREFIXES.DO}`"
+            )
 
     @cement.ex(
         help="List files, rows, databases, workspaces in Deep Origin",
@@ -234,12 +256,13 @@ databases to CSV files.
     def describe(self):
         """describe file or row"""
 
-        if "_file:" in self.app.pargs.object_id:
+        if PREFIXES.FILE in self.app.pargs.object_id:
             data = _api.describe_file(
                 self.app.pargs.object_id,
                 client=self._get_client(),
             )
         else:
+            # not a file
             data = _api.describe_row(
                 self.app.pargs.object_id,
                 client=self._get_client(),
@@ -299,64 +322,6 @@ databases to CSV files.
             _print_dict(data, json=self.app.pargs.json, transpose=True)
 
 
-class CopyController(cement.Controller):
-    """Copy Controller for copy subcommand in data"""
-
-    class Meta:
-        label = "cp"
-        stacked_on = "data"
-        stacked_type = "nested"
-        help = "Copy cells, columns, rows, files or databases"
-        description = """Copy data from cells, columns, rows,
-files or databases to or from a local filesystem. Databases
-are downloaded as CSV files; included files are downloaded 
-as-is. """
-        arguments = [
-            (
-                ["source"],
-                {
-                    "type": str,
-                    "metavar": "<source>",
-                    "help": "Identifier of Remote Resource: (Workspace, Database, or Row), or path to local folder or file",
-                },
-            ),
-            (
-                ["destination"],
-                {
-                    "type": str,
-                    "metavar": "<destination>",
-                    "help": "Identifier of Remote Resource: (Workspace, Database, or Row), or path to local folder or file",
-                },
-            ),
-            (
-                ["--include-files"],
-                {
-                    "action": "store_true",
-                    "help": "Whether to download files in database [default: False]",
-                },
-            ),
-        ]
-
-    @cement.ex(hide=True)
-    def _default(self):
-        args = self.app.pargs
-
-        if PREFIX in args.source and PREFIX not in args.destination:
-            api.download(
-                args.source,
-                args.destination,
-                include_files=args.include_files,
-            )
-        elif PREFIX in args.destination and PREFIX not in args.source:
-            raise NotImplementedError("Uploading has not been implemented yet")
-            # upload(args.source, args.destination)
-        else:
-            raise DeepOriginException(
-                f"Exactly one of <source> and <destination> should be prefixed with `{PREFIX}`"
-            )
-
-
 CONTROLLERS = [
     DataController,
-    CopyController,
 ]
