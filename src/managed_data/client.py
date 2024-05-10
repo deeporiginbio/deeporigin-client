@@ -5,9 +5,8 @@ from typing import Union
 
 import requests
 from beartype import beartype
-from deeporigin import cache_do_api_tokens, get_do_api_tokens
+from deeporigin import auth
 from deeporigin.config import get_value
-from deeporigin.do_api import read_cached_do_api_tokens
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.managed_data.schema import (
     ColumnItem,
@@ -92,18 +91,25 @@ class DeepOriginClient(Client):
     headers = dict()
 
     def authenticate(self, refresh_tokens: bool = True):
-        """authenticate to DeepOrigin API"""
+        """authenticate to DeepOrigin API
 
-        if refresh_tokens:
-            api_access_token, api_refresh_token = get_do_api_tokens()
-            cache_do_api_tokens(api_access_token, api_refresh_token)
-        else:
-            tokens = read_cached_do_api_tokens()
-            api_access_token = tokens["access"]
+        Authenticate to Deep Origin API. This needs to be called
+        before making any requests. refresh_tokens=False allows
+        for turning off refresh (saving one network request on
+        startup, ), making the CLI faster
+
+        Args:
+            refresh_tokens (bool, optional): Whether to
+            refresh tokens. Defaults to True.
+
+
+        """
+
+        tokens = auth.get_tokens(refresh=refresh_tokens)
 
         self.headers = {
             "accept": "application/json",
-            "authorization": f"Bearer {api_access_token}",
+            "authorization": f"Bearer {tokens['access']}",
             "content-type": "application/json",
             "x-org-id": self.org_id,
         }

@@ -11,7 +11,7 @@ from contextlib import redirect_stderr, redirect_stdout
 
 import crontab
 import pydantic
-from deeporigin import cli, config, do_api, feature_flags, utils, variables
+from deeporigin import auth, cli, config, feature_flags, utils, variables
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.variables import core as variables_core
 from deeporigin.variables import types as variables_types
@@ -40,7 +40,7 @@ class TestCase(unittest.TestCase):
     def setUp(self):
         config.get_value.cache_clear()
         feature_flags.get_value.cache_clear()
-        do_api.get_do_api_tokens.cache_clear()
+        auth.get_tokens.cache_clear()
 
         _, self.api_tokens_filename = tempfile.mkstemp(suffix=".yml")
         os.remove(self.api_tokens_filename)
@@ -76,7 +76,7 @@ class TestCase(unittest.TestCase):
     def tearDown(self):
         config.get_value.cache_clear()
         feature_flags.get_value.cache_clear()
-        do_api.get_do_api_tokens.cache_clear()
+        auth.get_tokens.cache_clear()
         if os.path.isfile(self.api_tokens_filename):
             os.remove(self.api_tokens_filename)
         if os.path.isfile(self.variables_cache_filename):
@@ -268,7 +268,7 @@ class TestCase(unittest.TestCase):
     def test_get_variables_from_do_platform(self):
         config.get_value.cache_clear()
         feature_flags.get_value.cache_clear()
-        do_api.get_do_api_tokens.cache_clear()
+        auth.get_tokens.cache_clear()
 
         env = {
             "DEEP_ORIGIN_ORGANIZATION_ID": "a123",
@@ -1060,7 +1060,7 @@ class TestCase(unittest.TestCase):
     def test_install_variables(self):
         user_home_dirname = tempfile.mkdtemp()
 
-        do_api.get_do_api_tokens.cache_clear()
+        auth.get_tokens.cache_clear()
         # os.remove(self.api_tokens_filename)
         api_responses = [
             unittest.mock.MagicMock(
@@ -1119,7 +1119,7 @@ class TestCase(unittest.TestCase):
             ),
         )
 
-        do_api.get_do_api_tokens.cache_clear()
+        auth.get_tokens.cache_clear()
         if os.path.isfile(self.api_tokens_filename):
             os.remove(self.api_tokens_filename)
         with unittest.mock.patch("requests.post", side_effect=api_responses):
@@ -1147,7 +1147,7 @@ class TestCase(unittest.TestCase):
             ),
         )
 
-        do_api.get_do_api_tokens.cache_clear()
+        auth.get_tokens.cache_clear()
         if os.path.isfile(self.api_tokens_filename):
             os.remove(self.api_tokens_filename)
         api_responses[-1] = unittest.mock.MagicMock(
@@ -1198,7 +1198,7 @@ class TestCase(unittest.TestCase):
             ),
         )
 
-        do_api.get_do_api_tokens.cache_clear()
+        auth.get_tokens.cache_clear()
         if os.path.isfile(self.api_tokens_filename):
             os.remove(self.api_tokens_filename)
 
@@ -1213,7 +1213,7 @@ class TestCase(unittest.TestCase):
 
         self.assertIn("No variables were modified", stdout)
 
-        do_api.get_do_api_tokens.cache_clear()
+        auth.get_tokens.cache_clear()
         if os.path.isfile(self.api_tokens_filename):
             os.remove(self.api_tokens_filename)
         api_responses[-1] = unittest.mock.MagicMock(
@@ -1251,7 +1251,7 @@ class TestCase(unittest.TestCase):
 
         self.assertIn("2 variables were modified", stdout)
 
-        do_api.get_do_api_tokens.cache_clear()
+        auth.get_tokens.cache_clear()
         if os.path.isfile(self.api_tokens_filename):
             os.remove(self.api_tokens_filename)
         api_responses[-1] = unittest.mock.MagicMock(
@@ -1290,7 +1290,7 @@ class TestCase(unittest.TestCase):
         self.assertIn("1 variables were modified", stdout)
         self.assertIn("1 variables were unmodified", stdout)
 
-        do_api.get_do_api_tokens.cache_clear()
+        auth.get_tokens.cache_clear()
         if os.path.isfile(self.api_tokens_filename):
             os.remove(self.api_tokens_filename)
         api_responses[-1] = unittest.mock.MagicMock(
@@ -1359,7 +1359,7 @@ class TestCase(unittest.TestCase):
             user_home_dirname=user_home_dirname
         )
 
-        do_api.get_do_api_tokens.cache_clear()
+        auth.get_tokens.cache_clear()
         # os.remove(self.api_tokens_filename)
         api_responses = [
             unittest.mock.MagicMock(
@@ -1552,7 +1552,7 @@ class TestCase(unittest.TestCase):
             self.assertFalse(os.path.isfile(os.path.join(user_home_dirname, "mno")))
 
     def test_install_invalid_variables(self):
-        do_api.get_do_api_tokens.cache_clear()
+        auth.get_tokens.cache_clear()
         # os.remove(self.api_tokens_filename)
         api_responses = [
             unittest.mock.MagicMock(
@@ -1679,7 +1679,7 @@ class TestCase(unittest.TestCase):
     def test_get_remove_do_api_tokens(self):
         config.get_value.cache_clear()
         feature_flags.get_value.cache_clear()
-        do_api.get_do_api_tokens.cache_clear()
+        auth.get_tokens.cache_clear()
 
         _, self.api_tokens_filename = tempfile.mkstemp(suffix=".yml")
         os.remove(self.api_tokens_filename)
@@ -1733,9 +1733,8 @@ class TestCase(unittest.TestCase):
             ),
         ]
         with unittest.mock.patch("requests.post", side_effect=responses):
-            api_access_token, api_refresh_token = do_api.get_do_api_tokens()
-        self.assertFalse(os.path.isfile(self.api_tokens_filename))
-        do_api.cache_do_api_tokens(api_access_token, api_refresh_token)
+            auth.get_tokens()
+
         self.assertTrue(os.path.isfile(self.api_tokens_filename))
 
         responses = [
@@ -1759,9 +1758,9 @@ class TestCase(unittest.TestCase):
             with self.assertRaisesRegex(
                 DeepOriginException, "Sign in to the Deep Origin platform failed"
             ):
-                do_api.sign_into_do_platform()
+                auth.authenticate()
 
-        do_api.get_do_api_tokens.cache_clear()
+        auth.get_tokens.cache_clear()
         response = unittest.mock.MagicMock(
             raise_for_status=lambda: None,
             json=lambda: {
@@ -1770,9 +1769,9 @@ class TestCase(unittest.TestCase):
             },
         )
         with unittest.mock.patch("requests.post", return_value=response):
-            do_api.get_do_api_tokens()
+            auth.get_tokens()
 
-        do_api.remove_cached_do_api_tokens()
+        auth.remove_cached_tokens()
         self.assertFalse(os.path.isfile(self.api_tokens_filename))
 
     def test_validate_drn(self):
