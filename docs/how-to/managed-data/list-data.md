@@ -236,7 +236,7 @@ their IDs for further queries.
               "contentType": "text/csv",
               "dateCreated": "2024-05-08 01:01:48.925",
               "dateUpdated": "2024-05-08 01:01:48.925",
-              "createdByUserDrn": "drn:identity::user:google-apps|scientist@deeporigin.com"
+              "createdByUserDrn": "scientist@deeporigin.com"
             }
           },
           {
@@ -249,7 +249,7 @@ their IDs for further queries.
               "contentType": "zip/gz",
               "dateCreated": "2024-05-08 18:08:09.149",
               "dateUpdated": "2024-05-08 18:08:09.149",
-              "createdByUserDrn": "drn:identity::user:google-apps|scientist@deeporigin.com"
+              "createdByUserDrn": "scientist@deeporigin.com"
             },
             "assignments": [
               {
@@ -267,7 +267,7 @@ their IDs for further queries.
               "contentType": "text/csv",
               "dateCreated": "2024-05-08 18:07:57.655",
               "dateUpdated": "2024-05-08 18:07:57.655",
-              "createdByUserDrn": "drn:identity::user:google-apps|scientist@deeporigin.com"
+              "createdByUserDrn": "scientist@deeporigin.com"
             },
             "assignments": [
               {
