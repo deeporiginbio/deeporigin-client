@@ -2,6 +2,7 @@ import json
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Union
+from urllib.parse import urljoin
 
 import requests
 from beartype import beartype
@@ -123,7 +124,7 @@ class DeepOriginClient(Client):
         """core call to API endpoint"""
 
         response = requests.post(
-            f"{self.api_url}{endpoint}",
+            urljoin(self.api_url, endpoint),
             headers=self.headers,
             json=data,
         )

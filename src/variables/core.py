@@ -7,6 +7,7 @@ import string
 import sys
 import typing
 import warnings
+from urllib.parse import urljoin
 
 import crontab
 import pydantic
@@ -222,7 +223,7 @@ def get_variables_from_do_platform(
     )
 
     response = requests.post(
-        config.api_endpoint,
+        urljoin(config.api_endpoint, config.graphql_api_route),
         json={
             "query": query,
         },
