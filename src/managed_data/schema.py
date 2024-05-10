@@ -8,7 +8,7 @@ mock data for testing.
 
 from typing import Literal, Optional, Union
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 RowType = Literal["row", "database", "workspace"]
 """Type of a row"""
@@ -25,6 +25,7 @@ DataType = Literal[
     "file",
     "reference",
     "editor",
+    "float",
 ]
 """Type of a column"""
 
@@ -35,11 +36,49 @@ DATAFRAME_ATTRIBUTE_KEYS = {
     "reference_ids",
 }
 
+
+Cardinality = Literal["one", "many"]
+
 IDFormat = Literal["human-id", "system-id"]
 """Format of an ID"""
 
 DatabaseReturnType = Literal["dataframe", "dict"]
 """Return type of a database"""
+
+
+class CreateDatabaseResponse(BaseModel):
+    """Schema for responses from the
+    `CreateDatabase` endpoint."""
+
+    id: str
+    type: RowType = "database"
+    name: str
+    parentId: str = "placeholder"  # sometimes not returned
+    dateCreated: str
+    dateUpdated: str
+    createdByUserDrn: str
+    hid: str
+    hidPrefix: str
+    cols: list
+    rowJsonSchema: dict = dict()
+
+    model_config = ConfigDict(extra="forbid")
+
+
+class CreateWorkspaceResponse(BaseModel):
+    """Schema for responses from the
+    `CreateWorkspace` endpoint."""
+
+    id: str
+    hid: str
+    name: str
+    dateCreated: str
+    dateUpdated: str
+    createdByUserDrn: str
+    type: RowType = "workspace"
+    rowJsonSchema: dict = dict()
+
+    model_config = ConfigDict(extra="forbid")
 
 
 class DescribeFileResponse(BaseModel):
@@ -52,9 +91,11 @@ class DescribeFileResponse(BaseModel):
     status: FileStatus
     contentLength: int
     contentType: str
+    dateCreated: str
+    dateUpdated: str
+    createdByUserDrn: str
 
-    class Config:
-        extra = "forbid"
+    model_config = ConfigDict(extra="forbid")
 
 
 class ListRowsResponse(BaseModel):
@@ -67,8 +108,7 @@ class ListRowsResponse(BaseModel):
     name: Optional[str] = "placeholder"
     type: RowType
 
-    class Config:
-        extra = "forbid"
+    model_config = ConfigDict(extra="forbid")
 
 
 class FieldItem(BaseModel):
@@ -79,11 +119,10 @@ class FieldItem(BaseModel):
     cellId: str
     validationStatus: str = "valid"
     type: DataType = "text"
-    value: Union[str, dict, int] = "placeholder-text"
+    value: Union[str, dict, int, float] = "placeholder-text"
     systemType: Optional[str] = None
 
-    class Config:
-        extra = "forbid"
+    model_config = ConfigDict(extra="forbid")
 
 
 class ColumnItem(BaseModel):
@@ -95,12 +134,19 @@ class ColumnItem(BaseModel):
     parentId: str = "db-placeholder-1"
     type: DataType = "text"
     dateCreated: str = "2024-04-04T17:03:33.033115"
-    cardinality: str = "one"
+    cardinality: Cardinality = "one"
     canCreate: Optional[bool] = False
     configSelect: Optional[dict] = None
 
-    class Config:
-        extra = "forbid"
+    model_config = ConfigDict(extra="forbid")
+
+
+class AddDatabaseColumnResponse(BaseModel):
+    """Schema for responses from the
+    `AddDatabaseColumn` endpoint."""
+
+    column: ColumnItem
+    database: dict
 
 
 class DescribeRowResponse(BaseModel):
@@ -128,8 +174,7 @@ class DescribeRowResponseRow(DescribeRowResponse):
     submissionStatus: str = "draft"
     validationStatus: str = "valid"
 
-    class Config:
-        extra = "forbid"
+    model_config = ConfigDict(extra="forbid")
 
 
 class DescribeRowResponseDatabase(DescribeRowResponse):
@@ -139,5 +184,4 @@ class DescribeRowResponseDatabase(DescribeRowResponse):
     hidPrefix: str
     name: str
 
-    class Config:
-        extra = "forbid"
+    model_config = ConfigDict(extra="forbid")

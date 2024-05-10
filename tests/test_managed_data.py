@@ -1,6 +1,7 @@
 """this tests low level functions in the data API"""
 
 import os
+import uuid
 
 import pandas as pd
 import pytest
@@ -9,16 +10,17 @@ from deeporigin.managed_data import _api, api
 from deeporigin.managed_data.client import (
     DeepOriginClient,
     MockClient,
-    file_description,
 )
 from deeporigin.managed_data.schema import (
     DATAFRAME_ATTRIBUTE_KEYS,
+    CreateDatabaseResponse,
+    CreateWorkspaceResponse,
     DescribeFileResponse,
     DescribeRowResponseDatabase,
     DescribeRowResponseRow,
     ListRowsResponse,
 )
-from deeporigin.utils import PREFIX
+from deeporigin.utils import PREFIXES
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -32,10 +34,12 @@ def config(pytestconfig):
     if pytestconfig.getoption("client") == "mock":
         data["client"] = MockClient()
         data["mock"] = True
+
+        # unpack mock data from client
         data["workspaces"] = data["client"].workspaces
         data["databases"] = data["client"].databases
         data["rows"] = data["client"].rows
-        data["file"] = file_description()
+        data["file"] = data["client"].file
     else:
         data["mock"] = False
         client = DeepOriginClient()
@@ -44,9 +48,10 @@ def config(pytestconfig):
 
         # if we're going to be making requests to a live
         # instance, we need to make sensible requests
-        databases = _api.list_rows(row_type="database")
-        data["databases"] = [db["hid"] for db in databases]
-        rows = _api.list_rows(row_type="row")
+        rows = _api.list_rows()
+
+        data["databases"] = [row["hid"] for row in rows if row["type"] == "database"]
+        data["workspaces"] = [row["hid"] for row in rows if row["type"] == "workspace"]
         data["rows"] = [row["hid"] for row in rows if row["type"] == "row"]
 
         # get a list of all files
@@ -58,6 +63,38 @@ def config(pytestconfig):
     yield data
 
     # teardown tasks, if any
+
+
+def test_create_workspace(config):
+    data = _api.create_workspace(
+        name="test-" + str(uuid.uuid4())[:6],
+        client=config["client"],
+    )
+
+    CreateWorkspaceResponse(**data)
+
+
+def test_create_database(config):
+    unique_id = str(uuid.uuid4())[:6]
+    data = _api.create_database(
+        name="test-" + unique_id,
+        hid_prefix="test" + unique_id,
+        client=config["client"],
+        parent_id=config["workspaces"][0],
+    )
+
+    CreateDatabaseResponse(**data)
+
+
+def test_delete_rows(config):
+    """delete workspaces and databases"""
+
+    for row_type in ["workspace", "database"]:
+        rows = _api.list_rows(row_type=row_type, client=config["client"])
+        row_ids = [row["id"] for row in rows if "test" in row["hid"]]
+
+        if len(row_ids) > 0:
+            _api.delete_rows(row_ids, client=config["client"])
 
 
 def test_list_rows(config):
@@ -79,7 +116,6 @@ def test_list_rows_root_parent(config):
         client=config["client"],
     )
 
-    assert len(root) == 1, "Expected there to be exactly one root"
     root = root[0]
 
     assert root["parentId"] is None, "Expected root to have no parent"
@@ -381,7 +417,7 @@ def test_download(config):
     os.remove(file_name)
 
     api.download(
-        f"{PREFIX}{db_id}",
+        f"{PREFIXES.DO}{db_id}",
         destination=os.getcwd(),
         client=config["client"],
     )

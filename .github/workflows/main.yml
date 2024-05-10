@@ -8,7 +8,7 @@ on:
 jobs:
 
   build-docs:
-    needs: [code-formatting-and-syntax]
+    needs: [code-formatting-syntax-and-docstrings]
     runs-on: ubuntu-latest
 
     steps:
@@ -31,7 +31,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-  code-formatting-and-syntax:
+  code-formatting-syntax-and-docstrings:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -50,6 +50,15 @@ jobs:
           version: 0.3.1
           args: check --select I
 
+      - name: Check docstrings using interrogate
+        run: |
+          pip install interrogate
+          if [ $(interrogate -c pyproject.toml -v . -f 100 | grep "FAILED" | wc -l) = 1 ]; then
+             echo "necessary docstrings missing:"
+             interrogate -vv . -f 100 
+             exit 1
+          fi
+
 
   functionality-tests:
     runs-on: ${{ matrix.os }}
@@ -59,7 +68,7 @@ jobs:
         os: [ubuntu-latest, windows-latest]
         python-version: ["3.9", "3.10", "3.11", "3.12"]
 
-    needs: [code-formatting-and-syntax]
+    needs: [code-formatting-syntax-and-docstrings]
     steps:
       - uses: actions/checkout@v4
 

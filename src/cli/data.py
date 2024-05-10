@@ -7,10 +7,12 @@ import cement
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.managed_data import _api, api
 from deeporigin.managed_data.client import DeepOriginClient
-from deeporigin.utils import PREFIX, _print_dict, _print_tree, _show_json, _truncate
+from deeporigin.utils import PREFIXES, _print_dict, _print_tree, _show_json, _truncate
 
 
 class DataController(cement.Controller):
+    """Controller for data subcommand of CLI"""
+
     class Meta:
         label = "data"
         stacked_on = "base"
@@ -89,28 +91,158 @@ databases to CSV files.
                 _api.download_file(file, destination=destination)
 
     @cement.ex(
-        help="Download a file from Deep Origin",
+        help="Copy files or databases from or to Deep Origin",
         arguments=[
             (
-                ["file_id"],
-                {"help": "File ID", "action": "store"},
+                ["source"],
+                {"help": "Source", "action": "store"},
+            ),
+            (
+                ["destination"],
+                {"help": "Destination", "action": "store"},
+            ),
+            (
+                ["--include-files"],
+                {
+                    "action": "store_true",
+                    "help": "Whether to also download files in a database: [False]",
+                },
             ),
         ],
     )
-    def download_file(self):
-        """download file"""
+    def copy(self):
+        """download or upload files or databases"""
 
-        _api.download_file(
-            self.app.pargs.file_id,
-            client=self._get_client(),
-        )
+        args = self.app.pargs
+
+        if PREFIXES.DO in args.source and PREFIXES.DO not in args.destination:
+            api.download(
+                args.source,
+                args.destination,
+                include_files=args.include_files,
+            )
+        elif PREFIXES.DO in args.destination and PREFIXES.DO not in args.source:
+            raise NotImplementedError("Uploading has not been implemented yet")
+            # upload(args.source, args.destination)
+        else:
+            raise DeepOriginException(
+                f"Exactly one of <source> and <destination> should be prefixed with `{PREFIXES.DO}`"
+            )
+
+    @cement.ex(
+        help="List files, rows, databases, workspaces in Deep Origin",
+        arguments=[
+            (
+                ["--files"],
+                {
+                    "action": "store_true",
+                    "help": "Whether to list files: [False]",
+                },
+            ),
+            (
+                ["--rows"],
+                {
+                    "action": "store_true",
+                    "help": "Whether to list rows: [False]",
+                },
+            ),
+            (
+                ["--workspaces"],
+                {
+                    "action": "store_true",
+                    "help": "Whether to list workspaces: [False]",
+                },
+            ),
+            (
+                ["--databases"],
+                {
+                    "action": "store_true",
+                    "help": "Whether to list databases: [False]",
+                },
+            ),
+            (
+                ["--json"],
+                {
+                    "action": "store_true",
+                    "help": "Whether to return JSON formatted data [default: [False]",
+                },
+            ),
+        ],
+    )
+    def list(self):
+        """list files, rows, databases, workspaces"""
+
+        if self.app.pargs.files:
+            # we will only list files
+            data = _api.list_files(
+                client=self._get_client(),
+            )
+            if not self.app.pargs.json:
+                # show a table with file names, ids, status
+                pdata = dict(Name=[], Status=[], ID=[])
+                for item in data:
+                    pdata["Name"].append(item["file"]["name"])
+                    pdata["Status"].append(item["file"]["status"])
+                    pdata["ID"].append(item["file"]["id"])
+                _print_dict(pdata, json=False, transpose=False)
+            else:
+                _show_json(data)
+            return
+
+        if (
+            not self.app.pargs.rows
+            and not self.app.pargs.workspaces
+            and not self.app.pargs.databases
+        ):
+            # we want to list everything, show show a tree.
+            if not self.app.pargs.json:
+                tree = api.get_tree(
+                    client=self._get_client(),
+                )
+                for branch in tree:
+                    _print_tree(branch)
+            else:
+                rows = _api.list_rows(client=self._get_client())
+                _show_json(rows)
+
+            return
+
+        # at this point it is not possible to construct a tree.
+        # so we will only show a table, or JSON output
+        rows = []
+        if self.app.pargs.rows:
+            rows += _api.list_rows(
+                row_type="row",
+                client=self._get_client(),
+            )
+        if self.app.pargs.databases:
+            rows += _api.list_rows(
+                row_type="database",
+                client=self._get_client(),
+            )
+        if self.app.pargs.workspaces:
+            rows += _api.list_rows(
+                row_type="workspace",
+                client=self._get_client(),
+            )
+
+        if not self.app.pargs.json:
+            pdata = dict(Name=[], Type=[], ID=[])
+
+            for item in rows:
+                pdata["Name"].append(item["name"])
+                pdata["Type"].append(item["type"])
+                pdata["ID"].append(item["hid"])
+            _print_dict(pdata, json=False, transpose=False)
+        else:
+            _show_json(rows)
 
     @cement.ex(
         help="Describe and get metadata of file uploaded to database in your Deep Origin data management system",
         arguments=[
             (
-                ["file_id"],
-                {"help": "File ID", "action": "store"},
+                ["object_id"],
+                {"help": "File ID or Row ID", "action": "store"},
             ),
             (
                 ["--json"],
@@ -121,161 +253,43 @@ databases to CSV files.
             ),
         ],
     )
-    def describe_file(self):
-        """describe file"""
+    def describe(self):
+        """describe file or row"""
 
-        data = _api.describe_file(
-            self.app.pargs.file_id,
-            client=self._get_client(),
-        )
+        if PREFIXES.FILE in self.app.pargs.object_id:
+            data = _api.describe_file(
+                self.app.pargs.object_id,
+                client=self._get_client(),
+            )
+        else:
+            # not a file
+            data = _api.describe_row(
+                self.app.pargs.object_id,
+                client=self._get_client(),
+            )
+
+            data.pop("rowJsonSchema", None)
+
+            if "cols" in data.keys():
+                col_names = [col["name"] for col in data["cols"]]
+                col_keys = [col["key"] for col in data["cols"]]
+
+                col_names = ", ".join(col_names)
+                col_keys = ", ".join(col_keys)
+
+                if data["type"] == "database" and not self.app.pargs.json:
+                    data["Column Names"] = _truncate(col_names)
+                    data["Column Keys"] = _truncate(col_keys)
+
+                    data.pop("cols", None)
 
         _print_dict(data, json=self.app.pargs.json)
 
     @cement.ex(
-        help="Describe row",
+        help="Show database or row",
         arguments=[
             (
-                ["row_id"],
-                {"help": "Row or Database ID", "action": "store"},
-            ),
-            (
-                ["--json"],
-                {
-                    "action": "store_true",
-                    "help": "Whether to return JSON formatted data [default: False]",
-                },
-            ),
-        ],
-    )
-    def describe_row(self):
-        """describe row"""
-
-        data = _api.describe_row(
-            self.app.pargs.row_id,
-            client=self._get_client(),
-        )
-        data.pop("rowJsonSchema", None)
-
-        if "cols" in data.keys():
-            col_names = [col["name"] for col in data["cols"]]
-            col_keys = [col["key"] for col in data["cols"]]
-
-            col_names = ", ".join(col_names)
-            col_keys = ", ".join(col_keys)
-
-            if data["type"] == "database" and not self.app.pargs.json:
-                data["Column Names"] = _truncate(col_names)
-                data["Column Keys"] = _truncate(col_keys)
-
-                data.pop("cols", None)
-
-        _print_dict(data, json=self.app.pargs.json)
-
-    @cement.ex(
-        help="List files in a database or row",
-        arguments=[
-            (
-                ["--assigned_row_ids"],
-                {
-                    "help": "Row IDs that files are assigned to",
-                    "action": "store",
-                    "nargs": "*",
-                },
-            ),
-            (
-                ["--unassigned"],
-                {
-                    "action": "store_true",
-                    "help": "Whether to only find unassigned files: False]",
-                },
-            ),
-            (
-                ["--json"],
-                {
-                    "action": "store_true",
-                    "help": "Whether to return JSON formatted data [default: False]",
-                },
-            ),
-            (
-                ["--show-uri"],
-                {
-                    "action": "store_true",
-                    "help": "Whether to show the URI [default: False]",
-                },
-            ),
-        ],
-    )
-    def list_files(self):
-        """list rows"""
-
-        files = _api.list_files(
-            assigned_row_ids=self.app.pargs.assigned_row_ids,
-            is_unassigned=self.app.pargs.unassigned,
-            client=self._get_client(),
-        )
-
-        if len(files) == 0:
-            print("No files found")
-            return
-
-        if self.app.pargs.json:
-            _show_json(files)
-            return
-
-        # convert a list of dicts to a dict of lists
-        data = {}
-        keys = files[0]["file"].keys()
-        for key in keys:
-            if not self.app.pargs.show_uri and key == "uri":
-                continue
-            data[key] = [file["file"][key] for file in files]
-
-        _print_dict(data, json=False, transpose=False)
-
-    @cement.ex(
-        help="List rows in a database or row",
-        arguments=[
-            (
-                ["row_id"],
-                {"help": "Row or Database ID", "action": "store"},
-            ),
-            (
-                ["--json"],
-                {
-                    "action": "store_true",
-                    "help": "Whether to return JSON formatted data [default: False]",
-                },
-            ),
-        ],
-    )
-    def list_rows(self):
-        """list rows"""
-
-        rows = _api.list_rows(
-            parent_id=self.app.pargs.row_id,
-            client=self._get_client(),
-        )
-
-        if self.app.pargs.json:
-            _show_json(rows)
-            return
-
-        # convert a list of dicts to a dict of lists
-        data = {}
-        keys = rows[0].keys()
-        for key in keys:
-            if key == "parentId" or key == "type":
-                continue
-            data[key] = [row[key] for row in rows]
-
-        _print_dict({"Parent ID": rows[0]["parentId"]}, json=False)
-        _print_dict(data, json=False, transpose=False)
-
-    @cement.ex(
-        help="List rows in a database",
-        arguments=[
-            (
-                ["db_id"],
+                ["object_id"],
                 {"help": "Database ID", "action": "store"},
             ),
             (
@@ -287,122 +301,30 @@ databases to CSV files.
             ),
         ],
     )
-    def show_db(self):
-        """list database row"""
+    def show(self):
+        """show database or row in Deep Origin"""
 
-        data = api.get_dataframe(
-            self.app.pargs.db_id,
-            return_type="dict",
+        data = _api.describe_row(
+            row_id=self.app.pargs.object_id,
             client=self._get_client(),
         )
+        row_type = data["type"]
 
-        _print_dict(data, json=self.app.pargs.json, transpose=False)
-
-    @cement.ex(
-        help="List child workspaces and databases in given workspace",
-        arguments=[
-            (
-                ["object_id"],
-                {
-                    "help": "Workspace ID",
-                    "action": "store",
-                    "nargs": "?",
-                    "const": None,
-                },
+        if row_type == "database":
+            data = api.get_dataframe(
+                self.app.pargs.object_id,
+                return_type="dict",
+                client=self._get_client(),
             )
-        ],
-    )
-    def ls(self):
-        """list rows in db"""
-
-        tree = api.get_tree(
-            client=self._get_client(),
-        )
-        for branch in tree:
-            _print_tree(branch)
-
-    @cement.ex(
-        help="Show column names and values for a given row",
-        arguments=[
-            (
-                ["row_id"],
-                {"help": "Row ID", "action": "store"},
-            ),
-            (
-                ["--json"],
-                {
-                    "action": "store_true",
-                    "help": "Whether to return JSON formatted data [default: False]",
-                },
-            ),
-        ],
-    )
-    def row(self):
-        """list the columns of the row and their values, where applicable"""
-        row_data = api.get_row_data(
-            self.app.pargs.row_id,
-            client=self._get_client(),
-        )
-
-        _print_dict(row_data, json=self.app.pargs.json)
-
-
-class CopyController(cement.Controller):
-    class Meta:
-        label = "cp"
-        stacked_on = "data"
-        stacked_type = "nested"
-        help = "Copy cells, columns, rows, files or databases"
-        description = """Copy data from cells, columns, rows,
-files or databases to or from a local filesystem. Databases
-are downloaded as CSV files; included files are downloaded 
-as-is. """
-        arguments = [
-            (
-                ["source"],
-                {
-                    "type": str,
-                    "metavar": "<source>",
-                    "help": "Identifier of Remote Resource: (Workspace, Database, or Row), or path to local folder or file",
-                },
-            ),
-            (
-                ["destination"],
-                {
-                    "type": str,
-                    "metavar": "<destination>",
-                    "help": "Identifier of Remote Resource: (Workspace, Database, or Row), or path to local folder or file",
-                },
-            ),
-            (
-                ["--include-files"],
-                {
-                    "action": "store_true",
-                    "help": "Whether to download files in database [default: False]",
-                },
-            ),
-        ]
-
-    @cement.ex(hide=True)
-    def _default(self):
-        args = self.app.pargs
-
-        if PREFIX in args.source and PREFIX not in args.destination:
-            api.download(
-                args.source,
-                args.destination,
-                include_files=args.include_files,
+            _print_dict(data, json=self.app.pargs.json, transpose=False)
+        elif row_type == "row":
+            data = api.get_row_data(
+                self.app.pargs.object_id,
+                client=self._get_client(),
             )
-        elif PREFIX in args.destination and PREFIX not in args.source:
-            raise NotImplementedError("Uploading has not been implemented yet")
-            # upload(args.source, args.destination)
-        else:
-            raise DeepOriginException(
-                f"Exactly one of <source> and <destination> should be prefixed with `{PREFIX}`"
-            )
+            _print_dict(data, json=self.app.pargs.json, transpose=True)
 
 
 CONTROLLERS = [
     DataController,
-    CopyController,
 ]

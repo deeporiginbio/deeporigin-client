@@ -77,7 +77,7 @@ class BaseController(cement.Controller):
 
 class App(cement.App):
     class Meta:
-        label = "deep-origin"
+        label = "deeporigin"
         base_controller = "base"
         handlers = (
             [BaseController]

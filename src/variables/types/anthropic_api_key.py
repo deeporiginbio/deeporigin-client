@@ -4,6 +4,8 @@ from .secret_env_var_value import SecretEnvironmentVariableValue
 
 
 class AnthropicApiKey(SecretEnvironmentVariableValue):
+    """Anthropic API key"""
+
     class Meta:
         platform_id = "Anthropic API key"
 

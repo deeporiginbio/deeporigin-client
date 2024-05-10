@@ -9,7 +9,11 @@ import requests
 from beartype import beartype
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.managed_data.client import Client, DeepOriginClient
-from deeporigin.managed_data.schema import RowType
+from deeporigin.managed_data.schema import (
+    Cardinality,
+    DataType,
+    RowType,
+)
 
 
 def _get_default_client(client: Optional[Client] = None):
@@ -30,6 +34,243 @@ def _get_default_client(client: Optional[Client] = None):
         client = DeepOriginClient()  # pragma: no cover
         client.authenticate()  # pragma: no cover
     return client
+
+
+@beartype
+def create_workspace(
+    *,
+    name: str,
+    hid: Optional[str] = None,
+    parent_id: Optional[str] = None,
+    client: Optional[Client] = None,
+) -> dict:
+    """Low level function that wraps the `CreateWorkspace` endpoint.
+
+    Creates a new workspace at the root level or within another workspace.
+
+    Args:
+        hid: Human ID of the workspace.
+        name: Name of the workspace.
+        parent_id: ID (or human ID) of the parent.
+
+    Returns:
+        A dictionary that conforms to a [CreateWorkspaceResponse][src.managed_data.schema.CreateWorkspaceResponse].
+    """
+    client = _get_default_client(client)
+
+    if hid is None:
+        hid = name
+
+    data = dict(
+        workspace=dict(
+            hid=hid,
+            name=name,
+            parentId=parent_id,
+        )
+    )
+    return client.invoke("CreateWorkspace", data)
+
+
+@beartype
+def create_database(
+    *,
+    name: str,
+    hid_prefix: str,
+    hid: Optional[str] = None,
+    parent_id: Optional[str] = None,
+    client: Optional[Client] = None,
+) -> dict:
+    """Low level function that wraps the `CreateDatabase` endpoint.
+
+    Creates a new database within a workspace.
+
+    Args:
+        hid: Human ID of the database.
+        name: Name of the database.
+        parent_id: ID of the parent workspace.
+        hid_prefix: Human ID prefix of the database. This prefix is used in every row.
+
+
+    Returns:
+        A dictionary that conforms to a [CreateDatabaseResponse][src.managed_data.schema.CreateDatabaseResponse]."""
+
+    client = _get_default_client(client)
+
+    if hid is None:
+        hid = name
+
+    data = dict(
+        database=dict(
+            hid=hid,
+            name=name,
+            parentId=parent_id,
+            hidPrefix=hid_prefix,
+        )
+    )
+    return client.invoke("CreateDatabase", data)
+
+
+@beartype
+def update_workspace(
+    *,
+    id: str,
+    hid: Optional[str] = None,
+    name: Optional[str] = None,
+    parent_id: Optional[str] = None,
+    client: Optional[Client] = None,
+) -> dict:
+    """Low level function that wraps the `UpdateWorkspace` endpoint.
+
+    Updates a workspace.
+
+    Args:
+        hid: Human ID of the workspace.
+        name: Name of the workspace.
+        parent_id: ID (or human ID) of the parent.
+
+    Returns:
+        A dictionary that conforms to a [CreateWorkspaceResponse][src.managed_data.schema.CreateWorkspaceResponse].
+
+    """
+    client = _get_default_client(client)
+
+    data = dict(id=id, workspace=dict())
+    if hid is not None:
+        data["workspace"]["hid"] = hid
+    if name is not None:
+        data["workspace"]["name"] = name
+
+    return client.invoke("UpdateWorkspace", data)
+
+
+@beartype
+def update_database(
+    *,
+    id: str,
+    hid_prefix: Optional[str] = None,
+    hid: Optional[str] = None,
+    name: Optional[str] = None,
+    parent_id: Optional[str] = None,
+    client: Optional[Client] = None,
+) -> dict:
+    """Low level function that wraps the `UpdateDatabase` endpoint.
+
+    Updates a database.
+
+    Args:
+        hid: Human ID of the database.
+        name: Name of the database.
+        parent_id: ID (or human ID) of the parent.
+        hid_prefix: Human ID prefix of the database. This prefix is used in every row.
+
+    Returns:
+        A dictionary that conforms to a [CreateDatabaseResponse][src.managed_data.schema.CreateDatabaseResponse].
+
+    """
+    client = _get_default_client(client)
+
+    data = dict(id=id, database=dict())
+    if hid is not None:
+        data["database"]["hid"] = hid
+    if name is not None:
+        data["database"]["name"] = name
+    if name is not None:
+        data["database"]["hidPrefix"] = hid_prefix
+
+    return client.invoke("UpdateDatabase", data)
+
+
+@beartype
+def delete_rows(
+    row_ids: list[str],
+    *,
+    client: Optional[Client] = None,
+) -> None:
+    """Low level function that wraps the `DeleteRows` endpoint.
+
+    Deletes rows, workspaces, or databases.
+
+    Args:
+        row_ids: A list of (system) row IDs
+
+    Returns:
+        None
+    """
+    client = _get_default_client(client)
+
+    data = dict(rowIds=row_ids)
+    client.invoke("DeleteRows", data)
+
+
+@beartype
+def add_database_column(
+    *,
+    database_id: str,
+    name: str,
+    type: DataType,
+    key: Optional[str] = None,
+    cardinality: Cardinality = "one",
+    client: Optional[Client] = None,
+) -> dict:
+    """Low level function that wraps the `AddDatabaseColumn` endpoint.
+
+    Adds a new column to a database.
+
+    Args:
+        database_id: ID of the database.
+        name: Name of the column.
+        type: Type of the column.
+        key: Key of the column.
+        cardinality: Cardinality of the column.
+
+    Returns:
+        A dictionary that conforms to a [AddDatabaseColumnResponse][src.managed_data.schema.AddDatabaseColumnResponse].
+    """
+    client = _get_default_client(client)
+
+    if key is None:
+        key = name
+
+    column = dict(
+        name=name,
+        type=type,
+        key=key,
+        cardinality=cardinality,
+    )
+
+    if type == "select":
+        column["configSelect"] = {
+            "options": [],
+            "canCreate": True,
+        }
+
+    data = dict(
+        databaseId=database_id,
+        column=column,
+    )
+
+    return client.invoke("AddDatabaseColumn", data)
+
+
+@beartype
+def delete_database_column(
+    column_id: str,
+    *,
+    client: Optional[Client] = None,
+) -> None:
+    """Low level function that wraps the `DeleteDatabaseColumn` endpoint.
+
+    Deletes a column from a database.
+
+    Args:
+        column_id: ID of the column.
+
+    Returns:
+        None
+    """
+    client = _get_default_client(client)
+
+    client.invoke("DeleteDatabaseColumn", dict(columnId=column_id))
 
 
 @beartype

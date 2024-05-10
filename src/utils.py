@@ -1,5 +1,6 @@
 import json
 import os
+from dataclasses import dataclass
 from typing import Union
 from urllib.parse import urljoin
 
@@ -12,7 +13,15 @@ __all__ = [
 ]
 
 
-PREFIX = "deeporigin://"
+@dataclass
+class PREFIXES:
+    """prefixes for CLI and python client"""
+
+    DO = "do://"
+    FILE = "_file"
+    DB = "_database"
+    ROW = "_row"
+    WS = "_workspace"
 
 
 @beartype
@@ -28,6 +37,8 @@ def _print_tree(tree: dict, offset: int = 0) -> None:
 
 @beartype
 def _truncate(txt: str) -> str:
+    """utility function for truncating text"""
+
     TERMINAL_WIDTH, _ = os.get_terminal_size()
     txt = (
         (txt[: int(TERMINAL_WIDTH / 2)] + "…")
@@ -39,7 +50,8 @@ def _truncate(txt: str) -> str:
 
 @beartype
 def _show_json(data: Union[list, dict]) -> None:
-    """utility for pretty printing JSON"""
+    """utility for pretty printing JSON, used in the CLI"""
+
     print(json.dumps(data, indent=2))
 
 
@@ -50,7 +62,8 @@ def _print_dict(
     json: bool = True,
     transpose: bool = True,
 ) -> None:
-    """helper function to pretty print a dict as a table"""
+    """helper function to pretty print a dict as a table,
+    used in the CLI"""
 
     if json:
         _show_json(data)

@@ -11,6 +11,9 @@ from deeporigin.do_api import read_cached_do_api_tokens
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.managed_data.schema import (
     ColumnItem,
+    CreateDatabaseResponse,
+    CreateWorkspaceResponse,
+    DescribeFileResponse,
     DescribeRowResponseDatabase,
     DescribeRowResponseRow,
     FieldItem,
@@ -19,18 +22,40 @@ from deeporigin.managed_data.schema import (
 from deeporigin.utils import _nucleus_url
 
 
+def file_description():
+    """mock file description"""
+
+    return DescribeFileResponse(
+        id="_file:placeholder-file",
+        uri="s3://placeholder/uri",
+        name="placeholder",
+        status="ready",
+        contentLength=123,
+        contentType="application/foo",
+        dateCreated="2024-05-08 19:16:09.26078",
+        dateUpdated="2024-05-08 19:16:09.26078",
+        createdByUserDrn="drn:identity::user:google-apps|foo@deeporigin.com",
+    ).model_dump()
+
+
 @dataclass
 class Client(ABC):
+    """client abstract base class. Actual clients inherit from this base class. Actual clients need to implement a `authenticate` and `invoke` method"""
+
     @abstractmethod
     def authenticate(self, refresh_tokens: bool = True):
+        """authenticate method to be called before making any requests. This needs to be implemented in derived classes"""
+
         pass  # pragma: no cover
 
     @abstractmethod
     def invoke(self, endpoint: str, data: dict):
+        """invoke method to be called to make requests. This needs to be implemented in derived classes"""
+
         pass  # pragma: no cover
 
     def __props__(self):
-        """helper method to show all properties of the client"""
+        """helper method to show all properties of the client. Do not use."""
         props = dict()
         for attribute in dir(self):
             if attribute.startswith("_"):
@@ -45,23 +70,30 @@ class Client(ABC):
         return json.dumps(props, indent=4)
 
     def __repr__(self):
+        """helper method to show all properties of the client. Do not use."""
         return self.__props__()
 
     def _repr_html_(self):
+        """helper method to show all properties of the client. Do not use. This method is called when you invoke a variable in a Jupyter instance"""
         return self.__props__()
 
     def __str__(self):
+        """helper method to show all properties of the client. Do not use."""
         return self.__props__()
 
 
 @dataclass
 class DeepOriginClient(Client):
+    """client to interact with DeepOrigin API"""
+
     api_url = _nucleus_url()
     org_id = get_value()["organization_id"]
 
     headers = dict()
 
     def authenticate(self, refresh_tokens: bool = True):
+        """authenticate to DeepOrigin API"""
+
         if refresh_tokens:
             api_access_token, api_refresh_token = get_do_api_tokens()
             cache_do_api_tokens(api_access_token, api_refresh_token)
@@ -101,6 +133,7 @@ class MockClient(Client):
     databases = ["db-placeholder"]
     rows = [f"row-placeholder-{idx}" for idx in range(10)]
     columns = [f"column-{idx}" for idx in range(5)]
+    file = file_description()
 
     def authenticate(self, refresh_tokens: bool = True):
         """no need to do anything here"""
@@ -108,6 +141,7 @@ class MockClient(Client):
 
     def invoke_list_rows(self, data: dict):
         """callback when we invoke ListRows"""
+
         if data == dict(filters=[]):
             # list_rows called with no filters. return
             # a workspace, a database, and some rows
@@ -118,7 +152,7 @@ class MockClient(Client):
                     id=self.workspaces[0],
                     type="workspace",
                     parentId=None,
-                ).dict()
+                ).model_dump()
             ]
             rows += [
                 ListRowsResponse(
@@ -126,7 +160,7 @@ class MockClient(Client):
                     id=self.databases[0],
                     type="database",
                     parentId=self.workspaces[0],
-                ).dict()
+                ).model_dump()
             ]
             rows += [
                 ListRowsResponse(
@@ -134,7 +168,7 @@ class MockClient(Client):
                     id=f"row-placeholder-{idx}",
                     type="row",
                     parentId=self.databases[0],
-                ).dict()
+                ).model_dump()
                 for idx in range(10)
             ]
             return rows
@@ -152,7 +186,7 @@ class MockClient(Client):
                     id=f"row-placeholder-{idx}",
                     type="row",
                     parentId=data["filters"][0]["parent"]["id"],
-                ).dict()
+                ).model_dump()
                 for idx in range(10)
             ]
 
@@ -166,7 +200,7 @@ class MockClient(Client):
                     id=self.workspaces[0],
                     type="workspace",
                     parentId=None,
-                ).dict()
+                ).model_dump()
             ]
         elif data == dict(filters=[dict(rowType="database")]):
             # return the example database
@@ -176,10 +210,27 @@ class MockClient(Client):
                     id=self.databases[0],
                     type="database",
                     parentId=self.workspaces[0],
-                ).dict()
+                ).model_dump()
             ]
+        elif data == dict(filters=[dict(rowType="row")]):
+            # return the example row
+            return [
+                ListRowsResponse(
+                    hid=self.rows[0],
+                    id=self.rows[0],
+                    type="row",
+                    parentId=self.databases[0],
+                ).model_dump()
+            ]
+        else:
+            print(data)
+            raise NotImplementedError(
+                "This specific request type hasn't been mocked yet"
+            )
 
     def invoke_describe_row(self, data):
+        """callback when we invoke DescribeRow"""
+
         if data["rowId"].startswith("db-"):
             # we are likely asking for a database
             name = self.databases[0]
@@ -199,7 +250,7 @@ class MockClient(Client):
                     for idx in range(5)
                 ],
                 hidPrefix="placeholder",
-            ).dict()
+            ).model_dump()
 
         else:
             # we are asking for a row in a database
@@ -216,7 +267,7 @@ class MockClient(Client):
                 hid=name,
                 parentId=self.databases[0],
                 fields=fields,
-            ).dict()
+            ).model_dump()
 
             if not data["fields"]:
                 row.pop("fields", None)
@@ -224,6 +275,8 @@ class MockClient(Client):
         return row
 
     def invoke_list_database_rows(self, data):
+        """callback when we invoke ListDatabaseRows"""
+
         fields = [
             FieldItem(
                 columnId=f"column-{idx}",
@@ -237,7 +290,7 @@ class MockClient(Client):
                 hid=f"row-placeholder-{idx}",
                 parentId=data["databaseRowId"],
                 fields=fields,
-            ).dict()
+            ).model_dump()
             for idx in range(5)
         ]
 
@@ -246,6 +299,34 @@ class MockClient(Client):
 
         if endpoint == "ListRows":
             return self.invoke_list_rows(data)
+
+        elif endpoint == "CreateWorkspace":
+            name = data["workspace"]["name"]
+            return CreateWorkspaceResponse(
+                id="_workspace:" + name,
+                hid="_workspace:" + name,
+                name=name,
+                dateCreated="2024-05-08 19:16:09.26078",
+                dateUpdated="2024-05-08 19:16:09.26078",
+                createdByUserDrn="drn:identity::user:google-apps|foo@deeporigin.com",
+            ).model_dump()
+
+        elif endpoint == "DeleteRows":
+            return dict(data=dict())
+
+        elif endpoint == "CreateDatabase":
+            name = data["database"]["name"]
+            return CreateDatabaseResponse(
+                id="_database:" + name,
+                hid="_database:" + name,
+                hidPrefix="placeholder",
+                name=name,
+                dateCreated="2024-05-08 19:16:09.26078",
+                dateUpdated="2024-05-08 19:16:09.26078",
+                createdByUserDrn="drn:identity::user:google-apps|foo@deeporigin.com",
+                parentId=data["database"]["parentId"],
+                cols=[],
+            ).model_dump()
 
         elif endpoint == "DescribeRow":
             return self.invoke_describe_row(data)
@@ -315,14 +396,3 @@ def _check_response(response: requests.models.Response) -> Union[dict, list]:
         return response["data"]
     else:
         raise KeyError("`data` not in response")
-
-
-def file_description():
-    return dict(
-        id="_file:placeholder-file",
-        uri="s3://placeholder/uri",
-        name="placeholder",
-        status="ready",
-        contentLength=123,
-        contentType="application/foo",
-    )
