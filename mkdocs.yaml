@@ -43,8 +43,8 @@ nav:
   - Authenticate to Deep Origin: how-to/auth.md
   - Set up a configuration file: how-to/config.md
   - Managed data: 
-    - Explore data: how-to/managed-data/explore-data.md
-    - Fetch data: how-to/managed-data/fetch-data.md
+    - List data: how-to/managed-data/list-data.md
+    - Inspect data: how-to/managed-data/inspect-data.md
     - Upload data: how-to/managed-data/upload-data.md
 - API reference:
   - Managed data:

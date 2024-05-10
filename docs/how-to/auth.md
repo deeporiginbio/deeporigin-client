@@ -13,8 +13,8 @@ You can sign into the Deep Origin platform using the Python Client or the CLI.
     
 
     ```python
-    from deeporigin import sign_into_do_platform
-    sign_into_do_platform()
+    from deeporigin import auth
+    auth.authenticate()
     ```
 
 
