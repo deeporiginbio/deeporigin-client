@@ -4,7 +4,7 @@ import warnings
 
 import cement
 import termcolor
-from deeporigin import cache_do_api_tokens, get_do_api_tokens
+from deeporigin import auth
 from deeporigin.config import get_value
 from deeporigin.utils import _print_dict
 
@@ -49,9 +49,7 @@ class BaseController(cement.Controller):
     )
     def authenticate(self):
         """list the columns of the row and their values, where applicable"""
-        access_token, refresh_token = get_do_api_tokens(verbose=True)
-
-        cache_do_api_tokens(access_token, refresh_token)
+        auth.get_tokens(refresh=False)
 
     @cement.ex(
         help="Show configuration",

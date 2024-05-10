@@ -5,69 +5,79 @@ import time
 from urllib.parse import urljoin
 
 import requests
+from beartype import beartype
 
 from .config import get_value as get_config
 from .exceptions import DeepOriginException
 
 __all__ = [
-    "get_do_api_tokens",
-    "cache_do_api_tokens",
-    "read_cached_do_api_tokens",
-    "remove_cached_do_api_tokens",
-    "sign_into_do_platform",
-    "refresh_access_to_do_platform",
+    "get_tokens",
+    "cache_tokens",
+    "read_cached_tokens",
+    "remove_cached_tokens",
+    "authenticate",
+    "refresh_tokens",
 ]
 
 
-@functools.cache
-def get_do_api_tokens(verbose: bool = False) -> tuple[str, str]:
-    """Get a token for accessing the Deep Origin API
+@beartype
+def tokens_exist() -> bool:
+    """Check if the cached API tokens exist"""
+    config = get_config()
+    return os.path.isfile(config.api_tokens_filename)
 
-    If the user already has a token, refresh it. If not, sign into the Deep Origin platform.
-    Then cache the new or refreshed token.
+
+@functools.cache
+def get_tokens(
+    *,
+    refresh: bool = True,
+) -> dict:
+    """Get access token for accessing the Deep Origin API
+
+    Gets tokens to access Deep Origin API. If the tokens exist
+    on disk, those tokens are used first. On first use (within
+    a python session), tokens are refreshed if refresh_tokens
+    is `True`. On subsequent uses, tokens are not refreshed
+    even if refresh_tokens is `True`.
+
+    Args:
+        refresh: whether to refresh the token (default: `True`)
 
     Returns:
         :obj:`tuple`: API access and refresh tokens
     """
-    config = get_config()
 
-    if os.path.isfile(config.api_tokens_filename):
-        if verbose:
-            print("Refreshing existing tokens...")
-        tokens = read_cached_do_api_tokens()
-        refresh_token = tokens["refresh"]
+    if tokens_exist():
+        # tokens exist on disk
+        tokens = read_cached_tokens()
 
-        access_token = refresh_access_to_do_platform(refresh_token)
+        if refresh:
+            tokens["access"] = refresh_tokens(tokens["refresh"])
 
     else:
-        if verbose:
-            print("No cached tokens. Signing into Deep Origin...")
-        access_token, refresh_token = sign_into_do_platform()
+        # no tokens on disk. have to sign into the platform to get tokens
+        tokens = authenticate()
 
-    return access_token, refresh_token
+    return tokens
 
 
-def cache_do_api_tokens(access_token: str, refresh_token: str) -> None:
+@beartype
+def cache_tokens(tokens: dict) -> None:
     """Save access and refresh tokens to a local file, for example, to
     enable variables/secrets to be regularly pulled without the user
     needing to regularly re-login.
 
     Args:
-        access_token (:obj:`str`): access token
-        refresh_token (:obj:`str`): refresh token
+        token: dictionary with access and refresh tokens
     """
     config = get_config()
 
     os.makedirs(os.path.dirname(config.api_tokens_filename), exist_ok=True)
     with open(config.api_tokens_filename, "w") as file:
-        tokens = {
-            "access": access_token,
-            "refresh": refresh_token,
-        }
         json.dump(tokens, file)
 
 
-def read_cached_do_api_tokens() -> dict[str, str]:
+def read_cached_tokens() -> dict[str, str]:
     """Read cached API tokens"""
     config = get_config()
     with open(config.api_tokens_filename, "r") as file:
@@ -75,14 +85,15 @@ def read_cached_do_api_tokens() -> dict[str, str]:
     return tokens
 
 
-def remove_cached_do_api_tokens():
+def remove_cached_tokens():
     """Remove cached API tokens"""
     config = get_config()
     if os.path.isfile(config.api_tokens_filename):
         os.remove(config.api_tokens_filename)
 
 
-def sign_into_do_platform() -> tuple[str, str]:
+@beartype
+def authenticate() -> dict:
     """Get an access token for use with the Deep Origin API.
     The tokens are also cached to file
 
@@ -142,10 +153,14 @@ def sign_into_do_platform() -> tuple[str, str]:
     api_access_token = response_json["access_token"]
     api_refresh_token = response_json["refresh_token"]
 
-    return api_access_token, api_refresh_token
+    tokens = dict(access=api_access_token, refresh=api_refresh_token)
+
+    cache_tokens(tokens)
+
+    return tokens
 
 
-def refresh_access_to_do_platform(api_refresh_token: str) -> str:
+def refresh_tokens(api_refresh_token: str) -> str:
     """Refresh the access token for the DO platform
 
     Args:

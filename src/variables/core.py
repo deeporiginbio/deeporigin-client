@@ -7,14 +7,15 @@ import string
 import sys
 import typing
 import warnings
+from urllib.parse import urljoin
 
 import crontab
 import pydantic
 import requests
 import yaml
+from deeporigin import auth
 
 from ..config import get_value as get_config
-from ..do_api import cache_do_api_tokens, get_do_api_tokens, remove_cached_do_api_tokens
 from ..exceptions import DeepOriginException
 from ..feature_flags import FeatureNotAvailableWarning
 from ..feature_flags import get_value as get_feature_flags
@@ -209,7 +210,7 @@ def get_variables_from_do_platform(
     config = get_config()
 
     # Get an access token for the Deep Origin API
-    api_access_token, _ = get_do_api_tokens()
+    tokens = auth.get_tokens()
 
     # Query variables API endpoint.
     #
@@ -222,12 +223,12 @@ def get_variables_from_do_platform(
     )
 
     response = requests.post(
-        config.api_endpoint,
+        urljoin(config.api_endpoint, config.graphql_api_route),
         json={
             "query": query,
         },
         headers={
-            "Authorization": f"Bearer {api_access_token}",
+            "Authorization": f"Bearer {tokens['access']}",
         },
     )
     response.raise_for_status()
@@ -376,8 +377,7 @@ def enable_variable_auto_updating(
         return []
 
     # Get an access token for the Deep Origin API
-    api_access_token, api_refresh_token = get_do_api_tokens()
-    cache_do_api_tokens(api_access_token, api_refresh_token)
+    tokens = auth.get_tokens()
 
     # load the CronTab configuration
     with crontab.CronTab(user=True) as cron_tab:
@@ -515,7 +515,7 @@ def disable_variable_auto_updating() -> None:
 
     config = get_config()
     if os.path.isfile(config.api_tokens_filename):
-        remove_cached_do_api_tokens()
+        auth.remove_cached_tokens()
 
 
 def get_auto_install_variables_cronjob_id() -> str:
