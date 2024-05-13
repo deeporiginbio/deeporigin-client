@@ -2,7 +2,6 @@ name: Test Python Code
 
 on:
   pull_request:
-    branches: [ main ]
     paths:
       - '**/*.py'
 
