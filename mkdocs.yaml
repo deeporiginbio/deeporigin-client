@@ -41,7 +41,8 @@ nav:
   - Installation: install.md
 - How to:
   - Authenticate to Deep Origin: how-to/auth.md
-  - Set up a configuration file: how-to/config.md
+  - Fetch Secrets and Variables: how-to/variables.md
+  - View Deep Origin Information: how-to/do-info.md
   - Managed data: 
     - List data: how-to/managed-data/list-data.md
     - Inspect data: how-to/managed-data/inspect-data.md
