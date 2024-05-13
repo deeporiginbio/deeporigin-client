@@ -23,4 +23,4 @@ No variables were deleted
 
 
 !!! warning "Only on ComputeBenches"
-    This functionality only works on Deep Origin ComputeBenches.
+    This functionality is meant to only function on Deep Origin ComputeBenches. 
