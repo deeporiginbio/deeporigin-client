@@ -405,6 +405,8 @@
       
         
       
+        
+      
     
     
       
@@ -464,11 +466,32 @@
   
   
     <li class="md-nav__item">
-      <a href="../../how-to/config.html" class="md-nav__link">
+      <a href="../../how-to/variables.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Set up a configuration file
+    Fetch Secrets and Variables
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/do-info.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    View Deep Origin Information
   </span>
   
 
@@ -503,10 +526,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_4" >
         
           
-          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_2_4" id="__nav_2_4_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -517,8 +540,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2_3">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_4">
             <span class="md-nav__icon md-icon"></span>
             Managed data
           </label>
@@ -531,11 +554,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../../how-to/managed-data/explore-data.html" class="md-nav__link">
+      <a href="../../how-to/managed-data/list-data.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Explore data
+    List data
   </span>
   
 
@@ -552,11 +575,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../../how-to/managed-data/fetch-data.html" class="md-nav__link">
+      <a href="../../how-to/managed-data/inspect-data.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Fetch data
+    Inspect data
   </span>
   
 
@@ -1588,7 +1611,7 @@ cells.</p>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">include_rows</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">client</span><span class="p">:</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n"><span title="deeporigin.managed_data.client.Client">Client</span></span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">dict</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">list</span><span class="p">[</span><span class="n">dict</span><span class="p">]</span>
 </code></pre></div>
 
   <div class="doc doc-contents ">
@@ -1642,7 +1665,7 @@ called <code>children</code>.</p>
     <tbody>
         <tr class="doc-section-item">
           <td>
-                <code>dict</code>
+                <code>list[dict]</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1652,7 +1675,7 @@ called <code>children</code>.</p>
         </tr>
         <tr class="doc-section-item">
           <td>
-                <code>dict</code>
+                <code>list[dict]</code>
           </td>
           <td>
             <div class="doc-md-description">

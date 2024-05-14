@@ -10,10 +10,10 @@
         <meta name="author" content="Deep Origin">
       
       
-        <link rel="canonical" href="https://formiclabs.github.io/deeporigin-client/how-to/managed-data/fetch-data.html">
+        <link rel="canonical" href="https://formiclabs.github.io/deeporigin-client/how-to/managed-data/inspect-data.html">
       
       
-        <link rel="prev" href="explore-data.html">
+        <link rel="prev" href="list-data.html">
       
       
         <link rel="next" href="upload-data.html">
@@ -24,7 +24,7 @@
     
     
       
-        <title>Fetch data - Deep Origin CLI and Python client</title>
+        <title>Inspect data - Deep Origin CLI and Python client</title>
       
     
     
@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#fetch-databases" class="md-skip">
+        <a href="#describe-data" class="md-skip">
           Skip to content
         </a>
       
@@ -111,7 +111,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Fetch data
+              Inspect data
             
           </span>
         </div>
@@ -405,6 +405,8 @@
       
         
       
+        
+      
     
     
       
@@ -467,11 +469,32 @@
   
   
     <li class="md-nav__item">
-      <a href="../config.html" class="md-nav__link">
+      <a href="../variables.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Set up a configuration file
+    Fetch Secrets and Variables
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../do-info.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    View Deep Origin Information
   </span>
   
 
@@ -508,10 +531,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_3" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_4" checked>
         
           
-          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_2_4" id="__nav_2_4_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -522,8 +545,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_2_3">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2_4">
             <span class="md-nav__icon md-icon"></span>
             Managed data
           </label>
@@ -536,11 +559,11 @@
   
   
     <li class="md-nav__item">
-      <a href="explore-data.html" class="md-nav__link">
+      <a href="list-data.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Explore data
+    List data
   </span>
   
 
@@ -568,18 +591,18 @@
           
   
   <span class="md-ellipsis">
-    Fetch data
+    Inspect data
   </span>
   
 
           <span class="md-nav__icon md-icon"></span>
         </label>
       
-      <a href="fetch-data.html" class="md-nav__link md-nav__link--active">
+      <a href="inspect-data.html" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
-    Fetch data
+    Inspect data
   </span>
   
 
@@ -601,20 +624,68 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#fetch-databases" class="md-nav__link">
+  <a href="#describe-data" class="md-nav__link">
     <span class="md-ellipsis">
-      Fetch databases
+      Describe data
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Describe data">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#describe-rows" class="md-nav__link">
+    <span class="md-ellipsis">
+      Describe rows
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#downloading-files" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#describe-files" class="md-nav__link">
     <span class="md-ellipsis">
-      Downloading files
+      Describe files
     </span>
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#show-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      Show data
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Show data">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#show-rows" class="md-nav__link">
+    <span class="md-ellipsis">
+      Show rows
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#show-databases" class="md-nav__link">
+    <span class="md-ellipsis">
+      Show databases
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -856,20 +927,68 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#fetch-databases" class="md-nav__link">
+  <a href="#describe-data" class="md-nav__link">
     <span class="md-ellipsis">
-      Fetch databases
+      Describe data
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Describe data">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#describe-rows" class="md-nav__link">
+    <span class="md-ellipsis">
+      Describe rows
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#downloading-files" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#describe-files" class="md-nav__link">
     <span class="md-ellipsis">
-      Downloading files
+      Describe files
     </span>
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#show-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      Show data
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Show data">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#show-rows" class="md-nav__link">
+    <span class="md-ellipsis">
+      Show rows
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#show-databases" class="md-nav__link">
+    <span class="md-ellipsis">
+      Show databases
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -891,41 +1010,210 @@
   
 
 
-  <h1>Fetch data</h1>
+  <h1>Inspect data</h1>
 
-<h2 id="fetch-databases">Fetch databases<a class="headerlink" href="#fetch-databases" title="Permanent link">&para;</a></h2>
+<p>This page describes how to describe and show details of data objects in Deep Origin. To simply list objects, see <a href="list-data.html">List data</a>.</p>
+<h2 id="describe-data">Describe data<a class="headerlink" href="#describe-data" title="Permanent link">&para;</a></h2>
+<h3 id="describe-rows">Describe rows<a class="headerlink" href="#describe-rows" title="Permanent link">&para;</a></h3>
+<p>Describing rows provides metadata about the row, such as its ID, parent, and status. </p>
+<div class="admonition info">
+<p class="admonition-title">Describe vs. Show</p>
+<p>This does not show you information in that row. To see data contained in that row, use the <a href="#show-data"><code>show</code></a> command.</p>
+</div>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">CLI</label><label for="__tabbed_1_2">Python Client</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<p>Databases can be viewed in the command line using:</p>
-<div class="language-bash highlight"><pre><span></span><code>deeporigin<span class="w"> </span>data<span class="w"> </span>show-db<span class="w"> </span>&lt;id-of-database&gt;
+<p>To describe a row in a database in Deep Origin, use:</p>
+<div class="language-bash highlight"><pre><span></span><code>deeporigin<span class="w"> </span>data<span class="w"> </span>describe<span class="w"> </span>&lt;row-id&gt;
 </code></pre></div>
-<p>The CLI can also return JSON output that can be piped
-to a JSON parser:</p>
-<div class="language-bash highlight"><pre><span></span><code>deeporigin<span class="w"> </span>data<span class="w"> </span>show-db<span class="w"> </span>&lt;id-of-database&gt;<span class="w"> </span>--json<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq
+<p>This will show you a table similar to:</p>
+<div class="language-text highlight"><pre><span></span><code>╭──────────────────┬────────────────────────────────────╮
+│ Name             │ Value                              │
+├──────────────────┼────────────────────────────────────┤
+│ id               │ _row:WORR9xeGvG6mSg0yyDRlk         │
+│ parentId         │ _database:kyEws11L4KagGAaqRwONv    │
+│ type             │ row                                │
+│ dateCreated      │ 2024-05-08 17:59:32.512306         │
+│ dateUpdated      │ 2024-05-08 18:08:13.103            │
+│ createdByUserDrn │ scientist@deeporigin.com           │
+│ editedByUserDrn  │ scientist@deeporigin.com           │
+│ hid              │ data-2                             │
+│ validationStatus │ valid                              │
+╰──────────────────┴────────────────────────────────────╯
 </code></pre></div>
-<p>This is useful to quickly view the data in the database. 
-To save this database to a CSV, use:</p>
-<div class="language-bash highlight"><pre><span></span><code>deeporigin<span class="w"> </span>data<span class="w"> </span>cp<span class="w"> </span>deeporigin://&lt;id-of-database&gt;<span class="w"> </span>&lt;local-folder&gt;
+<details class="tip">
+<summary>JSON output with <code>--json</code></summary>
+<p><a href="https://www.json.org/">JSON</a> output can be requested by adding <code>--json</code>, and allows
+you to pipe out to a JSON processor like <a href="https://jqlang.github.io/jq/">jq</a>:</p>
+<div class="language-bash highlight"><pre><span></span><code>deeporigin<span class="w"> </span>data<span class="w"> </span>describe<span class="w"> </span>&lt;row-id&gt;<span class="w"> </span>--json<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq
 </code></pre></div>
-<p>The <code>deeporigin://</code> prefix identifies a resource as
-existing on Deep Origin, and the <code>cp</code> command downloads 
-the database as a CSV and all included files are downloaded 
-to the <code>&lt;local-folder&gt;</code>.</p>
+<div class="language-json highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;_row:WORR9xeGvG6mSg0yyDRlk&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;parentId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;_database:kyEws11L4KagGAaqRwONv&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;row&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;dateCreated&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-05-08 17:59:32.512306&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;dateUpdated&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-05-08 18:08:13.103&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;createdByUserDrn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;scientist@deeporigin.com&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;editedByUserDrn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;scientist@deeporigin.com&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;hid&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;data-2&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;validationStatus&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;valid&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+</details>
 </div>
 <div class="tabbed-block">
-<p>Databases can be retrieved as <a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html"><code>pandas.DataFrame</code></a>s using:</p>
-<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">deeporigin.managed_data.api</span> <span class="kn">import</span> <span class="n">get_dataframe</span>
-<span class="n">df</span> <span class="o">=</span> <span class="n">get_dataframe</span><span class="p">(</span><span class="s2">&quot;id-of-database&quot;</span><span class="p">)</span>
+<p>To describe a row in a database in Deep Origin, use:</p>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">deeporigin.managed_data</span> <span class="kn">import</span> <span class="n">_api</span>
+<span class="n">_api</span><span class="o">.</span><span class="n">describe_row</span><span class="p">(</span><span class="s2">&quot;_row:WORR9xeGvG6mSg0yyDRlk&quot;</span><span class="p">)</span>
 </code></pre></div>
-<p>The dataframe contains all rows and columns of the 
-database as seen on Deep Origin. This dataframe can be saved
-to disk, or used for further downstream analysis.</p>
-<p>By default, files in databases are referred by file names. </p>
 </div>
 </div>
 </div>
-<h2 id="downloading-files">Downloading files<a class="headerlink" href="#downloading-files" title="Permanent link">&para;</a></h2>
+<h3 id="describe-files">Describe files<a class="headerlink" href="#describe-files" title="Permanent link">&para;</a></h3>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">CLI</label><label for="__tabbed_2_2">Python Client</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>To describe a row in a database in Deep Origin, use:</p>
+<div class="language-bash highlight"><pre><span></span><code>deeporigin<span class="w"> </span>data<span class="w"> </span>describe<span class="w"> </span>&lt;row-id&gt;
+</code></pre></div>
+<p>This will show you a table similar to:</p>
+<div class="language-text highlight"><pre><span></span><code>╭──────────────────┬───────────────────────────────────╮
+│ Name             │ Value                             │
+├──────────────────┼───────────────────────────────────┤
+│ id               │ _file:gBAK9tzFC5Cegx4NmSETc       │
+│ uri              │ s3://_file:gBAK9tzFC5Cegx4NmSETc  │
+│ name             │ db-dna.csv                        │
+│ status           │ ready                             │
+│ contentLength    │ 234                               │
+│ contentType      │ text/csv                          │
+│ dateCreated      │ 2024-05-08 01:01:48.925           │
+│ dateUpdated      │ 2024-05-08 01:01:48.925           │
+│ createdByUserDrn │ scientist@deeporigin.com          │
+╰──────────────────┴───────────────────────────────────╯
+</code></pre></div>
+<details class="tip">
+<summary>JSON output with <code>--json</code></summary>
+<p><a href="https://www.json.org/">JSON</a> output can be requested by adding <code>--json</code>, and allows
+you to pipe out to a JSON processor like <a href="https://jqlang.github.io/jq/">jq</a>:</p>
+<div class="language-bash highlight"><pre><span></span><code>deeporigin<span class="w"> </span>data<span class="w"> </span>describe<span class="w"> </span>&lt;file-id&gt;<span class="w"> </span>--json<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq
+</code></pre></div>
+<div class="language-json highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;_file:gBAK9tzFC5Cegx4NmSETc&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;uri&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;s3://_file:gBAK9tzFC5Cegx4NmSETc&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;db-dna.csv&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ready&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;contentLength&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">234</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;contentType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;text/csv&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;dateCreated&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-05-08 01:01:48.925&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;dateUpdated&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-05-08 01:01:48.925&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;createdByUserDrn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;scientist@deeporigin.com&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+</details>
+</div>
+<div class="tabbed-block">
+<p>To describe a file in a database in Deep Origin, use:</p>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">deeporigin.managed_data</span> <span class="kn">import</span> <span class="n">_api</span>
+<span class="n">_api</span><span class="o">.</span><span class="n">describe_file</span><span class="p">(</span><span class="s2">&quot;file-id&quot;</span><span class="p">)</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<h2 id="show-data">Show data<a class="headerlink" href="#show-data" title="Permanent link">&para;</a></h2>
+<h3 id="show-rows">Show rows<a class="headerlink" href="#show-rows" title="Permanent link">&para;</a></h3>
+<div class="tabbed-set tabbed-alternate" data-tabs="3:2"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">CLI</label><label for="__tabbed_3_2">Python Client</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>To show the data in a row in a database in Deep Origin, use:</p>
+<div class="language-bash highlight"><pre><span></span><code>deeporigin<span class="w"> </span>data<span class="w"> </span>show<span class="w"> </span>&lt;row-id&gt;
+</code></pre></div>
+<p>This will show you a table similar to:</p>
+<div class="language-text highlight"><pre><span></span><code>╭───────────┬─────────────────────────────╮
+│ Name      │ Value                       │
+├───────────┼─────────────────────────────┤
+│ File      │ _file:hnU7F62xeW8j0l1kR7YP1 │
+│ Float Num │ 112                         │
+│ selctcol  │ sdsd                        │
+╰───────────┴─────────────────────────────╯
+</code></pre></div>
+<details class="tip">
+<summary>JSON output with <code>--json</code></summary>
+<p><a href="https://www.json.org/">JSON</a> output can be requested by adding <code>--json</code>, and allows
+you to pipe out to a JSON processor like <a href="https://jqlang.github.io/jq/">jq</a>:</p>
+<div class="language-bash highlight"><pre><span></span><code>deeporigin<span class="w"> </span>data<span class="w"> </span>describe<span class="w"> </span>&lt;file-id&gt;<span class="w"> </span>--json<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq
+</code></pre></div>
+<div class="language-json highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;File&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;_file:hnU7F62xeW8j0l1kR7YP1&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;Float Num&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">112</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;selctcol&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sdsd&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+</details>
+</div>
+<div class="tabbed-block">
+<p>To show the data in a row in a database in Deep Origin, use:</p>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">deeporigin.managed_data</span> <span class="kn">import</span>  <span class="n">api</span>
+<span class="n">api</span><span class="o">.</span><span class="n">get_row_data</span><span class="p">(</span><span class="s2">&quot;row-id&quot;</span><span class="p">)</span>
+</code></pre></div>
+<p>Data is returned as a dictionary where the key is the column name and the value is the value in that cell.</p>
+</div>
+</div>
+</div>
+<h3 id="show-databases">Show databases<a class="headerlink" href="#show-databases" title="Permanent link">&para;</a></h3>
+<div class="tabbed-set tabbed-alternate" data-tabs="4:2"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">CLI</label><label for="__tabbed_4_2">Python Client</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>To show an entire database in Deep Origin, use:</p>
+<div class="language-bash highlight"><pre><span></span><code>deeporigin<span class="w"> </span>data<span class="w"> </span>show<span class="w"> </span>&lt;database-id&gt;
+</code></pre></div>
+<p>This will show you a table similar to:</p>
+<div class="language-text highlight"><pre><span></span><code>╭───────────┬───────────┬──────────────────┬────────────┬───────────────────╮
+│  Status   │ stag-id   │ Customer Name    │ Status     │  Output Files     │
+├───────────┼───────────┼──────────────────┼────────────┼───────────────────┤
+│ valid     │ stag-1    │ Blue Sun Corp    │ Processing │                   │
+│ valid     │ stag-2    │ Veridian Dynamics│ Complete   │   report.tar.gz   │
+╰───────────┴───────────┴──────────────────┴────────────┴───────────────────╯
+</code></pre></div>
+<details class="tip">
+<summary>JSON output with <code>--json</code></summary>
+<p><a href="https://www.json.org/">JSON</a> output can be requested by adding <code>--json</code>, and allows
+you to pipe out to a JSON processor like <a href="https://jqlang.github.io/jq/">jq</a>:</p>
+<div class="language-bash highlight"><pre><span></span><code>deeporigin<span class="w"> </span>data<span class="w"> </span>describe<span class="w"> </span>&lt;database-id&gt;<span class="w"> </span>--json<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq
+</code></pre></div>
+<div class="language-json highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;Status&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;valid&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;valid&quot;</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;stag-id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;stag-1&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;stag-2&quot;</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;Customer Name&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;Blue Sun Corp &quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;Veridian Dynamics&quot;</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;Status&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;Processing&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;Complete&quot;</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;Output Files&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;report.tar.gz&quot;</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div>
+</details>
+</div>
+<div class="tabbed-block">
+<p>To retrieve an entire database from Deep Origin, use:</p>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">deeporigin.managed_data</span> <span class="kn">import</span> <span class="n">api</span>
+<span class="n">api</span><span class="o">.</span><span class="n">get_dataframe</span><span class="p">(</span><span class="s2">&quot;database-id&quot;</span><span class="p">)</span>
+</code></pre></div>
+<p>Data is returned as a <a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html">Pandas DataFrame</a>.</p>
+</div>
+</div>
+</div>
 
 
 
@@ -948,7 +1236,7 @@ to disk, or used for further downstream analysis.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">April 26, 2024</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">May 10, 2024</span>
   </span>
 
     
@@ -958,7 +1246,7 @@ to disk, or used for further downstream analysis.</p>
     <span class="md-icon" title="Created">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3h-2Z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">April 26, 2024</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">May 10, 2024</span>
   </span>
 
     
@@ -995,7 +1283,7 @@ to disk, or used for further downstream analysis.</p>
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="explore-data.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Explore data">
+          <a href="list-data.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: List data">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
@@ -1005,7 +1293,7 @@ to disk, or used for further downstream analysis.</p>
                 Previous
               </span>
               <div class="md-ellipsis">
-                Explore data
+                List data
               </div>
             </div>
           </a>
