@@ -62,10 +62,13 @@ jobs:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v5
+        id: cached_python_setup
         with:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
           cache-dependency-path: pyproject.toml
+
+      - run: echo '${{ steps.cached_python_setup.outputs.cache-hit }}'
 
       - run: 'mkdir ~/.deeporigin/'
         shell: bash
