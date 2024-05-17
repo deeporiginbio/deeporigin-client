@@ -16,18 +16,18 @@ class TestCase(unittest.TestCase):
         with unittest.mock.patch("sys.argv", ["", "--help"]):
             with self.assertRaises(SystemExit) as context:
                 cli.main()
-                self.assertRegex(context.Exception, "usage: deep-origin")
+                self.assertRegex(context.Exception, "usage: deeporigin")
 
     def test_help(self):
         with cli.App(argv=["--help"]) as app:
             with self.assertRaises(SystemExit) as context:
                 app.run()
-                self.assertRegex(context.Exception, "usage: deep-origin")
+                self.assertRegex(context.Exception, "usage: deeporigin")
 
         with cli.App(argv=[]) as app:
             with self.assertRaises(SystemExit) as context:
                 app.run()
-                self.assertRegex(context.Exception, "usage: deep-origin")
+                self.assertRegex(context.Exception, "usage: deeporigin")
 
     def test_version(self):
         stdout_capture = io.StringIO()

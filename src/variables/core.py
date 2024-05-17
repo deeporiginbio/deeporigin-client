@@ -376,9 +376,6 @@ def enable_variable_auto_updating(
         warnings.warn(msg, FeatureNotAvailableWarning)
         return []
 
-    # Get an access token for the Deep Origin API
-    tokens = auth.get_tokens()
-
     # load the CronTab configuration
     with crontab.CronTab(user=True) as cron_tab:
         # get the id of the cron job
@@ -462,7 +459,7 @@ def enable_variable_auto_updating(
 
         if not cli:
             cli = sys.argv[0]
-            if not cli.endswith("/deep-origin") and not cli.endswith(
+            if not cli.endswith("/deeporigin") and not cli.endswith(
                 "pytest/__main__.py"
             ):
                 raise DeepOriginException(
@@ -484,7 +481,7 @@ def enable_variable_auto_updating(
             cli_command.append("--overwrite")
 
         log_filename = os.path.expanduser(
-            os.path.join("~", ".log", "deep-origin", "variables-auto-install.log")
+            os.path.join("~", ".log", "deeporigin", "variables-auto-install.log")
         )
         os.makedirs(os.path.dirname(log_filename), exist_ok=True)
 

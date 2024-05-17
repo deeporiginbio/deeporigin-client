@@ -1630,7 +1630,7 @@ class TestCase(unittest.TestCase):
         ]
         with unittest.mock.patch("requests.post", side_effect=responses):
             variables.enable_variable_auto_updating(
-                user=False, org=False, cli="deep-origin"
+                user=False, org=False, cli="deeporigin"
             )
 
         with crontab.CronTab(user=True) as cron_tab:
@@ -2482,7 +2482,7 @@ class TestCase(unittest.TestCase):
         var_xpress.install(None, user_home_dirname)
         expected_filenames.append(var_xpress.FILENAME.replace("~/", ""))
         expected_filenames.append(".bashrc")
-        expected_filenames.append(".deep-origin")
+        expected_filenames.append(".deeporigin")
         self.assertEqual(
             sorted(expected_filenames), sorted(os.listdir(user_home_dirname))
         )
