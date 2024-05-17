@@ -269,8 +269,8 @@ class EnvironmentVariable(Variable):
             :obj:`str`: Environment variable filename
         """
         if is_user_variable:
-            return os.path.join(user_home_dirname, ".deep-origin", "user-variables.env")
+            return os.path.join(user_home_dirname, ".deeporigin", "user-variables.env")
         else:
             return os.path.join(
-                user_home_dirname, ".deep-origin", "system-variables.env"
+                user_home_dirname, ".deeporigin", "system-variables.env"
             )
