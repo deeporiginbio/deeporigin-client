@@ -529,12 +529,14 @@ def download_file(
 
     save_path = os.path.join(destination, file_name)
 
-    response = requests.get(url)
-    if response.status_code == 200:
+    with requests.get(url, stream=True) as response:
+        if response.status_code != 200:
+            raise DeepOriginException(f"Failed to download file {file_id}")
+
         with open(save_path, "wb") as file:
-            file.write(response.content)
-    else:
-        raise DeepOriginException(f"Failed to download file {file_id}")
+            for chunk in response.iter_content(chunk_size=8192):
+                if chunk:  # Filter out keep-alive new chunks
+                    file.write(chunk)
 
 
 @beartype
