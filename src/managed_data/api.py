@@ -1,7 +1,6 @@
 """The `deeporigin.managed_data.api` module contains high-level functions for
 interacting with Deep Origin managed data."""
 
-
 import os
 from pathlib import Path
 from typing import Any, Optional, Union
