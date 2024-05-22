@@ -341,7 +341,6 @@ def test_download_file(config):
 
     if config["mock"]:
         _api.download_file(file_id, client=config["client"])
-        os.remove("placeholder")
 
         with pytest.raises(DeepOriginException, match="should be a path to a folder"):
             _api.download_file(

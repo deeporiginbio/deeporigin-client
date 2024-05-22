@@ -263,6 +263,9 @@ def get_dataframe(
         data[column["id"]] = []
 
     for row in rows:
+        if "fields" not in row.keys():
+            continue
+
         data[row_id].append(row["hid"])
         data["Validation Status"].append(row["validationStatus"])
 

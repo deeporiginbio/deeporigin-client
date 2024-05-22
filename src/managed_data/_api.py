@@ -2,12 +2,11 @@
 with Deep Origin's managed data API. The functions in this module
 simply provide Pythonic interfaces to individual API endpoints."""
 
+import mimetypes
 import os
 from typing import Optional, Union
-
 from urllib.parse import parse_qs, urlparse, urlunparse
-import mimetypes
-import requests
+
 from beartype import beartype
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.managed_data.client import Client, DeepOriginClient
@@ -38,12 +37,13 @@ def _get_default_client(client: Optional[Client] = None):
     return client
 
 
-@beartype
 def upload_file(
     file_path: str,
     client: Optional[Client] = None,
 ) -> None:
     """Upload a file to Deep Origin."""
+
+    client = _get_default_client(client)
 
     # attempt to guess the content type
     mime_type, _ = mimetypes.guess_type(file_path)
@@ -72,11 +72,17 @@ def upload_file(
     }
 
     with open(file_path, "rb") as file:
-        response = requests.put(
+        put_response = client.put(
             url,
+            headers=headers,
             params=params,
             data=file,
         )
+
+        if put_response.status_code != 200:
+            raise DeepOriginException("Error uploading file")
+
+    return response["file"]
 
 
 @beartype
@@ -130,8 +136,6 @@ def create_file_upload_url(
 
     return client.invoke("CreateFileUpload", data)
 
-
-def upload_file_to_url(url: str)
 
 @beartype
 def create_workspace(
@@ -626,14 +630,7 @@ def download_file(
 
     save_path = os.path.join(destination, file_name)
 
-    with requests.get(url, stream=True) as response:
-        if response.status_code != 200:
-            raise DeepOriginException(f"Failed to download file {file_id}")
-
-        with open(save_path, "wb") as file:
-            for chunk in response.iter_content(chunk_size=8192):
-                if chunk:  # Filter out keep-alive new chunks
-                    file.write(chunk)
+    client.download(url, save_path)
 
 
 @beartype
