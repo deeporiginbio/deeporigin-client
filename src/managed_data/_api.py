@@ -5,6 +5,8 @@ simply provide Pythonic interfaces to individual API endpoints."""
 import os
 from typing import Optional, Union
 
+from urllib.parse import parse_qs, urlparse, urlunparse
+import mimetypes
 import requests
 from beartype import beartype
 from deeporigin.exceptions import DeepOriginException
@@ -35,6 +37,101 @@ def _get_default_client(client: Optional[Client] = None):
         client.authenticate()  # pragma: no cover
     return client
 
+
+@beartype
+def upload_file(
+    file_path: str,
+    client: Optional[Client] = None,
+) -> None:
+    """Upload a file to Deep Origin."""
+
+    # attempt to guess the content type
+    mime_type, _ = mimetypes.guess_type(file_path)
+    content_type = mime_type if mime_type else "application/octet-stream"
+
+    content_length = os.path.getsize(file_path)
+
+    response = create_file_upload_url(
+        name=os.path.basename(file_path),
+        content_type=content_type,
+        content_length=content_length,
+    )
+
+    # extract pre-signed URL to upload to
+    url = urlparse(response["uploadUrl"])
+    url = urlunparse((url.scheme, url.netloc, url.path, "", "", ""))
+
+    # extract params
+    params = _parse_params_from_url(response["uploadUrl"])
+
+    headers = {
+        "Accept": "application/json, text/plain, */*",
+        "Connection": "keep-alive",
+        "Content-Length": str(content_length),
+        "Content-Type": content_type,
+    }
+
+    with open(file_path, "rb") as file:
+        response = requests.put(
+            url,
+            params=params,
+            data=file,
+        )
+
+
+@beartype
+def _parse_params_from_url(url: str) -> dict:
+    """utility function to extract params from a URL query
+
+    Warning: Internal function
+        Do not use this function
+
+    Args:
+        url: URL
+
+    Returns:
+        A dictionary of params
+    """
+
+    query = urlparse(url).query
+    params = parse_qs(query)
+    params = {key: value[0] for key, value in params.items()}
+    return params
+
+
+@beartype
+def create_file_upload_url(
+    *,
+    name: str,
+    content_type: str,
+    content_length: int,
+    client: Optional[Client] = None,
+) -> dict:
+    """low level function that wraps the `CreateFileUpload` endpoint.
+
+    Creates a new file upload URL.
+
+    Args:
+        name: Name of the file
+        content_type: Content type of the file
+        content_length: Content length of the file
+
+    Returns:
+        A dictionary that conforms to a [CreateFileUploadResponse][src.managed_data.schema.CreateFileUploadResponse]
+    """
+
+    client = _get_default_client(client)
+
+    data = {
+        "name": name,
+        "contentType": content_type,
+        "contentLength": str(content_length),
+    }
+
+    return client.invoke("CreateFileUpload", data)
+
+
+def upload_file_to_url(url: str)
 
 @beartype
 def create_workspace(

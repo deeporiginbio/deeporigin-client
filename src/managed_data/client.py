@@ -123,13 +123,24 @@ class DeepOriginClient(Client):
     ) -> Union[dict, list]:
         """core call to API endpoint"""
 
+        url = urljoin(self.api_url, endpoint)
+
         response = requests.post(
-            urljoin(self.api_url, endpoint),
+            url,
             headers=self.headers,
             json=data,
         )
 
-        return _check_response(response)
+        try:
+            response = _check_response(response)
+        except Exception as e:
+            print(f"URL: {url}")
+            print(f"headers: {self.headers}")
+            print(f"data: {data}")
+
+            raise e
+
+        return response
 
 
 class MockClient(Client):

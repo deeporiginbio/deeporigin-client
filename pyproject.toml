@@ -24,6 +24,7 @@ dependencies = [
     "pandas",
     "beartype",
     "tabulate",
+    "filetype",
 ]
 dynamic = ["version"]
 
@@ -36,8 +37,14 @@ test = [
 ]
 jupyter = ["ipykernel"]
 
-docs=["mkdocs", "mkdocs-material-extensions", "mkdocs-material", "mkdocstrings" ,"mkdocstrings-python","mkdocs-git-revision-date-localized-plugin","black"]
-
+docs = ["mkdocs", 
+    "mkdocs-material-extensions", 
+    "mkdocs-material", 
+    "mkdocstrings",
+    "mkdocstrings-python",
+    "mkdocs-git-revision-date-localized-plugin",
+    "black"
+]
 
 [tool.setuptools]
 package-dir = {"deeporigin" = "src"}
