@@ -4,6 +4,7 @@ description = "Command line tool and Python client for working with Deep Origin"
 authors = [
     {name = "Deep Origin", email = "support@deeporigin.com"},
 ]
+readme = "README.md"
 classifiers = [
     "Environment :: Console",
     "Intended Audience :: End Users/Desktop",

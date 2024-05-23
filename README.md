@@ -10,18 +10,17 @@ Deep Origin from the command line.
 > The `deeporigin` client is under active development. Features
 > may change, or be removed. 
 
-## Installation 
+## Installing 
 
 > [!CAUTION]
 > As a best practice, we recommend  installing this in a virtual environment. 
 
-### For end users
 
 ```bash
 pip install deeporigin
 ```
 
-### For developers
+## Developing 
 
 First, download from Github:
 
