@@ -35,7 +35,7 @@ test = [
     "coverage",
     "interrogate",
 ]
-jupyter = ["ipykernel"]
+jupyter = ["ipykernel","jupyter-black"]
 
 docs = ["mkdocs", 
     "mkdocs-material-extensions", 

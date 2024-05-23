@@ -13,6 +13,27 @@ from deeporigin.managed_data.schema import DatabaseReturnType, IDFormat
 from deeporigin.utils import PREFIXES
 
 
+def upload_file_to_new_database_row(
+    *,
+    database_id: str,
+    file_path: str,
+    column_id: str,
+    client: Optional[Client] = None,
+):
+    # upload file
+    response = _api.upload_file(file_path, client=client)
+    file_id = response["id"]
+
+    # assign file to column
+    # we're not specifying row_id, which will create a new row
+    return _api.assign_files_to_cell(
+        file_ids=[file_id],
+        database_id=database_id,
+        column_id=column_id,
+        client=client,
+    )
+
+
 @beartype
 def get_tree(
     *,
