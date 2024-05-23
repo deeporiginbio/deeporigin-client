@@ -13,6 +13,7 @@ from deeporigin.managed_data.schema import DatabaseReturnType, IDFormat
 from deeporigin.utils import PREFIXES
 
 
+@beartype
 def upload_file_to_new_database_row(
     *,
     database_id: str,
@@ -20,6 +21,20 @@ def upload_file_to_new_database_row(
     column_id: str,
     client: Optional[Client] = None,
 ):
+    """Upload a file to a new row in a database.
+
+    Upload a file to a new row in a database. This utility function
+    wraps two level functions:
+
+        - [upload_file][src.managed_data.api.upload_file]
+        - [assign_files_to_cell][src.managed_data.api.assign_files_to_cell]
+
+    Args:
+        database_id: ID (or human ID) of a database.
+        file_path: Path to the file to upload.
+        column_id: ID (or human ID) of a column in the database.
+
+    """
     # upload file
     response = _api.upload_file(file_path, client=client)
     file_id = response["id"]

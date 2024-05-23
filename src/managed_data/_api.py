@@ -17,6 +17,7 @@ from deeporigin.managed_data.schema import (
 )
 
 
+@beartype
 def _get_default_client(client: Optional[Client] = None):
     """Internal function to instantiate client
 
@@ -37,6 +38,7 @@ def _get_default_client(client: Optional[Client] = None):
     return client
 
 
+@beartype
 def assign_files_to_cell(
     *,
     file_ids: list[str],
@@ -85,6 +87,7 @@ def assign_files_to_cell(
     return client.invoke("EnsureRows", data)
 
 
+@beartype
 def make_database_rows(
     database_id: str,
     n_rows: int = 1,
@@ -104,6 +107,11 @@ def make_database_rows(
     """
 
     client = _get_default_client(client)
+
+    if n_rows < 1:
+        raise DeepOriginException(
+            f"n_rows must be at least 1. However, n_rows was {n_rows}"
+        )
 
     data = dict(
         databaseId=database_id,
