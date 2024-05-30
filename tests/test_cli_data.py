@@ -10,9 +10,9 @@ from deeporigin.managed_data import _api
 from deeporigin.managed_data.client import (
     Client,
     DeepOriginClient,
-    MockClient,
 )
 from deeporigin.managed_data.schema import DescribeFileResponse, ListRowsResponse
+from mock_client import MockClient
 
 # this allows us to try every CLI command with both
 # multiple options using pytest.mark.parametrize

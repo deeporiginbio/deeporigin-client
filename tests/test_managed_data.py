@@ -9,7 +9,6 @@ from deeporigin.exceptions import DeepOriginException
 from deeporigin.managed_data import _api, api
 from deeporigin.managed_data.client import (
     DeepOriginClient,
-    MockClient,
 )
 from deeporigin.managed_data.schema import (
     DATAFRAME_ATTRIBUTE_KEYS,
@@ -21,6 +20,7 @@ from deeporigin.managed_data.schema import (
     ListRowsResponse,
 )
 from deeporigin.utils import PREFIXES
+from mock_client import MockClient
 
 
 @pytest.fixture(scope="session", autouse=True)
