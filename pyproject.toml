@@ -4,6 +4,7 @@ description = "Command line tool and Python client for working with Deep Origin"
 authors = [
     {name = "Deep Origin", email = "support@deeporigin.com"},
 ]
+readme = "README.md"
 classifiers = [
     "Environment :: Console",
     "Intended Audience :: End Users/Desktop",
@@ -24,6 +25,7 @@ dependencies = [
     "pandas",
     "beartype",
     "tabulate",
+    "filetype",
 ]
 dynamic = ["version"]
 
@@ -34,10 +36,16 @@ test = [
     "coverage",
     "interrogate",
 ]
-jupyter = ["ipykernel"]
+jupyter = ["ipykernel","jupyter-black"]
 
-docs=["mkdocs", "mkdocs-material-extensions", "mkdocs-material", "mkdocstrings" ,"mkdocstrings-python","mkdocs-git-revision-date-localized-plugin","black"]
-
+docs = ["mkdocs", 
+    "mkdocs-material-extensions", 
+    "mkdocs-material", 
+    "mkdocstrings",
+    "mkdocstrings-python",
+    "mkdocs-git-revision-date-localized-plugin",
+    "black"
+]
 
 [tool.setuptools]
 package-dir = {"deeporigin" = "src"}

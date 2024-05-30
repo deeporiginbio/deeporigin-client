@@ -54,6 +54,18 @@ class Client(ABC):
 
         pass  # pragma: no cover
 
+    @abstractmethod
+    def download(self, endpoint: str, data: dict):
+        """abstract method to download a resource to disk"""
+
+        pass  # pragma: no cover
+
+    @abstractmethod
+    def put(self, endpoint: str, data: dict):
+        """abstract method to implement a PUT request"""
+
+        pass  # pragma: no cover
+
     def __props__(self):
         """helper method to show all properties of the client. Do not use."""
         props = dict()
@@ -115,6 +127,28 @@ class DeepOriginClient(Client):
             "x-org-id": self.org_id,
         }
 
+    def put(self, *args, **kwargs):
+        """overridden put method to use requests to make PUT requests"""
+
+        return requests.put(*args, **kwargs)
+
+    def download(self, url: str, save_path: str) -> None:
+        """concrete method to download a resource using GET and save to disk
+
+        Args:
+            url (str): url to download
+            save_path (str): path to save file
+        """
+
+        with requests.get(url, stream=True) as response:
+            if response.status_code != 200:
+                raise DeepOriginException(f"Failed to download file from {url}")
+
+            with open(save_path, "wb") as file:
+                for chunk in response.iter_content(chunk_size=8192):
+                    if chunk:  # Filter out keep-alive new chunks
+                        file.write(chunk)
+
     @beartype
     def invoke(
         self,
@@ -123,13 +157,24 @@ class DeepOriginClient(Client):
     ) -> Union[dict, list]:
         """core call to API endpoint"""
 
+        url = urljoin(self.api_url, endpoint)
+
         response = requests.post(
-            urljoin(self.api_url, endpoint),
+            url,
             headers=self.headers,
             json=data,
         )
 
-        return _check_response(response)
+        try:
+            response = _check_response(response)
+        except Exception as e:
+            print(f"URL: {url}")
+            print(f"headers: {self.headers}")
+            print(f"data: {data}")
+
+            raise e
+
+        return response
 
 
 class MockClient(Client):
@@ -143,6 +188,14 @@ class MockClient(Client):
     file = file_description()
 
     def authenticate(self, refresh_tokens: bool = True):
+        """no need to do anything here"""
+        pass
+
+    def download(self, url: str, save_path: str):
+        """no need to do anything here"""
+        pass
+
+    def put(self, *args, **kwargs):
         """no need to do anything here"""
         pass
 

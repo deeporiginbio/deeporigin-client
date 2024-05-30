@@ -28,13 +28,14 @@ jupyter:
 
 # install in a virtual env with all extras
 install:
+	@echo "Installing deeporigin in editable mode in a venv..."
 	@python3 -m venv venv
 	@source $(CURDIR)/venv/bin/activate && \
-	    pip install -e .[test,jupyter,docs] && \
+	    pip install -q -e .[test,jupyter,docs] && \
 	    deactivate
 	@-mkdir -p ~/.deeporigin
 	@test -f ~/.deeporigin/deeporigin || ln -s $(CURDIR)/venv/bin/deeporigin ~/.deeporigin/deeporigin
-	@echo 'export PATH="$$HOME/.deeporigin:$$PATH"' >> ~/.bash_profile
+
 
 build-docs:
 	bash scripts/build_docs.sh

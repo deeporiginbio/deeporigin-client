@@ -14,6 +14,42 @@ from deeporigin.utils import PREFIXES
 
 
 @beartype
+def upload_file_to_new_database_row(
+    *,
+    database_id: str,
+    file_path: str,
+    column_id: str,
+    client: Optional[Client] = None,
+):
+    """Upload a file to a new row in a database.
+
+    Upload a file to a new row in a database. This utility function
+    wraps two level functions:
+
+        - [upload_file][src.managed_data.api.upload_file]
+        - [assign_files_to_cell][src.managed_data.api.assign_files_to_cell]
+
+    Args:
+        database_id: ID (or human ID) of a database.
+        file_path: Path to the file to upload.
+        column_id: ID (or human ID) of a column in the database.
+
+    """
+    # upload file
+    response = _api.upload_file(file_path, client=client)
+    file_id = response["id"]
+
+    # assign file to column
+    # we're not specifying row_id, which will create a new row
+    return _api.assign_files_to_cell(
+        file_ids=[file_id],
+        database_id=database_id,
+        column_id=column_id,
+        client=client,
+    )
+
+
+@beartype
 def get_tree(
     *,
     include_rows: bool = True,
@@ -262,6 +298,9 @@ def get_dataframe(
         data[column["id"]] = []
 
     for row in rows:
+        if "fields" not in row.keys():
+            continue
+
         data[row_id].append(row["hid"])
         data["Validation Status"].append(row["validationStatus"])
 

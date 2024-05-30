@@ -2,10 +2,11 @@
 with Deep Origin's managed data API. The functions in this module
 simply provide Pythonic interfaces to individual API endpoints."""
 
+import mimetypes
 import os
 from typing import Optional, Union
+from urllib.parse import parse_qs, urlparse, urlunparse
 
-import requests
 from beartype import beartype
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.managed_data.client import Client, DeepOriginClient
@@ -16,6 +17,7 @@ from deeporigin.managed_data.schema import (
 )
 
 
+@beartype
 def _get_default_client(client: Optional[Client] = None):
     """Internal function to instantiate client
 
@@ -34,6 +36,189 @@ def _get_default_client(client: Optional[Client] = None):
         client = DeepOriginClient()  # pragma: no cover
         client.authenticate()  # pragma: no cover
     return client
+
+
+@beartype
+def assign_files_to_cell(
+    *,
+    file_ids: list[str],
+    database_id: str,
+    column_id: str,
+    row_id: Optional[str] = None,
+    client: Optional[Client] = None,
+) -> dict:
+    """Assign existing file(s) to a cell
+
+    Assign files to a cell in a database table, where the cell is identified by the database ID, row ID, and column ID. If row_id is None, a new row will be created.
+
+    Args:
+    file_id: ID of the file
+    column_id: ID of the column
+    row_id: ID of the row
+
+
+    """
+    client = _get_default_client(client)
+
+    if row_id is None:
+        data = make_database_rows(
+            database_id=database_id,
+            n_rows=1,
+            client=client,
+        )
+        row_id = data["rows"][0]["id"]
+
+    data = {
+        "databaseId": database_id,
+        "rows": [
+            {
+                "rowId": row_id,
+                "row": {},
+                "cells": [
+                    {
+                        "columnId": column_id,
+                        "value": {"fileIds": file_ids},
+                    },
+                ],
+            },
+        ],
+    }
+
+    return client.invoke("EnsureRows", data)
+
+
+@beartype
+def make_database_rows(
+    database_id: str,
+    n_rows: int = 1,
+    client: Optional[Client] = None,
+) -> dict:
+    """Makes one or several new row(s) in a Database table
+
+    This wraps the `EnsureRows` endpoint and sends a payload
+    designed to create new row(s) in a database table.
+
+
+    Args:
+        database_id: ID or Human ID of the database
+
+    Returns:
+        A dictionary that conforms to a [EnsureRowsResponse][src.managed_data.schema.EnsureRowsResponse]
+    """
+
+    client = _get_default_client(client)
+
+    if n_rows < 1:
+        raise DeepOriginException(
+            f"n_rows must be at least 1. However, n_rows was {n_rows}"
+        )
+
+    data = dict(
+        databaseId=database_id,
+        rows=[{"row": {}} for _ in range(n_rows)],
+    )
+
+    return client.invoke("EnsureRows", data)
+
+
+def upload_file(
+    file_path: str,
+    client: Optional[Client] = None,
+) -> None:
+    """Upload a file to Deep Origin."""
+
+    client = _get_default_client(client)
+
+    # attempt to guess the content type
+    mime_type, _ = mimetypes.guess_type(file_path)
+    content_type = mime_type if mime_type else "application/octet-stream"
+
+    content_length = os.path.getsize(file_path)
+
+    response = create_file_upload_url(
+        name=os.path.basename(file_path),
+        content_type=content_type,
+        content_length=content_length,
+    )
+
+    # extract pre-signed URL to upload to
+    url = urlparse(response["uploadUrl"])
+    url = urlunparse((url.scheme, url.netloc, url.path, "", "", ""))
+
+    # extract params
+    params = _parse_params_from_url(response["uploadUrl"])
+
+    headers = {
+        "Accept": "application/json, text/plain, */*",
+        "Connection": "keep-alive",
+        "Content-Length": str(content_length),
+        "Content-Type": content_type,
+    }
+
+    with open(file_path, "rb") as file:
+        put_response = client.put(
+            url,
+            headers=headers,
+            params=params,
+            data=file,
+        )
+
+        if put_response.status_code != 200:
+            raise DeepOriginException("Error uploading file")
+
+    return response["file"]
+
+
+@beartype
+def _parse_params_from_url(url: str) -> dict:
+    """utility function to extract params from a URL query
+
+    Warning: Internal function
+        Do not use this function
+
+    Args:
+        url: URL
+
+    Returns:
+        A dictionary of params
+    """
+
+    query = urlparse(url).query
+    params = parse_qs(query)
+    params = {key: value[0] for key, value in params.items()}
+    return params
+
+
+@beartype
+def create_file_upload_url(
+    *,
+    name: str,
+    content_type: str,
+    content_length: int,
+    client: Optional[Client] = None,
+) -> dict:
+    """low level function that wraps the `CreateFileUpload` endpoint.
+
+    Creates a new file upload URL.
+
+    Args:
+        name: Name of the file
+        content_type: Content type of the file
+        content_length: Content length of the file
+
+    Returns:
+        A dictionary that conforms to a [CreateFileUploadResponse][src.managed_data.schema.CreateFileUploadResponse]
+    """
+
+    client = _get_default_client(client)
+
+    data = {
+        "name": name,
+        "contentType": content_type,
+        "contentLength": str(content_length),
+    }
+
+    return client.invoke("CreateFileUpload", data)
 
 
 @beartype
@@ -529,12 +714,7 @@ def download_file(
 
     save_path = os.path.join(destination, file_name)
 
-    response = requests.get(url)
-    if response.status_code == 200:
-        with open(save_path, "wb") as file:
-            file.write(response.content)
-    else:
-        raise DeepOriginException(f"Failed to download file {file_id}")
+    client.download(url, save_path)
 
 
 @beartype

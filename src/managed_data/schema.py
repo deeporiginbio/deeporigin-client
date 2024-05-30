@@ -59,7 +59,7 @@ class CreateDatabaseResponse(BaseModel):
     createdByUserDrn: str
     hid: str
     hidPrefix: str
-    cols: list
+    cols: list = []
     rowJsonSchema: dict = dict()
 
     model_config = ConfigDict(extra="forbid")
