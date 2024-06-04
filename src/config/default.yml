@@ -1,16 +1,16 @@
-env: local
+env: prod
 organization_id: null
 bench_id: null
-api_endpoint: null
+api_endpoint: https://os.deeporigin.io
 nucleus_api_route: nucleus-api/api/
 graphql_api_route: api/graphql/
-auth_domain: null
+auth_domain: https://formicbio.us.auth0.com
 auth_device_code_endpoint: oauth/device/code/
 auth_token_endpoint: oauth/token/
-auth_audience: null
+auth_audience: https://os.deeporigin.io/api
 auth_grant_type: urn:ietf:params:oauth:grant-type:device_code
-auth_client_id: null
-auth_client_secret: null
+auth_client_id: m3iyUcrANcIap2ogzWKpnYxCNujOrW3s
+auth_client_secret: cQcZclTqMHMuovyXV-DD15tEiL-KH_2XD36vsppULRBuq7AjwyI4dh5ag11O_K1S
 list_bench_variables_query_template: |
   query {
     listBenchSecrets(drn: "${bench_drn}") {
