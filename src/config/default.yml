@@ -1,7 +1,7 @@
 env: prod
 organization_id: null
 bench_id: null
-api_endpoint: https://os.deeporigin.io/api
+api_endpoint: https://os.deeporigin.io
 nucleus_api_route: nucleus-api/api/
 graphql_api_route: api/graphql/
 auth_domain: https://formicbio.us.auth0.com
