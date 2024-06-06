@@ -315,10 +315,13 @@ def get_dataframe(
                 use_file_names=use_file_names,
                 reference_format=reference_format,
             )
-            if column["cardinality"] == "many":
-                data[column["id"]].append(value)
+            if value is None:
+                data[column["id"]].append(None)
             else:
-                data[column["id"]].extend(value)
+                if column["cardinality"] == "many":
+                    data[column["id"]].append(value)
+                else:
+                    data[column["id"]].extend(value)
 
     if return_type == "dataframe":
         # make the dataframe
@@ -367,10 +370,10 @@ def _parse_column_value(
     field = [field for field in fields if field["columnId"] == column["id"]]
 
     if len(field) == 0:
-        return [None]
+        return None
 
     if "value" not in field[0].keys():
-        return [None]
+        return None
     value = [field[0]["value"]]
 
     # special treatment for some column types
@@ -397,7 +400,7 @@ def _parse_column_value(
 
     # if there is no item
     if len(value) == 0:
-        value = [None]
+        value = None
 
     return value
 
@@ -421,16 +424,35 @@ def _type_and_cleanup_dataframe(
     for column in columns:
         column_mapper[column["id"]] = column["name"]
 
-    # special treatment of Select columns
     for column in columns:
         col_id = column["id"]
 
+        print(col_id)
+        print(column["type"])
+
+        if column["type"] == "date":
+            df[col_id] = pd.to_datetime(df[col_id])
+
+        # special treatment for string columns
+        if column["type"] in ["file", "text"]:
+            df[col_id] = df[col_id].astype("string")
+
+        if column["type"] == "boolean":
+            df[col_id] = df[col_id].astype("boolean")
+
+        # special treatment of Select columns
         if column["type"] == "select" and column["cardinality"] == "one":
             categories = column["configSelect"]["options"]
             df[col_id] = pd.Categorical(df[col_id], categories=categories)
 
     # rename columns
     df = df.rename(columns=column_mapper)
+
+    # special treatment for validation status
+    categories = set(df["Validation Status"])
+    df["Validation Status"] = pd.Categorical(
+        df["Validation Status"], categories=categories
+    )
 
     # wipe metadata from columns
     for column in df.columns:
