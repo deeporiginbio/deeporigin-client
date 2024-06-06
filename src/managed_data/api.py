@@ -429,9 +429,6 @@ def _type_and_cleanup_dataframe(
     for column in columns:
         col_id = column["id"]
 
-        print(col_id)
-        print(column["type"])
-
         if column["type"] == "date":
             df[col_id] = pd.to_datetime(df[col_id])
 
