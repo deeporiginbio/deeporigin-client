@@ -51,7 +51,7 @@ Run the following command:
 
 ## Supported Python versions
 
-`deeporigin` is [tested](https://github.com/formiclabs/deeporigin-client/actions/workflows/main.yml) against these versions of Python using GitHub Actions:
+`deeporigin` is [tested](https://github.com/deeporiginbio/deeporigin-client/actions/workflows/main.yml) against these versions of Python using GitHub Actions:
 
 - 3.9
 - 3.10
