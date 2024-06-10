@@ -255,7 +255,7 @@ class MockClient(client.Client):
 
         elif endpoint == "CreateFileDownloadUrl":
             return {
-                "downloadUrl": "https://github.com/formiclabs/deeporigin-client/archive/refs/tags/0.0.3.zip"
+                "downloadUrl": "https://github.com/deeporiginbio/deeporigin-client/archive/refs/tags/0.0.3.zip"
             }
 
         elif endpoint == "ListMentions":

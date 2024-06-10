@@ -25,7 +25,7 @@ pip install deeporigin
 First, download from Github:
 
 ```bash
-git clone git@github.com:formiclabs/deeporigin-client.git
+git clone git@github.com:deeporiginbio/deeporigin-client.git
 cd deeporigin-client
 ```
 Using `make > v4.4`, e.g.:

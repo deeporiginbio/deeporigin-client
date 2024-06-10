@@ -1,3 +1,3 @@
-* @formiclabs/catalog-developers
-src/managed_data/ @formiclabs/data-management-developers
-src/variables/ @formiclabs/platform-developers
+* @deeporiginbio/catalog-developers
+src/managed_data/ @deeporiginbio/data-management-developers
+src/variables/ @deeporiginbio/platform-developers
