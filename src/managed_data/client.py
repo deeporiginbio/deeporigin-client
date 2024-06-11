@@ -79,12 +79,16 @@ class DeepOriginClient(Client):
         org_id: Optional[str] = None,
     ):
         """custom init method to create a DeepOriginClient without needing config files"""
-        if not api_url:
+        if api_url:
+            self.api_url = api_url
+        else:
             from deeporigin.utils import _nucleus_url
 
             self.api_url = _nucleus_url()
 
-        if not org_id:
+        if org_id:
+            self.org_id = org_id
+        else:
             from deeporigin.config import get_value
 
             self.org_id = get_value()["organization_id"]
