@@ -82,12 +82,12 @@ class DeepOriginClient(Client):
         if not api_url:
             from deeporigin.utils import _nucleus_url
 
-            api_url = _nucleus_url()
+            self.api_url = _nucleus_url()
 
         if not org_id:
             from deeporigin.config import get_value
 
-            org_id = get_value()["organization_id"]
+            self.org_id = get_value()["organization_id"]
 
         super().__init__()
 
