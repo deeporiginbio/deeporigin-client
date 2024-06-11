@@ -1,15 +1,13 @@
 import json
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Union
+from typing import Optional, Union
 from urllib.parse import urljoin
 
 import requests
 from beartype import beartype
 from deeporigin import auth
-from deeporigin.config import get_value
 from deeporigin.exceptions import DeepOriginException
-from deeporigin.utils import _nucleus_url
 
 
 @dataclass
@@ -72,12 +70,33 @@ class Client(ABC):
 class DeepOriginClient(Client):
     """client to interact with DeepOrigin API"""
 
-    api_url = _nucleus_url()
-    org_id = get_value()["organization_id"]
-
     headers = dict()
 
-    def authenticate(self, refresh_tokens: bool = True):
+    def __init__(
+        self,
+        *,
+        api_url: Optional[str] = None,
+        org_id: Optional[str] = None,
+    ):
+        """custom init method to create a DeepOriginClient without needing config files"""
+        if not api_url:
+            from deeporigin.utils import _nucleus_url
+
+            api_url = _nucleus_url()
+
+        if not org_id:
+            from deeporigin.config import get_value
+
+            org_id = get_value()["organization_id"]
+
+        super().__init__()
+
+    def authenticate(
+        self,
+        *,
+        refresh_tokens: bool = True,
+        access_token: Optional[str] = None,
+    ):
         """authenticate to DeepOrigin API
 
         Authenticate to Deep Origin API. This needs to be called
@@ -88,15 +107,18 @@ class DeepOriginClient(Client):
         Args:
             refresh_tokens (bool, optional): Whether to
             refresh tokens. Defaults to True.
+            access_token: if provided, use this token instead of asking the authentication module for a token
 
 
         """
 
-        tokens = auth.get_tokens(refresh=refresh_tokens)
+        if not access_token:
+            tokens = auth.get_tokens(refresh=refresh_tokens)
+            access_token = tokens["access"]
 
         self.headers = {
             "accept": "application/json",
-            "authorization": f"Bearer {tokens['access']}",
+            "authorization": f"Bearer {access_token}",
             "content-type": "application/json",
             "x-org-id": self.org_id,
         }
