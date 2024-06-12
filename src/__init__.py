@@ -16,12 +16,15 @@ with open(version_filename, "r") as file:
 
     if __version__ == "0.0.0.dev0":
         # in dev mode. we use git to get a "version number"
-        # that will change with tags and commits
-        process = subprocess.run(
-            ["git", "describe", "--tags", "--dirty", "--long"],
-            capture_output=True,
-            universal_newlines=True,
-            cwd=Path(__file__).parent.parent,
-        )
-        if process.returncode == 0:
-            __version__ = process.stdout.strip()
+        # that will change with tags and commits, if possible
+        try:
+            process = subprocess.run(
+                ["git", "describe", "--tags", "--dirty", "--long"],
+                capture_output=True,
+                universal_newlines=True,
+                cwd=Path(__file__).parent.parent,
+            )
+            if process.returncode == 0:
+                __version__ = process.stdout.strip()
+        except Exception:
+            pass
