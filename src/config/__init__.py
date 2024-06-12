@@ -34,6 +34,19 @@ def get_value(
     Returns:
         :obj:`confuse.templates.AttrDict`: configuration for the Deep Origin CLI
     """
+
+    # if we're running on AWS lambda, read config values
+    # from env and return those.
+    if os.environ.get("AWS_LAMBDA_FUNCTION_NAME"):
+        return confuse.AttrDict(
+            dict(
+                organization_id=os.environ.get("DEEP_ORIGIN_ORGANIZATION_ID"),
+                api_endpoint=os.environ.get("DEEP_ORIGIN_API_ENDPOINT"),
+                nucleus_api_route=os.environ.get("DEEP_ORIGIN_NUCLEUS_API_ROUTE"),
+            )
+        )
+
+    # read the default configuration
     value = confuse.Configuration("deep_origin", __name__)
 
     # read the default configuration
