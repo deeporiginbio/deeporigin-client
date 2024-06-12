@@ -52,7 +52,7 @@ def get_value(
     # validate configuration
     template = {
         "organization_id": confuse.String(),
-        "bench_id": confuse.String(),
+        "bench_id": confuse.Optional(confuse.String()),
         "env": confuse.String(),
         "api_endpoint": confuse.Optional(confuse.String()),
         "nucleus_api_route": confuse.String(),
