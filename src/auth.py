@@ -34,11 +34,15 @@ def get_tokens(
 ) -> dict:
     """Get access token for accessing the Deep Origin API
 
-    Gets tokens to access Deep Origin API. If the tokens exist
-    on disk, those tokens are used first. On first use (within
-    a python session), tokens are refreshed if refresh_tokens
-    is `True`. On subsequent uses, tokens are not refreshed
-    even if refresh_tokens is `True`.
+    Gets tokens to access Deep Origin API.
+
+
+    If an access token exists in the ENV, then it is used before
+    anything else. If not, then ~/.deeporigin/api_tokens is
+    checked for access tokens, and used if they exist.
+    On first use (within a python session), tokens are
+    refreshed if refresh_tokens is `True`. On subsequent uses,
+    tokens are not refreshed even if refresh_tokens is `True`.
 
     Args:
         refresh: whether to refresh the token (default: `True`)
@@ -46,6 +50,11 @@ def get_tokens(
     Returns:
         :obj:`tuple`: API access and refresh tokens
     """
+
+    if "DEEP_ORIGIN_ACCESS_TOKEN" in os.environ:
+        return dict(
+            access=os.environ["DEEP_ORIGIN_ACCESS_TOKEN"],
+        )
 
     if tokens_exist():
         # tokens exist on disk
