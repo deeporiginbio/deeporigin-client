@@ -85,10 +85,14 @@ def _print_dict(
 @beartype
 def _nucleus_url() -> str:
     """returns URL for nucleus API endpoint"""
-    return urljoin(
+    url = urljoin(
         get_value()["api_endpoint"],
         get_value()["nucleus_api_route"],
     )
+    if not url.endswith("/"):
+        url += "/"
+
+    return url
 
 
 @beartype
