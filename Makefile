@@ -37,10 +37,10 @@ install:
 	@test -f ~/.deeporigin/deeporigin || ln -s $(CURDIR)/venv/bin/deeporigin ~/.deeporigin/deeporigin
 
 
-build-docs:
+docs-build:
 	bash scripts/build_docs.sh
 
-serve-docs:
+docs-serve:
 	@echo "Serving docs locally..."
 	@source $(CURDIR)/venv/bin/activate && \
 	    mkdocs serve && \

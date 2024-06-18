@@ -103,7 +103,7 @@ def make_database_rows(
         database_id: ID or Human ID of the database
 
     Returns:
-        A dictionary that conforms to a [EnsureRowsResponse][src.managed_data.schema.EnsureRowsResponse]
+        A dictionary that conforms to a EnsureRowsResponse
     """
 
     client = _get_default_client(client)
