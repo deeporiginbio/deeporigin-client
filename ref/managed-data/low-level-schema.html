@@ -10,7 +10,7 @@
         <meta name="author" content="Deep Origin">
       
       
-        <link rel="canonical" href="https://formiclabs.github.io/deeporigin-client/ref/managed-data/low-level-schema.html">
+        <link rel="canonical" href="https://deeporiginbio.github.io/deeporigin-client/ref/managed-data/low-level-schema.html">
       
       
         <link rel="prev" href="low-level-api.html">
@@ -18,7 +18,7 @@
       
       
       <link rel="icon" href="../../images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.18">
+      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.24">
     
     
       
@@ -26,7 +26,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.66ac8b77.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.6543a935.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
@@ -162,13 +162,13 @@
     
     
       <div class="md-header__source">
-        <a href="https://github.com/formiclabs/deeporigin-client" title="Go to repository" class="md-source" data-md-component="source">
+        <a href="https://github.com/deeporiginbio/deeporigin-client" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
   </div>
   <div class="md-source__repository">
-    formiclabs/deeporigin-client
+    deeporiginbio/deeporigin-client
   </div>
 </a>
       </div>
@@ -291,13 +291,13 @@
   </label>
   
     <div class="md-nav__source">
-      <a href="https://github.com/formiclabs/deeporigin-client" title="Go to repository" class="md-source" data-md-component="source">
+      <a href="https://github.com/deeporiginbio/deeporigin-client" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
   </div>
   <div class="md-source__repository">
-    formiclabs/deeporigin-client
+    deeporiginbio/deeporigin-client
   </div>
 </a>
     </div>
@@ -883,6 +883,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#src.managed_data.schema.CreateFileUploadResponse" class="md-nav__link">
+    <span class="md-ellipsis">
+      CreateFileUploadResponse
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#src.managed_data.schema.CreateWorkspaceResponse" class="md-nav__link">
     <span class="md-ellipsis">
       CreateWorkspaceResponse
@@ -1068,6 +1077,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#src.managed_data.schema.CreateFileUploadResponse" class="md-nav__link">
+    <span class="md-ellipsis">
+      CreateFileUploadResponse
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#src.managed_data.schema.CreateWorkspaceResponse" class="md-nav__link">
     <span class="md-ellipsis">
       CreateWorkspaceResponse
@@ -1155,15 +1173,15 @@
 
 
 
-  <div class="doc doc-contents first">
-  
+    <div class="doc doc-contents first">
+
       <p>The <code>deeporigin.managed_data.schema</code> module contains Pydantic <code>BaseModel</code>s that describe
 responses from Deep Origin's managed data API, and literals that
 describe possible values for certain queries.</p>
 <p>These models are used both to validate responses and to generate
 mock data for testing.</p>
 
-  
+
 
   <div class="doc doc-children">
 
@@ -1178,9 +1196,9 @@ mock data for testing.</p>
 
 
 <h2 id="src.managed_data.schema.DataType" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-attribute"></code>          <span class="doc doc-object-name doc-attribute-name">DataType</span>
+<code class="doc-symbol doc-symbol-heading doc-symbol-attribute"></code>            <span class="doc doc-object-name doc-attribute-name">DataType</span>
 
-  
+
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
   </span>
@@ -1199,10 +1217,10 @@ mock data for testing.</p>
 <span class="p">]</span>
 </code></pre></div>
 
-  <div class="doc doc-contents ">
-  
+    <div class="doc doc-contents ">
+
       <p>Type of a column</p>
-  </div>
+    </div>
 
 </div>
 
@@ -1211,9 +1229,9 @@ mock data for testing.</p>
 
 
 <h2 id="src.managed_data.schema.DatabaseReturnType" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-attribute"></code>          <span class="doc doc-object-name doc-attribute-name">DatabaseReturnType</span>
+<code class="doc-symbol doc-symbol-heading doc-symbol-attribute"></code>            <span class="doc doc-object-name doc-attribute-name">DatabaseReturnType</span>
 
-  
+
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
   </span>
@@ -1222,10 +1240,10 @@ mock data for testing.</p>
 <div class="language-python doc-signature highlight"><pre><span></span><code><span class="n">DatabaseReturnType</span> <span class="o">=</span> <span class="n"><span title="typing.Literal">Literal</span></span><span class="p">[</span><span class="s1">&#39;dataframe&#39;</span><span class="p">,</span> <span class="s1">&#39;dict&#39;</span><span class="p">]</span>
 </code></pre></div>
 
-  <div class="doc doc-contents ">
-  
+    <div class="doc doc-contents ">
+
       <p>Return type of a database</p>
-  </div>
+    </div>
 
 </div>
 
@@ -1234,9 +1252,9 @@ mock data for testing.</p>
 
 
 <h2 id="src.managed_data.schema.FileStatus" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-attribute"></code>          <span class="doc doc-object-name doc-attribute-name">FileStatus</span>
+<code class="doc-symbol doc-symbol-heading doc-symbol-attribute"></code>            <span class="doc doc-object-name doc-attribute-name">FileStatus</span>
 
-  
+
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
   </span>
@@ -1245,10 +1263,10 @@ mock data for testing.</p>
 <div class="language-python doc-signature highlight"><pre><span></span><code><span class="n">FileStatus</span> <span class="o">=</span> <span class="n"><span title="typing.Literal">Literal</span></span><span class="p">[</span><span class="s1">&#39;ready&#39;</span><span class="p">,</span> <span class="s1">&#39;archived&#39;</span><span class="p">]</span>
 </code></pre></div>
 
-  <div class="doc doc-contents ">
-  
+    <div class="doc doc-contents ">
+
       <p>Status of a file</p>
-  </div>
+    </div>
 
 </div>
 
@@ -1257,9 +1275,9 @@ mock data for testing.</p>
 
 
 <h2 id="src.managed_data.schema.IDFormat" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-attribute"></code>          <span class="doc doc-object-name doc-attribute-name">IDFormat</span>
+<code class="doc-symbol doc-symbol-heading doc-symbol-attribute"></code>            <span class="doc doc-object-name doc-attribute-name">IDFormat</span>
 
-  
+
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
   </span>
@@ -1268,10 +1286,10 @@ mock data for testing.</p>
 <div class="language-python doc-signature highlight"><pre><span></span><code><span class="n">IDFormat</span> <span class="o">=</span> <span class="n"><span title="typing.Literal">Literal</span></span><span class="p">[</span><span class="s1">&#39;human-id&#39;</span><span class="p">,</span> <span class="s1">&#39;system-id&#39;</span><span class="p">]</span>
 </code></pre></div>
 
-  <div class="doc doc-contents ">
-  
+    <div class="doc doc-contents ">
+
       <p>Format of an ID</p>
-  </div>
+    </div>
 
 </div>
 
@@ -1280,9 +1298,9 @@ mock data for testing.</p>
 
 
 <h2 id="src.managed_data.schema.RowType" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-attribute"></code>          <span class="doc doc-object-name doc-attribute-name">RowType</span>
+<code class="doc-symbol doc-symbol-heading doc-symbol-attribute"></code>            <span class="doc doc-object-name doc-attribute-name">RowType</span>
 
-  
+
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
   </span>
@@ -1291,10 +1309,10 @@ mock data for testing.</p>
 <div class="language-python doc-signature highlight"><pre><span></span><code><span class="n">RowType</span> <span class="o">=</span> <span class="n"><span title="typing.Literal">Literal</span></span><span class="p">[</span><span class="s1">&#39;row&#39;</span><span class="p">,</span> <span class="s1">&#39;database&#39;</span><span class="p">,</span> <span class="s1">&#39;workspace&#39;</span><span class="p">]</span>
 </code></pre></div>
 
-  <div class="doc doc-contents ">
-  
+    <div class="doc doc-contents ">
+
       <p>Type of a row</p>
-  </div>
+    </div>
 
 </div>
 
@@ -1304,37 +1322,37 @@ mock data for testing.</p>
 
 
 <h2 id="src.managed_data.schema.AddDatabaseColumnResponse" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-class"></code>          <span class="doc doc-object-name doc-class-name">AddDatabaseColumnResponse</span>
+<code class="doc-symbol doc-symbol-heading doc-symbol-class"></code>            <span class="doc doc-object-name doc-class-name">AddDatabaseColumnResponse</span>
 
 
 <a href="#src.managed_data.schema.AddDatabaseColumnResponse" class="headerlink" title="Permanent link">&para;</a></h2>
 
 
-  <div class="doc doc-contents ">
-          <p class="doc doc-class-bases">
-            Bases: <code><span title="pydantic.BaseModel">BaseModel</span></code></p>
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="pydantic.BaseModel">BaseModel</span></code></p>
 
-  
+
       <p>Schema for responses from the
 <code>AddDatabaseColumn</code> endpoint.</p>
 
-            <details class="quote">
-              <summary>Source code in <code>src/managed_data/schema.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">144</span>
-<span class="normal">145</span>
-<span class="normal">146</span>
-<span class="normal">147</span>
-<span class="normal">148</span>
-<span class="normal">149</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">AddDatabaseColumnResponse</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+              <details class="quote">
+                <summary>Source code in <code>src/managed_data/schema.py</code></summary>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">AddDatabaseColumnResponse</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Schema for responses from the</span>
 <span class="sd">    `AddDatabaseColumn` endpoint.&quot;&quot;&quot;</span>
 
     <span class="n">column</span><span class="p">:</span> <span class="n">ColumnItem</span>
     <span class="n">database</span><span class="p">:</span> <span class="nb">dict</span>
 </code></pre></div></td></tr></table></div>
-            </details>
+              </details>
 
-  
+
 
   <div class="doc doc-children">
 
@@ -1350,8 +1368,7 @@ mock data for testing.</p>
 
   </div>
 
-  </div>
-
+    </div>
 
 </div>
 
@@ -1360,35 +1377,35 @@ mock data for testing.</p>
 
 
 <h2 id="src.managed_data.schema.ColumnItem" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-class"></code>          <span class="doc doc-object-name doc-class-name">ColumnItem</span>
+<code class="doc-symbol doc-symbol-heading doc-symbol-class"></code>            <span class="doc doc-object-name doc-class-name">ColumnItem</span>
 
 
 <a href="#src.managed_data.schema.ColumnItem" class="headerlink" title="Permanent link">&para;</a></h2>
 
 
-  <div class="doc doc-contents ">
-          <p class="doc doc-class-bases">
-            Bases: <code><span title="pydantic.BaseModel">BaseModel</span></code></p>
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="pydantic.BaseModel">BaseModel</span></code></p>
 
-  
+
       <p>Schema for items in the <code>cols</code> attribute of responses from the <code>DescribeRow</code> endpoint for a database.</p>
 
-            <details class="quote">
-              <summary>Source code in <code>src/managed_data/schema.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">128</span>
-<span class="normal">129</span>
-<span class="normal">130</span>
-<span class="normal">131</span>
-<span class="normal">132</span>
-<span class="normal">133</span>
-<span class="normal">134</span>
-<span class="normal">135</span>
+              <details class="quote">
+                <summary>Source code in <code>src/managed_data/schema.py</code></summary>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">135</span>
 <span class="normal">136</span>
 <span class="normal">137</span>
 <span class="normal">138</span>
 <span class="normal">139</span>
 <span class="normal">140</span>
-<span class="normal">141</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">ColumnItem</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">ColumnItem</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Schema for items in the `cols` attribute of responses from the `DescribeRow` endpoint for a database.&quot;&quot;&quot;</span>
 
     <span class="nb">id</span><span class="p">:</span> <span class="nb">str</span>
@@ -1403,9 +1420,9 @@ mock data for testing.</p>
 
     <span class="n">model_config</span> <span class="o">=</span> <span class="n">ConfigDict</span><span class="p">(</span><span class="n">extra</span><span class="o">=</span><span class="s2">&quot;forbid&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-            </details>
+              </details>
 
-  
+
 
   <div class="doc doc-children">
 
@@ -1421,8 +1438,7 @@ mock data for testing.</p>
 
   </div>
 
-  </div>
-
+    </div>
 
 </div>
 
@@ -1431,23 +1447,23 @@ mock data for testing.</p>
 
 
 <h2 id="src.managed_data.schema.CreateDatabaseResponse" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-class"></code>          <span class="doc doc-object-name doc-class-name">CreateDatabaseResponse</span>
+<code class="doc-symbol doc-symbol-heading doc-symbol-class"></code>            <span class="doc doc-object-name doc-class-name">CreateDatabaseResponse</span>
 
 
 <a href="#src.managed_data.schema.CreateDatabaseResponse" class="headerlink" title="Permanent link">&para;</a></h2>
 
 
-  <div class="doc doc-contents ">
-          <p class="doc doc-class-bases">
-            Bases: <code><span title="pydantic.BaseModel">BaseModel</span></code></p>
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="pydantic.BaseModel">BaseModel</span></code></p>
 
-  
+
       <p>Schema for responses from the
 <code>CreateDatabase</code> endpoint.</p>
 
-            <details class="quote">
-              <summary>Source code in <code>src/managed_data/schema.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">49</span>
+              <details class="quote">
+                <summary>Source code in <code>src/managed_data/schema.py</code></summary>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">49</span>
 <span class="normal">50</span>
 <span class="normal">51</span>
 <span class="normal">52</span>
@@ -1476,14 +1492,14 @@ mock data for testing.</p>
     <span class="n">createdByUserDrn</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">hid</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">hidPrefix</span><span class="p">:</span> <span class="nb">str</span>
-    <span class="n">cols</span><span class="p">:</span> <span class="nb">list</span>
+    <span class="n">cols</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">rowJsonSchema</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
 
     <span class="n">model_config</span> <span class="o">=</span> <span class="n">ConfigDict</span><span class="p">(</span><span class="n">extra</span><span class="o">=</span><span class="s2">&quot;forbid&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-            </details>
+              </details>
 
-  
+
 
   <div class="doc doc-children">
 
@@ -1499,8 +1515,59 @@ mock data for testing.</p>
 
   </div>
 
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="src.managed_data.schema.CreateFileUploadResponse" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-class"></code>            <span class="doc doc-object-name doc-class-name">CreateFileUploadResponse</span>
+
+
+<a href="#src.managed_data.schema.CreateFileUploadResponse" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="pydantic.BaseModel">BaseModel</span></code></p>
+
+
+      <p>schema for responses to the <code>CreateFileUpload</code> endpoint.</p>
+
+              <details class="quote">
+                <summary>Source code in <code>src/managed_data/schema.py</code></summary>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">CreateFileUploadResponse</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;schema for responses to the `CreateFileUpload` endpoint.&quot;&quot;&quot;</span>
+
+    <span class="n">uploadUrl</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">file</span><span class="p">:</span> <span class="n">DescribeFileResponse</span>
+</code></pre></div></td></tr></table></div>
+              </details>
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
   </div>
 
+    </div>
 
 </div>
 
@@ -1509,23 +1576,23 @@ mock data for testing.</p>
 
 
 <h2 id="src.managed_data.schema.CreateWorkspaceResponse" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-class"></code>          <span class="doc doc-object-name doc-class-name">CreateWorkspaceResponse</span>
+<code class="doc-symbol doc-symbol-heading doc-symbol-class"></code>            <span class="doc doc-object-name doc-class-name">CreateWorkspaceResponse</span>
 
 
 <a href="#src.managed_data.schema.CreateWorkspaceResponse" class="headerlink" title="Permanent link">&para;</a></h2>
 
 
-  <div class="doc doc-contents ">
-          <p class="doc doc-class-bases">
-            Bases: <code><span title="pydantic.BaseModel">BaseModel</span></code></p>
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="pydantic.BaseModel">BaseModel</span></code></p>
 
-  
+
       <p>Schema for responses from the
 <code>CreateWorkspace</code> endpoint.</p>
 
-            <details class="quote">
-              <summary>Source code in <code>src/managed_data/schema.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">68</span>
+              <details class="quote">
+                <summary>Source code in <code>src/managed_data/schema.py</code></summary>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">68</span>
 <span class="normal">69</span>
 <span class="normal">70</span>
 <span class="normal">71</span>
@@ -1553,9 +1620,9 @@ mock data for testing.</p>
 
     <span class="n">model_config</span> <span class="o">=</span> <span class="n">ConfigDict</span><span class="p">(</span><span class="n">extra</span><span class="o">=</span><span class="s2">&quot;forbid&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-            </details>
+              </details>
 
-  
+
 
   <div class="doc doc-children">
 
@@ -1571,8 +1638,7 @@ mock data for testing.</p>
 
   </div>
 
-  </div>
-
+    </div>
 
 </div>
 
@@ -1581,23 +1647,23 @@ mock data for testing.</p>
 
 
 <h2 id="src.managed_data.schema.DescribeFileResponse" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-class"></code>          <span class="doc doc-object-name doc-class-name">DescribeFileResponse</span>
+<code class="doc-symbol doc-symbol-heading doc-symbol-class"></code>            <span class="doc doc-object-name doc-class-name">DescribeFileResponse</span>
 
 
 <a href="#src.managed_data.schema.DescribeFileResponse" class="headerlink" title="Permanent link">&para;</a></h2>
 
 
-  <div class="doc doc-contents ">
-          <p class="doc doc-class-bases">
-            Bases: <code><span title="pydantic.BaseModel">BaseModel</span></code></p>
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="pydantic.BaseModel">BaseModel</span></code></p>
 
-  
+
       <p>Schema for responses from the
 <code>DescribeFile</code> endpoint.</p>
 
-            <details class="quote">
-              <summary>Source code in <code>src/managed_data/schema.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">84</span>
+              <details class="quote">
+                <summary>Source code in <code>src/managed_data/schema.py</code></summary>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">84</span>
 <span class="normal">85</span>
 <span class="normal">86</span>
 <span class="normal">87</span>
@@ -1627,9 +1693,9 @@ mock data for testing.</p>
 
     <span class="n">model_config</span> <span class="o">=</span> <span class="n">ConfigDict</span><span class="p">(</span><span class="n">extra</span><span class="o">=</span><span class="s2">&quot;forbid&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-            </details>
+              </details>
 
-  
+
 
   <div class="doc doc-children">
 
@@ -1645,8 +1711,7 @@ mock data for testing.</p>
 
   </div>
 
-  </div>
-
+    </div>
 
 </div>
 
@@ -1655,35 +1720,35 @@ mock data for testing.</p>
 
 
 <h2 id="src.managed_data.schema.DescribeRowResponse" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-class"></code>          <span class="doc doc-object-name doc-class-name">DescribeRowResponse</span>
+<code class="doc-symbol doc-symbol-heading doc-symbol-class"></code>            <span class="doc doc-object-name doc-class-name">DescribeRowResponse</span>
 
 
 <a href="#src.managed_data.schema.DescribeRowResponse" class="headerlink" title="Permanent link">&para;</a></h2>
 
 
-  <div class="doc doc-contents ">
-          <p class="doc doc-class-bases">
-            Bases: <code><span title="pydantic.BaseModel">BaseModel</span></code></p>
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="pydantic.BaseModel">BaseModel</span></code></p>
 
-  
+
       <p>Schema for responses from the <code>DescribeRow</code> endpoint. This schema is complex because
 the response schema depends on whether <code>DescribeRow</code> is called for a row or database.</p>
 
-            <details class="quote">
-              <summary>Source code in <code>src/managed_data/schema.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">152</span>
-<span class="normal">153</span>
-<span class="normal">154</span>
-<span class="normal">155</span>
-<span class="normal">156</span>
-<span class="normal">157</span>
-<span class="normal">158</span>
-<span class="normal">159</span>
+              <details class="quote">
+                <summary>Source code in <code>src/managed_data/schema.py</code></summary>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">159</span>
 <span class="normal">160</span>
 <span class="normal">161</span>
 <span class="normal">162</span>
 <span class="normal">163</span>
-<span class="normal">164</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">DescribeRowResponse</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">DescribeRowResponse</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Schema for responses from the `DescribeRow` endpoint. This schema is complex because</span>
 <span class="sd">    the response schema depends on whether `DescribeRow` is called for a row or database.&quot;&quot;&quot;</span>
 
@@ -1697,9 +1762,9 @@ the response schema depends on whether <code>DescribeRow</code> is called for a 
     <span class="n">createdByUserDrn</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;placeholder&quot;</span>
     <span class="n">rowJsonSchema</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;object&quot;</span><span class="p">,</span> <span class="s2">&quot;required&quot;</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">&quot;properties&quot;</span><span class="p">:</span> <span class="p">{}}</span>
 </code></pre></div></td></tr></table></div>
-            </details>
+              </details>
 
-  
+
 
   <div class="doc doc-children">
 
@@ -1715,8 +1780,7 @@ the response schema depends on whether <code>DescribeRow</code> is called for a 
 
   </div>
 
-  </div>
-
+    </div>
 
 </div>
 
@@ -1725,29 +1789,29 @@ the response schema depends on whether <code>DescribeRow</code> is called for a 
 
 
 <h2 id="src.managed_data.schema.DescribeRowResponseDatabase" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-class"></code>          <span class="doc doc-object-name doc-class-name">DescribeRowResponseDatabase</span>
+<code class="doc-symbol doc-symbol-heading doc-symbol-class"></code>            <span class="doc doc-object-name doc-class-name">DescribeRowResponseDatabase</span>
 
 
 <a href="#src.managed_data.schema.DescribeRowResponseDatabase" class="headerlink" title="Permanent link">&para;</a></h2>
 
 
-  <div class="doc doc-contents ">
-          <p class="doc doc-class-bases">
-            Bases: <code><a class="autorefs autorefs-internal" title="src.managed_data.schema.DescribeRowResponse" href="#src.managed_data.schema.DescribeRowResponse">DescribeRowResponse</a></code></p>
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="src.managed_data.schema.DescribeRowResponse" href="#src.managed_data.schema.DescribeRowResponse">DescribeRowResponse</a></code></p>
 
-  
+
       <p>Schema for responses for the <code>DescribeRow</code> endpoint for a database.</p>
 
-            <details class="quote">
-              <summary>Source code in <code>src/managed_data/schema.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">180</span>
-<span class="normal">181</span>
-<span class="normal">182</span>
-<span class="normal">183</span>
-<span class="normal">184</span>
-<span class="normal">185</span>
-<span class="normal">186</span>
-<span class="normal">187</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">DescribeRowResponseDatabase</span><span class="p">(</span><span class="n">DescribeRowResponse</span><span class="p">):</span>
+              <details class="quote">
+                <summary>Source code in <code>src/managed_data/schema.py</code></summary>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">187</span>
+<span class="normal">188</span>
+<span class="normal">189</span>
+<span class="normal">190</span>
+<span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">DescribeRowResponseDatabase</span><span class="p">(</span><span class="n">DescribeRowResponse</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Schema for responses for the `DescribeRow` endpoint for a database.&quot;&quot;&quot;</span>
 
     <span class="n">cols</span><span class="p">:</span> <span class="nb">list</span>
@@ -1756,9 +1820,9 @@ the response schema depends on whether <code>DescribeRow</code> is called for a 
 
     <span class="n">model_config</span> <span class="o">=</span> <span class="n">ConfigDict</span><span class="p">(</span><span class="n">extra</span><span class="o">=</span><span class="s2">&quot;forbid&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-            </details>
+              </details>
 
-  
+
 
   <div class="doc doc-children">
 
@@ -1774,8 +1838,7 @@ the response schema depends on whether <code>DescribeRow</code> is called for a 
 
   </div>
 
-  </div>
-
+    </div>
 
 </div>
 
@@ -1784,33 +1847,33 @@ the response schema depends on whether <code>DescribeRow</code> is called for a 
 
 
 <h2 id="src.managed_data.schema.DescribeRowResponseRow" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-class"></code>          <span class="doc doc-object-name doc-class-name">DescribeRowResponseRow</span>
+<code class="doc-symbol doc-symbol-heading doc-symbol-class"></code>            <span class="doc doc-object-name doc-class-name">DescribeRowResponseRow</span>
 
 
 <a href="#src.managed_data.schema.DescribeRowResponseRow" class="headerlink" title="Permanent link">&para;</a></h2>
 
 
-  <div class="doc doc-contents ">
-          <p class="doc doc-class-bases">
-            Bases: <code><a class="autorefs autorefs-internal" title="src.managed_data.schema.DescribeRowResponse" href="#src.managed_data.schema.DescribeRowResponse">DescribeRowResponse</a></code></p>
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="src.managed_data.schema.DescribeRowResponse" href="#src.managed_data.schema.DescribeRowResponse">DescribeRowResponse</a></code></p>
 
-  
+
       <p>Schema for responses from the <code>DescribeRow</code> endpoint for a row.
 This is also the schema for responses from the <code>DescribeDatabaseRows</code> endpoint.</p>
 
-            <details class="quote">
-              <summary>Source code in <code>src/managed_data/schema.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">167</span>
-<span class="normal">168</span>
-<span class="normal">169</span>
-<span class="normal">170</span>
-<span class="normal">171</span>
-<span class="normal">172</span>
-<span class="normal">173</span>
-<span class="normal">174</span>
+              <details class="quote">
+                <summary>Source code in <code>src/managed_data/schema.py</code></summary>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">174</span>
 <span class="normal">175</span>
 <span class="normal">176</span>
-<span class="normal">177</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">DescribeRowResponseRow</span><span class="p">(</span><span class="n">DescribeRowResponse</span><span class="p">):</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
+<span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">DescribeRowResponseRow</span><span class="p">(</span><span class="n">DescribeRowResponse</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Schema for responses from the `DescribeRow` endpoint for a row.</span>
 <span class="sd">    This is also the schema for responses from the `DescribeDatabaseRows` endpoint.&quot;&quot;&quot;</span>
 
@@ -1822,9 +1885,9 @@ This is also the schema for responses from the <code>DescribeDatabaseRows</code>
 
     <span class="n">model_config</span> <span class="o">=</span> <span class="n">ConfigDict</span><span class="p">(</span><span class="n">extra</span><span class="o">=</span><span class="s2">&quot;forbid&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-            </details>
+              </details>
 
-  
+
 
   <div class="doc doc-children">
 
@@ -1840,8 +1903,7 @@ This is also the schema for responses from the <code>DescribeDatabaseRows</code>
 
   </div>
 
-  </div>
-
+    </div>
 
 </div>
 
@@ -1850,34 +1912,34 @@ This is also the schema for responses from the <code>DescribeDatabaseRows</code>
 
 
 <h2 id="src.managed_data.schema.FieldItem" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-class"></code>          <span class="doc doc-object-name doc-class-name">FieldItem</span>
+<code class="doc-symbol doc-symbol-heading doc-symbol-class"></code>            <span class="doc doc-object-name doc-class-name">FieldItem</span>
 
 
 <a href="#src.managed_data.schema.FieldItem" class="headerlink" title="Permanent link">&para;</a></h2>
 
 
-  <div class="doc doc-contents ">
-          <p class="doc doc-class-bases">
-            Bases: <code><span title="pydantic.BaseModel">BaseModel</span></code></p>
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="pydantic.BaseModel">BaseModel</span></code></p>
 
-  
+
       <p>Schema for items in the <code>fields</code> attribute of responses from
 the <code>DescribeRow</code> endpoint.</p>
 
-            <details class="quote">
-              <summary>Source code in <code>src/managed_data/schema.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">114</span>
-<span class="normal">115</span>
-<span class="normal">116</span>
-<span class="normal">117</span>
-<span class="normal">118</span>
-<span class="normal">119</span>
-<span class="normal">120</span>
-<span class="normal">121</span>
+              <details class="quote">
+                <summary>Source code in <code>src/managed_data/schema.py</code></summary>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">121</span>
 <span class="normal">122</span>
 <span class="normal">123</span>
 <span class="normal">124</span>
-<span class="normal">125</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">FieldItem</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="normal">125</span>
+<span class="normal">126</span>
+<span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">FieldItem</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Schema for items in the `fields` attribute of responses from</span>
 <span class="sd">    the `DescribeRow` endpoint.&quot;&quot;&quot;</span>
 
@@ -1890,9 +1952,9 @@ the <code>DescribeRow</code> endpoint.</p>
 
     <span class="n">model_config</span> <span class="o">=</span> <span class="n">ConfigDict</span><span class="p">(</span><span class="n">extra</span><span class="o">=</span><span class="s2">&quot;forbid&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-            </details>
+              </details>
 
-  
+
 
   <div class="doc doc-children">
 
@@ -1908,8 +1970,7 @@ the <code>DescribeRow</code> endpoint.</p>
 
   </div>
 
-  </div>
-
+    </div>
 
 </div>
 
@@ -1918,33 +1979,33 @@ the <code>DescribeRow</code> endpoint.</p>
 
 
 <h2 id="src.managed_data.schema.ListRowsResponse" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-class"></code>          <span class="doc doc-object-name doc-class-name">ListRowsResponse</span>
+<code class="doc-symbol doc-symbol-heading doc-symbol-class"></code>            <span class="doc doc-object-name doc-class-name">ListRowsResponse</span>
 
 
 <a href="#src.managed_data.schema.ListRowsResponse" class="headerlink" title="Permanent link">&para;</a></h2>
 
 
-  <div class="doc doc-contents ">
-          <p class="doc doc-class-bases">
-            Bases: <code><span title="pydantic.BaseModel">BaseModel</span></code></p>
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="pydantic.BaseModel">BaseModel</span></code></p>
 
-  
+
       <p>Schema for responses from the
 <code>ListRows</code> endpoint.</p>
 
-            <details class="quote">
-              <summary>Source code in <code>src/managed_data/schema.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">101</span>
-<span class="normal">102</span>
-<span class="normal">103</span>
-<span class="normal">104</span>
-<span class="normal">105</span>
-<span class="normal">106</span>
-<span class="normal">107</span>
-<span class="normal">108</span>
+              <details class="quote">
+                <summary>Source code in <code>src/managed_data/schema.py</code></summary>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">108</span>
 <span class="normal">109</span>
 <span class="normal">110</span>
-<span class="normal">111</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">ListRowsResponse</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">ListRowsResponse</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Schema for responses from the</span>
 <span class="sd">    `ListRows` endpoint.&quot;&quot;&quot;</span>
 
@@ -1956,9 +2017,9 @@ the <code>DescribeRow</code> endpoint.</p>
 
     <span class="n">model_config</span> <span class="o">=</span> <span class="n">ConfigDict</span><span class="p">(</span><span class="n">extra</span><span class="o">=</span><span class="s2">&quot;forbid&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-            </details>
+              </details>
 
-  
+
 
   <div class="doc doc-children">
 
@@ -1974,8 +2035,7 @@ the <code>DescribeRow</code> endpoint.</p>
 
   </div>
 
-  </div>
-
+    </div>
 
 </div>
 
@@ -1984,7 +2044,7 @@ the <code>DescribeRow</code> endpoint.</p>
 
   </div>
 
-  </div>
+    </div>
 
 </div>
 
@@ -2102,7 +2162,7 @@ the <code>DescribeRow</code> endpoint.</p>
     <script id="__config" type="application/json">{"base": "../..", "features": ["announce.dismiss", "content.code.annotate", "content.code.copy", "content.tabs.link", "content.tooltips", "navigation.footer", "navigation.indexes", "navigation.instant", "navigation.instant.prefetch", "navigation.instant.preview", "navigation.instant.progress", "navigation.path", "navigation.tabs", "navigation.top", "navigation.tracking", "search.suggest", "toc.follow"], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.3220b9d7.min.js"></script>
+      <script src="../../assets/javascripts/bundle.081f42fc.min.js"></script>
       
     
   </body>
