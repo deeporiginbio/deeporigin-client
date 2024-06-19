@@ -57,27 +57,24 @@ This page describes how to upload data to Deep Origin Data.
 
         ```
 
-    A file can be directly assigned to a specific cell in 
-    a database by specifying the database and column:
+    To upload a file and assign it to an existing cell, use:
 
-
-    ```bash
-    deeporigin data upload /path/to/test.fasta \
-        --column base_sequence_file \
-        --database db-dna
-    ```
-
-    Here, we did not specify a row; by default, a new row
-    is created and the file is assigned to that row. 
-
-    If you want to upload a file to a cell in an existing
-    row, use:
 
     ```bash
     deeporigin data upload /path/to/test.fasta \
         --column <column_id> \
-        --database db-dna \
-        --row <rod_id>
+        --database <database_id> \
+        --row <row_id>
+    ```
+
+    To upload a file and assign it to a column in a new row,
+    use: 
+
+
+    ```bash
+    deeporigin data upload /path/to/test.fasta \
+        --column <column_id> \
+        --database <database+_id> 
     ```
 
  
@@ -109,7 +106,20 @@ This page describes how to upload data to Deep Origin Data.
     }
     ```
 
-    To assign it to a specific cell in a database, use the `assign_files_to_cell` function:
+
+    To assign an uploaded file to a cell in an existing row, use the `assign_files_to_cell` function as follows:
+
+    ```py
+        _api.assign_files_to_cell(
+        file_ids=["_file:6Hdhyc3t8xZ6pmyCrQy1t"],
+        database_id="db-dna",
+        column_id="base_sequence_file",
+        row_id="row-id",
+    )
+
+    ```
+
+    To assign an uploaded file to a cell on a new row, use the `assign_files_to_cell` function as follows:
 
     ```py
         _api.assign_files_to_cell(
@@ -120,6 +130,4 @@ This page describes how to upload data to Deep Origin Data.
 
     ```
 
-    Here, we did not specify `row_id`, which will default to
-    creating a new row and assigning it to that row. 
 
