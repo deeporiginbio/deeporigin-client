@@ -1,4 +1,21 @@
-# Overview
+
+# Deep Origin CLI and Python Client
+
+<div class="grid cards" markdown>
+
+- :fontawesome-brands-python: **Pure python**       
+Lightweight implementation, written in pure Python. Works on any system that can run Python.
+- :fontawesome-solid-handshake-simple: **Talks to Deep Origin APIs**  
+Talks to Deep Origin APIs, including APIs to work with managed data, and ComputeBench.
+- :octicons-unlock-24: **Freely available**         
+Freely available and open source. Install on your computer!
+- :material-download: **Easy install**     
+Just `pip install deeporigin`.
+
+</div>
+
+## Overview
+
 
 The Deep Origin CLI and Python client allow you to programmatically
 interact with the [Deep Origin platform](https://os.deeporigin.io/).

@@ -98,6 +98,13 @@ class DescribeFileResponse(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
+class CreateFileUploadResponse(BaseModel):
+    """schema for responses to the `CreateFileUpload` endpoint."""
+
+    uploadUrl: str
+    file: DescribeFileResponse
+
+
 class ListRowsResponse(BaseModel):
     """Schema for responses from the
     `ListRows` endpoint."""

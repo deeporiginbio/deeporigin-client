@@ -324,6 +324,79 @@ databases to CSV files.
             )
             _print_dict(data, json=self.app.pargs.json, transpose=True)
 
+    @cement.ex(
+        help="Upload file to database",
+        arguments=[
+            (
+                ["file_path"],
+                {"help": "File path to upload", "action": "store"},
+            ),
+            (
+                ["--database"],
+                {
+                    "type": str,
+                    "required": False,
+                    "metavar": "<database_id>",
+                    "help": "ID of database to assign to",
+                },
+            ),
+            (
+                ["--column"],
+                {
+                    "type": str,
+                    "required": False,
+                    "metavar": "<column_id>",
+                    "help": "ID of column to assign to",
+                },
+            ),
+            (
+                ["--row"],
+                {
+                    "type": str,
+                    "required": False,
+                    "metavar": "<row_id>",
+                    "help": "ID of row to assign to",
+                },
+            ),
+            (
+                ["--json"],
+                {
+                    "action": "store_true",
+                    "help": "Whether to return JSON formatted data [default: False]",
+                },
+            ),
+        ],
+    )
+    def upload(self):
+        """upload file to database in Deep Origin"""
+
+        data = _api.upload_file(
+            file_path=self.app.pargs.file_path,
+            client=self._get_client(),
+        )
+
+        if not self.app.pargs.database:
+            # we are not making an assignment, so abort
+            _print_dict(data, json=self.app.pargs.json)
+            return
+
+        if self.app.pargs.column and self.app.pargs.database:
+            data = _api.assign_files_to_cell(
+                file_ids=[data["id"]],
+                database_id=self.app.pargs.database,
+                column_id=self.app.pargs.column,
+                row_id=self.app.pargs.row,
+            )
+
+            data = data["rows"][0]
+            data.pop("fields")
+
+            _print_dict(
+                data,
+                json=self.app.pargs.json,
+                transpose=True,
+            )
+
 
 CONTROLLERS = [
     DataController,
