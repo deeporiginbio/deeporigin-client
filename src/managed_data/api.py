@@ -14,6 +14,86 @@ from deeporigin.utils import PREFIXES
 
 
 @beartype
+def make_database_rows(
+    database_id: str,
+    n_rows: int = 1,
+    client: Optional[Client] = None,
+) -> dict:
+    """Makes one or several new row(s) in a Database table
+
+    This wraps the `EnsureRows` endpoint and sends a payload
+    designed to create new row(s) in a database table.
+
+
+    Args:
+        database_id: ID or Human ID of the database
+
+    Returns:
+        A dictionary that conforms to a EnsureRowsResponse
+    """
+
+    if n_rows < 1:
+        raise DeepOriginException(
+            f"n_rows must be at least 1. However, n_rows was {n_rows}"
+        )
+
+    data = dict(
+        databaseId=database_id,
+        rows=[{"row": {}} for _ in range(n_rows)],
+    )
+
+    return _api.ensure_rows(data, client=client)
+
+
+@beartype
+def assign_files_to_cell(
+    *,
+    file_ids: list[str],
+    database_id: str,
+    column_id: str,
+    row_id: Optional[str] = None,
+    client: Optional[Client] = None,
+) -> dict:
+    """Assign existing file(s) to a cell
+
+    Assign files to a cell in a database table, where the cell is identified by the database ID, row ID, and column ID. If row_id is None, a new row will be created.
+
+    Args:
+    file_id: ID of the file
+    column_id: ID of the column
+    row_id: ID of the row
+
+
+    """
+
+    if row_id is None:
+        data = make_database_rows(
+            database_id=database_id,
+            n_rows=1,
+            client=client,
+        )
+        row_id = data["rows"][0]["id"]
+
+    data = {
+        "databaseId": database_id,
+        "rows": [
+            {
+                "rowId": row_id,
+                "row": {},
+                "cells": [
+                    {
+                        "columnId": column_id,
+                        "value": {"fileIds": file_ids},
+                    },
+                ],
+            },
+        ],
+    }
+
+    return _api.ensure_rows(data, client=client)
+
+
+@beartype
 def upload_file_to_new_database_row(
     *,
     database_id: str,
@@ -143,6 +223,37 @@ def get_cell_data(
 
     data = get_row_data(row_id, client=client)
     return data[column_name]
+
+
+def set_cell_data(
+    value: Any,
+    *,
+    database_id: str,
+    row_id: str,
+    column_id: str,
+    client: Optional[Client] = None,
+) -> Any:
+    """set data in a cell to some value.
+
+    uses the EnsureRows API endpoint"""
+
+    data = {
+        "databaseId": database_id,
+        "rows": [
+            {
+                "cells": [
+                    {
+                        "columnId": column_id,
+                        "value": value,
+                    }
+                ],
+                "row": {},
+                "rowId": row_id,
+            }
+        ],
+    }
+
+    return _api.ensure_rows(data, client=client)
 
 
 @beartype
