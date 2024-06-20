@@ -33,7 +33,7 @@ class MockClient(client.Client):
 
     workspaces = ["ws-placeholder"]
     databases = ["db-placeholder"]
-    rows = [f"row-placeholder-{idx}" for idx in range(10)]
+    rows = [f"row-{idx}" for idx in range(10)]
     columns = [f"column-{idx}" for idx in range(5)]
     file = file_description()
 
@@ -74,8 +74,8 @@ class MockClient(client.Client):
             ]
             rows += [
                 ListRowsResponse(
-                    hid=f"row-placeholder-{idx}",
-                    id=f"row-placeholder-{idx}",
+                    hid=f"row-{idx}",
+                    id=f"row-{idx}",
                     type="row",
                     parentId=self.databases[0],
                 ).model_dump()
@@ -92,8 +92,8 @@ class MockClient(client.Client):
 
             return [
                 ListRowsResponse(
-                    hid=f"row-placeholder-{idx}",
-                    id=f"row-placeholder-{idx}",
+                    hid=f"row-{idx}",
+                    id=f"row-{idx}",
                     type="row",
                     parentId=data["filters"][0]["parent"]["id"],
                 ).model_dump()
@@ -149,7 +149,7 @@ class MockClient(client.Client):
                 hid=name,
                 name=name,
                 type="database",
-                parentId="ws-placeholder",
+                parentId="ws_placeholder",
                 cols=[
                     dict(
                         ColumnItem(
@@ -196,8 +196,8 @@ class MockClient(client.Client):
         ]
         return [
             DescribeRowResponseRow(
-                id=f"row-placeholder-{idx}",
-                hid=f"row-placeholder-{idx}",
+                id=f"row-{idx}",
+                hid=f"row-{idx}",
                 parentId=data["databaseRowId"],
                 fields=fields,
             ).model_dump()
