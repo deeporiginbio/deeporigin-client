@@ -575,6 +575,14 @@ def _type_and_cleanup_dataframe(
     # add a type to Validation Status because this column
     # doesn't actually exist in the database
     df["Validation Status"].attrs = dict(type="Validation Status")
+
+    # sort by primary key
+    primary_key = df.attrs["primary_key"]
+    df["numeric_id"] = df[primary_key].apply(lambda x: int(x.split("-")[1]))
+    df = df.sort_values(by="numeric_id")
+    df = df.drop(columns="numeric_id")
+    df.reset_index(drop=True, inplace=True)
+
     return df
 
 
