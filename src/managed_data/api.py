@@ -265,7 +265,6 @@ def set_cell_data(
                 "Attempting to write to a cell that is of type select. Values to be written here should be strings or lists of strings."
             )
 
-        # TODO check that this is a valid value
         options = column["configSelect"]["options"]
         for item in value:
             if item not in options:
