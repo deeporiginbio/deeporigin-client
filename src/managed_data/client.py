@@ -14,8 +14,6 @@ from deeporigin.exceptions import DeepOriginException
 class Client(ABC):
     """client abstract base class. Actual clients inherit from this base class. Actual clients need to implement a `authenticate` and `invoke` method"""
 
-    suppress_errors: bool = False
-
     @abstractmethod
     def authenticate(self, refresh_tokens: bool = True):
         """authenticate method to be called before making any requests. This needs to be implemented in derived classes"""
@@ -156,7 +154,7 @@ class DeepOriginClient(Client):
         self,
         endpoint: str,
         data: dict,
-    ) -> Union[dict, list, requests.models.Response]:
+    ) -> Union[dict, list]:
         """core call to API endpoint"""
 
         url = urljoin(self.api_url, endpoint)
@@ -170,8 +168,6 @@ class DeepOriginClient(Client):
         try:
             response = _check_response(response)
         except Exception as e:
-            if self.suppress_errors:
-                return response
             print(f"URL: {url}")
             print(f"headers: {self.headers}")
             print(f"data: {data}")
