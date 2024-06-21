@@ -18,11 +18,7 @@ from deeporigin.managed_data.schema import (
 
 
 @beartype
-def _get_default_client(
-    client: Optional[Client] = None,
-    *,
-    suppress_errors: bool = False,
-) -> Client:
+def _get_default_client(client: Optional[Client] = None) -> Client:
     """Internal function to instantiate client
 
     Creates and returns an authenticated client if
@@ -38,7 +34,6 @@ def _get_default_client(
     """
     if client is None:
         client = DeepOriginClient()  # pragma: no cover
-        client.suppress_errors = suppress_errors
         client.authenticate()  # pragma: no cover
     return client
 
@@ -47,10 +42,9 @@ def ensure_rows(
     data: dict,
     *,
     client: Optional[Client] = None,
-    suppress_errors: bool = False,
 ):
     """wrapper around EnsureRows endpoint"""
-    client = _get_default_client(client, suppress_errors=suppress_errors)
+    client = _get_default_client(client)
 
     return client.invoke("EnsureRows", data)
 

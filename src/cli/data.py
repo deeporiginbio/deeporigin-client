@@ -398,7 +398,7 @@ databases to CSV files.
             )
 
     @cement.ex(
-        help="Set data in database cell",
+        help="Write data to database cell",
         arguments=[
             (
                 ["data"],
