@@ -516,6 +516,8 @@
       
         
       
+        
+      
     
     
       
@@ -601,6 +603,27 @@
   
   <span class="md-ellipsis">
     Upload data
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/managed-data/write-data.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Write data
   </span>
   
 
@@ -805,15 +828,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#src.managed_data._api.assign_files_to_cell" class="md-nav__link">
-    <span class="md-ellipsis">
-      assign_files_to_cell
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#src.managed_data._api.convert_id_format" class="md-nav__link">
     <span class="md-ellipsis">
       convert_id_format
@@ -913,6 +927,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#src.managed_data._api.ensure_rows" class="md-nav__link">
+    <span class="md-ellipsis">
+      ensure_rows
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#src.managed_data._api.list_database_rows" class="md-nav__link">
     <span class="md-ellipsis">
       list_database_rows
@@ -952,15 +975,6 @@
   <a href="#src.managed_data._api.list_rows" class="md-nav__link">
     <span class="md-ellipsis">
       list_rows
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#src.managed_data._api.make_database_rows" class="md-nav__link">
-    <span class="md-ellipsis">
-      make_database_rows
     </span>
   </a>
   
@@ -1076,15 +1090,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#src.managed_data._api.assign_files_to_cell" class="md-nav__link">
-    <span class="md-ellipsis">
-      assign_files_to_cell
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#src.managed_data._api.convert_id_format" class="md-nav__link">
     <span class="md-ellipsis">
       convert_id_format
@@ -1184,6 +1189,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#src.managed_data._api.ensure_rows" class="md-nav__link">
+    <span class="md-ellipsis">
+      ensure_rows
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#src.managed_data._api.list_database_rows" class="md-nav__link">
     <span class="md-ellipsis">
       list_database_rows
@@ -1223,15 +1237,6 @@
   <a href="#src.managed_data._api.list_rows" class="md-nav__link">
     <span class="md-ellipsis">
       list_rows
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#src.managed_data._api.make_database_rows" class="md-nav__link">
-    <span class="md-ellipsis">
-      make_database_rows
     </span>
   </a>
   
@@ -1443,37 +1448,6 @@ simply provide Pythonic interfaces to individual API endpoints.</p>
           </tr>
       </tbody>
     </table>
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h2 id="src.managed_data._api.assign_files_to_cell" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>            <span class="doc doc-object-name doc-function-name">assign_files_to_cell</span>
-
-
-<a href="#src.managed_data._api.assign_files_to_cell" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">assign_files_to_cell</span><span class="p">(</span>
-    <span class="o">*</span><span class="p">,</span>
-    <span class="n">file_ids</span><span class="p">:</span> <span class="n">list</span><span class="p">[</span><span class="n">str</span><span class="p">],</span>
-    <span class="n">database_id</span><span class="p">:</span> <span class="n">str</span><span class="p">,</span>
-    <span class="n">column_id</span><span class="p">:</span> <span class="n">str</span><span class="p">,</span>
-    <span class="n">row_id</span><span class="p">:</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">client</span><span class="p">:</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n"><span title="deeporigin.managed_data.client.Client">Client</span></span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">dict</span>
-</code></pre></div>
-
-    <div class="doc doc-contents ">
-
-      <p>Assign existing file(s) to a cell</p>
-<p>Assign files to a cell in a database table, where the cell is identified by the database ID, row ID, and column ID. If row_id is None, a new row will be created.</p>
-<p>Args:
-file_id: ID of the file
-column_id: ID of the column
-row_id: ID of the row</p>
 
     </div>
 
@@ -2346,6 +2320,25 @@ status, content length, and type.</p>
 <div class="doc doc-object doc-function">
 
 
+<h2 id="src.managed_data._api.ensure_rows" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>            <span class="doc doc-object-name doc-function-name">ensure_rows</span>
+
+
+<a href="#src.managed_data._api.ensure_rows" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">ensure_rows</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">dict</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">client</span><span class="p">:</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n"><span title="deeporigin.managed_data.client.Client">Client</span></span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+      <p>wrapper around EnsureRows endpoint</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
 <h2 id="src.managed_data._api.list_database_rows" class="doc doc-heading">
 <code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>            <span class="doc doc-object-name doc-function-name">list_database_rows</span>
 
@@ -2702,83 +2695,6 @@ based on the parent, row type, or whether the parent is the root.</p>
             <td>
               <div class="doc-md-description">
                 <p>A list of dictionaries, where each entry corresponds to a row. Each dictionary conforms to a <a class="autorefs autorefs-internal" href="low-level-schema.html#src.managed_data.schema.ListRowsResponse">ListRowsResponse</a>.</p>
-              </div>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h2 id="src.managed_data._api.make_database_rows" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>            <span class="doc doc-object-name doc-function-name">make_database_rows</span>
-
-
-<a href="#src.managed_data._api.make_database_rows" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">make_database_rows</span><span class="p">(</span>
-    <span class="n">database_id</span><span class="p">:</span> <span class="n">str</span><span class="p">,</span>
-    <span class="n">n_rows</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
-    <span class="n">client</span><span class="p">:</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n"><span title="deeporigin.managed_data.client.Client">Client</span></span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">dict</span>
-</code></pre></div>
-
-    <div class="doc doc-contents ">
-
-      <p>Makes one or several new row(s) in a Database table</p>
-<p>This wraps the <code>EnsureRows</code> endpoint and sends a payload
-designed to create new row(s) in a database table.</p>
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td><code>database_id</code></td>
-            <td>
-                  <code>str</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>ID or Human ID of the database</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-    <p><span class="doc-section-title">Returns:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Type</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                  <code>dict</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>A dictionary that conforms to a EnsureRowsResponse</p>
               </div>
             </td>
           </tr>

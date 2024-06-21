@@ -514,6 +514,8 @@
       
         
       
+        
+      
     
     
       
@@ -599,6 +601,27 @@
   
   <span class="md-ellipsis">
     Upload data
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/managed-data/write-data.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Write data
   </span>
   
 
@@ -1214,6 +1237,7 @@ mock data for testing.</p>
     <span class="s2">&quot;reference&quot;</span><span class="p">,</span>
     <span class="s2">&quot;editor&quot;</span><span class="p">,</span>
     <span class="s2">&quot;float&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;boolean&quot;</span><span class="p">,</span>
 <span class="p">]</span>
 </code></pre></div>
 
@@ -1388,11 +1412,13 @@ mock data for testing.</p>
               Bases: <code><span title="pydantic.BaseModel">BaseModel</span></code></p>
 
 
-      <p>Schema for items in the <code>cols</code> attribute of responses from the <code>DescribeRow</code> endpoint for a database.</p>
+      <p>Schema for items in the <code>cols</code> attribute of responses
+from the <code>DescribeRow</code> endpoint for a database.</p>
 
               <details class="quote">
                 <summary>Source code in <code>src/managed_data/schema.py</code></summary>
-                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">135</span>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">134</span>
+<span class="normal">135</span>
 <span class="normal">136</span>
 <span class="normal">137</span>
 <span class="normal">138</span>
@@ -1406,7 +1432,8 @@ mock data for testing.</p>
 <span class="normal">146</span>
 <span class="normal">147</span>
 <span class="normal">148</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">ColumnItem</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Schema for items in the `cols` attribute of responses from the `DescribeRow` endpoint for a database.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Schema for items in the `cols` attribute of responses</span>
+<span class="sd">    from the `DescribeRow` endpoint for a database.&quot;&quot;&quot;</span>
 
     <span class="nb">id</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Placeholder Name&quot;</span>
@@ -1463,8 +1490,7 @@ mock data for testing.</p>
 
               <details class="quote">
                 <summary>Source code in <code>src/managed_data/schema.py</code></summary>
-                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">49</span>
-<span class="normal">50</span>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">50</span>
 <span class="normal">51</span>
 <span class="normal">52</span>
 <span class="normal">53</span>
@@ -1479,7 +1505,8 @@ mock data for testing.</p>
 <span class="normal">62</span>
 <span class="normal">63</span>
 <span class="normal">64</span>
-<span class="normal">65</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">CreateDatabaseResponse</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="normal">65</span>
+<span class="normal">66</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">CreateDatabaseResponse</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Schema for responses from the</span>
 <span class="sd">    `CreateDatabase` endpoint.&quot;&quot;&quot;</span>
 
@@ -1489,7 +1516,7 @@ mock data for testing.</p>
     <span class="n">parentId</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;placeholder&quot;</span>  <span class="c1"># sometimes not returned</span>
     <span class="n">dateCreated</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">dateUpdated</span><span class="p">:</span> <span class="nb">str</span>
-    <span class="n">createdByUserDrn</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">createdByUserDrn</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
     <span class="n">hid</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">hidPrefix</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">cols</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[]</span>
@@ -1539,11 +1566,11 @@ mock data for testing.</p>
 
               <details class="quote">
                 <summary>Source code in <code>src/managed_data/schema.py</code></summary>
-                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">101</span>
-<span class="normal">102</span>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">102</span>
 <span class="normal">103</span>
 <span class="normal">104</span>
-<span class="normal">105</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">CreateFileUploadResponse</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="normal">105</span>
+<span class="normal">106</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">CreateFileUploadResponse</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;schema for responses to the `CreateFileUpload` endpoint.&quot;&quot;&quot;</span>
 
     <span class="n">uploadUrl</span><span class="p">:</span> <span class="nb">str</span>
@@ -1592,8 +1619,7 @@ mock data for testing.</p>
 
               <details class="quote">
                 <summary>Source code in <code>src/managed_data/schema.py</code></summary>
-                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">68</span>
-<span class="normal">69</span>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">69</span>
 <span class="normal">70</span>
 <span class="normal">71</span>
 <span class="normal">72</span>
@@ -1605,7 +1631,8 @@ mock data for testing.</p>
 <span class="normal">78</span>
 <span class="normal">79</span>
 <span class="normal">80</span>
-<span class="normal">81</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">CreateWorkspaceResponse</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="normal">81</span>
+<span class="normal">82</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">CreateWorkspaceResponse</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Schema for responses from the</span>
 <span class="sd">    `CreateWorkspace` endpoint.&quot;&quot;&quot;</span>
 
@@ -1663,8 +1690,7 @@ mock data for testing.</p>
 
               <details class="quote">
                 <summary>Source code in <code>src/managed_data/schema.py</code></summary>
-                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">84</span>
-<span class="normal">85</span>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">85</span>
 <span class="normal">86</span>
 <span class="normal">87</span>
 <span class="normal">88</span>
@@ -1677,7 +1703,8 @@ mock data for testing.</p>
 <span class="normal">95</span>
 <span class="normal">96</span>
 <span class="normal">97</span>
-<span class="normal">98</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">DescribeFileResponse</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="normal">98</span>
+<span class="normal">99</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">DescribeFileResponse</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Schema for responses from the</span>
 <span class="sd">    `DescribeFile` endpoint.&quot;&quot;&quot;</span>
 
@@ -1689,7 +1716,7 @@ mock data for testing.</p>
     <span class="n">contentType</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">dateCreated</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">dateUpdated</span><span class="p">:</span> <span class="nb">str</span>
-    <span class="n">createdByUserDrn</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">createdByUserDrn</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
 
     <span class="n">model_config</span> <span class="o">=</span> <span class="n">ConfigDict</span><span class="p">(</span><span class="n">extra</span><span class="o">=</span><span class="s2">&quot;forbid&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -1804,14 +1831,14 @@ the response schema depends on whether <code>DescribeRow</code> is called for a 
 
               <details class="quote">
                 <summary>Source code in <code>src/managed_data/schema.py</code></summary>
-                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">187</span>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">185</span>
+<span class="normal">186</span>
+<span class="normal">187</span>
 <span class="normal">188</span>
 <span class="normal">189</span>
 <span class="normal">190</span>
 <span class="normal">191</span>
-<span class="normal">192</span>
-<span class="normal">193</span>
-<span class="normal">194</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">DescribeRowResponseDatabase</span><span class="p">(</span><span class="n">DescribeRowResponse</span><span class="p">):</span>
+<span class="normal">192</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">DescribeRowResponseDatabase</span><span class="p">(</span><span class="n">DescribeRowResponse</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Schema for responses for the `DescribeRow` endpoint for a database.&quot;&quot;&quot;</span>
 
     <span class="n">cols</span><span class="p">:</span> <span class="nb">list</span>
@@ -1871,9 +1898,7 @@ This is also the schema for responses from the <code>DescribeDatabaseRows</code>
 <span class="normal">179</span>
 <span class="normal">180</span>
 <span class="normal">181</span>
-<span class="normal">182</span>
-<span class="normal">183</span>
-<span class="normal">184</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">DescribeRowResponseRow</span><span class="p">(</span><span class="n">DescribeRowResponse</span><span class="p">):</span>
+<span class="normal">182</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">DescribeRowResponseRow</span><span class="p">(</span><span class="n">DescribeRowResponse</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Schema for responses from the `DescribeRow` endpoint for a row.</span>
 <span class="sd">    This is also the schema for responses from the `DescribeDatabaseRows` endpoint.&quot;&quot;&quot;</span>
 
@@ -1882,8 +1907,6 @@ This is also the schema for responses from the <code>DescribeDatabaseRows</code>
     <span class="n">hidNum</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="n">submissionStatus</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;draft&quot;</span>
     <span class="n">validationStatus</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;valid&quot;</span>
-
-    <span class="n">model_config</span> <span class="o">=</span> <span class="n">ConfigDict</span><span class="p">(</span><span class="n">extra</span><span class="o">=</span><span class="s2">&quot;forbid&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -1923,13 +1946,12 @@ This is also the schema for responses from the <code>DescribeDatabaseRows</code>
               Bases: <code><span title="pydantic.BaseModel">BaseModel</span></code></p>
 
 
-      <p>Schema for items in the <code>fields</code> attribute of responses from
-the <code>DescribeRow</code> endpoint.</p>
+      <p>Schema for items in the <code>fields</code> attribute of
+responses from the <code>DescribeRow</code> endpoint.</p>
 
               <details class="quote">
                 <summary>Source code in <code>src/managed_data/schema.py</code></summary>
-                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">121</span>
-<span class="normal">122</span>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">122</span>
 <span class="normal">123</span>
 <span class="normal">124</span>
 <span class="normal">125</span>
@@ -1938,10 +1960,9 @@ the <code>DescribeRow</code> endpoint.</p>
 <span class="normal">128</span>
 <span class="normal">129</span>
 <span class="normal">130</span>
-<span class="normal">131</span>
-<span class="normal">132</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">FieldItem</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Schema for items in the `fields` attribute of responses from</span>
-<span class="sd">    the `DescribeRow` endpoint.&quot;&quot;&quot;</span>
+<span class="normal">131</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">FieldItem</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Schema for items in the `fields` attribute of</span>
+<span class="sd">    responses from the `DescribeRow` endpoint.&quot;&quot;&quot;</span>
 
     <span class="n">columnId</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">cellId</span><span class="p">:</span> <span class="nb">str</span>
@@ -1949,8 +1970,6 @@ the <code>DescribeRow</code> endpoint.</p>
     <span class="nb">type</span><span class="p">:</span> <span class="n">DataType</span> <span class="o">=</span> <span class="s2">&quot;text&quot;</span>
     <span class="n">value</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;placeholder-text&quot;</span>
     <span class="n">systemType</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-
-    <span class="n">model_config</span> <span class="o">=</span> <span class="n">ConfigDict</span><span class="p">(</span><span class="n">extra</span><span class="o">=</span><span class="s2">&quot;forbid&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -1995,8 +2014,7 @@ the <code>DescribeRow</code> endpoint.</p>
 
               <details class="quote">
                 <summary>Source code in <code>src/managed_data/schema.py</code></summary>
-                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">108</span>
-<span class="normal">109</span>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">109</span>
 <span class="normal">110</span>
 <span class="normal">111</span>
 <span class="normal">112</span>
@@ -2005,7 +2023,8 @@ the <code>DescribeRow</code> endpoint.</p>
 <span class="normal">115</span>
 <span class="normal">116</span>
 <span class="normal">117</span>
-<span class="normal">118</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">ListRowsResponse</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="normal">118</span>
+<span class="normal">119</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">ListRowsResponse</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Schema for responses from the</span>
 <span class="sd">    `ListRows` endpoint.&quot;&quot;&quot;</span>
 
