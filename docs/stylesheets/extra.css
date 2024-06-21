@@ -1,3 +1,25 @@
 :root {
-  --md-primary-fg-color:        #6D2EB1;
+  --md-primary-fg-color: #6D2EB1;
+}
+
+.md-header, .md-tabs {
+  --md-primary-fg-color: #efe6f8;
+  --md-primary-bg-color: #6D2EB1;
+}
+
+.md-header__title .md-header__ellipsis .md-header__topic:after {
+  content: "CLI and Python client";
+}
+
+.md-header__title .md-header__ellipsis .md-header__topic .md-ellipsis {
+  display: none;
+}
+
+.md-search__input {
+  background-color: #e2d1f3;
+  color: var(--md-default-fg-color);
+}
+
+.md-search__input::placeholder {
+  color: #6D2EB1;
 }
