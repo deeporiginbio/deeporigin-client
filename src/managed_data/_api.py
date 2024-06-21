@@ -18,7 +18,7 @@ from deeporigin.managed_data.schema import (
 
 
 @beartype
-def _get_default_client(client: Optional[Client] = None):
+def _get_default_client(client: Optional[Client] = None) -> Client:
     """Internal function to instantiate client
 
     Creates and returns an authenticated client if
@@ -38,85 +38,13 @@ def _get_default_client(client: Optional[Client] = None):
     return client
 
 
-@beartype
-def assign_files_to_cell(
+def ensure_rows(
+    data: dict,
     *,
-    file_ids: list[str],
-    database_id: str,
-    column_id: str,
-    row_id: Optional[str] = None,
     client: Optional[Client] = None,
-) -> dict:
-    """Assign existing file(s) to a cell
-
-    Assign files to a cell in a database table, where the cell is identified by the database ID, row ID, and column ID. If row_id is None, a new row will be created.
-
-    Args:
-    file_id: ID of the file
-    column_id: ID of the column
-    row_id: ID of the row
-
-
-    """
+):
+    """wrapper around EnsureRows endpoint"""
     client = _get_default_client(client)
-
-    if row_id is None:
-        data = make_database_rows(
-            database_id=database_id,
-            n_rows=1,
-            client=client,
-        )
-        row_id = data["rows"][0]["id"]
-
-    data = {
-        "databaseId": database_id,
-        "rows": [
-            {
-                "rowId": row_id,
-                "row": {},
-                "cells": [
-                    {
-                        "columnId": column_id,
-                        "value": {"fileIds": file_ids},
-                    },
-                ],
-            },
-        ],
-    }
-
-    return client.invoke("EnsureRows", data)
-
-
-@beartype
-def make_database_rows(
-    database_id: str,
-    n_rows: int = 1,
-    client: Optional[Client] = None,
-) -> dict:
-    """Makes one or several new row(s) in a Database table
-
-    This wraps the `EnsureRows` endpoint and sends a payload
-    designed to create new row(s) in a database table.
-
-
-    Args:
-        database_id: ID or Human ID of the database
-
-    Returns:
-        A dictionary that conforms to a EnsureRowsResponse
-    """
-
-    client = _get_default_client(client)
-
-    if n_rows < 1:
-        raise DeepOriginException(
-            f"n_rows must be at least 1. However, n_rows was {n_rows}"
-        )
-
-    data = dict(
-        databaseId=database_id,
-        rows=[{"row": {}} for _ in range(n_rows)],
-    )
 
     return client.invoke("EnsureRows", data)
 

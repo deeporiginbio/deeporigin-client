@@ -26,6 +26,7 @@ DataType = Literal[
     "reference",
     "editor",
     "float",
+    "boolean",
 ]
 """Type of a column"""
 
@@ -56,7 +57,7 @@ class CreateDatabaseResponse(BaseModel):
     parentId: str = "placeholder"  # sometimes not returned
     dateCreated: str
     dateUpdated: str
-    createdByUserDrn: str
+    createdByUserDrn: Optional[str]
     hid: str
     hidPrefix: str
     cols: list = []
@@ -93,7 +94,7 @@ class DescribeFileResponse(BaseModel):
     contentType: str
     dateCreated: str
     dateUpdated: str
-    createdByUserDrn: str
+    createdByUserDrn: Optional[str]
 
     model_config = ConfigDict(extra="forbid")
 
@@ -119,8 +120,8 @@ class ListRowsResponse(BaseModel):
 
 
 class FieldItem(BaseModel):
-    """Schema for items in the `fields` attribute of responses from
-    the `DescribeRow` endpoint."""
+    """Schema for items in the `fields` attribute of
+    responses from the `DescribeRow` endpoint."""
 
     columnId: str
     cellId: str
@@ -129,11 +130,10 @@ class FieldItem(BaseModel):
     value: Union[str, dict, int, float] = "placeholder-text"
     systemType: Optional[str] = None
 
-    model_config = ConfigDict(extra="forbid")
-
 
 class ColumnItem(BaseModel):
-    """Schema for items in the `cols` attribute of responses from the `DescribeRow` endpoint for a database."""
+    """Schema for items in the `cols` attribute of responses
+    from the `DescribeRow` endpoint for a database."""
 
     id: str
     name: str = "Placeholder Name"
@@ -180,8 +180,6 @@ class DescribeRowResponseRow(DescribeRowResponse):
     hidNum: int = 1
     submissionStatus: str = "draft"
     validationStatus: str = "valid"
-
-    model_config = ConfigDict(extra="forbid")
 
 
 class DescribeRowResponseDatabase(DescribeRowResponse):

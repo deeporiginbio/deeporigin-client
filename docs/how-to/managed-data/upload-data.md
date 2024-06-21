@@ -9,7 +9,7 @@ This page describes how to upload data to Deep Origin Data.
     To upload a file to Deep Origin Data, use the `upload` command:
 
     ```bash
-    data upload /path/to/test.fasta 
+    deeporigin data upload /path/to/test.fasta 
     ```
 
     This will upload a file to the "Staging Area", and this
