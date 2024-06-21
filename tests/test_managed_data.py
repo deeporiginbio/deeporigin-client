@@ -65,6 +65,15 @@ def config(pytestconfig):
     # teardown tasks, if any
 
 
+def test_make_database_rows(config):
+    with pytest.raises(DeepOriginException, match="must be at least 1"):
+        data = api.make_database_rows(
+            config["databases"][0],
+            n_rows=0,
+            client=config["client"],
+        )
+
+
 def test_create_workspace(config):
     data = _api.create_workspace(
         name="test-" + str(uuid.uuid4())[:6],

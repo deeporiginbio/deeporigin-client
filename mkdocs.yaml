@@ -47,6 +47,7 @@ nav:
     - List data: how-to/managed-data/list-data.md
     - Inspect data: how-to/managed-data/inspect-data.md
     - Upload data: how-to/managed-data/upload-data.md
+    - Write data: how-to/managed-data/write-data.md
 - API reference:
   - Managed data:
     - High-level API: ref/managed-data/high-level-api.md

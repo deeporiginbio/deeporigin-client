@@ -1,10 +1,10 @@
 """The `deeporigin.managed_data.api` module contains high-level functions for
 interacting with Deep Origin managed data."""
-
 import os
 from pathlib import Path
 from typing import Any, Optional, Union
 
+import requests
 from beartype import beartype
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.managed_data import _api
@@ -237,6 +237,70 @@ def set_cell_data(
 
     uses the EnsureRows API endpoint"""
 
+    # first, get the type of the column
+    response = _api.describe_row(database_id, client=client)
+
+    column = [
+        col
+        for col in response["cols"]
+        if col["id"] == column_id or col["name"] == column_id or col["key"] == column_id
+    ]
+
+    if len(column) != 1:
+        raise DeepOriginException(
+            f"Could not find column {column_id} in database {database_id}"
+        )
+
+    column = column[0]
+    if column["type"] == "select":
+        if isinstance(value, list):
+            pass
+        elif isinstance(value, str):
+            value = [value]
+        elif value is None:
+            value = [""]
+        else:
+            raise DeepOriginException(
+                "Attempting to write to a cell that is of type select. Values to be written here should be strings or lists of strings."
+            )
+
+        # TODO check that this is a valid value
+        options = column["configSelect"]["options"]
+        for item in value:
+            if item not in options:
+                raise DeepOriginException(
+                    f"Expected every item to be in the options list. However, `{item}` is not in {options}"
+                )
+
+        validated_value = dict(selectedOptions=value)
+    elif column["type"] == "text":
+        validated_value = str(value)
+    elif column["type"] == "integer":
+        try:
+            validated_value = int(value)
+        except ValueError:
+            raise DeepOriginException(
+                f"Attempting to write to a cell that is of type integer. Value to be written here should be an integer. Instead, you attempted to write: {value}"
+            )
+
+    elif column["type"] == "float":
+        try:
+            validated_value = float(value)
+        except ValueError:
+            raise DeepOriginException(
+                f"Attempting to write to a cell that is of type float. Value to be written here should be an float. Instead, you attempted to write: {value}"
+            )
+
+    elif column["type"] == "boolean":
+        if isinstance(value, bool) or value is None:
+            validated_value = value
+        else:
+            raise DeepOriginException(
+                f"Attempting to write to a cell that is of type boolean. Value to be written here should be a True, False or None. Instead, you attempted to write: {value}"
+            )
+    else:
+        raise NotImplementedError("This data type is not yet supported")
+
     data = {
         "databaseId": database_id,
         "rows": [
@@ -244,7 +308,7 @@ def set_cell_data(
                 "cells": [
                     {
                         "columnId": column_id,
-                        "value": value,
+                        "value": validated_value,
                     }
                 ],
                 "row": {},

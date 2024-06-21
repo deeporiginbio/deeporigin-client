@@ -397,6 +397,61 @@ databases to CSV files.
                 transpose=True,
             )
 
+    @cement.ex(
+        help="Set data in database cell",
+        arguments=[
+            (
+                ["data"],
+                {"help": "Data to set", "action": "store"},
+            ),
+            (
+                ["--database"],
+                {
+                    "type": str,
+                    "required": True,
+                    "metavar": "<database_id>",
+                    "help": "ID of database to write to",
+                },
+            ),
+            (
+                ["--column"],
+                {
+                    "type": str,
+                    "required": True,
+                    "metavar": "<column_id>",
+                    "help": "ID of column to write to",
+                },
+            ),
+            (
+                ["--row"],
+                {
+                    "type": str,
+                    "required": True,
+                    "metavar": "<row_id>",
+                    "help": "ID of row to write to",
+                },
+            ),
+            (
+                ["--json"],
+                {
+                    "action": "store_true",
+                    "help": "Whether to return JSON formatted data [default: False]",
+                },
+            ),
+        ],
+    )
+    def write(self):
+        """Write data to a cell in a database"""
+
+        api.set_cell_data(
+            self.app.pargs.data,
+            database_id=self.app.pargs.database,
+            column_id=self.app.pargs.column,
+            row_id=self.app.pargs.row,
+        )
+
+        print(f"✔︎ Wrote {self.app.pargs.data} to database")
+
 
 CONTROLLERS = [
     DataController,
