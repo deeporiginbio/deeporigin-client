@@ -92,7 +92,7 @@ def upload_file(
         )
 
         if put_response.status_code != 200:
-            raise DeepOriginException("Error uploading file")
+            raise DeepOriginException(message="Error uploading file")
 
     return response["file"]
 
@@ -634,7 +634,9 @@ def download_file(
     client = _get_default_client(client)
 
     if not os.path.isdir(destination):
-        raise DeepOriginException(f"{destination} should be a path to a folder.")
+        raise DeepOriginException(
+            message=f"{destination} should be a path to a folder."
+        )
 
     file_name = describe_file(file_id, client=client)["name"]
 
@@ -656,7 +658,7 @@ def convert_id_format(
 
     if hids is None and ids is None:
         raise DeepOriginException(
-            "Either `hids` or `ids` should be non-None and a list of strings"
+            message="Either `hids` or `ids` should be non-None and a list of strings"
         )
 
     client = _get_default_client(client)

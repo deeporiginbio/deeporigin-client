@@ -144,7 +144,7 @@ class AwsProfile(Variable):
 
                 if completed_process.returncode != 0:
                     raise DeepOriginException(
-                        f"AWS profile {self.name or ''} could not be imported: {completed_process.stdout.decode().strip()}"
+                        message=f"AWS profile {self.name or ''} could not be imported: {completed_process.stdout.decode().strip()}"
                     )
         else:
             warnings.warn(
@@ -261,7 +261,7 @@ class AwsProfile(Variable):
 
             if completed_process.returncode != 0:
                 raise DeepOriginException(
-                    f"AWS profile {self.name or ''} could not be uninstalled: {completed_process.stdout.decode().strip()}"
+                    message=f"AWS profile {self.name or ''} could not be uninstalled: {completed_process.stdout.decode().strip()}"
                 )
         else:
             warnings.warn(

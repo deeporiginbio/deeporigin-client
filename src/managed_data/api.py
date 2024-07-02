@@ -34,7 +34,7 @@ def make_database_rows(
 
     if n_rows < 1:
         raise DeepOriginException(
-            f"n_rows must be at least 1. However, n_rows was {n_rows}"
+            message=f"n_rows must be at least 1. However, n_rows was {n_rows}"
         )
 
     data = dict(
@@ -248,7 +248,7 @@ def set_cell_data(
 
     if len(column) != 1:
         raise DeepOriginException(
-            f"Could not find column {column_id} in database {database_id}"
+            message=f"Could not find column {column_id} in database {database_id}"
         )
 
     column = column[0]
@@ -261,14 +261,14 @@ def set_cell_data(
             value = [""]
         else:
             raise DeepOriginException(
-                "Attempting to write to a cell that is of type select. Values to be written here should be strings or lists of strings."
+                message="Attempting to write to a cell that is of type select. Values to be written here should be strings or lists of strings."
             )
 
         options = column["configSelect"]["options"]
         for item in value:
             if item not in options:
                 raise DeepOriginException(
-                    f"Expected every item to be in the options list. However, `{item}` is not in {options}"
+                    message=f"Expected every item to be in the options list. However, `{item}` is not in {options}"
                 )
 
         validated_value = dict(selectedOptions=value)
@@ -279,7 +279,7 @@ def set_cell_data(
             validated_value = int(value)
         except ValueError:
             raise DeepOriginException(
-                f"Attempting to write to a cell that is of type integer. Value to be written here should be an integer. Instead, you attempted to write: {value}"
+                message=f"Attempting to write to a cell that is of type integer. Value to be written here should be an integer. Instead, you attempted to write: {value}"
             )
 
     elif column["type"] == "float":
@@ -287,7 +287,7 @@ def set_cell_data(
             validated_value = float(value)
         except ValueError:
             raise DeepOriginException(
-                f"Attempting to write to a cell that is of type float. Value to be written here should be an float. Instead, you attempted to write: {value}"
+                message=f"Attempting to write to a cell that is of type float. Value to be written here should be an float. Instead, you attempted to write: {value}"
             )
 
     elif column["type"] == "boolean":
@@ -295,7 +295,7 @@ def set_cell_data(
             validated_value = value
         else:
             raise DeepOriginException(
-                f"Attempting to write to a cell that is of type boolean. Value to be written here should be a True, False or None. Instead, you attempted to write: {value}"
+                message=f"Attempting to write to a cell that is of type boolean. Value to be written here should be a True, False or None. Instead, you attempted to write: {value}"
             )
     else:
         raise NotImplementedError("This data type is not yet supported")
@@ -347,7 +347,9 @@ def download(
     Path(destination).mkdir(parents=True, exist_ok=True)
 
     if not os.path.isdir(destination):
-        raise DeepOriginException(f"{destination} should be a path to a folder.")
+        raise DeepOriginException(
+            message=f"{destination} should be a path to a folder."
+        )
 
     source = source.replace(PREFIXES.DO, "")
 
@@ -398,13 +400,15 @@ def download_database(
     """
 
     if not os.path.isdir(destination):
-        raise DeepOriginException(f"{destination} should be a path to a folder.")
+        raise DeepOriginException(
+            message=f"{destination} should be a path to a folder."
+        )
 
     if isinstance(source, str):
         source = _api.describe_row(source, client=client)
     elif not {"hid", "id"}.issubset(set(list(source.keys()))):
         raise DeepOriginException(
-            f"If `source` is a dictionary, expected it contain the `hid` and `id` keys. These keys were not found. Instead, the keys are: {source.keys()}"
+            message=f"If `source` is a dictionary, expected it contain the `hid` and `id` keys. These keys were not found. Instead, the keys are: {source.keys()}"
         )
 
     database_id = source["id"]
@@ -704,7 +708,7 @@ def get_row_data(
 
     if response["type"] != "row":
         raise DeepOriginException(
-            f"Expected `row_id` to resolve to a row, instead, it resolves to a `{response['type']}`"
+            message=f"Expected `row_id` to resolve to a row, instead, it resolves to a `{response['type']}`"
         )
 
     # ask parent for column names
@@ -712,7 +716,7 @@ def get_row_data(
 
     if parent_response["type"] != "database":
         raise DeepOriginException(
-            f"Expected parent of `{row_id}` to resolve to a database, instead, it resolves to a `{parent_response['type']}`"
+            message=f"Expected parent of `{row_id}` to resolve to a database, instead, it resolves to a `{parent_response['type']}`"
         )
 
     # make a dictionary from column IDs to column names

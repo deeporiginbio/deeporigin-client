@@ -78,7 +78,7 @@ def get_variable_types_by_values(values: list[str]) -> list[VariableType]:
                 ),
             ]
         )
-        raise DeepOriginException(msg)
+        raise DeepOriginException(message=msg)
 
     return types
 
@@ -257,7 +257,7 @@ def get_variables_from_do_platform(
         msg = f"{len(invalid_variables)} variables are not valid.\n\n" + "\n\n".join(
             invalid_variables
         )
-        raise DeepOriginException(msg)
+        raise DeepOriginException(message=msg)
 
     # return variables
     return variables
@@ -278,7 +278,9 @@ def deserialize_variable(serialized: dict) -> Variable:
         if cls.value.Meta.platform_id == type_platform_id:
             return cls.value.from_platform(serialized)
 
-    raise DeepOriginException(f"{type} is not a valid type of variable or secret.")
+    raise DeepOriginException(
+        message=f"{type} is not a valid type of variable or secret."
+    )
 
 
 def is_variable_modified(variable: Variable) -> bool:
@@ -463,7 +465,7 @@ def enable_variable_auto_updating(
                 "pytest/__main__.py"
             ):
                 raise DeepOriginException(
-                    "Auto installation must be run from the Deep Origin CLI"
+                    message="Auto installation must be run from the Deep Origin CLI"
                 )
 
         cli_command = [cli, "variables", "install"]
