@@ -5,7 +5,6 @@ import os
 from pathlib import Path
 from typing import Any, Optional, Union
 
-import requests
 from beartype import beartype
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.managed_data import _api
@@ -458,12 +457,12 @@ def get_dataframe(
 
     columns = response["cols"]
     database_id = response["id"]
-    row_id = response["hidPrefix"] + "-id"
+    row_id = "ID"
 
     # make a dictionary with all data in the database
     data = dict()
-    data["Validation Status"] = []
     data[row_id] = []
+    data["Validation Status"] = []
 
     # keep track of all files and references in this database
     file_ids = []
@@ -645,7 +644,7 @@ def _type_and_cleanup_dataframe(
     df["numeric_id"] = df[primary_key].apply(lambda x: int(x.split("-")[1]))
     df = df.sort_values(by="numeric_id")
     df = df.drop(columns="numeric_id")
-    df.reset_index(drop=True, inplace=True)
+    df = df.set_index("ID")
 
     return df
 
