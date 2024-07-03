@@ -1,9 +1,11 @@
 """The `deeporigin.managed_data.api` module contains high-level functions for
 interacting with Deep Origin managed data."""
 
+import mimetypes
 import os
 from pathlib import Path
 from typing import Any, Optional, Union
+from urllib.parse import urlparse, urlunparse
 
 from beartype import beartype
 from deeporigin.exceptions import DeepOriginException
@@ -11,6 +13,52 @@ from deeporigin.managed_data import _api
 from deeporigin.managed_data.client import Client
 from deeporigin.managed_data.schema import DatabaseReturnType, IDFormat
 from deeporigin.utils import PREFIXES
+
+
+def upload_file(
+    file_path: str,
+    client: Optional[Client] = None,
+) -> None:
+    """Upload a file to Deep Origin."""
+
+    # attempt to guess the content type
+    mime_type, _ = mimetypes.guess_type(file_path)
+    content_type = mime_type if mime_type else "application/octet-stream"
+
+    content_length = os.path.getsize(file_path)
+
+    response = _api.create_file_upload_url(
+        name=os.path.basename(file_path),
+        content_type=content_type,
+        content_length=content_length,
+    )
+
+    # extract pre-signed URL to upload to
+    url = urlparse(response["uploadUrl"])
+    url = urlunparse((url.scheme, url.netloc, url.path, "", "", ""))
+
+    # extract params
+    params = _api._parse_params_from_url(response["uploadUrl"])
+
+    headers = {
+        "Accept": "application/json, text/plain, */*",
+        "Connection": "keep-alive",
+        "Content-Length": str(content_length),
+        "Content-Type": content_type,
+    }
+
+    with open(file_path, "rb") as file:
+        put_response = client.put(
+            url,
+            headers=headers,
+            params=params,
+            data=file,
+        )
+
+        if put_response.status_code != 200:
+            raise DeepOriginException(message="Error uploading file")
+
+    return response["file"]
 
 
 @beartype
