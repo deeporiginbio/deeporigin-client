@@ -26,6 +26,7 @@ dependencies = [
     "beartype",
     "tabulate",
     "filetype",
+    "pytest-xdist",
 ]
 dynamic = ["version"]
 
