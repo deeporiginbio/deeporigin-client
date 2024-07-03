@@ -453,6 +453,11 @@ def get_dataframe(
     # figure out the rows
     rows = _api.list_database_rows(database_id, client=client)
 
+    # filter out template rows
+    rows = [
+        row for row in rows if not ("isTemplate" in row.keys() and row["isTemplate"])
+    ]
+
     # figure out the column names and ID of the database
     response = _api.describe_row(database_id, client=client)
     assert (

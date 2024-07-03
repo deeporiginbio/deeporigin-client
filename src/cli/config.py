@@ -2,6 +2,7 @@
 managed_data.py"""
 
 import os
+import shutil
 
 import cement
 import yaml
@@ -69,12 +70,37 @@ Show and modify configuration file to connect to Deep Origin
 
         # check if config file exists
         if os.path.isfile(CONFIG_YML_LOCATION):
-            print("need to read file")
-            dsfsdf
+            with open(CONFIG_YML_LOCATION, "r") as file:
+                data = yaml.safe_load(file)
+            data[key] = value
         else:
             # no file.
-            with open(CONFIG_YML_LOCATION, "w") as file:
-                yaml.dump({key: value}, file, default_flow_style=False)
+            data = {key: value}
+        with open(CONFIG_YML_LOCATION, "w") as file:
+            yaml.dump(data, file, default_flow_style=False)
+
+        print(f"✔︎ {key} → {value}")
+
+    @cement.ex(
+        help="Save configuration file for later use",
+        arguments=[
+            (["name"], {"help": "Name to save as", "action": "store"}),
+        ],
+    )
+    def save(self):
+        """download or upload files or databases"""
+
+        name = self.app.pargs.name
+
+        # check if config file exists
+        if not os.path.isfile(CONFIG_YML_LOCATION):
+            raise DeepOriginException(
+                "Cannot save configuration for later use because no user configuration exists."
+            )
+
+        save_location = os.path.expanduser(f"~/.deeporigin/{name}.yml")
+        shutil.copy(CONFIG_YML_LOCATION, save_location)
+        print(f"✔︎ Configuration saved to {save_location}")
 
 
 CONTROLLERS = [
