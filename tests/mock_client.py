@@ -204,11 +204,31 @@ class MockClient(client.Client):
             for idx in range(5)
         ]
 
+    def invoke_ensure_rows(self, data):
+        """callback when we invoke EnsureRows"""
+        return {
+            "rows": [
+                {
+                    "id": "_row:RETrlQNnPAPNSC8q21toF",
+                    "parentId": "_database:IpWYEnJE0uIx2TchRVVLQ",
+                    "type": "row",
+                    "dateCreated": "2024-07-03 13:54:09.888684",
+                    "dateUpdated": "2024-07-03 13:54:09.888684",
+                    "createdByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
+                    "hid": "dna-12",
+                    "validationStatus": "invalid",
+                }
+            ]
+        }
+
     def invoke(self, endpoint: str, data: dict):
         """simple returns data without making any network requests"""
 
         if endpoint == "ListRows":
             return self.invoke_list_rows(data)
+
+        elif endpoint == "EnsureRows":
+            return self.invoke_ensure_rows(data)
 
         elif endpoint == "CreateWorkspace":
             name = data["workspace"]["name"]

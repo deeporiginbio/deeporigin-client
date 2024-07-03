@@ -85,7 +85,8 @@ universal = true
 
 [tool.coverage.run]
 omit = [
-    "src/managed_data/client.py"
+    "src/managed_data/client.py",
+    "tests/*.py",
 ]
 
 

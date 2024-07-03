@@ -5,7 +5,7 @@ simply provide Pythonic interfaces to individual API endpoints."""
 
 import os
 from typing import Optional, Union
-from urllib.parse import parse_qs, urlparse, urlunparse
+from urllib.parse import parse_qs, urlparse
 
 from beartype import beartype
 from deeporigin.exceptions import DeepOriginException

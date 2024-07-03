@@ -73,6 +73,14 @@ def test_make_database_rows(config):
             client=config["client"],
         )
 
+    response = api.make_database_rows(
+        config["databases"][0],
+        client=config["client"],
+    )
+
+    for row in response["rows"]:
+        assert row["type"] == "row", "Expected rows to be created."
+
 
 def test_create_workspace(config):
     data = _api.create_workspace(
