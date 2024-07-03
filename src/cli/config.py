@@ -88,7 +88,7 @@ Show and modify configuration file to connect to Deep Origin
         ],
     )
     def save(self):
-        """download or upload files or databases"""
+        """save a config file for later use"""
 
         name = self.app.pargs.name
 
@@ -101,6 +101,31 @@ Show and modify configuration file to connect to Deep Origin
         save_location = os.path.expanduser(f"~/.deeporigin/{name}.yml")
         shutil.copy(CONFIG_YML_LOCATION, save_location)
         print(f"✔︎ Configuration saved to {save_location}")
+
+    @cement.ex(
+        help="Save configuration file for later use",
+        arguments=[
+            (["name"], {"help": "Name to save as", "action": "store"}),
+        ],
+    )
+    def load(self):
+        """load a config file and use it"""
+
+        name = self.app.pargs.name
+
+        file_to_load = os.path.expanduser(f"~/.deeporigin/{name}.yml")
+
+        # check if config file exists
+        if not os.path.isfile(file_to_load):
+            raise DeepOriginException(
+                "Cannot save configuration for later use because no user configuration exists."
+            )
+
+        shutil.copy(file_to_load, CONFIG_YML_LOCATION)
+        print(f"✔︎ Configuration loaded from {file_to_load}")
+
+        # loading a config should remove api_tokens to trigger a re-authentication
+        os.remove(os.path.expanduser("~/.deeporigin/api_tokens"))
 
 
 CONTROLLERS = [
