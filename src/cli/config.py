@@ -65,7 +65,7 @@ Show and modify configuration file to connect to Deep Origin
         if key not in TEMPLATE.keys():
             raise DeepOriginException(
                 message=f"{key} is not a valid key for a configuration file.",
-                fix=f" Should be one of {", ".join(list(TEMPLATE.keys()))}",
+                fix=f" Should be one of {', '.join(list(TEMPLATE.keys()))}",
             )
 
         # check if config file exists
