@@ -2,7 +2,6 @@
 with Deep Origin's managed data API. The functions in this module
 simply provide Pythonic interfaces to individual API endpoints."""
 
-
 import os
 from typing import Optional, Union
 from urllib.parse import parse_qs, urlparse
