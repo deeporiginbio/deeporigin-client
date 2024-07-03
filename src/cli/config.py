@@ -125,7 +125,10 @@ Show and modify configuration file to connect to Deep Origin
         print(f"✔︎ Configuration loaded from {file_to_load}")
 
         # loading a config should remove api_tokens to trigger a re-authentication
-        os.remove(os.path.expanduser("~/.deeporigin/api_tokens"))
+        try:
+            os.remove(os.path.expanduser("~/.deeporigin/api_tokens"))
+        except FileNotFoundError:
+            pass
 
 
 CONTROLLERS = [
