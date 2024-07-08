@@ -1,7 +1,7 @@
-import collections.abc
 import functools
 import os
 import pathlib
+from typing import Optional
 
 import confuse
 
@@ -19,17 +19,41 @@ CONFIG_YML_LOCATION = os.path.expanduser(
 __all__ = ["get_value"]
 
 
-@functools.cache
-def get_value(
-    user_config_filenames: collections.abc.Iterable[str] = (
-        CONFIG_YML_LOCATION,
-        os.path.join(".deeporigin", "config.yml"),
+# validate configuration
+TEMPLATE = {
+    "organization_id": confuse.String(),
+    "bench_id": confuse.Optional(confuse.String()),
+    "env": confuse.String(),
+    "api_endpoint": confuse.Optional(confuse.String()),
+    "nucleus_api_route": confuse.String(),
+    "graphql_api_route": confuse.String(),
+    "auth_domain": confuse.String(),
+    "auth_device_code_endpoint": confuse.String(),
+    "auth_token_endpoint": confuse.String(),
+    "auth_audience": confuse.String(),
+    "auth_grant_type": confuse.String(),
+    "auth_client_id": confuse.String(),
+    "auth_client_secret": confuse.String(),
+    "list_bench_variables_query_template": confuse.String(),
+    "api_tokens_filename": confuse.Filename(),
+    "variables_cache_filename": confuse.Filename(),
+    "auto_install_variables_filename": confuse.Filename(),
+    "feature_flags": confuse.Optional(
+        confuse.MappingTemplate(
+            {
+                "variables": confuse.TypeTemplate(bool),
+            }
+        )
     ),
-) -> confuse.templates.AttrDict:
+}
+
+
+@functools.cache
+def get_value(config_file_location: Optional[str] = None) -> confuse.templates.AttrDict:
     """Get the configuration for the Deep Origin CLI
 
     Args:
-        user_config_filenames (:obj:`list`, optional): paths to the user's configuration files [default: :obj:`['~/.deeporigin/config.yml', './.deeporigin/config.yml']`]
+        user_config_filename: path to the user's configuration file
 
     Returns:
         :obj:`confuse.templates.AttrDict`: configuration for the Deep Origin CLI
@@ -54,45 +78,26 @@ def get_value(
     value.set_file(default_config_filename, base_for_paths=True)
 
     # read configuration overrides from the user
-    for user_config_filename in user_config_filenames:
-        if os.path.isfile(user_config_filename):
-            value.set_file(user_config_filename, base_for_paths=True)
-            break
+    if config_file_location is None:
+        config_file_location = CONFIG_YML_LOCATION
+    if os.path.isfile(config_file_location):
+        value.set_file(
+            config_file_location,
+            base_for_paths=True,
+        )
 
     # read configuration from environment variables
     value.set_env(sep="__")
 
-    # validate configuration
-    template = {
-        "organization_id": confuse.String(),
-        "bench_id": confuse.Optional(confuse.String()),
-        "env": confuse.String(),
-        "api_endpoint": confuse.Optional(confuse.String()),
-        "nucleus_api_route": confuse.String(),
-        "graphql_api_route": confuse.String(),
-        "auth_domain": confuse.String(),
-        "auth_device_code_endpoint": confuse.String(),
-        "auth_token_endpoint": confuse.String(),
-        "auth_audience": confuse.String(),
-        "auth_grant_type": confuse.String(),
-        "auth_client_id": confuse.String(),
-        "auth_client_secret": confuse.String(),
-        "list_bench_variables_query_template": confuse.String(),
-        "api_tokens_filename": confuse.Filename(),
-        "variables_cache_filename": confuse.Filename(),
-        "auto_install_variables_filename": confuse.Filename(),
-        "feature_flags": confuse.Optional(
-            confuse.MappingTemplate(
-                {
-                    "variables": confuse.TypeTemplate(bool),
-                }
-            )
-        ),
-    }
     try:
-        validated_value = value.get(template)
+        validated_value = value.get(TEMPLATE)
     except confuse.exceptions.ConfigTypeError as exception:
         detail = str(exception).replace("\n", "\n  ")
-        raise DeepOriginException(f"The configuration is not valid:\n  {detail}")
+        key = detail.split(":")[0].strip()
+        raise DeepOriginException(
+            title="Invalid configuration",
+            message=f"The Deep Origin CLI and python client requires a valid configuration file. This field is not valid:\n {detail}",
+            fix=f"To fix, run `deeporigin config set {key} <value>`",
+        )
 
     return validated_value

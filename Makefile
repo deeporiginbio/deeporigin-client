@@ -10,13 +10,23 @@ repo=$(shell basename $(CURDIR))
 client="mock"
 chosen_tests=""
 
+
 test: 
+ifeq ($(client), "mock")
 	source $(CURDIR)/venv/bin/activate && \
 		interrogate -c pyproject.toml -v . -f 100 && \
 		python3 -m coverage run -m pytest -x --failed-first -k $(chosen_tests) --client $(client) && \
 		python3 -m coverage html && \
 		deactivate
 	-open htmlcov/index.html
+else 
+	source $(CURDIR)/venv/bin/activate && \
+		interrogate -c pyproject.toml -v . -f 100 && \
+		python3 -m coverage run -m pytest -x --failed-first -k $(chosen_tests) --client $(client) -n auto && \
+		python3 -m coverage html && \
+		deactivate
+	-open htmlcov/index.html
+endif 
 
 # set up jupyter dev kernel
 jupyter:

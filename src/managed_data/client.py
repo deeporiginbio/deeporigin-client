@@ -142,7 +142,7 @@ class DeepOriginClient(Client):
 
         with requests.get(url, stream=True) as response:
             if response.status_code != 200:
-                raise DeepOriginException(f"Failed to download file from {url}")
+                raise DeepOriginException(message=f"Failed to download file from {url}")
 
             with open(save_path, "wb") as file:
                 for chunk in response.iter_content(chunk_size=8192):
@@ -183,16 +183,18 @@ def _check_response(response: requests.models.Response) -> Union[dict, list]:
 
     if response.status_code == 404:
         raise DeepOriginException(
-            f"[Error 404] The requested resource was not found. The response was: {response.json()}"
+            message=f"[Error 404] The requested resource was not found. The response was: {response.json()}"
         )
     elif response.status_code == 400:
-        raise DeepOriginException(f"[Error 400] The response was: {response.json()}")
+        raise DeepOriginException(
+            message=f"[Error 400] The response was: {response.json()}"
+        )
 
     response.raise_for_status()
     response = response.json()
 
     if "error" in response:
-        raise DeepOriginException(response["error"])
+        raise DeepOriginException(message=response["error"])
 
     if "data" in response:
         return response["data"]

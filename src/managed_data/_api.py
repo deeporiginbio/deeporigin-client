@@ -2,10 +2,9 @@
 with Deep Origin's managed data API. The functions in this module
 simply provide Pythonic interfaces to individual API endpoints."""
 
-import mimetypes
 import os
 from typing import Optional, Union
-from urllib.parse import parse_qs, urlparse, urlunparse
+from urllib.parse import parse_qs, urlparse
 
 from beartype import beartype
 from deeporigin.exceptions import DeepOriginException
@@ -47,54 +46,6 @@ def ensure_rows(
     client = _get_default_client(client)
 
     return client.invoke("EnsureRows", data)
-
-
-def upload_file(
-    file_path: str,
-    client: Optional[Client] = None,
-) -> None:
-    """Upload a file to Deep Origin."""
-
-    client = _get_default_client(client)
-
-    # attempt to guess the content type
-    mime_type, _ = mimetypes.guess_type(file_path)
-    content_type = mime_type if mime_type else "application/octet-stream"
-
-    content_length = os.path.getsize(file_path)
-
-    response = create_file_upload_url(
-        name=os.path.basename(file_path),
-        content_type=content_type,
-        content_length=content_length,
-    )
-
-    # extract pre-signed URL to upload to
-    url = urlparse(response["uploadUrl"])
-    url = urlunparse((url.scheme, url.netloc, url.path, "", "", ""))
-
-    # extract params
-    params = _parse_params_from_url(response["uploadUrl"])
-
-    headers = {
-        "Accept": "application/json, text/plain, */*",
-        "Connection": "keep-alive",
-        "Content-Length": str(content_length),
-        "Content-Type": content_type,
-    }
-
-    with open(file_path, "rb") as file:
-        put_response = client.put(
-            url,
-            headers=headers,
-            params=params,
-            data=file,
-        )
-
-        if put_response.status_code != 200:
-            raise DeepOriginException("Error uploading file")
-
-    return response["file"]
 
 
 @beartype
@@ -634,7 +585,9 @@ def download_file(
     client = _get_default_client(client)
 
     if not os.path.isdir(destination):
-        raise DeepOriginException(f"{destination} should be a path to a folder.")
+        raise DeepOriginException(
+            message=f"{destination} should be a path to a folder."
+        )
 
     file_name = describe_file(file_id, client=client)["name"]
 
@@ -656,7 +609,7 @@ def convert_id_format(
 
     if hids is None and ids is None:
         raise DeepOriginException(
-            "Either `hids` or `ids` should be non-None and a list of strings"
+            message="Either `hids` or `ids` should be non-None and a list of strings"
         )
 
     client = _get_default_client(client)

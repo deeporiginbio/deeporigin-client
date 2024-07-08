@@ -38,7 +38,7 @@ class TestCase(unittest.TestCase):
         }
         config.get_value.cache_clear()
         with unittest.mock.patch.dict("os.environ", env):
-            value = config.get_value(user_config_filenames=tuple())
+            value = config.get_value()
         expected_value = {
             "organization_id": "a123",
             "bench_id": "b123",
@@ -65,14 +65,14 @@ class TestCase(unittest.TestCase):
         env["DEEP_ORIGIN_FEATURE_FLAGS__VARIABLES"] = "false"
         config.get_value.cache_clear()
         with unittest.mock.patch.dict("os.environ", env):
-            value = config.get_value(user_config_filenames=tuple())
+            value = config.get_value()
         expected_value["feature_flags"] = {"variables": False}
         self.assertEqual(expected_value, value)
 
         env["DEEP_ORIGIN_FEATURE_FLAGS__VARIABLES"] = "true"
         config.get_value.cache_clear()
         with unittest.mock.patch.dict("os.environ", env):
-            value = config.get_value(user_config_filenames=tuple())
+            value = config.get_value()
         expected_value["feature_flags"]["variables"] = True
         self.assertEqual(expected_value, value)
 
@@ -103,7 +103,7 @@ class TestCase(unittest.TestCase):
             yaml.dump(user_config, file, Dumper=yaml.CDumper)
 
         with unittest.mock.patch.dict("os.environ", env):
-            value = config.get_value(user_config_filenames=(user_config_filename,))
+            value = config.get_value(user_config_filename)
 
         user_config["api_tokens_filename"] = os.path.expanduser(
             user_config["api_tokens_filename"]
@@ -146,7 +146,5 @@ class TestCase(unittest.TestCase):
             yaml.dump(user_config, file, Dumper=yaml.CDumper)
 
         with unittest.mock.patch.dict("os.environ", env):
-            with self.assertRaisesRegex(
-                DeepOriginException, "configuration is not valid"
-            ):
-                config.get_value(user_config_filenames=(user_config_filename,))
+            with self.assertRaisesRegex(DeepOriginException, "The Deep Origin CLI"):
+                config.get_value("/nonexistent.file")

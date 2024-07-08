@@ -1,17 +1,64 @@
 """The `deeporigin.managed_data.api` module contains high-level functions for
 interacting with Deep Origin managed data."""
 
+import mimetypes
 import os
 from pathlib import Path
 from typing import Any, Optional, Union
+from urllib.parse import urlparse, urlunparse
 
-import requests
 from beartype import beartype
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.managed_data import _api
 from deeporigin.managed_data.client import Client
 from deeporigin.managed_data.schema import DatabaseReturnType, IDFormat
 from deeporigin.utils import PREFIXES
+
+
+def upload_file(
+    file_path: str,
+    client: Optional[Client] = None,
+) -> None:
+    """Upload a file to Deep Origin."""
+
+    # attempt to guess the content type
+    mime_type, _ = mimetypes.guess_type(file_path)
+    content_type = mime_type if mime_type else "application/octet-stream"
+
+    content_length = os.path.getsize(file_path)
+
+    response = _api.create_file_upload_url(
+        name=os.path.basename(file_path),
+        content_type=content_type,
+        content_length=content_length,
+    )
+
+    # extract pre-signed URL to upload to
+    url = urlparse(response["uploadUrl"])
+    url = urlunparse((url.scheme, url.netloc, url.path, "", "", ""))
+
+    # extract params
+    params = _api._parse_params_from_url(response["uploadUrl"])
+
+    headers = {
+        "Accept": "application/json, text/plain, */*",
+        "Connection": "keep-alive",
+        "Content-Length": str(content_length),
+        "Content-Type": content_type,
+    }
+
+    with open(file_path, "rb") as file:
+        put_response = client.put(
+            url,
+            headers=headers,
+            params=params,
+            data=file,
+        )
+
+        if put_response.status_code != 200:
+            raise DeepOriginException(message="Error uploading file")
+
+    return response["file"]
 
 
 @beartype
@@ -35,7 +82,7 @@ def make_database_rows(
 
     if n_rows < 1:
         raise DeepOriginException(
-            f"n_rows must be at least 1. However, n_rows was {n_rows}"
+            message=f"n_rows must be at least 1. However, n_rows was {n_rows}"
         )
 
     data = dict(
@@ -249,7 +296,7 @@ def set_cell_data(
 
     if len(column) != 1:
         raise DeepOriginException(
-            f"Could not find column {column_id} in database {database_id}"
+            message=f"Could not find column {column_id} in database {database_id}"
         )
 
     column = column[0]
@@ -262,14 +309,14 @@ def set_cell_data(
             value = [""]
         else:
             raise DeepOriginException(
-                "Attempting to write to a cell that is of type select. Values to be written here should be strings or lists of strings."
+                message="Attempting to write to a cell that is of type select. Values to be written here should be strings or lists of strings."
             )
 
         options = column["configSelect"]["options"]
         for item in value:
             if item not in options:
                 raise DeepOriginException(
-                    f"Expected every item to be in the options list. However, `{item}` is not in {options}"
+                    message=f"Expected every item to be in the options list. However, `{item}` is not in {options}"
                 )
 
         validated_value = dict(selectedOptions=value)
@@ -280,7 +327,7 @@ def set_cell_data(
             validated_value = int(value)
         except ValueError:
             raise DeepOriginException(
-                f"Attempting to write to a cell that is of type integer. Value to be written here should be an integer. Instead, you attempted to write: {value}"
+                message=f"Attempting to write to a cell that is of type integer. Value to be written here should be an integer. Instead, you attempted to write: {value}"
             )
 
     elif column["type"] == "float":
@@ -288,7 +335,7 @@ def set_cell_data(
             validated_value = float(value)
         except ValueError:
             raise DeepOriginException(
-                f"Attempting to write to a cell that is of type float. Value to be written here should be an float. Instead, you attempted to write: {value}"
+                message=f"Attempting to write to a cell that is of type float. Value to be written here should be an float. Instead, you attempted to write: {value}"
             )
 
     elif column["type"] == "boolean":
@@ -296,7 +343,7 @@ def set_cell_data(
             validated_value = value
         else:
             raise DeepOriginException(
-                f"Attempting to write to a cell that is of type boolean. Value to be written here should be a True, False or None. Instead, you attempted to write: {value}"
+                message=f"Attempting to write to a cell that is of type boolean. Value to be written here should be a True, False or None. Instead, you attempted to write: {value}"
             )
     else:
         raise NotImplementedError("This data type is not yet supported")
@@ -348,7 +395,9 @@ def download(
     Path(destination).mkdir(parents=True, exist_ok=True)
 
     if not os.path.isdir(destination):
-        raise DeepOriginException(f"{destination} should be a path to a folder.")
+        raise DeepOriginException(
+            message=f"{destination} should be a path to a folder."
+        )
 
     source = source.replace(PREFIXES.DO, "")
 
@@ -399,13 +448,15 @@ def download_database(
     """
 
     if not os.path.isdir(destination):
-        raise DeepOriginException(f"{destination} should be a path to a folder.")
+        raise DeepOriginException(
+            message=f"{destination} should be a path to a folder."
+        )
 
     if isinstance(source, str):
         source = _api.describe_row(source, client=client)
     elif not {"hid", "id"}.issubset(set(list(source.keys()))):
         raise DeepOriginException(
-            f"If `source` is a dictionary, expected it contain the `hid` and `id` keys. These keys were not found. Instead, the keys are: {source.keys()}"
+            message=f"If `source` is a dictionary, expected it contain the `hid` and `id` keys. These keys were not found. Instead, the keys are: {source.keys()}"
         )
 
     database_id = source["id"]
@@ -450,6 +501,11 @@ def get_dataframe(
     # figure out the rows
     rows = _api.list_database_rows(database_id, client=client)
 
+    # filter out template rows
+    rows = [
+        row for row in rows if not ("isTemplate" in row.keys() and row["isTemplate"])
+    ]
+
     # figure out the column names and ID of the database
     response = _api.describe_row(database_id, client=client)
     assert (
@@ -458,12 +514,12 @@ def get_dataframe(
 
     columns = response["cols"]
     database_id = response["id"]
-    row_id = response["hidPrefix"] + "-id"
+    row_id = "ID"
 
     # make a dictionary with all data in the database
     data = dict()
-    data["Validation Status"] = []
     data[row_id] = []
+    data["Validation Status"] = []
 
     # keep track of all files and references in this database
     file_ids = []
@@ -645,7 +701,7 @@ def _type_and_cleanup_dataframe(
     df["numeric_id"] = df[primary_key].apply(lambda x: int(x.split("-")[1]))
     df = df.sort_values(by="numeric_id")
     df = df.drop(columns="numeric_id")
-    df.reset_index(drop=True, inplace=True)
+    df = df.set_index("ID")
 
     return df
 
@@ -705,7 +761,7 @@ def get_row_data(
 
     if response["type"] != "row":
         raise DeepOriginException(
-            f"Expected `row_id` to resolve to a row, instead, it resolves to a `{response['type']}`"
+            message=f"Expected `row_id` to resolve to a row, instead, it resolves to a `{response['type']}`"
         )
 
     # ask parent for column names
@@ -713,7 +769,7 @@ def get_row_data(
 
     if parent_response["type"] != "database":
         raise DeepOriginException(
-            f"Expected parent of `{row_id}` to resolve to a database, instead, it resolves to a `{parent_response['type']}`"
+            message=f"Expected parent of `{row_id}` to resolve to a database, instead, it resolves to a `{parent_response['type']}`"
         )
 
     # make a dictionary from column IDs to column names

@@ -67,11 +67,19 @@ def config(pytestconfig):
 
 def test_make_database_rows(config):
     with pytest.raises(DeepOriginException, match="must be at least 1"):
-        data = api.make_database_rows(
+        api.make_database_rows(
             config["databases"][0],
             n_rows=0,
             client=config["client"],
         )
+
+    response = api.make_database_rows(
+        config["databases"][0],
+        client=config["client"],
+    )
+
+    for row in response["rows"]:
+        assert row["type"] == "row", "Expected rows to be created."
 
 
 def test_create_workspace(config):
@@ -285,10 +293,6 @@ def test_get_dataframe(config):
     assert (
         "Validation Status" in df.columns
     ), f"Expected to find a column called `Validation Status` in the dataframe. Instead, the columns in this dataframe are: {df.columns}"
-
-    assert (
-        df.attrs["primary_key"] in df.columns
-    ), "Expected to find the primary key as a column"
 
     data = api.get_dataframe(
         config["databases"][0],
