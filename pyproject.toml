@@ -26,7 +26,6 @@ dependencies = [
     "beartype",
     "tabulate",
     "filetype",
-    "pytest-xdist",
 ]
 dynamic = ["version"]
 
@@ -36,6 +35,7 @@ test = [
     "parameterized",
     "coverage",
     "interrogate",
+    "pytest-xdist",
 ]
 jupyter = ["ipykernel","jupyter-black"]
 

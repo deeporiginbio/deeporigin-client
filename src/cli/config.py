@@ -5,6 +5,7 @@ import os
 import shutil
 
 import cement
+import confuse
 import yaml
 from deeporigin.config import CONFIG_YML_LOCATION, TEMPLATE, get_value
 from deeporigin.exceptions import DeepOriginException
@@ -76,6 +77,17 @@ Show and modify configuration file to connect to Deep Origin
         else:
             # no file.
             data = {key: value}
+
+        # check that this is valid
+        config = confuse.Configuration("deep_origin", __name__)
+        config.set(data)
+        try:
+            _ = config.get(TEMPLATE)
+        except confuse.confuse.ConfigError:
+            raise DeepOriginException(
+                f"{key}:{value} is not a valid entry for the configuration.",
+            )
+
         with open(CONFIG_YML_LOCATION, "w") as file:
             yaml.dump(data, file, default_flow_style=False)
 
@@ -84,13 +96,13 @@ Show and modify configuration file to connect to Deep Origin
     @cement.ex(
         help="Save configuration file for later use",
         arguments=[
-            (["name"], {"help": "Name to save as", "action": "store"}),
+            (["profile"], {"help": "Profile to save as", "action": "store"}),
         ],
     )
     def save(self):
         """save a config file for later use"""
 
-        name = self.app.pargs.name
+        name = self.app.pargs.profile
 
         # check if config file exists
         if not os.path.isfile(CONFIG_YML_LOCATION):
@@ -105,13 +117,13 @@ Show and modify configuration file to connect to Deep Origin
     @cement.ex(
         help="Save configuration file for later use",
         arguments=[
-            (["name"], {"help": "Name to save as", "action": "store"}),
+            (["profile"], {"help": "Profile name to save as", "action": "store"}),
         ],
     )
     def load(self):
         """load a config file and use it"""
 
-        name = self.app.pargs.name
+        name = self.app.pargs.profile
 
         file_to_load = os.path.expanduser(f"~/.deeporigin/{name}.yml")
 
