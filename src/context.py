@@ -78,7 +78,8 @@ def get_value():
     if compute_cluster_str:
         compute_cluster_dict = json.loads(compute_cluster_str)
         compute_cluster = ComputeClusterContext(
-            id=compute_cluster_dict.get("id", None), properties=compute_cluster_dict.get("properties", None)
+            id=compute_cluster_dict.get("id", None),
+            properties=compute_cluster_dict.get("properties", None),
         )
     else:
         compute_cluster = None
