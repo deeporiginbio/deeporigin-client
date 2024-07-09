@@ -7,7 +7,7 @@ import typing
 __all__ = [
     "get_value",
     "Context",
-    "HostContext",
+    "ComputeClusterContext",
     "HardwareContext",
     "CpuContext",
     "GpuContext",
@@ -16,8 +16,8 @@ __all__ = [
 
 
 @dataclasses.dataclass
-class HostContext:
-    """Host for a Deep Origin ComputeBench"""
+class ComputeClusterContext:
+    """Host compute cluster for a Deep Origin ComputeBench"""
 
     id: str
     properties: dict[str, typing.Any]
@@ -65,7 +65,7 @@ class Context:
     bench_id: str
     user_id: str
     org_id: str
-    host: HostContext
+    compute_cluster: ComputeClusterContext
     hardware: HardwareContext
     env: str
     debug: bool
@@ -74,14 +74,14 @@ class Context:
 @functools.cache
 def get_value():
     """returns a context from environment variables"""
-    host_str = os.getenv("DEEP_ORIGIN_HOST", None)
-    if host_str:
-        host_dict = json.loads(host_str)
-        host = HostContext(
-            id=host_dict.get("id", None), properties=host_dict.get("properties", None)
+    compute_cluster_str = os.getenv("DEEP_ORIGIN_COMPUTE_CLUSTER", None)
+    if compute_cluster_str:
+        compute_cluster_dict = json.loads(compute_cluster_str)
+        compute_cluster = ComputeClusterContext(
+            id=compute_cluster_dict.get("id", None), properties=compute_cluster_dict.get("properties", None)
         )
     else:
-        host = None
+        compute_cluster = None
 
     hardware_str = os.getenv("DEEP_ORIGIN_HARDWARE", None)
     if hardware_str:
@@ -130,7 +130,7 @@ def get_value():
         bench_id=os.getenv("DEEP_ORIGIN_BENCH_ID", None),
         user_id=os.getenv("DEEP_ORIGIN_USER_ID", None),
         org_id=os.getenv("DEEP_ORIGIN_ORGANIZATION_ID", None),
-        host=host,
+        compute_cluster=compute_cluster,
         hardware=hardware,
         env=os.getenv("DEEP_ORIGIN_ENV", None),
         debug=os.getenv("DEEP_ORIGIN_DEBUG", "").lower() == "true",

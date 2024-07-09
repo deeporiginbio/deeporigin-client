@@ -18,7 +18,7 @@ class ContextController(cement.Controller):
         stacked_on = "base"
         stacked_type = "nested"
         help = "Get the context for the Deep Origin ComputeBench"
-        description = "Get the context for the Deep Origin ComputeBench, such as the ID of the bench, user and organization, host, and hardware blueprint."
+        description = "Get the context for the Deep Origin ComputeBench, such as the ID of the bench, user and organization, host compute cluster, and hardware blueprint."
         arguments = []
 
     @cement.ex(hide=True)
@@ -33,18 +33,18 @@ class ContextController(cement.Controller):
         print(f"User ID: {context.user_id}")
         print(f"Organization ID: {context.org_id}")
 
-        # host
-        if context.host:
-            print("Host:")
-            print(f"  ID: {context.host.id}")
-            if context.host.properties:
+        # host compute cluster
+        if context.compute_cluster:
+            print("Compute cluster:")
+            print(f"  ID: {context.compute_cluster.id}")
+            if context.compute_cluster.properties:
                 print("  Properties:")
-                for key, value in context.host.properties.items():
+                for key, value in context.compute_cluster.properties.items():
                     print(f"    {key}: {value}")
             else:
                 print(f"  Properties: {None}")
         else:
-            print(f"Host: {None}")
+            print(f"Compute cluster: {None}")
 
         # hardware
         if context.hardware:

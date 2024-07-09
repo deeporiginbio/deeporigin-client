@@ -20,10 +20,11 @@ class TestCase(unittest.TestCase):
             "DEEP_ORIGIN_BENCH_ID": "cute-bear-123",
             "DEEP_ORIGIN_USER_ID": "john-doe",
             "DEEP_ORIGIN_ORGANIZATION_ID": "acme-bio",
-            "DEEP_ORIGIN_HOST": json.dumps(
+            "DEEP_ORIGIN_COMPUTE_CLUSTER": json.dumps(
                 {
-                    "id": "aws",
+                    "id": "us-west-2.aws.bench.deeporigin.io",
                     "properties": {
+                        "provider": "aws",
                         "region": "us-west-2",
                     },
                 }
@@ -55,9 +56,9 @@ class TestCase(unittest.TestCase):
             bench_id="cute-bear-123",
             user_id="john-doe",
             org_id="acme-bio",
-            host=context.HostContext(
-                id="aws",
-                properties={"region": "us-west-2"},
+            compute_cluster=context.ComputeClusterContext(
+                id="us-west-2.aws.bench.deeporigin.io",
+                properties={"provider": "aws", "region": "us-west-2"},
             ),
             hardware=context.HardwareContext(
                 cpu=context.CpuContext(
@@ -92,9 +93,10 @@ class TestCase(unittest.TestCase):
                 "Bench ID: cute-bear-123",
                 "User ID: john-doe",
                 "Organization ID: acme-bio",
-                "Host:",
-                "  ID: aws",
+                "Compute cluster:",
+                "  ID: us-west-2.aws.bench.deeporigin.io",
                 "  Properties:",
+                "    provider: aws",
                 "    region: us-west-2",
                 "Hardware:",
                 "  Processing:",
@@ -117,7 +119,7 @@ class TestCase(unittest.TestCase):
     def test_get_project_paths_nested_null(self):
         context.get_value.cache_clear()
         env = {
-            "DEEP_ORIGIN_HOST": json.dumps(
+            "DEEP_ORIGIN_COMPUTE_CLUSTER": json.dumps(
                 {
                     "id": None,
                     "properties": None,
@@ -144,7 +146,7 @@ class TestCase(unittest.TestCase):
             bench_id=None,
             user_id=None,
             org_id=None,
-            host=context.HostContext(
+            compute_cluster=context.ComputeClusterContext(
                 id=None,
                 properties=None,
             ),
@@ -179,7 +181,7 @@ class TestCase(unittest.TestCase):
                 "Bench ID: None",
                 "User ID: None",
                 "Organization ID: None",
-                "Host:",
+                "Compute cluster:",
                 "  ID: None",
                 "  Properties: None",
                 "Hardware:",
@@ -213,7 +215,7 @@ class TestCase(unittest.TestCase):
             bench_id=None,
             user_id=None,
             org_id=None,
-            host=None,
+            compute_cluster=None,
             hardware=context.HardwareContext(
                 cpu=None,
                 gpu=None,
@@ -236,7 +238,7 @@ class TestCase(unittest.TestCase):
                 "Bench ID: None",
                 "User ID: None",
                 "Organization ID: None",
-                "Host: None",
+                "Compute cluster: None",
                 "Hardware:",
                 "  Processing: N/A",
                 "  Accelerated processing: None",
@@ -255,7 +257,7 @@ class TestCase(unittest.TestCase):
             bench_id=None,
             user_id=None,
             org_id=None,
-            host=None,
+            compute_cluster=None,
             hardware=None,
             env=None,
             debug=False,
@@ -276,7 +278,7 @@ class TestCase(unittest.TestCase):
                 "Bench ID: None",
                 "User ID: None",
                 "Organization ID: None",
-                "Host: None",
+                "Compute cluster: None",
                 "Hardware: None",
                 "Environment: None",
                 "Debug: False",
