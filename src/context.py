@@ -146,35 +146,52 @@ class Context:
     env: str
     debug: bool
 
-    def __str__(self) -> str:
+    def __str__(
+        self,
+        bench: bool = True,
+        compute_cluster: bool = False,
+        user: bool = True,
+        org: bool = True,
+        hardware: bool = False,
+        env: bool = True,
+        debug: bool = True,
+    ) -> str:
         str_val = []
 
         # bench id
-        str_val.append(f"Bench ID: {self.bench_id}")
-
-        # user and organization
-        str_val.append(f"User ID: {self.user_id}")
-        str_val.append(f"Organization ID: {self.org_id}")
+        if bench:
+            str_val.append(f"Bench ID: {self.bench_id}")
 
         # host compute cluster
-        if self.compute_cluster:
-            str_val.append("Compute cluster:")
-            str_val.append("  " + str(self.compute_cluster).replace("\n", "\n  "))
-        else:
-            str_val.append(f"Compute cluster: {None}")
+        if compute_cluster:
+            if self.compute_cluster:
+                str_val.append("Compute cluster:")
+                str_val.append("  " + str(self.compute_cluster).replace("\n", "\n  "))
+            else:
+                str_val.append(f"Compute cluster: {None}")
+
+        # user and organization
+        if user:
+            str_val.append(f"User ID: {self.user_id}")
+
+        if org:
+            str_val.append(f"Organization ID: {self.org_id}")
 
         # hardware
-        if self.hardware:
-            str_val.append("Hardware:")
-            str_val.append("  " + str(self.hardware).replace("\n", "\n  "))
-        else:
-            str_val.append(f"Hardware: {None}")
+        if hardware:
+            if self.hardware:
+                str_val.append("Hardware:")
+                str_val.append("  " + str(self.hardware).replace("\n", "\n  "))
+            else:
+                str_val.append(f"Hardware: {None}")
 
         # environment
-        str_val.append(f"Environment: {self.env}")
+        if env:
+            str_val.append(f"Environment: {self.env}")
 
         # debug
-        str_val.append(f"Debug: {self.debug}")
+        if debug:
+            str_val.append(f"Debug: {self.debug}")
 
         return "\n".join(str_val)
 
