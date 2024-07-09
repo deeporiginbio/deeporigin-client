@@ -88,7 +88,7 @@ class TestCase(unittest.TestCase):
                 "  ID: us-west-2.aws.bench.deeporigin.io",
                 "  Properties:",
                 "    provider: aws",
-                "    region: us-west-2",                
+                "    region: us-west-2",
                 "User ID: john-doe",
                 "Organization ID: acme-bio",
                 "Hardware:",
@@ -107,7 +107,9 @@ class TestCase(unittest.TestCase):
                 "Debug: True",
             ]
         )
-        self.assertEqual(expected_str, value.__str__(compute_cluster=True, hardware=True))
+        self.assertEqual(
+            expected_str, value.__str__(compute_cluster=True, hardware=True)
+        )
 
     def test_get_project_paths_nested_null(self):
         context.get_value.cache_clear()
@@ -165,7 +167,7 @@ class TestCase(unittest.TestCase):
                 "Bench ID: None",
                 "Compute cluster:",
                 "  ID: None",
-                "  Properties: None",                
+                "  Properties: None",
                 "User ID: None",
                 "Organization ID: None",
                 "Hardware:",
@@ -181,7 +183,9 @@ class TestCase(unittest.TestCase):
                 "Debug: False",
             ]
         )
-        self.assertEqual(expected_str, value.__str__(compute_cluster=True, hardware=True))
+        self.assertEqual(
+            expected_str, value.__str__(compute_cluster=True, hardware=True)
+        )
 
     def test_get_project_paths_null_1(self):
         context.get_value.cache_clear()
@@ -212,7 +216,7 @@ class TestCase(unittest.TestCase):
         expected_str = "\n".join(
             [
                 "Bench ID: None",
-                "Compute cluster: None",                
+                "Compute cluster: None",
                 "User ID: None",
                 "Organization ID: None",
                 "Hardware:",
@@ -222,7 +226,9 @@ class TestCase(unittest.TestCase):
                 "Debug: False",
             ]
         )
-        self.assertEqual(expected_str, value.__str__(compute_cluster=True, hardware=True))
+        self.assertEqual(
+            expected_str, value.__str__(compute_cluster=True, hardware=True)
+        )
 
     def test_get_project_paths_null_2(self):
         context.get_value.cache_clear()
@@ -245,24 +251,30 @@ class TestCase(unittest.TestCase):
                 "Bench ID: None",
                 "Compute cluster: None",
                 "User ID: None",
-                "Organization ID: None",                
+                "Organization ID: None",
                 "Hardware: None",
                 "Environment: None",
                 "Debug: False",
             ]
         )
-        self.assertEqual(expected_str_with_cluster_hardware, value.__str__(compute_cluster=True, hardware=True))
+        self.assertEqual(
+            expected_str_with_cluster_hardware,
+            value.__str__(compute_cluster=True, hardware=True),
+        )
 
         expected_str_without_cluster_hardware = "\n".join(
             [
                 "Bench ID: None",
                 "User ID: None",
-                "Organization ID: None",                
+                "Organization ID: None",
                 "Environment: None",
                 "Debug: False",
             ]
         )
-        self.assertEqual(expected_str_without_cluster_hardware, value.__str__(compute_cluster=False, hardware=False))
+        self.assertEqual(
+            expected_str_without_cluster_hardware,
+            value.__str__(compute_cluster=False, hardware=False),
+        )
 
         stdout_capture = io.StringIO()
         stderr_capture = io.StringIO()
