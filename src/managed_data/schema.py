@@ -158,7 +158,8 @@ class AddDatabaseColumnResponse(BaseModel):
 
 class DescribeRowResponse(BaseModel):
     """Schema for responses from the `DescribeRow` endpoint. This schema is complex because
-    the response schema depends on whether `DescribeRow` is called for a row or database."""
+    the response schema depends on whether `DescribeRow` is called for a row or database.
+    """
 
     id: str
     hid: str

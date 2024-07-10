@@ -20,10 +20,11 @@ class TestCase(unittest.TestCase):
             "DEEP_ORIGIN_BENCH_ID": "cute-bear-123",
             "DEEP_ORIGIN_USER_ID": "john-doe",
             "DEEP_ORIGIN_ORGANIZATION_ID": "acme-bio",
-            "DEEP_ORIGIN_HOST": json.dumps(
+            "DEEP_ORIGIN_COMPUTE_CLUSTER": json.dumps(
                 {
-                    "id": "aws",
+                    "id": "us-west-2.aws.bench.deeporigin.io",
                     "properties": {
+                        "provider": "aws",
                         "region": "us-west-2",
                     },
                 }
@@ -55,9 +56,9 @@ class TestCase(unittest.TestCase):
             bench_id="cute-bear-123",
             user_id="john-doe",
             org_id="acme-bio",
-            host=context.HostContext(
-                id="aws",
-                properties={"region": "us-west-2"},
+            compute_cluster=context.ComputeClusterContext(
+                id="us-west-2.aws.bench.deeporigin.io",
+                properties={"provider": "aws", "region": "us-west-2"},
             ),
             hardware=context.HardwareContext(
                 cpu=context.CpuContext(
@@ -80,22 +81,16 @@ class TestCase(unittest.TestCase):
         )
         self.assertEqual(expected_value, value)
 
-        stdout_capture = io.StringIO()
-        stderr_capture = io.StringIO()
-
-        with redirect_stdout(stdout_capture), redirect_stderr(stderr_capture):
-            with cli.App(argv=["context"]) as app:
-                app.run()
-            stdout = stdout_capture.getvalue().strip()
-        expected_stdout = "\n".join(
+        expected_str = "\n".join(
             [
                 "Bench ID: cute-bear-123",
+                "Compute cluster:",
+                "  ID: us-west-2.aws.bench.deeporigin.io",
+                "  Properties:",
+                "    provider: aws",
+                "    region: us-west-2",
                 "User ID: john-doe",
                 "Organization ID: acme-bio",
-                "Host:",
-                "  ID: aws",
-                "  Properties:",
-                "    region: us-west-2",
                 "Hardware:",
                 "  Processing:",
                 "    Quantity: 8.0 vCPU",
@@ -112,12 +107,14 @@ class TestCase(unittest.TestCase):
                 "Debug: True",
             ]
         )
-        self.assertEqual(expected_stdout, stdout)
+        self.assertEqual(
+            expected_str, value.__str__(compute_cluster=True, hardware=True)
+        )
 
     def test_get_project_paths_nested_null(self):
         context.get_value.cache_clear()
         env = {
-            "DEEP_ORIGIN_HOST": json.dumps(
+            "DEEP_ORIGIN_COMPUTE_CLUSTER": json.dumps(
                 {
                     "id": None,
                     "properties": None,
@@ -144,7 +141,7 @@ class TestCase(unittest.TestCase):
             bench_id=None,
             user_id=None,
             org_id=None,
-            host=context.HostContext(
+            compute_cluster=context.ComputeClusterContext(
                 id=None,
                 properties=None,
             ),
@@ -165,23 +162,14 @@ class TestCase(unittest.TestCase):
         )
         self.assertEqual(expected_value, value)
 
-        stdout_capture = io.StringIO()
-        stderr_capture = io.StringIO()
-
-        with redirect_stdout(stdout_capture), redirect_stderr(stderr_capture):
-            with cli.App(argv=["context"]) as app:
-                app.run()
-
-            stdout = stdout_capture.getvalue().strip()
-
-        expected_stdout = "\n".join(
+        expected_str = "\n".join(
             [
                 "Bench ID: None",
-                "User ID: None",
-                "Organization ID: None",
-                "Host:",
+                "Compute cluster:",
                 "  ID: None",
                 "  Properties: None",
+                "User ID: None",
+                "Organization ID: None",
                 "Hardware:",
                 "  Processing:",
                 "    Quantity: N/A",
@@ -195,7 +183,9 @@ class TestCase(unittest.TestCase):
                 "Debug: False",
             ]
         )
-        self.assertEqual(expected_stdout, stdout)
+        self.assertEqual(
+            expected_str, value.__str__(compute_cluster=True, hardware=True)
+        )
 
     def test_get_project_paths_null_1(self):
         context.get_value.cache_clear()
@@ -213,7 +203,7 @@ class TestCase(unittest.TestCase):
             bench_id=None,
             user_id=None,
             org_id=None,
-            host=None,
+            compute_cluster=None,
             hardware=context.HardwareContext(
                 cpu=None,
                 gpu=None,
@@ -223,20 +213,12 @@ class TestCase(unittest.TestCase):
         )
         self.assertEqual(expected_value, value)
 
-        stdout_capture = io.StringIO()
-        stderr_capture = io.StringIO()
-
-        with redirect_stdout(stdout_capture), redirect_stderr(stderr_capture):
-            with cli.App(argv=["context"]) as app:
-                app.run()
-
-            stdout = stdout_capture.getvalue().strip()
-        expected_stdout = "\n".join(
+        expected_str = "\n".join(
             [
                 "Bench ID: None",
+                "Compute cluster: None",
                 "User ID: None",
                 "Organization ID: None",
-                "Host: None",
                 "Hardware:",
                 "  Processing: N/A",
                 "  Accelerated processing: None",
@@ -244,7 +226,9 @@ class TestCase(unittest.TestCase):
                 "Debug: False",
             ]
         )
-        self.assertEqual(expected_stdout, stdout)
+        self.assertEqual(
+            expected_str, value.__str__(compute_cluster=True, hardware=True)
+        )
 
     def test_get_project_paths_null_2(self):
         context.get_value.cache_clear()
@@ -255,12 +239,42 @@ class TestCase(unittest.TestCase):
             bench_id=None,
             user_id=None,
             org_id=None,
-            host=None,
+            compute_cluster=None,
             hardware=None,
             env=None,
             debug=False,
         )
         self.assertEqual(expected_value, value)
+
+        expected_str_with_cluster_hardware = "\n".join(
+            [
+                "Bench ID: None",
+                "Compute cluster: None",
+                "User ID: None",
+                "Organization ID: None",
+                "Hardware: None",
+                "Environment: None",
+                "Debug: False",
+            ]
+        )
+        self.assertEqual(
+            expected_str_with_cluster_hardware,
+            value.__str__(compute_cluster=True, hardware=True),
+        )
+
+        expected_str_without_cluster_hardware = "\n".join(
+            [
+                "Bench ID: None",
+                "User ID: None",
+                "Organization ID: None",
+                "Environment: None",
+                "Debug: False",
+            ]
+        )
+        self.assertEqual(
+            expected_str_without_cluster_hardware,
+            value.__str__(compute_cluster=False, hardware=False),
+        )
 
         stdout_capture = io.StringIO()
         stderr_capture = io.StringIO()
@@ -271,15 +285,5 @@ class TestCase(unittest.TestCase):
 
             stdout = stdout_capture.getvalue().strip()
 
-        expected_stdout = "\n".join(
-            [
-                "Bench ID: None",
-                "User ID: None",
-                "Organization ID: None",
-                "Host: None",
-                "Hardware: None",
-                "Environment: None",
-                "Debug: False",
-            ]
-        )
+        expected_stdout = expected_str_without_cluster_hardware
         self.assertEqual(expected_stdout, stdout)

@@ -156,7 +156,8 @@ def create_database(
 
 
     Returns:
-        A dictionary that conforms to a [CreateDatabaseResponse][src.managed_data.schema.CreateDatabaseResponse]."""
+        A dictionary that conforms to a [CreateDatabaseResponse][src.managed_data.schema.CreateDatabaseResponse].
+    """
 
     client = _get_default_client(client)
 

@@ -51,8 +51,6 @@ and you will see a table that looks like this:
 Bench ID: average-possum-3x3
 User ID: None
 Organization ID: likely-aardvark-ewo
-Host: None
-Hardware: None
 Environment: edge
 Debug: False
 ```
@@ -65,8 +63,6 @@ Debug: False
     Bench ID: None
     User ID: None
     Organization ID: None
-    Host: None
-    Hardware: None
     Environment: None
     Debug: False
     ```
