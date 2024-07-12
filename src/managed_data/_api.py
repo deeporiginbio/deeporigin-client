@@ -16,27 +16,6 @@ from deeporigin.managed_data.schema import (
 )
 
 
-@beartype
-def _get_default_client(client: Optional[Client] = None) -> Client:
-    """Internal function to instantiate client
-
-    Creates and returns an authenticated client if
-    not provided with one.
-
-    Warning: Internal function
-        Do not use this function
-
-    Args:
-        client: None, or a Client
-
-
-    """
-    if client is None:
-        client = DeepOriginClient()  # pragma: no cover
-        client.authenticate()  # pragma: no cover
-    return client
-
-
 def ensure_rows(
     data: dict,
     *,
@@ -336,45 +315,6 @@ def delete_database_column(
     client = _get_default_client(client)
 
     client.invoke("DeleteDatabaseColumn", dict(columnId=column_id))
-
-
-@beartype
-def list_rows(
-    *,
-    parent_id: Optional[str] = None,
-    row_type: Optional[RowType] = None,
-    parent_is_root: Optional[bool] = None,
-    client: Optional[Client] = None,
-) -> list[dict]:
-    """Low level function that wraps the `ListRows` endpoint.
-
-    Returns a list of rows from workspaces and databases,
-    based on the parent, row type, or whether the parent is the root.
-
-    Args:
-        parent_id: ID (or human ID) or the parent.
-        row_type: One of `row`, `workspace`, or `database`.
-        parent_is_root: If `True` only rows that are children of the root will be returned.
-
-    Returns:
-        A list of dictionaries, where each entry corresponds to a row. Each dictionary conforms to a [ListRowsResponse][src.managed_data.schema.ListRowsResponse].
-
-    """
-
-    client = _get_default_client(client)
-    filters = []
-
-    if parent_is_root is not None:
-        filters.append(dict(parent=dict(isRoot=parent_is_root)))
-
-    if parent_id:
-        filters.append(dict(parent=dict(id=parent_id)))
-
-    if row_type:
-        filters.append(dict(rowType=row_type))
-
-    data = dict(filters=filters)
-    return client.invoke("ListRows", data)
 
 
 @beartype

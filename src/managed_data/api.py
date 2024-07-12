@@ -8,16 +8,97 @@ from typing import Any, Optional, Union
 from urllib.parse import urlparse, urlunparse
 
 from beartype import beartype
+from deeporigin import auth
+from deeporigin._data_api import DeeporiginData
+from deeporigin._data_api.types.rows.hierarchy_list_response import (
+    Data as ListRowResponse,
+)
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.managed_data import _api
-from deeporigin.managed_data.client import Client
-from deeporigin.managed_data.schema import DatabaseReturnType, IDFormat
+from deeporigin.managed_data.schema import (
+    Cardinality,
+    DataType,
+    DatabaseReturnType,
+    IDFormat,
+    RowType,
+)
 from deeporigin.utils import PREFIXES
+
+
+@beartype
+def _get_default_client(client=None):
+    """Internal function to instantiate client
+
+    Creates and returns an authenticated client if
+    not provided with one.
+
+    Warning: Internal function
+        Do not use this function
+
+    Args:
+        client: None, or a Client
+
+
+    """
+    if client is None:
+        tokens = auth.get_tokens()
+        access_token = tokens["access"]
+
+        from deeporigin.config import get_value
+
+        org_id = get_value()["organization_id"]
+
+        client = DeeporiginData(
+            bearer_token=access_token,
+            org_id=org_id,
+        )
+
+    return client
+
+
+@beartype
+def list_rows(
+    *,
+    parent_id: Optional[str] = None,
+    row_type: Optional[RowType] = None,
+    parent_is_root: Optional[bool] = None,
+    client=None,
+) -> list[ListRowResponse]:
+    """Low level function that wraps the `ListRows` endpoint.
+
+    Returns a list of rows from workspaces and databases,
+    based on the parent, row type, or whether the parent is the root.
+
+    Args:
+        parent_id: ID (or human ID) or the parent.
+        row_type: One of `row`, `workspace`, or `database`.
+        parent_is_root: If `True` only rows that are children of the root will be returned.
+
+    Returns:
+        A list of dictionaries, where each entry corresponds to a row. Each dictionary conforms to a [ListRowsResponse][src.managed_data.schema.ListRowsResponse].
+
+    """
+
+    client = _get_default_client(client)
+    filters = []
+
+    if parent_is_root is not None:
+        filters.append(dict(parent=dict(isRoot=parent_is_root)))
+
+    if parent_id:
+        filters.append(dict(parent=dict(id=parent_id)))
+
+    if row_type:
+        filters.append(dict(rowType=row_type))
+
+    response = client.rows.hierarchy.list(filters=filters)
+
+    return response.data
 
 
 def upload_file(
     file_path: str,
-    client: Optional[Client] = None,
+    client=None,
 ) -> None:
     """Upload a file to Deep Origin."""
 
@@ -65,7 +146,7 @@ def upload_file(
 def make_database_rows(
     database_id: str,
     n_rows: int = 1,
-    client: Optional[Client] = None,
+    client=None,
 ) -> dict:
     """Makes one or several new row(s) in a Database table
 
@@ -100,7 +181,7 @@ def assign_files_to_cell(
     database_id: str,
     column_id: str,
     row_id: Optional[str] = None,
-    client: Optional[Client] = None,
+    client=None,
 ) -> dict:
     """Assign existing file(s) to a cell
 
@@ -147,7 +228,7 @@ def upload_file_to_new_database_row(
     database_id: str,
     file_path: str,
     column_id: str,
-    client: Optional[Client] = None,
+    client=None,
 ):
     """Upload a file to a new row in a database.
 
@@ -181,7 +262,7 @@ def upload_file_to_new_database_row(
 def get_tree(
     *,
     include_rows: bool = True,
-    client: Optional[Client] = None,
+    client=None,
 ) -> list[dict]:
     """Construct a tree of all workspaces, databases and rows.
 
@@ -245,7 +326,7 @@ def get_cell_data(
     *,
     row_id: str,
     column_name: str,
-    client: Optional[Client] = None,
+    client=None,
 ) -> Any:
     """Extract data from a cell in a database, referenced
     by `row_id` and `column_name`.
@@ -279,7 +360,7 @@ def set_cell_data(
     database_id: str,
     row_id: str,
     column_id: str,
-    client: Optional[Client] = None,
+    client=None,
 ) -> Any:
     """set data in a cell to some value.
 
@@ -373,7 +454,7 @@ def download(
     destination: str,
     *,
     include_files: bool = False,
-    client: Optional[Client] = None,
+    client=None,
 ) -> None:
     """Download resources from Deep Origin and save them to
     a local destination.
@@ -433,7 +514,7 @@ def download_database(
     destination: str = os.getcwd(),
     *,
     include_files: bool = False,
-    client: Optional[Client] = None,
+    client=None,
 ) -> None:
     """Download a database and save it to a CSV file on the local disk.
 
@@ -484,7 +565,7 @@ def get_dataframe(
     use_file_names: bool = True,
     reference_format: IDFormat = "human-id",
     return_type: DatabaseReturnType = "dataframe",
-    client: Optional[Client] = None,
+    client=None,
 ):
     """Generate a `pandas.DataFrame` or dictionary for a database.
 
@@ -710,7 +791,7 @@ def _type_and_cleanup_dataframe(
 def get_columns(
     row_id: str,
     *,
-    client: Optional[Client] = None,
+    client=None,
 ) -> list[dict]:
     """Get information about the columns of a row or database.
 
@@ -741,7 +822,7 @@ def get_row_data(
     row_id: str,
     *,
     use_column_keys: bool = False,
-    client: Optional[Client] = None,
+    client=None,
 ) -> dict:
     """Get the data in a row.
 
