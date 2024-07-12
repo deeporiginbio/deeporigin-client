@@ -63,10 +63,14 @@ class ConvertIDFormatResource(SyncAPIResource):
         return self._post(
             "/ConvertIdFormat",
             body=maybe_transform(
-                {"conversions": conversions}, convert_id_format_convert_params.ConvertIDFormatConvertParams
+                {"conversions": conversions},
+                convert_id_format_convert_params.ConvertIDFormatConvertParams,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=ConvertIDFormatConvertResponse,
         )
@@ -78,7 +82,9 @@ class AsyncConvertIDFormatResource(AsyncAPIResource):
         return AsyncConvertIDFormatResourceWithRawResponse(self)
 
     @cached_property
-    def with_streaming_response(self) -> AsyncConvertIDFormatResourceWithStreamingResponse:
+    def with_streaming_response(
+        self,
+    ) -> AsyncConvertIDFormatResourceWithStreamingResponse:
         return AsyncConvertIDFormatResourceWithStreamingResponse(self)
 
     async def convert(
@@ -107,10 +113,14 @@ class AsyncConvertIDFormatResource(AsyncAPIResource):
         return await self._post(
             "/ConvertIdFormat",
             body=await async_maybe_transform(
-                {"conversions": conversions}, convert_id_format_convert_params.ConvertIDFormatConvertParams
+                {"conversions": conversions},
+                convert_id_format_convert_params.ConvertIDFormatConvertParams,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=ConvertIDFormatConvertResponse,
         )

@@ -61,9 +61,15 @@ class ArchiveFilesResource(SyncAPIResource):
         """
         return self._post(
             "/ArchiveFiles",
-            body=maybe_transform({"file_ids": file_ids}, archive_file_archive_params.ArchiveFileArchiveParams),
+            body=maybe_transform(
+                {"file_ids": file_ids},
+                archive_file_archive_params.ArchiveFileArchiveParams,
+            ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=object,
         )
@@ -104,10 +110,14 @@ class AsyncArchiveFilesResource(AsyncAPIResource):
         return await self._post(
             "/ArchiveFiles",
             body=await async_maybe_transform(
-                {"file_ids": file_ids}, archive_file_archive_params.ArchiveFileArchiveParams
+                {"file_ids": file_ids},
+                archive_file_archive_params.ArchiveFileArchiveParams,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=object,
         )

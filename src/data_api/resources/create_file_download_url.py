@@ -21,7 +21,9 @@ from .._response import (
 from .._base_client import (
     make_request_options,
 )
-from ..types.create_file_download_url_create_response import CreateFileDownloadURLCreateResponse
+from ..types.create_file_download_url_create_response import (
+    CreateFileDownloadURLCreateResponse,
+)
 
 __all__ = ["CreateFileDownloadURLResource", "AsyncCreateFileDownloadURLResource"]
 
@@ -32,7 +34,9 @@ class CreateFileDownloadURLResource(SyncAPIResource):
         return CreateFileDownloadURLResourceWithRawResponse(self)
 
     @cached_property
-    def with_streaming_response(self) -> CreateFileDownloadURLResourceWithStreamingResponse:
+    def with_streaming_response(
+        self,
+    ) -> CreateFileDownloadURLResourceWithStreamingResponse:
         return CreateFileDownloadURLResourceWithStreamingResponse(self)
 
     def create(
@@ -61,10 +65,14 @@ class CreateFileDownloadURLResource(SyncAPIResource):
         return self._post(
             "/CreateFileDownloadUrl",
             body=maybe_transform(
-                {"file_id": file_id}, create_file_download_url_create_params.CreateFileDownloadURLCreateParams
+                {"file_id": file_id},
+                create_file_download_url_create_params.CreateFileDownloadURLCreateParams,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=CreateFileDownloadURLCreateResponse,
         )
@@ -76,7 +84,9 @@ class AsyncCreateFileDownloadURLResource(AsyncAPIResource):
         return AsyncCreateFileDownloadURLResourceWithRawResponse(self)
 
     @cached_property
-    def with_streaming_response(self) -> AsyncCreateFileDownloadURLResourceWithStreamingResponse:
+    def with_streaming_response(
+        self,
+    ) -> AsyncCreateFileDownloadURLResourceWithStreamingResponse:
         return AsyncCreateFileDownloadURLResourceWithStreamingResponse(self)
 
     async def create(
@@ -105,10 +115,14 @@ class AsyncCreateFileDownloadURLResource(AsyncAPIResource):
         return await self._post(
             "/CreateFileDownloadUrl",
             body=await async_maybe_transform(
-                {"file_id": file_id}, create_file_download_url_create_params.CreateFileDownloadURLCreateParams
+                {"file_id": file_id},
+                create_file_download_url_create_params.CreateFileDownloadURLCreateParams,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=CreateFileDownloadURLCreateResponse,
         )
@@ -124,7 +138,9 @@ class CreateFileDownloadURLResourceWithRawResponse:
 
 
 class AsyncCreateFileDownloadURLResourceWithRawResponse:
-    def __init__(self, create_file_download_url: AsyncCreateFileDownloadURLResource) -> None:
+    def __init__(
+        self, create_file_download_url: AsyncCreateFileDownloadURLResource
+    ) -> None:
         self._create_file_download_url = create_file_download_url
 
         self.create = async_to_raw_response_wrapper(
@@ -142,7 +158,9 @@ class CreateFileDownloadURLResourceWithStreamingResponse:
 
 
 class AsyncCreateFileDownloadURLResourceWithStreamingResponse:
-    def __init__(self, create_file_download_url: AsyncCreateFileDownloadURLResource) -> None:
+    def __init__(
+        self, create_file_download_url: AsyncCreateFileDownloadURLResource
+    ) -> None:
         self._create_file_download_url = create_file_download_url
 
         self.create = async_to_streamed_response_wrapper(

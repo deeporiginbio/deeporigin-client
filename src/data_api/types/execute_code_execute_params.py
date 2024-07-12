@@ -12,4 +12,6 @@ __all__ = ["ExecuteCodeExecuteParams"]
 class ExecuteCodeExecuteParams(TypedDict, total=False):
     code: Required[str]
 
-    code_language: Required[Annotated[Literal["python"], PropertyInfo(alias="codeLanguage")]]
+    code_language: Required[
+        Annotated[Literal["python"], PropertyInfo(alias="codeLanguage")]
+    ]

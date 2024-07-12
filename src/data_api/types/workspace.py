@@ -21,11 +21,15 @@ class Workspace(BaseModel):
 
     type: Literal["workspace"]
 
-    created_by_user_drn: Optional[str] = FieldInfo(alias="createdByUserDrn", default=None)
+    created_by_user_drn: Optional[str] = FieldInfo(
+        alias="createdByUserDrn", default=None
+    )
 
     creation_block_id: Optional[str] = FieldInfo(alias="creationBlockId", default=None)
 
-    creation_parent_id: Optional[str] = FieldInfo(alias="creationParentId", default=None)
+    creation_parent_id: Optional[str] = FieldInfo(
+        alias="creationParentId", default=None
+    )
 
     date_updated: Optional[str] = FieldInfo(alias="dateUpdated", default=None)
 
@@ -37,6 +41,8 @@ class Workspace(BaseModel):
 
     parent_id: Optional[str] = FieldInfo(alias="parentId", default=None)
 
-    submission_status: Optional[Literal["draft", "final"]] = FieldInfo(alias="submissionStatus", default=None)
+    submission_status: Optional[Literal["draft", "final"]] = FieldInfo(
+        alias="submissionStatus", default=None
+    )
 
     validation_status: Optional[str] = FieldInfo(alias="validationStatus", default=None)

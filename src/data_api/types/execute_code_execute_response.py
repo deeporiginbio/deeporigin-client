@@ -17,9 +17,13 @@ class DataCodeExecution(BaseModel):
 
     code: Optional[str] = None
 
-    code_language: Optional[Literal["python"]] = FieldInfo(alias="codeLanguage", default=None)
+    code_language: Optional[Literal["python"]] = FieldInfo(
+        alias="codeLanguage", default=None
+    )
 
-    created_by_user_drn: Optional[str] = FieldInfo(alias="createdByUserDrn", default=None)
+    created_by_user_drn: Optional[str] = FieldInfo(
+        alias="createdByUserDrn", default=None
+    )
 
     finished_date: Optional[str] = FieldInfo(alias="finishedDate", default=None)
 

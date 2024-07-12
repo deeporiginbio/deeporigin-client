@@ -13,7 +13,11 @@ __all__ = ["ConfigureColumnSelectOptionConfigureParams", "OptionConfiguration"]
 class ConfigureColumnSelectOptionConfigureParams(TypedDict, total=False):
     column_id: Required[Annotated[str, PropertyInfo(alias="columnId")]]
 
-    option_configuration: Required[Annotated[Iterable[OptionConfiguration], PropertyInfo(alias="optionConfiguration")]]
+    option_configuration: Required[
+        Annotated[
+            Iterable[OptionConfiguration], PropertyInfo(alias="optionConfiguration")
+        ]
+    ]
 
 
 class OptionConfiguration(TypedDict, total=False):

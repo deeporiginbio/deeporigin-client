@@ -25,10 +25,20 @@ import httpx
 import pydantic
 
 from ._types import NoneType
-from ._utils import is_given, extract_type_arg, is_annotated_type, extract_type_var_from_base
+from ._utils import (
+    is_given,
+    extract_type_arg,
+    is_annotated_type,
+    extract_type_var_from_base,
+)
 from ._models import BaseModel, is_basemodel
 from ._constants import RAW_RESPONSE_HEADER, OVERRIDE_CAST_TO_HEADER
-from ._streaming import Stream, AsyncStream, is_stream_class_type, extract_stream_chunk_type
+from ._streaming import (
+    Stream,
+    AsyncStream,
+    is_stream_class_type,
+    extract_stream_chunk_type,
+)
 from ._exceptions import DeeporiginDataError, APIResponseValidationError
 
 if TYPE_CHECKING:
@@ -116,9 +126,7 @@ class BaseAPIResponse(Generic[R]):
 
     @override
     def __repr__(self) -> str:
-        return (
-            f"<{self.__class__.__name__} [{self.status_code} {self.http_response.reason_phrase}] type={self._cast_to}>"
-        )
+        return f"<{self.__class__.__name__} [{self.status_code} {self.http_response.reason_phrase}] type={self._cast_to}>"
 
     def _parse(self, *, to: type[_T] | None = None) -> R | _T:
         # unwrap `Annotated[T, ...]` -> `T`
@@ -128,7 +136,9 @@ class BaseAPIResponse(Generic[R]):
         if self._is_sse_stream:
             if to:
                 if not is_stream_class_type(to):
-                    raise TypeError(f"Expected custom parse type to be a subclass of {Stream} or {AsyncStream}")
+                    raise TypeError(
+                        f"Expected custom parse type to be a subclass of {Stream} or {AsyncStream}"
+                    )
 
                 return cast(
                     _T,
@@ -152,7 +162,10 @@ class BaseAPIResponse(Generic[R]):
                     ),
                 )
 
-            stream_cls = cast("type[Stream[Any]] | type[AsyncStream[Any]] | None", self._client._default_stream_cls)
+            stream_cls = cast(
+                "type[Stream[Any]] | type[AsyncStream[Any]] | None",
+                self._client._default_stream_cls,
+            )
             if stream_cls is None:
                 raise MissingStreamClassError()
 
@@ -199,10 +212,16 @@ class BaseAPIResponse(Generic[R]):
             # the response class ourselves but that is something that should be supported directly in httpx
             # as it would be easy to incorrectly construct the Response object due to the multitude of arguments.
             if cast_to != httpx.Response:
-                raise ValueError(f"Subclasses of httpx.Response cannot be passed to `cast_to`")
+                raise ValueError(
+                    f"Subclasses of httpx.Response cannot be passed to `cast_to`"
+                )
             return cast(R, response)
 
-        if inspect.isclass(origin) and not issubclass(origin, BaseModel) and issubclass(origin, pydantic.BaseModel):
+        if (
+            inspect.isclass(origin)
+            and not issubclass(origin, BaseModel)
+            and issubclass(origin, pydantic.BaseModel)
+        ):
             raise TypeError(
                 "Pydantic models must subclass our base model type, e.g. `from deeporigin_data import BaseModel`"
             )
@@ -226,7 +245,11 @@ class BaseAPIResponse(Generic[R]):
                 try:
                     data = response.json()
                 except Exception as exc:
-                    log.debug("Could not read JSON from response data due to %s - %s", type(exc), exc)
+                    log.debug(
+                        "Could not read JSON from response data due to %s - %s",
+                        type(exc),
+                        exc,
+                    )
                 else:
                     return self._client._process_response_data(
                         data=data,
@@ -257,12 +280,10 @@ class BaseAPIResponse(Generic[R]):
 
 class APIResponse(BaseAPIResponse[R]):
     @overload
-    def parse(self, *, to: type[_T]) -> _T:
-        ...
+    def parse(self, *, to: type[_T]) -> _T: ...
 
     @overload
-    def parse(self) -> R:
-        ...
+    def parse(self) -> R: ...
 
     def parse(self, *, to: type[_T] | None = None) -> R | _T:
         """Returns the rich python representation of this response's data.
@@ -361,12 +382,10 @@ class APIResponse(BaseAPIResponse[R]):
 
 class AsyncAPIResponse(BaseAPIResponse[R]):
     @overload
-    async def parse(self, *, to: type[_T]) -> _T:
-        ...
+    async def parse(self, *, to: type[_T]) -> _T: ...
 
     @overload
-    async def parse(self) -> R:
-        ...
+    async def parse(self) -> R: ...
 
     async def parse(self, *, to: type[_T] | None = None) -> R | _T:
         """Returns the rich python representation of this response's data.
@@ -634,14 +653,20 @@ class AsyncResponseContextManager(Generic[_AsyncAPIResponseT]):
             await self.__response.close()
 
 
-def to_streamed_response_wrapper(func: Callable[P, R]) -> Callable[P, ResponseContextManager[APIResponse[R]]]:
+def to_streamed_response_wrapper(
+    func: Callable[P, R],
+) -> Callable[P, ResponseContextManager[APIResponse[R]]]:
     """Higher order function that takes one of our bound API methods and wraps it
     to support streaming and returning the raw `APIResponse` object directly.
     """
 
     @functools.wraps(func)
-    def wrapped(*args: P.args, **kwargs: P.kwargs) -> ResponseContextManager[APIResponse[R]]:
-        extra_headers: dict[str, str] = {**(cast(Any, kwargs.get("extra_headers")) or {})}
+    def wrapped(
+        *args: P.args, **kwargs: P.kwargs
+    ) -> ResponseContextManager[APIResponse[R]]:
+        extra_headers: dict[str, str] = {
+            **(cast(Any, kwargs.get("extra_headers")) or {})
+        }
         extra_headers[RAW_RESPONSE_HEADER] = "stream"
 
         kwargs["extra_headers"] = extra_headers
@@ -661,15 +686,21 @@ def async_to_streamed_response_wrapper(
     """
 
     @functools.wraps(func)
-    def wrapped(*args: P.args, **kwargs: P.kwargs) -> AsyncResponseContextManager[AsyncAPIResponse[R]]:
-        extra_headers: dict[str, str] = {**(cast(Any, kwargs.get("extra_headers")) or {})}
+    def wrapped(
+        *args: P.args, **kwargs: P.kwargs
+    ) -> AsyncResponseContextManager[AsyncAPIResponse[R]]:
+        extra_headers: dict[str, str] = {
+            **(cast(Any, kwargs.get("extra_headers")) or {})
+        }
         extra_headers[RAW_RESPONSE_HEADER] = "stream"
 
         kwargs["extra_headers"] = extra_headers
 
         make_request = func(*args, **kwargs)
 
-        return AsyncResponseContextManager(cast(Awaitable[AsyncAPIResponse[R]], make_request))
+        return AsyncResponseContextManager(
+            cast(Awaitable[AsyncAPIResponse[R]], make_request)
+        )
 
     return wrapped
 
@@ -685,8 +716,12 @@ def to_custom_streamed_response_wrapper(
     """
 
     @functools.wraps(func)
-    def wrapped(*args: P.args, **kwargs: P.kwargs) -> ResponseContextManager[_APIResponseT]:
-        extra_headers: dict[str, Any] = {**(cast(Any, kwargs.get("extra_headers")) or {})}
+    def wrapped(
+        *args: P.args, **kwargs: P.kwargs
+    ) -> ResponseContextManager[_APIResponseT]:
+        extra_headers: dict[str, Any] = {
+            **(cast(Any, kwargs.get("extra_headers")) or {})
+        }
         extra_headers[RAW_RESPONSE_HEADER] = "stream"
         extra_headers[OVERRIDE_CAST_TO_HEADER] = response_cls
 
@@ -710,8 +745,12 @@ def async_to_custom_streamed_response_wrapper(
     """
 
     @functools.wraps(func)
-    def wrapped(*args: P.args, **kwargs: P.kwargs) -> AsyncResponseContextManager[_AsyncAPIResponseT]:
-        extra_headers: dict[str, Any] = {**(cast(Any, kwargs.get("extra_headers")) or {})}
+    def wrapped(
+        *args: P.args, **kwargs: P.kwargs
+    ) -> AsyncResponseContextManager[_AsyncAPIResponseT]:
+        extra_headers: dict[str, Any] = {
+            **(cast(Any, kwargs.get("extra_headers")) or {})
+        }
         extra_headers[RAW_RESPONSE_HEADER] = "stream"
         extra_headers[OVERRIDE_CAST_TO_HEADER] = response_cls
 
@@ -719,7 +758,9 @@ def async_to_custom_streamed_response_wrapper(
 
         make_request = func(*args, **kwargs)
 
-        return AsyncResponseContextManager(cast(Awaitable[_AsyncAPIResponseT], make_request))
+        return AsyncResponseContextManager(
+            cast(Awaitable[_AsyncAPIResponseT], make_request)
+        )
 
     return wrapped
 
@@ -731,7 +772,9 @@ def to_raw_response_wrapper(func: Callable[P, R]) -> Callable[P, APIResponse[R]]
 
     @functools.wraps(func)
     def wrapped(*args: P.args, **kwargs: P.kwargs) -> APIResponse[R]:
-        extra_headers: dict[str, str] = {**(cast(Any, kwargs.get("extra_headers")) or {})}
+        extra_headers: dict[str, str] = {
+            **(cast(Any, kwargs.get("extra_headers")) or {})
+        }
         extra_headers[RAW_RESPONSE_HEADER] = "raw"
 
         kwargs["extra_headers"] = extra_headers
@@ -741,14 +784,18 @@ def to_raw_response_wrapper(func: Callable[P, R]) -> Callable[P, APIResponse[R]]
     return wrapped
 
 
-def async_to_raw_response_wrapper(func: Callable[P, Awaitable[R]]) -> Callable[P, Awaitable[AsyncAPIResponse[R]]]:
+def async_to_raw_response_wrapper(
+    func: Callable[P, Awaitable[R]],
+) -> Callable[P, Awaitable[AsyncAPIResponse[R]]]:
     """Higher order function that takes one of our bound API methods and wraps it
     to support returning the raw `APIResponse` object directly.
     """
 
     @functools.wraps(func)
     async def wrapped(*args: P.args, **kwargs: P.kwargs) -> AsyncAPIResponse[R]:
-        extra_headers: dict[str, str] = {**(cast(Any, kwargs.get("extra_headers")) or {})}
+        extra_headers: dict[str, str] = {
+            **(cast(Any, kwargs.get("extra_headers")) or {})
+        }
         extra_headers[RAW_RESPONSE_HEADER] = "raw"
 
         kwargs["extra_headers"] = extra_headers
@@ -770,7 +817,9 @@ def to_custom_raw_response_wrapper(
 
     @functools.wraps(func)
     def wrapped(*args: P.args, **kwargs: P.kwargs) -> _APIResponseT:
-        extra_headers: dict[str, Any] = {**(cast(Any, kwargs.get("extra_headers")) or {})}
+        extra_headers: dict[str, Any] = {
+            **(cast(Any, kwargs.get("extra_headers")) or {})
+        }
         extra_headers[RAW_RESPONSE_HEADER] = "raw"
         extra_headers[OVERRIDE_CAST_TO_HEADER] = response_cls
 
@@ -793,7 +842,9 @@ def async_to_custom_raw_response_wrapper(
 
     @functools.wraps(func)
     def wrapped(*args: P.args, **kwargs: P.kwargs) -> Awaitable[_AsyncAPIResponseT]:
-        extra_headers: dict[str, Any] = {**(cast(Any, kwargs.get("extra_headers")) or {})}
+        extra_headers: dict[str, Any] = {
+            **(cast(Any, kwargs.get("extra_headers")) or {})
+        }
         extra_headers[RAW_RESPONSE_HEADER] = "raw"
         extra_headers[OVERRIDE_CAST_TO_HEADER] = response_cls
 
@@ -817,6 +868,8 @@ def extract_response_type(typ: type[BaseAPIResponse[Any]]) -> type:
     """
     return extract_type_var_from_base(
         typ,
-        generic_bases=cast("tuple[type, ...]", (BaseAPIResponse, APIResponse, AsyncAPIResponse)),
+        generic_bases=cast(
+            "tuple[type, ...]", (BaseAPIResponse, APIResponse, AsyncAPIResponse)
+        ),
         index=0,
     )

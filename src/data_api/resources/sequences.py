@@ -60,9 +60,14 @@ class SequencesResource(SyncAPIResource):
         """
         return self._post(
             "/ParseBaseSequenceData",
-            body=maybe_transform({"file_id": file_id}, sequence_parse_params.SequenceParseParams),
+            body=maybe_transform(
+                {"file_id": file_id}, sequence_parse_params.SequenceParseParams
+            ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=SequenceParseResponse,
         )
@@ -102,9 +107,14 @@ class AsyncSequencesResource(AsyncAPIResource):
         """
         return await self._post(
             "/ParseBaseSequenceData",
-            body=await async_maybe_transform({"file_id": file_id}, sequence_parse_params.SequenceParseParams),
+            body=await async_maybe_transform(
+                {"file_id": file_id}, sequence_parse_params.SequenceParseParams
+            ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=SequenceParseResponse,
         )

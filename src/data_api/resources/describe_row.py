@@ -39,7 +39,8 @@ class DescribeRowResource(SyncAPIResource):
         self,
         *,
         row_id: str,
-        column_selection: describe_row_retrieve_params.ColumnSelection | NotGiven = NOT_GIVEN,
+        column_selection: describe_row_retrieve_params.ColumnSelection
+        | NotGiven = NOT_GIVEN,
         fields: bool | NotGiven = NOT_GIVEN,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -71,7 +72,10 @@ class DescribeRowResource(SyncAPIResource):
                 describe_row_retrieve_params.DescribeRowRetrieveParams,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=DescribeRowResponse,
         )
@@ -90,7 +94,8 @@ class AsyncDescribeRowResource(AsyncAPIResource):
         self,
         *,
         row_id: str,
-        column_selection: describe_row_retrieve_params.ColumnSelection | NotGiven = NOT_GIVEN,
+        column_selection: describe_row_retrieve_params.ColumnSelection
+        | NotGiven = NOT_GIVEN,
         fields: bool | NotGiven = NOT_GIVEN,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -122,7 +127,10 @@ class AsyncDescribeRowResource(AsyncAPIResource):
                 describe_row_retrieve_params.DescribeRowRetrieveParams,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=DescribeRowResponse,
         )

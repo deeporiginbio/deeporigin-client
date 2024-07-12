@@ -73,7 +73,10 @@ class EnsureRowsResource(SyncAPIResource):
                 ensure_row_ensure_params.EnsureRowEnsureParams,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=EnsureRowEnsureResponse,
         )
@@ -124,7 +127,10 @@ class AsyncEnsureRowsResource(AsyncAPIResource):
                 ensure_row_ensure_params.EnsureRowEnsureParams,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=EnsureRowEnsureResponse,
         )

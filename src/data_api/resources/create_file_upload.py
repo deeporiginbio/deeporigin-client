@@ -74,7 +74,10 @@ class CreateFileUploadResource(SyncAPIResource):
                 create_file_upload_create_params.CreateFileUploadCreateParams,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=CreateFileUploadCreateResponse,
         )
@@ -86,7 +89,9 @@ class AsyncCreateFileUploadResource(AsyncAPIResource):
         return AsyncCreateFileUploadResourceWithRawResponse(self)
 
     @cached_property
-    def with_streaming_response(self) -> AsyncCreateFileUploadResourceWithStreamingResponse:
+    def with_streaming_response(
+        self,
+    ) -> AsyncCreateFileUploadResourceWithStreamingResponse:
         return AsyncCreateFileUploadResourceWithStreamingResponse(self)
 
     async def create(
@@ -126,7 +131,10 @@ class AsyncCreateFileUploadResource(AsyncAPIResource):
                 create_file_upload_create_params.CreateFileUploadCreateParams,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=CreateFileUploadCreateResponse,
         )

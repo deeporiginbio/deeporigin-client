@@ -62,9 +62,14 @@ class HierarchyResource(SyncAPIResource):
         """
         return self._post(
             "/ListRows",
-            body=maybe_transform({"filters": filters}, hierarchy_list_params.HierarchyListParams),
+            body=maybe_transform(
+                {"filters": filters}, hierarchy_list_params.HierarchyListParams
+            ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=HierarchyListResponse,
         )
@@ -104,9 +109,14 @@ class AsyncHierarchyResource(AsyncAPIResource):
         """
         return await self._post(
             "/ListRows",
-            body=await async_maybe_transform({"filters": filters}, hierarchy_list_params.HierarchyListParams),
+            body=await async_maybe_transform(
+                {"filters": filters}, hierarchy_list_params.HierarchyListParams
+            ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=HierarchyListResponse,
         )

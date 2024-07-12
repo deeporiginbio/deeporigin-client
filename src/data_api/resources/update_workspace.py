@@ -69,7 +69,10 @@ class UpdateWorkspaceResource(SyncAPIResource):
                 update_workspace_run_params.UpdateWorkspaceRunParams,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=UpdateWorkspaceRunResponse,
         )
@@ -81,7 +84,9 @@ class AsyncUpdateWorkspaceResource(AsyncAPIResource):
         return AsyncUpdateWorkspaceResourceWithRawResponse(self)
 
     @cached_property
-    def with_streaming_response(self) -> AsyncUpdateWorkspaceResourceWithStreamingResponse:
+    def with_streaming_response(
+        self,
+    ) -> AsyncUpdateWorkspaceResourceWithStreamingResponse:
         return AsyncUpdateWorkspaceResourceWithStreamingResponse(self)
 
     async def run(
@@ -118,7 +123,10 @@ class AsyncUpdateWorkspaceResource(AsyncAPIResource):
                 update_workspace_run_params.UpdateWorkspaceRunParams,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=UpdateWorkspaceRunResponse,
         )

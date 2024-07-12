@@ -55,7 +55,9 @@ class FilterUnionMember0(TypedDict, total=False):
 class FilterUnionMember1(TypedDict, total=False):
     column_id: Required[Annotated[str, PropertyInfo(alias="columnId")]]
 
-    filter_type: Required[Annotated[Literal["number"], PropertyInfo(alias="filterType")]]
+    filter_type: Required[
+        Annotated[Literal["number"], PropertyInfo(alias="filterType")]
+    ]
 
     filter_value: Required[Annotated[float, PropertyInfo(alias="filterValue")]]
 
@@ -73,7 +75,9 @@ class FilterUnionMember1(TypedDict, total=False):
     ]
 
 
-class FilterRowFilterJoinConditionRowFilterJoinConditionUnionMember0(TypedDict, total=False):
+class FilterRowFilterJoinConditionRowFilterJoinConditionUnionMember0(
+    TypedDict, total=False
+):
     column_id: Required[Annotated[str, PropertyInfo(alias="columnId")]]
 
     filter_type: Required[Annotated[Literal["text"], PropertyInfo(alias="filterType")]]
@@ -83,10 +87,14 @@ class FilterRowFilterJoinConditionRowFilterJoinConditionUnionMember0(TypedDict, 
     operator: Required[Literal["equals", "notEqual", "blank", "notBlank"]]
 
 
-class FilterRowFilterJoinConditionRowFilterJoinConditionUnionMember1(TypedDict, total=False):
+class FilterRowFilterJoinConditionRowFilterJoinConditionUnionMember1(
+    TypedDict, total=False
+):
     column_id: Required[Annotated[str, PropertyInfo(alias="columnId")]]
 
-    filter_type: Required[Annotated[Literal["number"], PropertyInfo(alias="filterType")]]
+    filter_type: Required[
+        Annotated[Literal["number"], PropertyInfo(alias="filterType")]
+    ]
 
     filter_value: Required[Annotated[float, PropertyInfo(alias="filterValue")]]
 
@@ -132,7 +140,9 @@ class FilterRowFilterJoinConditionUnionMember1(TypedDict, total=False):
 class FilterRowFilterJoinConditionUnionMember2(TypedDict, total=False):
     column_id: Required[Annotated[str, PropertyInfo(alias="columnId")]]
 
-    filter_type: Required[Annotated[Literal["number"], PropertyInfo(alias="filterType")]]
+    filter_type: Required[
+        Annotated[Literal["number"], PropertyInfo(alias="filterType")]
+    ]
 
     filter_value: Required[Annotated[float, PropertyInfo(alias="filterValue")]]
 

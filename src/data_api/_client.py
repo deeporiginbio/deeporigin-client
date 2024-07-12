@@ -160,7 +160,9 @@ class DeeporiginData(SyncAPIClient):
 
         self.add_database_column = resources.AddDatabaseColumnResource(self)
         self.archive_files = resources.ArchiveFilesResource(self)
-        self.configure_column_select_options = resources.ConfigureColumnSelectOptionsResource(self)
+        self.configure_column_select_options = (
+            resources.ConfigureColumnSelectOptionsResource(self)
+        )
         self.convert_id_format = resources.ConvertIDFormatResource(self)
         self.databases = resources.DatabasesResource(self)
         self.create_file_download_url = resources.CreateFileDownloadURLResource(self)
@@ -232,10 +234,14 @@ class DeeporiginData(SyncAPIClient):
         Create a new client instance re-using the same options given to the current client with optional overriding.
         """
         if default_headers is not None and set_default_headers is not None:
-            raise ValueError("The `default_headers` and `set_default_headers` arguments are mutually exclusive")
+            raise ValueError(
+                "The `default_headers` and `set_default_headers` arguments are mutually exclusive"
+            )
 
         if default_query is not None and set_default_query is not None:
-            raise ValueError("The `default_query` and `set_default_query` arguments are mutually exclusive")
+            raise ValueError(
+                "The `default_query` and `set_default_query` arguments are mutually exclusive"
+            )
 
         headers = self._custom_headers
         if default_headers is not None:
@@ -279,10 +285,14 @@ class DeeporiginData(SyncAPIClient):
             return _exceptions.BadRequestError(err_msg, response=response, body=body)
 
         if response.status_code == 401:
-            return _exceptions.AuthenticationError(err_msg, response=response, body=body)
+            return _exceptions.AuthenticationError(
+                err_msg, response=response, body=body
+            )
 
         if response.status_code == 403:
-            return _exceptions.PermissionDeniedError(err_msg, response=response, body=body)
+            return _exceptions.PermissionDeniedError(
+                err_msg, response=response, body=body
+            )
 
         if response.status_code == 404:
             return _exceptions.NotFoundError(err_msg, response=response, body=body)
@@ -291,13 +301,17 @@ class DeeporiginData(SyncAPIClient):
             return _exceptions.ConflictError(err_msg, response=response, body=body)
 
         if response.status_code == 422:
-            return _exceptions.UnprocessableEntityError(err_msg, response=response, body=body)
+            return _exceptions.UnprocessableEntityError(
+                err_msg, response=response, body=body
+            )
 
         if response.status_code == 429:
             return _exceptions.RateLimitError(err_msg, response=response, body=body)
 
         if response.status_code >= 500:
-            return _exceptions.InternalServerError(err_msg, response=response, body=body)
+            return _exceptions.InternalServerError(
+                err_msg, response=response, body=body
+            )
         return APIStatusError(err_msg, response=response, body=body)
 
 
@@ -410,23 +424,33 @@ class AsyncDeeporiginData(AsyncAPIClient):
 
         self.add_database_column = resources.AsyncAddDatabaseColumnResource(self)
         self.archive_files = resources.AsyncArchiveFilesResource(self)
-        self.configure_column_select_options = resources.AsyncConfigureColumnSelectOptionsResource(self)
+        self.configure_column_select_options = (
+            resources.AsyncConfigureColumnSelectOptionsResource(self)
+        )
         self.convert_id_format = resources.AsyncConvertIDFormatResource(self)
         self.databases = resources.AsyncDatabasesResource(self)
-        self.create_file_download_url = resources.AsyncCreateFileDownloadURLResource(self)
+        self.create_file_download_url = resources.AsyncCreateFileDownloadURLResource(
+            self
+        )
         self.create_file_upload = resources.AsyncCreateFileUploadResource(self)
         self.workspaces = resources.AsyncWorkspacesResource(self)
         self.delete_database_column = resources.AsyncDeleteDatabaseColumnResource(self)
         self.delete_rows = resources.AsyncDeleteRowsResource(self)
-        self.describe_code_execution = resources.AsyncDescribeCodeExecutionResource(self)
-        self.describe_database_stats = resources.AsyncDescribeDatabaseStatsResource(self)
+        self.describe_code_execution = resources.AsyncDescribeCodeExecutionResource(
+            self
+        )
+        self.describe_database_stats = resources.AsyncDescribeDatabaseStatsResource(
+            self
+        )
         self.describe_file = resources.AsyncDescribeFileResource(self)
         self.describe_row = resources.AsyncDescribeRowResource(self)
         self.download_file = resources.AsyncDownloadFileResource(self)
         self.ensure_rows = resources.AsyncEnsureRowsResource(self)
         self.execute_code = resources.AsyncExecuteCodeResource(self)
         self.execute_code_sync = resources.AsyncExecuteCodeSyncResource(self)
-        self.get_code_execution_result = resources.AsyncGetCodeExecutionResultResource(self)
+        self.get_code_execution_result = resources.AsyncGetCodeExecutionResultResource(
+            self
+        )
         self.import_rows = resources.AsyncImportRowsResource(self)
         self.organization = resources.AsyncOrganizationResource(self)
         self.chat_threads = resources.AsyncChatThreadsResource(self)
@@ -482,10 +506,14 @@ class AsyncDeeporiginData(AsyncAPIClient):
         Create a new client instance re-using the same options given to the current client with optional overriding.
         """
         if default_headers is not None and set_default_headers is not None:
-            raise ValueError("The `default_headers` and `set_default_headers` arguments are mutually exclusive")
+            raise ValueError(
+                "The `default_headers` and `set_default_headers` arguments are mutually exclusive"
+            )
 
         if default_query is not None and set_default_query is not None:
-            raise ValueError("The `default_query` and `set_default_query` arguments are mutually exclusive")
+            raise ValueError(
+                "The `default_query` and `set_default_query` arguments are mutually exclusive"
+            )
 
         headers = self._custom_headers
         if default_headers is not None:
@@ -529,10 +557,14 @@ class AsyncDeeporiginData(AsyncAPIClient):
             return _exceptions.BadRequestError(err_msg, response=response, body=body)
 
         if response.status_code == 401:
-            return _exceptions.AuthenticationError(err_msg, response=response, body=body)
+            return _exceptions.AuthenticationError(
+                err_msg, response=response, body=body
+            )
 
         if response.status_code == 403:
-            return _exceptions.PermissionDeniedError(err_msg, response=response, body=body)
+            return _exceptions.PermissionDeniedError(
+                err_msg, response=response, body=body
+            )
 
         if response.status_code == 404:
             return _exceptions.NotFoundError(err_msg, response=response, body=body)
@@ -541,210 +573,442 @@ class AsyncDeeporiginData(AsyncAPIClient):
             return _exceptions.ConflictError(err_msg, response=response, body=body)
 
         if response.status_code == 422:
-            return _exceptions.UnprocessableEntityError(err_msg, response=response, body=body)
+            return _exceptions.UnprocessableEntityError(
+                err_msg, response=response, body=body
+            )
 
         if response.status_code == 429:
             return _exceptions.RateLimitError(err_msg, response=response, body=body)
 
         if response.status_code >= 500:
-            return _exceptions.InternalServerError(err_msg, response=response, body=body)
+            return _exceptions.InternalServerError(
+                err_msg, response=response, body=body
+            )
         return APIStatusError(err_msg, response=response, body=body)
 
 
 class DeeporiginDataWithRawResponse:
     def __init__(self, client: DeeporiginData) -> None:
-        self.add_database_column = resources.AddDatabaseColumnResourceWithRawResponse(client.add_database_column)
-        self.archive_files = resources.ArchiveFilesResourceWithRawResponse(client.archive_files)
-        self.configure_column_select_options = resources.ConfigureColumnSelectOptionsResourceWithRawResponse(
-            client.configure_column_select_options
+        self.add_database_column = resources.AddDatabaseColumnResourceWithRawResponse(
+            client.add_database_column
         )
-        self.convert_id_format = resources.ConvertIDFormatResourceWithRawResponse(client.convert_id_format)
+        self.archive_files = resources.ArchiveFilesResourceWithRawResponse(
+            client.archive_files
+        )
+        self.configure_column_select_options = (
+            resources.ConfigureColumnSelectOptionsResourceWithRawResponse(
+                client.configure_column_select_options
+            )
+        )
+        self.convert_id_format = resources.ConvertIDFormatResourceWithRawResponse(
+            client.convert_id_format
+        )
         self.databases = resources.DatabasesResourceWithRawResponse(client.databases)
-        self.create_file_download_url = resources.CreateFileDownloadURLResourceWithRawResponse(
-            client.create_file_download_url
+        self.create_file_download_url = (
+            resources.CreateFileDownloadURLResourceWithRawResponse(
+                client.create_file_download_url
+            )
         )
-        self.create_file_upload = resources.CreateFileUploadResourceWithRawResponse(client.create_file_upload)
+        self.create_file_upload = resources.CreateFileUploadResourceWithRawResponse(
+            client.create_file_upload
+        )
         self.workspaces = resources.WorkspacesResourceWithRawResponse(client.workspaces)
-        self.delete_database_column = resources.DeleteDatabaseColumnResourceWithRawResponse(
-            client.delete_database_column
+        self.delete_database_column = (
+            resources.DeleteDatabaseColumnResourceWithRawResponse(
+                client.delete_database_column
+            )
         )
-        self.delete_rows = resources.DeleteRowsResourceWithRawResponse(client.delete_rows)
-        self.describe_code_execution = resources.DescribeCodeExecutionResourceWithRawResponse(
-            client.describe_code_execution
+        self.delete_rows = resources.DeleteRowsResourceWithRawResponse(
+            client.delete_rows
         )
-        self.describe_database_stats = resources.DescribeDatabaseStatsResourceWithRawResponse(
-            client.describe_database_stats
+        self.describe_code_execution = (
+            resources.DescribeCodeExecutionResourceWithRawResponse(
+                client.describe_code_execution
+            )
         )
-        self.describe_file = resources.DescribeFileResourceWithRawResponse(client.describe_file)
-        self.describe_row = resources.DescribeRowResourceWithRawResponse(client.describe_row)
-        self.download_file = resources.DownloadFileResourceWithRawResponse(client.download_file)
-        self.ensure_rows = resources.EnsureRowsResourceWithRawResponse(client.ensure_rows)
-        self.execute_code = resources.ExecuteCodeResourceWithRawResponse(client.execute_code)
-        self.execute_code_sync = resources.ExecuteCodeSyncResourceWithRawResponse(client.execute_code_sync)
-        self.get_code_execution_result = resources.GetCodeExecutionResultResourceWithRawResponse(
-            client.get_code_execution_result
+        self.describe_database_stats = (
+            resources.DescribeDatabaseStatsResourceWithRawResponse(
+                client.describe_database_stats
+            )
         )
-        self.import_rows = resources.ImportRowsResourceWithRawResponse(client.import_rows)
-        self.organization = resources.OrganizationResourceWithRawResponse(client.organization)
-        self.chat_threads = resources.ChatThreadsResourceWithRawResponse(client.chat_threads)
+        self.describe_file = resources.DescribeFileResourceWithRawResponse(
+            client.describe_file
+        )
+        self.describe_row = resources.DescribeRowResourceWithRawResponse(
+            client.describe_row
+        )
+        self.download_file = resources.DownloadFileResourceWithRawResponse(
+            client.download_file
+        )
+        self.ensure_rows = resources.EnsureRowsResourceWithRawResponse(
+            client.ensure_rows
+        )
+        self.execute_code = resources.ExecuteCodeResourceWithRawResponse(
+            client.execute_code
+        )
+        self.execute_code_sync = resources.ExecuteCodeSyncResourceWithRawResponse(
+            client.execute_code_sync
+        )
+        self.get_code_execution_result = (
+            resources.GetCodeExecutionResultResourceWithRawResponse(
+                client.get_code_execution_result
+            )
+        )
+        self.import_rows = resources.ImportRowsResourceWithRawResponse(
+            client.import_rows
+        )
+        self.organization = resources.OrganizationResourceWithRawResponse(
+            client.organization
+        )
+        self.chat_threads = resources.ChatThreadsResourceWithRawResponse(
+            client.chat_threads
+        )
         self.files = resources.FilesResourceWithRawResponse(client.files)
         self.mentions = resources.MentionsResourceWithRawResponse(client.mentions)
         self.rows = resources.RowsResourceWithRawResponse(client.rows)
         self.sequences = resources.SequencesResourceWithRawResponse(client.sequences)
-        self.chat_messages = resources.ChatMessagesResourceWithRawResponse(client.chat_messages)
-        self.update_database = resources.UpdateDatabaseResourceWithRawResponse(client.update_database)
-        self.update_database_column = resources.UpdateDatabaseColumnResourceWithRawResponse(
-            client.update_database_column
+        self.chat_messages = resources.ChatMessagesResourceWithRawResponse(
+            client.chat_messages
         )
-        self.update_workspace = resources.UpdateWorkspaceResourceWithRawResponse(client.update_workspace)
+        self.update_database = resources.UpdateDatabaseResourceWithRawResponse(
+            client.update_database
+        )
+        self.update_database_column = (
+            resources.UpdateDatabaseColumnResourceWithRawResponse(
+                client.update_database_column
+            )
+        )
+        self.update_workspace = resources.UpdateWorkspaceResourceWithRawResponse(
+            client.update_workspace
+        )
 
 
 class AsyncDeeporiginDataWithRawResponse:
     def __init__(self, client: AsyncDeeporiginData) -> None:
-        self.add_database_column = resources.AsyncAddDatabaseColumnResourceWithRawResponse(client.add_database_column)
-        self.archive_files = resources.AsyncArchiveFilesResourceWithRawResponse(client.archive_files)
-        self.configure_column_select_options = resources.AsyncConfigureColumnSelectOptionsResourceWithRawResponse(
-            client.configure_column_select_options
+        self.add_database_column = (
+            resources.AsyncAddDatabaseColumnResourceWithRawResponse(
+                client.add_database_column
+            )
         )
-        self.convert_id_format = resources.AsyncConvertIDFormatResourceWithRawResponse(client.convert_id_format)
-        self.databases = resources.AsyncDatabasesResourceWithRawResponse(client.databases)
-        self.create_file_download_url = resources.AsyncCreateFileDownloadURLResourceWithRawResponse(
-            client.create_file_download_url
+        self.archive_files = resources.AsyncArchiveFilesResourceWithRawResponse(
+            client.archive_files
         )
-        self.create_file_upload = resources.AsyncCreateFileUploadResourceWithRawResponse(client.create_file_upload)
-        self.workspaces = resources.AsyncWorkspacesResourceWithRawResponse(client.workspaces)
-        self.delete_database_column = resources.AsyncDeleteDatabaseColumnResourceWithRawResponse(
-            client.delete_database_column
+        self.configure_column_select_options = (
+            resources.AsyncConfigureColumnSelectOptionsResourceWithRawResponse(
+                client.configure_column_select_options
+            )
         )
-        self.delete_rows = resources.AsyncDeleteRowsResourceWithRawResponse(client.delete_rows)
-        self.describe_code_execution = resources.AsyncDescribeCodeExecutionResourceWithRawResponse(
-            client.describe_code_execution
+        self.convert_id_format = resources.AsyncConvertIDFormatResourceWithRawResponse(
+            client.convert_id_format
         )
-        self.describe_database_stats = resources.AsyncDescribeDatabaseStatsResourceWithRawResponse(
-            client.describe_database_stats
+        self.databases = resources.AsyncDatabasesResourceWithRawResponse(
+            client.databases
         )
-        self.describe_file = resources.AsyncDescribeFileResourceWithRawResponse(client.describe_file)
-        self.describe_row = resources.AsyncDescribeRowResourceWithRawResponse(client.describe_row)
-        self.download_file = resources.AsyncDownloadFileResourceWithRawResponse(client.download_file)
-        self.ensure_rows = resources.AsyncEnsureRowsResourceWithRawResponse(client.ensure_rows)
-        self.execute_code = resources.AsyncExecuteCodeResourceWithRawResponse(client.execute_code)
-        self.execute_code_sync = resources.AsyncExecuteCodeSyncResourceWithRawResponse(client.execute_code_sync)
-        self.get_code_execution_result = resources.AsyncGetCodeExecutionResultResourceWithRawResponse(
-            client.get_code_execution_result
+        self.create_file_download_url = (
+            resources.AsyncCreateFileDownloadURLResourceWithRawResponse(
+                client.create_file_download_url
+            )
         )
-        self.import_rows = resources.AsyncImportRowsResourceWithRawResponse(client.import_rows)
-        self.organization = resources.AsyncOrganizationResourceWithRawResponse(client.organization)
-        self.chat_threads = resources.AsyncChatThreadsResourceWithRawResponse(client.chat_threads)
+        self.create_file_upload = (
+            resources.AsyncCreateFileUploadResourceWithRawResponse(
+                client.create_file_upload
+            )
+        )
+        self.workspaces = resources.AsyncWorkspacesResourceWithRawResponse(
+            client.workspaces
+        )
+        self.delete_database_column = (
+            resources.AsyncDeleteDatabaseColumnResourceWithRawResponse(
+                client.delete_database_column
+            )
+        )
+        self.delete_rows = resources.AsyncDeleteRowsResourceWithRawResponse(
+            client.delete_rows
+        )
+        self.describe_code_execution = (
+            resources.AsyncDescribeCodeExecutionResourceWithRawResponse(
+                client.describe_code_execution
+            )
+        )
+        self.describe_database_stats = (
+            resources.AsyncDescribeDatabaseStatsResourceWithRawResponse(
+                client.describe_database_stats
+            )
+        )
+        self.describe_file = resources.AsyncDescribeFileResourceWithRawResponse(
+            client.describe_file
+        )
+        self.describe_row = resources.AsyncDescribeRowResourceWithRawResponse(
+            client.describe_row
+        )
+        self.download_file = resources.AsyncDownloadFileResourceWithRawResponse(
+            client.download_file
+        )
+        self.ensure_rows = resources.AsyncEnsureRowsResourceWithRawResponse(
+            client.ensure_rows
+        )
+        self.execute_code = resources.AsyncExecuteCodeResourceWithRawResponse(
+            client.execute_code
+        )
+        self.execute_code_sync = resources.AsyncExecuteCodeSyncResourceWithRawResponse(
+            client.execute_code_sync
+        )
+        self.get_code_execution_result = (
+            resources.AsyncGetCodeExecutionResultResourceWithRawResponse(
+                client.get_code_execution_result
+            )
+        )
+        self.import_rows = resources.AsyncImportRowsResourceWithRawResponse(
+            client.import_rows
+        )
+        self.organization = resources.AsyncOrganizationResourceWithRawResponse(
+            client.organization
+        )
+        self.chat_threads = resources.AsyncChatThreadsResourceWithRawResponse(
+            client.chat_threads
+        )
         self.files = resources.AsyncFilesResourceWithRawResponse(client.files)
         self.mentions = resources.AsyncMentionsResourceWithRawResponse(client.mentions)
         self.rows = resources.AsyncRowsResourceWithRawResponse(client.rows)
-        self.sequences = resources.AsyncSequencesResourceWithRawResponse(client.sequences)
-        self.chat_messages = resources.AsyncChatMessagesResourceWithRawResponse(client.chat_messages)
-        self.update_database = resources.AsyncUpdateDatabaseResourceWithRawResponse(client.update_database)
-        self.update_database_column = resources.AsyncUpdateDatabaseColumnResourceWithRawResponse(
-            client.update_database_column
+        self.sequences = resources.AsyncSequencesResourceWithRawResponse(
+            client.sequences
         )
-        self.update_workspace = resources.AsyncUpdateWorkspaceResourceWithRawResponse(client.update_workspace)
+        self.chat_messages = resources.AsyncChatMessagesResourceWithRawResponse(
+            client.chat_messages
+        )
+        self.update_database = resources.AsyncUpdateDatabaseResourceWithRawResponse(
+            client.update_database
+        )
+        self.update_database_column = (
+            resources.AsyncUpdateDatabaseColumnResourceWithRawResponse(
+                client.update_database_column
+            )
+        )
+        self.update_workspace = resources.AsyncUpdateWorkspaceResourceWithRawResponse(
+            client.update_workspace
+        )
 
 
 class DeeporiginDataWithStreamedResponse:
     def __init__(self, client: DeeporiginData) -> None:
-        self.add_database_column = resources.AddDatabaseColumnResourceWithStreamingResponse(client.add_database_column)
-        self.archive_files = resources.ArchiveFilesResourceWithStreamingResponse(client.archive_files)
-        self.configure_column_select_options = resources.ConfigureColumnSelectOptionsResourceWithStreamingResponse(
-            client.configure_column_select_options
+        self.add_database_column = (
+            resources.AddDatabaseColumnResourceWithStreamingResponse(
+                client.add_database_column
+            )
         )
-        self.convert_id_format = resources.ConvertIDFormatResourceWithStreamingResponse(client.convert_id_format)
-        self.databases = resources.DatabasesResourceWithStreamingResponse(client.databases)
-        self.create_file_download_url = resources.CreateFileDownloadURLResourceWithStreamingResponse(
-            client.create_file_download_url
+        self.archive_files = resources.ArchiveFilesResourceWithStreamingResponse(
+            client.archive_files
         )
-        self.create_file_upload = resources.CreateFileUploadResourceWithStreamingResponse(client.create_file_upload)
-        self.workspaces = resources.WorkspacesResourceWithStreamingResponse(client.workspaces)
-        self.delete_database_column = resources.DeleteDatabaseColumnResourceWithStreamingResponse(
-            client.delete_database_column
+        self.configure_column_select_options = (
+            resources.ConfigureColumnSelectOptionsResourceWithStreamingResponse(
+                client.configure_column_select_options
+            )
         )
-        self.delete_rows = resources.DeleteRowsResourceWithStreamingResponse(client.delete_rows)
-        self.describe_code_execution = resources.DescribeCodeExecutionResourceWithStreamingResponse(
-            client.describe_code_execution
+        self.convert_id_format = resources.ConvertIDFormatResourceWithStreamingResponse(
+            client.convert_id_format
         )
-        self.describe_database_stats = resources.DescribeDatabaseStatsResourceWithStreamingResponse(
-            client.describe_database_stats
+        self.databases = resources.DatabasesResourceWithStreamingResponse(
+            client.databases
         )
-        self.describe_file = resources.DescribeFileResourceWithStreamingResponse(client.describe_file)
-        self.describe_row = resources.DescribeRowResourceWithStreamingResponse(client.describe_row)
-        self.download_file = resources.DownloadFileResourceWithStreamingResponse(client.download_file)
-        self.ensure_rows = resources.EnsureRowsResourceWithStreamingResponse(client.ensure_rows)
-        self.execute_code = resources.ExecuteCodeResourceWithStreamingResponse(client.execute_code)
-        self.execute_code_sync = resources.ExecuteCodeSyncResourceWithStreamingResponse(client.execute_code_sync)
-        self.get_code_execution_result = resources.GetCodeExecutionResultResourceWithStreamingResponse(
-            client.get_code_execution_result
+        self.create_file_download_url = (
+            resources.CreateFileDownloadURLResourceWithStreamingResponse(
+                client.create_file_download_url
+            )
         )
-        self.import_rows = resources.ImportRowsResourceWithStreamingResponse(client.import_rows)
-        self.organization = resources.OrganizationResourceWithStreamingResponse(client.organization)
-        self.chat_threads = resources.ChatThreadsResourceWithStreamingResponse(client.chat_threads)
+        self.create_file_upload = (
+            resources.CreateFileUploadResourceWithStreamingResponse(
+                client.create_file_upload
+            )
+        )
+        self.workspaces = resources.WorkspacesResourceWithStreamingResponse(
+            client.workspaces
+        )
+        self.delete_database_column = (
+            resources.DeleteDatabaseColumnResourceWithStreamingResponse(
+                client.delete_database_column
+            )
+        )
+        self.delete_rows = resources.DeleteRowsResourceWithStreamingResponse(
+            client.delete_rows
+        )
+        self.describe_code_execution = (
+            resources.DescribeCodeExecutionResourceWithStreamingResponse(
+                client.describe_code_execution
+            )
+        )
+        self.describe_database_stats = (
+            resources.DescribeDatabaseStatsResourceWithStreamingResponse(
+                client.describe_database_stats
+            )
+        )
+        self.describe_file = resources.DescribeFileResourceWithStreamingResponse(
+            client.describe_file
+        )
+        self.describe_row = resources.DescribeRowResourceWithStreamingResponse(
+            client.describe_row
+        )
+        self.download_file = resources.DownloadFileResourceWithStreamingResponse(
+            client.download_file
+        )
+        self.ensure_rows = resources.EnsureRowsResourceWithStreamingResponse(
+            client.ensure_rows
+        )
+        self.execute_code = resources.ExecuteCodeResourceWithStreamingResponse(
+            client.execute_code
+        )
+        self.execute_code_sync = resources.ExecuteCodeSyncResourceWithStreamingResponse(
+            client.execute_code_sync
+        )
+        self.get_code_execution_result = (
+            resources.GetCodeExecutionResultResourceWithStreamingResponse(
+                client.get_code_execution_result
+            )
+        )
+        self.import_rows = resources.ImportRowsResourceWithStreamingResponse(
+            client.import_rows
+        )
+        self.organization = resources.OrganizationResourceWithStreamingResponse(
+            client.organization
+        )
+        self.chat_threads = resources.ChatThreadsResourceWithStreamingResponse(
+            client.chat_threads
+        )
         self.files = resources.FilesResourceWithStreamingResponse(client.files)
         self.mentions = resources.MentionsResourceWithStreamingResponse(client.mentions)
         self.rows = resources.RowsResourceWithStreamingResponse(client.rows)
-        self.sequences = resources.SequencesResourceWithStreamingResponse(client.sequences)
-        self.chat_messages = resources.ChatMessagesResourceWithStreamingResponse(client.chat_messages)
-        self.update_database = resources.UpdateDatabaseResourceWithStreamingResponse(client.update_database)
-        self.update_database_column = resources.UpdateDatabaseColumnResourceWithStreamingResponse(
-            client.update_database_column
+        self.sequences = resources.SequencesResourceWithStreamingResponse(
+            client.sequences
         )
-        self.update_workspace = resources.UpdateWorkspaceResourceWithStreamingResponse(client.update_workspace)
+        self.chat_messages = resources.ChatMessagesResourceWithStreamingResponse(
+            client.chat_messages
+        )
+        self.update_database = resources.UpdateDatabaseResourceWithStreamingResponse(
+            client.update_database
+        )
+        self.update_database_column = (
+            resources.UpdateDatabaseColumnResourceWithStreamingResponse(
+                client.update_database_column
+            )
+        )
+        self.update_workspace = resources.UpdateWorkspaceResourceWithStreamingResponse(
+            client.update_workspace
+        )
 
 
 class AsyncDeeporiginDataWithStreamedResponse:
     def __init__(self, client: AsyncDeeporiginData) -> None:
-        self.add_database_column = resources.AsyncAddDatabaseColumnResourceWithStreamingResponse(
-            client.add_database_column
+        self.add_database_column = (
+            resources.AsyncAddDatabaseColumnResourceWithStreamingResponse(
+                client.add_database_column
+            )
         )
-        self.archive_files = resources.AsyncArchiveFilesResourceWithStreamingResponse(client.archive_files)
-        self.configure_column_select_options = resources.AsyncConfigureColumnSelectOptionsResourceWithStreamingResponse(
-            client.configure_column_select_options
+        self.archive_files = resources.AsyncArchiveFilesResourceWithStreamingResponse(
+            client.archive_files
         )
-        self.convert_id_format = resources.AsyncConvertIDFormatResourceWithStreamingResponse(client.convert_id_format)
-        self.databases = resources.AsyncDatabasesResourceWithStreamingResponse(client.databases)
-        self.create_file_download_url = resources.AsyncCreateFileDownloadURLResourceWithStreamingResponse(
-            client.create_file_download_url
+        self.configure_column_select_options = (
+            resources.AsyncConfigureColumnSelectOptionsResourceWithStreamingResponse(
+                client.configure_column_select_options
+            )
         )
-        self.create_file_upload = resources.AsyncCreateFileUploadResourceWithStreamingResponse(
-            client.create_file_upload
+        self.convert_id_format = (
+            resources.AsyncConvertIDFormatResourceWithStreamingResponse(
+                client.convert_id_format
+            )
         )
-        self.workspaces = resources.AsyncWorkspacesResourceWithStreamingResponse(client.workspaces)
-        self.delete_database_column = resources.AsyncDeleteDatabaseColumnResourceWithStreamingResponse(
-            client.delete_database_column
+        self.databases = resources.AsyncDatabasesResourceWithStreamingResponse(
+            client.databases
         )
-        self.delete_rows = resources.AsyncDeleteRowsResourceWithStreamingResponse(client.delete_rows)
-        self.describe_code_execution = resources.AsyncDescribeCodeExecutionResourceWithStreamingResponse(
-            client.describe_code_execution
+        self.create_file_download_url = (
+            resources.AsyncCreateFileDownloadURLResourceWithStreamingResponse(
+                client.create_file_download_url
+            )
         )
-        self.describe_database_stats = resources.AsyncDescribeDatabaseStatsResourceWithStreamingResponse(
-            client.describe_database_stats
+        self.create_file_upload = (
+            resources.AsyncCreateFileUploadResourceWithStreamingResponse(
+                client.create_file_upload
+            )
         )
-        self.describe_file = resources.AsyncDescribeFileResourceWithStreamingResponse(client.describe_file)
-        self.describe_row = resources.AsyncDescribeRowResourceWithStreamingResponse(client.describe_row)
-        self.download_file = resources.AsyncDownloadFileResourceWithStreamingResponse(client.download_file)
-        self.ensure_rows = resources.AsyncEnsureRowsResourceWithStreamingResponse(client.ensure_rows)
-        self.execute_code = resources.AsyncExecuteCodeResourceWithStreamingResponse(client.execute_code)
-        self.execute_code_sync = resources.AsyncExecuteCodeSyncResourceWithStreamingResponse(client.execute_code_sync)
-        self.get_code_execution_result = resources.AsyncGetCodeExecutionResultResourceWithStreamingResponse(
-            client.get_code_execution_result
+        self.workspaces = resources.AsyncWorkspacesResourceWithStreamingResponse(
+            client.workspaces
         )
-        self.import_rows = resources.AsyncImportRowsResourceWithStreamingResponse(client.import_rows)
-        self.organization = resources.AsyncOrganizationResourceWithStreamingResponse(client.organization)
-        self.chat_threads = resources.AsyncChatThreadsResourceWithStreamingResponse(client.chat_threads)
+        self.delete_database_column = (
+            resources.AsyncDeleteDatabaseColumnResourceWithStreamingResponse(
+                client.delete_database_column
+            )
+        )
+        self.delete_rows = resources.AsyncDeleteRowsResourceWithStreamingResponse(
+            client.delete_rows
+        )
+        self.describe_code_execution = (
+            resources.AsyncDescribeCodeExecutionResourceWithStreamingResponse(
+                client.describe_code_execution
+            )
+        )
+        self.describe_database_stats = (
+            resources.AsyncDescribeDatabaseStatsResourceWithStreamingResponse(
+                client.describe_database_stats
+            )
+        )
+        self.describe_file = resources.AsyncDescribeFileResourceWithStreamingResponse(
+            client.describe_file
+        )
+        self.describe_row = resources.AsyncDescribeRowResourceWithStreamingResponse(
+            client.describe_row
+        )
+        self.download_file = resources.AsyncDownloadFileResourceWithStreamingResponse(
+            client.download_file
+        )
+        self.ensure_rows = resources.AsyncEnsureRowsResourceWithStreamingResponse(
+            client.ensure_rows
+        )
+        self.execute_code = resources.AsyncExecuteCodeResourceWithStreamingResponse(
+            client.execute_code
+        )
+        self.execute_code_sync = (
+            resources.AsyncExecuteCodeSyncResourceWithStreamingResponse(
+                client.execute_code_sync
+            )
+        )
+        self.get_code_execution_result = (
+            resources.AsyncGetCodeExecutionResultResourceWithStreamingResponse(
+                client.get_code_execution_result
+            )
+        )
+        self.import_rows = resources.AsyncImportRowsResourceWithStreamingResponse(
+            client.import_rows
+        )
+        self.organization = resources.AsyncOrganizationResourceWithStreamingResponse(
+            client.organization
+        )
+        self.chat_threads = resources.AsyncChatThreadsResourceWithStreamingResponse(
+            client.chat_threads
+        )
         self.files = resources.AsyncFilesResourceWithStreamingResponse(client.files)
-        self.mentions = resources.AsyncMentionsResourceWithStreamingResponse(client.mentions)
-        self.rows = resources.AsyncRowsResourceWithStreamingResponse(client.rows)
-        self.sequences = resources.AsyncSequencesResourceWithStreamingResponse(client.sequences)
-        self.chat_messages = resources.AsyncChatMessagesResourceWithStreamingResponse(client.chat_messages)
-        self.update_database = resources.AsyncUpdateDatabaseResourceWithStreamingResponse(client.update_database)
-        self.update_database_column = resources.AsyncUpdateDatabaseColumnResourceWithStreamingResponse(
-            client.update_database_column
+        self.mentions = resources.AsyncMentionsResourceWithStreamingResponse(
+            client.mentions
         )
-        self.update_workspace = resources.AsyncUpdateWorkspaceResourceWithStreamingResponse(client.update_workspace)
+        self.rows = resources.AsyncRowsResourceWithStreamingResponse(client.rows)
+        self.sequences = resources.AsyncSequencesResourceWithStreamingResponse(
+            client.sequences
+        )
+        self.chat_messages = resources.AsyncChatMessagesResourceWithStreamingResponse(
+            client.chat_messages
+        )
+        self.update_database = (
+            resources.AsyncUpdateDatabaseResourceWithStreamingResponse(
+                client.update_database
+            )
+        )
+        self.update_database_column = (
+            resources.AsyncUpdateDatabaseColumnResourceWithStreamingResponse(
+                client.update_database_column
+            )
+        )
+        self.update_workspace = (
+            resources.AsyncUpdateWorkspaceResourceWithStreamingResponse(
+                client.update_workspace
+            )
+        )
 
 
 Client = DeeporiginData

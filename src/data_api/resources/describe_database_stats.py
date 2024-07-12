@@ -21,7 +21,9 @@ from .._response import (
 from .._base_client import (
     make_request_options,
 )
-from ..types.describe_database_stat_retrieve_response import DescribeDatabaseStatRetrieveResponse
+from ..types.describe_database_stat_retrieve_response import (
+    DescribeDatabaseStatRetrieveResponse,
+)
 
 __all__ = ["DescribeDatabaseStatsResource", "AsyncDescribeDatabaseStatsResource"]
 
@@ -32,7 +34,9 @@ class DescribeDatabaseStatsResource(SyncAPIResource):
         return DescribeDatabaseStatsResourceWithRawResponse(self)
 
     @cached_property
-    def with_streaming_response(self) -> DescribeDatabaseStatsResourceWithStreamingResponse:
+    def with_streaming_response(
+        self,
+    ) -> DescribeDatabaseStatsResourceWithStreamingResponse:
         return DescribeDatabaseStatsResourceWithStreamingResponse(self)
 
     def retrieve(
@@ -61,10 +65,14 @@ class DescribeDatabaseStatsResource(SyncAPIResource):
         return self._post(
             "/DescribeDatabaseStats",
             body=maybe_transform(
-                {"database_id": database_id}, describe_database_stat_retrieve_params.DescribeDatabaseStatRetrieveParams
+                {"database_id": database_id},
+                describe_database_stat_retrieve_params.DescribeDatabaseStatRetrieveParams,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=DescribeDatabaseStatRetrieveResponse,
         )
@@ -76,7 +84,9 @@ class AsyncDescribeDatabaseStatsResource(AsyncAPIResource):
         return AsyncDescribeDatabaseStatsResourceWithRawResponse(self)
 
     @cached_property
-    def with_streaming_response(self) -> AsyncDescribeDatabaseStatsResourceWithStreamingResponse:
+    def with_streaming_response(
+        self,
+    ) -> AsyncDescribeDatabaseStatsResourceWithStreamingResponse:
         return AsyncDescribeDatabaseStatsResourceWithStreamingResponse(self)
 
     async def retrieve(
@@ -105,10 +115,14 @@ class AsyncDescribeDatabaseStatsResource(AsyncAPIResource):
         return await self._post(
             "/DescribeDatabaseStats",
             body=await async_maybe_transform(
-                {"database_id": database_id}, describe_database_stat_retrieve_params.DescribeDatabaseStatRetrieveParams
+                {"database_id": database_id},
+                describe_database_stat_retrieve_params.DescribeDatabaseStatRetrieveParams,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=DescribeDatabaseStatRetrieveResponse,
         )
@@ -124,7 +138,9 @@ class DescribeDatabaseStatsResourceWithRawResponse:
 
 
 class AsyncDescribeDatabaseStatsResourceWithRawResponse:
-    def __init__(self, describe_database_stats: AsyncDescribeDatabaseStatsResource) -> None:
+    def __init__(
+        self, describe_database_stats: AsyncDescribeDatabaseStatsResource
+    ) -> None:
         self._describe_database_stats = describe_database_stats
 
         self.retrieve = async_to_raw_response_wrapper(
@@ -142,7 +158,9 @@ class DescribeDatabaseStatsResourceWithStreamingResponse:
 
 
 class AsyncDescribeDatabaseStatsResourceWithStreamingResponse:
-    def __init__(self, describe_database_stats: AsyncDescribeDatabaseStatsResource) -> None:
+    def __init__(
+        self, describe_database_stats: AsyncDescribeDatabaseStatsResource
+    ) -> None:
         self._describe_database_stats = describe_database_stats
 
         self.retrieve = async_to_streamed_response_wrapper(

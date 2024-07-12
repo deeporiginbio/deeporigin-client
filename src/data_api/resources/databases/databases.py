@@ -85,9 +85,14 @@ class DatabasesResource(SyncAPIResource):
         """
         return self._post(
             "/CreateDatabase",
-            body=maybe_transform({"database": database}, database_create_params.DatabaseCreateParams),
+            body=maybe_transform(
+                {"database": database}, database_create_params.DatabaseCreateParams
+            ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=DatabaseCreateResponse,
         )
@@ -135,9 +140,14 @@ class AsyncDatabasesResource(AsyncAPIResource):
         """
         return await self._post(
             "/CreateDatabase",
-            body=await async_maybe_transform({"database": database}, database_create_params.DatabaseCreateParams),
+            body=await async_maybe_transform(
+                {"database": database}, database_create_params.DatabaseCreateParams
+            ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=DatabaseCreateResponse,
         )

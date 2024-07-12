@@ -69,7 +69,10 @@ class UpdateDatabaseResource(SyncAPIResource):
                 update_database_run_params.UpdateDatabaseRunParams,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=UpdateDatabaseRunResponse,
         )
@@ -81,7 +84,9 @@ class AsyncUpdateDatabaseResource(AsyncAPIResource):
         return AsyncUpdateDatabaseResourceWithRawResponse(self)
 
     @cached_property
-    def with_streaming_response(self) -> AsyncUpdateDatabaseResourceWithStreamingResponse:
+    def with_streaming_response(
+        self,
+    ) -> AsyncUpdateDatabaseResourceWithStreamingResponse:
         return AsyncUpdateDatabaseResourceWithStreamingResponse(self)
 
     async def run(
@@ -118,7 +123,10 @@ class AsyncUpdateDatabaseResource(AsyncAPIResource):
                 update_database_run_params.UpdateDatabaseRunParams,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=UpdateDatabaseRunResponse,
         )

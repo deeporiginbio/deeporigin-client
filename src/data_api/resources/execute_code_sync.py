@@ -23,7 +23,9 @@ from .._response import (
 from .._base_client import (
     make_request_options,
 )
-from ..types.execute_code_sync_execute_sync_response import ExecuteCodeSyncExecuteSyncResponse
+from ..types.execute_code_sync_execute_sync_response import (
+    ExecuteCodeSyncExecuteSyncResponse,
+)
 
 __all__ = ["ExecuteCodeSyncResource", "AsyncExecuteCodeSyncResource"]
 
@@ -71,7 +73,10 @@ class ExecuteCodeSyncResource(SyncAPIResource):
                 execute_code_sync_execute_sync_params.ExecuteCodeSyncExecuteSyncParams,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=ExecuteCodeSyncExecuteSyncResponse,
         )
@@ -83,7 +88,9 @@ class AsyncExecuteCodeSyncResource(AsyncAPIResource):
         return AsyncExecuteCodeSyncResourceWithRawResponse(self)
 
     @cached_property
-    def with_streaming_response(self) -> AsyncExecuteCodeSyncResourceWithStreamingResponse:
+    def with_streaming_response(
+        self,
+    ) -> AsyncExecuteCodeSyncResourceWithStreamingResponse:
         return AsyncExecuteCodeSyncResourceWithStreamingResponse(self)
 
     async def execute_sync(
@@ -120,7 +127,10 @@ class AsyncExecuteCodeSyncResource(AsyncAPIResource):
                 execute_code_sync_execute_sync_params.ExecuteCodeSyncExecuteSyncParams,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=ExecuteCodeSyncExecuteSyncResponse,
         )

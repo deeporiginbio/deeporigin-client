@@ -64,7 +64,10 @@ class FilesResource(SyncAPIResource):
             "/ListFiles",
             body=maybe_transform({"filters": filters}, file_list_params.FileListParams),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=FileListResponse,
         )
@@ -104,9 +107,14 @@ class AsyncFilesResource(AsyncAPIResource):
         """
         return await self._post(
             "/ListFiles",
-            body=await async_maybe_transform({"filters": filters}, file_list_params.FileListParams),
+            body=await async_maybe_transform(
+                {"filters": filters}, file_list_params.FileListParams
+            ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=FileListResponse,
         )

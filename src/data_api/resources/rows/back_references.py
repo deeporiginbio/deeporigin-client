@@ -60,9 +60,14 @@ class BackReferencesResource(SyncAPIResource):
         """
         return self._post(
             "/ListRowBackReferences",
-            body=maybe_transform({"row_id": row_id}, back_reference_list_params.BackReferenceListParams),
+            body=maybe_transform(
+                {"row_id": row_id}, back_reference_list_params.BackReferenceListParams
+            ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BackReferenceListResponse,
         )
@@ -74,7 +79,9 @@ class AsyncBackReferencesResource(AsyncAPIResource):
         return AsyncBackReferencesResourceWithRawResponse(self)
 
     @cached_property
-    def with_streaming_response(self) -> AsyncBackReferencesResourceWithStreamingResponse:
+    def with_streaming_response(
+        self,
+    ) -> AsyncBackReferencesResourceWithStreamingResponse:
         return AsyncBackReferencesResourceWithStreamingResponse(self)
 
     async def list(
@@ -102,9 +109,14 @@ class AsyncBackReferencesResource(AsyncAPIResource):
         """
         return await self._post(
             "/ListRowBackReferences",
-            body=await async_maybe_transform({"row_id": row_id}, back_reference_list_params.BackReferenceListParams),
+            body=await async_maybe_transform(
+                {"row_id": row_id}, back_reference_list_params.BackReferenceListParams
+            ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BackReferenceListResponse,
         )

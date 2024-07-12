@@ -29,11 +29,15 @@ class Database(BaseModel):
 
     cols: Optional[List[Col]] = None
 
-    created_by_user_drn: Optional[str] = FieldInfo(alias="createdByUserDrn", default=None)
+    created_by_user_drn: Optional[str] = FieldInfo(
+        alias="createdByUserDrn", default=None
+    )
 
     creation_block_id: Optional[str] = FieldInfo(alias="creationBlockId", default=None)
 
-    creation_parent_id: Optional[str] = FieldInfo(alias="creationParentId", default=None)
+    creation_parent_id: Optional[str] = FieldInfo(
+        alias="creationParentId", default=None
+    )
 
     date_updated: Optional[str] = FieldInfo(alias="dateUpdated", default=None)
 
@@ -47,6 +51,8 @@ class Database(BaseModel):
 
     row_json_schema: Optional[object] = FieldInfo(alias="rowJsonSchema", default=None)
 
-    submission_status: Optional[Literal["draft", "final"]] = FieldInfo(alias="submissionStatus", default=None)
+    submission_status: Optional[Literal["draft", "final"]] = FieldInfo(
+        alias="submissionStatus", default=None
+    )
 
     validation_status: Optional[str] = FieldInfo(alias="validationStatus", default=None)

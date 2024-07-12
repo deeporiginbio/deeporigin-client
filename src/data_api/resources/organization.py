@@ -60,9 +60,14 @@ class OrganizationResource(SyncAPIResource):
         """
         return self._post(
             "/InitializeOrg",
-            body=maybe_transform(body, organization_initialize_params.OrganizationInitializeParams),
+            body=maybe_transform(
+                body, organization_initialize_params.OrganizationInitializeParams
+            ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=OrganizationInitializeResponse,
         )
@@ -102,9 +107,14 @@ class AsyncOrganizationResource(AsyncAPIResource):
         """
         return await self._post(
             "/InitializeOrg",
-            body=await async_maybe_transform(body, organization_initialize_params.OrganizationInitializeParams),
+            body=await async_maybe_transform(
+                body, organization_initialize_params.OrganizationInitializeParams
+            ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=OrganizationInitializeResponse,
         )

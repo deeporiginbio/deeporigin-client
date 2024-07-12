@@ -77,4 +77,6 @@ class AsyncColumnsResourceWithStreamingResponse:
 
     @cached_property
     def unique_values(self) -> AsyncUniqueValuesResourceWithStreamingResponse:
-        return AsyncUniqueValuesResourceWithStreamingResponse(self._columns.unique_values)
+        return AsyncUniqueValuesResourceWithStreamingResponse(
+            self._columns.unique_values
+        )

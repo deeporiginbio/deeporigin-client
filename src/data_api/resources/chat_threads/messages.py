@@ -60,9 +60,14 @@ class MessagesResource(SyncAPIResource):
         """
         return self._post(
             "/ListChatThreadMessages",
-            body=maybe_transform({"thread_id": thread_id}, message_list_params.MessageListParams),
+            body=maybe_transform(
+                {"thread_id": thread_id}, message_list_params.MessageListParams
+            ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=MessageListResponse,
         )
@@ -102,9 +107,14 @@ class AsyncMessagesResource(AsyncAPIResource):
         """
         return await self._post(
             "/ListChatThreadMessages",
-            body=await async_maybe_transform({"thread_id": thread_id}, message_list_params.MessageListParams),
+            body=await async_maybe_transform(
+                {"thread_id": thread_id}, message_list_params.MessageListParams
+            ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=MessageListResponse,
         )

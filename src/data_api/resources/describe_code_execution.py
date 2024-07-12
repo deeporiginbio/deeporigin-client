@@ -21,7 +21,9 @@ from .._response import (
 from .._base_client import (
     make_request_options,
 )
-from ..types.describe_code_execution_retrieve_response import DescribeCodeExecutionRetrieveResponse
+from ..types.describe_code_execution_retrieve_response import (
+    DescribeCodeExecutionRetrieveResponse,
+)
 
 __all__ = ["DescribeCodeExecutionResource", "AsyncDescribeCodeExecutionResource"]
 
@@ -32,7 +34,9 @@ class DescribeCodeExecutionResource(SyncAPIResource):
         return DescribeCodeExecutionResourceWithRawResponse(self)
 
     @cached_property
-    def with_streaming_response(self) -> DescribeCodeExecutionResourceWithStreamingResponse:
+    def with_streaming_response(
+        self,
+    ) -> DescribeCodeExecutionResourceWithStreamingResponse:
         return DescribeCodeExecutionResourceWithStreamingResponse(self)
 
     def retrieve(
@@ -61,10 +65,14 @@ class DescribeCodeExecutionResource(SyncAPIResource):
         return self._post(
             "/DescribeCodeExecution",
             body=maybe_transform(
-                {"id": id}, describe_code_execution_retrieve_params.DescribeCodeExecutionRetrieveParams
+                {"id": id},
+                describe_code_execution_retrieve_params.DescribeCodeExecutionRetrieveParams,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=DescribeCodeExecutionRetrieveResponse,
         )
@@ -76,7 +84,9 @@ class AsyncDescribeCodeExecutionResource(AsyncAPIResource):
         return AsyncDescribeCodeExecutionResourceWithRawResponse(self)
 
     @cached_property
-    def with_streaming_response(self) -> AsyncDescribeCodeExecutionResourceWithStreamingResponse:
+    def with_streaming_response(
+        self,
+    ) -> AsyncDescribeCodeExecutionResourceWithStreamingResponse:
         return AsyncDescribeCodeExecutionResourceWithStreamingResponse(self)
 
     async def retrieve(
@@ -105,10 +115,14 @@ class AsyncDescribeCodeExecutionResource(AsyncAPIResource):
         return await self._post(
             "/DescribeCodeExecution",
             body=await async_maybe_transform(
-                {"id": id}, describe_code_execution_retrieve_params.DescribeCodeExecutionRetrieveParams
+                {"id": id},
+                describe_code_execution_retrieve_params.DescribeCodeExecutionRetrieveParams,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=DescribeCodeExecutionRetrieveResponse,
         )
@@ -124,7 +138,9 @@ class DescribeCodeExecutionResourceWithRawResponse:
 
 
 class AsyncDescribeCodeExecutionResourceWithRawResponse:
-    def __init__(self, describe_code_execution: AsyncDescribeCodeExecutionResource) -> None:
+    def __init__(
+        self, describe_code_execution: AsyncDescribeCodeExecutionResource
+    ) -> None:
         self._describe_code_execution = describe_code_execution
 
         self.retrieve = async_to_raw_response_wrapper(
@@ -142,7 +158,9 @@ class DescribeCodeExecutionResourceWithStreamingResponse:
 
 
 class AsyncDescribeCodeExecutionResourceWithStreamingResponse:
-    def __init__(self, describe_code_execution: AsyncDescribeCodeExecutionResource) -> None:
+    def __init__(
+        self, describe_code_execution: AsyncDescribeCodeExecutionResource
+    ) -> None:
         self._describe_code_execution = describe_code_execution
 
         self.retrieve = async_to_streamed_response_wrapper(

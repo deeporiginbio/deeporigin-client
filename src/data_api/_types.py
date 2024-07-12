@@ -16,7 +16,14 @@ from typing import (
     Optional,
     Sequence,
 )
-from typing_extensions import Literal, Protocol, TypeAlias, TypedDict, override, runtime_checkable
+from typing_extensions import (
+    Literal,
+    Protocol,
+    TypeAlias,
+    TypedDict,
+    override,
+    runtime_checkable,
+)
 
 import httpx
 import pydantic
@@ -44,7 +51,9 @@ if TYPE_CHECKING:
     FileContent = Union[IO[bytes], bytes, PathLike[str]]
 else:
     Base64FileInput = Union[IO[bytes], PathLike]
-    FileContent = Union[IO[bytes], bytes, PathLike]  # PathLike is not subscriptable in Python 3.8.
+    FileContent = Union[
+        IO[bytes], bytes, PathLike
+    ]  # PathLike is not subscriptable in Python 3.8.
 FileTypes = Union[
     # file (or bytes)
     FileContent,
@@ -69,7 +78,9 @@ HttpxFileTypes = Union[
     # (filename, file (or bytes), content_type, headers)
     Tuple[Optional[str], HttpxFileContent, Optional[str], Mapping[str, str]],
 ]
-HttpxRequestFiles = Union[Mapping[str, HttpxFileTypes], Sequence[Tuple[str, HttpxFileTypes]]]
+HttpxRequestFiles = Union[
+    Mapping[str, HttpxFileTypes], Sequence[Tuple[str, HttpxFileTypes]]
+]
 
 # Workaround to support (cast_to: Type[ResponseT]) -> ResponseT
 # where ResponseT includes `None`. In order to support directly
@@ -162,16 +173,14 @@ class ModelBuilderProtocol(Protocol):
         *,
         response: Response,
         data: object,
-    ) -> _T:
-        ...
+    ) -> _T: ...
 
 
 Headers = Mapping[str, Union[str, Omit]]
 
 
 class HeadersLikeProtocol(Protocol):
-    def get(self, __key: str) -> str | None:
-        ...
+    def get(self, __key: str) -> str | None: ...
 
 
 HeadersLike = Union[Headers, HeadersLikeProtocol]

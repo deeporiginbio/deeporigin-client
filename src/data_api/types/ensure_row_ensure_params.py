@@ -32,7 +32,9 @@ class RowRow(TypedDict, total=False):
 
     is_template: Annotated[Optional[bool], PropertyInfo(alias="isTemplate")]
 
-    submission_status: Annotated[Literal["draft", "final"], PropertyInfo(alias="submissionStatus")]
+    submission_status: Annotated[
+        Literal["draft", "final"], PropertyInfo(alias="submissionStatus")
+    ]
 
 
 class Row(TypedDict, total=False):

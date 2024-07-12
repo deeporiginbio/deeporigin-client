@@ -23,9 +23,14 @@ from .._response import (
 from .._base_client import (
     make_request_options,
 )
-from ..types.configure_column_select_option_configure_response import ConfigureColumnSelectOptionConfigureResponse
+from ..types.configure_column_select_option_configure_response import (
+    ConfigureColumnSelectOptionConfigureResponse,
+)
 
-__all__ = ["ConfigureColumnSelectOptionsResource", "AsyncConfigureColumnSelectOptionsResource"]
+__all__ = [
+    "ConfigureColumnSelectOptionsResource",
+    "AsyncConfigureColumnSelectOptionsResource",
+]
 
 
 class ConfigureColumnSelectOptionsResource(SyncAPIResource):
@@ -34,14 +39,18 @@ class ConfigureColumnSelectOptionsResource(SyncAPIResource):
         return ConfigureColumnSelectOptionsResourceWithRawResponse(self)
 
     @cached_property
-    def with_streaming_response(self) -> ConfigureColumnSelectOptionsResourceWithStreamingResponse:
+    def with_streaming_response(
+        self,
+    ) -> ConfigureColumnSelectOptionsResourceWithStreamingResponse:
         return ConfigureColumnSelectOptionsResourceWithStreamingResponse(self)
 
     def configure(
         self,
         *,
         column_id: str,
-        option_configuration: Iterable[configure_column_select_option_configure_params.OptionConfiguration],
+        option_configuration: Iterable[
+            configure_column_select_option_configure_params.OptionConfiguration
+        ],
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -72,7 +81,10 @@ class ConfigureColumnSelectOptionsResource(SyncAPIResource):
                 configure_column_select_option_configure_params.ConfigureColumnSelectOptionConfigureParams,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=ConfigureColumnSelectOptionConfigureResponse,
         )
@@ -80,18 +92,24 @@ class ConfigureColumnSelectOptionsResource(SyncAPIResource):
 
 class AsyncConfigureColumnSelectOptionsResource(AsyncAPIResource):
     @cached_property
-    def with_raw_response(self) -> AsyncConfigureColumnSelectOptionsResourceWithRawResponse:
+    def with_raw_response(
+        self,
+    ) -> AsyncConfigureColumnSelectOptionsResourceWithRawResponse:
         return AsyncConfigureColumnSelectOptionsResourceWithRawResponse(self)
 
     @cached_property
-    def with_streaming_response(self) -> AsyncConfigureColumnSelectOptionsResourceWithStreamingResponse:
+    def with_streaming_response(
+        self,
+    ) -> AsyncConfigureColumnSelectOptionsResourceWithStreamingResponse:
         return AsyncConfigureColumnSelectOptionsResourceWithStreamingResponse(self)
 
     async def configure(
         self,
         *,
         column_id: str,
-        option_configuration: Iterable[configure_column_select_option_configure_params.OptionConfiguration],
+        option_configuration: Iterable[
+            configure_column_select_option_configure_params.OptionConfiguration
+        ],
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -122,14 +140,19 @@ class AsyncConfigureColumnSelectOptionsResource(AsyncAPIResource):
                 configure_column_select_option_configure_params.ConfigureColumnSelectOptionConfigureParams,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=ConfigureColumnSelectOptionConfigureResponse,
         )
 
 
 class ConfigureColumnSelectOptionsResourceWithRawResponse:
-    def __init__(self, configure_column_select_options: ConfigureColumnSelectOptionsResource) -> None:
+    def __init__(
+        self, configure_column_select_options: ConfigureColumnSelectOptionsResource
+    ) -> None:
         self._configure_column_select_options = configure_column_select_options
 
         self.configure = to_raw_response_wrapper(
@@ -138,7 +161,9 @@ class ConfigureColumnSelectOptionsResourceWithRawResponse:
 
 
 class AsyncConfigureColumnSelectOptionsResourceWithRawResponse:
-    def __init__(self, configure_column_select_options: AsyncConfigureColumnSelectOptionsResource) -> None:
+    def __init__(
+        self, configure_column_select_options: AsyncConfigureColumnSelectOptionsResource
+    ) -> None:
         self._configure_column_select_options = configure_column_select_options
 
         self.configure = async_to_raw_response_wrapper(
@@ -147,7 +172,9 @@ class AsyncConfigureColumnSelectOptionsResourceWithRawResponse:
 
 
 class ConfigureColumnSelectOptionsResourceWithStreamingResponse:
-    def __init__(self, configure_column_select_options: ConfigureColumnSelectOptionsResource) -> None:
+    def __init__(
+        self, configure_column_select_options: ConfigureColumnSelectOptionsResource
+    ) -> None:
         self._configure_column_select_options = configure_column_select_options
 
         self.configure = to_streamed_response_wrapper(
@@ -156,7 +183,9 @@ class ConfigureColumnSelectOptionsResourceWithStreamingResponse:
 
 
 class AsyncConfigureColumnSelectOptionsResourceWithStreamingResponse:
-    def __init__(self, configure_column_select_options: AsyncConfigureColumnSelectOptionsResource) -> None:
+    def __init__(
+        self, configure_column_select_options: AsyncConfigureColumnSelectOptionsResource
+    ) -> None:
         self._configure_column_select_options = configure_column_select_options
 
         self.configure = async_to_streamed_response_wrapper(

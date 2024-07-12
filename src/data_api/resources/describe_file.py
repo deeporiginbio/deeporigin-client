@@ -60,9 +60,15 @@ class DescribeFileResource(SyncAPIResource):
         """
         return self._post(
             "/DescribeFile",
-            body=maybe_transform({"file_id": file_id}, describe_file_retrieve_params.DescribeFileRetrieveParams),
+            body=maybe_transform(
+                {"file_id": file_id},
+                describe_file_retrieve_params.DescribeFileRetrieveParams,
+            ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=DescribeFileRetrieveResponse,
         )
@@ -103,10 +109,14 @@ class AsyncDescribeFileResource(AsyncAPIResource):
         return await self._post(
             "/DescribeFile",
             body=await async_maybe_transform(
-                {"file_id": file_id}, describe_file_retrieve_params.DescribeFileRetrieveParams
+                {"file_id": file_id},
+                describe_file_retrieve_params.DescribeFileRetrieveParams,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=DescribeFileRetrieveResponse,
         )

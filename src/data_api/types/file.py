@@ -16,7 +16,9 @@ class File(BaseModel):
 
     content_type: Optional[str] = FieldInfo(alias="contentType", default=None)
 
-    created_by_user_drn: Optional[str] = FieldInfo(alias="createdByUserDrn", default=None)
+    created_by_user_drn: Optional[str] = FieldInfo(
+        alias="createdByUserDrn", default=None
+    )
 
     date_created: str = FieldInfo(alias="dateCreated")
 

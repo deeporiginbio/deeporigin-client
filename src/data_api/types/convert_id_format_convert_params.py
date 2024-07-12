@@ -5,7 +5,12 @@ from __future__ import annotations
 from typing import Union, Iterable
 from typing_extensions import Required, TypedDict
 
-__all__ = ["ConvertIDFormatConvertParams", "Conversion", "ConversionID", "ConversionHid"]
+__all__ = [
+    "ConvertIDFormatConvertParams",
+    "Conversion",
+    "ConversionID",
+    "ConversionHid",
+]
 
 
 class ConvertIDFormatConvertParams(TypedDict, total=False):

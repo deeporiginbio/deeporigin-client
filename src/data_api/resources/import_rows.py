@@ -60,9 +60,15 @@ class ImportRowsResource(SyncAPIResource):
         """
         return self._post(
             "/ImportRows",
-            body=maybe_transform({"database_id": database_id}, import_row_create_params.ImportRowCreateParams),
+            body=maybe_transform(
+                {"database_id": database_id},
+                import_row_create_params.ImportRowCreateParams,
+            ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=ImportRowCreateResponse,
         )
@@ -103,10 +109,14 @@ class AsyncImportRowsResource(AsyncAPIResource):
         return await self._post(
             "/ImportRows",
             body=await async_maybe_transform(
-                {"database_id": database_id}, import_row_create_params.ImportRowCreateParams
+                {"database_id": database_id},
+                import_row_create_params.ImportRowCreateParams,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=ImportRowCreateResponse,
         )

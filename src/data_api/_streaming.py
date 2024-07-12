@@ -5,7 +5,14 @@ import json
 import inspect
 from types import TracebackType
 from typing import TYPE_CHECKING, Any, Generic, TypeVar, Iterator, AsyncIterator, cast
-from typing_extensions import Self, Protocol, TypeGuard, override, get_origin, runtime_checkable
+from typing_extensions import (
+    Self,
+    Protocol,
+    TypeGuard,
+    override,
+    get_origin,
+    runtime_checkable,
+)
 
 import httpx
 
@@ -220,7 +227,9 @@ class SSEDecoder:
         if data:
             yield data
 
-    async def aiter_bytes(self, iterator: AsyncIterator[bytes]) -> AsyncIterator[ServerSentEvent]:
+    async def aiter_bytes(
+        self, iterator: AsyncIterator[bytes]
+    ) -> AsyncIterator[ServerSentEvent]:
         """Given an iterator that yields raw binary data, iterate over it & yield every event encountered"""
         async for chunk in self._aiter_chunks(iterator):
             # Split before decoding so splitlines() only uses \r and \n
@@ -230,7 +239,9 @@ class SSEDecoder:
                 if sse:
                     yield sse
 
-    async def _aiter_chunks(self, iterator: AsyncIterator[bytes]) -> AsyncIterator[bytes]:
+    async def _aiter_chunks(
+        self, iterator: AsyncIterator[bytes]
+    ) -> AsyncIterator[bytes]:
         """Given an iterator that yields raw binary data, iterate over it and yield individual SSE chunks"""
         data = b""
         async for chunk in iterator:
@@ -246,7 +257,12 @@ class SSEDecoder:
         # See: https://html.spec.whatwg.org/multipage/server-sent-events.html#event-stream-interpretation  # noqa: E501
 
         if not line:
-            if not self._event and not self._data and not self._last_event_id and self._retry is None:
+            if (
+                not self._event
+                and not self._data
+                and not self._last_event_id
+                and self._retry is None
+            ):
                 return None
 
             sse = ServerSentEvent(
@@ -297,12 +313,16 @@ class SSEBytesDecoder(Protocol):
         """Given an iterator that yields raw binary data, iterate over it & yield every event encountered"""
         ...
 
-    def aiter_bytes(self, iterator: AsyncIterator[bytes]) -> AsyncIterator[ServerSentEvent]:
+    def aiter_bytes(
+        self, iterator: AsyncIterator[bytes]
+    ) -> AsyncIterator[ServerSentEvent]:
         """Given an async iterator that yields raw binary data, iterate over it & yield every event encountered"""
         ...
 
 
-def is_stream_class_type(typ: type) -> TypeGuard[type[Stream[object]] | type[AsyncStream[object]]]:
+def is_stream_class_type(
+    typ: type,
+) -> TypeGuard[type[Stream[object]] | type[AsyncStream[object]]]:
     """TypeGuard for determining whether or not the given type is a subclass of `Stream` / `AsyncStream`"""
     origin = get_origin(typ) or typ
     return inspect.isclass(origin) and issubclass(origin, (Stream, AsyncStream))

@@ -62,9 +62,14 @@ class DeleteRowsResource(SyncAPIResource):
         """
         return self._post(
             "/DeleteRows",
-            body=maybe_transform({"row_ids": row_ids}, delete_row_delete_params.DeleteRowDeleteParams),
+            body=maybe_transform(
+                {"row_ids": row_ids}, delete_row_delete_params.DeleteRowDeleteParams
+            ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=DeleteRowDeleteResponse,
         )
@@ -104,9 +109,14 @@ class AsyncDeleteRowsResource(AsyncAPIResource):
         """
         return await self._post(
             "/DeleteRows",
-            body=await async_maybe_transform({"row_ids": row_ids}, delete_row_delete_params.DeleteRowDeleteParams),
+            body=await async_maybe_transform(
+                {"row_ids": row_ids}, delete_row_delete_params.DeleteRowDeleteParams
+            ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=DeleteRowDeleteResponse,
         )

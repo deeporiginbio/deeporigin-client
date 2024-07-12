@@ -32,7 +32,9 @@ class UpdateDatabaseColumnResource(SyncAPIResource):
         return UpdateDatabaseColumnResourceWithRawResponse(self)
 
     @cached_property
-    def with_streaming_response(self) -> UpdateDatabaseColumnResourceWithStreamingResponse:
+    def with_streaming_response(
+        self,
+    ) -> UpdateDatabaseColumnResourceWithStreamingResponse:
         return UpdateDatabaseColumnResourceWithStreamingResponse(self)
 
     def run(
@@ -69,7 +71,10 @@ class UpdateDatabaseColumnResource(SyncAPIResource):
                 update_database_column_run_params.UpdateDatabaseColumnRunParams,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=UpdateDatabaseColumnRunResponse,
         )
@@ -81,7 +86,9 @@ class AsyncUpdateDatabaseColumnResource(AsyncAPIResource):
         return AsyncUpdateDatabaseColumnResourceWithRawResponse(self)
 
     @cached_property
-    def with_streaming_response(self) -> AsyncUpdateDatabaseColumnResourceWithStreamingResponse:
+    def with_streaming_response(
+        self,
+    ) -> AsyncUpdateDatabaseColumnResourceWithStreamingResponse:
         return AsyncUpdateDatabaseColumnResourceWithStreamingResponse(self)
 
     async def run(
@@ -118,7 +125,10 @@ class AsyncUpdateDatabaseColumnResource(AsyncAPIResource):
                 update_database_column_run_params.UpdateDatabaseColumnRunParams,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=UpdateDatabaseColumnRunResponse,
         )
@@ -134,7 +144,9 @@ class UpdateDatabaseColumnResourceWithRawResponse:
 
 
 class AsyncUpdateDatabaseColumnResourceWithRawResponse:
-    def __init__(self, update_database_column: AsyncUpdateDatabaseColumnResource) -> None:
+    def __init__(
+        self, update_database_column: AsyncUpdateDatabaseColumnResource
+    ) -> None:
         self._update_database_column = update_database_column
 
         self.run = async_to_raw_response_wrapper(
@@ -152,7 +164,9 @@ class UpdateDatabaseColumnResourceWithStreamingResponse:
 
 
 class AsyncUpdateDatabaseColumnResourceWithStreamingResponse:
-    def __init__(self, update_database_column: AsyncUpdateDatabaseColumnResource) -> None:
+    def __init__(
+        self, update_database_column: AsyncUpdateDatabaseColumnResource
+    ) -> None:
         self._update_database_column = update_database_column
 
         self.run = async_to_streamed_response_wrapper(

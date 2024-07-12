@@ -21,7 +21,9 @@ from .._response import (
 from .._base_client import (
     make_request_options,
 )
-from ..types.delete_database_column_delete_response import DeleteDatabaseColumnDeleteResponse
+from ..types.delete_database_column_delete_response import (
+    DeleteDatabaseColumnDeleteResponse,
+)
 
 __all__ = ["DeleteDatabaseColumnResource", "AsyncDeleteDatabaseColumnResource"]
 
@@ -32,7 +34,9 @@ class DeleteDatabaseColumnResource(SyncAPIResource):
         return DeleteDatabaseColumnResourceWithRawResponse(self)
 
     @cached_property
-    def with_streaming_response(self) -> DeleteDatabaseColumnResourceWithStreamingResponse:
+    def with_streaming_response(
+        self,
+    ) -> DeleteDatabaseColumnResourceWithStreamingResponse:
         return DeleteDatabaseColumnResourceWithStreamingResponse(self)
 
     def delete(
@@ -61,10 +65,14 @@ class DeleteDatabaseColumnResource(SyncAPIResource):
         return self._post(
             "/DeleteDatabaseColumn",
             body=maybe_transform(
-                {"column_id": column_id}, delete_database_column_delete_params.DeleteDatabaseColumnDeleteParams
+                {"column_id": column_id},
+                delete_database_column_delete_params.DeleteDatabaseColumnDeleteParams,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=DeleteDatabaseColumnDeleteResponse,
         )
@@ -76,7 +84,9 @@ class AsyncDeleteDatabaseColumnResource(AsyncAPIResource):
         return AsyncDeleteDatabaseColumnResourceWithRawResponse(self)
 
     @cached_property
-    def with_streaming_response(self) -> AsyncDeleteDatabaseColumnResourceWithStreamingResponse:
+    def with_streaming_response(
+        self,
+    ) -> AsyncDeleteDatabaseColumnResourceWithStreamingResponse:
         return AsyncDeleteDatabaseColumnResourceWithStreamingResponse(self)
 
     async def delete(
@@ -105,10 +115,14 @@ class AsyncDeleteDatabaseColumnResource(AsyncAPIResource):
         return await self._post(
             "/DeleteDatabaseColumn",
             body=await async_maybe_transform(
-                {"column_id": column_id}, delete_database_column_delete_params.DeleteDatabaseColumnDeleteParams
+                {"column_id": column_id},
+                delete_database_column_delete_params.DeleteDatabaseColumnDeleteParams,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=DeleteDatabaseColumnDeleteResponse,
         )
@@ -124,7 +138,9 @@ class DeleteDatabaseColumnResourceWithRawResponse:
 
 
 class AsyncDeleteDatabaseColumnResourceWithRawResponse:
-    def __init__(self, delete_database_column: AsyncDeleteDatabaseColumnResource) -> None:
+    def __init__(
+        self, delete_database_column: AsyncDeleteDatabaseColumnResource
+    ) -> None:
         self._delete_database_column = delete_database_column
 
         self.delete = async_to_raw_response_wrapper(
@@ -142,7 +158,9 @@ class DeleteDatabaseColumnResourceWithStreamingResponse:
 
 
 class AsyncDeleteDatabaseColumnResourceWithStreamingResponse:
-    def __init__(self, delete_database_column: AsyncDeleteDatabaseColumnResource) -> None:
+    def __init__(
+        self, delete_database_column: AsyncDeleteDatabaseColumnResource
+    ) -> None:
         self._delete_database_column = delete_database_column
 
         self.delete = async_to_streamed_response_wrapper(

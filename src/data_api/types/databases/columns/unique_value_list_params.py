@@ -17,7 +17,9 @@ class Variant0(TypedDict, total=False):
 class Variant1(TypedDict, total=False):
     database_row_id: Required[Annotated[str, PropertyInfo(alias="databaseRowId")]]
 
-    system_column_name: Required[Annotated[Literal["creationParentId"], PropertyInfo(alias="systemColumnName")]]
+    system_column_name: Required[
+        Annotated[Literal["creationParentId"], PropertyInfo(alias="systemColumnName")]
+    ]
 
 
 UniqueValueListParams = Union[Variant0, Variant1]

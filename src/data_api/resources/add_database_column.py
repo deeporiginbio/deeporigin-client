@@ -69,7 +69,10 @@ class AddDatabaseColumnResource(SyncAPIResource):
                 add_database_column_add_params.AddDatabaseColumnAddParams,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=AddDatabaseColumnAddResponse,
         )
@@ -81,7 +84,9 @@ class AsyncAddDatabaseColumnResource(AsyncAPIResource):
         return AsyncAddDatabaseColumnResourceWithRawResponse(self)
 
     @cached_property
-    def with_streaming_response(self) -> AsyncAddDatabaseColumnResourceWithStreamingResponse:
+    def with_streaming_response(
+        self,
+    ) -> AsyncAddDatabaseColumnResourceWithStreamingResponse:
         return AsyncAddDatabaseColumnResourceWithStreamingResponse(self)
 
     async def add(
@@ -118,7 +123,10 @@ class AsyncAddDatabaseColumnResource(AsyncAPIResource):
                 add_database_column_add_params.AddDatabaseColumnAddParams,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=AddDatabaseColumnAddResponse,
         )

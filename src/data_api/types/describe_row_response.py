@@ -95,9 +95,13 @@ class DataDatabaseRowFieldUnionMember0(BaseModel):
 
     validation_status: str = FieldInfo(alias="validationStatus")
 
-    invalid_data: Optional[DataDatabaseRowFieldUnionMember0InvalidData] = FieldInfo(alias="invalidData", default=None)
+    invalid_data: Optional[DataDatabaseRowFieldUnionMember0InvalidData] = FieldInfo(
+        alias="invalidData", default=None
+    )
 
-    system_type: Optional[Literal["name", "bodyDocument"]] = FieldInfo(alias="systemType", default=None)
+    system_type: Optional[Literal["name", "bodyDocument"]] = FieldInfo(
+        alias="systemType", default=None
+    )
 
     value: Optional[str] = None
 
@@ -115,9 +119,13 @@ class DataDatabaseRowFieldUnionMember1(BaseModel):
 
     validation_status: str = FieldInfo(alias="validationStatus")
 
-    invalid_data: Optional[DataDatabaseRowFieldUnionMember1InvalidData] = FieldInfo(alias="invalidData", default=None)
+    invalid_data: Optional[DataDatabaseRowFieldUnionMember1InvalidData] = FieldInfo(
+        alias="invalidData", default=None
+    )
 
-    system_type: Optional[Literal["name", "bodyDocument"]] = FieldInfo(alias="systemType", default=None)
+    system_type: Optional[Literal["name", "bodyDocument"]] = FieldInfo(
+        alias="systemType", default=None
+    )
 
     value: Optional[float] = None
 
@@ -135,9 +143,13 @@ class DataDatabaseRowFieldUnionMember2(BaseModel):
 
     validation_status: str = FieldInfo(alias="validationStatus")
 
-    invalid_data: Optional[DataDatabaseRowFieldUnionMember2InvalidData] = FieldInfo(alias="invalidData", default=None)
+    invalid_data: Optional[DataDatabaseRowFieldUnionMember2InvalidData] = FieldInfo(
+        alias="invalidData", default=None
+    )
 
-    system_type: Optional[Literal["name", "bodyDocument"]] = FieldInfo(alias="systemType", default=None)
+    system_type: Optional[Literal["name", "bodyDocument"]] = FieldInfo(
+        alias="systemType", default=None
+    )
 
     value: Optional[float] = None
 
@@ -155,9 +167,13 @@ class DataDatabaseRowFieldUnionMember3(BaseModel):
 
     validation_status: str = FieldInfo(alias="validationStatus")
 
-    invalid_data: Optional[DataDatabaseRowFieldUnionMember3InvalidData] = FieldInfo(alias="invalidData", default=None)
+    invalid_data: Optional[DataDatabaseRowFieldUnionMember3InvalidData] = FieldInfo(
+        alias="invalidData", default=None
+    )
 
-    system_type: Optional[Literal["name", "bodyDocument"]] = FieldInfo(alias="systemType", default=None)
+    system_type: Optional[Literal["name", "bodyDocument"]] = FieldInfo(
+        alias="systemType", default=None
+    )
 
     value: Optional[bool] = None
 
@@ -179,9 +195,13 @@ class DataDatabaseRowFieldUnionMember4(BaseModel):
 
     validation_status: str = FieldInfo(alias="validationStatus")
 
-    invalid_data: Optional[DataDatabaseRowFieldUnionMember4InvalidData] = FieldInfo(alias="invalidData", default=None)
+    invalid_data: Optional[DataDatabaseRowFieldUnionMember4InvalidData] = FieldInfo(
+        alias="invalidData", default=None
+    )
 
-    system_type: Optional[Literal["name", "bodyDocument"]] = FieldInfo(alias="systemType", default=None)
+    system_type: Optional[Literal["name", "bodyDocument"]] = FieldInfo(
+        alias="systemType", default=None
+    )
 
     value: Optional[DataDatabaseRowFieldUnionMember4Value] = None
 
@@ -203,9 +223,13 @@ class DataDatabaseRowFieldUnionMember5(BaseModel):
 
     validation_status: str = FieldInfo(alias="validationStatus")
 
-    invalid_data: Optional[DataDatabaseRowFieldUnionMember5InvalidData] = FieldInfo(alias="invalidData", default=None)
+    invalid_data: Optional[DataDatabaseRowFieldUnionMember5InvalidData] = FieldInfo(
+        alias="invalidData", default=None
+    )
 
-    system_type: Optional[Literal["name", "bodyDocument"]] = FieldInfo(alias="systemType", default=None)
+    system_type: Optional[Literal["name", "bodyDocument"]] = FieldInfo(
+        alias="systemType", default=None
+    )
 
     value: Optional[DataDatabaseRowFieldUnionMember5Value] = None
 
@@ -227,9 +251,13 @@ class DataDatabaseRowFieldUnionMember6(BaseModel):
 
     validation_status: str = FieldInfo(alias="validationStatus")
 
-    invalid_data: Optional[DataDatabaseRowFieldUnionMember6InvalidData] = FieldInfo(alias="invalidData", default=None)
+    invalid_data: Optional[DataDatabaseRowFieldUnionMember6InvalidData] = FieldInfo(
+        alias="invalidData", default=None
+    )
 
-    system_type: Optional[Literal["name", "bodyDocument"]] = FieldInfo(alias="systemType", default=None)
+    system_type: Optional[Literal["name", "bodyDocument"]] = FieldInfo(
+        alias="systemType", default=None
+    )
 
     value: Optional[DataDatabaseRowFieldUnionMember6Value] = None
 
@@ -251,9 +279,13 @@ class DataDatabaseRowFieldUnionMember7(BaseModel):
 
     validation_status: str = FieldInfo(alias="validationStatus")
 
-    invalid_data: Optional[DataDatabaseRowFieldUnionMember7InvalidData] = FieldInfo(alias="invalidData", default=None)
+    invalid_data: Optional[DataDatabaseRowFieldUnionMember7InvalidData] = FieldInfo(
+        alias="invalidData", default=None
+    )
 
-    system_type: Optional[Literal["name", "bodyDocument"]] = FieldInfo(alias="systemType", default=None)
+    system_type: Optional[Literal["name", "bodyDocument"]] = FieldInfo(
+        alias="systemType", default=None
+    )
 
     value: Optional[DataDatabaseRowFieldUnionMember7Value] = None
 
@@ -271,9 +303,13 @@ class DataDatabaseRowFieldUnionMember8(BaseModel):
 
     validation_status: str = FieldInfo(alias="validationStatus")
 
-    invalid_data: Optional[DataDatabaseRowFieldUnionMember8InvalidData] = FieldInfo(alias="invalidData", default=None)
+    invalid_data: Optional[DataDatabaseRowFieldUnionMember8InvalidData] = FieldInfo(
+        alias="invalidData", default=None
+    )
 
-    system_type: Optional[Literal["name", "bodyDocument"]] = FieldInfo(alias="systemType", default=None)
+    system_type: Optional[Literal["name", "bodyDocument"]] = FieldInfo(
+        alias="systemType", default=None
+    )
 
     value: Optional[str] = None
 
@@ -301,9 +337,13 @@ class DataDatabaseRowFieldUnionMember9(BaseModel):
 
     validation_status: str = FieldInfo(alias="validationStatus")
 
-    invalid_data: Optional[DataDatabaseRowFieldUnionMember9InvalidData] = FieldInfo(alias="invalidData", default=None)
+    invalid_data: Optional[DataDatabaseRowFieldUnionMember9InvalidData] = FieldInfo(
+        alias="invalidData", default=None
+    )
 
-    system_type: Optional[Literal["name", "bodyDocument"]] = FieldInfo(alias="systemType", default=None)
+    system_type: Optional[Literal["name", "bodyDocument"]] = FieldInfo(
+        alias="systemType", default=None
+    )
 
     value: Optional[DataDatabaseRowFieldUnionMember9Value] = None
 
@@ -325,9 +365,13 @@ class DataDatabaseRowFieldUnionMember10(BaseModel):
 
     validation_status: str = FieldInfo(alias="validationStatus")
 
-    invalid_data: Optional[DataDatabaseRowFieldUnionMember10InvalidData] = FieldInfo(alias="invalidData", default=None)
+    invalid_data: Optional[DataDatabaseRowFieldUnionMember10InvalidData] = FieldInfo(
+        alias="invalidData", default=None
+    )
 
-    system_type: Optional[Literal["name", "bodyDocument"]] = FieldInfo(alias="systemType", default=None)
+    system_type: Optional[Literal["name", "bodyDocument"]] = FieldInfo(
+        alias="systemType", default=None
+    )
 
     value: Optional[DataDatabaseRowFieldUnionMember10Value] = None
 
@@ -358,9 +402,13 @@ class DataDatabaseRowFieldUnionMember11(BaseModel):
 
     value: DataDatabaseRowFieldUnionMember11Value
 
-    invalid_data: Optional[DataDatabaseRowFieldUnionMember11InvalidData] = FieldInfo(alias="invalidData", default=None)
+    invalid_data: Optional[DataDatabaseRowFieldUnionMember11InvalidData] = FieldInfo(
+        alias="invalidData", default=None
+    )
 
-    system_type: Optional[Literal["name", "bodyDocument"]] = FieldInfo(alias="systemType", default=None)
+    system_type: Optional[Literal["name", "bodyDocument"]] = FieldInfo(
+        alias="systemType", default=None
+    )
 
 
 class DataDatabaseRowFieldUnionMember12InvalidData(BaseModel):
@@ -380,11 +428,13 @@ class DataDatabaseRowFieldUnionMember12ValueUnionMember0(BaseModel):
 
     validation_status: str = FieldInfo(alias="validationStatus")
 
-    invalid_data: Optional[DataDatabaseRowFieldUnionMember12ValueUnionMember0InvalidData] = FieldInfo(
-        alias="invalidData", default=None
-    )
+    invalid_data: Optional[
+        DataDatabaseRowFieldUnionMember12ValueUnionMember0InvalidData
+    ] = FieldInfo(alias="invalidData", default=None)
 
-    system_type: Optional[Literal["name", "bodyDocument"]] = FieldInfo(alias="systemType", default=None)
+    system_type: Optional[Literal["name", "bodyDocument"]] = FieldInfo(
+        alias="systemType", default=None
+    )
 
     value: Optional[str] = None
 
@@ -402,11 +452,13 @@ class DataDatabaseRowFieldUnionMember12ValueUnionMember1(BaseModel):
 
     validation_status: str = FieldInfo(alias="validationStatus")
 
-    invalid_data: Optional[DataDatabaseRowFieldUnionMember12ValueUnionMember1InvalidData] = FieldInfo(
-        alias="invalidData", default=None
-    )
+    invalid_data: Optional[
+        DataDatabaseRowFieldUnionMember12ValueUnionMember1InvalidData
+    ] = FieldInfo(alias="invalidData", default=None)
 
-    system_type: Optional[Literal["name", "bodyDocument"]] = FieldInfo(alias="systemType", default=None)
+    system_type: Optional[Literal["name", "bodyDocument"]] = FieldInfo(
+        alias="systemType", default=None
+    )
 
     value: Optional[float] = None
 
@@ -424,11 +476,13 @@ class DataDatabaseRowFieldUnionMember12ValueUnionMember2(BaseModel):
 
     validation_status: str = FieldInfo(alias="validationStatus")
 
-    invalid_data: Optional[DataDatabaseRowFieldUnionMember12ValueUnionMember2InvalidData] = FieldInfo(
-        alias="invalidData", default=None
-    )
+    invalid_data: Optional[
+        DataDatabaseRowFieldUnionMember12ValueUnionMember2InvalidData
+    ] = FieldInfo(alias="invalidData", default=None)
 
-    system_type: Optional[Literal["name", "bodyDocument"]] = FieldInfo(alias="systemType", default=None)
+    system_type: Optional[Literal["name", "bodyDocument"]] = FieldInfo(
+        alias="systemType", default=None
+    )
 
     value: Optional[float] = None
 
@@ -446,11 +500,13 @@ class DataDatabaseRowFieldUnionMember12ValueUnionMember3(BaseModel):
 
     validation_status: str = FieldInfo(alias="validationStatus")
 
-    invalid_data: Optional[DataDatabaseRowFieldUnionMember12ValueUnionMember3InvalidData] = FieldInfo(
-        alias="invalidData", default=None
-    )
+    invalid_data: Optional[
+        DataDatabaseRowFieldUnionMember12ValueUnionMember3InvalidData
+    ] = FieldInfo(alias="invalidData", default=None)
 
-    system_type: Optional[Literal["name", "bodyDocument"]] = FieldInfo(alias="systemType", default=None)
+    system_type: Optional[Literal["name", "bodyDocument"]] = FieldInfo(
+        alias="systemType", default=None
+    )
 
     value: Optional[bool] = None
 
@@ -472,11 +528,13 @@ class DataDatabaseRowFieldUnionMember12ValueUnionMember4(BaseModel):
 
     validation_status: str = FieldInfo(alias="validationStatus")
 
-    invalid_data: Optional[DataDatabaseRowFieldUnionMember12ValueUnionMember4InvalidData] = FieldInfo(
-        alias="invalidData", default=None
-    )
+    invalid_data: Optional[
+        DataDatabaseRowFieldUnionMember12ValueUnionMember4InvalidData
+    ] = FieldInfo(alias="invalidData", default=None)
 
-    system_type: Optional[Literal["name", "bodyDocument"]] = FieldInfo(alias="systemType", default=None)
+    system_type: Optional[Literal["name", "bodyDocument"]] = FieldInfo(
+        alias="systemType", default=None
+    )
 
     value: Optional[DataDatabaseRowFieldUnionMember12ValueUnionMember4Value] = None
 
@@ -498,11 +556,13 @@ class DataDatabaseRowFieldUnionMember12ValueUnionMember5(BaseModel):
 
     validation_status: str = FieldInfo(alias="validationStatus")
 
-    invalid_data: Optional[DataDatabaseRowFieldUnionMember12ValueUnionMember5InvalidData] = FieldInfo(
-        alias="invalidData", default=None
-    )
+    invalid_data: Optional[
+        DataDatabaseRowFieldUnionMember12ValueUnionMember5InvalidData
+    ] = FieldInfo(alias="invalidData", default=None)
 
-    system_type: Optional[Literal["name", "bodyDocument"]] = FieldInfo(alias="systemType", default=None)
+    system_type: Optional[Literal["name", "bodyDocument"]] = FieldInfo(
+        alias="systemType", default=None
+    )
 
     value: Optional[DataDatabaseRowFieldUnionMember12ValueUnionMember5Value] = None
 
@@ -524,11 +584,13 @@ class DataDatabaseRowFieldUnionMember12ValueUnionMember6(BaseModel):
 
     validation_status: str = FieldInfo(alias="validationStatus")
 
-    invalid_data: Optional[DataDatabaseRowFieldUnionMember12ValueUnionMember6InvalidData] = FieldInfo(
-        alias="invalidData", default=None
-    )
+    invalid_data: Optional[
+        DataDatabaseRowFieldUnionMember12ValueUnionMember6InvalidData
+    ] = FieldInfo(alias="invalidData", default=None)
 
-    system_type: Optional[Literal["name", "bodyDocument"]] = FieldInfo(alias="systemType", default=None)
+    system_type: Optional[Literal["name", "bodyDocument"]] = FieldInfo(
+        alias="systemType", default=None
+    )
 
     value: Optional[DataDatabaseRowFieldUnionMember12ValueUnionMember6Value] = None
 
@@ -550,11 +612,13 @@ class DataDatabaseRowFieldUnionMember12ValueUnionMember7(BaseModel):
 
     validation_status: str = FieldInfo(alias="validationStatus")
 
-    invalid_data: Optional[DataDatabaseRowFieldUnionMember12ValueUnionMember7InvalidData] = FieldInfo(
-        alias="invalidData", default=None
-    )
+    invalid_data: Optional[
+        DataDatabaseRowFieldUnionMember12ValueUnionMember7InvalidData
+    ] = FieldInfo(alias="invalidData", default=None)
 
-    system_type: Optional[Literal["name", "bodyDocument"]] = FieldInfo(alias="systemType", default=None)
+    system_type: Optional[Literal["name", "bodyDocument"]] = FieldInfo(
+        alias="systemType", default=None
+    )
 
     value: Optional[DataDatabaseRowFieldUnionMember12ValueUnionMember7Value] = None
 
@@ -572,11 +636,13 @@ class DataDatabaseRowFieldUnionMember12ValueUnionMember8(BaseModel):
 
     validation_status: str = FieldInfo(alias="validationStatus")
 
-    invalid_data: Optional[DataDatabaseRowFieldUnionMember12ValueUnionMember8InvalidData] = FieldInfo(
-        alias="invalidData", default=None
-    )
+    invalid_data: Optional[
+        DataDatabaseRowFieldUnionMember12ValueUnionMember8InvalidData
+    ] = FieldInfo(alias="invalidData", default=None)
 
-    system_type: Optional[Literal["name", "bodyDocument"]] = FieldInfo(alias="systemType", default=None)
+    system_type: Optional[Literal["name", "bodyDocument"]] = FieldInfo(
+        alias="systemType", default=None
+    )
 
     value: Optional[str] = None
 
@@ -604,11 +670,13 @@ class DataDatabaseRowFieldUnionMember12ValueUnionMember9(BaseModel):
 
     validation_status: str = FieldInfo(alias="validationStatus")
 
-    invalid_data: Optional[DataDatabaseRowFieldUnionMember12ValueUnionMember9InvalidData] = FieldInfo(
-        alias="invalidData", default=None
-    )
+    invalid_data: Optional[
+        DataDatabaseRowFieldUnionMember12ValueUnionMember9InvalidData
+    ] = FieldInfo(alias="invalidData", default=None)
 
-    system_type: Optional[Literal["name", "bodyDocument"]] = FieldInfo(alias="systemType", default=None)
+    system_type: Optional[Literal["name", "bodyDocument"]] = FieldInfo(
+        alias="systemType", default=None
+    )
 
     value: Optional[DataDatabaseRowFieldUnionMember12ValueUnionMember9Value] = None
 
@@ -630,11 +698,13 @@ class DataDatabaseRowFieldUnionMember12ValueUnionMember10(BaseModel):
 
     validation_status: str = FieldInfo(alias="validationStatus")
 
-    invalid_data: Optional[DataDatabaseRowFieldUnionMember12ValueUnionMember10InvalidData] = FieldInfo(
-        alias="invalidData", default=None
-    )
+    invalid_data: Optional[
+        DataDatabaseRowFieldUnionMember12ValueUnionMember10InvalidData
+    ] = FieldInfo(alias="invalidData", default=None)
 
-    system_type: Optional[Literal["name", "bodyDocument"]] = FieldInfo(alias="systemType", default=None)
+    system_type: Optional[Literal["name", "bodyDocument"]] = FieldInfo(
+        alias="systemType", default=None
+    )
 
     value: Optional[DataDatabaseRowFieldUnionMember12ValueUnionMember10Value] = None
 
@@ -663,9 +733,13 @@ class DataDatabaseRowFieldUnionMember12(BaseModel):
 
     validation_status: str = FieldInfo(alias="validationStatus")
 
-    invalid_data: Optional[DataDatabaseRowFieldUnionMember12InvalidData] = FieldInfo(alias="invalidData", default=None)
+    invalid_data: Optional[DataDatabaseRowFieldUnionMember12InvalidData] = FieldInfo(
+        alias="invalidData", default=None
+    )
 
-    system_type: Optional[Literal["name", "bodyDocument"]] = FieldInfo(alias="systemType", default=None)
+    system_type: Optional[Literal["name", "bodyDocument"]] = FieldInfo(
+        alias="systemType", default=None
+    )
 
     value: Optional[DataDatabaseRowFieldUnionMember12Value] = None
 
@@ -696,11 +770,15 @@ class DataDatabaseRow(BaseModel):
 
     type: Literal["row"]
 
-    created_by_user_drn: Optional[str] = FieldInfo(alias="createdByUserDrn", default=None)
+    created_by_user_drn: Optional[str] = FieldInfo(
+        alias="createdByUserDrn", default=None
+    )
 
     creation_block_id: Optional[str] = FieldInfo(alias="creationBlockId", default=None)
 
-    creation_parent_id: Optional[str] = FieldInfo(alias="creationParentId", default=None)
+    creation_parent_id: Optional[str] = FieldInfo(
+        alias="creationParentId", default=None
+    )
 
     date_updated: Optional[str] = FieldInfo(alias="dateUpdated", default=None)
 
@@ -714,12 +792,16 @@ class DataDatabaseRow(BaseModel):
 
     parent_id: Optional[str] = FieldInfo(alias="parentId", default=None)
 
-    submission_status: Optional[Literal["draft", "final"]] = FieldInfo(alias="submissionStatus", default=None)
+    submission_status: Optional[Literal["draft", "final"]] = FieldInfo(
+        alias="submissionStatus", default=None
+    )
 
     validation_status: Optional[str] = FieldInfo(alias="validationStatus", default=None)
 
 
-Data = Annotated[Union[Database, DataDatabaseRow, Workspace], PropertyInfo(discriminator="type")]
+Data = Annotated[
+    Union[Database, DataDatabaseRow, Workspace], PropertyInfo(discriminator="type")
+]
 
 
 class DescribeRowResponse(BaseModel):

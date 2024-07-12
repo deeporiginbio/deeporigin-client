@@ -50,7 +50,9 @@ class DataMessageContentUnionMember2(BaseModel):
 
 
 DataMessageContent = Union[
-    DataMessageContentUnionMember0, DataMessageContentUnionMember1, DataMessageContentUnionMember2
+    DataMessageContentUnionMember0,
+    DataMessageContentUnionMember1,
+    DataMessageContentUnionMember2,
 ]
 
 

@@ -31,7 +31,9 @@ class GetCodeExecutionResultResource(SyncAPIResource):
         return GetCodeExecutionResultResourceWithRawResponse(self)
 
     @cached_property
-    def with_streaming_response(self) -> GetCodeExecutionResultResourceWithStreamingResponse:
+    def with_streaming_response(
+        self,
+    ) -> GetCodeExecutionResultResourceWithStreamingResponse:
         return GetCodeExecutionResultResourceWithStreamingResponse(self)
 
     def retrieve(
@@ -60,10 +62,14 @@ class GetCodeExecutionResultResource(SyncAPIResource):
         return self._post(
             "/GetCodeExecutionResult",
             body=maybe_transform(
-                {"id": id}, get_code_execution_result_retrieve_params.GetCodeExecutionResultRetrieveParams
+                {"id": id},
+                get_code_execution_result_retrieve_params.GetCodeExecutionResultRetrieveParams,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=object,
         )
@@ -75,7 +81,9 @@ class AsyncGetCodeExecutionResultResource(AsyncAPIResource):
         return AsyncGetCodeExecutionResultResourceWithRawResponse(self)
 
     @cached_property
-    def with_streaming_response(self) -> AsyncGetCodeExecutionResultResourceWithStreamingResponse:
+    def with_streaming_response(
+        self,
+    ) -> AsyncGetCodeExecutionResultResourceWithStreamingResponse:
         return AsyncGetCodeExecutionResultResourceWithStreamingResponse(self)
 
     async def retrieve(
@@ -104,17 +112,23 @@ class AsyncGetCodeExecutionResultResource(AsyncAPIResource):
         return await self._post(
             "/GetCodeExecutionResult",
             body=await async_maybe_transform(
-                {"id": id}, get_code_execution_result_retrieve_params.GetCodeExecutionResultRetrieveParams
+                {"id": id},
+                get_code_execution_result_retrieve_params.GetCodeExecutionResultRetrieveParams,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=object,
         )
 
 
 class GetCodeExecutionResultResourceWithRawResponse:
-    def __init__(self, get_code_execution_result: GetCodeExecutionResultResource) -> None:
+    def __init__(
+        self, get_code_execution_result: GetCodeExecutionResultResource
+    ) -> None:
         self._get_code_execution_result = get_code_execution_result
 
         self.retrieve = to_raw_response_wrapper(
@@ -123,7 +137,9 @@ class GetCodeExecutionResultResourceWithRawResponse:
 
 
 class AsyncGetCodeExecutionResultResourceWithRawResponse:
-    def __init__(self, get_code_execution_result: AsyncGetCodeExecutionResultResource) -> None:
+    def __init__(
+        self, get_code_execution_result: AsyncGetCodeExecutionResultResource
+    ) -> None:
         self._get_code_execution_result = get_code_execution_result
 
         self.retrieve = async_to_raw_response_wrapper(
@@ -132,7 +148,9 @@ class AsyncGetCodeExecutionResultResourceWithRawResponse:
 
 
 class GetCodeExecutionResultResourceWithStreamingResponse:
-    def __init__(self, get_code_execution_result: GetCodeExecutionResultResource) -> None:
+    def __init__(
+        self, get_code_execution_result: GetCodeExecutionResultResource
+    ) -> None:
         self._get_code_execution_result = get_code_execution_result
 
         self.retrieve = to_streamed_response_wrapper(
@@ -141,7 +159,9 @@ class GetCodeExecutionResultResourceWithStreamingResponse:
 
 
 class AsyncGetCodeExecutionResultResourceWithStreamingResponse:
-    def __init__(self, get_code_execution_result: AsyncGetCodeExecutionResultResource) -> None:
+    def __init__(
+        self, get_code_execution_result: AsyncGetCodeExecutionResultResource
+    ) -> None:
         self._get_code_execution_result = get_code_execution_result
 
         self.retrieve = async_to_streamed_response_wrapper(

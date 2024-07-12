@@ -25,7 +25,9 @@ from ...._base_client import (
     make_request_options,
 )
 from ....types.databases.columns import unique_value_list_params
-from ....types.databases.columns.unique_value_list_response import UniqueValueListResponse
+from ....types.databases.columns.unique_value_list_response import (
+    UniqueValueListResponse,
+)
 
 __all__ = ["UniqueValuesResource", "AsyncUniqueValuesResource"]
 
@@ -117,7 +119,10 @@ class UniqueValuesResource(SyncAPIResource):
                 unique_value_list_params.UniqueValueListParams,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=UniqueValueListResponse,
         )
@@ -210,7 +215,10 @@ class AsyncUniqueValuesResource(AsyncAPIResource):
                 unique_value_list_params.UniqueValueListParams,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=UniqueValueListResponse,
         )

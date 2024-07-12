@@ -73,7 +73,10 @@ class ChatMessagesResource(SyncAPIResource):
                 chat_message_send_params.ChatMessageSendParams,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=NoneType,
         )
@@ -125,7 +128,10 @@ class AsyncChatMessagesResource(AsyncAPIResource):
                 chat_message_send_params.ChatMessageSendParams,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=NoneType,
         )

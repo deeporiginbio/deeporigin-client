@@ -105,7 +105,9 @@ class AsyncRowsResourceWithStreamingResponse:
 
     @cached_property
     def back_references(self) -> AsyncBackReferencesResourceWithStreamingResponse:
-        return AsyncBackReferencesResourceWithStreamingResponse(self._rows.back_references)
+        return AsyncBackReferencesResourceWithStreamingResponse(
+            self._rows.back_references
+        )
 
     @cached_property
     def hierarchy(self) -> AsyncHierarchyResourceWithStreamingResponse:

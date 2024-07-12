@@ -60,9 +60,14 @@ class WorkspacesResource(SyncAPIResource):
         """
         return self._post(
             "/CreateWorkspace",
-            body=maybe_transform({"workspace": workspace}, workspace_create_params.WorkspaceCreateParams),
+            body=maybe_transform(
+                {"workspace": workspace}, workspace_create_params.WorkspaceCreateParams
+            ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=WorkspaceCreateResponse,
         )
@@ -102,9 +107,14 @@ class AsyncWorkspacesResource(AsyncAPIResource):
         """
         return await self._post(
             "/CreateWorkspace",
-            body=await async_maybe_transform({"workspace": workspace}, workspace_create_params.WorkspaceCreateParams),
+            body=await async_maybe_transform(
+                {"workspace": workspace}, workspace_create_params.WorkspaceCreateParams
+            ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=WorkspaceCreateResponse,
         )
