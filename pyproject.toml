@@ -26,6 +26,8 @@ dependencies = [
     "beartype",
     "tabulate",
     "filetype",
+    "httpx",
+    "distro",
 ]
 dynamic = ["version"]
 

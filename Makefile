@@ -41,6 +41,7 @@ install:
 	@echo "Installing deeporigin in editable mode in a venv..."
 	@python3 -m venv venv
 	@source $(CURDIR)/venv/bin/activate && \
+		pip install --upgrade pip && \
 	    pip install -q -e .[test,jupyter,docs] && \
 	    deactivate
 	@-mkdir -p ~/.deeporigin
