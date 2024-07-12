@@ -22,7 +22,7 @@ from deeporigin.managed_data.schema import (
     IDFormat,
     RowType,
 )
-from deeporigin.utils import PREFIXES
+from deeporigin.utils import PREFIXES, download_sync
 
 
 @beartype
@@ -54,6 +54,68 @@ def _get_default_client(client=None):
         )
 
     return client
+
+
+@beartype
+def list_files(
+    *,
+    assigned_row_ids: Optional[list[str]] = None,
+    is_unassigned: Optional[bool] = None,
+    client=None,
+) -> list:
+    """Low level function that wraps the `ListFiles` endpoint.
+
+    Returns a list of files from databases and rows
+    based on row assigned to.
+
+    Args:
+        assigned_row_ids: ID (or human ID) or the assigned row.
+        is_unassigned: Whether file is assigned to any row.
+
+    Returns:
+        A list of dictionaries, where each entry corresponds to a file. Each dictionary contains a field called `file` that corresponds conforms to a [DescribeFileResponse][src.managed_data.schema.DescribeFileResponse].
+
+    """
+    client = _get_default_client(client)
+
+    filters = []
+
+    if is_unassigned is not None:
+        filters.append(dict(isUnassigned=is_unassigned))
+
+    if assigned_row_ids:
+        filters.append(dict(assignedRowIds=assigned_row_ids))
+
+    response = client.files.list(filters=filters)
+
+    return response.data
+
+
+@beartype
+def create_file_download_url(
+    file_id: str,
+    *,
+    client=None,
+):
+    """Low level function that wraps the `CreateFileDownloadUrl` endpoint.
+
+    Returns a pre-signed URL that allows you to download a
+    file.
+
+
+    Args:
+        file_id: ID of file.
+
+    Returns:
+        A dictionary that contains a field `downloadUrl`, that
+        contains a AWS pre-signed URL.
+
+    """
+
+    client = _get_default_client(client)
+
+    response = client.create_file_download_url.create(file_id=file_id)
+    return response.data
 
 
 @beartype
@@ -92,6 +154,131 @@ def list_rows(
         filters.append(dict(rowType=row_type))
 
     response = client.rows.hierarchy.list(filters=filters)
+
+    return response.data
+
+
+@beartype
+def describe_file(
+    file_id: str,
+    *,
+    client=None,
+):
+    """Low level function that wraps the `DescribeFile` endpoint.
+
+    Returns a description of file, including S3 URI, name,
+    status, content length, and type.
+
+
+    Args:
+        file_id: ID of file.
+
+    Returns:
+        A dictionary that contains a file description, that conforms to [DescribeFileResponse][src.managed_data.schema.DescribeFileResponse].
+
+    """
+
+    client = _get_default_client(client)
+
+    response = client.describe_file.retrieve(file_id=file_id)
+    return response.data
+
+
+@beartype
+def describe_row(
+    row_id: str,
+    *,
+    fields: bool = False,
+    client=None,
+):
+    """Low level function that wraps the `DescribeRow` endpoint.
+
+    Returns a description of a row or a database
+
+
+    Args:
+        row_id: ID or (human ID) or row or database.
+        fields: if True, a fields item is returned in the response.
+
+    Returns:
+        A dictionary that contains a row description, that
+        conforms to [DescribeRowResponse][deeporigin._data_api.types.describe_row_response.DescribeRowResponse].
+
+    """
+
+    client = _get_default_client(client)
+
+    response = client.describe_row.retrieve(row_id=row_id, fields=fields)
+    return response.data
+
+
+@beartype
+def download_file(
+    file_id: str,
+    *,
+    destination: str = os.getcwd(),
+    client=None,
+) -> None:
+    """Download a file to a destination folder."""
+
+    client = _get_default_client(client)
+
+    if not os.path.isdir(destination):
+        raise DeepOriginException(
+            message=f"{destination} should be a path to a folder."
+        )
+
+    file_name = describe_file(file_id, client=client).name
+
+    url = create_file_download_url(file_id, client=client).downloadUrl
+
+    save_path = os.path.join(destination, file_name)
+
+    download_sync(url, save_path)
+
+
+@beartype
+def list_database_rows(
+    row_id: str,
+    *,
+    client=None,
+):
+    """Low level function that wraps the `ListDatabaseRows` endpoint."""
+
+    client = _get_default_client(client)
+
+    response = client.databases.rows.list(database_row_id=row_id)
+    return response.data
+
+
+@beartype
+def create_file_upload_url(
+    *,
+    name: str,
+    content_type: str,
+    content_length: int,
+    client=None,
+):
+    """low level function that wraps the `CreateFileUpload` endpoint.
+
+    Creates a new file upload URL.
+
+    Args:
+        name: Name of the file
+        content_type: Content type of the file
+        content_length: Content length of the file
+
+    Returns:
+        A dictionary that conforms to a [CreateFileUploadResponse][src.managed_data.schema.CreateFileUploadResponse]
+    """
+
+    client = _get_default_client(client)
+
+    response = client.create_file_upload.create(
+        name=name,
+        content_type=content_type,
+        content_length=content_length,
+    )
 
     return response.data
 

@@ -132,23 +132,6 @@ class DeepOriginClient(Client):
 
         return requests.put(*args, **kwargs)
 
-    def download(self, url: str, save_path: str) -> None:
-        """concrete method to download a resource using GET and save to disk
-
-        Args:
-            url (str): url to download
-            save_path (str): path to save file
-        """
-
-        with requests.get(url, stream=True) as response:
-            if response.status_code != 200:
-                raise DeepOriginException(message=f"Failed to download file from {url}")
-
-            with open(save_path, "wb") as file:
-                for chunk in response.iter_content(chunk_size=8192):
-                    if chunk:  # Filter out keep-alive new chunks
-                        file.write(chunk)
-
     @beartype
     def invoke(
         self,

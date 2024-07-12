@@ -16,17 +16,6 @@ from deeporigin.managed_data.schema import (
 )
 
 
-def ensure_rows(
-    data: dict,
-    *,
-    client: Optional[Client] = None,
-):
-    """wrapper around EnsureRows endpoint"""
-    client = _get_default_client(client)
-
-    return client.invoke("EnsureRows", data)
-
-
 @beartype
 def _parse_params_from_url(url: str) -> dict:
     """utility function to extract params from a URL query
@@ -45,38 +34,6 @@ def _parse_params_from_url(url: str) -> dict:
     params = parse_qs(query)
     params = {key: value[0] for key, value in params.items()}
     return params
-
-
-@beartype
-def create_file_upload_url(
-    *,
-    name: str,
-    content_type: str,
-    content_length: int,
-    client: Optional[Client] = None,
-) -> dict:
-    """low level function that wraps the `CreateFileUpload` endpoint.
-
-    Creates a new file upload URL.
-
-    Args:
-        name: Name of the file
-        content_type: Content type of the file
-        content_length: Content length of the file
-
-    Returns:
-        A dictionary that conforms to a [CreateFileUploadResponse][src.managed_data.schema.CreateFileUploadResponse]
-    """
-
-    client = _get_default_client(client)
-
-    data = {
-        "name": name,
-        "contentType": content_type,
-        "contentLength": str(content_length),
-    }
-
-    return client.invoke("CreateFileUpload", data)
 
 
 @beartype
@@ -318,39 +275,6 @@ def delete_database_column(
 
 
 @beartype
-def list_files(
-    *,
-    assigned_row_ids: Optional[list[str]] = None,
-    is_unassigned: Optional[bool] = None,
-    client: Optional[Client] = None,
-) -> list[dict]:
-    """Low level function that wraps the `ListFiles` endpoint.
-
-    Returns a list of files from databases and rows
-    based on row assigned to.
-
-    Args:
-        assigned_row_ids: ID (or human ID) or the assigned row.
-        is_unassigned: Whether file is assigned to any row.
-
-    Returns:
-        A list of dictionaries, where each entry corresponds to a file. Each dictionary contains a field called `file` that corresponds conforms to a [DescribeFileResponse][src.managed_data.schema.DescribeFileResponse].
-
-    """
-    client = _get_default_client(client)
-
-    filters = []
-
-    if is_unassigned is not None:
-        filters.append(dict(isUnassigned=is_unassigned))
-
-    if assigned_row_ids:
-        filters.append(dict(assignedRowIds=assigned_row_ids))
-
-    return client.invoke("ListFiles", data=dict(filters=filters))
-
-
-@beartype
 def describe_database_stats(
     database_id: str,
     *,
@@ -418,125 +342,6 @@ def list_row_back_references(
     client = _get_default_client(client)
 
     return client.invoke("ListRowBackReferences", dict(rowId=row_id))
-
-
-@beartype
-def create_file_download_url(
-    file_id: str,
-    *,
-    client: Optional[Client] = None,
-) -> dict:
-    """Low level function that wraps the `CreateFileDownloadUrl` endpoint.
-
-    Returns a pre-signed URL that allows you to download a
-    file.
-
-
-    Args:
-        file_id: ID of file.
-
-    Returns:
-        A dictionary that contains a field `downloadUrl`, that
-        contains a AWS pre-signed URL.
-
-    """
-
-    client = _get_default_client(client)
-
-    return client.invoke("CreateFileDownloadUrl", dict(fileId=file_id))
-
-
-@beartype
-def describe_file(
-    file_id: str,
-    *,
-    client: Optional[Client] = None,
-) -> dict:
-    """Low level function that wraps the `DescribeFile` endpoint.
-
-    Returns a description of file, including S3 URI, name,
-    status, content length, and type.
-
-
-    Args:
-        file_id: ID of file.
-
-    Returns:
-        A dictionary that contains a file description, that conforms to [DescribeFileResponse][src.managed_data.schema.DescribeFileResponse].
-
-    """
-
-    client = _get_default_client(client)
-
-    return client.invoke("DescribeFile", dict(fileId=file_id))
-
-
-@beartype
-def describe_row(
-    row_id: str,
-    *,
-    fields: bool = False,
-    client: Optional[Client] = None,
-) -> dict:
-    """Low level function that wraps the `DescribeRow` endpoint.
-
-    Returns a description of a row or a database
-
-
-    Args:
-        row_id: ID or (human ID) or row or database.
-        fields: if True, a fields item is returned in the response.
-
-    Returns:
-        A dictionary that contains a row description, that
-        conforms to [DescribeRowResponse][src.managed_data.schema.DescribeRowResponse].
-
-    """
-
-    client = _get_default_client(client)
-
-    data = dict(rowId=row_id, fields=fields)
-
-    return client.invoke("DescribeRow", data)
-
-
-@beartype
-def list_database_rows(
-    row_id: str,
-    *,
-    client: Optional[Client] = None,
-) -> list[dict]:
-    """Low level function that wraps the `ListDatabaseRows` endpoint."""
-
-    client = _get_default_client(client)
-
-    data = dict(databaseRowId=row_id)
-    return client.invoke("ListDatabaseRows", data)
-
-
-@beartype
-def download_file(
-    file_id: str,
-    *,
-    destination: str = os.getcwd(),
-    client: Optional[Client] = None,
-) -> None:
-    """Download a file to a destination folder."""
-
-    client = _get_default_client(client)
-
-    if not os.path.isdir(destination):
-        raise DeepOriginException(
-            message=f"{destination} should be a path to a folder."
-        )
-
-    file_name = describe_file(file_id, client=client)["name"]
-
-    url = create_file_download_url(file_id, client=client)["downloadUrl"]
-
-    save_path = os.path.join(destination, file_name)
-
-    client.download(url, save_path)
 
 
 @beartype

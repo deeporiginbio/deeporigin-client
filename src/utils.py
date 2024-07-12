@@ -4,8 +4,10 @@ from dataclasses import dataclass
 from typing import Union
 from urllib.parse import urljoin
 
+import requests
 from beartype import beartype
 from deeporigin.config import get_value
+from deeporigin.exceptions import DeepOriginException
 from tabulate import tabulate
 
 __all__ = [
@@ -112,3 +114,21 @@ def expand_user(path, user_home_dirname: str = os.path.expanduser("~")) -> str:
         return os.path.join(user_home_dirname, path[2:])
     else:
         return path
+
+
+def download_sync(url: str, save_path: str) -> None:
+    """concrete method to download a resource using GET and save to disk
+
+    Args:
+        url (str): url to download
+        save_path (str): path to save file
+    """
+
+    with requests.get(url, stream=True) as response:
+        if response.status_code != 200:
+            raise DeepOriginException(message=f"Failed to download file from {url}")
+
+        with open(save_path, "wb") as file:
+            for chunk in response.iter_content(chunk_size=8192):
+                if chunk:  # Filter out keep-alive new chunks
+                    file.write(chunk)
