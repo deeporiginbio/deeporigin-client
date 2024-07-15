@@ -6,10 +6,7 @@ import uuid
 import pandas as pd
 import pytest
 from deeporigin.exceptions import DeepOriginException
-from deeporigin.managed_data import _api, api
-from deeporigin.managed_data.client import (
-    DeepOriginClient,
-)
+from deeporigin.managed_data import api
 from deeporigin.managed_data.schema import (
     DATAFRAME_ATTRIBUTE_KEYS,
     CreateDatabaseResponse,
@@ -42,20 +39,20 @@ def config(pytestconfig):
         data["file"] = data["client"].file
     else:
         data["mock"] = False
-        client = DeepOriginClient()
-        client.authenticate()
+        client = api._get_default_client()
+
         data["client"] = client
 
         # if we're going to be making requests to a live
         # instance, we need to make sensible requests
-        rows = _api.list_rows()
+        rows = api.list_rows()
 
-        data["databases"] = [row["hid"] for row in rows if row["type"] == "database"]
-        data["workspaces"] = [row["hid"] for row in rows if row["type"] == "workspace"]
-        data["rows"] = [row["hid"] for row in rows if row["type"] == "row"]
+        data["databases"] = [row.hid for row in rows if row.type == "database"]
+        data["workspaces"] = [row.hid for row in rows if row.type == "workspace"]
+        data["rows"] = [row.hid for row in rows if row.type == "row"]
 
         # get a list of all files
-        files = _api.list_files()
+        files = api.list_files()
         if len(files) > 0:
             data["file"] = files[0]["file"]
 
@@ -115,7 +112,7 @@ def test_delete_rows(config):
 
 
 def test_list_rows(config):
-    rows = _api.list_rows(
+    rows = api.list_rows(
         parent_id=config["databases"][0],
         client=config["client"],
     )

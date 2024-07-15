@@ -101,7 +101,7 @@ omit = [
 
 [tool.interrogate]
 fail-under = 100
-exclude = ["setup.py", "docs", "build","tests","variables","conftest.py"]
+exclude = ["setup.py", "docs", "build","tests","variables","conftest.py","src/_data_api"]
 ignore-init-method = true
 ignore-init-module = true
 ignore-magic = true

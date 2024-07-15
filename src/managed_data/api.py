@@ -15,6 +15,7 @@ from deeporigin._data_api.types.rows.hierarchy_list_response import (
 )
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.managed_data import _api
+from deeporigin.managed_data._api import *  # noqa: F403
 from deeporigin.managed_data.schema import (
     Cardinality,
     DataType,

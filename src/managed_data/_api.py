@@ -1,274 +1,114 @@
-"""The `deeporigin.managed_data._api` module contains low-level functions for interacting
-with Deep Origin's managed data API. The functions in this module
-simply provide Pythonic interfaces to individual API endpoints."""
-
-import os
+import inspect
+import sys
 from typing import Optional, Union
-from urllib.parse import parse_qs, urlparse
 
-from beartype import beartype
-from deeporigin.exceptions import DeepOriginException
-from deeporigin.managed_data.client import Client, DeepOriginClient
-from deeporigin.managed_data.schema import (
-    Cardinality,
-    DataType,
-    RowType,
+from deeporigin import auth
+from deeporigin._data_api import DeeporiginData
+from deeporigin.utils import _get_method
+
+# this dict allows us to simply wrap endpoints in the low-level
+# API so that we can more easily call them, without needing
+# to explicitly write functions for them
+WRAPPER_MAPPER = dict(
+    create_file_download_url=dict(
+        method="create_file_download_url.create",
+    ),
+    describe_file=dict(
+        method="describe_file.retrieve",
+    ),
+    describe_row=dict(
+        method="describe_row.retrieve",
+    ),
+    list_database_rows=dict(method="databases.rows.list"),
+    create_file_upload_url=dict(
+        method="create_file_upload.create",
+    ),
+    list_row_back_references=dict(
+        method="rows.back_references.list",
+    ),
+    list_mentions=dict(
+        method="mentions.list",
+    ),
+    describe_database_stats=dict(
+        method="describe_database_stats.retrieve",
+    ),
+    convert_id_format=dict(
+        method="convert_id_format.convert",
+    ),
+    delete_databse_column=dict(
+        method="delete_database_column.delete",
+    ),
+    delete_rows=dict(method="delete_rows.delete"),
+    create_database=dict(method="databases.create"),
+    create_workspace=dict(method="workspaces.create"),
+    update_workspace=dict(method="update_workspace.run"),
+    update_database=dict(method="update_database.run"),
+    add_database_column=dict(method="add_database_column.add"),
 )
 
 
-@beartype
-def _parse_params_from_url(url: str) -> dict:
-    """utility function to extract params from a URL query
+def _get_default_client(client=None):
+    """Internal function to instantiate client
+
+    Creates and returns an authenticated client if
+    not provided with one.
 
     Warning: Internal function
         Do not use this function
 
     Args:
-        url: URL
+        client: None, or a Client
 
-    Returns:
-        A dictionary of params
+
     """
+    if client is None:
+        tokens = auth.get_tokens(refresh=True)
+        access_token = tokens["access"]
 
-    query = urlparse(url).query
-    params = parse_qs(query)
-    params = {key: value[0] for key, value in params.items()}
-    return params
+        from deeporigin.config import get_value
 
+        org_id = get_value()["organization_id"]
 
-@beartype
-def create_workspace(
-    *,
-    name: str,
-    hid: Optional[str] = None,
-    parent_id: Optional[str] = None,
-    client: Optional[Client] = None,
-) -> dict:
-    """Low level function that wraps the `CreateWorkspace` endpoint.
-
-    Creates a new workspace at the root level or within another workspace.
-
-    Args:
-        hid: Human ID of the workspace.
-        name: Name of the workspace.
-        parent_id: ID (or human ID) of the parent.
-
-    Returns:
-        A dictionary that conforms to a [CreateWorkspaceResponse][src.managed_data.schema.CreateWorkspaceResponse].
-    """
-    client = _get_default_client(client)
-
-    if hid is None:
-        hid = name
-
-    data = dict(
-        workspace=dict(
-            hid=hid,
-            name=name,
-            parentId=parent_id,
+        client = DeeporiginData(
+            bearer_token=access_token,
+            org_id=org_id,
         )
-    )
-    return client.invoke("CreateWorkspace", data)
+
+    return client
 
 
-@beartype
-def create_database(
-    *,
-    name: str,
-    hid_prefix: str,
-    hid: Optional[str] = None,
-    parent_id: Optional[str] = None,
-    client: Optional[Client] = None,
-) -> dict:
-    """Low level function that wraps the `CreateDatabase` endpoint.
+def _create_function(name, data, client=None):
+    """utility function the dynamically creates functions
+    that wrap low-level functions in the DeepOrigin data API"""
 
-    Creates a new database within a workspace.
+    method_path = data["method"]
+    if client is None:
+        client = _get_default_client()
+    method = _get_method(client, method_path)
 
-    Args:
-        hid: Human ID of the database.
-        name: Name of the database.
-        parent_id: ID of the parent workspace.
-        hid_prefix: Human ID prefix of the database. This prefix is used in every row.
+    signature = inspect.signature(method)
 
+    def dynamic_function(**kwargs):
+        # call the low level API method
+        method(**kwargs)
 
-    Returns:
-        A dictionary that conforms to a [CreateDatabaseResponse][src.managed_data.schema.CreateDatabaseResponse].
-    """
+    # attach the signature of the underlying method to the
+    # function so that IDEs can display it properly
+    dynamic_function.__signature__ = signature
 
-    client = _get_default_client(client)
-
-    if hid is None:
-        hid = name
-
-    data = dict(
-        database=dict(
-            hid=hid,
-            name=name,
-            parentId=parent_id,
-            hidPrefix=hid_prefix,
-        )
-    )
-    return client.invoke("CreateDatabase", data)
+    return dynamic_function
 
 
-@beartype
-def update_workspace(
-    *,
-    id: str,
-    hid: Optional[str] = None,
-    name: Optional[str] = None,
-    parent_id: Optional[str] = None,
-    client: Optional[Client] = None,
-) -> dict:
-    """Low level function that wraps the `UpdateWorkspace` endpoint.
-
-    Updates a workspace.
-
-    Args:
-        hid: Human ID of the workspace.
-        name: Name of the workspace.
-        parent_id: ID (or human ID) of the parent.
-
-    Returns:
-        A dictionary that conforms to a [CreateWorkspaceResponse][src.managed_data.schema.CreateWorkspaceResponse].
-
-    """
-    client = _get_default_client(client)
-
-    data = dict(id=id, workspace=dict())
-    if hid is not None:
-        data["workspace"]["hid"] = hid
-    if name is not None:
-        data["workspace"]["name"] = name
-
-    return client.invoke("UpdateWorkspace", data)
+module_name = sys.modules[__name__]
 
 
-@beartype
-def update_database(
-    *,
-    id: str,
-    hid_prefix: Optional[str] = None,
-    hid: Optional[str] = None,
-    name: Optional[str] = None,
-    parent_id: Optional[str] = None,
-    client: Optional[Client] = None,
-) -> dict:
-    """Low level function that wraps the `UpdateDatabase` endpoint.
-
-    Updates a database.
-
-    Args:
-        hid: Human ID of the database.
-        name: Name of the database.
-        parent_id: ID (or human ID) of the parent.
-        hid_prefix: Human ID prefix of the database. This prefix is used in every row.
-
-    Returns:
-        A dictionary that conforms to a [CreateDatabaseResponse][src.managed_data.schema.CreateDatabaseResponse].
-
-    """
-    client = _get_default_client(client)
-
-    data = dict(id=id, database=dict())
-    if hid is not None:
-        data["database"]["hid"] = hid
-    if name is not None:
-        data["database"]["name"] = name
-    if name is not None:
-        data["database"]["hidPrefix"] = hid_prefix
-
-    return client.invoke("UpdateDatabase", data)
+def _generate_functions(client=None):
+    # Dynamically create functions and attach them to the module
+    for name, data in WRAPPER_MAPPER.items():
+        setattr(module_name, name, _create_function(name, data))
 
 
-@beartype
-def delete_rows(
-    row_ids: list[str],
-    *,
-    client: Optional[Client] = None,
-) -> None:
-    """Low level function that wraps the `DeleteRows` endpoint.
+# generate functions for the default client
+_generate_functions()
 
-    Deletes rows, workspaces, or databases.
-
-    Args:
-        row_ids: A list of (system) row IDs
-
-    Returns:
-        None
-    """
-    client = _get_default_client(client)
-
-    data = dict(rowIds=row_ids)
-    client.invoke("DeleteRows", data)
-
-
-@beartype
-def add_database_column(
-    *,
-    database_id: str,
-    name: str,
-    type: DataType,
-    key: Optional[str] = None,
-    cardinality: Cardinality = "one",
-    client: Optional[Client] = None,
-) -> dict:
-    """Low level function that wraps the `AddDatabaseColumn` endpoint.
-
-    Adds a new column to a database.
-
-    Args:
-        database_id: ID of the database.
-        name: Name of the column.
-        type: Type of the column.
-        key: Key of the column.
-        cardinality: Cardinality of the column.
-
-    Returns:
-        A dictionary that conforms to a [AddDatabaseColumnResponse][src.managed_data.schema.AddDatabaseColumnResponse].
-    """
-    client = _get_default_client(client)
-
-    if key is None:
-        key = name
-
-    column = dict(
-        name=name,
-        type=type,
-        key=key,
-        cardinality=cardinality,
-    )
-
-    if type == "select":
-        column["configSelect"] = {
-            "options": [],
-            "canCreate": True,
-        }
-
-    data = dict(
-        databaseId=database_id,
-        column=column,
-    )
-
-    return client.invoke("AddDatabaseColumn", data)
-
-
-@beartype
-def delete_database_column(
-    column_id: str,
-    *,
-    client: Optional[Client] = None,
-) -> None:
-    """Low level function that wraps the `DeleteDatabaseColumn` endpoint.
-
-    Deletes a column from a database.
-
-    Args:
-        column_id: ID of the column.
-
-    Returns:
-        None
-    """
-    client = _get_default_client(client)
-
-    client.invoke("DeleteDatabaseColumn", dict(columnId=column_id))
+__all__ = [function for function in WRAPPER_MAPPER.keys()]

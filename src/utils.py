@@ -2,7 +2,7 @@ import json
 import os
 from dataclasses import dataclass
 from typing import Union
-from urllib.parse import urljoin
+from urllib.parse import parse_qs, urljoin, urlparse
 
 import requests
 from beartype import beartype
@@ -132,3 +132,34 @@ def download_sync(url: str, save_path: str) -> None:
             for chunk in response.iter_content(chunk_size=8192):
                 if chunk:  # Filter out keep-alive new chunks
                     file.write(chunk)
+
+
+@beartype
+def _parse_params_from_url(url: str) -> dict:
+    """utility function to extract params from a URL query
+
+    Warning: Internal function
+        Do not use this function
+
+    Args:
+        url: URL
+
+    Returns:
+        A dictionary of params
+    """
+
+    query = urlparse(url).query
+    params = parse_qs(query)
+    params = {key: value[0] for key, value in params.items()}
+    return params
+
+
+def _get_method(obj, method_path):
+    # Split the method path into components
+    methods = method_path.split(".")
+
+    # Traverse the attributes to get to the final method
+    for method in methods:
+        obj = getattr(obj, method)
+
+    return obj
