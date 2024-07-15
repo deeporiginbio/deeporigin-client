@@ -342,34 +342,3 @@ def list_row_back_references(
     client = _get_default_client(client)
 
     return client.invoke("ListRowBackReferences", dict(rowId=row_id))
-
-
-@beartype
-def convert_id_format(
-    *,
-    hids: Optional[Union[list[str], set[str]]] = None,
-    ids: Optional[Union[list[str], set[str]]] = None,
-    client: Optional[Client] = None,
-) -> list[dict]:
-    """Convert a list of human IDs to IDs or vice versa."""
-
-    if hids is None and ids is None:
-        raise DeepOriginException(
-            message="Either `hids` or `ids` should be non-None and a list of strings"
-        )
-
-    client = _get_default_client(client)
-
-    conversions = []
-
-    if hids is not None:
-        for hid in hids:
-            conversions.append(dict(hid=hid))
-
-    if ids is not None:
-        for sid in ids:
-            conversions.append(dict(id=sid))
-
-    data = dict(conversions=conversions)
-
-    return client.invoke("ConvertIdFormat", data)

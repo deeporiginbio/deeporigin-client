@@ -56,7 +56,49 @@ def _get_default_client(client=None):
     return client
 
 
+def ensure_client(func):
+    """decorator to make sure that the client is configured"""
+
+    def wrapper(*args, **kwargs):
+        if "client" not in kwargs or kwargs["client"] is None:
+            kwargs["client"] = _get_default_client()
+        return func(*args, **kwargs)
+
+    return wrapper
+
+
 @beartype
+@ensure_client
+def convert_id_format(
+    *,
+    hids: Optional[Union[list[str], set[str]]] = None,
+    ids: Optional[Union[list[str], set[str]]] = None,
+    client=None,
+) -> list[dict]:
+    """Convert a list of human IDs to IDs or vice versa."""
+
+    if hids is None and ids is None:
+        raise DeepOriginException(
+            message="Either `hids` or `ids` should be non-None and a list of strings"
+        )
+
+    conversions = []
+
+    if hids is not None:
+        for hid in hids:
+            conversions.append(dict(hid=hid))
+
+    if ids is not None:
+        for sid in ids:
+            conversions.append(dict(id=sid))
+
+    response = client.convert_id_format.convert(conversions=conversions)
+
+    return response.data
+
+
+@beartype
+@ensure_client
 def list_files(
     *,
     assigned_row_ids: Optional[list[str]] = None,
@@ -76,7 +118,6 @@ def list_files(
         A list of dictionaries, where each entry corresponds to a file. Each dictionary contains a field called `file` that corresponds conforms to a [DescribeFileResponse][src.managed_data.schema.DescribeFileResponse].
 
     """
-    client = _get_default_client(client)
 
     filters = []
 
@@ -91,34 +132,41 @@ def list_files(
     return response.data
 
 
+# this dict allows us to simply wrap endpoints in the low-level
+# API so that we can more easily call them, without needing
+# to explicitly write functions for them
+WRAPPER_MAPPER = dict(
+    create_file_download_url="create_file_download_url.create",
+    describe_file="describe_file.retrieve",
+    describe_row="describe_row.retrieve",
+    list_database_rows="databases.rows.list",
+    create_file_upload_url="create_file_upload.create",
+)
+
+
+def __getattr__(name):
+    def dynamic_function(*args, **kwargs):
+        client = _get_default_client()
+
+        return _call_method(client, WRAPPER_MAPPER[name], **kwargs)
+
+    return dynamic_function
+
+
+def _call_method(obj, method_path, **kwargs):
+    # Split the method path into components
+    methods = method_path.split(".")
+
+    # Traverse the attributes to get to the final method
+    for method in methods:
+        obj = getattr(obj, method)
+
+    # Call the final method with the provided arguments
+    return obj(**kwargs)
+
+
 @beartype
-def create_file_download_url(
-    file_id: str,
-    *,
-    client=None,
-):
-    """Low level function that wraps the `CreateFileDownloadUrl` endpoint.
-
-    Returns a pre-signed URL that allows you to download a
-    file.
-
-
-    Args:
-        file_id: ID of file.
-
-    Returns:
-        A dictionary that contains a field `downloadUrl`, that
-        contains a AWS pre-signed URL.
-
-    """
-
-    client = _get_default_client(client)
-
-    response = client.create_file_download_url.create(file_id=file_id)
-    return response.data
-
-
-@beartype
+@ensure_client
 def list_rows(
     *,
     parent_id: Optional[str] = None,
@@ -140,8 +188,6 @@ def list_rows(
         A list of dictionaries, where each entry corresponds to a row. Each dictionary conforms to a [ListRowsResponse][src.managed_data.schema.ListRowsResponse].
 
     """
-
-    client = _get_default_client(client)
     filters = []
 
     if parent_is_root is not None:
@@ -159,60 +205,7 @@ def list_rows(
 
 
 @beartype
-def describe_file(
-    file_id: str,
-    *,
-    client=None,
-):
-    """Low level function that wraps the `DescribeFile` endpoint.
-
-    Returns a description of file, including S3 URI, name,
-    status, content length, and type.
-
-
-    Args:
-        file_id: ID of file.
-
-    Returns:
-        A dictionary that contains a file description, that conforms to [DescribeFileResponse][src.managed_data.schema.DescribeFileResponse].
-
-    """
-
-    client = _get_default_client(client)
-
-    response = client.describe_file.retrieve(file_id=file_id)
-    return response.data
-
-
-@beartype
-def describe_row(
-    row_id: str,
-    *,
-    fields: bool = False,
-    client=None,
-):
-    """Low level function that wraps the `DescribeRow` endpoint.
-
-    Returns a description of a row or a database
-
-
-    Args:
-        row_id: ID or (human ID) or row or database.
-        fields: if True, a fields item is returned in the response.
-
-    Returns:
-        A dictionary that contains a row description, that
-        conforms to [DescribeRowResponse][deeporigin._data_api.types.describe_row_response.DescribeRowResponse].
-
-    """
-
-    client = _get_default_client(client)
-
-    response = client.describe_row.retrieve(row_id=row_id, fields=fields)
-    return response.data
-
-
-@beartype
+@ensure_client
 def download_file(
     file_id: str,
     *,
@@ -220,8 +213,6 @@ def download_file(
     client=None,
 ) -> None:
     """Download a file to a destination folder."""
-
-    client = _get_default_client(client)
 
     if not os.path.isdir(destination):
         raise DeepOriginException(
@@ -238,51 +229,7 @@ def download_file(
 
 
 @beartype
-def list_database_rows(
-    row_id: str,
-    *,
-    client=None,
-):
-    """Low level function that wraps the `ListDatabaseRows` endpoint."""
-
-    client = _get_default_client(client)
-
-    response = client.databases.rows.list(database_row_id=row_id)
-    return response.data
-
-
-@beartype
-def create_file_upload_url(
-    *,
-    name: str,
-    content_type: str,
-    content_length: int,
-    client=None,
-):
-    """low level function that wraps the `CreateFileUpload` endpoint.
-
-    Creates a new file upload URL.
-
-    Args:
-        name: Name of the file
-        content_type: Content type of the file
-        content_length: Content length of the file
-
-    Returns:
-        A dictionary that conforms to a [CreateFileUploadResponse][src.managed_data.schema.CreateFileUploadResponse]
-    """
-
-    client = _get_default_client(client)
-
-    response = client.create_file_upload.create(
-        name=name,
-        content_type=content_type,
-        content_length=content_length,
-    )
-
-    return response.data
-
-
+@ensure_client
 def upload_file(
     file_path: str,
     client=None,
@@ -330,6 +277,7 @@ def upload_file(
 
 
 @beartype
+@ensure_client
 def make_database_rows(
     database_id: str,
     n_rows: int = 1,
@@ -410,6 +358,7 @@ def assign_files_to_cell(
 
 
 @beartype
+@ensure_client
 def upload_file_to_new_database_row(
     *,
     database_id: str,
