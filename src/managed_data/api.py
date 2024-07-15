@@ -132,18 +132,6 @@ def list_files(
     return response.data
 
 
-# this dict allows us to simply wrap endpoints in the low-level
-# API so that we can more easily call them, without needing
-# to explicitly write functions for them
-WRAPPER_MAPPER = dict(
-    create_file_download_url="create_file_download_url.create",
-    describe_file="describe_file.retrieve",
-    describe_row="describe_row.retrieve",
-    list_database_rows="databases.rows.list",
-    create_file_upload_url="create_file_upload.create",
-)
-
-
 def __getattr__(name):
     def dynamic_function(*args, **kwargs):
         client = _get_default_client()
