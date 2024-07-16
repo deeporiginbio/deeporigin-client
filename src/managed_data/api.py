@@ -290,12 +290,11 @@ def make_database_rows(
             message=f"n_rows must be at least 1. However, n_rows was {n_rows}"
         )
 
-    data = dict(
-        databaseId=database_id,
+    response = client.ensure_rows.ensure(
         rows=[{"row": {}} for _ in range(n_rows)],
+        database_id=database_id,
     )
-
-    return _api.ensure_rows(data, client=client)
+    return response.data
 
 
 @beartype

@@ -88,9 +88,12 @@ def _create_function(name, data, client=None):
 
     signature = inspect.signature(method)
 
-    def dynamic_function(**kwargs):
+    def dynamic_function(*, client=None, **kwargs):
+        if client is None:
+            client = _get_default_client()
+        method = _get_method(client, method_path)
         # call the low level API method
-        method(**kwargs)
+        return method(**kwargs)
 
     # attach the signature of the underlying method to the
     # function so that IDEs can display it properly

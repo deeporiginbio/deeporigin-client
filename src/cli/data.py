@@ -6,7 +6,6 @@ import os
 import cement
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.managed_data import _api, api
-from deeporigin.managed_data.client import DeepOriginClient
 from deeporigin.utils import PREFIXES, _print_dict, _print_tree, _show_json, _truncate
 
 

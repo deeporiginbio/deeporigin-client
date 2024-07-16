@@ -1,4 +1,3 @@
-from deeporigin.managed_data import client
 from deeporigin.managed_data.schema import (
     ColumnItem,
     CreateDatabaseResponse,
@@ -27,7 +26,7 @@ def file_description():
     ).model_dump()
 
 
-class MockClient(client.Client):
+class MockClient:
     """mock client to respond with static data for testing
     purposes"""
 

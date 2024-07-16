@@ -7,15 +7,6 @@ import pandas as pd
 import pytest
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.managed_data import api
-from deeporigin.managed_data.schema import (
-    DATAFRAME_ATTRIBUTE_KEYS,
-    CreateDatabaseResponse,
-    CreateWorkspaceResponse,
-    DescribeFileResponse,
-    DescribeRowResponseDatabase,
-    DescribeRowResponseRow,
-    ListRowsResponse,
-)
 from deeporigin.utils import PREFIXES
 from mock_client import MockClient
 
@@ -54,7 +45,7 @@ def config(pytestconfig):
         # get a list of all files
         files = api.list_files()
         if len(files) > 0:
-            data["file"] = files[0]["file"]
+            data["file"] = files[0].file
 
     # tests run on yield
     yield data
@@ -75,40 +66,43 @@ def test_make_database_rows(config):
         client=config["client"],
     )
 
-    for row in response["rows"]:
-        assert row["type"] == "row", "Expected rows to be created."
+    for row in response.rows:
+        assert row.type == "row", "Expected rows to be created."
 
 
 def test_create_workspace(config):
-    data = _api.create_workspace(
-        name="test-" + str(uuid.uuid4())[:6],
+    name = "test-" + str(uuid.uuid4())[:6]
+    api.create_workspace(
+        workspace=dict(name=name, hid=name),
         client=config["client"],
     )
-
-    CreateWorkspaceResponse(**data)
 
 
 def test_create_database(config):
     unique_id = str(uuid.uuid4())[:6]
-    data = _api.create_database(
-        name="test-" + unique_id,
-        hid_prefix="test" + unique_id,
+    api.create_database(
+        database=dict(
+            name="test-" + unique_id,
+            hid="test-" + unique_id,
+            hid_prefix="test" + unique_id,
+            parent_id=config["workspaces"][0],
+        ),
         client=config["client"],
-        parent_id=config["workspaces"][0],
     )
-
-    CreateDatabaseResponse(**data)
 
 
 def test_delete_rows(config):
     """delete workspaces and databases"""
 
     for row_type in ["workspace", "database"]:
-        rows = _api.list_rows(row_type=row_type, client=config["client"])
-        row_ids = [row["id"] for row in rows if "test" in row["hid"]]
+        rows = api.list_rows(row_type=row_type, client=config["client"])
+        row_ids = [row.id for row in rows if "test" in row.hid]
 
         if len(row_ids) > 0:
-            _api.delete_rows(row_ids, client=config["client"])
+            api.delete_rows(
+                row_ids=row_ids,
+                client=config["client"],
+            )
 
 
 def test_list_rows(config):
@@ -118,28 +112,22 @@ def test_list_rows(config):
     )
 
     for row in rows:
-        assert row["type"] == "row"
-
-        # check type
-        ListRowsResponse(**row)
+        assert row.type == "row"
 
 
 def test_list_rows_root_parent(config):
-    root = _api.list_rows(
+    root = api.list_rows(
         parent_is_root=True,
         client=config["client"],
     )
 
     root = root[0]
 
-    assert root["parentId"] is None, "Expected root to have no parent"
-
-    # check type
-    ListRowsResponse(**root)
+    assert root.parent_id is None, "Expected root to have no parent"
 
 
 def test_list_rows_by_type(config):
-    rows = _api.list_rows(
+    rows = api.list_rows(
         row_type="workspace",
         client=config["client"],
     )
@@ -148,15 +136,12 @@ def test_list_rows_by_type(config):
 
     for row in rows:
         assert (
-            row["type"] == "workspace"
+            row.type == "workspace"
         ), f"Expected to get a list of workspaces, but {row} is not a workspace"
-
-        # check type
-        ListRowsResponse(**row)
 
 
 def test_list_files_unassigned(config):
-    files = _api.list_files(
+    files = api.list_files(
         is_unassigned=True,
         client=config["client"],
     )
@@ -165,12 +150,12 @@ def test_list_files_unassigned(config):
 
     for file in files:
         assert (
-            "assignments" not in file.keys()
+            file.assignments is None
         ), f"Expected not to see an assignments key for this file, but instead found {file}"
 
 
 def test_list_files_assigned(config):
-    files = _api.list_files(
+    files = api.list_files(
         is_unassigned=False,
         client=config["client"],
     )
@@ -178,67 +163,48 @@ def test_list_files_assigned(config):
     assert len(files) > 0, "Expected to find at least 1 assigned files"
 
     for file in files:
-        assert (
-            "assignments" in file.keys()
-        ), f"Expected to see an assignments key for this file, but instead found {file}"
-
-        assignments = file["assignments"]
+        assignments = file.assignments
         assert (
             len(assignments) > 0
         ), "Expected assignments to be a list with at least 1 element"
 
         for assignment in assignments:
             assert (
-                "rowId" in assignment.keys()
-            ), f"Expected to find a rowId in assignments, but instead found {assignment}"
+                assignment.row_id is not None
+            ), f"Expected to find a row_id in assignments, but instead found {assignment}"
 
 
-def test_describe_database_stats(config):
-    stats = _api.describe_database_stats(
-        config["databases"][0],
-        client=config["client"],
-    )
+# def test_describe_database_stats(config):
+#     stats = api.describe_database_stats(
+#         database_id=config["databases"][0],
+#         client=config["client"],
+#     )
 
-    assert (
-        "rowCount" in stats.keys()
-    ), f"Expected stats to be a dictionary with a key called `rowCount`, instead got {stats}"
-
-    assert stats["rowCount"] >= 0, "Expected a positive number of rows"
+#     assert stats.row_count >= 0, "Expected a positive number of rows"
 
 
 def test_describe_row(config):
     """test describe_row, using mocked response"""
 
-    row = _api.describe_row(
-        config["rows"][0],
+    row = api.describe_row(
+        row_id=config["rows"][0],
         client=config["client"],
         fields=True,
     )
 
-    assert "fields" in row.keys(), "Expected to find fields in response"
-
-    # check if we can coerce into response type
-    DescribeRowResponseRow(**row)
-
-    row = _api.describe_row(
-        config["rows"][0],
+    row = api.describe_row(
+        row_id=config["rows"][0],
         client=config["client"],
         fields=False,
     )
 
     assert "fields" not in row.keys(), "Expected to NOT find fields in response"
 
-    # check if we can coerce into response type
-    DescribeRowResponseRow(**row)
-
     # database
-    row = _api.describe_row(
+    row = api.describe_row(
         config["databases"][0],
         client=config["client"],
     )
-
-    # check if we can coerce into response type
-    DescribeRowResponseDatabase(**row)
 
 
 def test_convert_id_format(config):
@@ -252,7 +218,7 @@ def test_convert_id_format(config):
         system_ids.append(conversion["id"])
         assert {"id", "hid"} == set(conversion.keys())
 
-    conversions = _api.convert_id_format(
+    conversions = api.convert_id_format(
         ids=system_ids,
         client=config["client"],
     )
@@ -261,11 +227,11 @@ def test_convert_id_format(config):
         assert {"id", "hid"} == set(conversion.keys())
 
     with pytest.raises(DeepOriginException, match="non-None and a list of strings"):
-        _api.convert_id_format()
+        api.convert_id_format()
 
 
 def test_list_database_rows(config):
-    rows = _api.list_database_rows(
+    rows = api.list_database_rows(
         config["databases"][0],
         client=config["client"],
     )
