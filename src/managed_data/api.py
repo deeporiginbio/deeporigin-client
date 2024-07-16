@@ -9,21 +9,11 @@ from urllib.parse import urlparse, urlunparse
 
 from beartype import beartype
 from deeporigin import auth
-from deeporigin._data_api import DeeporiginData
-from deeporigin._data_api.types.rows.hierarchy_list_response import (
-    Data as ListRowResponse,
-)
 from deeporigin.exceptions import DeepOriginException
-from deeporigin.managed_data import _api
 from deeporigin.managed_data._api import *  # noqa: F403
-from deeporigin.managed_data.schema import (
-    Cardinality,
-    DataType,
-    DatabaseReturnType,
-    IDFormat,
-    RowType,
-)
+from deeporigin.managed_data.schema import IDFormat
 from deeporigin.utils import PREFIXES, download_sync
+from deeporigin_data import DeeporiginData
 
 
 @beartype
@@ -50,7 +40,7 @@ def _get_default_client(client=None):
         org_id = get_value()["organization_id"]
 
         client = DeeporiginData(
-            bearer_token=access_token,
+            token=access_token,
             org_id=org_id,
         )
 
@@ -133,36 +123,15 @@ def list_files(
     return response.data
 
 
-def __getattr__(name):
-    def dynamic_function(*args, **kwargs):
-        client = _get_default_client()
-
-        return _call_method(client, WRAPPER_MAPPER[name], **kwargs)
-
-    return dynamic_function
-
-
-def _call_method(obj, method_path, **kwargs):
-    # Split the method path into components
-    methods = method_path.split(".")
-
-    # Traverse the attributes to get to the final method
-    for method in methods:
-        obj = getattr(obj, method)
-
-    # Call the final method with the provided arguments
-    return obj(**kwargs)
-
-
 @beartype
 @ensure_client
 def list_rows(
     *,
     parent_id: Optional[str] = None,
-    row_type: Optional[RowType] = None,
+    row_type: Optional = None,
     parent_is_root: Optional[bool] = None,
     client=None,
-) -> list[ListRowResponse]:
+) -> list:
     """Low level function that wraps the `ListRows` endpoint.
 
     Returns a list of rows from workspaces and databases,
@@ -188,7 +157,7 @@ def list_rows(
     if row_type:
         filters.append(dict(rowType=row_type))
 
-    response = client.rows.hierarchy.list(filters=filters)
+    response = client.rows.list(filters=filters)
 
     return response.data
 
@@ -290,7 +259,7 @@ def make_database_rows(
             message=f"n_rows must be at least 1. However, n_rows was {n_rows}"
         )
 
-    response = client.ensure_rows.ensure(
+    response = client.rows.ensure(
         rows=[{"row": {}} for _ in range(n_rows)],
         database_id=database_id,
     )
@@ -687,8 +656,8 @@ def get_dataframe(
     database_id: str,
     *,
     use_file_names: bool = True,
-    reference_format: IDFormat = "human-id",
-    return_type: DatabaseReturnType = "dataframe",
+    reference_format="human-id",
+    return_type="dataframe",
     client=None,
 ):
     """Generate a `pandas.DataFrame` or dictionary for a database.
@@ -704,21 +673,21 @@ def get_dataframe(
     """
 
     # figure out the rows
-    rows = _api.list_database_rows(database_id, client=client)
+    rows = list_database_rows(database_row_id=database_id, client=client)  # noqa: F405
 
     # filter out template rows
     rows = [
-        row for row in rows if not ("isTemplate" in row.keys() and row["isTemplate"])
+        row for row in rows if not (hasattr(row, "is_template") and row.is_template)
     ]
 
     # figure out the column names and ID of the database
-    response = _api.describe_row(database_id, client=client)
+    row = describe_row(row_id=database_id, client=client)  # noqa: F405
     assert (
-        response["type"] == "database"
-    ), f"Expected database_id: {database_id} to resolve to a database, but instead, it resolved to a {response['type']}"
+        row.type == "database"
+    ), f"Expected database_id: {database_id} to resolve to a database, but instead, it resolved to a {row.type}"
 
-    columns = response["cols"]
-    database_id = response["id"]
+    columns = row.cols
+    database_id = row.id
     row_id = "ID"
 
     # make a dictionary with all data in the database
@@ -734,15 +703,15 @@ def get_dataframe(
         data[column["id"]] = []
 
     for row in rows:
-        data[row_id].append(row["hid"])
-        data["Validation Status"].append(row["validationStatus"])
+        data[row_id].append(row.hid)
+        data["Validation Status"].append(row.validation_status)
 
-        if "fields" not in row.keys():
+        if not hasattr(row, "fields"):
             for column in columns:
                 data[column["id"]].append(None)
             continue
 
-        fields = row["fields"]
+        fields = row.fields
 
         for column in columns:
             value = _parse_column_value(
@@ -793,7 +762,7 @@ def get_dataframe(
 def _parse_column_value(
     *,
     column: dict,
-    fields: list[dict],
+    fields: Optional[list],
     file_ids: list,
     reference_ids: list,
     use_file_names: bool,
@@ -805,14 +774,17 @@ def _parse_column_value(
         Do not use this function.
     """
 
-    field = [field for field in fields if field["columnId"] == column["id"]]
+    if fields is None:
+        return None
+
+    field = [field for field in fields if field.column_id == column["id"]]
 
     if len(field) == 0:
         return None
 
-    if "value" not in field[0].keys():
+    if not hasattr(field[0], "value"):
         return None
-    value = [field[0]["value"]]
+    value = [field[0].value]
 
     # special treatment for some column types
     if column["type"] == "select" and len(value) == 1:
@@ -824,17 +796,17 @@ def _parse_column_value(
 
         if use_file_names:
             try:
-                value = [_api.describe_file(file_id)["name"] for file_id in value]
+                value = [describe_file(file_id).name for file_id in value]  # noqa: F405
             except DeepOriginException:
                 # something went wrong, ignore
                 pass
     elif column["type"] == "reference" and len(value) == 1:
-        value = value[0]["rowIds"]
+        value = value[0].row_ids
         reference_ids.extend(value)
 
         if reference_format == "human-id":
-            value = _api.convert_id_format(ids=value)
-            value = [thing["hid"] for thing in value]
+            value = convert_id_format(ids=value)
+            value = [thing.hid for thing in value]
 
     # if there is no item
     if len(value) == 0:
