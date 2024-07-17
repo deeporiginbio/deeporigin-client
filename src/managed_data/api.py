@@ -568,14 +568,17 @@ def download_database(
         )
 
     if isinstance(source, str):
-        source = _api.describe_row(row_id=source, client=client)
+        source = _api.describe_row(
+            row_id=source,
+            client=client,
+        )
     elif not {"hid", "id"}.issubset(set(list(source.keys()))):
         raise DeepOriginException(
             message=f"If `source` is a dictionary, expected it contain the `hid` and `id` keys. These keys were not found. Instead, the keys are: {source.keys()}"
         )
 
-    database_id = source["id"]
-    database_hid = source["hid"]
+    database_id = source.id
+    database_hid = source.hid
     df = get_dataframe(
         database_id,
         use_file_names=True,
@@ -622,54 +625,34 @@ def get_dataframe(
     ]
 
     # figure out the column names and ID of the database
-    row = describe_row(row_id=database_id, client=client)  # noqa: F405
+    db_row = describe_row(row_id=database_id, client=client)  # noqa: F405
     assert (
-        row.type == "database"
-    ), f"Expected database_id: {database_id} to resolve to a database, but instead, it resolved to a {row.type}"
+        db_row.type == "database"
+    ), f"Expected database_id: {database_id} to resolve to a database, but instead, it resolved to a {db_row.type}"
 
-    columns = row.cols
-    database_id = row.id
-    row_id = "ID"
+    columns = db_row.cols
+    database_id = db_row.id
 
     # make a dictionary with all data in the database
     data = dict()
-    data[row_id] = []
+    data["ID"] = []
     data["Validation Status"] = []
 
     # keep track of all files and references in this database
     file_ids = []
     reference_ids = []
 
+    # create empty lists for each column
     for column in columns:
         data[column["id"]] = []
 
     for row in rows:
-        data[row_id].append(row.hid)
-        data["Validation Status"].append(row.validation_status)
-
-        if not hasattr(row, "fields"):
-            for column in columns:
-                data[column["id"]].append(None)
-            continue
-
-        fields = row.fields
-
-        for column in columns:
-            value = _parse_column_value(
-                column=column,
-                fields=fields,
-                file_ids=file_ids,
-                reference_ids=reference_ids,
-                use_file_names=use_file_names,
-                reference_format=reference_format,
-            )
-            if value is None:
-                data[column["id"]].append(None)
-            else:
-                if column["cardinality"] == "many":
-                    data[column["id"]].append(value)
-                else:
-                    data[column["id"]].extend(value)
+        add_row_to_data(
+            data=data,
+            row=row,
+            columns=columns,
+            use_file_names=use_file_names,
+        )
 
     if return_type == "dataframe":
         # make the dataframe
@@ -682,7 +665,6 @@ def get_dataframe(
         df.attrs["file_ids"] = list(set(file_ids))
         df.attrs["reference_ids"] = list(set(reference_ids))
         df.attrs["id"] = database_id
-        df.attrs["primary_key"] = row_id
 
         return _type_and_cleanup_dataframe(df, columns)
 
@@ -728,20 +710,20 @@ def _parse_column_value(
     value = [field[0].value]
 
     # special treatment for some column types
-    if column["type"] == "select" and len(value) == 1:
-        value = value[0]["selectedOptions"]
-    elif column["type"] == "file" and len(value) == 1:
-        value = value[0]["fileIds"]
+    if column["type"] == "select" and len(value) == 1 and value[0] is not None:
+        value = value[0].selected_options
+    elif column["type"] == "file" and len(value) == 1 and value[0] is not None:
+        value = value[0].file_ids
 
         file_ids.extend(value)
 
         if use_file_names:
             try:
-                value = [describe_file(file_id).name for file_id in value]  # noqa: F405
+                value = [describe_file(file_id=file_id).name for file_id in value]  # noqa: F405
             except DeepOriginException:
                 # something went wrong, ignore
                 pass
-    elif column["type"] == "reference" and len(value) == 1:
+    elif column["type"] == "reference" and len(value) == 1 and value[0] is not None:
         value = value[0].row_ids
         reference_ids.extend(value)
 
@@ -749,11 +731,53 @@ def _parse_column_value(
             value = convert_id_format(ids=value)
             value = [thing.hid for thing in value]
 
-    # if there is no item
     if len(value) == 0:
         value = None
 
     return value
+
+
+def add_row_to_data(*, data: dict, row, columns: list, use_file_names: bool = True):
+    row_data = _row_to_dict(row, use_file_names=use_file_names)
+    data["ID"].append(row_data["ID"])
+    data["Validation Status"].append(row_data["Validation Status"])
+
+    for column in columns:
+        col_id = column["id"]
+        if col_id in row_data.keys():
+            value = row_data[col_id]
+            if column["cardinality"] == "one" and isinstance(value, list):
+                value = value[0]
+            data[col_id].append(value)
+        else:
+            data[col_id].append(None)
+
+
+def _row_to_dict(row, *, use_file_names: bool = True):
+    fields = row.fields
+
+    values = {"ID": row.hid, "Validation Status": row.validation_status}
+    if fields is None:
+        return values
+    for field in fields:
+        if field.type in ["float", "int", "boolean"]:
+            value = field.value
+        elif field.type == "select":
+            value = field.value.selected_options
+        elif field.type == "reference":
+            value = field.value.row_ids
+        elif field.type == "file":
+            value = field.value.file_ids
+            if use_file_names and value is not None:
+                try:
+                    value = [describe_file(file_id=file_id).name for file_id in value]  # noqa: F405
+                except DeepOriginException:
+                    # something went wrong, ignore
+                    pass
+        else:
+            value = field.value
+        values[field.column_id] = value
+    return values
 
 
 @beartype
@@ -815,8 +839,7 @@ def _type_and_cleanup_dataframe(
     df["Validation Status"].attrs = dict(type="Validation Status")
 
     # sort by primary key
-    primary_key = df.attrs["primary_key"]
-    df["numeric_id"] = df[primary_key].apply(lambda x: int(x.split("-")[1]))
+    df["numeric_id"] = df["ID"].apply(lambda x: int(x.split("-")[1]))
     df = df.sort_values(by="numeric_id")
     df = df.drop(columns="numeric_id")
     df = df.set_index("ID")

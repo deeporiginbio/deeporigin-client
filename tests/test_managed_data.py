@@ -323,32 +323,47 @@ def test_download_file(config):
     else:
         api.download_file(file_id=file_id, client=config["client"])
         data = api.describe_file(file_id=file_id)
-        os.remove(data["name"])
+        os.remove(data.name)
 
 
 def test_describe_file(config):
     file_id = config["file"].id
 
-    api.describe_file(file_id=file_id, client=config["client"])
+    api.describe_file(
+        file_id=file_id,
+        client=config["client"],
+    )
 
 
 def test_get_row_data(config):
     row_id = config["rows"][0]
 
-    data = api.get_row_data(row_id=row_id, client=config["client"])
-    assert isinstance(data, dict), "Expected response to be a dict"
+    data1 = api.get_row_data(
+        row_id=row_id,
+        client=config["client"],
+    )
 
-    data = api.get_row_data(
+    assert isinstance(data1, dict), "Expected return type to be a dict"
+
+    data2 = api.get_row_data(
         row_id,
         client=config["client"],
         use_column_keys=True,
     )
-    assert isinstance(data, dict), "Expected response to be a dict"
+
+    assert isinstance(data2, dict), "Expected return type to be a dict"
+
+    assert (
+        data1.keys() != data2.keys()
+    ), "Expected different keys, because we asked for column keys in the second instance"
 
 
 def test_get_cell_data(config):
     row_id = config["rows"][0]
-    data = api.get_row_data(row_id, client=config["client"])
+    data = api.get_row_data(
+        row_id=row_id,
+        client=config["client"],
+    )
     column_name = list(data.keys())[0]
     data = api.get_cell_data(
         row_id=row_id,
