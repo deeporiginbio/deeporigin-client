@@ -1,6 +1,5 @@
 import inspect
 import sys
-from typing import Optional, Union
 
 from deeporigin import auth
 from deeporigin.utils import _get_method
@@ -9,42 +8,37 @@ from deeporigin_data import DeeporiginData
 # this dict allows us to simply wrap endpoints in the low-level
 # API so that we can more easily call them, without needing
 # to explicitly write functions for them
-WRAPPER_MAPPER = dict(
-    create_file_download_url=dict(
-        method="files.download",
-    ),
-    describe_file=dict(
-        method="files.describe",
-    ),
-    describe_row=dict(
-        method="describe_row.describe",
-    ),
-    list_database_rows=dict(method="database_rows.list"),
-    create_file_upload_url=dict(
-        method="files.upload",
-    ),
-    list_row_back_references=dict(
-        method="rows.back_references",
-    ),
-    list_mentions=dict(
-        method="mentions.list",
-    ),
-    describe_database_stats=dict(
-        method="database_stats.describe",
-    ),
-    convert_id_format=dict(
-        method="convert_id_format.convert",
-    ),
-    delete_databse_column=dict(
-        method="database_columns.delete",
-    ),
-    delete_rows=dict(method="rows.delete"),
-    create_database=dict(method="databases.create"),
-    create_workspace=dict(method="workspaces.create"),
-    update_workspace=dict(method="workspaces.update"),
-    update_database=dict(method="databases.update"),
-    add_database_column=dict(method="database_columns.add"),
-)
+IGNORED_METHODS = {
+    "close",
+    "get",
+    "post",
+    "put",
+    "delete",
+    "get_api_list",
+    "is_closed",
+    "platform_headers",
+    "patch",
+    "with_options",
+}
+
+
+OVERRIDDEN_METHODS = {"list_rows", "convert_id_format"}
+
+
+def _get_client_methods():
+    # the only reason we're creating this client is to
+    # extract methods from it. So no need to
+    # authenticate
+    client = DeeporiginData(token="", org_id="")
+    methods = set(
+        [
+            attr
+            for attr in dir(client)
+            if callable(getattr(client, attr)) and not attr.startswith("_")
+        ]
+    ).difference(IGNORED_METHODS)
+
+    return methods
 
 
 def _get_default_client(client=None):
@@ -77,13 +71,15 @@ def _get_default_client(client=None):
     return client
 
 
-def _create_function(name, data, client=None):
+def _create_function(method_path):
     """utility function the dynamically creates functions
     that wrap low-level functions in the DeepOrigin data API"""
 
-    method_path = data["method"]
-    if client is None:
-        client = _get_default_client()
+    # we're constructing a client solely for the purposes
+    # of inspecting its methods and extracting
+    # function signatures. So we don't need any
+    # authentication
+    client = DeeporiginData(token="", org_id="")
     method = _get_method(client, method_path)
 
     signature = inspect.signature(method)
@@ -110,13 +106,9 @@ def _create_function(name, data, client=None):
 module_name = sys.modules[__name__]
 
 
-def _generate_functions(*, client=None):
-    # Dynamically create functions and attach them to the module
-    for name, data in WRAPPER_MAPPER.items():
-        setattr(module_name, name, _create_function(name, data))
+methods = _get_client_methods()
+for method in methods:
+    setattr(module_name, method, _create_function(method))
 
 
-# generate functions for the default client
-_generate_functions()
-
-__all__ = [function for function in WRAPPER_MAPPER.keys()]
+__all__ = list((methods | {"_get_default_client"}).difference(OVERRIDDEN_METHODS))

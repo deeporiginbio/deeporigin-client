@@ -28,7 +28,7 @@ dependencies = [
     "filetype",
     "httpx",
     "distro",
-    "deeporigin-data-sdk>=0.1.0a4",
+    "deeporigin-data-sdk>=0.1.0a6",
 ]
 dynamic = ["version"]
 

@@ -8,43 +8,17 @@ from typing import Any, Optional, Union
 from urllib.parse import urlparse, urlunparse
 
 from beartype import beartype
-from deeporigin import auth
 from deeporigin.exceptions import DeepOriginException
+
+# this import is to allow us to use functions
+# not marked in __all__ in _api
+from deeporigin.managed_data import _api
+
+# this import is to make sure that all simply-wrapped
+# functions in _api are available in api (this module)
 from deeporigin.managed_data._api import *  # noqa: F403
 from deeporigin.managed_data.schema import IDFormat
-from deeporigin.utils import PREFIXES, download_sync
-from deeporigin_data import DeeporiginData
-
-
-@beartype
-def _get_default_client(client=None):
-    """Internal function to instantiate client
-
-    Creates and returns an authenticated client if
-    not provided with one.
-
-    Warning: Internal function
-        Do not use this function
-
-    Args:
-        client: None, or a Client
-
-
-    """
-    if client is None:
-        tokens = auth.get_tokens()
-        access_token = tokens["access"]
-
-        from deeporigin.config import get_value
-
-        org_id = get_value()["organization_id"]
-
-        client = DeeporiginData(
-            token=access_token,
-            org_id=org_id,
-        )
-
-    return client
+from deeporigin.utils import PREFIXES, _parse_params_from_url, download_sync
 
 
 def ensure_client(func):
@@ -52,7 +26,7 @@ def ensure_client(func):
 
     def wrapper(*args, **kwargs):
         if "client" not in kwargs or kwargs["client"] is None:
-            kwargs["client"] = _get_default_client()
+            kwargs["client"] = _get_default_client()  # noqa: F405
         return func(*args, **kwargs)
 
     return wrapper
@@ -83,44 +57,7 @@ def convert_id_format(
         for sid in ids:
             conversions.append(dict(id=sid))
 
-    response = client.convert_id_format.convert(conversions=conversions)
-
-    return response.data
-
-
-@beartype
-@ensure_client
-def list_files(
-    *,
-    assigned_row_ids: Optional[list[str]] = None,
-    is_unassigned: Optional[bool] = None,
-    client=None,
-) -> list:
-    """Low level function that wraps the `ListFiles` endpoint.
-
-    Returns a list of files from databases and rows
-    based on row assigned to.
-
-    Args:
-        assigned_row_ids: ID (or human ID) or the assigned row.
-        is_unassigned: Whether file is assigned to any row.
-
-    Returns:
-        A list of dictionaries, where each entry corresponds to a file. Each dictionary contains a field called `file` that corresponds conforms to a [DescribeFileResponse][src.managed_data.schema.DescribeFileResponse].
-
-    """
-
-    filters = []
-
-    if is_unassigned is not None:
-        filters.append(dict(isUnassigned=is_unassigned))
-
-    if assigned_row_ids:
-        filters.append(dict(assignedRowIds=assigned_row_ids))
-
-    response = client.files.list(filters=filters)
-
-    return response.data
+    return _api.convert_id_format(conversions=conversions)
 
 
 @beartype
@@ -157,9 +94,7 @@ def list_rows(
     if row_type:
         filters.append(dict(rowType=row_type))
 
-    response = client.rows.list(filters=filters)
-
-    return response.data
+    return _api.list_rows(filters=filters)
 
 
 @beartype
@@ -177,9 +112,9 @@ def download_file(
             message=f"{destination} should be a path to a folder."
         )
 
-    file_name = describe_file(file_id, client=client).name
+    file_name = describe_file(file_id, client=client).name  # noqa: F405
 
-    url = create_file_download_url(file_id, client=client).downloadUrl
+    url = create_file_download_url(file_id, client=client).downloadUrl  # noqa: F405
 
     save_path = os.path.join(destination, file_name)
 
@@ -200,7 +135,7 @@ def upload_file(
 
     content_length = os.path.getsize(file_path)
 
-    response = _api.create_file_upload_url(
+    response = create_file_upload_url(  # noqa: F405
         name=os.path.basename(file_path),
         content_type=content_type,
         content_length=content_length,
@@ -211,7 +146,7 @@ def upload_file(
     url = urlunparse((url.scheme, url.netloc, url.path, "", "", ""))
 
     # extract params
-    params = _api._parse_params_from_url(response["uploadUrl"])
+    params = _parse_params_from_url(response["uploadUrl"])
 
     headers = {
         "Accept": "application/json, text/plain, */*",
@@ -259,11 +194,11 @@ def make_database_rows(
             message=f"n_rows must be at least 1. However, n_rows was {n_rows}"
         )
 
-    response = client.rows.ensure(
+    return ensure_rows(  # noqa: F405
+        client=client,
         rows=[{"row": {}} for _ in range(n_rows)],
         database_id=database_id,
     )
-    return response.data
 
 
 @beartype
@@ -295,23 +230,25 @@ def assign_files_to_cell(
         )
         row_id = data["rows"][0]["id"]
 
-    data = {
-        "databaseId": database_id,
-        "rows": [
-            {
-                "rowId": row_id,
-                "row": {},
-                "cells": [
-                    {
-                        "columnId": column_id,
-                        "value": {"fileIds": file_ids},
-                    },
-                ],
-            },
-        ],
-    }
+    rows = [
+        {
+            "rowId": row_id,
+            "row": {},
+            "cells": [
+                {
+                    "columnId": column_id,
+                    "value": {"fileIds": file_ids},
+                },
+            ],
+        },
+    ]
 
-    return _api.ensure_rows(data, client=client)
+    return ensure_rows(  # noqa: F405
+        database_id,
+        database_id,
+        rows=rows,
+        client=client,
+    )
 
 
 @beartype
@@ -356,7 +293,7 @@ def get_tree(
     *,
     include_rows: bool = True,
     client=None,
-) -> list[dict]:
+) -> list:
     """Construct a tree of all workspaces, databases and rows.
 
     Returns a tree that contains all workspaces, databases and
@@ -376,19 +313,23 @@ def get_tree(
 
     if include_rows:
         # we need to fetch everything, so use a single call
-        objects = _api.list_rows(client=client)
-        rows = [obj for obj in objects if obj["type"] == "row"]
-        workspaces = [obj for obj in objects if obj["type"] == "workspace"]
-        databases = [obj for obj in objects if obj["type"] == "database"]
+        objects = list_rows(client=client)
+        rows = [obj.dict() for obj in objects if obj.type == "row"]
+        workspaces = [obj for obj in objects if obj.type == "workspace"]
+        databases = [obj for obj in objects if obj.type == "database"]
     else:
-        workspaces = _api.list_rows(row_type="workspace", client=client)
-        databases = _api.list_rows(row_type="database", client=client)
+        workspaces = list_rows(row_type="workspace", client=client)
+        databases = list_rows(row_type="database", client=client)
         objects = workspaces + databases
+
+    # convert everything into a dict
+    workspaces = [obj.dict() for obj in workspaces]
+    databases = [obj.dict() for obj in databases]
 
     for obj in workspaces + databases:
         obj["children"] = []
 
-    root_objects = [obj for obj in objects if obj["parentId"] is None]
+    root_objects = [obj.dict() for obj in objects if obj.parent_id is None]
 
     for root_object in root_objects:
         _add_children(root_object, workspaces)
@@ -411,7 +352,7 @@ def _add_children(node: dict, objects: list[dict]) -> None:
         Do not use this function.
 
     """
-    node["children"] = [obj for obj in objects if obj["parentId"] == node["id"]]
+    node["children"] = [obj for obj in objects if obj["parent_id"] == node["id"]]
 
 
 @beartype

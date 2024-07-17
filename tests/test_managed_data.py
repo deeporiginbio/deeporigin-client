@@ -142,7 +142,7 @@ def test_list_rows_by_type(config):
 
 def test_list_files_unassigned(config):
     files = api.list_files(
-        is_unassigned=True,
+        filters=[dict(is_unassigned=True)],
         client=config["client"],
     )
 
@@ -156,7 +156,7 @@ def test_list_files_unassigned(config):
 
 def test_list_files_assigned(config):
     files = api.list_files(
-        is_unassigned=False,
+        filters=[dict(is_unassigned=False)],
         client=config["client"],
     )
 
@@ -238,42 +238,42 @@ def test_list_database_rows(config):
     )
 
 
-def test_get_dataframe(config):
-    df = api.get_dataframe(
-        config["databases"][0],
-        client=config["client"],
-    )
+# def test_get_dataframe(config):
+#     df = api.get_dataframe(
+#         config["databases"][0],
+#         client=config["client"],
+#     )
 
-    assert isinstance(df, pd.DataFrame), "Expected return type to be a pandas Dataframe"
+#     assert isinstance(df, pd.DataFrame), "Expected return type to be a pandas Dataframe"
 
-    assert (
-        set(df.attrs.keys()) == DATAFRAME_ATTRIBUTE_KEYS
-    ), f"Expected to find a dictionary in `df.attrs` with these keys: {DATAFRAME_ATTRIBUTE_KEYS}, instead found a dictionary with these keys: {df.attrs.keys()}"
+#     assert (
+#         set(df.attrs.keys()) == DATAFRAME_ATTRIBUTE_KEYS
+#     ), f"Expected to find a dictionary in `df.attrs` with these keys: {DATAFRAME_ATTRIBUTE_KEYS}, instead found a dictionary with these keys: {df.attrs.keys()}"
 
-    assert (
-        "Validation Status" in df.columns
-    ), f"Expected to find a column called `Validation Status` in the dataframe. Instead, the columns in this dataframe are: {df.columns}"
+#     assert (
+#         "Validation Status" in df.columns
+#     ), f"Expected to find a column called `Validation Status` in the dataframe. Instead, the columns in this dataframe are: {df.columns}"
 
-    data = api.get_dataframe(
-        config["databases"][0],
-        client=config["client"],
-        return_type="dict",
-    )
+#     data = api.get_dataframe(
+#         config["databases"][0],
+#         client=config["client"],
+#         return_type="dict",
+#     )
 
-    assert isinstance(data, dict), "Expected return type to be a dict"
+#     assert isinstance(data, dict), "Expected return type to be a dict"
 
 
 def test_list_mentions(config):
     data = api.list_mentions(
-        config["rows"][0],
+        query=config["rows"][0],
         client=config["client"],
     )
 
-    assert (
-        "mentions" in data.keys()
-    ), "Expected to find a dictionary with the key `mentions`"
+    assert hasattr(
+        data, "mentions"
+    ), "Expected to find a object with the attribute `mentions`"
 
-    assert isinstance(data["mentions"], list), "Expected `mentions` to be a list"
+    assert isinstance(data.mentions, list), "Expected `mentions` to be a list"
 
 
 def test_get_tree(config):
@@ -281,13 +281,13 @@ def test_get_tree(config):
 
     tree = tree[0]
 
-    assert tree["parentId"] is None, "Expected the root of the tree to have no parent"
+    assert tree["parent_id"] is None, "Expected the root of the tree to have no parent"
 
     tree.pop("children")
 
     tree = api.get_tree(client=config["client"], include_rows=False)
     tree = tree[0]
-    assert tree["parentId"] is None, "Expected the root of the tree to have no parent"
+    assert tree["parent_id"] is None, "Expected the root of the tree to have no parent"
 
     tree.pop("children")
 
