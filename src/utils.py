@@ -116,6 +116,7 @@ def expand_user(path, user_home_dirname: str = os.path.expanduser("~")) -> str:
         return path
 
 
+@beartype
 def download_sync(url: str, save_path: str) -> None:
     """concrete method to download a resource using GET and save to disk
 

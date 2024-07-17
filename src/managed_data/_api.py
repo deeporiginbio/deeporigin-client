@@ -59,13 +59,21 @@ def _get_default_client(client=None):
         tokens = auth.get_tokens(refresh=True)
         access_token = tokens["access"]
 
+        import httpx
         from deeporigin.config import get_value
 
-        org_id = get_value()["organization_id"]
+        value = get_value()
+
+        org_id = value["organization_id"]
+        base_url = httpx.URL.join(
+            value["api_endpoint"],
+            value["nucleus_api_route"],
+        )
 
         client = DeeporiginData(
             token=access_token,
             org_id=org_id,
+            base_url=base_url,
         )
 
     return client

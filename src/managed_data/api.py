@@ -112,9 +112,9 @@ def download_file(
             message=f"{destination} should be a path to a folder."
         )
 
-    file_name = describe_file(file_id, client=client).name  # noqa: F405
+    file_name = describe_file(file_id=file_id, client=client).name  # noqa: F405
 
-    url = create_file_download_url(file_id, client=client).downloadUrl  # noqa: F405
+    url = create_file_download_url(file_id=file_id, client=client).download_url  # noqa: F405
 
     save_path = os.path.join(destination, file_name)
 
@@ -520,7 +520,7 @@ def download(
     if PREFIXES.FILE in source:
         # this is a file
 
-        _api.download_file(
+        download_file(
             file_id=source,
             destination=destination,
             client=client,
@@ -528,7 +528,7 @@ def download(
         return
 
     # not a file, so need to determine what sort of row it is
-    obj = _api.describe_row(source, client=client)
+    obj = _api.describe_row(row_id=source, client=client)
     if obj["type"] == "database":
         download_database(
             obj,
@@ -568,7 +568,7 @@ def download_database(
         )
 
     if isinstance(source, str):
-        source = _api.describe_row(source, client=client)
+        source = _api.describe_row(row_id=source, client=client)
     elif not {"hid", "id"}.issubset(set(list(source.keys()))):
         raise DeepOriginException(
             message=f"If `source` is a dictionary, expected it contain the `hid` and `id` keys. These keys were not found. Instead, the keys are: {source.keys()}"
@@ -587,7 +587,7 @@ def download_database(
         file_ids = df.attrs["file_ids"]
 
         for file_id in file_ids:
-            _api.download_file(file_id, destination, client=client)
+            download_file(file_id, destination, client=client)
 
     df.to_csv(os.path.join(destination, database_hid + ".csv"))
 
@@ -875,17 +875,24 @@ def get_row_data(
         DeepOriginException: If row_id is not a row
     """
 
-    response = _api.describe_row(row_id, fields=True, client=client)
+    response = _api.describe_row(
+        row_id=row_id,
+        fields=True,
+        client=client,
+    )
 
-    if response["type"] != "row":
+    if response.type != "row":
         raise DeepOriginException(
-            message=f"Expected `row_id` to resolve to a row, instead, it resolves to a `{response['type']}`"
+            message=f"Expected `row_id` to resolve to a row, instead, it resolves to a `{response.type}`"
         )
 
     # ask parent for column names
-    parent_response = _api.describe_row(response["parentId"], client=client)
+    parent_response = _api.describe_row(
+        row_id=response.parent_id,
+        client=client,
+    )
 
-    if parent_response["type"] != "database":
+    if parent_response.type != "database":
         raise DeepOriginException(
             message=f"Expected parent of `{row_id}` to resolve to a database, instead, it resolves to a `{parent_response['type']}`"
         )
@@ -893,7 +900,7 @@ def get_row_data(
     # make a dictionary from column IDs to column names
     column_name_mapper = dict()
     column_cardinality_mapper = dict()
-    for col in parent_response["cols"]:
+    for col in parent_response.cols:
         if use_column_keys:
             column_name_mapper[col["id"]] = col["key"]
         else:
@@ -902,7 +909,7 @@ def get_row_data(
 
     # now use this to construct the required dictionary
     row_data = dict()
-    for field in response["fields"]:
+    for field in response.fields:
         column_id = field["columnId"]
 
         if "value" not in field:

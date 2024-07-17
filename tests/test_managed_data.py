@@ -293,51 +293,49 @@ def test_get_tree(config):
 
 
 def test_create_file_download_url(config):
-    file_id = config["file"]["id"]
+    file_id = config["file"].id
     data = api.create_file_download_url(
-        file_id,
+        file_id=file_id,
         client=config["client"],
     )
 
-    assert (
-        "downloadUrl" in data.keys()
-    ), "Expected to find `downloadUrl` in data response"
+    assert hasattr(
+        data, "download_url"
+    ), "Expected to find `download_url` in data response"
 
 
 def test_download_file(config):
     if "file" not in config.keys():
         return
 
-    file_id = config["file"]["id"]
+    file_id = config["file"].id
 
     if config["mock"]:
-        api.download_file(file_id, client=config["client"])
+        api.download_file(file_id=file_id, client=config["client"])
 
         with pytest.raises(DeepOriginException, match="should be a path to a folder"):
             api.download_file(
-                file_id,
+                file_id=file_id,
                 client=config["client"],
                 destination="non-existent-path",
             )
 
     else:
-        api.download_file(file_id, client=config["client"])
-        data = api.describe_file(file_id)
+        api.download_file(file_id=file_id, client=config["client"])
+        data = api.describe_file(file_id=file_id)
         os.remove(data["name"])
 
 
 def test_describe_file(config):
-    file_id = config["file"]["id"]
+    file_id = config["file"].id
 
-    data = api.describe_file(file_id, client=config["client"])
-
-    assert isinstance(data, dict), "Expected response to be a dict"
+    api.describe_file(file_id=file_id, client=config["client"])
 
 
 def test_get_row_data(config):
     row_id = config["rows"][0]
 
-    data = api.get_row_data(row_id, client=config["client"])
+    data = api.get_row_data(row_id=row_id, client=config["client"])
     assert isinstance(data, dict), "Expected response to be a dict"
 
     data = api.get_row_data(
