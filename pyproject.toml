@@ -27,7 +27,6 @@ dependencies = [
     "tabulate",
     "filetype",
     "httpx",
-    "distro",
     "deeporigin-data-sdk>=0.1.0a6",
 ]
 dynamic = ["version"]
@@ -102,7 +101,7 @@ omit = [
 
 [tool.interrogate]
 fail-under = 100
-exclude = ["setup.py", "docs", "build","tests","variables","conftest.py","src/_data_api"]
+exclude = ["setup.py", "docs", "build","tests","variables","conftest.py"]
 ignore-init-method = true
 ignore-init-module = true
 ignore-magic = true

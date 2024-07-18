@@ -41,7 +41,7 @@ def _get_client_methods():
     return methods
 
 
-def _get_default_client(client=None):
+def _get_default_client(client=None, refresh: bool = True):
     """Internal function to instantiate client
 
     Creates and returns an authenticated client if
@@ -56,7 +56,7 @@ def _get_default_client(client=None):
 
     """
     if client is None:
-        tokens = auth.get_tokens(refresh=True)
+        tokens = auth.get_tokens(refresh=refresh)
         access_token = tokens["access"]
 
         import httpx
