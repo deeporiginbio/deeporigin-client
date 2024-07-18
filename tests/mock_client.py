@@ -1,29 +1,33 @@
-from deeporigin.managed_data.schema import (
-    ColumnItem,
-    CreateDatabaseResponse,
-    CreateWorkspaceResponse,
-    DescribeFileResponse,
-    DescribeRowResponseDatabase,
-    DescribeRowResponseRow,
-    FieldItem,
-    ListRowsResponse,
-)
+from deeporigin_data import types
+from pydantic import BaseModel
+
+USER_DRN = "drn:identity::user:google-apps|user@deeporigin.com"
 
 
-def file_description():
-    """mock file description"""
+class GenericModel(BaseModel):
+    """this catch all model is used for some problematic
+    models that cannot be converted into dict and cannot be constructed due to errors in the generated code"""
 
-    return DescribeFileResponse(
-        id="_file:placeholder-file",
-        uri="s3://placeholder/uri",
-        name="placeholder",
-        status="ready",
-        contentLength=123,
-        contentType="application/foo",
-        dateCreated="2024-05-08 19:16:09.26078",
-        dateUpdated="2024-05-08 19:16:09.26078",
-        createdByUserDrn="drn:identity::user:google-apps|foo@deeporigin.com",
-    ).model_dump()
+    pass
+
+
+def list_files_response(assignments=None):
+    return [
+        types.list_files_response.Data(
+            file=types.list_files_response.DataFile(
+                id="_file:09fwpdPqHtVdt4jj43ywC",
+                contentLength=1343642.0,
+                dateCreated="2024-07-03 23:45:44.214",
+                name="science.ade2574_sm.pdf",
+                status="ready",
+                uri="s3://data.deeporigin-com.ijvjf/files/_file:09fwpdPqHtVdt4jj43ywC",
+                content_type="application/pdf",
+                created_by_user_drn=USER_DRN,
+                date_updated="2024-07-03 23:45:44.214",
+            ),
+            assignments=assignments,
+        )
+    ]
 
 
 class MockClient:
@@ -34,45 +38,39 @@ class MockClient:
     databases = ["db-placeholder"]
     rows = [f"row-{idx}" for idx in range(10)]
     columns = [f"column-{idx}" for idx in range(5)]
-    file = file_description()
+    file = list_files_response()[0].file
 
-    def authenticate(self, refresh_tokens: bool = True):
-        """no need to do anything here"""
-        pass
-
-    def download(self, url: str, save_path: str):
-        """no need to do anything here"""
-        pass
-
-    def put(self, *args, **kwargs):
-        """no need to do anything here"""
-        pass
-
-    def invoke_list_rows(self, data: dict):
+    def list_rows(self, filters):
         """callback when we invoke ListRows"""
 
-        if data == dict(filters=[]):
+        if filters == []:
             # list_rows called with no filters. return
             # a workspace, a database, and some rows
-            rows = []
-            rows += [
-                ListRowsResponse(
-                    hid=self.workspaces[0],
+
+            # root workspace
+            rows = [
+                types.list_rows_response.Data(
                     id=self.workspaces[0],
+                    hid=self.workspaces[0],
                     type="workspace",
-                    parentId=None,
-                ).model_dump()
+                    name=self.workspaces[0],
+                    parent_id=None,
+                )
             ]
+            # root database
             rows += [
-                ListRowsResponse(
+                types.list_rows_response.Data(
                     hid=self.databases[0],
                     id=self.databases[0],
                     type="database",
-                    parentId=self.workspaces[0],
-                ).model_dump()
+                    name=self.workspaces[0],
+                    parent_id=self.workspaces[0],
+                )
             ]
+
+            # rows in the database
             rows += [
-                ListRowsResponse(
+                types.list_rows_response.Data(
                     hid=f"row-{idx}",
                     id=f"row-{idx}",
                     type="row",
@@ -83,56 +81,56 @@ class MockClient:
             return rows
 
         elif (
-            "parent" in data["filters"][0].keys()
-            and "id" in data["filters"][0]["parent"].keys()
-            and data["filters"][0]["parent"]["id"].startswith("db-")
+            "parent" in filters[0].keys()
+            and "id" in filters[0]["parent"].keys()
+            and filters[0]["parent"]["id"].startswith("db-")
         ):
             # we're asking for rows that belong to a database
 
             return [
-                ListRowsResponse(
+                types.list_rows_response.Data(
                     hid=f"row-{idx}",
                     id=f"row-{idx}",
                     type="row",
-                    parentId=data["filters"][0]["parent"]["id"],
-                ).model_dump()
+                    parentId=filters[0]["parent"]["id"],
+                )
                 for idx in range(10)
             ]
 
-        elif data == dict(filters=[dict(parent=dict(isRoot=True))]) or data == dict(
-            filters=[dict(rowType="workspace")]
-        ):
+        elif filters == [dict(parent=dict(is_root=True))] or filters == [
+            dict(row_type="workspace")
+        ]:
             # return the root workspace
             return [
-                ListRowsResponse(
+                types.list_rows_response.Data(
                     hid=self.workspaces[0],
                     id=self.workspaces[0],
                     type="workspace",
                     parentId=None,
-                ).model_dump()
+                )
             ]
-        elif data == dict(filters=[dict(rowType="database")]):
+        elif filters == [dict(row_type="database")]:
             # return the example database
             return [
-                ListRowsResponse(
+                types.list_rows_response.Data(
                     hid=self.databases[0],
                     id=self.databases[0],
                     type="database",
                     parentId=self.workspaces[0],
-                ).model_dump()
+                )
             ]
-        elif data == dict(filters=[dict(rowType="row")]):
+        elif filters == [dict(row_type="row")]:
             # return the example row
             return [
-                ListRowsResponse(
+                types.list_rows_response.Data(
                     hid=self.rows[0],
                     id=self.rows[0],
                     type="row",
                     parentId=self.databases[0],
-                ).model_dump()
+                )
             ]
         else:
-            print(data)
+            print(filters)
             raise NotImplementedError(
                 "This specific request type hasn't been mocked yet"
             )
@@ -203,22 +201,75 @@ class MockClient:
             for idx in range(5)
         ]
 
-    def invoke_ensure_rows(self, data):
+    def list_files(self, filters):
+        if filters == [dict(isUnassigned=True)]:
+            return list_files_response()
+        elif filters == [dict(isUnassigned=False)]:
+            list_files_response(
+                assignments=[
+                    types.list_files_response.DataAssignment(
+                        rowId="_row:HmeXSzMWo96G0Or6HpEXK"
+                    )
+                ],
+            )
+
+    def ensure_rows(self, **kwargs):
         """callback when we invoke EnsureRows"""
-        return {
-            "rows": [
-                {
-                    "id": "_row:RETrlQNnPAPNSC8q21toF",
-                    "parentId": "_database:IpWYEnJE0uIx2TchRVVLQ",
-                    "type": "row",
-                    "dateCreated": "2024-07-03 13:54:09.888684",
-                    "dateUpdated": "2024-07-03 13:54:09.888684",
-                    "createdByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
-                    "hid": "dna-12",
-                    "validationStatus": "invalid",
-                }
-            ]
-        }
+        return types.ensure_rows_response.Data(
+            **{
+                "rows": [
+                    {
+                        "id": "_row:RETrlQNnPAPNSC8q21toF",
+                        "parentId": "_database:IpWYEnJE0uIx2TchRVVLQ",
+                        "type": "row",
+                        "dateCreated": "2024-07-03 13:54:09.888684",
+                        "dateUpdated": "2024-07-03 13:54:09.888684",
+                        "createdByUserDrn": USER_DRN,
+                        "hid": "dna-12",
+                        "validationStatus": "invalid",
+                    }
+                ]
+            }
+        )
+
+    def create_workspace(self, **kwargs):
+        name = kwargs["workspace"]["name"]
+        return types.create_workspace_response.Data(
+            type="workspace",
+            id="_workspace:" + name,
+            hid="_workspace:" + name,
+            name=name,
+            dateCreated="2024-05-08 19:16:09.26078",
+            dateUpdated="2024-05-08 19:16:09.26078",
+            createdByUserDrn=USER_DRN,
+        )
+
+    def create_database(self, **kwargs):
+        name = kwargs["database"]["name"]
+        parentId = kwargs["database"]["parent_id"]
+        return GenericModel(
+            id="_database:FzTJKQ11i1VVRfqolWsFg",
+            date_created="2024-07-18 13:36:18.017657",
+            hid=name,
+            hid_prefix=name,
+            name=name,
+            type="database",
+            cols=None,
+            created_by_user_drn=USER_DRN,
+            creation_block_id=None,
+            creation_parent_id=None,
+            date_updated="2024-07-18 13:36:18.017657",
+            edited_by_user_drn=None,
+            editor=None,
+            is_template=None,
+            parent_id=parentId,
+            row_json_schema={"type": "object", "required": [], "properties": {}},
+            submission_status=None,
+            validation_status=None,
+        )
+
+    def delete_database(self, **kwargs):
+        return dict()
 
     def invoke(self, endpoint: str, data: dict):
         """simple returns data without making any network requests"""
@@ -228,34 +279,6 @@ class MockClient:
 
         elif endpoint == "EnsureRows":
             return self.invoke_ensure_rows(data)
-
-        elif endpoint == "CreateWorkspace":
-            name = data["workspace"]["name"]
-            return CreateWorkspaceResponse(
-                id="_workspace:" + name,
-                hid="_workspace:" + name,
-                name=name,
-                dateCreated="2024-05-08 19:16:09.26078",
-                dateUpdated="2024-05-08 19:16:09.26078",
-                createdByUserDrn="drn:identity::user:google-apps|foo@deeporigin.com",
-            ).model_dump()
-
-        elif endpoint == "DeleteRows":
-            return dict(data=dict())
-
-        elif endpoint == "CreateDatabase":
-            name = data["database"]["name"]
-            return CreateDatabaseResponse(
-                id="_database:" + name,
-                hid="_database:" + name,
-                hidPrefix="placeholder",
-                name=name,
-                dateCreated="2024-05-08 19:16:09.26078",
-                dateUpdated="2024-05-08 19:16:09.26078",
-                createdByUserDrn="drn:identity::user:google-apps|foo@deeporigin.com",
-                parentId=data["database"]["parentId"],
-                cols=[],
-            ).model_dump()
 
         elif endpoint == "DescribeRow":
             return self.invoke_describe_row(data)
@@ -287,18 +310,3 @@ class MockClient:
                     }
                 ]
             }
-        elif endpoint == "ListFiles":
-            if data == dict(filters=[dict(isUnassigned=True)]):
-                return [{"file": file_description()}]
-            elif dict(filters=[dict(isUnassigned=False)]):
-                return [
-                    {
-                        "file": file_description(),
-                        "assignments": [
-                            {"rowId": "_row:ZEaEUIgsbHmGLVlgnxfvU"},
-                            {"rowId": "_row:aCWxUxumDFDnu8ZhmhQ0X"},
-                            {"rowId": "_row:WZVb1jsebafhfLgrHtz2l"},
-                            {"rowId": "_row:3A3okCbvuaZvEkOZLqLwY"},
-                        ],
-                    },
-                ]

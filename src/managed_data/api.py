@@ -57,7 +57,10 @@ def convert_id_format(
         for sid in ids:
             conversions.append(dict(id=sid))
 
-    return _api.convert_id_format(conversions=conversions)
+    return _api.convert_id_format(
+        conversions=conversions,
+        client=client,
+    )
 
 
 @beartype
@@ -86,15 +89,15 @@ def list_rows(
     filters = []
 
     if parent_is_root is not None:
-        filters.append(dict(parent=dict(isRoot=parent_is_root)))
+        filters.append(dict(parent=dict(is_root=parent_is_root)))
 
     if parent_id:
         filters.append(dict(parent=dict(id=parent_id)))
 
     if row_type:
-        filters.append(dict(rowType=row_type))
+        filters.append(dict(row_type=row_type))
 
-    return _api.list_rows(filters=filters)
+    return _api.list_rows(filters=filters, client=client)
 
 
 @beartype
