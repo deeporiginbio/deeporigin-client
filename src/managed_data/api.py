@@ -529,9 +529,9 @@ def download(
 
     # not a file, so need to determine what sort of row it is
     obj = _api.describe_row(row_id=source, client=client)
-    if obj["type"] == "database":
+    if obj.type == "database":
         download_database(
-            obj,
+            obj.id,
             destination,
             include_files=include_files,
             client=client,
@@ -544,7 +544,7 @@ def download(
 
 @beartype
 def download_database(
-    source: Union[str, dict],
+    source: str,
     destination: str = os.getcwd(),
     *,
     include_files: bool = False,
@@ -571,10 +571,6 @@ def download_database(
         source = _api.describe_row(
             row_id=source,
             client=client,
-        )
-    elif not {"hid", "id"}.issubset(set(list(source.keys()))):
-        raise DeepOriginException(
-            message=f"If `source` is a dictionary, expected it contain the `hid` and `id` keys. These keys were not found. Instead, the keys are: {source.keys()}"
         )
 
     database_id = source.id
@@ -738,6 +734,7 @@ def _parse_column_value(
 
 
 def add_row_to_data(*, data: dict, row, columns: list, use_file_names: bool = True):
+    """utility function to combine data from a row into a dataframe"""
     row_data = _row_to_dict(row, use_file_names=use_file_names)
     data["ID"].append(row_data["ID"])
     data["Validation Status"].append(row_data["Validation Status"])
@@ -754,18 +751,23 @@ def add_row_to_data(*, data: dict, row, columns: list, use_file_names: bool = Tr
 
 
 def _row_to_dict(row, *, use_file_names: bool = True):
+    """utility function to convert a row to a dictionary"""
     fields = row.fields
 
     values = {"ID": row.hid, "Validation Status": row.validation_status}
     if fields is None:
         return values
     for field in fields:
-        if field.type in ["float", "int", "boolean"]:
+        if field.value is None:
+            value = None
+        elif field.type in ["float", "int", "boolean"]:
             value = field.value
         elif field.type == "select":
             value = field.value.selected_options
+
         elif field.type == "reference":
             value = field.value.row_ids
+
         elif field.type == "file":
             value = field.value.file_ids
             if use_file_names and value is not None:
