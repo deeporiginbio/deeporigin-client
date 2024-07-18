@@ -17,8 +17,7 @@ from deeporigin.managed_data import _api
 # this import is to make sure that all simply-wrapped
 # functions in _api are available in api (this module)
 from deeporigin.managed_data._api import *  # noqa: F403
-from deeporigin.managed_data.schema import IDFormat
-from deeporigin.utils import PREFIXES, _parse_params_from_url, download_sync
+from deeporigin.utils import PREFIXES, IDFormat, _parse_params_from_url, download_sync
 
 
 def ensure_client(func):
@@ -937,6 +936,8 @@ def get_row_data(
 
     # now use this to construct the required dictionary
     row_data = dict()
+    if not hasattr(response, "fields"):
+        return row_data
     for field in response.fields:
         column_id = field["columnId"]
 

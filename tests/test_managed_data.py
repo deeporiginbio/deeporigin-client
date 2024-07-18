@@ -7,7 +7,7 @@ import pandas as pd
 import pytest
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.managed_data import api
-from deeporigin.utils import PREFIXES
+from deeporigin.utils import DATAFRAME_ATTRIBUTE_KEYS, PREFIXES
 from mock_client import MockClient
 
 
@@ -238,29 +238,29 @@ def test_list_database_rows(config):
     )
 
 
-# def test_get_dataframe(config):
-#     df = api.get_dataframe(
-#         config["databases"][0],
-#         client=config["client"],
-#     )
+def test_get_dataframe(config):
+    df = api.get_dataframe(
+        config["databases"][0],
+        client=config["client"],
+    )
 
-#     assert isinstance(df, pd.DataFrame), "Expected return type to be a pandas Dataframe"
+    assert isinstance(df, pd.DataFrame), "Expected return type to be a pandas Dataframe"
 
-#     assert (
-#         set(df.attrs.keys()) == DATAFRAME_ATTRIBUTE_KEYS
-#     ), f"Expected to find a dictionary in `df.attrs` with these keys: {DATAFRAME_ATTRIBUTE_KEYS}, instead found a dictionary with these keys: {df.attrs.keys()}"
+    assert (
+        set(df.attrs.keys()) == DATAFRAME_ATTRIBUTE_KEYS
+    ), f"Expected to find a dictionary in `df.attrs` with these keys: {DATAFRAME_ATTRIBUTE_KEYS}, instead found a dictionary with these keys: {df.attrs.keys()}"
 
-#     assert (
-#         "Validation Status" in df.columns
-#     ), f"Expected to find a column called `Validation Status` in the dataframe. Instead, the columns in this dataframe are: {df.columns}"
+    assert (
+        "Validation Status" in df.columns
+    ), f"Expected to find a column called `Validation Status` in the dataframe. Instead, the columns in this dataframe are: {df.columns}"
 
-#     data = api.get_dataframe(
-#         config["databases"][0],
-#         client=config["client"],
-#         return_type="dict",
-#     )
+    data = api.get_dataframe(
+        config["databases"][0],
+        client=config["client"],
+        return_type="dict",
+    )
 
-#     assert isinstance(data, dict), "Expected return type to be a dict"
+    assert isinstance(data, dict), "Expected return type to be a dict"
 
 
 def test_list_mentions(config):

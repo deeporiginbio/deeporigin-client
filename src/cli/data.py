@@ -5,7 +5,7 @@ import os
 
 import cement
 from deeporigin.exceptions import DeepOriginException
-from deeporigin.managed_data import _api, api
+from deeporigin.managed_data import api
 from deeporigin.utils import PREFIXES, _print_dict, _print_tree, _show_json, _truncate
 
 
@@ -28,8 +28,7 @@ databases to CSV files.
         try:
             return self.app.client
         except Exception:
-            client = DeepOriginClient()  # pragma: no cover
-            client.authenticate(refresh_tokens=False)  # pragma: no cover
+            client = api._get_default_client()
 
             return client  # pragma: no cover
 
@@ -87,7 +86,7 @@ databases to CSV files.
         for df in dfs:
             files = df.attrs["file_ids"]
             for file in files:
-                _api.download_file(file, destination=destination)
+                api.download_file(file, destination=destination)
 
     @cement.ex(
         help="Copy files or databases from or to Deep Origin",
@@ -173,19 +172,20 @@ databases to CSV files.
 
         if self.app.pargs.files:
             # we will only list files
-            data = _api.list_files(
+            files = api.list_files(
                 client=self._get_client(),
             )
             if not self.app.pargs.json:
                 # show a table with file names, ids, status
                 pdata = dict(Name=[], Status=[], ID=[])
-                for item in data:
-                    pdata["Name"].append(item["file"]["name"])
-                    pdata["Status"].append(item["file"]["status"])
-                    pdata["ID"].append(item["file"]["id"])
+                for item in files:
+                    pdata["Name"].append(item.file.name)
+                    pdata["Status"].append(item.file.status)
+                    pdata["ID"].append(item.file.id)
                 _print_dict(pdata, json=False, transpose=False)
             else:
-                _show_json(data)
+                files = [file.dict() for file in files]
+                _show_json(files)
             return
 
         if (
@@ -201,7 +201,8 @@ databases to CSV files.
                 for branch in tree:
                     _print_tree(branch)
             else:
-                rows = _api.list_rows(client=self._get_client())
+                rows = api.list_rows(client=self._get_client())
+                rows = [row.dict() for row in rows]
                 _show_json(rows)
 
             return
@@ -210,17 +211,17 @@ databases to CSV files.
         # so we will only show a table, or JSON output
         rows = []
         if self.app.pargs.rows:
-            rows += _api.list_rows(
+            rows += api.list_rows(
                 row_type="row",
                 client=self._get_client(),
             )
         if self.app.pargs.databases:
-            rows += _api.list_rows(
+            rows += api.list_rows(
                 row_type="database",
                 client=self._get_client(),
             )
         if self.app.pargs.workspaces:
-            rows += _api.list_rows(
+            rows += api.list_rows(
                 row_type="workspace",
                 client=self._get_client(),
             )
@@ -229,11 +230,12 @@ databases to CSV files.
             pdata = dict(Name=[], Type=[], ID=[])
 
             for item in rows:
-                pdata["Name"].append(item["name"])
-                pdata["Type"].append(item["type"])
-                pdata["ID"].append(item["hid"])
+                pdata["Name"].append(item.name)
+                pdata["Type"].append(item.type)
+                pdata["ID"].append(item.hid)
             _print_dict(pdata, json=False, transpose=False)
         else:
+            rows = [row.dict() for row in rows]
             _show_json(rows)
 
     @cement.ex(
@@ -253,23 +255,28 @@ databases to CSV files.
         ],
     )
     def describe(self):
-        """describe file or row"""
+        """describe file or row or database"""
 
         if PREFIXES.FILE in self.app.pargs.object_id:
-            data = _api.describe_file(
-                self.app.pargs.object_id,
+            data = api.describe_file(
+                file_id=self.app.pargs.object_id,
                 client=self._get_client(),
             )
+            data = data.dict()
         else:
             # not a file
-            data = _api.describe_row(
-                self.app.pargs.object_id,
+            data = api.describe_row(
+                row_id=self.app.pargs.object_id,
                 client=self._get_client(),
             )
 
-            data.pop("rowJsonSchema", None)
+            data = dict(data)
 
-            if "cols" in data.keys():
+            data.pop("row_json_schema", None)
+            data.pop("rowJsonSchema", None)
+            data.pop("editor", None)
+
+            if "cols" in data.keys() and data["cols"] is not None:
                 col_names = [col["name"] for col in data["cols"]]
                 col_keys = [col["key"] for col in data["cols"]]
 
@@ -303,11 +310,11 @@ databases to CSV files.
     def show(self):
         """show database or row in Deep Origin"""
 
-        data = _api.describe_row(
+        data = api.describe_row(
             row_id=self.app.pargs.object_id,
             client=self._get_client(),
         )
-        row_type = data["type"]
+        row_type = data.type
 
         if row_type == "database":
             data = api.get_dataframe(
@@ -369,7 +376,7 @@ databases to CSV files.
     def upload(self):
         """upload file to database in Deep Origin"""
 
-        data = _api.upload_file(
+        data = api.upload_file(
             file_path=self.app.pargs.file_path,
             client=self._get_client(),
         )
@@ -380,7 +387,7 @@ databases to CSV files.
             return
 
         if self.app.pargs.column and self.app.pargs.database:
-            data = _api.assign_files_to_cell(
+            data = api.assign_files_to_cell(
                 file_ids=[data["id"]],
                 database_id=self.app.pargs.database,
                 column_id=self.app.pargs.column,

@@ -8,7 +8,20 @@ class GenericModel(BaseModel):
     """this catch all model is used for some problematic
     models that cannot be converted into dict and cannot be constructed due to errors in the generated code"""
 
-    pass
+    class Config:
+        extra = "allow"
+
+
+def column_item(name: str = "col-placeholder"):
+    return {
+        "id": "_column:zRpsD9FirjyIkaszUUTku",
+        "name": name,
+        "key": "name",
+        "parentId": "_database:ZiEtc7k02S8XIVOG5z007",
+        "type": "text",
+        "systemType": "name",
+        "cardinality": "one",
+    }
 
 
 def list_files_response(assignments=None):
@@ -18,9 +31,9 @@ def list_files_response(assignments=None):
                 id="_file:09fwpdPqHtVdt4jj43ywC",
                 contentLength=1343642.0,
                 dateCreated="2024-07-03 23:45:44.214",
-                name="science.ade2574_sm.pdf",
+                name="foo.pdf",
                 status="ready",
-                uri="s3://data.deeporigin-com.ijvjf/files/_file:09fwpdPqHtVdt4jj43ywC",
+                uri="s3://data.deeporigin-com.foo/files/_file:09fwpdPqHtVdt4jj43ywC",
                 content_type="application/pdf",
                 created_by_user_drn=USER_DRN,
                 date_updated="2024-07-03 23:45:44.214",
@@ -75,7 +88,7 @@ class MockClient:
                     id=f"row-{idx}",
                     type="row",
                     parentId=self.databases[0],
-                ).model_dump()
+                )
                 for idx in range(10)
             ]
             return rows
@@ -135,83 +148,15 @@ class MockClient:
                 "This specific request type hasn't been mocked yet"
             )
 
-    def invoke_describe_row(self, data):
-        """callback when we invoke DescribeRow"""
-
-        if data["rowId"].startswith("db-"):
-            # we are likely asking for a database
-            name = self.databases[0]
-            return DescribeRowResponseDatabase(
-                id=name,
-                hid=name,
-                name=name,
-                type="database",
-                parentId="ws_placeholder",
-                cols=[
-                    dict(
-                        ColumnItem(
-                            id=f"column-{idx}",
-                            key=f"column-{idx}",
-                        )
-                    )
-                    for idx in range(5)
-                ],
-                hidPrefix="placeholder",
-            ).model_dump()
-
-        else:
-            # we are asking for a row in a database
-            name = data["rowId"]
-            fields = [
-                FieldItem(
-                    columnId=f"column-{idx}",
-                    cellId=f"column-{idx}",
+    def list_files(self, filters: list):
+        assignments = None
+        if filters == [dict(is_unassigned=False)]:
+            assignments = [
+                types.list_files_response.DataAssignment(
+                    rowId="_row:HmeXSzMWo96G0Or6HpEXK"
                 )
-                for idx in range(5)
             ]
-            row = DescribeRowResponseRow(
-                id=name,
-                hid=name,
-                parentId=self.databases[0],
-                fields=fields,
-            ).model_dump()
-
-            if not data["fields"]:
-                row.pop("fields", None)
-
-        return row
-
-    def invoke_list_database_rows(self, data):
-        """callback when we invoke ListDatabaseRows"""
-
-        fields = [
-            FieldItem(
-                columnId=f"column-{idx}",
-                cellId=f"column-{idx}",
-            )
-            for idx in range(5)
-        ]
-        return [
-            DescribeRowResponseRow(
-                id=f"row-{idx}",
-                hid=f"row-{idx}",
-                parentId=data["databaseRowId"],
-                fields=fields,
-            ).model_dump()
-            for idx in range(5)
-        ]
-
-    def list_files(self, filters):
-        if filters == [dict(isUnassigned=True)]:
-            return list_files_response()
-        elif filters == [dict(isUnassigned=False)]:
-            list_files_response(
-                assignments=[
-                    types.list_files_response.DataAssignment(
-                        rowId="_row:HmeXSzMWo96G0Or6HpEXK"
-                    )
-                ],
-            )
+        return list_files_response(assignments=assignments)
 
     def ensure_rows(self, **kwargs):
         """callback when we invoke EnsureRows"""
@@ -268,45 +213,101 @@ class MockClient:
             validation_status=None,
         )
 
+    def describe_database_stats(self, **kwargs):
+        return types.describe_database_stats_response.Data(rowCount=5)
+
+    def convert_id_format(self, **kwargs):
+        return [
+            types.convert_id_format_response.Data(
+                id="_workspace:57xVgPwGWdhxP5DoQGT30", hid="sandbox"
+            )
+        ]
+
+    def describe_row(self, row_id, fields: bool = True):
+        row_type = "row"
+        cols = None
+        if row_id.startswith("db-"):
+            row_type = "database"
+            cols = [column_item(name=f"col-{idx}") for idx in range(5)]
+        return GenericModel(
+            id=row_id,
+            hid=row_id,
+            hid_prefix=None,
+            name=row_id,
+            type=row_type,
+            cols=cols,
+            creation_block_id=None,
+            creation_parent_id=None,
+            editor=None,
+            is_template=None,
+            row_json_schema=None,
+            submission_status=None,
+            parentId="_database:ZiEtc7k02S8XIVOG5z007",
+            dateCreated="2024-06-20 19:21:10.81895",
+            dateUpdated="2024-07-17 15:33:35.951",
+            createdByUserDrn=USER_DRN,
+            editedByUserDrn=USER_DRN,
+            validationStatus="invalid",
+        )
+
     def delete_database(self, **kwargs):
         return dict()
 
-    def invoke(self, endpoint: str, data: dict):
-        """simple returns data without making any network requests"""
+    def list_mentions(self, **kwargs):
+        return types.list_mentions_response.Data(
+            mentions=[
+                types.list_mentions_response.DataMention(
+                    id="_row:k0okQigiru5g6jc8IFfEj",
+                    hid="ligand-1",
+                    type="row",
+                    name="Mol 1",
+                    parent_id=None,
+                )
+            ]
+        )
 
-        if endpoint == "ListRows":
-            return self.invoke_list_rows(data)
+    def list_database_rows(self, database_row_id):
+        return [
+            types.list_database_rows_response.Data(
+                id=database_row_id,
+                hid="ligand-4",
+                type="row",
+                creation_block_id=None,
+                creation_parent_id=None,
+                fields=[
+                    types.list_database_rows_response.DataFieldUnionMember0(
+                        cellId="_cell:V0arbWA6UvQ4Q8UOw5Jua",
+                        columnId="_column:zRpsD9FirjyIkaszUUTku",
+                        type="text",
+                        validationStatus="valid",
+                        invalid_data=None,
+                        system_type="name",
+                        value="Mol 4",
+                    ),
+                    types.list_database_rows_response.DataFieldUnionMember0(
+                        cellId="_cell:kJ97kqhgilDGPYJWEzikf",
+                        columnId="_column:iooVcZhMFXKYMQCeirREJ",
+                        type="text",
+                        validationStatus="valid",
+                        invalid_data=None,
+                        system_type=None,
+                        value="CCC",
+                    ),
+                ],
+                is_template=None,
+                name="Mol 4",
+                parent_id="_database:ZiEtc7k02S8XIVOG5z007",
+                submission_status=None,
+                parentId="_database:ZiEtc7k02S8XIVOG5z007",
+                dateCreated="2024-07-10 19:26:52.597836",
+                dateUpdated="2024-07-10 19:29:33.341",
+                createdByUserDrn=USER_DRN,
+                editedByUserDrn=USER_DRN,
+                validationStatus="valid",
+            )
+        ]
 
-        elif endpoint == "EnsureRows":
-            return self.invoke_ensure_rows(data)
-
-        elif endpoint == "DescribeRow":
-            return self.invoke_describe_row(data)
-
-        elif endpoint == "ConvertIdFormat":
-            return [{"id": "_row:W6DjtaCrZ201EGLpmZtGO", "hid": "sample-1"}]
-
-        elif endpoint == "ListDatabaseRows":
-            return self.invoke_list_database_rows(data)
-
-        elif endpoint == "DescribeFile":
-            return file_description()
-
-        elif endpoint == "DescribeDatabaseStats":
-            return {"rowCount": 5}
-
-        elif endpoint == "CreateFileDownloadUrl":
-            return {
-                "downloadUrl": "https://github.com/deeporiginbio/deeporigin-client/archive/refs/tags/0.0.3.zip"
-            }
-
-        elif endpoint == "ListMentions":
-            return {
-                "mentions": [
-                    {
-                        "type": "row",
-                        "id": "_row:W6DjtaCrZ201EGLpmZtGO",
-                        "hid": "sample-1",
-                    }
-                ]
-            }
+    def create_file_download_url(self, **kwargs):
+        return types.create_file_download_url_response.Data(
+            downloadUrl="https://foo.com"
+        )

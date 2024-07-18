@@ -1,7 +1,7 @@
 import json
 import os
 from dataclasses import dataclass
-from typing import Union
+from typing import Literal, Union
 from urllib.parse import parse_qs, urljoin, urlparse
 
 import requests
@@ -13,6 +13,42 @@ from tabulate import tabulate
 __all__ = [
     "expand_user",
 ]
+
+
+RowType = Literal["row", "database", "workspace"]
+"""Type of a row"""
+
+FileStatus = Literal["ready", "archived"]
+"""Status of a file"""
+
+DataType = Literal[
+    "integer",
+    "str",
+    "select",
+    "date",
+    "text",
+    "file",
+    "reference",
+    "editor",
+    "float",
+    "boolean",
+]
+"""Type of a column"""
+
+DATAFRAME_ATTRIBUTE_KEYS = {
+    "file_ids",
+    "id",
+    "reference_ids",
+}
+
+
+Cardinality = Literal["one", "many"]
+
+IDFormat = Literal["human-id", "system-id"]
+"""Format of an ID"""
+
+DatabaseReturnType = Literal["dataframe", "dict"]
+"""Return type of a database"""
 
 
 @dataclass

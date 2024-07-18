@@ -13,7 +13,7 @@ chosen_tests=""
 test-debug:
 	source $(CURDIR)/venv/bin/activate && \
 		interrogate -c pyproject.toml -v . -f 100 && \
-		python3 -m coverage run -m pytest -x -s --failed-first -k test_managed_data --client $(client) && \
+		python3 -m coverage run -m pytest -x -s --failed-first --client $(client) && \
 		python3 -m coverage html && \
 		deactivate
 	-open htmlcov/index.html
