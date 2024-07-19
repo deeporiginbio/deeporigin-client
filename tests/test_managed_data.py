@@ -228,7 +228,7 @@ def test_convert_id_format(config):
     )
 
     with pytest.raises(DeepOriginException, match="non-None and a list of strings"):
-        api.convert_id_format()
+        api.convert_id_format(client=config["client"])
 
 
 def test_list_database_rows(config):
