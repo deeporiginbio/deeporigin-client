@@ -5,9 +5,8 @@ from deeporigin import auth
 from deeporigin.utils import _get_method
 from deeporigin_data import DeeporiginData
 
-# this dict allows us to simply wrap endpoints in the low-level
-# API so that we can more easily call them, without needing
-# to explicitly write functions for them
+# this list specifies methods in the low level API that should
+# not be automatically wrapped
 IGNORED_METHODS = {
     "close",
     "get",
@@ -21,7 +20,8 @@ IGNORED_METHODS = {
     "with_options",
 }
 
-
+# this list specifies methods that should be overridden
+# by functions in api.py
 OVERRIDDEN_METHODS = {"list_rows", "convert_id_format"}
 
 
@@ -56,8 +56,7 @@ def _get_default_client(client=None, refresh: bool = True):
 
     """
     if client is None:
-        # TODO - add refresh
-        tokens = auth.get_tokens(refresh=False)
+        tokens = auth.get_tokens(refresh=refresh)
         access_token = tokens["access"]
 
         import httpx
