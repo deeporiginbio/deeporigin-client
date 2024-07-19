@@ -56,7 +56,8 @@ def _get_default_client(client=None, refresh: bool = True):
 
     """
     if client is None:
-        tokens = auth.get_tokens(refresh=refresh)
+        # TODO - add refresh
+        tokens = auth.get_tokens(refresh=False)
         access_token = tokens["access"]
 
         import httpx
@@ -97,7 +98,9 @@ def _create_function(method_path):
             client = _get_default_client()
         method = _get_method(client, method_path)
         # call the low level API method
+
         response = method(**kwargs)
+
         if hasattr(response, "data"):
             return response.data
         else:

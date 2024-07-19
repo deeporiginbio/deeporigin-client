@@ -12,14 +12,26 @@ class GenericModel(BaseModel):
         extra = "allow"
 
 
-def column_item(name: str = "col-placeholder"):
+def make_fields(n: int = 1):
+    return [
+        {
+            "columnId": f"_column:col-{idx}",
+            "cellId": "_cell:ubpEc7OdSkVe6AkVI3vi0",
+            "validationStatus": "valid",
+            "type": "text",
+            "value": "placeholder text",
+        }
+        for idx in range(n)
+    ]
+
+
+def column_item(idx: int = 1):
     return {
-        "id": "_column:zRpsD9FirjyIkaszUUTku",
-        "name": name,
-        "key": "name",
-        "parentId": "_database:ZiEtc7k02S8XIVOG5z007",
+        "id": f"_column:col-{idx}",
+        "name": f"col-{idx}",
+        "key": f"col-{idx}",
+        "parentId": "db-placeholder",
         "type": "text",
-        "systemType": "name",
         "cardinality": "one",
     }
 
@@ -148,7 +160,7 @@ class MockClient:
                 "This specific request type hasn't been mocked yet"
             )
 
-    def list_files(self, filters: list):
+    def list_files(self, filters: list = []):
         assignments = None
         if filters == [dict(is_unassigned=False)]:
             assignments = [
@@ -224,12 +236,19 @@ class MockClient:
         ]
 
     def describe_row(self, row_id, fields: bool = True):
-        row_type = "row"
-        cols = None
-        if row_id.startswith("db-"):
+        if row_id.startswith("row-"):
+            row_type = "row"
+            parent_id = "db-placeholder"
+        elif row_id.startswith("db-"):
             row_type = "database"
-            cols = [column_item(name=f"col-{idx}") for idx in range(5)]
-        return GenericModel(
+            parent_id = "ws-placeholder"
+        elif row_id.startswith("ws-"):
+            row_type = "workspace"
+            parent_id = None
+
+        cols = [column_item(idx=idx) for idx in range(5)]
+
+        response = GenericModel(
             id=row_id,
             hid=row_id,
             hid_prefix=None,
@@ -242,13 +261,17 @@ class MockClient:
             is_template=None,
             row_json_schema=None,
             submission_status=None,
-            parentId="_database:ZiEtc7k02S8XIVOG5z007",
+            parent_id=parent_id,
             dateCreated="2024-06-20 19:21:10.81895",
             dateUpdated="2024-07-17 15:33:35.951",
             createdByUserDrn=USER_DRN,
             editedByUserDrn=USER_DRN,
             validationStatus="invalid",
         )
+
+        if fields:
+            response.fields = make_fields(5)
+        return response
 
     def delete_database(self, **kwargs):
         return dict()
@@ -309,5 +332,19 @@ class MockClient:
 
     def create_file_download_url(self, **kwargs):
         return types.create_file_download_url_response.Data(
-            downloadUrl="https://foo.com"
+            downloadUrl="https://github.com/deeporiginbio/deeporigin-client/archive/refs/tags/0.0.3.zip"
+        )
+
+    def describe_file(self, file_id: str):
+        return types.describe_file_response.Data(
+            id=file_id,
+            content_length=56.0,
+            name="local database.csv",
+            status="ready",
+            uri=f"s3://data.deeporigin-com.ijvjf/files/{file_id}",
+            contentLength=56,
+            contentType="application/vnd.ms-excel",
+            dateCreated="2024-07-03 23:42:51.746",
+            dateUpdated="2024-07-03 23:42:51.746",
+            createdByUserDrn=USER_DRN,
         )

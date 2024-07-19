@@ -921,7 +921,7 @@ def get_row_data(
 
     if parent_response.type != "database":
         raise DeepOriginException(
-            message=f"Expected parent of `{row_id}` to resolve to a database, instead, it resolves to a `{parent_response['type']}`"
+            message=f"Expected parent of `{row_id}` to resolve to a database, instead, it resolves to a `{parent_response.type}`"
         )
 
     # make a dictionary from column IDs to column names
