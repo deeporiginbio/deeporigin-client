@@ -107,7 +107,6 @@ def _create_function(method_path):
                 tokens["access"] = auth.refresh_tokens(tokens["refresh"])
                 auth.cache_tokens(tokens)
                 client.token = tokens["access"]
-                print(client.token)
                 response = method(**kwargs)
             else:
                 raise error
