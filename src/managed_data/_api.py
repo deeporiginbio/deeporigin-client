@@ -3,7 +3,7 @@ import sys
 
 from deeporigin import auth
 from deeporigin.utils import _get_method
-from deeporigin_data import DeeporiginData
+from deeporigin_data import AuthenticationError, DeeporiginData
 
 # this list specifies methods in the low level API that should
 # not be automatically wrapped
@@ -98,7 +98,19 @@ def _create_function(method_path):
         method = _get_method(client, method_path)
         # call the low level API method
 
-        response = method(**kwargs)
+        try:
+            response = method(**kwargs)
+        except AuthenticationError as error:
+            if "expired token" in error.message:
+                print("⚠️ Token expired. Refreshing credentials...")
+                tokens = auth.read_cached_tokens()
+                tokens["access"] = auth.refresh_tokens(tokens["refresh"])
+                auth.cache_tokens(tokens)
+                client.token = tokens["access"]
+                print(client.token)
+                response = method(**kwargs)
+            else:
+                raise error
 
         if hasattr(response, "data"):
             return response.data

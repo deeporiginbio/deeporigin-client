@@ -62,6 +62,7 @@ def get_tokens(
 
         if refresh:
             tokens["access"] = refresh_tokens(tokens["refresh"])
+            cache_tokens(tokens)
 
     else:
         # no tokens on disk. have to sign into the platform to get tokens
