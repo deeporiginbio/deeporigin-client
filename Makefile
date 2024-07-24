@@ -22,7 +22,7 @@ ifeq ($(client), "mock")
 else 
 	source $(CURDIR)/venv/bin/activate && \
 		interrogate -c pyproject.toml -v . -f 100 && \
-		python3 -m coverage run -m pytest -x --failed-first -k $(chosen_tests) --client $(client) -n auto && \
+		python3 -m coverage run -m pytest --failed-first -k $(chosen_tests) --client $(client) -n auto && \
 		python3 -m coverage html && \
 		deactivate
 	-open htmlcov/index.html
@@ -41,7 +41,8 @@ install:
 	@echo "Installing deeporigin in editable mode in a venv..."
 	@python3 -m venv venv
 	@source $(CURDIR)/venv/bin/activate && \
-	    pip install -q -e .[test,jupyter,docs] && \
+		pip install --upgrade pip && \
+	    pip install -e .[test,jupyter,docs] && \
 	    deactivate
 	@-mkdir -p ~/.deeporigin
 	@test -f ~/.deeporigin/deeporigin || ln -s $(CURDIR)/venv/bin/deeporigin ~/.deeporigin/deeporigin

@@ -73,12 +73,6 @@ jobs:
       - run: 'mkdir ~/.deeporigin/'
         shell: bash
 
-      - run: 'cp tests/config.yml ~/.deeporigin/config.yml'
-        shell: bash
-
-      - run: 'cp tests/api_tokens ~/.deeporigin/api_tokens'
-        shell: bash
-
 
       - name: run tests
         run: |

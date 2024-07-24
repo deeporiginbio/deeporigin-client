@@ -1,16 +1,54 @@
 import json
 import os
 from dataclasses import dataclass
-from typing import Union
-from urllib.parse import urljoin
+from typing import Literal, Union
+from urllib.parse import parse_qs, urljoin, urlparse
 
+import requests
 from beartype import beartype
 from deeporigin.config import get_value
+from deeporigin.exceptions import DeepOriginException
 from tabulate import tabulate
 
 __all__ = [
     "expand_user",
 ]
+
+
+RowType = Literal["row", "database", "workspace"]
+"""Type of a row"""
+
+FileStatus = Literal["ready", "archived"]
+"""Status of a file"""
+
+DataType = Literal[
+    "integer",
+    "str",
+    "select",
+    "date",
+    "text",
+    "file",
+    "reference",
+    "editor",
+    "float",
+    "boolean",
+]
+"""Type of a column"""
+
+DATAFRAME_ATTRIBUTE_KEYS = {
+    "file_ids",
+    "id",
+    "reference_ids",
+}
+
+
+Cardinality = Literal["one", "many"]
+
+IDFormat = Literal["human-id", "system-id"]
+"""Format of an ID"""
+
+DatabaseReturnType = Literal["dataframe", "dict"]
+"""Return type of a database"""
 
 
 @dataclass
@@ -112,3 +150,53 @@ def expand_user(path, user_home_dirname: str = os.path.expanduser("~")) -> str:
         return os.path.join(user_home_dirname, path[2:])
     else:
         return path
+
+
+@beartype
+def download_sync(url: str, save_path: str) -> None:
+    """concrete method to download a resource using GET and save to disk
+
+    Args:
+        url (str): url to download
+        save_path (str): path to save file
+    """
+
+    with requests.get(url, stream=True) as response:
+        if response.status_code != 200:
+            raise DeepOriginException(message=f"Failed to download file from {url}")
+
+        with open(save_path, "wb") as file:
+            for chunk in response.iter_content(chunk_size=8192):
+                if chunk:  # Filter out keep-alive new chunks
+                    file.write(chunk)
+
+
+@beartype
+def _parse_params_from_url(url: str) -> dict:
+    """utility function to extract params from a URL query
+
+    Warning: Internal function
+        Do not use this function
+
+    Args:
+        url: URL
+
+    Returns:
+        A dictionary of params
+    """
+
+    query = urlparse(url).query
+    params = parse_qs(query)
+    params = {key: value[0] for key, value in params.items()}
+    return params
+
+
+def _get_method(obj, method_path):
+    # Split the method path into components
+    methods = method_path.split(".")
+
+    # Traverse the attributes to get to the final method
+    for method in methods:
+        obj = getattr(obj, method)
+
+    return obj

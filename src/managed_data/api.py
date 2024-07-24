@@ -9,15 +9,125 @@ from urllib.parse import urlparse, urlunparse
 
 from beartype import beartype
 from deeporigin.exceptions import DeepOriginException
+
+# this import is to allow us to use functions
+# not marked in __all__ in _api
 from deeporigin.managed_data import _api
-from deeporigin.managed_data.client import Client
-from deeporigin.managed_data.schema import DatabaseReturnType, IDFormat
-from deeporigin.utils import PREFIXES
+
+# this import is to make sure that all simply-wrapped
+# functions in _api are available in api (this module)
+from deeporigin.managed_data._api import *  # noqa: F403
+from deeporigin.utils import PREFIXES, IDFormat, _parse_params_from_url, download_sync
 
 
+def ensure_client(func):
+    """decorator to make sure that the client is configured"""
+
+    def wrapper(*args, **kwargs):
+        if "client" not in kwargs or kwargs["client"] is None:
+            kwargs["client"] = _get_default_client()  # noqa: F405
+        return func(*args, **kwargs)
+
+    return wrapper
+
+
+@beartype
+@ensure_client
+def convert_id_format(
+    *,
+    hids: Optional[Union[list[str], set[str]]] = None,
+    ids: Optional[Union[list[str], set[str]]] = None,
+    client=None,
+) -> list[dict]:
+    """Convert a list of human IDs to IDs or vice versa."""
+
+    if hids is None and ids is None:
+        raise DeepOriginException(
+            message="Either `hids` or `ids` should be non-None and a list of strings"
+        )
+
+    conversions = []
+
+    if hids is not None:
+        for hid in hids:
+            conversions.append(dict(hid=hid))
+
+    if ids is not None:
+        for sid in ids:
+            conversions.append(dict(id=sid))
+
+    return _api.convert_id_format(
+        conversions=conversions,
+        client=client,
+    )
+
+
+@beartype
+@ensure_client
+def list_rows(
+    *,
+    parent_id: Optional[str] = None,
+    row_type: Optional = None,
+    parent_is_root: Optional[bool] = None,
+    client=None,
+) -> list:
+    """Low level function that wraps the `ListRows` endpoint.
+
+    Returns a list of rows from workspaces and databases,
+    based on the parent, row type, or whether the parent is the root.
+
+    Args:
+        parent_id: ID (or human ID) or the parent.
+        row_type: One of `row`, `workspace`, or `database`.
+        parent_is_root: If `True` only rows that are children of the root will be returned.
+
+    Returns:
+        A list of dictionaries, where each entry corresponds to a row. Each dictionary conforms to a [ListRowsResponse][src.managed_data.schema.ListRowsResponse].
+
+    """
+    filters = []
+
+    if parent_is_root is not None:
+        filters.append(dict(parent=dict(is_root=parent_is_root)))
+
+    if parent_id:
+        filters.append(dict(parent=dict(id=parent_id)))
+
+    if row_type:
+        filters.append(dict(row_type=row_type))
+
+    return _api.list_rows(filters=filters, client=client)
+
+
+@beartype
+@ensure_client
+def download_file(
+    file_id: str,
+    *,
+    destination: str = os.getcwd(),
+    client=None,
+) -> None:
+    """Download a file to a destination folder."""
+
+    if not os.path.isdir(destination):
+        raise DeepOriginException(
+            message=f"{destination} should be a path to a folder."
+        )
+
+    file_name = describe_file(file_id=file_id, client=client).name  # noqa: F405
+
+    url = create_file_download_url(file_id=file_id, client=client).download_url  # noqa: F405
+
+    save_path = os.path.join(destination, file_name)
+
+    download_sync(url, save_path)
+
+
+@beartype
+@ensure_client
 def upload_file(
     file_path: str,
-    client: Optional[Client] = None,
+    client=None,
 ) -> None:
     """Upload a file to Deep Origin."""
 
@@ -27,7 +137,7 @@ def upload_file(
 
     content_length = os.path.getsize(file_path)
 
-    response = _api.create_file_upload_url(
+    response = create_file_upload_url(  # noqa: F405
         name=os.path.basename(file_path),
         content_type=content_type,
         content_length=content_length,
@@ -38,7 +148,7 @@ def upload_file(
     url = urlunparse((url.scheme, url.netloc, url.path, "", "", ""))
 
     # extract params
-    params = _api._parse_params_from_url(response["uploadUrl"])
+    params = _parse_params_from_url(response["uploadUrl"])
 
     headers = {
         "Accept": "application/json, text/plain, */*",
@@ -62,10 +172,11 @@ def upload_file(
 
 
 @beartype
+@ensure_client
 def make_database_rows(
     database_id: str,
     n_rows: int = 1,
-    client: Optional[Client] = None,
+    client=None,
 ) -> dict:
     """Makes one or several new row(s) in a Database table
 
@@ -85,12 +196,11 @@ def make_database_rows(
             message=f"n_rows must be at least 1. However, n_rows was {n_rows}"
         )
 
-    data = dict(
-        databaseId=database_id,
+    return ensure_rows(  # noqa: F405
+        client=client,
         rows=[{"row": {}} for _ in range(n_rows)],
+        database_id=database_id,
     )
-
-    return _api.ensure_rows(data, client=client)
 
 
 @beartype
@@ -100,7 +210,7 @@ def assign_files_to_cell(
     database_id: str,
     column_id: str,
     row_id: Optional[str] = None,
-    client: Optional[Client] = None,
+    client=None,
 ) -> dict:
     """Assign existing file(s) to a cell
 
@@ -122,32 +232,35 @@ def assign_files_to_cell(
         )
         row_id = data["rows"][0]["id"]
 
-    data = {
-        "databaseId": database_id,
-        "rows": [
-            {
-                "rowId": row_id,
-                "row": {},
-                "cells": [
-                    {
-                        "columnId": column_id,
-                        "value": {"fileIds": file_ids},
-                    },
-                ],
-            },
-        ],
-    }
+    rows = [
+        {
+            "rowId": row_id,
+            "row": {},
+            "cells": [
+                {
+                    "columnId": column_id,
+                    "value": {"fileIds": file_ids},
+                },
+            ],
+        },
+    ]
 
-    return _api.ensure_rows(data, client=client)
+    return ensure_rows(  # noqa: F405
+        database_id,
+        database_id,
+        rows=rows,
+        client=client,
+    )
 
 
 @beartype
+@ensure_client
 def upload_file_to_new_database_row(
     *,
     database_id: str,
     file_path: str,
     column_id: str,
-    client: Optional[Client] = None,
+    client=None,
 ):
     """Upload a file to a new row in a database.
 
@@ -181,8 +294,8 @@ def upload_file_to_new_database_row(
 def get_tree(
     *,
     include_rows: bool = True,
-    client: Optional[Client] = None,
-) -> list[dict]:
+    client=None,
+) -> list:
     """Construct a tree of all workspaces, databases and rows.
 
     Returns a tree that contains all workspaces, databases and
@@ -202,19 +315,23 @@ def get_tree(
 
     if include_rows:
         # we need to fetch everything, so use a single call
-        objects = _api.list_rows(client=client)
-        rows = [obj for obj in objects if obj["type"] == "row"]
-        workspaces = [obj for obj in objects if obj["type"] == "workspace"]
-        databases = [obj for obj in objects if obj["type"] == "database"]
+        objects = list_rows(client=client)
+        rows = [obj.dict() for obj in objects if obj.type == "row"]
+        workspaces = [obj for obj in objects if obj.type == "workspace"]
+        databases = [obj for obj in objects if obj.type == "database"]
     else:
-        workspaces = _api.list_rows(row_type="workspace", client=client)
-        databases = _api.list_rows(row_type="database", client=client)
+        workspaces = list_rows(row_type="workspace", client=client)
+        databases = list_rows(row_type="database", client=client)
         objects = workspaces + databases
+
+    # convert everything into a dict
+    workspaces = [obj.dict() for obj in workspaces]
+    databases = [obj.dict() for obj in databases]
 
     for obj in workspaces + databases:
         obj["children"] = []
 
-    root_objects = [obj for obj in objects if obj["parentId"] is None]
+    root_objects = [obj.dict() for obj in objects if obj.parent_id is None]
 
     for root_object in root_objects:
         _add_children(root_object, workspaces)
@@ -237,7 +354,7 @@ def _add_children(node: dict, objects: list[dict]) -> None:
         Do not use this function.
 
     """
-    node["children"] = [obj for obj in objects if obj["parentId"] == node["id"]]
+    node["children"] = [obj for obj in objects if obj["parent_id"] == node["id"]]
 
 
 @beartype
@@ -245,7 +362,7 @@ def get_cell_data(
     *,
     row_id: str,
     column_name: str,
-    client: Optional[Client] = None,
+    client=None,
 ) -> Any:
     """Extract data from a cell in a database, referenced
     by `row_id` and `column_name`.
@@ -279,7 +396,7 @@ def set_cell_data(
     database_id: str,
     row_id: str,
     column_id: str,
-    client: Optional[Client] = None,
+    client=None,
 ) -> Any:
     """set data in a cell to some value.
 
@@ -373,7 +490,7 @@ def download(
     destination: str,
     *,
     include_files: bool = False,
-    client: Optional[Client] = None,
+    client=None,
 ) -> None:
     """Download resources from Deep Origin and save them to
     a local destination.
@@ -405,7 +522,7 @@ def download(
     if PREFIXES.FILE in source:
         # this is a file
 
-        _api.download_file(
+        download_file(
             file_id=source,
             destination=destination,
             client=client,
@@ -413,10 +530,10 @@ def download(
         return
 
     # not a file, so need to determine what sort of row it is
-    obj = _api.describe_row(source, client=client)
-    if obj["type"] == "database":
+    obj = _api.describe_row(row_id=source, client=client)
+    if obj.type == "database":
         download_database(
-            obj,
+            obj.id,
             destination,
             include_files=include_files,
             client=client,
@@ -429,11 +546,11 @@ def download(
 
 @beartype
 def download_database(
-    source: Union[str, dict],
+    source: str,
     destination: str = os.getcwd(),
     *,
     include_files: bool = False,
-    client: Optional[Client] = None,
+    client=None,
 ) -> None:
     """Download a database and save it to a CSV file on the local disk.
 
@@ -453,14 +570,13 @@ def download_database(
         )
 
     if isinstance(source, str):
-        source = _api.describe_row(source, client=client)
-    elif not {"hid", "id"}.issubset(set(list(source.keys()))):
-        raise DeepOriginException(
-            message=f"If `source` is a dictionary, expected it contain the `hid` and `id` keys. These keys were not found. Instead, the keys are: {source.keys()}"
+        source = _api.describe_row(
+            row_id=source,
+            client=client,
         )
 
-    database_id = source["id"]
-    database_hid = source["hid"]
+    database_id = source.id
+    database_hid = source.hid
     df = get_dataframe(
         database_id,
         use_file_names=True,
@@ -472,7 +588,7 @@ def download_database(
         file_ids = df.attrs["file_ids"]
 
         for file_id in file_ids:
-            _api.download_file(file_id, destination, client=client)
+            download_file(file_id, destination, client=client)
 
     df.to_csv(os.path.join(destination, database_hid + ".csv"))
 
@@ -482,9 +598,9 @@ def get_dataframe(
     database_id: str,
     *,
     use_file_names: bool = True,
-    reference_format: IDFormat = "human-id",
-    return_type: DatabaseReturnType = "dataframe",
-    client: Optional[Client] = None,
+    reference_format="human-id",
+    return_type="dataframe",
+    client=None,
 ):
     """Generate a `pandas.DataFrame` or dictionary for a database.
 
@@ -499,62 +615,42 @@ def get_dataframe(
     """
 
     # figure out the rows
-    rows = _api.list_database_rows(database_id, client=client)
+    rows = list_database_rows(database_row_id=database_id, client=client)  # noqa: F405
 
     # filter out template rows
     rows = [
-        row for row in rows if not ("isTemplate" in row.keys() and row["isTemplate"])
+        row for row in rows if not (hasattr(row, "is_template") and row.is_template)
     ]
 
     # figure out the column names and ID of the database
-    response = _api.describe_row(database_id, client=client)
+    db_row = describe_row(row_id=database_id, client=client)  # noqa: F405
     assert (
-        response["type"] == "database"
-    ), f"Expected database_id: {database_id} to resolve to a database, but instead, it resolved to a {response['type']}"
+        db_row.type == "database"
+    ), f"Expected database_id: {database_id} to resolve to a database, but instead, it resolved to a {db_row.type}"
 
-    columns = response["cols"]
-    database_id = response["id"]
-    row_id = "ID"
+    columns = db_row.cols
+    database_id = db_row.id
 
     # make a dictionary with all data in the database
     data = dict()
-    data[row_id] = []
+    data["ID"] = []
     data["Validation Status"] = []
 
     # keep track of all files and references in this database
     file_ids = []
     reference_ids = []
 
+    # create empty lists for each column
     for column in columns:
         data[column["id"]] = []
 
     for row in rows:
-        data[row_id].append(row["hid"])
-        data["Validation Status"].append(row["validationStatus"])
-
-        if "fields" not in row.keys():
-            for column in columns:
-                data[column["id"]].append(None)
-            continue
-
-        fields = row["fields"]
-
-        for column in columns:
-            value = _parse_column_value(
-                column=column,
-                fields=fields,
-                file_ids=file_ids,
-                reference_ids=reference_ids,
-                use_file_names=use_file_names,
-                reference_format=reference_format,
-            )
-            if value is None:
-                data[column["id"]].append(None)
-            else:
-                if column["cardinality"] == "many":
-                    data[column["id"]].append(value)
-                else:
-                    data[column["id"]].extend(value)
+        add_row_to_data(
+            data=data,
+            row=row,
+            columns=columns,
+            use_file_names=use_file_names,
+        )
 
     if return_type == "dataframe":
         # make the dataframe
@@ -567,7 +663,6 @@ def get_dataframe(
         df.attrs["file_ids"] = list(set(file_ids))
         df.attrs["reference_ids"] = list(set(reference_ids))
         df.attrs["id"] = database_id
-        df.attrs["primary_key"] = row_id
 
         return _type_and_cleanup_dataframe(df, columns)
 
@@ -588,7 +683,7 @@ def get_dataframe(
 def _parse_column_value(
     *,
     column: dict,
-    fields: list[dict],
+    fields: Optional[list],
     file_ids: list,
     reference_ids: list,
     use_file_names: bool,
@@ -600,42 +695,93 @@ def _parse_column_value(
         Do not use this function.
     """
 
-    field = [field for field in fields if field["columnId"] == column["id"]]
+    if fields is None:
+        return None
+
+    field = [field for field in fields if field.column_id == column["id"]]
 
     if len(field) == 0:
         return None
 
-    if "value" not in field[0].keys():
+    if not hasattr(field[0], "value"):
         return None
-    value = [field[0]["value"]]
+    value = [field[0].value]
 
     # special treatment for some column types
-    if column["type"] == "select" and len(value) == 1:
-        value = value[0]["selectedOptions"]
-    elif column["type"] == "file" and len(value) == 1:
-        value = value[0]["fileIds"]
+    if column["type"] == "select" and len(value) == 1 and value[0] is not None:
+        value = value[0].selected_options
+    elif column["type"] == "file" and len(value) == 1 and value[0] is not None:
+        value = value[0].file_ids
 
         file_ids.extend(value)
 
         if use_file_names:
             try:
-                value = [_api.describe_file(file_id)["name"] for file_id in value]
+                value = [describe_file(file_id=file_id).name for file_id in value]  # noqa: F405
             except DeepOriginException:
                 # something went wrong, ignore
                 pass
-    elif column["type"] == "reference" and len(value) == 1:
-        value = value[0]["rowIds"]
+    elif column["type"] == "reference" and len(value) == 1 and value[0] is not None:
+        value = value[0].row_ids
         reference_ids.extend(value)
 
         if reference_format == "human-id":
-            value = _api.convert_id_format(ids=value)
-            value = [thing["hid"] for thing in value]
+            value = convert_id_format(ids=value)
+            value = [thing.hid for thing in value]
 
-    # if there is no item
     if len(value) == 0:
         value = None
 
     return value
+
+
+def add_row_to_data(*, data: dict, row, columns: list, use_file_names: bool = True):
+    """utility function to combine data from a row into a dataframe"""
+    row_data = _row_to_dict(row, use_file_names=use_file_names)
+    data["ID"].append(row_data["ID"])
+    data["Validation Status"].append(row_data["Validation Status"])
+
+    for column in columns:
+        col_id = column["id"]
+        if col_id in row_data.keys():
+            value = row_data[col_id]
+            if column["cardinality"] == "one" and isinstance(value, list):
+                value = value[0]
+            data[col_id].append(value)
+        else:
+            data[col_id].append(None)
+
+
+def _row_to_dict(row, *, use_file_names: bool = True):
+    """utility function to convert a row to a dictionary"""
+    fields = row.fields
+
+    values = {"ID": row.hid, "Validation Status": row.validation_status}
+    if fields is None:
+        return values
+    for field in fields:
+        if field.value is None:
+            value = None
+        elif field.type in ["float", "int", "boolean"]:
+            value = field.value
+        elif field.type == "select":
+            value = field.value.selected_options
+
+        elif field.type == "reference":
+            value = field.value.row_ids
+
+        elif field.type == "file":
+            value = field.value.file_ids
+            if use_file_names and value is not None:
+                try:
+                    value = [describe_file(file_id=file_id).name for file_id in value]  # noqa: F405
+                except DeepOriginException:
+                    # something went wrong, ignore
+                    pass
+        else:
+            value = field.value
+        values[field.column_id] = value
+    return values
 
 
 @beartype
@@ -697,8 +843,7 @@ def _type_and_cleanup_dataframe(
     df["Validation Status"].attrs = dict(type="Validation Status")
 
     # sort by primary key
-    primary_key = df.attrs["primary_key"]
-    df["numeric_id"] = df[primary_key].apply(lambda x: int(x.split("-")[1]))
+    df["numeric_id"] = df["ID"].apply(lambda x: int(x.split("-")[1]))
     df = df.sort_values(by="numeric_id")
     df = df.drop(columns="numeric_id")
     df = df.set_index("ID")
@@ -710,7 +855,7 @@ def _type_and_cleanup_dataframe(
 def get_columns(
     row_id: str,
     *,
-    client: Optional[Client] = None,
+    client=None,
 ) -> list[dict]:
     """Get information about the columns of a row or database.
 
@@ -741,7 +886,7 @@ def get_row_data(
     row_id: str,
     *,
     use_column_keys: bool = False,
-    client: Optional[Client] = None,
+    client=None,
 ) -> dict:
     """Get the data in a row.
 
@@ -757,25 +902,32 @@ def get_row_data(
         DeepOriginException: If row_id is not a row
     """
 
-    response = _api.describe_row(row_id, fields=True, client=client)
+    response = _api.describe_row(
+        row_id=row_id,
+        fields=True,
+        client=client,
+    )
 
-    if response["type"] != "row":
+    if response.type != "row":
         raise DeepOriginException(
-            message=f"Expected `row_id` to resolve to a row, instead, it resolves to a `{response['type']}`"
+            message=f"Expected `row_id` to resolve to a row, instead, it resolves to a `{response.type}`"
         )
 
     # ask parent for column names
-    parent_response = _api.describe_row(response["parentId"], client=client)
+    parent_response = _api.describe_row(
+        row_id=response.parent_id,
+        client=client,
+    )
 
-    if parent_response["type"] != "database":
+    if parent_response.type != "database":
         raise DeepOriginException(
-            message=f"Expected parent of `{row_id}` to resolve to a database, instead, it resolves to a `{parent_response['type']}`"
+            message=f"Expected parent of `{row_id}` to resolve to a database, instead, it resolves to a `{parent_response.type}`"
         )
 
     # make a dictionary from column IDs to column names
     column_name_mapper = dict()
     column_cardinality_mapper = dict()
-    for col in parent_response["cols"]:
+    for col in parent_response.cols:
         if use_column_keys:
             column_name_mapper[col["id"]] = col["key"]
         else:
@@ -784,7 +936,9 @@ def get_row_data(
 
     # now use this to construct the required dictionary
     row_data = dict()
-    for field in response["fields"]:
+    if not hasattr(response, "fields"):
+        return row_data
+    for field in response.fields:
         column_id = field["columnId"]
 
         if "value" not in field:

@@ -6,12 +6,7 @@ from typing import Union
 import pytest
 from beartype import beartype
 from deeporigin import cli
-from deeporigin.managed_data import _api
-from deeporigin.managed_data.client import (
-    Client,
-    DeepOriginClient,
-)
-from deeporigin.managed_data.schema import DescribeFileResponse, ListRowsResponse
+from deeporigin.managed_data import api
 from mock_client import MockClient
 
 # this allows us to try every CLI command with both
@@ -49,21 +44,20 @@ def config(pytestconfig):
         data["rows"] = data["client"].rows
         data["file"] = data["client"].file
     else:
-        client = DeepOriginClient()
-        client.authenticate()
+        client = api._get_default_client()
         data["client"] = client
 
         # if we're going to be making requests to a live
         # instance, we need to make sensible requests
-        databases = _api.list_rows(row_type="database")
-        data["databases"] = [db["hid"] for db in databases]
-        rows = _api.list_rows(row_type="row")
-        data["rows"] = [row["id"] for row in rows]
+        databases = api.list_rows(row_type="database")
+        data["databases"] = [db.hid for db in databases]
+        rows = api.list_rows(row_type="row")
+        data["rows"] = [row.id for row in rows]
 
         # get a list of all files
-        files = _api.list_files()
+        files = api.list_files()
         if len(files) > 0:
-            data["file"] = files[0]["file"]
+            data["file"] = files[0].file
 
     # tests run on yield
     yield data
@@ -82,7 +76,7 @@ def test_data(config):
 
 @pytest.mark.parametrize("json_option", JSON_OPTIONS)
 def test_describe_file(config, json_option):
-    file_id = config["file"]["id"]
+    file_id = config["file"].id
 
     stdout = _run_cli_command(
         ["data", "describe", file_id] + json_option,
@@ -121,13 +115,7 @@ def test_list(config, list_option, json_option):
 
     # check that we can parse into JSON
     if json_option == ["--json"]:
-        data = _check_json(stdout)
-
-        for item in data:
-            if list_option == ["--files"]:
-                DescribeFileResponse(**(item["file"]))
-            else:
-                ListRowsResponse(**item)
+        _check_json(stdout)
 
 
 @pytest.mark.parametrize("json_option", JSON_OPTIONS)
@@ -142,7 +130,7 @@ def test_show_db(config, json_option):
 
 
 @beartype
-def _run_cli_command(argv: list[str], client: Client) -> str:
+def _run_cli_command(argv: list[str], client) -> str:
     """helper function to run a CLI command, parse output and return"""
     stdout = io.StringIO()
     stderr = io.StringIO()
