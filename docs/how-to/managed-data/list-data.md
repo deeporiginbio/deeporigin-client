@@ -71,7 +71,7 @@ their IDs for further queries.
 === "Python Client"
     
 
-    We can list all workspaces using a [`RowType`][src.managed_data.schema.RowType] argument:
+    We can list all workspaces using a [`RowType`][src.utils.RowType] argument:
 
 
     ```py
@@ -147,7 +147,7 @@ their IDs for further queries.
 
 === "Python Client"
     
-    We can list all databases using a [`RowType`][src.managed_data.schema.RowType] argument:
+    We can list all databases using a [`RowType`][src.utils.RowType] argument:
 
 
     ```python
@@ -183,7 +183,7 @@ their IDs for further queries.
 
 === "Python Client"
     
-    We can list all rows using a [`RowType`][src.managed_data.schema.RowType] argument:
+    We can list all rows using a [`RowType`][src.utils.RowType] argument:
 
 
     ```python

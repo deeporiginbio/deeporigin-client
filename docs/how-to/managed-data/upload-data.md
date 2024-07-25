@@ -91,7 +91,7 @@ and assign it to a cell in a row.
     ```
 
     This uploads files to the "Staging Area" of Deep Origin
-    Data, and returns data that conforms to [DescribeFileResponse][src.managed_data.schema.DescribeFileResponse]. An example is shown below:
+    Data. An example is shown below:
 
     ```json
     {

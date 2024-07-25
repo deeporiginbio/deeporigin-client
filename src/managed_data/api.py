@@ -17,7 +17,14 @@ from deeporigin.managed_data import _api
 # this import is to make sure that all simply-wrapped
 # functions in _api are available in api (this module)
 from deeporigin.managed_data._api import *  # noqa: F403
-from deeporigin.utils import PREFIXES, IDFormat, _parse_params_from_url, download_sync
+from deeporigin.utils import (
+    PREFIXES,
+    DatabaseReturnType,
+    IDFormat,
+    RowType,
+    _parse_params_from_url,
+    download_sync,
+)
 
 
 def ensure_client(func):
@@ -39,7 +46,13 @@ def convert_id_format(
     ids: Optional[Union[list[str], set[str]]] = None,
     client=None,
 ) -> list[dict]:
-    """Convert a list of human IDs to IDs or vice versa."""
+    """Convert a list of human IDs to IDs or vice versa.
+
+    Args:
+        hids: List of human IDs
+        ids: List of IDs (system IDs)
+
+    """
 
     if hids is None and ids is None:
         raise DeepOriginException(
@@ -67,11 +80,11 @@ def convert_id_format(
 def list_rows(
     *,
     parent_id: Optional[str] = None,
-    row_type: Optional = None,
+    row_type: RowType = None,
     parent_is_root: Optional[bool] = None,
     client=None,
 ) -> list:
-    """Low level function that wraps the `ListRows` endpoint.
+    """List rows in a database or workspace.
 
     Returns a list of rows from workspaces and databases,
     based on the parent, row type, or whether the parent is the root.
@@ -82,7 +95,7 @@ def list_rows(
         parent_is_root: If `True` only rows that are children of the root will be returned.
 
     Returns:
-        A list of dictionaries, where each entry corresponds to a row. Each dictionary conforms to a [ListRowsResponse][src.managed_data.schema.ListRowsResponse].
+        A list of objects, where each entry corresponds to a row.
 
     """
     filters = []
@@ -107,7 +120,16 @@ def download_file(
     destination: str = os.getcwd(),
     client=None,
 ) -> None:
-    """Download a file to a destination folder."""
+    """Download a file to a destination folder.
+
+    Download a file synchronously from Deep Origin
+    to folder on the local file system.
+
+    Args:
+        file_id: ID of the file on Deep Origin
+        destination: Path to the destination folder
+
+    """
 
     if not os.path.isdir(destination):
         raise DeepOriginException(
@@ -129,7 +151,15 @@ def upload_file(
     file_path: str,
     client=None,
 ) -> None:
-    """Upload a file to Deep Origin."""
+    """Upload a file to Deep Origin.
+
+    This uploads to the "staging area" on Deep Origin Data.
+    To assign this file to a cell, use [assign_files_to_cell][src.managed_data.api.assign_files_to_cell]
+
+    Args:
+        file_path: Path to the file to upload
+
+    """
 
     # attempt to guess the content type
     mime_type, _ = mimetypes.guess_type(file_path)
@@ -183,12 +213,11 @@ def make_database_rows(
 ) -> dict:
     """Makes one or several new row(s) in a Database table
 
-    This wraps the `EnsureRows` endpoint and sends a payload
-    designed to create new row(s) in a database table.
 
 
     Args:
         database_id: ID or Human ID of the database
+        n_rows: Number of rows to create. Must be an integer greater than 0
 
     Returns:
         A dictionary that conforms to a EnsureRowsResponse
@@ -217,12 +246,15 @@ def assign_files_to_cell(
 ):
     """Assign existing file(s) to a cell
 
-    Assign files to a cell in a database table, where the cell is identified by the database ID, row ID, and column ID. If row_id is None, a new row will be created.
+    Assign files to a cell in a database table, where the cell is identified by the database ID, row ID, and column ID.
+
+    If row_id is `None`, a new row will be created.
 
     Args:
-    file_id: ID of the file
-    column_id: ID of the column
-    row_id: ID of the row
+        file_ids: ID of the file
+        database_id: ID of database to assign to
+        column_id: ID of the column
+        row_id: ID of the row
 
 
     """
@@ -266,11 +298,11 @@ def upload_file_to_new_database_row(
 ):
     """Upload a file to a new row in a database.
 
-    Upload a file to a new row in a database. This utility function
-    wraps two level functions:
+    Upload a file to a new row in a database. This utility
+    function wraps two other functions:
 
-        - [upload_file][src.managed_data.api.upload_file]
-        - [assign_files_to_cell][src.managed_data.api.assign_files_to_cell]
+    - [upload_file][src.managed_data.api.upload_file]
+    - [assign_files_to_cell][src.managed_data.api.assign_files_to_cell]
 
     Args:
         database_id: ID (or human ID) of a database.
@@ -400,9 +432,17 @@ def set_cell_data(
     column_id: str,
     client=None,
 ) -> Any:
-    """set data in a cell to some value.
+    """Set data in a cell to some value.
 
-    uses the EnsureRows API endpoint"""
+
+    Args:
+        value: Value to set in the cell
+        database_id: ID (or human ID) of a database
+        row_id: ID (or human ID) of a row
+        column_id: ID (or human ID) of a column
+
+
+    """
 
     # first, get the type of the column
     response = _api.describe_row(
@@ -607,8 +647,8 @@ def get_dataframe(
     database_id: str,
     *,
     use_file_names: bool = True,
-    reference_format="human-id",
-    return_type="dataframe",
+    reference_format: IDFormat = "human-id",
+    return_type: DatabaseReturnType = "dataframe",
     client=None,
 ):
     """Generate a `pandas.DataFrame` or dictionary for a database.
@@ -978,55 +1018,3 @@ def get_row_data(
         row_data[column_name_mapper[column_id]] = value
 
     return row_data
-
-
-@beartype
-def merge_databases(dfs: list):
-    """Merge dataframes for multiple databases into a single dataframes.
-
-    Given a list of dataframes derived from Deep Origin databases,
-    merge them into a single dataframe, resolving cross-references
-    across the databases.
-
-    Info: Work in progress
-        All features in this function have not been implemented yet.
-
-
-    Args:
-        dfs: List of `pandas.DataFrames`.
-
-
-    """
-
-    import pandas as pd
-
-    for df in dfs:
-        assert isinstance(df, pd.DataFrame), "Expected a list of dataframes to merge"
-
-    assert len(dfs) == 2, "For now we only support merging 2 databases"
-
-    # make a cross reference mapper that converts
-    # system IDs to column names
-    cross_reference_mapper = dict()
-
-    for df in dfs:
-        cross_reference_mapper[df.attrs["id"]] = df.attrs["primary_key"]
-
-    # rename columns that contain cross-references (foreign keys)
-    # so that the pandas merge works correctly
-
-    for df in dfs:
-        column_mapper = dict()
-
-        for column in df.columns:
-            attrs = df[column].attrs
-
-            if "referenceDatabaseRowId" in attrs.keys():
-                column_mapper[column] = cross_reference_mapper[
-                    attrs["referenceDatabaseRowId"]
-                ]
-
-        df.rename(columns=column_mapper, inplace=True)
-
-    # for now we only support merging 2 DBs
-    return dfs[0].merge(dfs[1], how="outer")
