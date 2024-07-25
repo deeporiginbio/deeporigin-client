@@ -25,7 +25,7 @@ def ensure_client(func):
 
     def wrapper(*args, **kwargs):
         if "client" not in kwargs or kwargs["client"] is None:
-            kwargs["client"] = _get_default_client()  # noqa: F405
+            kwargs["client"] = _api._get_default_client()
         return func(*args, **kwargs)
 
     return wrapper
@@ -114,9 +114,9 @@ def download_file(
             message=f"{destination} should be a path to a folder."
         )
 
-    file_name = describe_file(file_id=file_id, client=client).name  # noqa: F405
+    file_name = _api.describe_file(file_id=file_id, client=client).name
 
-    url = create_file_download_url(file_id=file_id, client=client).download_url  # noqa: F405
+    url = _api.create_file_download_url(file_id=file_id, client=client).download_url
 
     save_path = os.path.join(destination, file_name)
 
@@ -137,10 +137,11 @@ def upload_file(
 
     content_length = os.path.getsize(file_path)
 
-    response = create_file_upload(  # noqa: F405
+    response = _api.create_file_upload(
         name=os.path.basename(file_path),
         content_type=content_type,
         content_length=str(content_length),
+        client=client,
     )
 
     # extract pre-signed URL to upload to
@@ -198,7 +199,7 @@ def make_database_rows(
             message=f"n_rows must be at least 1. However, n_rows was {n_rows}"
         )
 
-    return ensure_rows(  # noqa: F405
+    return _api.ensure_rows(
         client=client,
         rows=[{"row": {}} for _ in range(n_rows)],
         database_id=database_id,
@@ -247,7 +248,7 @@ def assign_files_to_cell(
         },
     ]
 
-    return ensure_rows(  # noqa: F405
+    return _api.ensure_rows(
         database_id=database_id,
         rows=rows,
         client=client,
@@ -278,8 +279,8 @@ def upload_file_to_new_database_row(
 
     """
     # upload file
-    response = _api.upload_file(file_path, client=client)
-    file_id = response["id"]
+    response = upload_file(file_path, client=client)
+    file_id = response.id
 
     # assign file to column
     # we're not specifying row_id, which will create a new row
@@ -404,11 +405,14 @@ def set_cell_data(
     uses the EnsureRows API endpoint"""
 
     # first, get the type of the column
-    response = _api.describe_row(database_id, client=client)
+    response = _api.describe_row(
+        row_id=database_id,
+        client=client,
+    )
 
     column = [
         col
-        for col in response["cols"]
+        for col in response.cols
         if col["id"] == column_id or col["name"] == column_id or col["key"] == column_id
     ]
 
@@ -466,23 +470,24 @@ def set_cell_data(
     else:
         raise NotImplementedError("This data type is not yet supported")
 
-    data = {
-        "databaseId": database_id,
-        "rows": [
-            {
-                "cells": [
-                    {
-                        "columnId": column_id,
-                        "value": validated_value,
-                    }
-                ],
-                "row": {},
-                "rowId": row_id,
-            }
-        ],
-    }
+    rows = [
+        {
+            "cells": [
+                {
+                    "columnId": column_id,
+                    "value": validated_value,
+                }
+            ],
+            "row": {},
+            "rowId": row_id,
+        }
+    ]
 
-    return _api.ensure_rows(data, client=client)
+    return _api.ensure_rows(
+        rows=rows,
+        client=client,
+        database_id=database_id,
+    )
 
 
 @beartype
@@ -531,7 +536,10 @@ def download(
         return
 
     # not a file, so need to determine what sort of row it is
-    obj = _api.describe_row(row_id=source, client=client)
+    obj = _api.describe_row(
+        row_id=source,
+        client=client,
+    )
     if obj.type == "database":
         download_database(
             obj.id,
@@ -616,7 +624,10 @@ def get_dataframe(
     """
 
     # figure out the rows
-    rows = list_database_rows(database_row_id=database_id, client=client)  # noqa: F405
+    rows = _api.list_database_rows(
+        database_row_id=database_id,
+        client=client,
+    )
 
     # filter out template rows
     rows = [
@@ -624,7 +635,10 @@ def get_dataframe(
     ]
 
     # figure out the column names and ID of the database
-    db_row = describe_row(row_id=database_id, client=client)  # noqa: F405
+    db_row = _api.describe_row(
+        row_id=database_id,
+        client=client,
+    )
     assert (
         db_row.type == "database"
     ), f"Expected database_id: {database_id} to resolve to a database, but instead, it resolved to a {db_row.type}"
@@ -718,7 +732,7 @@ def _parse_column_value(
 
         if use_file_names:
             try:
-                value = [describe_file(file_id=file_id).name for file_id in value]  # noqa: F405
+                value = [_api.describe_file(file_id=file_id).name for file_id in value]
             except DeepOriginException:
                 # something went wrong, ignore
                 pass
@@ -775,7 +789,9 @@ def _row_to_dict(row, *, use_file_names: bool = True):
             value = field.value.file_ids
             if use_file_names and value is not None:
                 try:
-                    value = [describe_file(file_id=file_id).name for file_id in value]  # noqa: F405
+                    value = [
+                        _api.describe_file(file_id=file_id).name for file_id in value
+                    ]
                 except DeepOriginException:
                     # something went wrong, ignore
                     pass
@@ -868,7 +884,11 @@ def get_columns(
         row_id: ID (or human ID) of a row or database on Deep Origin.
     """
 
-    response = _api.describe_row(row_id, fields=True, client=client)
+    response = _api.describe_row(
+        row_id=row_id,
+        fields=True,
+        client=client,
+    )
 
     assert response["type"] in [
         "row",

@@ -1,7 +1,8 @@
 
-This page describes how to upload data to Deep Origin Data.
+This page describes how to upload data to Deep Origin Data,
+and assign it to a cell in a row.
 
-## Upload Files
+## Upload and Assign Files
 
 
 === "CLI"
@@ -85,8 +86,8 @@ This page describes how to upload data to Deep Origin Data.
     We can upload a file using 
 
     ```py
-    from deeporigin.managed_data import _api, api
-    _api.upload_file("/path/to/file.fasta")
+    from deeporigin.managed_data import api
+    api.upload_file("/path/to/file.fasta")
     ```
 
     This uploads files to the "Staging Area" of Deep Origin
@@ -110,7 +111,7 @@ This page describes how to upload data to Deep Origin Data.
     To assign an uploaded file to a cell in an existing row, use the `assign_files_to_cell` function as follows:
 
     ```py
-        _api.assign_files_to_cell(
+        api.assign_files_to_cell(
         file_ids=["_file:6Hdhyc3t8xZ6pmyCrQy1t"],
         database_id="db-dna",
         column_id="base_sequence_file",
@@ -122,7 +123,7 @@ This page describes how to upload data to Deep Origin Data.
     To assign an uploaded file to a cell on a new row, use the `assign_files_to_cell` function as follows:
 
     ```py
-        _api.assign_files_to_cell(
+        api.assign_files_to_cell(
         file_ids=["_file:6Hdhyc3t8xZ6pmyCrQy1t"],
         database_id="db-dna",
         column_id="base_sequence_file",

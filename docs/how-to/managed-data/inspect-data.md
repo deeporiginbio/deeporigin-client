@@ -78,10 +78,10 @@ Describing rows provides metadata about the row, such as its ID, parent, and sta
 
 === "CLI"
 
-    To describe a row in a database in Deep Origin, use:
+    To describe a file in a database in Deep Origin, use:
 
     ```bash
-    deeporigin data describe <row-id>
+    deeporigin data describe <file-id>
     ```
 
     This will show you a table similar to:

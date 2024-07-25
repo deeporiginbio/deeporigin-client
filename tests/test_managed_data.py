@@ -53,6 +53,24 @@ def config(pytestconfig):
     # teardown tasks, if any
 
 
+def test_upload_file(config):
+    full_path = os.path.abspath(__file__)
+
+    from requests.exceptions import ConnectionError
+
+    if config["mock"]:
+        with pytest.raises(ConnectionError):
+            api.upload_file(
+                full_path,
+                client=config["client"],
+            )
+    else:
+        api.upload_file(
+            full_path,
+            client=config["client"],
+        )
+
+
 def test_make_database_rows(config):
     with pytest.raises(DeepOriginException, match="must be at least 1"):
         api.make_database_rows(
