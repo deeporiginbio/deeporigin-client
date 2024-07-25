@@ -6,7 +6,7 @@
 - :fontawesome-brands-python: **Pure python**       
 Lightweight implementation, written in pure Python. Works on any system that can run Python.
 - :fontawesome-solid-handshake-simple: **Talks to Deep Origin APIs**  
-Talks to Deep Origin APIs, including APIs to work with managed data, and ComputeBench.
+Talks to Deep Origin APIs, including APIs to work with managed data workstations.
 - :octicons-unlock-24: **Freely available**         
 Freely available and open source. Install on your computer!
 - :material-download: **Easy install**     
@@ -14,7 +14,7 @@ Just `pip install deeporigin`.
 
 </div>
 
-## Overview
+## Example
 
 
 The Deep Origin CLI and Python client allow you to programmatically

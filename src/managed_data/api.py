@@ -137,18 +137,18 @@ def upload_file(
 
     content_length = os.path.getsize(file_path)
 
-    response = create_file_upload_url(  # noqa: F405
+    response = create_file_upload(  # noqa: F405
         name=os.path.basename(file_path),
         content_type=content_type,
-        content_length=content_length,
+        content_length=str(content_length),
     )
 
     # extract pre-signed URL to upload to
-    url = urlparse(response["uploadUrl"])
+    url = urlparse(response.upload_url)
     url = urlunparse((url.scheme, url.netloc, url.path, "", "", ""))
 
     # extract params
-    params = _parse_params_from_url(response["uploadUrl"])
+    params = _parse_params_from_url(response.upload_url)
 
     headers = {
         "Accept": "application/json, text/plain, */*",
@@ -158,7 +158,9 @@ def upload_file(
     }
 
     with open(file_path, "rb") as file:
-        put_response = client.put(
+        import requests
+
+        put_response = requests.put(
             url,
             headers=headers,
             params=params,
@@ -168,7 +170,7 @@ def upload_file(
         if put_response.status_code != 200:
             raise DeepOriginException(message="Error uploading file")
 
-    return response["file"]
+    return response.file
 
 
 @beartype
@@ -211,7 +213,7 @@ def assign_files_to_cell(
     column_id: str,
     row_id: Optional[str] = None,
     client=None,
-) -> dict:
+):
     """Assign existing file(s) to a cell
 
     Assign files to a cell in a database table, where the cell is identified by the database ID, row ID, and column ID. If row_id is None, a new row will be created.
@@ -230,7 +232,7 @@ def assign_files_to_cell(
             n_rows=1,
             client=client,
         )
-        row_id = data["rows"][0]["id"]
+        row_id = data.rows[0].id
 
     rows = [
         {
@@ -246,8 +248,7 @@ def assign_files_to_cell(
     ]
 
     return ensure_rows(  # noqa: F405
-        database_id,
-        database_id,
+        database_id=database_id,
         rows=rows,
         client=client,
     )
@@ -282,7 +283,7 @@ def upload_file_to_new_database_row(
 
     # assign file to column
     # we're not specifying row_id, which will create a new row
-    return _api.assign_files_to_cell(
+    return assign_files_to_cell(
         file_ids=[file_id],
         database_id=database_id,
         column_id=column_id,

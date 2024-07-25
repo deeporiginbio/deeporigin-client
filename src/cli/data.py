@@ -383,19 +383,21 @@ databases to CSV files.
 
         if not self.app.pargs.database:
             # we are not making an assignment, so abort
-            _print_dict(data, json=self.app.pargs.json)
+            _print_dict(data.dict(), json=self.app.pargs.json)
             return
 
         if self.app.pargs.column and self.app.pargs.database:
             data = api.assign_files_to_cell(
-                file_ids=[data["id"]],
+                file_ids=[data.id],
                 database_id=self.app.pargs.database,
                 column_id=self.app.pargs.column,
                 row_id=self.app.pargs.row,
             )
 
-            data = data["rows"][0]
-            data.pop("fields")
+            data = data.rows
+
+            data = [row.dict() for row in data][0]
+            data.pop("fields", None)
 
             _print_dict(
                 data,
