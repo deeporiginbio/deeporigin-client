@@ -5,7 +5,10 @@
 
 ::: src.managed_data.api
     options:
-      filters: ["!^_[^_]"]
+      filters: 
+        - "!^_"
+        - "!ensure_client"
+        - "!add_row_to_data"
       members_order: alphabetical
       show_root_toc_entry: false
       show_root_heading: false

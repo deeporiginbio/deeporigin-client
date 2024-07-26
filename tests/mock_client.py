@@ -335,6 +335,29 @@ class MockClient:
             downloadUrl="https://github.com/deeporiginbio/deeporigin-client/archive/refs/tags/0.0.3.zip"
         )
 
+    def create_file_upload(
+        self,
+        *,
+        name,
+        content_type: str,
+        content_length: str,
+        **kwargs,
+    ):
+        file = types.create_file_upload_response.DataFile(
+            id="_file:placeholder",
+            contentLength=content_length,
+            name=name,
+            status="ready",
+            uri="s3://data.deeporigin-com.ijvjf/files/placeholder",
+            contentType=content_type,
+            dateCreated="2024-07-25T15:24:09.459Z",
+        )
+
+        return types.create_file_upload_response.Data(
+            file=file,
+            uploadUrl="https://foo.bar/foo",
+        )
+
     def describe_file(self, file_id: str):
         return types.describe_file_response.Data(
             id=file_id,

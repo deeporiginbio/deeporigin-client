@@ -17,19 +17,25 @@ Run the following command:
     pip install -q deeporigin
     ```
 
+=== "pixi"
+
+    ```bash
+    pixi add deeporigin
+    ```
+
 === "pipx"
 
     ```bash
     pipx install deeporigin
     ```
 
-=== "Pipenv"
+=== "pipenv"
 
     ```bash
     pipenv install deeporigin
     ```
 
-=== "Poetry"
+=== "poetry"
 
     ```bash
     poetry add deeporigin
@@ -41,9 +47,13 @@ Run the following command:
     uv pip install deeporigin
     ```
 
+=== "micromamba"
 
+    ```bash
+    micromamba install -c https://repo.prefix.dev/deeporigin-public deeporigin
+    ```
 
-=== "Flit"
+=== "flit"
 
     ```bash
     flit install deeporigin

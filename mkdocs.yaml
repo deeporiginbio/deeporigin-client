@@ -52,7 +52,8 @@ nav:
   - Managed data:
     - High-level API: ref/managed-data/high-level-api.md
     - Low-level API: ref/managed-data/low-level-api.md
-    - Low-level response schemas: ref/managed-data/low-level-schema.md
+    - Types and constants: ref/managed-data/types.md
+
 
 validation:
   omitted_files: warn
@@ -88,8 +89,6 @@ markdown_extensions:
 
 plugins:
   - search
-  - git-revision-date-localized:
-      enable_creation_date: true
   - mkdocstrings:
       default_handler: python
       handlers:

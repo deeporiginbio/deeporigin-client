@@ -68,8 +68,8 @@ Describing rows provides metadata about the row, such as its ID, parent, and sta
     To describe a row in a database in Deep Origin, use:
 
     ```python
-    from deeporigin.managed_data import _api
-    _api.describe_row("_row:WORR9xeGvG6mSg0yyDRlk")
+    from deeporigin.managed_data import api
+    api.describe_row("_row:WORR9xeGvG6mSg0yyDRlk")
     ```
 
 
@@ -78,10 +78,10 @@ Describing rows provides metadata about the row, such as its ID, parent, and sta
 
 === "CLI"
 
-    To describe a row in a database in Deep Origin, use:
+    To describe a file in a database in Deep Origin, use:
 
     ```bash
-    deeporigin data describe <row-id>
+    deeporigin data describe <file-id>
     ```
 
     This will show you a table similar to:
@@ -134,8 +134,8 @@ Describing rows provides metadata about the row, such as its ID, parent, and sta
     To describe a file in a database in Deep Origin, use:
 
     ```python
-    from deeporigin.managed_data import _api
-    _api.describe_file("file-id")
+    from deeporigin.managed_data import api
+    api.describe_file("file-id")
     ```
 
 ## Show data 
