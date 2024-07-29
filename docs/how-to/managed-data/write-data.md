@@ -1,4 +1,4 @@
-This page describes how to write data to Deep Origin Data.
+This page describes how to write data to the Deep Origin data hub.
 
 ## Write data to a cell in a database
 

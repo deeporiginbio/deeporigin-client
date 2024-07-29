@@ -153,7 +153,7 @@ def upload_file(
 ) -> None:
     """Upload a file to Deep Origin.
 
-    This uploads to the "staging area" on Deep Origin Data.
+    This uploads to the "staging area" of the Deep Origin data hub.
     To assign this file to a cell, use [assign_files_to_cell][src.managed_data.api.assign_files_to_cell]
 
     Args:
@@ -211,7 +211,7 @@ def make_database_rows(
     n_rows: int = 1,
     client=None,
 ) -> dict:
-    """Makes one or several new row(s) in a Database table
+    """Makes one or several new row(s) in a database table
 
 
 

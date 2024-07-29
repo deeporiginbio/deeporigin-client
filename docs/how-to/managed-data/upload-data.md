@@ -1,12 +1,12 @@
 
 # Upload data
 
-This page describes how to upload data to Deep Origin Data,
+This page describes how to upload data to the Deep Origin data hub,
 and assign it to a cell in a row.
 
 ## Upload and assign Files
 
-To upload a file to Deep Origin Data, run the following commands:
+To upload a file to the Deep Origin data hub, run the following commands:
 
 === "CLI"
 
