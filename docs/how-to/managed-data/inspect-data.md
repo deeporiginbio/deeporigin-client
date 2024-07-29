@@ -62,7 +62,7 @@ Describing rows provides metadata about the row, such as its ID, parent, and sta
 
 
 
-=== "Python Client"
+=== "Python client"
     
 
     To describe a row in a database in Deep Origin, use:
@@ -128,7 +128,7 @@ Describing rows provides metadata about the row, such as its ID, parent, and sta
 
 
 
-=== "Python Client"
+=== "Python client"
     
 
     To describe a file in a database in Deep Origin, use:
@@ -181,7 +181,7 @@ Describing rows provides metadata about the row, such as its ID, parent, and sta
         ```
 
 
-=== "Python Client"
+=== "Python client"
     
 
     To show the data in a row in a database in Deep Origin, use:
@@ -248,7 +248,7 @@ Describing rows provides metadata about the row, such as its ID, parent, and sta
         ```
 
 
-=== "Python Client"
+=== "Python client"
     
 
     To retrieve an entire database from Deep Origin, use:

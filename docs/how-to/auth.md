@@ -1,4 +1,4 @@
-You can sign into the Deep Origin platform using the Python Client or the CLI. 
+You can sign into the Deep Origin platform using the Python client or the CLI. 
 
 
 === "CLI"
@@ -9,7 +9,7 @@ You can sign into the Deep Origin platform using the Python Client or the CLI.
     deeporigin authenticate
     ```
 
-=== "Python Client"
+=== "Python client"
     
 
     ```python

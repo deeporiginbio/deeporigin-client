@@ -80,7 +80,7 @@ and assign it to a cell in a row.
 
  
 
-=== "Python Client"
+=== "Python client"
     
 
     We can upload a file using 

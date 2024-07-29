@@ -68,7 +68,7 @@ their IDs for further queries.
         deeporigin data list --workspaces --databases
         ```
 
-=== "Python Client"
+=== "Python client"
     
 
     We can list all workspaces using a [`RowType`][src.utils.RowType] argument:
@@ -145,7 +145,7 @@ their IDs for further queries.
         deeporigin data list --workspaces --databases
         ```
 
-=== "Python Client"
+=== "Python client"
     
     We can list all databases using a [`RowType`][src.utils.RowType] argument:
 
@@ -181,7 +181,7 @@ their IDs for further queries.
     ╰────────┴────────┴────────╯
     ```
 
-=== "Python Client"
+=== "Python client"
     
     We can list all rows using a [`RowType`][src.utils.RowType] argument:
 
@@ -291,7 +291,7 @@ their IDs for further queries.
 
 
 
-=== "Python Client"
+=== "Python client"
 
     First, we start off by importing the necessary modules:
 

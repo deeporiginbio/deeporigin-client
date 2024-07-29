@@ -19,7 +19,7 @@ We can write a string to a cell in a database that is of type `text` using:
     ```
 
 
-=== "Python Client"
+=== "Python client"
 
     ```py
     from deeporigin.managed_data import api
@@ -49,7 +49,7 @@ We can write a number to a cell in a database that is of type `integer` or type 
     ```
 
 
-=== "Python Client"
+=== "Python client"
 
  
 
@@ -82,7 +82,7 @@ This section describes how to write data to a cell in a database that is of type
 
  
 
-=== "Python Client"
+=== "Python client"
     
 
     We can write a number to a cell in a database that is of type `integer` or type `float` using 
@@ -115,7 +115,7 @@ We can write a Boolean value to a cell in a database that is of type `boolean` u
     ```
  
 
-=== "Python Client"
+=== "Python client"
     
 
     ```py
