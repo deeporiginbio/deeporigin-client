@@ -239,7 +239,7 @@ def get_variables_from_do_platform(
     # Parse GraphQL response
     variables = []
     invalid_variables = []
-    for serialized_variable in response_json.get("data", {}).get(
+    for serialized_variable in (response_json.get("data", {}) or {}).get(
         "listBenchSecrets", []
     ):
         try:

@@ -159,8 +159,6 @@ class InstallVariablesController(cement.Controller):
         else:
             print("No variables were modified")
 
-        print("")
-
         if num_added_variable_names:
             print(
                 f"{num_added_variable_names} variables were added:\n  {added_variable_names}"
