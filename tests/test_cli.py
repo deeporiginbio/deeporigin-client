@@ -51,7 +51,7 @@ class TestCase(unittest.TestCase):
 
         stdout = stdout_capture.getvalue().strip()
 
-        self.assertRegex(stdout, "List data in managed data on Deep Origin")
+        self.assertRegex(stdout, "List data in the data hub on Deep Origin")
 
     @pytest.mark.skipif(
         sys.version_info < (3, 11), reason="requires Python 3.10 or higher"

@@ -16,11 +16,8 @@ class DataController(cement.Controller):
         label = "data"
         stacked_on = "base"
         stacked_type = "nested"
-        help = "explore and fetch data from Deep Origin managed data"
-        description = """
-List data in managed data on Deep Origin, and save
-databases to CSV files. 
-            """
+        help = "Explore and fetch data from the Deep Origin data hub"
+        description = """List data in the data hub on Deep Origin, and save databases to CSV files."""
 
     def _get_client(self):
         """helper method that returns an authenticated
@@ -239,7 +236,7 @@ databases to CSV files.
             _show_json(rows)
 
     @cement.ex(
-        help="Describe and get metadata of file uploaded to database in your Deep Origin data management system",
+        help="Describe and get metadata of about a file, row, or database in your Deep Origin data hub",
         arguments=[
             (
                 ["object_id"],
@@ -296,11 +293,11 @@ databases to CSV files.
         _print_dict(data, json=self.app.pargs.json, key_label=key_label)
 
     @cement.ex(
-        help="Show database or row",
+        help="Show a row or a database",
         arguments=[
             (
                 ["object_id"],
-                {"help": "Database or row ID", "action": "store"},
+                {"help": "Row ID or database ID", "action": "store"},
             ),
             (
                 ["--json"],
@@ -337,7 +334,7 @@ databases to CSV files.
             )
 
     @cement.ex(
-        help="Upload file to database",
+        help="Upload a file to database",
         arguments=[
             (
                 ["file_path"],

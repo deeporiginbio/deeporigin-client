@@ -2,13 +2,11 @@ This page describes how to write data to Deep Origin Data.
 
 ## Write data to a cell in a database
 
+### Write text data
 
-### Write text data 
-
-We can write a string to a cell in a database that is of type `text` using:
+Run the following to write a text value to a cell in a database:
 
 === "CLI"
-
 
     ```bash
     deeporigin data write "some-string" \
@@ -18,8 +16,7 @@ We can write a string to a cell in a database that is of type `text` using:
 
     ```
 
-
-=== "Python client"
+=== "Python"
 
     ```py
     from deeporigin.managed_data import api
@@ -31,12 +28,9 @@ We can write a string to a cell in a database that is of type `text` using:
     )
     ```
 
-
-
-
 ### Write numeric data
 
-We can write a number to a cell in a database that is of type `integer` or type `float` using:
+Run the following to write a numeric value to a cell in a database:
 
 === "CLI"
 
@@ -48,12 +42,9 @@ We can write a number to a cell in a database that is of type `integer` or type 
 
     ```
 
+=== "Python"
 
-=== "Python client"
-
- 
-
-    ```py
+    ```python
     from deeporigin.managed_data import api
     api.set_cell_data(
         1,
@@ -63,10 +54,9 @@ We can write a number to a cell in a database that is of type `integer` or type 
     )
     ```
 
-Numeric data will be coerced to the data type of the underlying cell. 
+Numeric data will be coerced to the data type of the underlying cell.
 
-
-### Write Select data 
+### Write select data
 
 This section describes how to write data to a cell in a database that is of type `select`. This includes cells where a single option can be selected from a list, and cells where more than one value can be selected from a list of options.
 
@@ -80,12 +70,7 @@ This section describes how to write data to a cell in a database that is of type
 
     ```
 
- 
-
-=== "Python client"
-    
-
-    We can write a number to a cell in a database that is of type `integer` or type `float` using 
+=== "Python"
 
     ```py
     from deeporigin.managed_data import api
@@ -99,10 +84,9 @@ This section describes how to write data to a cell in a database that is of type
 
 The value must be one of the options in the list. If it is not, an error will be raised showing the list of legal options.
 
-
 ### Write Boolean data
 
-We can write a Boolean value to a cell in a database that is of type `boolean` using:
+Run the following to write a Boolean value to a cell in a database:
 
 === "CLI"
 
@@ -113,12 +97,10 @@ We can write a Boolean value to a cell in a database that is of type `boolean` u
         --row $row_id
 
     ```
- 
 
-=== "Python client"
-    
+=== "Python"
 
-    ```py
+    ```python
     from deeporigin.managed_data import api
     api.set_cell_data(
         True,
@@ -140,6 +122,3 @@ We can write a Boolean value to a cell in a database that is of type `boolean` u
             row_id="row ID",
         )
         ```
-
-
-

@@ -1,17 +1,14 @@
+# Configure this package
 
+## View the configuration for this package
 
-## View Deep Origin Config Info
-
-
-To view configuration information on Deep Origin, run:
-
-
+To view the configuration for this package, run:
 
 ```bash
-deeporigin config
+deeporigin config show
 ```
 
-and you will see a table that looks like this:
+This will display a table like below:
 
 ```
 ╭─────────────────────────────┬─────────────────────────────────────╮
@@ -36,33 +33,10 @@ and you will see a table that looks like this:
 ╰─────────────────────────────┴─────────────────────────────────────╯
 ```
 
-## View Deep Origin Context Information
+## Set a configuration variable
 
-Context information from Deep Origin can be displayed using the CLI:
-
-```bash
-deeporigin context
-```
-
-and you will see a table that looks like this:
-
+To set a variable, run:
 
 ```bash
-Bench ID: average-possum-3x3
-User ID: None
-Organization ID: likely-aardvark-ewo
-Environment: edge
-Debug: False
+deeporigin config set [variable-name] [variable-value]
 ```
-
-
-!!! warning "Only supported on ComputeBenches"
-    Note that this command is only supported on ComputeBenches. If you run this command outside of a ComputeBench, you will likely see something like this:
-
-    ```bash
-    Bench ID: None
-    User ID: None
-    Organization ID: None
-    Environment: None
-    Debug: False
-    ```

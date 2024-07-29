@@ -1,24 +1,25 @@
-This page describes how to describe and show details of data objects in Deep Origin. To simply list objects, see [List data](./list-data.md).
+# Inspect data
+
+This page describes how to describe and show the details of data objects in Deep Origin. To simply list objects, see [List data](./list-data.md).
 
 ## Describe data
 
-### Describe rows 
+### Describe rows
 
-Describing rows provides metadata about the row, such as its ID, parent, and status. 
-
+Describing rows provides metadata about the row, such as its ID, parent, and status.
 
 !!! info "Describe vs. Show"
     This does not show you information in that row. To see data contained in that row, use the [`show`](#show-data) command.
 
-=== "CLI"
+To describe a row in a database in Deep Origin, run:
 
-    To describe a row in a database in Deep Origin, use:
+=== "CLI"
 
     ```bash
     deeporigin data describe <row-id>
     ```
 
-    This will show you a table similar to:
+    This will display a table similar to:
 
     ```
     ╭──────────────────┬────────────────────────────────────╮
@@ -58,33 +59,24 @@ Describing rows provides metadata about the row, such as its ID, parent, and sta
         }
         ```
 
-    
-
-
-
-=== "Python client"
-    
-
-    To describe a row in a database in Deep Origin, use:
+=== "Python"
 
     ```python
     from deeporigin.managed_data import api
     api.describe_row("_row:WORR9xeGvG6mSg0yyDRlk")
     ```
 
+### Describe files
 
-### Describe files 
-
+To describe a file in a database in Deep Origin, run:
 
 === "CLI"
-
-    To describe a file in a database in Deep Origin, use:
 
     ```bash
     deeporigin data describe <file-id>
     ```
 
-    This will show you a table similar to:
+    This will display a table similar to:
 
     ```
     ╭──────────────────┬───────────────────────────────────╮
@@ -124,35 +116,26 @@ Describing rows provides metadata about the row, such as its ID, parent, and sta
         }
         ```
 
-    
-
-
-
-=== "Python client"
-    
-
-    To describe a file in a database in Deep Origin, use:
+=== "Python"
 
     ```python
     from deeporigin.managed_data import api
     api.describe_file("file-id")
     ```
 
-## Show data 
-
-
+## Show data
 
 ### Show rows
 
-=== "CLI"
+To show the data in a row in a database in Deep Origin, run:
 
-    To show the data in a row in a database in Deep Origin, use:
+=== "CLI"
 
     ```bash
     deeporigin data show <row-id>
     ```
 
-    This will show you a table similar to:
+    This will display a table similar to:
 
     ```
     ╭───────────┬─────────────────────────────╮
@@ -180,30 +163,24 @@ Describing rows provides metadata about the row, such as its ID, parent, and sta
         }
         ```
 
-
-=== "Python client"
-    
-
-    To show the data in a row in a database in Deep Origin, use:
+=== "Python"
 
     ```python
     from deeporigin.managed_data import  api
     api.get_row_data("row-id")
     ```
 
-    Data is returned as a dictionary where the key is the column name and the value is the value in that cell.
+    The data will be returned as a dictionary, where the keys are the column names and the values are values of the cells.
 
 ### Show databases
 
 === "CLI"
 
-    To show an entire database in Deep Origin, use:
-
     ```bash
     deeporigin data show <database-id>
     ```
 
-    This will show you a table similar to:
+    This will display a table similar to:
 
     ```
     ╭───────────┬───────────┬──────────────────┬────────────┬───────────────────╮
@@ -247,16 +224,11 @@ Describing rows provides metadata about the row, such as its ID, parent, and sta
         }
         ```
 
-
-=== "Python client"
-    
-
-    To retrieve an entire database from Deep Origin, use:
-
+=== "Python"
 
     ```python
     from deeporigin.managed_data import api
     api.get_dataframe("database-id")
     ```
 
-    Data is returned as a [Pandas DataFrame](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html).
+    The data will be returned as a [Pandas DataFrame](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html).

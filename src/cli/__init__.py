@@ -20,10 +20,10 @@ __all__ = ["main", "App"]
 class BaseController(cement.Controller):
     class Meta:
         label = "base"
-        help = "Utility for managing Deep Origin ComputeBenches"
+        help = "Client for Deep Origin"
         description = (
-            "Utility for managing Deep Origin ComputeBenches, such as retrieving variables and "
-            "secrets from the Deep Origin platform and installing them into benches."
+            "Client for Deep Origin such as for downloading data and installing variables and "
+            "secrets into workstations."
         )
         arguments = [
             (
@@ -44,7 +44,7 @@ class BaseController(cement.Controller):
             raise SystemExit(self._parser.print_help())
 
     @cement.ex(
-        help="Authenticate to the Deep Origin platform",
+        help="Authenticate to Deep Origin",
     )
     def authenticate(self):
         """list the columns of the row and their values, where applicable"""

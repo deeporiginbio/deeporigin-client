@@ -41,16 +41,17 @@ nav:
   - Installation: install.md
   - Configuration: configure.md
 - How to:
-  - Authenticate to Deep Origin: how-to/auth.md
-  - Fetch Secrets and Variables: how-to/variables.md
-  - View Deep Origin Information: how-to/do-info.md
-  - Managed data: 
+  - Sign into Deep Origin: how-to/auth.md
+  - Data hub:
     - List data: how-to/managed-data/list-data.md
     - Inspect data: how-to/managed-data/inspect-data.md
     - Upload data: how-to/managed-data/upload-data.md
     - Write data: how-to/managed-data/write-data.md
+  - Install variables and secrets: how-to/variables.md
+  - Get info about your workstation: how-to/workstation-info.md
+  - Configure this package: how-to/config-package.md
 - API reference:
-  - Managed data:
+  - Data hub:
     - High-level API: ref/managed-data/high-level-api.md
     - Low-level API: ref/managed-data/low-level-api.md
     - Types and constants: ref/managed-data/types.md

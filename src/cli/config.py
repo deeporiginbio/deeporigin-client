@@ -1,4 +1,4 @@
-"""this implements controllers and hooks to connect to
+"""This implements controllers and hooks to connect to
 managed_data.py"""
 
 import os
@@ -16,16 +16,14 @@ from deeporigin.utils import _print_dict
 
 
 class ConfigController(cement.Controller):
-    """Controller for config subcommand of CLI"""
+    """Controller for the config subcommand of the CLI"""
 
     class Meta:
         label = "config"
         stacked_on = "base"
         stacked_type = "nested"
         help = "Show and modify configuration"
-        description = """
-Show and modify the configuration for this application
-            """
+        description = """Show and modify the configuration for this application"""
 
     def _default(self):
         self.app.pargs.json = False
@@ -48,7 +46,7 @@ Show and modify the configuration for this application
 
         data = get_value()
 
-        data.pop("list_bench_variables_query_template", None)
+        data.pop("list_workstation_variables_query_template", None)
 
         _print_dict(data, json=self.app.pargs.json, key_label="Variable")
 

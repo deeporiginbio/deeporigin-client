@@ -53,7 +53,7 @@ class TestCase(unittest.TestCase):
         with unittest.mock.patch.dict("os.environ", env):
             value = context.get_value()
         expected_value = context.Context(
-            bench_id="cute-bear-123",
+            workstation_id="cute-bear-123",
             user_id="john-doe",
             org_id="acme-bio",
             compute_cluster=context.ComputeClusterContext(
@@ -83,7 +83,7 @@ class TestCase(unittest.TestCase):
 
         expected_str = "\n".join(
             [
-                "Bench ID: cute-bear-123",
+                "Workstation ID: cute-bear-123",
                 "Compute cluster:",
                 "  ID: us-west-2.aws.bench.deeporigin.io",
                 "  Properties:",
@@ -138,7 +138,7 @@ class TestCase(unittest.TestCase):
         with unittest.mock.patch.dict("os.environ", env):
             value = context.get_value()
         expected_value = context.Context(
-            bench_id=None,
+            workstation_id=None,
             user_id=None,
             org_id=None,
             compute_cluster=context.ComputeClusterContext(
@@ -164,7 +164,7 @@ class TestCase(unittest.TestCase):
 
         expected_str = "\n".join(
             [
-                "Bench ID: None",
+                "Workstation ID: None",
                 "Compute cluster:",
                 "  ID: None",
                 "  Properties: None",
@@ -200,7 +200,7 @@ class TestCase(unittest.TestCase):
         with unittest.mock.patch.dict("os.environ", env):
             value = context.get_value()
         expected_value = context.Context(
-            bench_id=None,
+            workstation_id=None,
             user_id=None,
             org_id=None,
             compute_cluster=None,
@@ -215,7 +215,7 @@ class TestCase(unittest.TestCase):
 
         expected_str = "\n".join(
             [
-                "Bench ID: None",
+                "Workstation ID: None",
                 "Compute cluster: None",
                 "User ID: None",
                 "Organization ID: None",
@@ -236,7 +236,7 @@ class TestCase(unittest.TestCase):
         with unittest.mock.patch.dict("os.environ", env):
             value = context.get_value()
         expected_value = context.Context(
-            bench_id=None,
+            workstation_id=None,
             user_id=None,
             org_id=None,
             compute_cluster=None,
@@ -248,7 +248,7 @@ class TestCase(unittest.TestCase):
 
         expected_str_with_cluster_hardware = "\n".join(
             [
-                "Bench ID: None",
+                "Workstation ID: None",
                 "Compute cluster: None",
                 "User ID: None",
                 "Organization ID: None",
@@ -264,7 +264,7 @@ class TestCase(unittest.TestCase):
 
         expected_str_without_cluster_hardware = "\n".join(
             [
-                "Bench ID: None",
+                "Workstation ID: None",
                 "User ID: None",
                 "Organization ID: None",
                 "Environment: None",

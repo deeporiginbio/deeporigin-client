@@ -91,9 +91,9 @@ def install_variables(
     overwrite: bool = False,
 ) -> dict[str, dict[str, typing.Union[str, VariableType]]]:
     """
-    Retrieve the variables and secrets for your bench from the Deep Origin platform and
-    install them into the bench. Includes your variables and secrets, as well as those of
-    the parent organization of the bench.
+    Retrieve the variables and secrets for your workstation from the Deep Origin platform and
+    install them into the workstation. Includes your variables and secrets, as well as those of
+    the parent organization of the workstation.
 
     Args:
         user (:obj:`bool`, optional): Whether to retrieve and install user variables and secrets
@@ -189,9 +189,9 @@ def get_variables_from_do_platform(
     types: typing.Iterable[VariableType] = tuple(VariableType.__members__.values()),
 ) -> list[Variable]:
     """
-    Retrieve the variables and secrets for your bench from the Deep Origin platform.
+    Retrieve the variables and secrets for your workstation from the Deep Origin platform.
     Includes your variables and secrets, as well as those of the parent organization
-    of the bench.
+    of the workstation.
 
     Args:
         user (:obj:`bool`, optional): Whether to retrieve and install user variables and secrets
@@ -217,10 +217,12 @@ def get_variables_from_do_platform(
     # TODO Support filtering for
     # - Just user's variables
     # - Just organization variables
-    bench_drn = f"drn:compute:{config.organization_id}:computebench:{config.bench_id}"
-    query = string.Template(config.list_bench_variables_query_template).substitute(
-        bench_drn=bench_drn
+    workstation_drn = (
+        f"drn:compute:{config.organization_id}:computebench:{config.bench_id}"
     )
+    query = string.Template(
+        config.list_workstation_variables_query_template
+    ).substitute(workstation_drn=workstation_drn)
 
     response = requests.post(
         urljoin(config.api_endpoint, config.graphql_api_route),
@@ -361,9 +363,9 @@ def enable_variable_auto_updating(
     cli: typing.Optional[str] = None,
 ) -> None:
     """
-    Configure the variables and secrets for your bench from the Deep Origin
+    Configure the variables and secrets for your workstation from the Deep Origin
     platform to be automatically installed once added or modified. Includes your
-    variables and secrets, as well as those of the parent organization of the bench.
+    variables and secrets, as well as those of the parent organization of the workstation.
 
     Args:
         user (:obj:`bool`, optional): Whether to retrieve and install user variables and secrets
@@ -392,7 +394,7 @@ def enable_variable_auto_updating(
         # assemble the command for the job
         config = get_config()
         escaped_organization_id = config.organization_id.replace("'", "\\'")
-        escaped_bench_id = config.bench_id.replace("'", "\\'")
+        escaped_workstation_id = config.bench_id.replace("'", "\\'")
         escaped_env = config.env.replace("'", "\\'")
         escaped_api_endpoint = config.api_endpoint.replace("'", "\\'")
         escaped_auth_domain = config.auth_domain.replace("'", "\\'")
@@ -404,8 +406,8 @@ def enable_variable_auto_updating(
         escaped_auth_grant_type = config.auth_grant_type.replace("'", "\\'")
         escaped_auth_client_id = config.auth_client_id.replace("'", "\\'")
         escaped_auth_client_secret = config.auth_client_secret.replace("'", "\\'")
-        escaped_list_bench_variables_query_template = (
-            config.list_bench_variables_query_template.replace("\n", " ").replace(
+        escaped_list_workstation_variables_query_template = (
+            config.list_workstation_variables_query_template.replace("\n", " ").replace(
                 "'", "\\'"
             )
         )
@@ -427,7 +429,7 @@ def enable_variable_auto_updating(
         commands.append(
             f"export DEEP_ORIGIN_ORGANIZATION_ID='{escaped_organization_id}'"
         )
-        commands.append(f"export DEEP_ORIGIN_BENCH_ID='{escaped_bench_id}'")
+        commands.append(f"export DEEP_ORIGIN_BENCH_ID='{escaped_workstation_id}'")
         commands.append(f"export DEEP_ORIGIN_ENV='{escaped_env}'")
         commands.append(f"export DEEP_ORIGIN_API_ENDPOINT='{escaped_api_endpoint}'")
         commands.append(f"export DEEP_ORIGIN_AUTH_DOMAIN='{escaped_auth_domain}'")
@@ -446,7 +448,7 @@ def enable_variable_auto_updating(
             f"export DEEP_ORIGIN_AUTH_CLIENT_SECRET='{escaped_auth_client_secret}'"
         )
         commands.append(
-            f"export DEEP_ORIGIN_LIST_BENCH_VARIABLES_QUERY_TEMPLATE='{escaped_list_bench_variables_query_template}'"
+            f"export DEEP_ORIGIN_LIST_WORKSTATION_VARIABLES_QUERY_TEMPLATE='{escaped_list_workstation_variables_query_template}'"
         )
 
         commands.append(

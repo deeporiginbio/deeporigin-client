@@ -30,7 +30,7 @@ class TestCase(unittest.TestCase):
             "DEEP_ORIGIN_AUTH_GRANT_TYPE": "jklm",
             "DEEP_ORIGIN_AUTH_CLIENT_ID": "mno",
             "DEEP_ORIGIN_AUTH_CLIENT_SECRET": "mnop1",
-            "DEEP_ORIGIN_LIST_BENCH_VARIABLES_QUERY_TEMPLATE": "mnop",
+            "DEEP_ORIGIN_LIST_WORKSTATION_VARIABLES_QUERY_TEMPLATE": "mnop",
             "DEEP_ORIGIN_API_TOKENS_FILENAME": "mnopq",
             "DEEP_ORIGIN_VARIABLES_CACHE_FILENAME": "vwx",
             "DEEP_ORIGIN_AUTO_INSTALL_VARIABLES_FILENAME": "vwx",
@@ -39,6 +39,7 @@ class TestCase(unittest.TestCase):
         config.get_value.cache_clear()
         with unittest.mock.patch.dict("os.environ", env):
             value = config.get_value()
+
         expected_value = {
             "organization_id": "a123",
             "bench_id": "b123",
@@ -53,7 +54,7 @@ class TestCase(unittest.TestCase):
             "auth_grant_type": "jklm",
             "auth_client_id": "mno",
             "auth_client_secret": "mnop1",
-            "list_bench_variables_query_template": "mnop",
+            "list_workstation_variables_query_template": "mnop",
             "api_tokens_filename": os.path.abspath("mnopq"),
             "variables_cache_filename": os.path.abspath("vwx"),
             "auto_install_variables_filename": os.path.abspath("vwx"),
@@ -93,7 +94,7 @@ class TestCase(unittest.TestCase):
             "auth_grant_type": "jklm",
             "auth_client_id": "mno",
             "auth_client_secret": "mnop1",
-            "list_bench_variables_query_template": "mnop",
+            "list_workstation_variables_query_template": "mnop",
             "api_tokens_filename": os.path.join("~", "mnopq"),
             "variables_cache_filename": os.path.join("~", "vwx"),
             "auto_install_variables_filename": os.path.join("~", "vwx"),
@@ -136,7 +137,7 @@ class TestCase(unittest.TestCase):
             "auth_grant_type": "jklm",
             "auth_client_id": None,
             "auth_client_secret": "mnop1",
-            "list_bench_variables_query_template": "mnop",
+            "list_workstation_variables_query_template": "mnop",
             "api_tokens_filename": os.path.join("~", "mnopq"),
             "variables_cache_filename": os.path.join("~", "vwx"),
             "auto_install_variables_filename": os.path.join("~", "vwx"),
