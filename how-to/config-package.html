@@ -10,28 +10,28 @@
         <meta name="author" content="Deep Origin">
       
       
-        <link rel="canonical" href="https://deeporiginbio.github.io/deeporigin-client/how-to/managed-data/upload-data.html">
+        <link rel="canonical" href="https://deeporiginbio.github.io/deeporigin-client/how-to/config-package.html">
       
       
-        <link rel="prev" href="inspect-data.html">
+        <link rel="prev" href="workstation-info.html">
       
       
-        <link rel="next" href="write-data.html">
+        <link rel="next" href="../ref/managed-data/high-level-api.html">
       
       
-      <link rel="icon" href="../../images/favicon.png">
+      <link rel="icon" href="../images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.30">
     
     
       
-        <title>Upload data - CLI and Python client | Deep Origin</title>
+        <title>Configure this package - CLI and Python client | Deep Origin</title>
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.3cba04c6.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.3cba04c6.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
       
       
 
@@ -50,11 +50,11 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
     
-      <link rel="stylesheet" href="../../stylesheets/extra.css">
+      <link rel="stylesheet" href="../stylesheets/extra.css">
     
-    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#upload-data" class="md-skip">
+        <a href="#configure-this-package" class="md-skip">
           Skip to content
         </a>
       
@@ -92,9 +92,9 @@
 
 <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../.." title="CLI and Python client | Deep Origin" class="md-header__button md-logo" aria-label="CLI and Python client | Deep Origin" data-md-component="logo">
+    <a href=".." title="CLI and Python client | Deep Origin" class="md-header__button md-logo" aria-label="CLI and Python client | Deep Origin" data-md-component="logo">
       
-  <img src="../../images/logo.svg" alt="logo">
+  <img src="../images/logo.svg" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -111,7 +111,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Upload data
+              Configure this package
             
           </span>
         </div>
@@ -196,7 +196,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../index.html" class="md-tabs__link">
+        <a href="../index.html" class="md-tabs__link">
           
   
     
@@ -218,7 +218,7 @@
     
     
       <li class="md-tabs__item md-tabs__item--active">
-        <a href="../auth.html" class="md-tabs__link">
+        <a href="auth.html" class="md-tabs__link">
           
   
     
@@ -244,7 +244,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../ref/managed-data/high-level-api.html" class="md-tabs__link">
+        <a href="../ref/managed-data/high-level-api.html" class="md-tabs__link">
           
   
     
@@ -282,9 +282,9 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="CLI and Python client | Deep Origin" class="md-nav__button md-logo" aria-label="CLI and Python client | Deep Origin" data-md-component="logo">
+    <a href=".." title="CLI and Python client | Deep Origin" class="md-nav__button md-logo" aria-label="CLI and Python client | Deep Origin" data-md-component="logo">
       
-  <img src="../../images/logo.svg" alt="logo">
+  <img src="../images/logo.svg" alt="logo">
 
     </a>
     CLI and Python client | Deep Origin
@@ -336,7 +336,7 @@
           
           
           <div class="md-nav__link md-nav__container">
-            <a href="../../index.html" class="md-nav__link ">
+            <a href="../index.html" class="md-nav__link ">
               
   
   <span class="md-ellipsis">
@@ -369,7 +369,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../install.html" class="md-nav__link">
+      <a href="../install.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -390,7 +390,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../configure.html" class="md-nav__link">
+      <a href="../configure.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -473,7 +473,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth.html" class="md-nav__link">
+      <a href="auth.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -491,10 +491,8 @@
                 
   
   
-    
   
   
-  
     
     
       
@@ -512,11 +510,11 @@
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2" >
         
           
           <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
@@ -530,7 +528,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_2_2">
             <span class="md-nav__icon md-icon"></span>
             Data hub
@@ -544,7 +542,7 @@
   
   
     <li class="md-nav__item">
-      <a href="list-data.html" class="md-nav__link">
+      <a href="managed-data/list-data.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -565,11 +563,103 @@
   
   
     <li class="md-nav__item">
-      <a href="inspect-data.html" class="md-nav__link">
+      <a href="managed-data/inspect-data.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
     Inspect data
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="managed-data/upload-data.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Upload data
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="managed-data/write-data.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Write data
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="variables.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Install variables and secrets
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="workstation-info.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Get info about your workstation
   </span>
   
 
@@ -599,18 +689,18 @@
           
   
   <span class="md-ellipsis">
-    Upload data
+    Configure this package
   </span>
   
 
           <span class="md-nav__icon md-icon"></span>
         </label>
       
-      <a href="upload-data.html" class="md-nav__link md-nav__link--active">
+      <a href="config-package.html" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
-    Upload data
+    Configure this package
   </span>
   
 
@@ -634,9 +724,18 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#upload-and-assign-files" class="md-nav__link">
+  <a href="#view-the-configuration-for-this-package" class="md-nav__link">
     <span class="md-ellipsis">
-      Upload and assign Files
+      View the configuration for this package
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#set-a-configuration-variable" class="md-nav__link">
+    <span class="md-ellipsis">
+      Set a configuration variable
     </span>
   </a>
   
@@ -646,98 +745,6 @@
   
 </nav>
       
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="write-data.html" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Write data
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../variables.html" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Install variables and secrets
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../workstation-info.html" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Get info about your workstation
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../config-package.html" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Configure this package
-  </span>
-  
-
-      </a>
     </li>
   
 
@@ -845,7 +852,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../ref/managed-data/high-level-api.html" class="md-nav__link">
+      <a href="../ref/managed-data/high-level-api.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -866,7 +873,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../ref/managed-data/low-level-api.html" class="md-nav__link">
+      <a href="../ref/managed-data/low-level-api.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -887,7 +894,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../ref/managed-data/types.html" class="md-nav__link">
+      <a href="../ref/managed-data/types.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -945,9 +952,18 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#upload-and-assign-files" class="md-nav__link">
+  <a href="#view-the-configuration-for-this-package" class="md-nav__link">
     <span class="md-ellipsis">
-      Upload and assign Files
+      View the configuration for this package
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#set-a-configuration-variable" class="md-nav__link">
+    <span class="md-ellipsis">
+      Set a configuration variable
     </span>
   </a>
   
@@ -971,101 +987,37 @@
   
 
 
-<h1 id="upload-data">Upload data<a class="headerlink" href="#upload-data" title="Permanent link">&para;</a></h1>
-<p>This page describes how to upload data to the Deep Origin data hub,
-and assign it to a cell in a row.</p>
-<h2 id="upload-and-assign-files">Upload and assign Files<a class="headerlink" href="#upload-and-assign-files" title="Permanent link">&para;</a></h2>
-<p>To upload a file to the Deep Origin data hub, run the following commands:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">CLI</label><label for="__tabbed_1_2">Python</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block">
-<div class="language-bash highlight"><pre><span></span><code>deeporigin<span class="w"> </span>data<span class="w"> </span>upload<span class="w"> </span>/path/to/test.fasta
+<h1 id="configure-this-package">Configure this package<a class="headerlink" href="#configure-this-package" title="Permanent link">&para;</a></h1>
+<h2 id="view-the-configuration-for-this-package">View the configuration for this package<a class="headerlink" href="#view-the-configuration-for-this-package" title="Permanent link">&para;</a></h2>
+<p>To view the configuration for this package, run:</p>
+<div class="language-bash highlight"><pre><span></span><code>deeporigin<span class="w"> </span>config<span class="w"> </span>show
 </code></pre></div>
-<p>This will upload a file to the "Staging area", and this
-file will not assigned to any database or cell. An example
-response is shown below:</p>
-<div class="language-text highlight"><pre><span></span><code>╭──────────────────┬──────────────────────────────╮
-│ Property         │ Value                        │
-├──────────────────┼──────────────────────────────┤
-│ name             │ test.fasta                   │
-│ contentType      │ data/fasta                   │
-│ contentLength    │ 554588                       │
-│ id               │ _file:36ufKT2Sej22coSEOizpK  │
-│ status           │ ready                        │
-│ uri              │ s3://foo                     │
-│ dateCreated      │ 2024-06-18T14:48:33.501Z     │
-│ dateUpdated      │ 2024-06-18T14:48:33.501Z     │
-│ createdByUserDrn │ levins@deeporigin.com        │
-╰──────────────────┴──────────────────────────────╯
+<p>This will display a table like below:</p>
+<div class="language-text highlight"><pre><span></span><code>╭─────────────────────────────┬─────────────────────────────────────╮
+│ Variable                    │ Value                               │
+├─────────────────────────────┼─────────────────────────────────────┤
+│ organization_id             │ likely-aardvark-ewo                 │
+│ bench_id                    │ average-possum-3x3                  │
+│ env                         │ us-west-1                           │
+│ api_endpoint                │ https://os.prod.deeporigin.io/api   │
+│ nucleus_api_route           │ nucleus-api/api/                    │
+│ graphql_api_route           │ api/graphql/                        │
+│ auth_domain                 │ https://formicbio-dev.us.auth0.com  │
+│ auth_device_code_endpoint   │ oauth/device/code/                  │
+│ auth_token_endpoint         │ oauth/token/                        │
+│ auth_audience               │ https://os.deeporigin.io/api        │
+│ auth_grant_type             │ urn:ietf:params:device_code         │
+│ auth_client_id              │ &lt;secret&gt;                            │
+│ auth_client_secret          │ &lt;secret&gt;                            │
+│ api_tokens_filename         │ ~/api_tokens                        │
+│ variables_cache_filename    │ ~/variables.yml                     │
+│ feature_flags               │                                     │
+╰─────────────────────────────┴─────────────────────────────────────╯
 </code></pre></div>
-<details class="tip">
-<summary>JSON output with <code>--json</code></summary>
-<p><a href="https://www.json.org/">JSON</a> output can be requested by adding <code>--json</code>, and allows
-you to pipe out to a JSON processor like <a href="https://jqlang.github.io/jq/">jq</a>:</p>
-<div class="language-bash highlight"><pre><span></span><code>deeporigin<span class="w"> </span>upload<span class="w"> </span>/path/to/test.fasta<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq
+<h2 id="set-a-configuration-variable">Set a configuration variable<a class="headerlink" href="#set-a-configuration-variable" title="Permanent link">&para;</a></h2>
+<p>To set a variable, run:</p>
+<div class="language-bash highlight"><pre><span></span><code>deeporigin<span class="w"> </span>config<span class="w"> </span><span class="nb">set</span><span class="w"> </span><span class="o">[</span>variable-name<span class="o">]</span><span class="w"> </span><span class="o">[</span>variable-value<span class="o">]</span>
 </code></pre></div>
-<div class="language-json highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;test.fasta&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;contentType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;data/fasta&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;contentLength&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">554588</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;_file:36ufKT2Sej22coSEOizpK&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ready&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;uri&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;s3://foo&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;dateCreated&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-06-18T14:51:43.876Z&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;dateUpdated&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-06-18T14:51:43.876Z&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;createdByUserDrn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;levins@deeporigin.com&quot;</span>
-<span class="p">}</span>
-</code></pre></div>
-</details>
-<p>To upload a file and assign it to an existing cell, run:</p>
-<div class="language-bash highlight"><pre><span></span><code>deeporigin<span class="w"> </span>data<span class="w"> </span>upload<span class="w"> </span>/path/to/test.fasta<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--column<span class="w"> </span>&lt;column_id&gt;<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--database<span class="w"> </span>&lt;database_id&gt;<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--row<span class="w"> </span>&lt;row_id&gt;
-</code></pre></div>
-<p>To upload a file and assign it to a column in a new row,
-run:</p>
-<div class="language-bash highlight"><pre><span></span><code>deeporigin<span class="w"> </span>data<span class="w"> </span>upload<span class="w"> </span>/path/to/test.fasta<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--column<span class="w"> </span>&lt;column_id&gt;<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--database<span class="w"> </span>&lt;database+_id&gt;<span class="w"> </span>
-</code></pre></div>
-</div>
-<div class="tabbed-block">
-<div class="language-py highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">deeporigin.managed_data</span> <span class="kn">import</span> <span class="n">api</span>
-<span class="n">api</span><span class="o">.</span><span class="n">upload_file</span><span class="p">(</span><span class="s2">&quot;/path/to/file.fasta&quot;</span><span class="p">)</span>
-</code></pre></div>
-<p>This will upload the file to the "Staging Area" of the Deep Origin
-data hub. An example is shown below:</p>
-<div class="language-json highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;file.fasta&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;contentType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;data/foo&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;contentLength&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">55454688</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;_file:6Hdhyc3t8xZ6pmyCrQy1t&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ready&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;uri&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;s3://data.&lt;org-name&gt;/_file:6Hdhyc3t8xZ6pmyCrQy1t&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;dateCreated&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-06-18T14:18:37.409Z&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;dateUpdated&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-06-18T14:18:37.409Z&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;createdByUserDrn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;haldane@deeporigin.com&quot;</span><span class="p">,</span>
-<span class="p">}</span>
-</code></pre></div>
-<p>To assign an uploaded file to a cell in an existing row, use the <code>assign_files_to_cell</code> function as follows:</p>
-<div class="language-py highlight"><pre><span></span><code>    <span class="n">api</span><span class="o">.</span><span class="n">assign_files_to_cell</span><span class="p">(</span>
-    <span class="n">file_ids</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;_file:6Hdhyc3t8xZ6pmyCrQy1t&quot;</span><span class="p">],</span>
-    <span class="n">database_id</span><span class="o">=</span><span class="s2">&quot;db-dna&quot;</span><span class="p">,</span>
-    <span class="n">column_id</span><span class="o">=</span><span class="s2">&quot;base_sequence_file&quot;</span><span class="p">,</span>
-    <span class="n">row_id</span><span class="o">=</span><span class="s2">&quot;row-id&quot;</span><span class="p">,</span>
-<span class="p">)</span>
-</code></pre></div>
-<p>To assign an uploaded file to a cell on a new row, use the <code>assign_files_to_cell</code> function as follows:</p>
-<div class="language-py highlight"><pre><span></span><code>    <span class="n">api</span><span class="o">.</span><span class="n">assign_files_to_cell</span><span class="p">(</span>
-    <span class="n">file_ids</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;_file:6Hdhyc3t8xZ6pmyCrQy1t&quot;</span><span class="p">],</span>
-    <span class="n">database_id</span><span class="o">=</span><span class="s2">&quot;db-dna&quot;</span><span class="p">,</span>
-    <span class="n">column_id</span><span class="o">=</span><span class="s2">&quot;base_sequence_file&quot;</span><span class="p">,</span>
-<span class="p">)</span>
-</code></pre></div>
-</div>
-</div>
-</div>
 
 
 
@@ -1103,7 +1055,7 @@ data hub. An example is shown below:</p>
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="inspect-data.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Inspect data">
+          <a href="workstation-info.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Get info about your workstation">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
@@ -1113,20 +1065,20 @@ data hub. An example is shown below:</p>
                 Previous
               </span>
               <div class="md-ellipsis">
-                Inspect data
+                Get info about your workstation
               </div>
             </div>
           </a>
         
         
           
-          <a href="write-data.html" class="md-footer__link md-footer__link--next" aria-label="Next: Write data">
+          <a href="../ref/managed-data/high-level-api.html" class="md-footer__link md-footer__link--next" aria-label="Next: High-level API">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Write data
+                High-level API
               </div>
             </div>
             <div class="md-footer__button md-icon">
@@ -1162,10 +1114,10 @@ data hub. An example is shown below:</p>
       <div class="md-progress" data-md-component="progress" role="progressbar"></div>
     
     
-    <script id="__config" type="application/json">{"base": "../..", "features": ["announce.dismiss", "content.code.annotate", "content.code.copy", "content.tabs.link", "content.tooltips", "navigation.footer", "navigation.indexes", "navigation.instant", "navigation.instant.prefetch", "navigation.instant.preview", "navigation.instant.progress", "navigation.path", "navigation.tabs", "navigation.top", "navigation.tracking", "search.suggest", "toc.follow"], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": ["announce.dismiss", "content.code.annotate", "content.code.copy", "content.tabs.link", "content.tooltips", "navigation.footer", "navigation.indexes", "navigation.instant", "navigation.instant.prefetch", "navigation.instant.preview", "navigation.instant.progress", "navigation.path", "navigation.tabs", "navigation.top", "navigation.tracking", "search.suggest", "toc.follow"], "search": "../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.fe8b6f2b.min.js"></script>
+      <script src="../assets/javascripts/bundle.fe8b6f2b.min.js"></script>
       
     
   </body>
