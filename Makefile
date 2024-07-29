@@ -12,7 +12,12 @@ client="mock"
 chosen_tests=""
 
 
-test: 
+lint:
+	source $(CURDIR)/venv/bin/activate && \
+		ruff format && \
+		deactivate
+
+test:
 ifeq ($(client), "mock")
 	source $(CURDIR)/venv/bin/activate && \
 		interrogate -c pyproject.toml -v . -f 100 && \
@@ -51,7 +56,7 @@ install:
 	@python3 -m venv venv
 	@source $(CURDIR)/venv/bin/activate && \
 		pip install --upgrade pip && \
-	    pip install -e .[test,jupyter,docs] && \
+	    pip install -e .[lint,test,jupyter,docs] && \
 	    deactivate
 	@-mkdir -p ~/.deeporigin
 	@test -f ~/.deeporigin/deeporigin || ln -s $(CURDIR)/venv/bin/deeporigin ~/.deeporigin/deeporigin
