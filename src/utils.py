@@ -53,7 +53,7 @@ DatabaseReturnType = Literal["dataframe", "dict"]
 
 @dataclass
 class PREFIXES:
-    """prefixes for CLI and python client"""
+    """prefixes for CLI and Python client"""
 
     DO = "do://"
     FILE = "_file"
@@ -99,6 +99,7 @@ def _print_dict(
     *,
     json: bool = True,
     transpose: bool = True,
+    key_label: str = "Name",
 ) -> None:
     """helper function to pretty print a dict as a table,
     used in the CLI"""
@@ -108,7 +109,7 @@ def _print_dict(
     else:
         if transpose:
             data = data.items()
-            headers = ["Name", "Value"]
+            headers = [key_label, "Value"]
         else:
             headers = "keys"
         print(

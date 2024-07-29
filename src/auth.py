@@ -40,7 +40,7 @@ def get_tokens(
     If an access token exists in the ENV, then it is used before
     anything else. If not, then ~/.deeporigin/api_tokens is
     checked for access tokens, and used if they exist.
-    On first use (within a python session), tokens are
+    On first use (within a Python session), tokens are
     refreshed if refresh_tokens is `True`. On subsequent uses,
     tokens are not refreshed even if refresh_tokens is `True`.
 

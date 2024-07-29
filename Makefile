@@ -1,6 +1,7 @@
 .PHONY:  test test-github jupyter install
 
 SHELL := /bin/bash
+uname=$(shell uname -s)
 
 repo=$(shell basename $(CURDIR))
 
@@ -18,14 +19,22 @@ ifeq ($(client), "mock")
 		python3 -m coverage run -m pytest -x --failed-first -k $(chosen_tests) --client $(client) && \
 		python3 -m coverage html && \
 		deactivate
-	-open htmlcov/index.html
+	if [ "$(uname)" = "Linux" ]; then \
+		xdg-open htmlcov/index.html; \
+	else \
+		open htmlcov/index.html; \
+	fi
 else 
 	source $(CURDIR)/venv/bin/activate && \
 		interrogate -c pyproject.toml -v . -f 100 && \
 		python3 -m coverage run -m pytest --failed-first -k $(chosen_tests) --client $(client) -n auto && \
 		python3 -m coverage html && \
 		deactivate
-	-open htmlcov/index.html
+	if [ "$(uname)" = "Linux" ]; then \
+		xdg-open htmlcov/index.html; \
+	else \
+		open htmlcov/index.html; \
+	fi
 endif 
 
 # set up jupyter dev kernel
@@ -65,5 +74,3 @@ docs-deploy:
 
 test-github:
 	python3 -m coverage run -m pytest -k $(chosen_tests) --client $(client)
-
-

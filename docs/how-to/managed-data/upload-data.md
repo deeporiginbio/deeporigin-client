@@ -19,7 +19,7 @@ and assign it to a cell in a row.
 
     ```
     ╭──────────────────┬──────────────────────────────╮
-    │ Name             │ Value                        │
+    │ Property         │ Value                        │
     ├──────────────────┼──────────────────────────────┤
     │ name             │ test.fasta                   │
     │ contentType      │ data/fasta                   │

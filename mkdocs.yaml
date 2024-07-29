@@ -39,6 +39,7 @@ nav:
 - Getting started:
   - Overview: index.md
   - Installation: install.md
+  - Configuration: configure.md
 - How to:
   - Authenticate to Deep Origin: how-to/auth.md
   - Fetch Secrets and Variables: how-to/variables.md

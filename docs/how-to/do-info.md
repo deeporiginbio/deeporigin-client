@@ -15,7 +15,7 @@ and you will see a table that looks like this:
 
 ```
 ╭─────────────────────────────┬─────────────────────────────────────╮
-│ Name                        │ Value                               │
+│ Variable                    │ Value                               │
 ├─────────────────────────────┼─────────────────────────────────────┤
 │ organization_id             │ likely-aardvark-ewo                 │
 │ bench_id                    │ average-possum-3x3                  │

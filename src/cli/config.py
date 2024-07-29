@@ -7,13 +7,13 @@ import shutil
 import cement
 import confuse
 import yaml
-from deeporigin.config import CONFIG_YML_LOCATION, TEMPLATE, get_value
+from deeporigin.config import DEFAULT_CONFIG_FILENAME, CONFIG_YML_LOCATION, TEMPLATE, get_value
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.utils import _print_dict
 
 
 class ConfigController(cement.Controller):
-    """Controller for data subcommand of CLI"""
+    """Controller for config subcommand of CLI"""
 
     class Meta:
         label = "config"
@@ -21,7 +21,7 @@ class ConfigController(cement.Controller):
         stacked_type = "nested"
         help = "Show and modify configuration"
         description = """
-Show and modify configuration file to connect to Deep Origin 
+Show and modify the configuration for this application
             """
 
     def _default(self):
@@ -41,23 +41,23 @@ Show and modify configuration file to connect to Deep Origin
         ],
     )
     def show(self):
-        """list the columns of the row and their values, where applicable"""
+        """Show configuration"""
 
         data = get_value()
 
         data.pop("list_bench_variables_query_template", None)
 
-        _print_dict(data, json=self.app.pargs.json)
+        _print_dict(data, json=self.app.pargs.json, key_label="Variable")
 
     @cement.ex(
-        help="Set configuration value in config file",
+        help="Set configuration value",
         arguments=[
             (["key"], {"help": "Key to set", "action": "store"}),
             (["value"], {"help": "Value to set", "action": "store"}),
         ],
     )
     def set(self):
-        """download or upload files or databases"""
+        """Set configuration value and save to config file"""
 
         key = self.app.pargs.key
         value = self.app.pargs.value
@@ -73,34 +73,28 @@ Show and modify configuration file to connect to Deep Origin
         if os.path.isfile(CONFIG_YML_LOCATION):
             with open(CONFIG_YML_LOCATION, "r") as file:
                 data = yaml.safe_load(file)
-            data[key] = value
         else:
             # no file.
-            data = {key: value}
+            data = {}
+        data[key] = value
 
         # check that this is valid
-        config = confuse.Configuration("deep_origin", __name__)
-        config.set(data)
-        try:
-            _ = config.get(TEMPLATE)
-        except confuse.confuse.ConfigError:
-            raise DeepOriginException(
-                f"{key}:{value} is not a valid entry for the configuration.",
-            )
+        get_value(override_values=tuple(data.items()))
 
+        # save configuration
         with open(CONFIG_YML_LOCATION, "w") as file:
             yaml.dump(data, file, default_flow_style=False)
 
         print(f"✔︎ {key} → {value}")
 
     @cement.ex(
-        help="Save configuration file for later use",
+        help="Save configuration to a file",
         arguments=[
             (["profile"], {"help": "Profile to save as", "action": "store"}),
         ],
     )
     def save(self):
-        """save a config file for later use"""
+        """Save configuration to a file"""
 
         name = self.app.pargs.profile
 
@@ -115,13 +109,13 @@ Show and modify configuration file to connect to Deep Origin
         print(f"✔︎ Configuration saved to {save_location}")
 
     @cement.ex(
-        help="Save configuration file for later use",
+        help="Load configuration from a file",
         arguments=[
             (["profile"], {"help": "Profile name to save as", "action": "store"}),
         ],
     )
     def load(self):
-        """load a config file and use it"""
+        """Load configuration from a file"""
 
         name = self.app.pargs.profile
 

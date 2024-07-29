@@ -22,10 +22,10 @@ class DeepOriginException(Exception):
         self,
         message: str,
         *,
-        title: str = "Deep Origin Error",
+        title: str = "Deep Origin error",
         fix: Optional[str] = None,
     ):
-        """utility function to print a nicely formatted error, used in the CLI"""
+        """Utility function to print a nicely formatted error, used in the CLI"""
 
         self.message = message
 

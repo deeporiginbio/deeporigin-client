@@ -22,7 +22,7 @@ Describing rows provides metadata about the row, such as its ID, parent, and sta
 
     ```
     ╭──────────────────┬────────────────────────────────────╮
-    │ Name             │ Value                              │
+    │ Column           │ Value                              │
     ├──────────────────┼────────────────────────────────────┤
     │ id               │ _row:WORR9xeGvG6mSg0yyDRlk         │
     │ parentId         │ _database:kyEws11L4KagGAaqRwONv    │
@@ -88,7 +88,7 @@ Describing rows provides metadata about the row, such as its ID, parent, and sta
 
     ```
     ╭──────────────────┬───────────────────────────────────╮
-    │ Name             │ Value                             │
+    │ Property         │ Value                             │
     ├──────────────────┼───────────────────────────────────┤
     │ id               │ _file:gBAK9tzFC5Cegx4NmSETc       │
     │ uri              │ s3://_file:gBAK9tzFC5Cegx4NmSETc  │
@@ -156,7 +156,7 @@ Describing rows provides metadata about the row, such as its ID, parent, and sta
 
     ```
     ╭───────────┬─────────────────────────────╮
-    │ Name      │ Value                       │
+    │ Column    │ Value                       │
     ├───────────┼─────────────────────────────┤
     │ File      │ _file:hnU7F62xeW8j0l1kR7YP1 │
     │ Float Num │ 112                         │

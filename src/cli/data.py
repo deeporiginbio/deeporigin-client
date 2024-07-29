@@ -243,7 +243,7 @@ databases to CSV files.
         arguments=[
             (
                 ["object_id"],
-                {"help": "File ID or Row ID", "action": "store"},
+                {"help": "File ID or row ID", "action": "store"},
             ),
             (
                 ["--json"],
@@ -258,6 +258,8 @@ databases to CSV files.
         """describe file or row or database"""
 
         if PREFIXES.FILE in self.app.pargs.object_id:
+            key_label="Property"
+
             data = api.describe_file(
                 file_id=self.app.pargs.object_id,
                 client=self._get_client(),
@@ -265,6 +267,8 @@ databases to CSV files.
             data = data.dict()
         else:
             # not a file
+            key_label="Column"
+
             data = api.describe_row(
                 row_id=self.app.pargs.object_id,
                 client=self._get_client(),
@@ -289,14 +293,14 @@ databases to CSV files.
 
                     data.pop("cols", None)
 
-        _print_dict(data, json=self.app.pargs.json)
+        _print_dict(data, json=self.app.pargs.json, key_label=key_label)
 
     @cement.ex(
         help="Show database or row",
         arguments=[
             (
                 ["object_id"],
-                {"help": "Database ID", "action": "store"},
+                {"help": "Database or row ID", "action": "store"},
             ),
             (
                 ["--json"],
@@ -328,7 +332,7 @@ databases to CSV files.
                 self.app.pargs.object_id,
                 client=self._get_client(),
             )
-            _print_dict(data, json=self.app.pargs.json, transpose=True)
+            _print_dict(data, json=self.app.pargs.json, transpose=True, key_label="Column")
 
     @cement.ex(
         help="Upload file to database",
@@ -383,7 +387,7 @@ databases to CSV files.
 
         if not self.app.pargs.database:
             # we are not making an assignment, so abort
-            _print_dict(data.dict(), json=self.app.pargs.json)
+            _print_dict(data.dict(), json=self.app.pargs.json, key_label="Property")
             return
 
         if self.app.pargs.column and self.app.pargs.database:
@@ -403,6 +407,7 @@ databases to CSV files.
                 data,
                 json=self.app.pargs.json,
                 transpose=True,
+                key_label="Property",
             )
 
     @cement.ex(
