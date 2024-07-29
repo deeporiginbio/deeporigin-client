@@ -76,7 +76,7 @@ Second, install Python 3.9+ and
 To verify that both are installed, run the following commands:
 
 ```bash
-python --version
+python3 --version
 # Python 3.12.3
 
 make --version
@@ -105,16 +105,15 @@ make test
 
 ### Compiling and serving the documentation for this package
 
-You can compile and serve the documentation for this package by running the following commands:
+You can compile and serve the documentation for this package by running:
 
 ```bash
-make docs-build
 make docs-serve
 ```
 
 ## Supported Python versions
 
-`deeporigin` was [tested](https://github.com/deeporiginbio/deeporigin-client/actions/workflows/main.yml) against the following versions of Python in Ubuntu Linux and Windows:
+`deeporigin` is [tested](https://github.com/deeporiginbio/deeporigin-client/actions/workflows/main.yml) against the following versions of Python in Ubuntu Linux and Windows:
 
 - 3.9
 - 3.10

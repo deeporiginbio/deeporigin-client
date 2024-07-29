@@ -1,5 +1,4 @@
-"""This implements controllers and hooks to connect to
-managed_data.py"""
+"""This implements tools to configure the CLI and python client"""
 
 import os
 import shutil

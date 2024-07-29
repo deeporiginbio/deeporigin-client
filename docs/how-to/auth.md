@@ -38,5 +38,5 @@ After signing in, your access tokens will be cached to disk and then automatical
 be used in subsequent interactions with Deep Origin.
 
 !!! info "Authenticating"
-    In most cases, you only need to authenticate to the Deep Origin platform.
-    You do not need to authenticate every time you use the client or the CLI. Authenticating once, before first use, is sufficient for .
+    In most cases, you only need to authenticate to the Deep Origin platform once.
+    You do not need to authenticate every time you use the client or the CLI.

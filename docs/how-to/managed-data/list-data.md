@@ -17,13 +17,13 @@ To list all of your Deep Origin workspaces, run:
     This will display a screen similar to below:
 
     ```
-    ╭─────────────────┬────────────┬────────────────╮
-    │ Name           │ Type      │ ID            │
-    ├─────────────────┼────────────┼────────────────┤
-    │ Secret Project │ workspace │ secret        │
-    │ QC Efforts     │ workspace │ qc-efforts    │
-    │ Covid Target   │ workspace │ corona        │
-    ╰─────────────────┴────────────┴────────────────╯
+    ╭─────────────────┬────────────┬───────────────╮
+    │ Name            │ Type       │ ID            │
+    ├─────────────────┼────────────┼───────────────┤
+    │ Secret Project  │ workspace  │ secret        │
+    │ QC Efforts      │ workspace  │ qc-efforts    │
+    │ Covid Target    │ workspace  │ corona        │
+    ╰─────────────────┴────────────┴───────────────╯
     ```
 
     ??? tip "JSON output with `--json`"
@@ -70,8 +70,8 @@ To list all of your Deep Origin workspaces, run:
 === "Python"
 
     ```py
-    from deeporigin.managed_data import _api, api
-    _api.list_rows(row_type="workspace")
+    from deeporigin.managed_data import api
+    api.list_rows(row_type="workspace")
     ```
 
 ## List databases
@@ -141,8 +141,8 @@ To list all of your databases in Deep Origin, run:
 === "Python"
 
     ```python
-    from deeporigin.managed_data import _api, api
-    _api.list_rows(row_type="database")
+    from deeporigin.managed_data import api
+    api.list_rows(row_type="database")
     ```
 
 ## List rows
@@ -172,8 +172,8 @@ To list all of your database rows in Deep Origin:
 === "Python"
 
     ```python
-    from deeporigin.managed_data import _api, api
-    _api.list_rows(row_type="row")
+    from deeporigin.managed_data import api
+    api.list_rows(row_type="row")
     ```
 
 ## List files
@@ -277,18 +277,18 @@ To list all of your files in Deep Origin, run:
     We can list all files on Deep Origin using:
 
     ```python
-    from deeporigin.managed_data import _api, api
-    _api.list_files()
+    from deeporigin.managed_data import api
+    api.list_files()
     ```
 
     To find only unassigned files, we can use:
 
     ```python
-    _api.list_files(is_unassigned=True)
+    api.list_files(is_unassigned=True)
     ```
 
     To find files that are assigned to a specific row:
 
     ```python
-    _api.list_files(assigned_row_ids=["row-1"])
+    api.list_files(assigned_row_ids=["row-1"])
     ```
