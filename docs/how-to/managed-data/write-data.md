@@ -91,7 +91,7 @@ Run the following to write a Boolean value to a cell in a database:
 === "CLI"
 
     ```bash
-    deeporigin data write "option A" \
+    deeporigin data write "True" \
         --database $database_id \
         --column $column_id \
         --row $row_id

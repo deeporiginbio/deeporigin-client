@@ -503,9 +503,13 @@ def set_cell_data(
     elif column["type"] == "boolean":
         if isinstance(value, bool) or value is None:
             validated_value = value
+        elif isinstance(value, str) and value in ["True", "true", "1", "Yes", "yes", "Y", "y"]:
+            validated_value = True
+        elif isinstance(value, str) and value in ["False", "false", "0", "No", "no", "N", "n"]:
+            validated_value = False
         else:
             raise DeepOriginException(
-                message=f"Attempting to write to a cell that is of type boolean. Value to be written here should be a True, False or None. Instead, you attempted to write: {value}"
+                message=f"Attempting to write to a cell that is of type Boolean. Value to be written here should be a True, False or None. Instead, you attempted to write: {value}"
             )
     else:
         raise NotImplementedError("This data type is not yet supported")
