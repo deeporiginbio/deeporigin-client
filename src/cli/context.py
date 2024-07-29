@@ -17,8 +17,8 @@ class ContextController(cement.Controller):
         label = "context"
         stacked_on = "base"
         stacked_type = "nested"
-        help = "Get the context for the Deep Origin ComputeBench"
-        description = "Get the context for the Deep Origin ComputeBench, such as the ID of the bench, user and organization, host compute cluster, and hardware blueprint."
+        help = "Get information about a Deep Origin workstation"
+        description = "Get information about a Deep Origin workstation, such as the ID of the workstation, user and organization, host compute cluster, and hardware."
         arguments = []
 
     @cement.ex(hide=True)

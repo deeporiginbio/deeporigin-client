@@ -1,5 +1,5 @@
 """The `deeporigin.managed_data.api` module contains high-level functions for
-interacting with Deep Origin managed data."""
+interacting with the Deep Origin data hub."""
 
 import mimetypes
 import os
@@ -153,7 +153,7 @@ def upload_file(
 ) -> None:
     """Upload a file to Deep Origin.
 
-    This uploads to the "staging area" on Deep Origin Data.
+    This uploads to the "staging area" of the Deep Origin data hub.
     To assign this file to a cell, use [assign_files_to_cell][src.managed_data.api.assign_files_to_cell]
 
     Args:
@@ -211,7 +211,7 @@ def make_database_rows(
     n_rows: int = 1,
     client=None,
 ) -> dict:
-    """Makes one or several new row(s) in a Database table
+    """Makes one or several new row(s) in a database table
 
 
 
@@ -503,9 +503,29 @@ def set_cell_data(
     elif column["type"] == "boolean":
         if isinstance(value, bool) or value is None:
             validated_value = value
+        elif isinstance(value, str) and value in [
+            "True",
+            "true",
+            "1",
+            "Yes",
+            "yes",
+            "Y",
+            "y",
+        ]:
+            validated_value = True
+        elif isinstance(value, str) and value in [
+            "False",
+            "false",
+            "0",
+            "No",
+            "no",
+            "N",
+            "n",
+        ]:
+            validated_value = False
         else:
             raise DeepOriginException(
-                message=f"Attempting to write to a cell that is of type boolean. Value to be written here should be a True, False or None. Instead, you attempted to write: {value}"
+                message=f"Attempting to write to a cell that is of type Boolean. Value to be written here should be a True, False or None. Instead, you attempted to write: {value}"
             )
     else:
         raise NotImplementedError("This data type is not yet supported")
@@ -542,7 +562,7 @@ def download(
     a local destination.
 
     Download databases, objects and other entities from
-    Deep Origin managed data and save them to local disk.
+    the Deep Origin data hub and save them to local disk.
 
     Info: Work in progress
         All features in this function have not been implemented yet.
@@ -603,7 +623,7 @@ def download_database(
 ) -> None:
     """Download a database and save it to a CSV file on the local disk.
 
-    Download a database from Deep Origin managed data
+    Download a database from the Deep Origin data hub
     and save to local disk as a CSV file.
 
     Args:
@@ -653,7 +673,7 @@ def get_dataframe(
 ):
     """Generate a `pandas.DataFrame` or dictionary for a database.
 
-    Download a database from Deep Origin managed data
+    Download a database from the Deep Origin data hub
     and return it as a data frame or dictionary.
 
     Args:

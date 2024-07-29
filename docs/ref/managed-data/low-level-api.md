@@ -2,8 +2,7 @@
 
 ## Background
 
-We use automatically generated code to implement a low-level python SDK that connects to the Deep Origin Data API. This page describes that API. In most cases, you will not need to know how this works, nor will you need to use it. 
-
+We use automatically generated code to implement a low-level Python SDK that connects to the Deep Origin data hub API. This page describes that API. In most cases, you will not need to know how this works, nor will you need to use it.
 
 !!! tip "How to use this reference"
     This page contains information about each class and function in our low-level API. This is meant as a detailed reference for this module. If you're looking an introduction, we recommend reviewing the **How to** section.

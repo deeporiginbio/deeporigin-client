@@ -17,7 +17,7 @@ __all__ = [
 
 @dataclasses.dataclass
 class ComputeClusterContext:
-    """Host compute cluster for a Deep Origin ComputeBench"""
+    """Host compute cluster for a Deep Origin workstation"""
 
     id: str
     properties: dict[str, typing.Any]
@@ -38,7 +38,7 @@ class ComputeClusterContext:
 
 @dataclasses.dataclass
 class CpuContext:
-    """CPU for a Deep Origin ComputeBench"""
+    """CPU for a Deep Origin workstation"""
 
     quantity_vcpu: float
     architecture: str
@@ -62,7 +62,7 @@ class CpuContext:
 
 @dataclasses.dataclass
 class GpuArchitectureContext:
-    """GPU architecture for a Deep Origin ComputeBench"""
+    """GPU architecture for a Deep Origin workstation"""
 
     vendor: str
     microarchitecture: str
@@ -80,7 +80,7 @@ class GpuArchitectureContext:
 
 @dataclasses.dataclass
 class GpuContext:
-    """GPU for a Deep Origin ComputeBench"""
+    """GPU for a Deep Origin"""
 
     quantity_gpu: int
     architecture: GpuArchitectureContext
@@ -108,7 +108,7 @@ class GpuContext:
 
 @dataclasses.dataclass
 class HardwareContext:
-    """Hardware for a Deep Origin ComputeBench"""
+    """Hardware for a Deep Origin workstation"""
 
     cpu: CpuContext
     gpu: typing.Optional[GpuContext]
@@ -136,9 +136,9 @@ class HardwareContext:
 
 @dataclasses.dataclass
 class Context:
-    """Context for a Deep Origin ComputeBench"""
+    """Context for a Deep Origin workstation"""
 
-    bench_id: str
+    workstation_id: str
     user_id: str
     org_id: str
     compute_cluster: ComputeClusterContext
@@ -148,7 +148,7 @@ class Context:
 
     def __str__(
         self,
-        bench: bool = True,
+        workstation: bool = True,
         compute_cluster: bool = False,
         user: bool = True,
         org: bool = True,
@@ -158,9 +158,9 @@ class Context:
     ) -> str:
         str_val = []
 
-        # bench id
-        if bench:
-            str_val.append(f"Bench ID: {self.bench_id}")
+        # workstation id
+        if workstation:
+            str_val.append(f"Workstation ID: {self.workstation_id}")
 
         # host compute cluster
         if compute_cluster:
@@ -253,7 +253,7 @@ def get_value():
         hardware = None
 
     return Context(
-        bench_id=os.getenv("DEEP_ORIGIN_BENCH_ID", None),
+        workstation_id=os.getenv("DEEP_ORIGIN_BENCH_ID", None),
         user_id=os.getenv("DEEP_ORIGIN_USER_ID", None),
         org_id=os.getenv("DEEP_ORIGIN_ORGANIZATION_ID", None),
         compute_cluster=compute_cluster,

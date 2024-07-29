@@ -2,19 +2,15 @@
 
 ## For users
 
-Run the commands below to use your favorite package manager to install the Deep Origin CLI and Python client.
-
-Run the following command:
-
+Run the command below for your favorite package manager to install the Deep Origin CLI and Python client.
 
 !!! warning
-    We recommend installing this package into a virtual environment. Some tools create their own virtual environments, like poetry.
-
+    We recommend installing this package into a virtual environment, such as using [venv](https://docs.python.org/3/library/venv.html), [pyenv](https://github.com/pyenv/pyenv), [Pipenv](https://pipenv.pypa.io/en/latest/), or [Poetry](https://python-poetry.org/).
 
 === "pip"
 
     ```bash
-    pip install -q deeporigin
+    pip install deeporigin
     ```
 
 === "pixi"
@@ -59,23 +55,15 @@ Run the following command:
     flit install deeporigin
     ```
 
-## Supported Python versions
-
-`deeporigin` is [tested](https://github.com/deeporiginbio/deeporigin-client/actions/workflows/main.yml) against these versions of Python using GitHub Actions:
-
-- 3.9
-- 3.10
-- 3.11
-- 3.12
-
 ## For developers
 
 !!! warning "Developers only"
-    If you intend to contribute this package, we recommend installing this package via the instructions below. If you merely intend to use this package, we recommend following the instructions above.
+    If you intend to contribute this package, we recommend installing this package via the instructions below. If you simply intend to use this package, we recommend following the instructions above.
 
 ### Get the code
 
-First, run the following command:
+First, run the following command to clone the source code repository:
+
 ```bash
 git clone git@github.com:deeporiginbio/deeporigin-client.git
 ```
@@ -83,7 +71,7 @@ git clone git@github.com:deeporiginbio/deeporigin-client.git
 ### Install the development dependencies for this package
 
 Second, install Python 3.9+ and
-[make](https://www.gnu.org/software/make//).
+[make](https://www.gnu.org/software/make/).
 
 To verify that both are installed, run the following commands:
 
@@ -95,21 +83,39 @@ make --version
 # GNU Make 4.4.1
 ```
 
-### Install this package locally
+### Create an editable installation of this package from the cloned source code
 
-Third, navigate to the directory you downloaded the code to, and run the following command:
+Third, navigate to the directory you cloned the code to, and run the following command:
 
 ```bash
 make install
 ```
 
-This will install this package in an "editable" mode. In this mode, your changes will take effect
+This will install this package in an "editable" mode. In this mode, changes to the source code will take effect
 immediately.
 
-### Running the tests for this package
+### Run the linting and tests for this package
 
-Once installed, you can test this package by running the following command:
+Once installed, you can lint and test this package by running the following commands:
 
 ```bash
+make lint
 make test
 ```
+
+### Compiling and serving the documentation for this package
+
+You can compile and serve the documentation for this package by running:
+
+```bash
+make docs-serve
+```
+
+## Supported Python versions
+
+`deeporigin` is [tested](https://github.com/deeporiginbio/deeporigin-client/actions/workflows/main.yml) against the following versions of Python in Ubuntu Linux and Windows:
+
+- 3.9
+- 3.10
+- 3.11
+- 3.12

@@ -4,27 +4,26 @@ Listing workspaces, databases, rows and files can be used
 to discover the resources available on Deep Origin, and show
 their IDs for further queries.
 
-
 ## List workspaces
 
-=== "CLI"
+To list all of your Deep Origin workspaces, run:
 
-    To list all workspaces in Deep Origin:
+=== "CLI"
 
     ```bash
     deeporigin data list --workspaces
     ```
 
-    This will show you a screen similar to:
+    This will display a screen similar to below:
 
     ```
-    ╭────────────────┬───────────┬────────────────╮
-    │ Name           │ Type      │ ID             │
-    ├────────────────┼───────────┼────────────────┤
-    │ Secret Project │ workspace │ secret         │
-    │ QC Efforts     │ workspace │ qc-efforts     │
-    │ Covid Target   │ workspace │ corona         │
-    ╰────────────────┴───────────┴────────────────╯
+    ╭─────────────────┬────────────┬───────────────╮
+    │ Name            │ Type       │ ID            │
+    ├─────────────────┼────────────┼───────────────┤
+    │ Secret Project  │ workspace  │ secret        │
+    │ QC Efforts      │ workspace  │ qc-efforts    │
+    │ Covid Target    │ workspace  │ corona        │
+    ╰─────────────────┴────────────┴───────────────╯
     ```
 
     ??? tip "JSON output with `--json`"
@@ -68,30 +67,24 @@ their IDs for further queries.
         deeporigin data list --workspaces --databases
         ```
 
-=== "Python Client"
-    
-
-    We can list all workspaces using a [`RowType`][src.utils.RowType] argument:
-
+=== "Python"
 
     ```py
-    from deeporigin.managed_data import _api, api
-    _api.list_rows(row_type="workspace")
+    from deeporigin.managed_data import api
+    api.list_rows(row_type="workspace")
     ```
-
-
 
 ## List databases
 
-=== "CLI"
+To list all of your databases in Deep Origin, run:
 
-    To list all databases in Deep Origin:
+=== "CLI"    
 
     ```bash
     deeporigin data list --databases
     ```
 
-    This will show you a screen similar to:
+    This will display a screen similar to below:
 
     ```
     ╭────────────────┬───────────┬────────────────╮
@@ -145,29 +138,24 @@ their IDs for further queries.
         deeporigin data list --workspaces --databases
         ```
 
-=== "Python Client"
-    
-    We can list all databases using a [`RowType`][src.utils.RowType] argument:
-
+=== "Python"
 
     ```python
-    from deeporigin.managed_data import _api, api
-    _api.list_rows(row_type="database")
+    from deeporigin.managed_data import api
+    api.list_rows(row_type="database")
     ```
 
-## List rows 
+## List rows
 
+To list all of your database rows in Deep Origin:
 
 === "CLI"
-
-
-    To list all database rows in Deep Origin:
 
     ```bash
     deeporigin data list --rows
     ```
 
-    This will show you a screen similar to:
+    This will display a screen similar to below:
 
     ```
     ╭────────┬────────┬────────╮
@@ -181,29 +169,24 @@ their IDs for further queries.
     ╰────────┴────────┴────────╯
     ```
 
-=== "Python Client"
-    
-    We can list all rows using a [`RowType`][src.utils.RowType] argument:
-
+=== "Python"
 
     ```python
-    from deeporigin.managed_data import _api, api
-    _api.list_rows(row_type="row")
+    from deeporigin.managed_data import api
+    api.list_rows(row_type="row")
     ```
 
+## List files
 
-
-## List files 
+To list all of your files in Deep Origin, run:
 
 === "CLI"
-
-    To list all databases in Deep Origin:
 
     ```bash
     deeporigin data list --files
     ```
 
-    This will show you a table similar to:
+    This will display a screen similar to below:
 
     ```
     ╭────────────┬──────────┬─────────────────────────────╮
@@ -278,39 +261,34 @@ their IDs for further queries.
         ]
         ```
 
-    
-
     !!! warning "Listing files cannot list other objects"
         If you pass `--files` to the list command, all other 
-        arguments are ignored. So 
+        arguments are ignored. As a result, 
 
         ```bash
         deeporigin data list --files --databases
         ```
         will only list files.
 
-
-
-=== "Python Client"
+=== "Python"
 
     First, we start off by importing the necessary modules:
-
 
     We can list all files on Deep Origin using:
 
     ```python
-    from deeporigin.managed_data import _api, api
-    _api.list_files()
+    from deeporigin.managed_data import api
+    api.list_files()
     ```
 
     To find only unassigned files, we can use:
 
     ```python
-    _api.list_files(is_unassigned=True)
+    api.list_files(is_unassigned=True)
     ```
 
     To find files that are assigned to a specific row:
 
     ```python
-    _api.list_files(assigned_row_ids=["row-1"])
+    api.list_files(assigned_row_ids=["row-1"])
     ```

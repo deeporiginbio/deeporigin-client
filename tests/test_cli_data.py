@@ -71,7 +71,7 @@ def test_data(config):
         config["client"],
     )
 
-    assert "List data in managed data on Deep Origin" in stdout, "Unexpected output"
+    assert "List data in the data hub on Deep Origin" in stdout, "Unexpected output"
 
 
 @pytest.mark.parametrize("json_option", JSON_OPTIONS)

@@ -16,11 +16,8 @@ class DataController(cement.Controller):
         label = "data"
         stacked_on = "base"
         stacked_type = "nested"
-        help = "explore and fetch data from Deep Origin managed data"
-        description = """
-List data in managed data on Deep Origin, and save
-databases to CSV files. 
-            """
+        help = "Explore and fetch data from the Deep Origin data hub"
+        description = """List data in the data hub on Deep Origin, and save databases to CSV files."""
 
     def _get_client(self):
         """helper method that returns an authenticated
@@ -239,11 +236,11 @@ databases to CSV files.
             _show_json(rows)
 
     @cement.ex(
-        help="Describe and get metadata of file uploaded to database in your Deep Origin data management system",
+        help="Describe and get metadata of about a file, row, or database in your Deep Origin data hub",
         arguments=[
             (
                 ["object_id"],
-                {"help": "File ID or Row ID", "action": "store"},
+                {"help": "File ID or row ID", "action": "store"},
             ),
             (
                 ["--json"],
@@ -258,6 +255,8 @@ databases to CSV files.
         """describe file or row or database"""
 
         if PREFIXES.FILE in self.app.pargs.object_id:
+            key_label = "Property"
+
             data = api.describe_file(
                 file_id=self.app.pargs.object_id,
                 client=self._get_client(),
@@ -265,6 +264,8 @@ databases to CSV files.
             data = data.dict()
         else:
             # not a file
+            key_label = "Column"
+
             data = api.describe_row(
                 row_id=self.app.pargs.object_id,
                 client=self._get_client(),
@@ -289,14 +290,14 @@ databases to CSV files.
 
                     data.pop("cols", None)
 
-        _print_dict(data, json=self.app.pargs.json)
+        _print_dict(data, json=self.app.pargs.json, key_label=key_label)
 
     @cement.ex(
-        help="Show database or row",
+        help="Show a row or a database",
         arguments=[
             (
                 ["object_id"],
-                {"help": "Database ID", "action": "store"},
+                {"help": "Row ID or database ID", "action": "store"},
             ),
             (
                 ["--json"],
@@ -328,10 +329,12 @@ databases to CSV files.
                 self.app.pargs.object_id,
                 client=self._get_client(),
             )
-            _print_dict(data, json=self.app.pargs.json, transpose=True)
+            _print_dict(
+                data, json=self.app.pargs.json, transpose=True, key_label="Column"
+            )
 
     @cement.ex(
-        help="Upload file to database",
+        help="Upload a file to database",
         arguments=[
             (
                 ["file_path"],
@@ -383,7 +386,7 @@ databases to CSV files.
 
         if not self.app.pargs.database:
             # we are not making an assignment, so abort
-            _print_dict(data.dict(), json=self.app.pargs.json)
+            _print_dict(data.dict(), json=self.app.pargs.json, key_label="Property")
             return
 
         if self.app.pargs.column and self.app.pargs.database:
@@ -403,6 +406,7 @@ databases to CSV files.
                 data,
                 json=self.app.pargs.json,
                 transpose=True,
+                key_label="Property",
             )
 
     @cement.ex(

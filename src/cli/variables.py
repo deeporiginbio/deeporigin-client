@@ -35,13 +35,10 @@ class VariablesController(cement.Controller):
         label = "variables"
         stacked_on = "base"
         stacked_type = "nested"
-        help = (
-            "Retrieve and install variables and secrets from the Deep Origin platform"
-        )
+        help = "Install and uninstall variables and secrets from Deep Origin"
         description = (
-            "Retrieve the variables and secrets for your bench from the Deep Origin platform and "
-            "install them into the bench. Includes your variables and secrets, as well as those of "
-            "the parent organization of the bench."
+            "Retrieve your variables and secrets from Deep Origin and "
+            "install them into the workstation, as well as uninstall them."
         )
 
 
@@ -53,11 +50,11 @@ class InstallVariablesController(cement.Controller):
         aliases = ["install"]
         stacked_on = "variables"
         stacked_type = "nested"
-        help = "Retrieve variables and secrets from the Deep Origin platform and install them"
+        help = "Install variables and secrets from Deep Origin"
         description = (
-            "Retrieve the variables and secrets for your bench from the Deep Origin platform and "
-            "install them into the bench. Includes your variables and secrets, as well as those of "
-            "the parent organization of the bench.\n"
+            "Retrieve your variables and secrets from Deep Origin and "
+            "install them into the workstation. Includes your variables and secrets, as well as those of "
+            "the parent organization of the workstation.\n"
             "\n"
             "By default, this will not overwrite direct changes to variables. To overwrite direct "
             "changes, include the `--overwrite` argument."
@@ -75,7 +72,7 @@ class InstallVariablesController(cement.Controller):
             #     ["--no-org"],
             #     {
             #         "action": "store_true",
-            #         "help": "Whether to not pull and install the variables and secrets for the parent organization of your bench [default: False]",
+            #         "help": "Whether to not pull and install the variables and secrets for the parent organization of your workstation [default: False]",
             #     },
             # ),
             (
@@ -162,8 +159,6 @@ class InstallVariablesController(cement.Controller):
         else:
             print("No variables were modified")
 
-        print("")
-
         if num_added_variable_names:
             print(
                 f"{num_added_variable_names} variables were added:\n  {added_variable_names}"
@@ -217,11 +212,11 @@ class AutoInstallVariablesController(cement.Controller):
         aliases = ["auto-install"]
         stacked_on = "variables"
         stacked_type = "nested"
-        help = "Enable variables and secrets to be automatically retrieved from the Deep Origin platform and installed"
+        help = "Enable variables and secrets to be automatically retrieved from Deep Origin and installed"
         description = (
-            "Enable or disable the variables and secrets for your bench from the Deep Origin "
-            "platform to be automatically installed once added or modified. Includes your "
-            "variables and secrets, as well as those of the parent organization of the bench.\n"
+            "Enable or disable the variables and secrets for your workstation from Deep Origin "
+            "to be automatically installed once added or modified. Includes your "
+            "variables and secrets, as well as those of the parent organization of the workstation.\n"
             "\n"
             "By default, this will not overwrite direct changes to variables. To overwrite direct "
             "changes, include the `--overwrite` argument."
@@ -239,7 +234,7 @@ class AutoInstallVariablesController(cement.Controller):
             #     ["--no-org"],
             #     {
             #         "action": "store_true",
-            #         "help": "Whether to not pull and install the variables and secrets for the parent organization of your bench [default: False]",
+            #         "help": "Whether to not pull and install the variables and secrets for the parent organization of your workstation [default: False]",
             #     },
             # ),
             (
@@ -321,9 +316,9 @@ class UninstallVariablesController(cement.Controller):
         aliases = ["uninstall"]
         stacked_on = "variables"
         stacked_type = "nested"
-        help = "Uninstall variables and secrets retrieved from the Deep Origin platform"
+        help = "Uninstall variables and secrets retrieved from Deep Origin"
         description = (
-            "Remove variables and secrets retrieved from the Deep Origin platform, including "
+            "Remove variables and secrets retrieved from Deep Origin, including "
             "uninstalling variables and secrets.\n"
             "\n"
             "By default, this will not overwrite direct changes to variables. To overwrite direct "
@@ -342,7 +337,7 @@ class UninstallVariablesController(cement.Controller):
             #     ["--no-org"],
             #     {
             #         "action": "store_true",
-            #         "help": "Whether to not pull and install the variables and secrets for the parent organization of your bench [default: False]",
+            #         "help": "Whether to not pull and install the variables and secrets for the parent organization of your workstation [default: False]",
             #     },
             # ),
             (

@@ -1,25 +1,26 @@
 
-This page describes how to upload data to Deep Origin Data,
+# Upload data
+
+This page describes how to upload data to the Deep Origin data hub,
 and assign it to a cell in a row.
 
-## Upload and Assign Files
+## Upload and assign Files
 
+To upload a file to the Deep Origin data hub, run the following commands:
 
 === "CLI"
 
-    To upload a file to Deep Origin Data, use the `upload` command:
-
     ```bash
-    deeporigin data upload /path/to/test.fasta 
+    deeporigin data upload /path/to/test.fasta
     ```
 
-    This will upload a file to the "Staging Area", and this
-    file is not assigned to any database or cell. An example
+    This will upload a file to the "Staging area", and this
+    file will not assigned to any database or cell. An example
     response is shown below:
 
     ```
     ╭──────────────────┬──────────────────────────────╮
-    │ Name             │ Value                        │
+    │ Property         │ Value                        │
     ├──────────────────┼──────────────────────────────┤
     │ name             │ test.fasta                   │
     │ contentType      │ data/fasta                   │
@@ -58,8 +59,7 @@ and assign it to a cell in a row.
 
         ```
 
-    To upload a file and assign it to an existing cell, use:
-
+    To upload a file and assign it to an existing cell, run:
 
     ```bash
     deeporigin data upload /path/to/test.fasta \
@@ -69,8 +69,7 @@ and assign it to a cell in a row.
     ```
 
     To upload a file and assign it to a column in a new row,
-    use: 
-
+    run:
 
     ```bash
     deeporigin data upload /path/to/test.fasta \
@@ -78,20 +77,15 @@ and assign it to a cell in a row.
         --database <database+_id> 
     ```
 
- 
-
-=== "Python Client"
-    
-
-    We can upload a file using 
+=== "Python"
 
     ```py
     from deeporigin.managed_data import api
     api.upload_file("/path/to/file.fasta")
     ```
 
-    This uploads files to the "Staging Area" of Deep Origin
-    Data. An example is shown below:
+    This will upload the file to the "Staging Area" of the Deep Origin
+    data hub. An example is shown below:
 
     ```json
     {
@@ -106,7 +100,6 @@ and assign it to a cell in a row.
         "createdByUserDrn": "haldane@deeporigin.com",
     }
     ```
-
 
     To assign an uploaded file to a cell in an existing row, use the `assign_files_to_cell` function as follows:
 
@@ -130,5 +123,3 @@ and assign it to a cell in a row.
     )
 
     ```
-
-

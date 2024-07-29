@@ -29,7 +29,7 @@ class TestCase(unittest.TestCase):
             "DEEP_ORIGIN_AUTH_GRANT_TYPE": "xxx",
             "DEEP_ORIGIN_AUTH_CLIENT_ID": "xxx",
             "DEEP_ORIGIN_AUTH_CLIENT_SECRET": "xxx",
-            "DEEP_ORIGIN_LIST_BENCH_VARIABLES_QUERY_TEMPLATE": "xxx",
+            "DEEP_ORIGIN_LIST_WORKSTATION_VARIABLES_QUERY_TEMPLATE": "xxx",
         }
 
         feature_flags.get_value.cache_clear()
@@ -54,7 +54,7 @@ class TestCase(unittest.TestCase):
             "DEEP_ORIGIN_AUTH_GRANT_TYPE": "xxx",
             "DEEP_ORIGIN_AUTH_CLIENT_ID": "xxx",
             "DEEP_ORIGIN_AUTH_CLIENT_SECRET": "xxx",
-            "DEEP_ORIGIN_LIST_BENCH_VARIABLES_QUERY_TEMPLATE": "xxx",
+            "DEEP_ORIGIN_LIST_WORKSTATION_VARIABLES_QUERY_TEMPLATE": "xxx",
             "DEEP_ORIGIN_FEATURE_FLAGS__VARIABLES": "false",
         }
 

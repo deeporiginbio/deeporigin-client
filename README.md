@@ -1,68 +1,69 @@
-# deeporigin 
+# deeporigin
 
 ![PyPI](https://img.shields.io/pypi/v/deeporigin)
 
-This repository contains the `deeporigin` CLI and 
-python client, which allows you to interact with 
-Deep Origin from the command line. 
+This repository contains the `deeporigin` CLI and
+Python client, which allows you to interact with
+Deep Origin from the command line and Python.
 
 > [!WARNING]  
 > The `deeporigin` client is under active development. Features
-> may change, or be removed. 
+> may change or be removed.
 
-## Installing 
+## Installing
 
 > [!CAUTION]
-> As a best practice, we recommend  installing this in a virtual environment. 
+> As a best practice, we recommend installing this package in a virtual environment.
 
+To install this package, run the following:
 
 ```bash
 pip install deeporigin
 ```
 
-## Developing 
+## Configuration
 
-First, download from Github:
+If you are running `deeporigin` outside of a Deep Origin workstation (for example, on your own computer), you need to configure this. Run the following to configure your organization, replacing `org-id` with the ID of the organization you would like to work with.
+
+```bash
+deeporigin config set organization_id [org-id]
+```
+
+## Developing
+
+First, download the source code from GitHub:
 
 ```bash
 git clone git@github.com:deeporiginbio/deeporigin-client.git
 cd deeporigin-client
 ```
-Using `make > v4.4`, e.g.:
 
-```bash
-make --version # 4.4.1
-```
-
-Install in a virtual env using:
+Second, run the code below to create a virtual environment and install this package into it. This requires make v4.4 or higher.
 
 ```bash
 make install
 ```
 
-## Configuration
+## Testing
 
-## Testing 
+### Running the tests locally
 
-### Running tests locally 
-
-By default, tests are run using mocked responses. To run tests locally:
+To run the tests locally, execute the following:
 
 ```bash
 make test
 ```
 
-If you want to run tests against a live instance:
+By default, the tests are run using mocked responses. To run the tests against the live Deep Origin API, execute the following:
 
 ```bash
 make test client=default
 ```
 
-### Tests on GitHub Actions
+### Automated tests on GitHub Actions
 
-Tests are run on GitHub Actions on every commit to every pull request. 
+The tests are automatically run on GitHub Actions on every commit to every pull request.
 
-
-## License 
+## License
 
 MIT

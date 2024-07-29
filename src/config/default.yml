@@ -11,9 +11,9 @@ auth_audience: https://os.deeporigin.io/api
 auth_grant_type: urn:ietf:params:oauth:grant-type:device_code
 auth_client_id: m3iyUcrANcIap2ogzWKpnYxCNujOrW3s
 auth_client_secret: cQcZclTqMHMuovyXV-DD15tEiL-KH_2XD36vsppULRBuq7AjwyI4dh5ag11O_K1S
-list_bench_variables_query_template: |
+list_workstation_variables_query_template: |
   query {
-    listBenchSecrets(drn: "${bench_drn}") {
+    listBenchSecrets(drn: "${workstation_drn}") {
       ... on EnvironmentValueOutput {
         drn
         type

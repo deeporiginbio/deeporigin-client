@@ -1,13 +1,14 @@
 import functools
 import os
 import pathlib
-from typing import Optional
+from typing import Any, Optional
 
 import confuse
 
 from ..exceptions import DeepOriginException
 
 CONFIG_DIR = pathlib.Path(__file__).parent
+DEFAULT_CONFIG_FILENAME = os.path.join(CONFIG_DIR, "default.yml")
 CONFIG_YML_LOCATION = os.path.expanduser(
     os.path.join(
         "~",
@@ -34,7 +35,7 @@ TEMPLATE = {
     "auth_grant_type": confuse.String(),
     "auth_client_id": confuse.String(),
     "auth_client_secret": confuse.String(),
-    "list_bench_variables_query_template": confuse.String(),
+    "list_workstation_variables_query_template": confuse.String(),
     "api_tokens_filename": confuse.Filename(),
     "variables_cache_filename": confuse.Filename(),
     "auto_install_variables_filename": confuse.Filename(),
@@ -49,11 +50,14 @@ TEMPLATE = {
 
 
 @functools.cache
-def get_value(config_file_location: Optional[str] = None) -> confuse.templates.AttrDict:
+def get_value(
+    config_file_location: Optional[str] = None, override_values: tuple = None
+) -> confuse.templates.AttrDict:
     """Get the configuration for the Deep Origin CLI
 
     Args:
         user_config_filename: path to the user's configuration file
+        override_values: values to use to override the default value
 
     Returns:
         :obj:`confuse.templates.AttrDict`: configuration for the Deep Origin CLI
@@ -74,8 +78,8 @@ def get_value(config_file_location: Optional[str] = None) -> confuse.templates.A
     value = confuse.Configuration("deep_origin", __name__)
 
     # read the default configuration
-    default_config_filename = os.path.join(CONFIG_DIR, "default.yml")
-    value.set_file(default_config_filename, base_for_paths=True)
+    DEFAULT_CONFIG_FILENAME = os.path.join(CONFIG_DIR, "default.yml")
+    value.set_file(DEFAULT_CONFIG_FILENAME, base_for_paths=True)
 
     # read configuration overrides from the user
     if config_file_location is None:
@@ -89,6 +93,11 @@ def get_value(config_file_location: Optional[str] = None) -> confuse.templates.A
     # read configuration from environment variables
     value.set_env(sep="__")
 
+    # set overriding values
+    if override_values is not None:
+        for k, v in override_values:
+            value.set({k: v})
+
     try:
         validated_value = value.get(TEMPLATE)
     except confuse.exceptions.ConfigTypeError as exception:
@@ -96,7 +105,7 @@ def get_value(config_file_location: Optional[str] = None) -> confuse.templates.A
         key = detail.split(":")[0].strip()
         raise DeepOriginException(
             title="Invalid configuration",
-            message=f"The Deep Origin CLI and python client requires a valid configuration file. This field is not valid:\n {detail}",
+            message=f"The Deep Origin CLI and Python client requires a valid configuration file. This field is not valid:\n {detail}",
             fix=f"To fix, run `deeporigin config set {key} <value>`",
         )
 
