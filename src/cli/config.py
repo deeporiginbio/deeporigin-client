@@ -7,7 +7,12 @@ import shutil
 import cement
 import confuse
 import yaml
-from deeporigin.config import DEFAULT_CONFIG_FILENAME, CONFIG_YML_LOCATION, TEMPLATE, get_value
+from deeporigin.config import (
+    DEFAULT_CONFIG_FILENAME,
+    CONFIG_YML_LOCATION,
+    TEMPLATE,
+    get_value,
+)
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.utils import _print_dict
 

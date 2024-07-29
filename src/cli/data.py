@@ -258,7 +258,7 @@ databases to CSV files.
         """describe file or row or database"""
 
         if PREFIXES.FILE in self.app.pargs.object_id:
-            key_label="Property"
+            key_label = "Property"
 
             data = api.describe_file(
                 file_id=self.app.pargs.object_id,
@@ -267,7 +267,7 @@ databases to CSV files.
             data = data.dict()
         else:
             # not a file
-            key_label="Column"
+            key_label = "Column"
 
             data = api.describe_row(
                 row_id=self.app.pargs.object_id,
@@ -332,7 +332,9 @@ databases to CSV files.
                 self.app.pargs.object_id,
                 client=self._get_client(),
             )
-            _print_dict(data, json=self.app.pargs.json, transpose=True, key_label="Column")
+            _print_dict(
+                data, json=self.app.pargs.json, transpose=True, key_label="Column"
+            )
 
     @cement.ex(
         help="Upload file to database",

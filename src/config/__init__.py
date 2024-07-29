@@ -50,7 +50,9 @@ TEMPLATE = {
 
 
 @functools.cache
-def get_value(config_file_location: Optional[str] = None, override_values: tuple = None) -> confuse.templates.AttrDict:
+def get_value(
+    config_file_location: Optional[str] = None, override_values: tuple = None
+) -> confuse.templates.AttrDict:
     """Get the configuration for the Deep Origin CLI
 
     Args:
