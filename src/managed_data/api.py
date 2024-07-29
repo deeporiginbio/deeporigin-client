@@ -503,9 +503,25 @@ def set_cell_data(
     elif column["type"] == "boolean":
         if isinstance(value, bool) or value is None:
             validated_value = value
-        elif isinstance(value, str) and value in ["True", "true", "1", "Yes", "yes", "Y", "y"]:
+        elif isinstance(value, str) and value in [
+            "True",
+            "true",
+            "1",
+            "Yes",
+            "yes",
+            "Y",
+            "y",
+        ]:
             validated_value = True
-        elif isinstance(value, str) and value in ["False", "false", "0", "No", "no", "N", "n"]:
+        elif isinstance(value, str) and value in [
+            "False",
+            "false",
+            "0",
+            "No",
+            "no",
+            "N",
+            "n",
+        ]:
             validated_value = False
         else:
             raise DeepOriginException(
