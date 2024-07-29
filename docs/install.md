@@ -114,7 +114,7 @@ make docs-serve
 
 ## Supported Python versions
 
-`deeporigin` was [tested](https://github.com/deeporiginbio/deeporigin-client/actions/workflows/main.yml) against the following versions of Python in Ubuntu Linux:
+`deeporigin` was [tested](https://github.com/deeporiginbio/deeporigin-client/actions/workflows/main.yml) against the following versions of Python in Ubuntu Linux and Windows:
 
 - 3.9
 - 3.10
