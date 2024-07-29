@@ -1,7 +1,7 @@
 import functools
 import os
 import pathlib
-from typing import Optional, Any
+from typing import Any, Optional
 
 import confuse
 

@@ -13,29 +13,30 @@ chosen_tests=""
 
 
 lint:
-	source $(CURDIR)/venv/bin/activate && \
+	@source $(CURDIR)/venv/bin/activate && \
 		ruff format && \
+		ruff check --select I && \
 		deactivate
 
 test:
 ifeq ($(client), "mock")
-	source $(CURDIR)/venv/bin/activate && \
+	@source $(CURDIR)/venv/bin/activate && \
 		interrogate -c pyproject.toml -v . -f 100 && \
 		python3 -m coverage run -m pytest -x --failed-first -k $(chosen_tests) --client $(client) && \
 		python3 -m coverage html && \
 		deactivate
-	if [ "$(uname)" = "Linux" ]; then \
+	@if [ "$(uname)" = "Linux" ]; then \
 		xdg-open htmlcov/index.html; \
 	else \
 		open htmlcov/index.html; \
 	fi
 else 
-	source $(CURDIR)/venv/bin/activate && \
+	@source $(CURDIR)/venv/bin/activate && \
 		interrogate -c pyproject.toml -v . -f 100 && \
 		python3 -m coverage run -m pytest --failed-first -k $(chosen_tests) --client $(client) -n auto && \
 		python3 -m coverage html && \
 		deactivate
-	if [ "$(uname)" = "Linux" ]; then \
+	@if [ "$(uname)" = "Linux" ]; then \
 		xdg-open htmlcov/index.html; \
 	else \
 		open htmlcov/index.html; \
@@ -46,7 +47,7 @@ endif
 jupyter:
 	-deactivate
 	-yes | jupyter kernelspec uninstall $(repo)
-	source $(CURDIR)/venv/bin/activate && \
+	@source $(CURDIR)/venv/bin/activate && \
 		python3 -m ipykernel install --user --name $(repo) && \
 		deactivate
 

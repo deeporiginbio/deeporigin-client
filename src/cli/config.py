@@ -5,10 +5,8 @@ import os
 import shutil
 
 import cement
-import confuse
 import yaml
 from deeporigin.config import (
-    DEFAULT_CONFIG_FILENAME,
     CONFIG_YML_LOCATION,
     TEMPLATE,
     get_value,
