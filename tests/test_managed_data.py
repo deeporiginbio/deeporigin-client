@@ -5,8 +5,8 @@ import uuid
 
 import pandas as pd
 import pytest
-from deeporigin.exceptions import DeepOriginException
 from deeporigin.data_hub import api
+from deeporigin.exceptions import DeepOriginException
 from deeporigin.utils import DATAFRAME_ATTRIBUTE_KEYS, PREFIXES
 from mock_client import MockClient
 

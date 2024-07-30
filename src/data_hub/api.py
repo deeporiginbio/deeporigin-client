@@ -8,7 +8,6 @@ from typing import Any, Optional, Union
 from urllib.parse import urlparse, urlunparse
 
 from beartype import beartype
-from deeporigin.exceptions import DeepOriginException
 
 # this import is to allow us to use functions
 # not marked in __all__ in _api
@@ -17,6 +16,7 @@ from deeporigin.data_hub import _api
 # this import is to make sure that all simply-wrapped
 # functions in _api are available in api (this module)
 from deeporigin.data_hub._api import *  # noqa: F403
+from deeporigin.exceptions import DeepOriginException
 from deeporigin.utils import (
     PREFIXES,
     DatabaseReturnType,

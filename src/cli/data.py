@@ -4,8 +4,8 @@ data_hub.py"""
 import os
 
 import cement
-from deeporigin.exceptions import DeepOriginException
 from deeporigin.data_hub import api
+from deeporigin.exceptions import DeepOriginException
 from deeporigin.utils import PREFIXES, _print_dict, _print_tree, _show_json, _truncate
 
 
