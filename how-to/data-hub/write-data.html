@@ -10,13 +10,13 @@
         <meta name="author" content="Deep Origin">
       
       
-        <link rel="canonical" href="https://deeporiginbio.github.io/deeporigin-client/how-to/managed-data/upload-data.html">
+        <link rel="canonical" href="https://deeporiginbio.github.io/deeporigin-client/how-to/data-hub/write-data.html">
       
       
-        <link rel="prev" href="inspect-data.html">
+        <link rel="prev" href="upload-data.html">
       
       
-        <link rel="next" href="write-data.html">
+        <link rel="next" href="../variables.html">
       
       
       <link rel="icon" href="../../images/favicon.png">
@@ -24,7 +24,7 @@
     
     
       
-        <title>Upload data - CLI and Python client | Deep Origin</title>
+        <title>Write data - CLI and Python client | Deep Origin</title>
       
     
     
@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#upload-data" class="md-skip">
+        <a href="#write-data-to-a-cell-in-a-database" class="md-skip">
           Skip to content
         </a>
       
@@ -111,7 +111,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Upload data
+              Write data
             
           </span>
         </div>
@@ -244,7 +244,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../ref/managed-data/high-level-api.html" class="md-tabs__link">
+        <a href="../../ref/data-hub/high-level-api.html" class="md-tabs__link">
           
   
     
@@ -583,6 +583,27 @@
                 
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="upload-data.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Upload data
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
     
   
   
@@ -592,25 +613,23 @@
       <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
       
       
-        
-      
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
           
   
   <span class="md-ellipsis">
-    Upload data
+    Write data
   </span>
   
 
           <span class="md-nav__icon md-icon"></span>
         </label>
       
-      <a href="upload-data.html" class="md-nav__link md-nav__link--active">
+      <a href="write-data.html" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
-    Upload data
+    Write data
   </span>
   
 
@@ -624,8 +643,6 @@
   
   
   
-    
-  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -634,11 +651,53 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#upload-and-assign-files" class="md-nav__link">
+  <a href="#write-data-to-a-cell-in-a-database" class="md-nav__link">
     <span class="md-ellipsis">
-      Upload and assign Files
+      Write data to a cell in a database
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Write data to a cell in a database">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#write-text-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      Write text data
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#write-numeric-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      Write numeric data
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#write-select-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      Write select data
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#write-boolean-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      Write Boolean data
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -646,27 +705,6 @@
   
 </nav>
       
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="write-data.html" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Write data
-  </span>
-  
-
-      </a>
     </li>
   
 
@@ -845,7 +883,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../ref/managed-data/high-level-api.html" class="md-nav__link">
+      <a href="../../ref/data-hub/high-level-api.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -866,7 +904,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../ref/managed-data/low-level-api.html" class="md-nav__link">
+      <a href="../../ref/data-hub/low-level-api.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -887,7 +925,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../ref/managed-data/types.html" class="md-nav__link">
+      <a href="../../ref/data-hub/types.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -935,8 +973,6 @@
   
   
   
-    
-  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -945,11 +981,53 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#upload-and-assign-files" class="md-nav__link">
+  <a href="#write-data-to-a-cell-in-a-database" class="md-nav__link">
     <span class="md-ellipsis">
-      Upload and assign Files
+      Write data to a cell in a database
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Write data to a cell in a database">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#write-text-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      Write text data
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#write-numeric-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      Write numeric data
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#write-select-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      Write select data
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#write-boolean-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      Write Boolean data
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -971,98 +1049,113 @@
   
 
 
-<h1 id="upload-data">Upload data<a class="headerlink" href="#upload-data" title="Permanent link">&para;</a></h1>
-<p>This page describes how to upload data to the Deep Origin data hub,
-and assign it to a cell in a row.</p>
-<h2 id="upload-and-assign-files">Upload and assign Files<a class="headerlink" href="#upload-and-assign-files" title="Permanent link">&para;</a></h2>
-<p>To upload a file to the Deep Origin data hub, run the following commands:</p>
+  <h1>Write data</h1>
+
+<p>This page describes how to write data to the Deep Origin data hub.</p>
+<h2 id="write-data-to-a-cell-in-a-database">Write data to a cell in a database<a class="headerlink" href="#write-data-to-a-cell-in-a-database" title="Permanent link">&para;</a></h2>
+<h3 id="write-text-data">Write text data<a class="headerlink" href="#write-text-data" title="Permanent link">&para;</a></h3>
+<p>Run the following to write a text value to a cell in a database:</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">CLI</label><label for="__tabbed_1_2">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="language-bash highlight"><pre><span></span><code>deeporigin<span class="w"> </span>data<span class="w"> </span>upload<span class="w"> </span>/path/to/test.fasta
-</code></pre></div>
-<p>This will upload a file to the "Staging area", and this
-file will not assigned to any database or cell. An example
-response is shown below:</p>
-<div class="language-text highlight"><pre><span></span><code>╭──────────────────┬──────────────────────────────╮
-│ Property         │ Value                        │
-├──────────────────┼──────────────────────────────┤
-│ name             │ test.fasta                   │
-│ contentType      │ data/fasta                   │
-│ contentLength    │ 554588                       │
-│ id               │ _file:36ufKT2Sej22coSEOizpK  │
-│ status           │ ready                        │
-│ uri              │ s3://foo                     │
-│ dateCreated      │ 2024-06-18T14:48:33.501Z     │
-│ dateUpdated      │ 2024-06-18T14:48:33.501Z     │
-│ createdByUserDrn │ levins@deeporigin.com        │
-╰──────────────────┴──────────────────────────────╯
-</code></pre></div>
-<details class="tip">
-<summary>JSON output with <code>--json</code></summary>
-<p><a href="https://www.json.org/">JSON</a> output can be requested by adding <code>--json</code>, and allows
-you to pipe out to a JSON processor like <a href="https://jqlang.github.io/jq/">jq</a>:</p>
-<div class="language-bash highlight"><pre><span></span><code>deeporigin<span class="w"> </span>upload<span class="w"> </span>/path/to/test.fasta<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq
-</code></pre></div>
-<div class="language-json highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;test.fasta&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;contentType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;data/fasta&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;contentLength&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">554588</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;_file:36ufKT2Sej22coSEOizpK&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ready&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;uri&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;s3://foo&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;dateCreated&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-06-18T14:51:43.876Z&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;dateUpdated&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-06-18T14:51:43.876Z&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;createdByUserDrn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;levins@deeporigin.com&quot;</span>
-<span class="p">}</span>
-</code></pre></div>
-</details>
-<p>To upload a file and assign it to an existing cell, run:</p>
-<div class="language-bash highlight"><pre><span></span><code>deeporigin<span class="w"> </span>data<span class="w"> </span>upload<span class="w"> </span>/path/to/test.fasta<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--column<span class="w"> </span>&lt;column_id&gt;<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--database<span class="w"> </span>&lt;database_id&gt;<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--row<span class="w"> </span>&lt;row_id&gt;
-</code></pre></div>
-<p>To upload a file and assign it to a column in a new row,
-run:</p>
-<div class="language-bash highlight"><pre><span></span><code>deeporigin<span class="w"> </span>data<span class="w"> </span>upload<span class="w"> </span>/path/to/test.fasta<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--column<span class="w"> </span>&lt;column_id&gt;<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--database<span class="w"> </span>&lt;database+_id&gt;<span class="w"> </span>
+<div class="language-bash highlight"><pre><span></span><code>deeporigin<span class="w"> </span>data<span class="w"> </span>write<span class="w"> </span><span class="s2">&quot;some-string&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--database<span class="w"> </span><span class="nv">$database_id</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--column<span class="w"> </span><span class="nv">$column_id</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--row<span class="w"> </span><span class="nv">$row_id</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="language-py highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">deeporigin.managed_data</span> <span class="kn">import</span> <span class="n">api</span>
-<span class="n">api</span><span class="o">.</span><span class="n">upload_file</span><span class="p">(</span><span class="s2">&quot;/path/to/file.fasta&quot;</span><span class="p">)</span>
-</code></pre></div>
-<p>This will upload the file to the "Staging Area" of the Deep Origin
-data hub. An example is shown below:</p>
-<div class="language-json highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;file.fasta&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;contentType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;data/foo&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;contentLength&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">55454688</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;_file:6Hdhyc3t8xZ6pmyCrQy1t&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ready&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;uri&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;s3://data.&lt;org-name&gt;/_file:6Hdhyc3t8xZ6pmyCrQy1t&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;dateCreated&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-06-18T14:18:37.409Z&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;dateUpdated&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-06-18T14:18:37.409Z&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;createdByUserDrn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;haldane@deeporigin.com&quot;</span><span class="p">,</span>
-<span class="p">}</span>
-</code></pre></div>
-<p>To assign an uploaded file to a cell in an existing row, use the <code>assign_files_to_cell</code> function as follows:</p>
-<div class="language-py highlight"><pre><span></span><code>    <span class="n">api</span><span class="o">.</span><span class="n">assign_files_to_cell</span><span class="p">(</span>
-    <span class="n">file_ids</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;_file:6Hdhyc3t8xZ6pmyCrQy1t&quot;</span><span class="p">],</span>
-    <span class="n">database_id</span><span class="o">=</span><span class="s2">&quot;db-dna&quot;</span><span class="p">,</span>
-    <span class="n">column_id</span><span class="o">=</span><span class="s2">&quot;base_sequence_file&quot;</span><span class="p">,</span>
-    <span class="n">row_id</span><span class="o">=</span><span class="s2">&quot;row-id&quot;</span><span class="p">,</span>
+<div class="language-py highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">deeporigin.data_hub</span> <span class="kn">import</span> <span class="n">api</span>
+<span class="n">api</span><span class="o">.</span><span class="n">set_cell_data</span><span class="p">(</span>
+    <span class="s2">&quot;some string&quot;</span><span class="p">,</span>
+    <span class="n">database_id</span><span class="o">=</span><span class="s2">&quot;database ID or name&quot;</span><span class="p">,</span>
+    <span class="n">column_id</span><span class="o">=</span><span class="s2">&quot;column ID or programmatic key&quot;</span><span class="p">,</span>
+    <span class="n">row_id</span><span class="o">=</span><span class="s2">&quot;row ID&quot;</span><span class="p">,</span>
 <span class="p">)</span>
 </code></pre></div>
-<p>To assign an uploaded file to a cell on a new row, use the <code>assign_files_to_cell</code> function as follows:</p>
-<div class="language-py highlight"><pre><span></span><code>    <span class="n">api</span><span class="o">.</span><span class="n">assign_files_to_cell</span><span class="p">(</span>
-    <span class="n">file_ids</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;_file:6Hdhyc3t8xZ6pmyCrQy1t&quot;</span><span class="p">],</span>
-    <span class="n">database_id</span><span class="o">=</span><span class="s2">&quot;db-dna&quot;</span><span class="p">,</span>
-    <span class="n">column_id</span><span class="o">=</span><span class="s2">&quot;base_sequence_file&quot;</span><span class="p">,</span>
+</div>
+</div>
+</div>
+<h3 id="write-numeric-data">Write numeric data<a class="headerlink" href="#write-numeric-data" title="Permanent link">&para;</a></h3>
+<p>Run the following to write a numeric value to a cell in a database:</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">CLI</label><label for="__tabbed_2_2">Python</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="language-bash highlight"><pre><span></span><code>deeporigin<span class="w"> </span>data<span class="w"> </span>write<span class="w"> </span><span class="m">123</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--database<span class="w"> </span><span class="nv">$database_id</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--column<span class="w"> </span><span class="nv">$column_id</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--row<span class="w"> </span><span class="nv">$row_id</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">deeporigin.data_hub</span> <span class="kn">import</span> <span class="n">api</span>
+<span class="n">api</span><span class="o">.</span><span class="n">set_cell_data</span><span class="p">(</span>
+    <span class="mi">1</span><span class="p">,</span>
+    <span class="n">database_id</span><span class="o">=</span><span class="s2">&quot;database ID or name&quot;</span><span class="p">,</span>
+    <span class="n">column_id</span><span class="o">=</span><span class="s2">&quot;column ID or programmatic key&quot;</span><span class="p">,</span>
+    <span class="n">row_id</span><span class="o">=</span><span class="s2">&quot;row ID&quot;</span><span class="p">,</span>
 <span class="p">)</span>
 </code></pre></div>
+</div>
+</div>
+</div>
+<p>Numeric data will be coerced to the data type of the underlying cell.</p>
+<h3 id="write-select-data">Write select data<a class="headerlink" href="#write-select-data" title="Permanent link">&para;</a></h3>
+<p>This section describes how to write data to a cell in a database that is of type <code>select</code>. This includes cells where a single option can be selected from a list, and cells where more than one value can be selected from a list of options.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="3:2"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">CLI</label><label for="__tabbed_3_2">Python</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="language-bash highlight"><pre><span></span><code>deeporigin<span class="w"> </span>data<span class="w"> </span>write<span class="w"> </span><span class="s2">&quot;option A&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--database<span class="w"> </span><span class="nv">$database_id</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--column<span class="w"> </span><span class="nv">$column_id</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--row<span class="w"> </span><span class="nv">$row_id</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="language-py highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">deeporigin.data_hub</span> <span class="kn">import</span> <span class="n">api</span>
+<span class="n">api</span><span class="o">.</span><span class="n">set_cell_data</span><span class="p">(</span>
+    <span class="s2">&quot;option A&quot;</span><span class="p">,</span>
+    <span class="n">database_id</span><span class="o">=</span><span class="s2">&quot;database ID or name&quot;</span><span class="p">,</span>
+    <span class="n">column_id</span><span class="o">=</span><span class="s2">&quot;column ID or programmatic key&quot;</span><span class="p">,</span>
+    <span class="n">row_id</span><span class="o">=</span><span class="s2">&quot;row ID&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<p>The value must be one of the options in the list. If it is not, an error will be raised showing the list of legal options.</p>
+<h3 id="write-boolean-data">Write Boolean data<a class="headerlink" href="#write-boolean-data" title="Permanent link">&para;</a></h3>
+<p>Run the following to write a Boolean value to a cell in a database:</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="4:2"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">CLI</label><label for="__tabbed_4_2">Python</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="language-bash highlight"><pre><span></span><code>deeporigin<span class="w"> </span>data<span class="w"> </span>write<span class="w"> </span><span class="s2">&quot;True&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--database<span class="w"> </span><span class="nv">$database_id</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--column<span class="w"> </span><span class="nv">$column_id</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--row<span class="w"> </span><span class="nv">$row_id</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">deeporigin.data_hub</span> <span class="kn">import</span> <span class="n">api</span>
+<span class="n">api</span><span class="o">.</span><span class="n">set_cell_data</span><span class="p">(</span>
+    <span class="kc">True</span><span class="p">,</span>
+    <span class="n">database_id</span><span class="o">=</span><span class="s2">&quot;database ID or name&quot;</span><span class="p">,</span>
+    <span class="n">column_id</span><span class="o">=</span><span class="s2">&quot;column ID or programmatic key&quot;</span><span class="p">,</span>
+    <span class="n">row_id</span><span class="o">=</span><span class="s2">&quot;row ID&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div>
+<details class="tip">
+<summary>Unsetting Boolean data</summary>
+<p>To unset a cell, so that it contains no data, write <code>None</code> to the cell as follows: </p>
+<div class="language-py highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">deeporigin.data_hub</span> <span class="kn">import</span> <span class="n">api</span>
+<span class="n">api</span><span class="o">.</span><span class="n">set_cell_data</span><span class="p">(</span>
+    <span class="kc">None</span><span class="p">,</span>
+    <span class="n">database_id</span><span class="o">=</span><span class="s2">&quot;database ID or name&quot;</span><span class="p">,</span>
+    <span class="n">column_id</span><span class="o">=</span><span class="s2">&quot;column ID or programmatic key&quot;</span><span class="p">,</span>
+    <span class="n">row_id</span><span class="o">=</span><span class="s2">&quot;row ID&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div>
+</details>
 </div>
 </div>
 </div>
@@ -1103,7 +1196,7 @@ data hub. An example is shown below:</p>
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="inspect-data.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Inspect data">
+          <a href="upload-data.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Upload data">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
@@ -1113,20 +1206,20 @@ data hub. An example is shown below:</p>
                 Previous
               </span>
               <div class="md-ellipsis">
-                Inspect data
+                Upload data
               </div>
             </div>
           </a>
         
         
           
-          <a href="write-data.html" class="md-footer__link md-footer__link--next" aria-label="Next: Write data">
+          <a href="../variables.html" class="md-footer__link md-footer__link--next" aria-label="Next: Install variables and secrets">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Write data
+                Install variables and secrets
               </div>
             </div>
             <div class="md-footer__button md-icon">

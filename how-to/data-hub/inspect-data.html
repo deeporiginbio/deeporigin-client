@@ -10,7 +10,7 @@
         <meta name="author" content="Deep Origin">
       
       
-        <link rel="canonical" href="https://deeporiginbio.github.io/deeporigin-client/how-to/managed-data/inspect-data.html">
+        <link rel="canonical" href="https://deeporiginbio.github.io/deeporigin-client/how-to/data-hub/inspect-data.html">
       
       
         <link rel="prev" href="list-data.html">
@@ -244,7 +244,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../ref/managed-data/high-level-api.html" class="md-tabs__link">
+        <a href="../../ref/data-hub/high-level-api.html" class="md-tabs__link">
           
   
     
@@ -902,7 +902,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../ref/managed-data/high-level-api.html" class="md-nav__link">
+      <a href="../../ref/data-hub/high-level-api.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -923,7 +923,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../ref/managed-data/low-level-api.html" class="md-nav__link">
+      <a href="../../ref/data-hub/low-level-api.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -944,7 +944,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../ref/managed-data/types.html" class="md-nav__link">
+      <a href="../../ref/data-hub/types.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1136,7 +1136,7 @@ you to pipe out to a JSON processor like <a href="https://jqlang.github.io/jq/">
 </details>
 </div>
 <div class="tabbed-block">
-<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">deeporigin.managed_data</span> <span class="kn">import</span> <span class="n">api</span>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">deeporigin.data_hub</span> <span class="kn">import</span> <span class="n">api</span>
 <span class="n">api</span><span class="o">.</span><span class="n">describe_row</span><span class="p">(</span><span class="s2">&quot;_row:WORR9xeGvG6mSg0yyDRlk&quot;</span><span class="p">)</span>
 </code></pre></div>
 </div>
@@ -1185,7 +1185,7 @@ you to pipe out to a JSON processor like <a href="https://jqlang.github.io/jq/">
 </details>
 </div>
 <div class="tabbed-block">
-<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">deeporigin.managed_data</span> <span class="kn">import</span> <span class="n">api</span>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">deeporigin.data_hub</span> <span class="kn">import</span> <span class="n">api</span>
 <span class="n">api</span><span class="o">.</span><span class="n">describe_file</span><span class="p">(</span><span class="s2">&quot;file-id&quot;</span><span class="p">)</span>
 </code></pre></div>
 </div>
@@ -1223,7 +1223,7 @@ you to pipe out to a JSON processor like <a href="https://jqlang.github.io/jq/">
 </details>
 </div>
 <div class="tabbed-block">
-<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">deeporigin.managed_data</span> <span class="kn">import</span>  <span class="n">api</span>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">deeporigin.data_hub</span> <span class="kn">import</span>  <span class="n">api</span>
 <span class="n">api</span><span class="o">.</span><span class="n">get_row_data</span><span class="p">(</span><span class="s2">&quot;row-id&quot;</span><span class="p">)</span>
 </code></pre></div>
 <p>The data will be returned as a dictionary, where the keys are the column names and the values are values of the cells.</p>
@@ -1276,7 +1276,7 @@ you to pipe out to a JSON processor like <a href="https://jqlang.github.io/jq/">
 </details>
 </div>
 <div class="tabbed-block">
-<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">deeporigin.managed_data</span> <span class="kn">import</span> <span class="n">api</span>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">deeporigin.data_hub</span> <span class="kn">import</span> <span class="n">api</span>
 <span class="n">api</span><span class="o">.</span><span class="n">get_dataframe</span><span class="p">(</span><span class="s2">&quot;database-id&quot;</span><span class="p">)</span>
 </code></pre></div>
 <p>The data will be returned as a <a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html">Pandas DataFrame</a>.</p>
