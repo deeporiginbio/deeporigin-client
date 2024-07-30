@@ -1,4 +1,4 @@
-"""This implements tools to configure the CLI and python client"""
+"""This implements tools to configure the CLI and Python client"""
 
 import os
 import shutil
