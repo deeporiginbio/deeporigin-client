@@ -1,17 +1,17 @@
 
 This page describes how to list resources on Deep Origin.
-Listing workspaces, databases, rows and files can be used
+Listing folders, databases, rows and files can be used
 to discover the resources available on Deep Origin, and show
 their IDs for further queries.
 
-## List workspaces
+## List folders
 
-To list all of your Deep Origin workspaces, run:
+To list all of your Deep Origin folders, run:
 
 === "CLI"
 
     ```bash
-    deeporigin data list --workspaces
+    deeporigin data list --folders
     ```
 
     This will display a screen similar to below:
@@ -31,7 +31,7 @@ To list all of your Deep Origin workspaces, run:
         you to pipe out to a JSON processor like [jq](https://jqlang.github.io/jq/):
 
         ```bash
-        deeporigin data list --workspaces --json | jq
+        deeporigin data list --folders --json | jq
         ```
 
         ```json
@@ -61,10 +61,10 @@ To list all of your Deep Origin workspaces, run:
         ```
 
     ??? tip "Combining outputs"
-        You can combine multiple output types. For example, to list all workspaces and databases:
+        You can combine multiple output types. For example, to list all folders and databases:
 
         ```bash
-        deeporigin data list --workspaces --databases
+        deeporigin data list --folders --databases
         ```
 
 === "Python"
@@ -132,10 +132,10 @@ To list all of your databases in Deep Origin, run:
         ```
 
     ??? tip "Combining outputs"
-        You can combine multiple output types. For example, to list all workspaces and databases:
+        You can combine multiple output types. For example, to list all folders and databases:
 
         ```bash
-        deeporigin data list --workspaces --databases
+        deeporigin data list --folders --databases
         ```
 
 === "Python"

@@ -59,7 +59,7 @@ class PREFIXES:
     FILE = "_file"
     DB = "_database"
     ROW = "_row"
-    WS = "_workspace"
+    FOLDER = "_workspace"
 
 
 @beartype

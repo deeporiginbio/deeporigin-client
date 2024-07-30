@@ -84,14 +84,14 @@ def list_rows(
     parent_is_root: Optional[bool] = None,
     client=None,
 ) -> list:
-    """List rows in a database or workspace.
+    """List rows in a database or folder.
 
-    Returns a list of rows from workspaces and databases,
+    Returns a list of rows from folders and databases,
     based on the parent, row type, or whether the parent is the root.
 
     Args:
         parent_id: ID (or human ID) or the parent.
-        row_type: One of `row`, `workspace`, or `database`.
+        row_type: One of `row`, `folder`, or `database`.
         parent_is_root: If `True` only rows that are children of the root will be returned.
 
     Returns:
@@ -330,9 +330,9 @@ def get_tree(
     include_rows: bool = True,
     client=None,
 ) -> list:
-    """Construct a tree of all workspaces, databases and rows.
+    """Construct a tree of all folders, databases and rows.
 
-    Returns a tree that contains all workspaces, databases and
+    Returns a tree that contains all folders, databases and
     (optionally) rows. The tree is returned as a dictionary,
     and children of each object are contained in a field
     called `children`.
@@ -342,7 +342,7 @@ def get_tree(
         include_rows: If `True`, rows are included in the tree.
 
     Returns:
-        A dictionary describing the tree structure of all workspaces
+        A dictionary describing the tree structure of all folders
         and databases.
 
     """
@@ -351,26 +351,26 @@ def get_tree(
         # we need to fetch everything, so use a single call
         objects = list_rows(client=client)
         rows = [obj.dict() for obj in objects if obj.type == "row"]
-        workspaces = [obj for obj in objects if obj.type == "workspace"]
+        folders = [obj for obj in objects if obj.type == "workspace"]
         databases = [obj for obj in objects if obj.type == "database"]
     else:
-        workspaces = list_rows(row_type="workspace", client=client)
+        folders = list_rows(row_type="workspace", client=client)
         databases = list_rows(row_type="database", client=client)
-        objects = workspaces + databases
+        objects = folders + databases
 
     # convert everything into a dict
-    workspaces = [obj.dict() for obj in workspaces]
+    folders = [obj.dict() for obj in folders]
     databases = [obj.dict() for obj in databases]
 
-    for obj in workspaces + databases:
+    for obj in folders + databases:
         obj["children"] = []
 
     root_objects = [obj.dict() for obj in objects if obj.parent_id is None]
 
     for root_object in root_objects:
-        _add_children(root_object, workspaces)
-        for workspace in workspaces:
-            _add_children(workspace, workspaces + databases)
+        _add_children(root_object, folders)
+        for folder in folders:
+            _add_children(folder, folders + databases)
 
         if include_rows:
             for database in databases:

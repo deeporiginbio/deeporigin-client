@@ -59,7 +59,7 @@ class MockClient:
     """mock client to respond with static data for testing
     purposes"""
 
-    workspaces = ["ws-placeholder"]
+    folders = ["ws-placeholder"]
     databases = ["db-placeholder"]
     rows = [f"row-{idx}" for idx in range(10)]
     columns = [f"column-{idx}" for idx in range(5)]
@@ -70,15 +70,15 @@ class MockClient:
 
         if filters == []:
             # list_rows called with no filters. return
-            # a workspace, a database, and some rows
+            # a folder, a database, and some rows
 
-            # root workspace
+            # root folder
             rows = [
                 types.list_rows_response.Data(
-                    id=self.workspaces[0],
-                    hid=self.workspaces[0],
+                    id=self.folders[0],
+                    hid=self.folders[0],
                     type="workspace",
-                    name=self.workspaces[0],
+                    name=self.folders[0],
                     parent_id=None,
                 )
             ]
@@ -88,8 +88,8 @@ class MockClient:
                     hid=self.databases[0],
                     id=self.databases[0],
                     type="database",
-                    name=self.workspaces[0],
-                    parent_id=self.workspaces[0],
+                    name=self.folders[0],
+                    parent_id=self.folders[0],
                 )
             ]
 
@@ -125,11 +125,11 @@ class MockClient:
         elif filters == [dict(parent=dict(is_root=True))] or filters == [
             dict(row_type="workspace")
         ]:
-            # return the root workspace
+            # return the root folder
             return [
                 types.list_rows_response.Data(
-                    hid=self.workspaces[0],
-                    id=self.workspaces[0],
+                    hid=self.folders[0],
+                    id=self.folders[0],
                     type="workspace",
                     parentId=None,
                 )
@@ -141,7 +141,7 @@ class MockClient:
                     hid=self.databases[0],
                     id=self.databases[0],
                     type="database",
-                    parentId=self.workspaces[0],
+                    parentId=self.folders[0],
                 )
             ]
         elif filters == [dict(row_type="row")]:
