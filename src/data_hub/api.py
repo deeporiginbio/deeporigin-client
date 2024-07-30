@@ -1,4 +1,4 @@
-"""The `deeporigin.managed_data.api` module contains high-level functions for
+"""The `deeporigin.data_hub.api` module contains high-level functions for
 interacting with the Deep Origin data hub."""
 
 import mimetypes
@@ -8,15 +8,15 @@ from typing import Any, Optional, Union
 from urllib.parse import urlparse, urlunparse
 
 from beartype import beartype
-from deeporigin.exceptions import DeepOriginException
 
 # this import is to allow us to use functions
 # not marked in __all__ in _api
-from deeporigin.managed_data import _api
+from deeporigin.data_hub import _api
 
 # this import is to make sure that all simply-wrapped
 # functions in _api are available in api (this module)
-from deeporigin.managed_data._api import *  # noqa: F403
+from deeporigin.data_hub._api import *  # noqa: F403
+from deeporigin.exceptions import DeepOriginException
 from deeporigin.utils import (
     PREFIXES,
     DatabaseReturnType,
@@ -84,14 +84,14 @@ def list_rows(
     parent_is_root: Optional[bool] = None,
     client=None,
 ) -> list:
-    """List rows in a database or workspace.
+    """List rows in a database or folder.
 
-    Returns a list of rows from workspaces and databases,
+    Returns a list of rows from folders and databases,
     based on the parent, row type, or whether the parent is the root.
 
     Args:
         parent_id: ID (or human ID) or the parent.
-        row_type: One of `row`, `workspace`, or `database`.
+        row_type: One of `row`, `folder`, or `database`.
         parent_is_root: If `True` only rows that are children of the root will be returned.
 
     Returns:
@@ -154,7 +154,7 @@ def upload_file(
     """Upload a file to Deep Origin.
 
     This uploads to the "staging area" of the Deep Origin data hub.
-    To assign this file to a cell, use [assign_files_to_cell][src.managed_data.api.assign_files_to_cell]
+    To assign this file to a cell, use [assign_files_to_cell][src.data_hub.api.assign_files_to_cell]
 
     Args:
         file_path: Path to the file to upload
@@ -301,8 +301,8 @@ def upload_file_to_new_database_row(
     Upload a file to a new row in a database. This utility
     function wraps two other functions:
 
-    - [upload_file][src.managed_data.api.upload_file]
-    - [assign_files_to_cell][src.managed_data.api.assign_files_to_cell]
+    - [upload_file][src.data_hub.api.upload_file]
+    - [assign_files_to_cell][src.data_hub.api.assign_files_to_cell]
 
     Args:
         database_id: ID (or human ID) of a database.
@@ -330,9 +330,9 @@ def get_tree(
     include_rows: bool = True,
     client=None,
 ) -> list:
-    """Construct a tree of all workspaces, databases and rows.
+    """Construct a tree of all folders, databases and rows.
 
-    Returns a tree that contains all workspaces, databases and
+    Returns a tree that contains all folders, databases and
     (optionally) rows. The tree is returned as a dictionary,
     and children of each object are contained in a field
     called `children`.
@@ -342,7 +342,7 @@ def get_tree(
         include_rows: If `True`, rows are included in the tree.
 
     Returns:
-        A dictionary describing the tree structure of all workspaces
+        A dictionary describing the tree structure of all folders
         and databases.
 
     """
@@ -351,26 +351,26 @@ def get_tree(
         # we need to fetch everything, so use a single call
         objects = list_rows(client=client)
         rows = [obj.dict() for obj in objects if obj.type == "row"]
-        workspaces = [obj for obj in objects if obj.type == "workspace"]
+        folders = [obj for obj in objects if obj.type == "workspace"]
         databases = [obj for obj in objects if obj.type == "database"]
     else:
-        workspaces = list_rows(row_type="workspace", client=client)
+        folders = list_rows(row_type="workspace", client=client)
         databases = list_rows(row_type="database", client=client)
-        objects = workspaces + databases
+        objects = folders + databases
 
     # convert everything into a dict
-    workspaces = [obj.dict() for obj in workspaces]
+    folders = [obj.dict() for obj in folders]
     databases = [obj.dict() for obj in databases]
 
-    for obj in workspaces + databases:
+    for obj in folders + databases:
         obj["children"] = []
 
     root_objects = [obj.dict() for obj in objects if obj.parent_id is None]
 
     for root_object in root_objects:
-        _add_children(root_object, workspaces)
-        for workspace in workspaces:
-            _add_children(workspace, workspaces + databases)
+        _add_children(root_object, folders)
+        for folder in folders:
+            _add_children(folder, folders + databases)
 
         if include_rows:
             for database in databases:
@@ -405,10 +405,10 @@ def get_cell_data(
 
     Warning: Caution
         This function internally calls
-        [get_row_data][src.managed_data.api.get_row_data],
+        [get_row_data][src.data_hub.api.get_row_data],
         so it is not efficient to write a loop to get all values
         of cells from a row. It will be faster to call
-        [get_row_data][src.managed_data.api.get_row_data] directly.
+        [get_row_data][src.data_hub.api.get_row_data] directly.
 
 
     Args:

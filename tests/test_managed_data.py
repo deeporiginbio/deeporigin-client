@@ -5,8 +5,8 @@ import uuid
 
 import pandas as pd
 import pytest
+from deeporigin.data_hub import api
 from deeporigin.exceptions import DeepOriginException
-from deeporigin.managed_data import api
 from deeporigin.utils import DATAFRAME_ATTRIBUTE_KEYS, PREFIXES
 from mock_client import MockClient
 
@@ -24,7 +24,7 @@ def config(pytestconfig):
         data["mock"] = True
 
         # unpack mock data from client
-        data["workspaces"] = data["client"].workspaces
+        data["folders"] = data["client"].folders
         data["databases"] = data["client"].databases
         data["rows"] = data["client"].rows
         data["file"] = data["client"].file
@@ -39,7 +39,7 @@ def config(pytestconfig):
         rows = api.list_rows()
 
         data["databases"] = [row.hid for row in rows if row.type == "database"]
-        data["workspaces"] = [row.hid for row in rows if row.type == "workspace"]
+        data["folders"] = [row.hid for row in rows if row.type == "workspace"]
         data["rows"] = [row.hid for row in rows if row.type == "row"]
 
         # get a list of all files
@@ -103,14 +103,14 @@ def test_create_database(config):
             name="test-" + unique_id,
             hid="test-" + unique_id,
             hid_prefix="test" + unique_id,
-            parent_id=config["workspaces"][0],
+            parent_id=config["folders"][0],
         ),
         client=config["client"],
     )
 
 
 def test_delete_rows(config):
-    """delete workspaces and databases"""
+    """delete folders and databases"""
 
     for row_type in ["workspace", "database"]:
         rows = api.list_rows(row_type=row_type, client=config["client"])
@@ -150,12 +150,12 @@ def test_list_rows_by_type(config):
         client=config["client"],
     )
 
-    assert len(rows) > 0, "Expected at least one workspace"
+    assert len(rows) > 0, "Expected at least one folder"
 
     for row in rows:
         assert (
             row.type == "workspace"
-        ), f"Expected to get a list of workspaces, but {row} is not a workspace"
+        ), f"Expected to get a list of folders, but {row} is not a folder"
 
 
 def test_list_files_unassigned(config):

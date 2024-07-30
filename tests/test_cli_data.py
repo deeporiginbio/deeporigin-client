@@ -6,7 +6,7 @@ from typing import Union
 import pytest
 from beartype import beartype
 from deeporigin import cli
-from deeporigin.managed_data import api
+from deeporigin.data_hub import api
 from mock_client import MockClient
 
 # this allows us to try every CLI command with both
@@ -20,9 +20,9 @@ LIST_OPTIONS = (
     ["--rows"],
     ["--databases"],
     ["--files"],
-    ["--workspaces"],
-    ["--workspaces", "--databases"],
-    ["--workspaces", "--rows"],
+    ["--folders"],
+    ["--folders", "--databases"],
+    ["--folders", "--rows"],
     ["--databases", "--rows"],
 )
 
@@ -39,7 +39,7 @@ def config(pytestconfig):
         data["client"] = MockClient()
 
         # unpack mock data from client
-        data["workspaces"] = data["client"].workspaces
+        data["folders"] = data["client"].folders
         data["databases"] = data["client"].databases
         data["rows"] = data["client"].rows
         data["file"] = data["client"].file

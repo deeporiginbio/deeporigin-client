@@ -1,11 +1,11 @@
 """this implements controllers and hooks to connect to
-managed_data.py"""
+data_hub.py"""
 
 import os
 
 import cement
+from deeporigin.data_hub import api
 from deeporigin.exceptions import DeepOriginException
-from deeporigin.managed_data import api
 from deeporigin.utils import PREFIXES, _print_dict, _print_tree, _show_json, _truncate
 
 
@@ -125,7 +125,7 @@ class DataController(cement.Controller):
             )
 
     @cement.ex(
-        help="List files, rows, databases, workspaces in Deep Origin",
+        help="List files, rows, databases, folders in Deep Origin",
         arguments=[
             (
                 ["--files"],
@@ -142,10 +142,10 @@ class DataController(cement.Controller):
                 },
             ),
             (
-                ["--workspaces"],
+                ["--folders"],
                 {
                     "action": "store_true",
-                    "help": "Whether to list workspaces: [False]",
+                    "help": "Whether to list folders: [False]",
                 },
             ),
             (
@@ -165,7 +165,7 @@ class DataController(cement.Controller):
         ],
     )
     def list(self):
-        """list files, rows, databases, workspaces"""
+        """list files, rows, databases, folders"""
 
         if self.app.pargs.files:
             # we will only list files
@@ -187,7 +187,7 @@ class DataController(cement.Controller):
 
         if (
             not self.app.pargs.rows
-            and not self.app.pargs.workspaces
+            and not self.app.pargs.folders
             and not self.app.pargs.databases
         ):
             # we want to list everything, show show a tree.
@@ -217,7 +217,7 @@ class DataController(cement.Controller):
                 row_type="database",
                 client=self._get_client(),
             )
-        if self.app.pargs.workspaces:
+        if self.app.pargs.folders:
             rows += api.list_rows(
                 row_type="workspace",
                 client=self._get_client(),

@@ -1,17 +1,17 @@
 
 This page describes how to list resources on Deep Origin.
-Listing workspaces, databases, rows and files can be used
+Listing folders, databases, rows and files can be used
 to discover the resources available on Deep Origin, and show
 their IDs for further queries.
 
-## List workspaces
+## List folders
 
-To list all of your Deep Origin workspaces, run:
+To list all of your Deep Origin folders, run:
 
 === "CLI"
 
     ```bash
-    deeporigin data list --workspaces
+    deeporigin data list --folders
     ```
 
     This will display a screen similar to below:
@@ -31,7 +31,7 @@ To list all of your Deep Origin workspaces, run:
         you to pipe out to a JSON processor like [jq](https://jqlang.github.io/jq/):
 
         ```bash
-        deeporigin data list --workspaces --json | jq
+        deeporigin data list --folders --json | jq
         ```
 
         ```json
@@ -61,16 +61,16 @@ To list all of your Deep Origin workspaces, run:
         ```
 
     ??? tip "Combining outputs"
-        You can combine multiple output types. For example, to list all workspaces and databases:
+        You can combine multiple output types. For example, to list all folders and databases:
 
         ```bash
-        deeporigin data list --workspaces --databases
+        deeporigin data list --folders --databases
         ```
 
 === "Python"
 
     ```py
-    from deeporigin.managed_data import api
+    from deeporigin.data_hub import api
     api.list_rows(row_type="workspace")
     ```
 
@@ -132,16 +132,16 @@ To list all of your databases in Deep Origin, run:
         ```
 
     ??? tip "Combining outputs"
-        You can combine multiple output types. For example, to list all workspaces and databases:
+        You can combine multiple output types. For example, to list all folders and databases:
 
         ```bash
-        deeporigin data list --workspaces --databases
+        deeporigin data list --folders --databases
         ```
 
 === "Python"
 
     ```python
-    from deeporigin.managed_data import api
+    from deeporigin.data_hub import api
     api.list_rows(row_type="database")
     ```
 
@@ -172,7 +172,7 @@ To list all of your database rows in Deep Origin:
 === "Python"
 
     ```python
-    from deeporigin.managed_data import api
+    from deeporigin.data_hub import api
     api.list_rows(row_type="row")
     ```
 
@@ -277,7 +277,7 @@ To list all of your files in Deep Origin, run:
     We can list all files on Deep Origin using:
 
     ```python
-    from deeporigin.managed_data import api
+    from deeporigin.data_hub import api
     api.list_files()
     ```
 
