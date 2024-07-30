@@ -40,7 +40,7 @@ retrieve the database row with ID `data-1`.
 === "Python"
 
     ```python
-    from deeporigin.managed_data import api
+    from deeporigin.data_hub import api
 
     api.get_row_data("data-1")
 

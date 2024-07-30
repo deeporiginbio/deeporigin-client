@@ -1,5 +1,5 @@
 * @deeporiginbio/catalog-developers
-src/managed_data/ @deeporiginbio/data-management-developers
+src/data_hub/ @deeporiginbio/data-management-developers
 src/variables/ @deeporiginbio/platform-developers
 mkdocs.yaml @deeporiginbio/documentation-writers @deeporiginbio/designers
 docs/ @deeporiginbio/documentation-writers

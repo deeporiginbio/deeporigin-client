@@ -1,11 +1,11 @@
 """this implements controllers and hooks to connect to
-managed_data.py"""
+data_hub.py"""
 
 import os
 
 import cement
 from deeporigin.exceptions import DeepOriginException
-from deeporigin.managed_data import api
+from deeporigin.data_hub import api
 from deeporigin.utils import PREFIXES, _print_dict, _print_tree, _show_json, _truncate
 
 

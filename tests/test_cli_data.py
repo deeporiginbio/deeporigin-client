@@ -6,7 +6,7 @@ from typing import Union
 import pytest
 from beartype import beartype
 from deeporigin import cli
-from deeporigin.managed_data import api
+from deeporigin.data_hub import api
 from mock_client import MockClient
 
 # this allows us to try every CLI command with both

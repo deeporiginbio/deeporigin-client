@@ -19,7 +19,7 @@ Run the following to write a text value to a cell in a database:
 === "Python"
 
     ```py
-    from deeporigin.managed_data import api
+    from deeporigin.data_hub import api
     api.set_cell_data(
         "some string",
         database_id="database ID or name",
@@ -45,7 +45,7 @@ Run the following to write a numeric value to a cell in a database:
 === "Python"
 
     ```python
-    from deeporigin.managed_data import api
+    from deeporigin.data_hub import api
     api.set_cell_data(
         1,
         database_id="database ID or name",
@@ -73,7 +73,7 @@ This section describes how to write data to a cell in a database that is of type
 === "Python"
 
     ```py
-    from deeporigin.managed_data import api
+    from deeporigin.data_hub import api
     api.set_cell_data(
         "option A",
         database_id="database ID or name",
@@ -101,7 +101,7 @@ Run the following to write a Boolean value to a cell in a database:
 === "Python"
 
     ```python
-    from deeporigin.managed_data import api
+    from deeporigin.data_hub import api
     api.set_cell_data(
         True,
         database_id="database ID or name",
@@ -114,7 +114,7 @@ Run the following to write a Boolean value to a cell in a database:
         To unset a cell, so that it contains no data, write `None` to the cell as follows: 
 
         ```py
-        from deeporigin.managed_data import api
+        from deeporigin.data_hub import api
         api.set_cell_data(
             None,
             database_id="database ID or name",

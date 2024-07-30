@@ -3,7 +3,7 @@
 !!! tip "How to use this reference"
     This page contains information about each class and function in this module. This is meant as a detailed reference for this module. If you're looking an introduction, we recommend reviewing the **How to** section.
 
-::: src.managed_data.api
+::: src.data_hub.api
     options:
       filters: 
         - "!^_"

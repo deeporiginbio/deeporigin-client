@@ -62,7 +62,7 @@ To describe a row in a database in Deep Origin, run:
 === "Python"
 
     ```python
-    from deeporigin.managed_data import api
+    from deeporigin.data_hub import api
     api.describe_row("_row:WORR9xeGvG6mSg0yyDRlk")
     ```
 
@@ -119,7 +119,7 @@ To describe a file in a database in Deep Origin, run:
 === "Python"
 
     ```python
-    from deeporigin.managed_data import api
+    from deeporigin.data_hub import api
     api.describe_file("file-id")
     ```
 
@@ -166,7 +166,7 @@ To show the data in a row in a database in Deep Origin, run:
 === "Python"
 
     ```python
-    from deeporigin.managed_data import  api
+    from deeporigin.data_hub import  api
     api.get_row_data("row-id")
     ```
 
@@ -227,7 +227,7 @@ To show the data in a row in a database in Deep Origin, run:
 === "Python"
 
     ```python
-    from deeporigin.managed_data import api
+    from deeporigin.data_hub import api
     api.get_dataframe("database-id")
     ```
 

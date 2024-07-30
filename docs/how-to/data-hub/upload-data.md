@@ -80,7 +80,7 @@ To upload a file to the Deep Origin data hub, run the following commands:
 === "Python"
 
     ```py
-    from deeporigin.managed_data import api
+    from deeporigin.data_hub import api
     api.upload_file("/path/to/file.fasta")
     ```
 

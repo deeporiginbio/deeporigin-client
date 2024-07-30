@@ -70,7 +70,7 @@ To list all of your Deep Origin folders, run:
 === "Python"
 
     ```py
-    from deeporigin.managed_data import api
+    from deeporigin.data_hub import api
     api.list_rows(row_type="workspace")
     ```
 
@@ -141,7 +141,7 @@ To list all of your databases in Deep Origin, run:
 === "Python"
 
     ```python
-    from deeporigin.managed_data import api
+    from deeporigin.data_hub import api
     api.list_rows(row_type="database")
     ```
 
@@ -172,7 +172,7 @@ To list all of your database rows in Deep Origin:
 === "Python"
 
     ```python
-    from deeporigin.managed_data import api
+    from deeporigin.data_hub import api
     api.list_rows(row_type="row")
     ```
 
@@ -277,7 +277,7 @@ To list all of your files in Deep Origin, run:
     We can list all files on Deep Origin using:
 
     ```python
-    from deeporigin.managed_data import api
+    from deeporigin.data_hub import api
     api.list_files()
     ```
 

@@ -53,7 +53,7 @@ DatabaseReturnType = Literal["dataframe", "dict"]
 
 @dataclass
 class PREFIXES:
-    """prefixes for CLI and Python client"""
+    """Prefixes for CLI and Python client"""
 
     DO = "do://"
     FILE = "_file"
@@ -64,7 +64,7 @@ class PREFIXES:
 
 @beartype
 def _print_tree(tree: dict, offset: int = 0) -> None:
-    """helper function to pretty print a tree"""
+    """Helper function to pretty print a tree"""
     print(" " * offset + tree["hid"])
 
     if "children" not in tree.keys():
@@ -75,7 +75,7 @@ def _print_tree(tree: dict, offset: int = 0) -> None:
 
 @beartype
 def _truncate(txt: str) -> str:
-    """utility function for truncating text"""
+    """Utility function for truncating text"""
 
     TERMINAL_WIDTH, _ = os.get_terminal_size()
     txt = (
@@ -88,7 +88,7 @@ def _truncate(txt: str) -> str:
 
 @beartype
 def _show_json(data: Union[list, dict]) -> None:
-    """utility for pretty printing JSON, used in the CLI"""
+    """Utility for pretty printing JSON, used in the CLI"""
 
     print(json.dumps(data, indent=2))
 
@@ -101,7 +101,7 @@ def _print_dict(
     transpose: bool = True,
     key_label: str = "Name",
 ) -> None:
-    """helper function to pretty print a dict as a table,
+    """Helper function to pretty print a dict as a table,
     used in the CLI"""
 
     if json:
@@ -123,7 +123,7 @@ def _print_dict(
 
 @beartype
 def _nucleus_url() -> str:
-    """returns URL for nucleus API endpoint"""
+    """Returns URL for nucleus API endpoint"""
     url = urljoin(
         get_value()["api_endpoint"],
         get_value()["nucleus_api_route"],
@@ -155,7 +155,7 @@ def expand_user(path, user_home_dirname: str = os.path.expanduser("~")) -> str:
 
 @beartype
 def download_sync(url: str, save_path: str) -> None:
-    """concrete method to download a resource using GET and save to disk
+    """Concrete method to download a resource using GET and save to disk
 
     Args:
         url (str): url to download
@@ -174,7 +174,7 @@ def download_sync(url: str, save_path: str) -> None:
 
 @beartype
 def _parse_params_from_url(url: str) -> dict:
-    """utility function to extract params from a URL query
+    """Utility function to extract params from a URL query
 
     Warning: Internal function
         Do not use this function

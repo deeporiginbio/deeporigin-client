@@ -23,7 +23,7 @@
       "always",
       [
         "testing",
-        "managed-data",
+        "data-hub",
         "feature-flags",
         "cli",
         "docs",

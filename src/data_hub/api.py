@@ -1,4 +1,4 @@
-"""The `deeporigin.managed_data.api` module contains high-level functions for
+"""The `deeporigin.data_hub.api` module contains high-level functions for
 interacting with the Deep Origin data hub."""
 
 import mimetypes
@@ -12,11 +12,11 @@ from deeporigin.exceptions import DeepOriginException
 
 # this import is to allow us to use functions
 # not marked in __all__ in _api
-from deeporigin.managed_data import _api
+from deeporigin.data_hub import _api
 
 # this import is to make sure that all simply-wrapped
 # functions in _api are available in api (this module)
-from deeporigin.managed_data._api import *  # noqa: F403
+from deeporigin.data_hub._api import *  # noqa: F403
 from deeporigin.utils import (
     PREFIXES,
     DatabaseReturnType,
@@ -154,7 +154,7 @@ def upload_file(
     """Upload a file to Deep Origin.
 
     This uploads to the "staging area" of the Deep Origin data hub.
-    To assign this file to a cell, use [assign_files_to_cell][src.managed_data.api.assign_files_to_cell]
+    To assign this file to a cell, use [assign_files_to_cell][src.data_hub.api.assign_files_to_cell]
 
     Args:
         file_path: Path to the file to upload
@@ -301,8 +301,8 @@ def upload_file_to_new_database_row(
     Upload a file to a new row in a database. This utility
     function wraps two other functions:
 
-    - [upload_file][src.managed_data.api.upload_file]
-    - [assign_files_to_cell][src.managed_data.api.assign_files_to_cell]
+    - [upload_file][src.data_hub.api.upload_file]
+    - [assign_files_to_cell][src.data_hub.api.assign_files_to_cell]
 
     Args:
         database_id: ID (or human ID) of a database.
@@ -405,10 +405,10 @@ def get_cell_data(
 
     Warning: Caution
         This function internally calls
-        [get_row_data][src.managed_data.api.get_row_data],
+        [get_row_data][src.data_hub.api.get_row_data],
         so it is not efficient to write a loop to get all values
         of cells from a row. It will be faster to call
-        [get_row_data][src.managed_data.api.get_row_data] directly.
+        [get_row_data][src.data_hub.api.get_row_data] directly.
 
 
     Args:
