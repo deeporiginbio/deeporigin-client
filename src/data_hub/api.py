@@ -920,7 +920,7 @@ def _type_and_cleanup_dataframe(
     df["Validation Status"].attrs = dict(type="Validation Status")
 
     # sort by primary key
-    df["numeric_id"] = df["ID"].apply(lambda x: int(x.split("-")[1]))
+    df["numeric_id"] = df["ID"].apply(lambda x: int(x.split("-")[-1]))
     df = df.sort_values(by="numeric_id")
     df = df.drop(columns="numeric_id")
     df = df.set_index("ID")
