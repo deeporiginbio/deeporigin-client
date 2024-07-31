@@ -715,6 +715,14 @@ def get_dataframe(
     file_ids = []
     reference_ids = []
 
+    # remove body document columns because they are not
+    # shown in the UI as columns
+    columns = [
+        col
+        for col in columns
+        if "systemType" not in col.keys() or col["systemType"] != "bodyDocument"
+    ]
+
     # create empty lists for each column
     for column in columns:
         data[column["id"]] = []
@@ -835,6 +843,8 @@ def _row_to_dict(row, *, use_file_names: bool = True):
     if fields is None:
         return values
     for field in fields:
+        if field.system_type == "bodyDocument":
+            continue
         if field.value is None:
             value = None
         elif field.type in ["float", "int", "boolean"]:
