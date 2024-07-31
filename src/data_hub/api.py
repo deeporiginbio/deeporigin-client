@@ -424,6 +424,58 @@ def get_cell_data(
     return data[column_name]
 
 
+def set_data_in_cells(
+    *,
+    values: list,
+    row_ids: list[str],
+    column_id: str,
+    database_id: str,
+    client=None,
+):
+    """Set data in multiple cells to some value."""
+    # first, get the type of the column
+    response = _api.describe_row(
+        row_id=database_id,
+        client=client,
+    )
+
+    column = [
+        col
+        for col in response.cols
+        if col["id"] == column_id or col["name"] == column_id or col["key"] == column_id
+    ]
+
+    if len(column) != 1:
+        raise DeepOriginException(
+            message=f"Could not find column {column_id} in database {database_id}"
+        )
+
+    column = column[0]
+    validated_values = [
+        _validate_value_for_column(value=value, column=column) for value in values
+    ]
+
+    rows = [
+        {
+            "cells": [
+                {
+                    "columnId": column_id,
+                    "value": validated_value,
+                }
+            ],
+            "row": {},
+            "rowId": row_id,
+        }
+        for (row_id, validated_value) in zip(row_ids, validated_values)
+    ]
+
+    return _api.ensure_rows(
+        rows=rows,
+        client=client,
+        database_id=database_id,
+    )
+
+
 def set_cell_data(
     value: Any,
     *,
@@ -462,6 +514,35 @@ def set_cell_data(
         )
 
     column = column[0]
+    validated_value = _validate_value_for_column(
+        value=value,
+        column=column,
+    )
+
+    rows = [
+        {
+            "cells": [
+                {
+                    "columnId": column_id,
+                    "value": validated_value,
+                }
+            ],
+            "row": {},
+            "rowId": row_id,
+        }
+    ]
+
+    return _api.ensure_rows(
+        rows=rows,
+        client=client,
+        database_id=database_id,
+    )
+
+
+def _validate_value_for_column(*, column: dict, value: Any):
+    """helper function that validates a value for a column,
+    so that it can be written to the database."""
+
     if column["type"] == "select":
         if isinstance(value, list):
             pass
@@ -530,24 +611,7 @@ def set_cell_data(
     else:
         raise NotImplementedError("This data type is not yet supported")
 
-    rows = [
-        {
-            "cells": [
-                {
-                    "columnId": column_id,
-                    "value": validated_value,
-                }
-            ],
-            "row": {},
-            "rowId": row_id,
-        }
-    ]
-
-    return _api.ensure_rows(
-        rows=rows,
-        client=client,
-        database_id=database_id,
-    )
+    return validated_value
 
 
 @beartype
@@ -715,6 +779,14 @@ def get_dataframe(
     file_ids = []
     reference_ids = []
 
+    # remove body document columns because they are not
+    # shown in the UI as columns
+    columns = [
+        col
+        for col in columns
+        if "systemType" not in col.keys() or col["systemType"] != "bodyDocument"
+    ]
+
     # create empty lists for each column
     for column in columns:
         data[column["id"]] = []
@@ -835,6 +907,8 @@ def _row_to_dict(row, *, use_file_names: bool = True):
     if fields is None:
         return values
     for field in fields:
+        if field.system_type == "bodyDocument":
+            continue
         if field.value is None:
             value = None
         elif field.type in ["float", "int", "boolean"]:
