@@ -2,8 +2,8 @@ import inspect
 import sys
 
 from deeporigin import auth
-from deeporigin.utils import _get_method
-from deeporigin_data import AuthenticationError, DeeporiginData
+from deeporigin.utils import _get_method, _print_dict
+from deeporigin_data import AuthenticationError, DeeporiginData, _response
 
 # this list specifies methods in the low level API that should
 # not be automatically wrapped
@@ -41,7 +41,12 @@ def _get_client_methods():
     return methods
 
 
-def _get_default_client(client=None, refresh: bool = True):
+def _get_default_client(
+    *,
+    client=None,
+    refresh: bool = True,
+    debug: bool = False,
+):
     """Internal function to instantiate client
 
     Creates and returns an authenticated client if
@@ -76,6 +81,9 @@ def _get_default_client(client=None, refresh: bool = True):
             base_url=base_url,
         )
 
+        if debug:
+            client = client.with_raw_response
+
     return client
 
 
@@ -92,9 +100,14 @@ def _create_function(method_path):
 
     signature = inspect.signature(method)
 
-    def dynamic_function(*, client=None, **kwargs):
+    def dynamic_function(
+        *,
+        client=None,
+        debug: bool = False,
+        **kwargs,
+    ):
         if client is None:
-            client = _get_default_client()
+            client = _get_default_client(debug=debug)
         method = _get_method(client, method_path)
         # call the low level API method
 
@@ -110,6 +123,13 @@ def _create_function(method_path):
                 response = method(**kwargs)
             else:
                 raise error
+
+        if isinstance(response, _response.APIResponse):
+            print(f"Response request = {response.http_request}")
+            print("Response headers:")
+            _print_dict(dict(response.headers), json=False)
+            print(f"Response = {response.http_response}")
+            response = response.json()
 
         if hasattr(response, "data"):
             return response.data
