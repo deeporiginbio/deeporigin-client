@@ -1,7 +1,7 @@
 * @deeporiginbio/catalog-developers
 src/data_hub/ @deeporiginbio/data-management-developers
 src/variables/ @deeporiginbio/platform-developers
-mkdocs.yaml @deeporiginbio/documentation-writers @deeporiginbio/designers
-docs/ @deeporiginbio/documentation-writers
-docs/images/ @deeporiginbio/documentation-writers @deeporiginbio/designers
-docs/stylesheets/ @deeporiginbio/documentation-writers @deeporiginbio/designers
+mkdocs.yaml @deeporiginbio/platform-documentation-writers @deeporiginbio/designers
+docs/ @deeporiginbio/platform-documentation-writers
+docs/images/ @deeporiginbio/platform-documentation-writers @deeporiginbio/designers
+docs/stylesheets/ @deeporiginbio/platform-documentation-writers @deeporiginbio/designers
