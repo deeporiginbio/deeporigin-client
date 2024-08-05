@@ -313,10 +313,10 @@ class DataController(cement.Controller):
                 },
             ),
             (
-                ["--body-document"],
+                ["--notebook"],
                 {
                     "action": "store_true",
-                    "help": "Whether to show body document [default: False]",
+                    "help": "Whether to show the notebook entry for each row [default: False]",
                 },
             ),
         ],
@@ -324,7 +324,7 @@ class DataController(cement.Controller):
     def show(self):
         """show database or row in Deep Origin"""
 
-        if self.app.pargs.body_document:
+        if self.app.pargs.notebook:
             # show body document
             document = api.get_body_document(
                 row_id=self.app.pargs.object_id,
