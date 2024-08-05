@@ -1,4 +1,4 @@
-# Inspect data
+# View data
 
 This page describes how to describe and show the details of data objects in Deep Origin. To simply list objects, see [List data](./list-data.md).
 

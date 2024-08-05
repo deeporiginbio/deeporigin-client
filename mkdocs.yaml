@@ -36,16 +36,16 @@ extra_css:
   - stylesheets/extra.css
 
 nav:
-- Getting started:
+- Quickstart:
   - Overview: index.md
-  - Installation: install.md
-  - Configuration: configure.md
+  - Install: install.md
+  - Configure: configure.md
 - How to:
   - Sign into Deep Origin: how-to/auth.md
   - Data hub:
     - List data: how-to/data-hub/list-data.md
-    - Inspect data: how-to/data-hub/inspect-data.md
-    - Upload data: how-to/data-hub/upload-data.md
+    - View data: how-to/data-hub/view-data.md
+    - Upload files: how-to/data-hub/upload-files.md
     - Write data: how-to/data-hub/write-data.md
   - Install variables and secrets: how-to/variables.md
   - Get info about your workstation: how-to/workstation-info.md

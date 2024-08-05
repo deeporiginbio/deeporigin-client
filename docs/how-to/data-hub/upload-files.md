@@ -1,10 +1,10 @@
 
-# Upload data
+# Upload files
 
-This page describes how to upload data to the Deep Origin data hub,
-and assign it to a cell in a row.
+This page describes how to upload files to the Deep Origin
+data hub, and assign them to individual cells.
 
-## Upload and assign Files
+## Upload a file to the data hub
 
 To upload a file to the Deep Origin data hub, run the following commands:
 
@@ -14,8 +14,8 @@ To upload a file to the Deep Origin data hub, run the following commands:
     deeporigin data upload /path/to/test.fasta
     ```
 
-    This will upload a file to the "Staging area", and this
-    file will not assigned to any database or cell. An example
+    This will upload the file to your data hub, but the
+    file will not yet be assigned to any database or cell. An example
     response is shown below:
 
     ```
@@ -59,24 +59,6 @@ To upload a file to the Deep Origin data hub, run the following commands:
 
         ```
 
-    To upload a file and assign it to an existing cell, run:
-
-    ```bash
-    deeporigin data upload /path/to/test.fasta \
-        --column <column_id> \
-        --database <database_id> \
-        --row <row_id>
-    ```
-
-    To upload a file and assign it to a column in a new row,
-    run:
-
-    ```bash
-    deeporigin data upload /path/to/test.fasta \
-        --column <column_id> \
-        --database <database+_id> 
-    ```
-
 === "Python"
 
     ```py
@@ -84,8 +66,7 @@ To upload a file to the Deep Origin data hub, run the following commands:
     api.upload_file("/path/to/file.fasta")
     ```
 
-    This will upload the file to the "Staging Area" of the Deep Origin
-    data hub. An example is shown below:
+    This will upload the file to your data hub. An example is shown below:
 
     ```json
     {
@@ -101,7 +82,27 @@ To upload a file to the Deep Origin data hub, run the following commands:
     }
     ```
 
-    To assign an uploaded file to a cell in an existing row, use the `assign_files_to_cell` function as follows:
+## Upload a file to an existing row
+
+To upload a file and assign it to a cell in an existing row, run the following commands:
+
+=== "CLI"
+
+    ```bash
+    deeporigin data upload /path/to/test.fasta \
+        --column <column_id> \
+        --database <database_id> \
+        --row <row_id>
+    ```
+
+=== "Python"
+
+    ```py
+    from deeporigin.data_hub import api
+    api.upload_file("/path/to/file.fasta")
+    ```
+
+    To assign an uploaded file to a cell in an existing row, run the `assign_files_to_cell` function:
 
     ```py
         api.assign_files_to_cell(
@@ -113,10 +114,34 @@ To upload a file to the Deep Origin data hub, run the following commands:
 
     ```
 
-    To assign an uploaded file to a cell on a new row, use the `assign_files_to_cell` function as follows:
+## Upload a file to a new row of a database
+
+To upload a file and assign it to a column in a new row, run the following commands:
+
+=== "CLI"
+
+    ```bash
+    deeporigin data upload /path/to/test.fasta \
+        --column <column_id> \
+        --database <database_id> 
+    ```
+    
+    This omits the `--row` parameter, which
+    would create a new row in the database.
+
+=== "Python"
+
+    First, upload a file to your data hub by running:
 
     ```py
-        api.assign_files_to_cell(
+    from deeporigin.data_hub import api
+    api.upload_file("/path/to/file.fasta")
+    ```
+
+    Second, assign the file to a new row by running:
+
+    ```py
+    api.assign_files_to_cell(
         file_ids=["_file:6Hdhyc3t8xZ6pmyCrQy1t"],
         database_id="db-dna",
         column_id="base_sequence_file",

@@ -40,3 +40,9 @@ To set a variable, run:
 ```bash
 deeporigin config set [variable-name] [variable-value]
 ```
+
+For example, to configure your organization, run:
+
+```bash
+deeporigin config set organization_id likely-aardvark-ewo
+```
