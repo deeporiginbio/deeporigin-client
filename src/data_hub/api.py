@@ -1040,8 +1040,6 @@ def get_columns(
 def get_notebook(row_id: str, *, client=None) -> list:
     """Get the notebook of a row, if it exists
 
-
-
     Args:
         row_id: ID (or human ID) of a row on Deep Origin.
 
