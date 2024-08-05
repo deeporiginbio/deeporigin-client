@@ -779,7 +779,7 @@ def get_dataframe(
     file_ids = []
     reference_ids = []
 
-    # remove body document columns because they are not
+    # remove notebook columns because they are not
     # shown in the UI as columns
     columns = [
         col
@@ -1038,14 +1038,15 @@ def get_columns(
 
 @beartype
 def get_notebook(row_id: str, *, client=None) -> list:
-    """Get the body document of a row, if it exists
+    """Get the notebook of a row, if it exists
+
 
 
     Args:
         row_id: ID (or human ID) of a row on Deep Origin.
 
     Returns:
-        The body document of the row, returned as a list
+        The notebook of the row, returned as a list
         of blocks
 
     """
