@@ -1,5 +1,6 @@
 import json
 import os
+import shutil
 from dataclasses import dataclass
 from typing import Literal, Union
 from urllib.parse import parse_qs, urljoin, urlparse
@@ -73,16 +74,12 @@ def _print_tree(tree: dict, offset: int = 0) -> None:
         _print_tree(child, offset + 2)
 
 
-@beartype
 def _truncate(txt: str) -> str:
     """Utility function for truncating text"""
 
-    TERMINAL_WIDTH, _ = os.get_terminal_size()
-    txt = (
-        (txt[: int(TERMINAL_WIDTH / 2)] + "…")
-        if len(txt) > int(TERMINAL_WIDTH / 2)
-        else txt
-    )
+    TERMINAL_WIDTH = int(shutil.get_terminal_size().columns / 2)
+    if len(txt) > TERMINAL_WIDTH:
+        txt = txt[: TERMINAL_WIDTH - 3] + "..."
     return txt
 
 
@@ -107,11 +104,16 @@ def _print_dict(
     if json:
         _show_json(data)
     else:
+        # truncate values so that long strings
+        # don't break the table
+        data = {key: _truncate(str(value)) for key, value in data.items()}
+
         if transpose:
             data = data.items()
             headers = [key_label, "Value"]
         else:
             headers = "keys"
+
         print(
             tabulate(
                 data,
