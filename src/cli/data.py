@@ -30,12 +30,12 @@ class DataController(cement.Controller):
             return client  # pragma: no cover
 
     @cement.ex(
-        help="Merge two databases into a single one, integrating cross-references",
+        help="Merge two or more databases into a single table, integrating their cross-references, and save the table to a CSV file",
         arguments=[
             (
                 ["--databases"],
                 {
-                    "help": "List of databases to merge",
+                    "help": "List of IDs of the databases to merge",
                     "action": "store",
                     "nargs": "*",
                     "required": True,
@@ -47,14 +47,14 @@ class DataController(cement.Controller):
                     "type": str,
                     "required": True,
                     "metavar": "<destination>",
-                    "help": "Folder on local disk to save to",
+                    "help": "Local directory path to save the table to",
                 },
             ),
             (
                 ["--include-files"],
                 {
                     "action": "store_true",
-                    "help": "Whether to download files in database [default: False]",
+                    "help": "Whether to download the files in the databases [default: False]",
                 },
             ),
         ],
@@ -86,21 +86,27 @@ class DataController(cement.Controller):
                 api.download_file(file, destination=destination)
 
     @cement.ex(
-        help="Copy files or databases from or to Deep Origin",
+        help="Copy a file or database to or from your data hub",
         arguments=[
             (
                 ["source"],
-                {"help": "Source", "action": "store"},
+                {
+                    "help": "Source: ID of a file or database, or local path for a file or database",
+                    "action": "store",
+                },
             ),
             (
                 ["destination"],
-                {"help": "Destination", "action": "store"},
+                {
+                    "help": "Destination: ID of a file or database, or local path for a file or database",
+                    "action": "store",
+                },
             ),
             (
                 ["--include-files"],
                 {
                     "action": "store_true",
-                    "help": "Whether to also download files in a database: [False]",
+                    "help": "Whether to also download the files in the database: [False]",
                 },
             ),
         ],
@@ -125,7 +131,7 @@ class DataController(cement.Controller):
             )
 
     @cement.ex(
-        help="List files, rows, databases, folders in Deep Origin",
+        help="List the files, rows, databases, and/or folders in your Deep Origin data hub",
         arguments=[
             (
                 ["--files"],
@@ -159,7 +165,7 @@ class DataController(cement.Controller):
                 ["--json"],
                 {
                     "action": "store_true",
-                    "help": "Whether to return JSON formatted data [default: [False]",
+                    "help": "Whether to return data in JSON format [default: [False]",
                 },
             ),
         ],
@@ -236,17 +242,17 @@ class DataController(cement.Controller):
             _show_json(rows)
 
     @cement.ex(
-        help="Describe and get metadata of about a file, row, or database in your Deep Origin data hub",
+        help="Show the metadata about a file, row, or database in your data hub",
         arguments=[
             (
                 ["object_id"],
-                {"help": "File ID or row ID", "action": "store"},
+                {"help": "ID for the file, row, or database", "action": "store"},
             ),
             (
                 ["--json"],
                 {
                     "action": "store_true",
-                    "help": "Whether to return JSON formatted data [default: False]",
+                    "help": "Whether to return data in JSON format [default: False]",
                 },
             ),
         ],
@@ -293,17 +299,17 @@ class DataController(cement.Controller):
         _print_dict(data, json=self.app.pargs.json, key_label=key_label)
 
     @cement.ex(
-        help="Show a row or a database",
+        help="Show a row or a database from your data hub",
         arguments=[
             (
                 ["object_id"],
-                {"help": "Row ID or database ID", "action": "store"},
+                {"help": "ID for the row or database", "action": "store"},
             ),
             (
                 ["--json"],
                 {
                     "action": "store_true",
-                    "help": "Whether to return JSON formatted data [default: False]",
+                    "help": "Whether to return data in JSON format [default: False]",
                 },
             ),
             (
@@ -347,7 +353,7 @@ class DataController(cement.Controller):
             )
 
     @cement.ex(
-        help="Upload a file to database",
+        help="Upload a file to a database, column of a database, or a cell of a database in your data hub",
         arguments=[
             (
                 ["file_path"],
@@ -359,7 +365,7 @@ class DataController(cement.Controller):
                     "type": str,
                     "required": False,
                     "metavar": "<database_id>",
-                    "help": "ID of database to assign to",
+                    "help": "ID of the database to assign the file to",
                 },
             ),
             (
@@ -368,7 +374,7 @@ class DataController(cement.Controller):
                     "type": str,
                     "required": False,
                     "metavar": "<column_id>",
-                    "help": "ID of column to assign to",
+                    "help": "ID of the column to assign the file to",
                 },
             ),
             (
@@ -377,14 +383,14 @@ class DataController(cement.Controller):
                     "type": str,
                     "required": False,
                     "metavar": "<row_id>",
-                    "help": "ID of row to assign to",
+                    "help": "ID of the row to assign the file to",
                 },
             ),
             (
                 ["--json"],
                 {
                     "action": "store_true",
-                    "help": "Whether to return JSON formatted data [default: False]",
+                    "help": "Whether to return data in JSON format [default: False]",
                 },
             ),
         ],
@@ -423,7 +429,7 @@ class DataController(cement.Controller):
             )
 
     @cement.ex(
-        help="Write data to database cell",
+        help="Write data to a cell of a database in your data hub",
         arguments=[
             (
                 ["data"],
@@ -435,7 +441,7 @@ class DataController(cement.Controller):
                     "type": str,
                     "required": True,
                     "metavar": "<database_id>",
-                    "help": "ID of database to write to",
+                    "help": "ID of the database to write to",
                 },
             ),
             (
@@ -444,7 +450,7 @@ class DataController(cement.Controller):
                     "type": str,
                     "required": True,
                     "metavar": "<column_id>",
-                    "help": "ID of column to write to",
+                    "help": "ID of the column to write to",
                 },
             ),
             (
@@ -453,14 +459,14 @@ class DataController(cement.Controller):
                     "type": str,
                     "required": True,
                     "metavar": "<row_id>",
-                    "help": "ID of row to write to",
+                    "help": "ID of the row to write to",
                 },
             ),
             (
                 ["--json"],
                 {
                     "action": "store_true",
-                    "help": "Whether to return JSON formatted data [default: False]",
+                    "help": "Whether to return data in JSON format [default: False]",
                 },
             ),
         ],
