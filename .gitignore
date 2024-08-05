@@ -1,6 +1,7 @@
 venv/*
 github_token
 bench.pid
+*.csv
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
