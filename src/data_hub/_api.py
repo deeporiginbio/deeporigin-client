@@ -3,7 +3,7 @@ import sys
 
 from deeporigin import auth
 from deeporigin.utils import _get_method, _print_dict
-from deeporigin_data import AuthenticationError, DeeporiginData, _response
+from deeporigin_data import AuthenticationError, DeeporiginData
 
 # this list specifies methods in the low level API that should
 # not be automatically wrapped
@@ -124,7 +124,7 @@ def _create_function(method_path):
             else:
                 raise error
 
-        if isinstance(response, _response.APIResponse):
+        if debug:
             print(f"Response request = {response.http_request}")
             print("Response headers:")
             _print_dict(dict(response.headers), json=False)
