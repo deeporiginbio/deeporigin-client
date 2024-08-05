@@ -1115,17 +1115,14 @@ def get_row_data(
         column_cardinality_mapper[col["id"]] = col["cardinality"]
 
     # now use this to construct the required dictionary
+
     row_data = dict()
+    for col in parent_response.cols:
+        if use_column_keys:
+            row_data[col["key"]] = None
+        else:
+            row_data[col["name"]] = None
     if not hasattr(response, "fields"):
-        # this is a completely empty row, with
-        # no fields. in order to return a dict
-        # with keys corresponding to the rows,
-        # we need to manually create it
-        for col in parent_response.cols:
-            if use_column_keys:
-                row_data[col["key"]] = None
-            else:
-                row_data[col["name"]] = None
         return row_data
     for field in response.fields:
         if "systemType" in field.keys() and field["systemType"] == "bodyDocument":
