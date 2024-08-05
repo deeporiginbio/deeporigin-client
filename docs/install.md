@@ -1,11 +1,15 @@
 # Installation
 
-## For users
+
+## On a Deep Origin workstation
+
+No installation needed!
+
+The Deep Origin CLI and Python client are installed as part of the Deep Origin platform.
+
+## On your local computer
 
 Run the command below for your favorite package manager to install the Deep Origin CLI and Python client.
-
-!!! warning
-    We recommend installing this package into a virtual environment, such as using [venv](https://docs.python.org/3/library/venv.html), [pyenv](https://github.com/pyenv/pyenv), [Pipenv](https://pipenv.pypa.io/en/latest/), or [Poetry](https://python-poetry.org/).
 
 === "pip"
 
