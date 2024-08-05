@@ -40,7 +40,7 @@ nav:
   - Overview: index.md
   - Install: install.md
   - Configure: configure.md
-- How to: 
+- How to:
   - Sign into Deep Origin: how-to/auth.md
   - Data hub:
     - List data: how-to/data-hub/list-data.md

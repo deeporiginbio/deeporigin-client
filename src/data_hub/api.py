@@ -1,5 +1,5 @@
 """The `deeporigin.data_hub.api` module contains high-level functions for
-interacting with the Deep Origin data hub."""
+interacting with your Deep Origin data hub."""
 
 import mimetypes
 import os
@@ -153,8 +153,8 @@ def upload_file(
 ) -> None:
     """Upload a file to Deep Origin.
 
-    This uploads to the "staging area" of the Deep Origin data hub.
-    To assign this file to a cell, use [assign_files_to_cell][src.data_hub.api.assign_files_to_cell]
+    This upload files to your Deep Origin data hub.
+    To assign this file to a cell, next run [assign_files_to_cell][src.data_hub.api.assign_files_to_cell]
 
     Args:
         file_path: Path to the file to upload
@@ -626,7 +626,7 @@ def download(
     a local destination.
 
     Download databases, objects and other entities from
-    the Deep Origin data hub and save them to local disk.
+    your Deep Origin data hub and save them to local disk.
 
     Info: Work in progress
         All features in this function have not been implemented yet.
@@ -687,7 +687,7 @@ def download_database(
 ) -> None:
     """Download a database and save it to a CSV file on the local disk.
 
-    Download a database from the Deep Origin data hub
+    Download a database from your Deep Origin data hub
     and save to local disk as a CSV file.
 
     Args:
@@ -737,7 +737,7 @@ def get_dataframe(
 ):
     """Generate a `pandas.DataFrame` or dictionary for a database.
 
-    Download a database from the Deep Origin data hub
+    Download a database from your Deep Origin data hub
     and return it as a data frame or dictionary.
 
     Args:

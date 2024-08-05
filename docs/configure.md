@@ -2,9 +2,7 @@
 
 ## On a Deep Origin workstation
 
-On a Deep Origin workstation, no configuration is needed! 
-
-The Deep Origin CLI and python client are automatically configured with your organization name, and other details. 
+On a Deep Origin workstation, no configuration is needed! Within a workstation, the Deep Origin CLI and Python client are automatically configured.
 
 ## On your local computer
 
