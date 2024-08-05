@@ -312,15 +312,33 @@ class DataController(cement.Controller):
                     "help": "Whether to return data in JSON format [default: False]",
                 },
             ),
+            (
+                ["--notebook"],
+                {
+                    "action": "store_true",
+                    "help": "Whether to show the notebook entry for each row [default: False]",
+                },
+            ),
         ],
     )
     def show(self):
         """show database or row in Deep Origin"""
 
+        if self.app.pargs.notebook:
+            # show body document
+            document = api.get_body_document(
+                row_id=self.app.pargs.object_id,
+                client=self._get_client(),
+            )
+
+            print(document)
+            return
+
         data = api.describe_row(
             row_id=self.app.pargs.object_id,
             client=self._get_client(),
         )
+        hid = data.hid
         row_type = data.type
 
         if row_type == "database":
@@ -329,12 +347,17 @@ class DataController(cement.Controller):
                 return_type="dict",
                 client=self._get_client(),
             )
+
             _print_dict(data, json=self.app.pargs.json, transpose=False)
         elif row_type == "row":
             data = api.get_row_data(
                 self.app.pargs.object_id,
                 client=self._get_client(),
             )
+
+            # insert HID as the first column
+            data["ID"] = hid
+
             _print_dict(
                 data, json=self.app.pargs.json, transpose=True, key_label="Column"
             )
