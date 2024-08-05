@@ -1037,7 +1037,7 @@ def get_columns(
 
 
 @beartype
-def get_body_document(row_id: str, *, client=None):
+def get_notebook(row_id: str, *, client=None):
     """Get the body document of a row, if it exists
 
 
