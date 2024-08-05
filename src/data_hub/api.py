@@ -1117,6 +1117,15 @@ def get_row_data(
     # now use this to construct the required dictionary
     row_data = dict()
     if not hasattr(response, "fields"):
+        # this is a completely empty row, with
+        # no fields. in order to return a dict
+        # with keys corresponding to the rows,
+        # we need to manually create it
+        for col in parent_response.cols:
+            if use_column_keys:
+                row_data[col["key"]] = None
+            else:
+                row_data[col["name"]] = None
         return row_data
     for field in response.fields:
         if "systemType" in field.keys() and field["systemType"] == "bodyDocument":
@@ -1125,9 +1134,10 @@ def get_row_data(
         column_id = field["columnId"]
 
         if "value" not in field:
-            continue
+            value = None
+        else:
+            value = field["value"]
 
-        value = field["value"]
         if isinstance(value, dict):
             if "selectedOptions" in value.keys():
                 value = value["selectedOptions"]

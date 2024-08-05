@@ -324,6 +324,16 @@ class DataController(cement.Controller):
     def show(self):
         """show database or row in Deep Origin"""
 
+        if self.app.pargs.body_document:
+            # show body document
+            document = api.get_body_document(
+                row_id=self.app.pargs.object_id,
+                client=self._get_client(),
+            )
+
+            print(document)
+            return
+
         data = api.describe_row(
             row_id=self.app.pargs.object_id,
             client=self._get_client(),
