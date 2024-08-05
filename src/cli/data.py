@@ -306,6 +306,13 @@ class DataController(cement.Controller):
                     "help": "Whether to return JSON formatted data [default: False]",
                 },
             ),
+            (
+                ["--body-document"],
+                {
+                    "action": "store_true",
+                    "help": "Whether to show body document [default: False]",
+                },
+            ),
         ],
     )
     def show(self):
@@ -315,6 +322,7 @@ class DataController(cement.Controller):
             row_id=self.app.pargs.object_id,
             client=self._get_client(),
         )
+        hid = data.hid
         row_type = data.type
 
         if row_type == "database":
@@ -323,12 +331,17 @@ class DataController(cement.Controller):
                 return_type="dict",
                 client=self._get_client(),
             )
+
             _print_dict(data, json=self.app.pargs.json, transpose=False)
         elif row_type == "row":
             data = api.get_row_data(
                 self.app.pargs.object_id,
                 client=self._get_client(),
             )
+
+            # insert HID as the first column
+            data["ID"] = hid
+
             _print_dict(
                 data, json=self.app.pargs.json, transpose=True, key_label="Column"
             )

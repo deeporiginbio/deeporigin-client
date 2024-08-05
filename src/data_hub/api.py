@@ -1037,6 +1037,31 @@ def get_columns(
 
 
 @beartype
+def get_body_document(row_id: str, *, client=None):
+    """Get the body document of a row, if it exists
+
+
+    Args:
+        row_id: ID (or human ID) of a row on Deep Origin.
+
+    Returns:
+        The body document of the row, returned as a list
+        of blocks
+
+    """
+
+    response = _api.describe_row(
+        row_id=row_id,
+        fields=True,
+        client=client,
+    )
+
+    for field in response.fields:
+        if field["systemType"] == "bodyDocument":
+            return field["value"]["topLevelBlocks"]
+
+
+@beartype
 def get_row_data(
     row_id: str,
     *,
@@ -1094,6 +1119,9 @@ def get_row_data(
     if not hasattr(response, "fields"):
         return row_data
     for field in response.fields:
+        if "systemType" in field.keys() and field["systemType"] == "bodyDocument":
+            continue
+
         column_id = field["columnId"]
 
         if "value" not in field:
