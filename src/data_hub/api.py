@@ -1117,6 +1117,8 @@ def get_row_data(
 
     row_data = dict()
     for col in parent_response.cols:
+        if "systemType" in col.keys() and col["systemType"] == "bodyDocument":
+            continue
         if use_column_keys:
             row_data[col["key"]] = None
         else:
