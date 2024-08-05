@@ -325,7 +325,7 @@ class DataController(cement.Controller):
         """show database or row in Deep Origin"""
 
         if self.app.pargs.notebook:
-            # show body document
+            # show notebook
             document = api.get_body_document(
                 row_id=self.app.pargs.object_id,
                 client=self._get_client(),
