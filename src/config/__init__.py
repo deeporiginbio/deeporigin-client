@@ -105,8 +105,8 @@ def get_value(
         key = detail.split(":")[0].strip()
         raise DeepOriginException(
             title="Invalid configuration",
-            message=f"The Deep Origin CLI and Python client requires a valid configuration file. This field is not valid:\n {detail}",
-            fix=f"To fix, run `deeporigin config set {key} <value>`",
+            message=f"The Deep Origin CLI and Python client requires a valid configuration. The {key} field is not valid:\n {detail}",
+            fix=f"To fix this issue, run `deeporigin config set {key} <value>`",
         )
 
     return validated_value

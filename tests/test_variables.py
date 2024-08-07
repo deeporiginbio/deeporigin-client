@@ -1756,7 +1756,7 @@ class TestCase(unittest.TestCase):
         ]
         with unittest.mock.patch("requests.post", side_effect=responses):
             with self.assertRaisesRegex(
-                DeepOriginException, "Sign in to the Deep Origin platform failed"
+                DeepOriginException, "Sign in to Deep Origin failed"
             ):
                 auth.authenticate()
 

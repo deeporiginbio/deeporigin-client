@@ -128,8 +128,8 @@ def _create_function(method_path):
             message = error.body["errors"][0]["title"]
             raise DeepOriginException(
                 message,
-                fix="Could not find resource. Please check ID and organization to make sure this resource exists. ",
-                title="Deep Origin Error: [Resource Not Found]",
+                fix="The resource could not be found. Please check the ID and organization.",
+                title="Deep Origin error: [Resource not found]",
             )
 
         if debug:

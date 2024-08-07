@@ -127,7 +127,7 @@ class DataController(cement.Controller):
             # upload(args.source, args.destination)
         else:
             raise DeepOriginException(
-                f"Exactly one of <source> and <destination> should be prefixed with `{PREFIXES.DO}`"
+                f"Exactly one of <source> or <destination> should be prefixed with `{PREFIXES.DO}`"
             )
 
     @cement.ex(
