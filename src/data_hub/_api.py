@@ -2,8 +2,9 @@ import inspect
 import sys
 
 from deeporigin import auth
+from deeporigin.exceptions import DeepOriginException
 from deeporigin.utils import _get_method, _print_dict
-from deeporigin_data import AuthenticationError, DeeporiginData
+from deeporigin_data import AuthenticationError, DeeporiginData, NotFoundError
 
 # this list specifies methods in the low level API that should
 # not be automatically wrapped
@@ -123,6 +124,13 @@ def _create_function(method_path):
                 response = method(**kwargs)
             else:
                 raise error
+        except NotFoundError as error:
+            message = error.body["errors"][0]["title"]
+            raise DeepOriginException(
+                message,
+                fix="Could not find resource. Please check ID and organization to make sure this resource exists. ",
+                title="Deep Origin Error: [Resource Not Found]",
+            )
 
         if debug:
             print(f"Response request = {response.http_request}")

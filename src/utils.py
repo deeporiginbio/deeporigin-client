@@ -78,6 +78,10 @@ def _truncate(txt: str) -> str:
     """Utility function for truncating text"""
 
     TERMINAL_WIDTH = int(shutil.get_terminal_size().columns / 2)
+
+    if txt is None:
+        return txt
+    txt = str(txt)
     if len(txt) > TERMINAL_WIDTH:
         txt = txt[: TERMINAL_WIDTH - 3] + "..."
     return txt
@@ -106,7 +110,7 @@ def _print_dict(
     else:
         # truncate values so that long strings
         # don't break the table
-        data = {key: _truncate(str(value)) for key, value in data.items()}
+        data = {key: _truncate(value) for key, value in data.items()}
 
         if transpose:
             data = data.items()
