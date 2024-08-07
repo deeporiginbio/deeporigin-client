@@ -201,7 +201,7 @@
   
     
   
-  Getting started
+  Quickstart
 
         </a>
       </li>
@@ -342,7 +342,7 @@
               
   
   <span class="md-ellipsis">
-    Getting started
+    Quickstart
   </span>
   
 
@@ -358,7 +358,7 @@
         <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_1">
             <span class="md-nav__icon md-icon"></span>
-            Getting started
+            Quickstart
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
@@ -375,7 +375,7 @@
         
   
   <span class="md-ellipsis">
-    Installation
+    Install
   </span>
   
 
@@ -396,7 +396,7 @@
         
   
   <span class="md-ellipsis">
-    Configuration
+    Configure
   </span>
   
 
@@ -560,11 +560,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../../how-to/data-hub/inspect-data.html" class="md-nav__link">
+      <a href="../../how-to/data-hub/view-data.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Inspect data
+    View data
   </span>
   
 
@@ -581,11 +581,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../../how-to/data-hub/upload-data.html" class="md-nav__link">
+      <a href="../../how-to/data-hub/upload-files.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Upload data
+    Upload files
   </span>
   
 
@@ -2153,8 +2153,13 @@
 <h2 id="background">Background<a class="headerlink" href="#background" title="Permanent link">&para;</a></h2>
 <p>We use automatically generated code to implement a low-level Python SDK that connects to the Deep Origin data hub API. This page describes that API. In most cases, you will not need to know how this works, nor will you need to use it.</p>
 <div class="admonition tip">
-<p class="admonition-title">How to use this reference</p>
-<p>This page contains information about each class and function in our low-level API. This is meant as a detailed reference for this module. If you're looking an introduction, we recommend reviewing the <strong>How to</strong> section.</p>
+<p class="admonition-title">Using the methods in the DeeporiginData class</p>
+<p>The <code>deeporigin._api</code> module provides wrappers that allow you to use methods in the <code>deeporigin_data.DeeporiginData</code> class, without needing to instantiate an object and configure it. Each method of this class is exposed as a function with the same name. These functions enable you to easily use the methods of the <code>deeporigin_data.DeeporiginData</code> class.</p>
+<p>For example, to use the <a href="#deeporigin_data._client.DeeporiginData.list_files">list_files</a> method in the <code>DeeporiginData</code> class, run:</p>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">deeporigin.data_hub</span> <span class="kn">import</span> <span class="n">_api</span>
+<span class="n">_api</span><span class="o">.</span><span class="n">list_files</span><span class="p">()</span>
+</code></pre></div>
+<p>Your IDE should be able to provide information about the arguments and return types of these functions by typing <code>_api.list_files(</code> and then pressing tab.    </p>
 </div>
 
 

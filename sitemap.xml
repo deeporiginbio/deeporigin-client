@@ -2,72 +2,72 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://deeporiginbio.github.io/deeporigin-client/index.html</loc>
-         <lastmod>2024-07-30</lastmod>
+         <lastmod>2024-08-07</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://deeporiginbio.github.io/deeporigin-client/configure.html</loc>
-         <lastmod>2024-07-30</lastmod>
+         <lastmod>2024-08-07</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://deeporiginbio.github.io/deeporigin-client/install.html</loc>
-         <lastmod>2024-07-30</lastmod>
+         <lastmod>2024-08-07</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://deeporiginbio.github.io/deeporigin-client/how-to/auth.html</loc>
-         <lastmod>2024-07-30</lastmod>
+         <lastmod>2024-08-07</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://deeporiginbio.github.io/deeporigin-client/how-to/config-package.html</loc>
-         <lastmod>2024-07-30</lastmod>
+         <lastmod>2024-08-07</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://deeporiginbio.github.io/deeporigin-client/how-to/variables.html</loc>
-         <lastmod>2024-07-30</lastmod>
+         <lastmod>2024-08-07</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://deeporiginbio.github.io/deeporigin-client/how-to/workstation-info.html</loc>
-         <lastmod>2024-07-30</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://deeporiginbio.github.io/deeporigin-client/how-to/data-hub/inspect-data.html</loc>
-         <lastmod>2024-07-30</lastmod>
+         <lastmod>2024-08-07</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://deeporiginbio.github.io/deeporigin-client/how-to/data-hub/list-data.html</loc>
-         <lastmod>2024-07-30</lastmod>
+         <lastmod>2024-08-07</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://deeporiginbio.github.io/deeporigin-client/how-to/data-hub/upload-data.html</loc>
-         <lastmod>2024-07-30</lastmod>
+         <loc>https://deeporiginbio.github.io/deeporigin-client/how-to/data-hub/upload-files.html</loc>
+         <lastmod>2024-08-07</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://deeporiginbio.github.io/deeporigin-client/how-to/data-hub/view-data.html</loc>
+         <lastmod>2024-08-07</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://deeporiginbio.github.io/deeporigin-client/how-to/data-hub/write-data.html</loc>
-         <lastmod>2024-07-30</lastmod>
+         <lastmod>2024-08-07</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://deeporiginbio.github.io/deeporigin-client/ref/data-hub/high-level-api.html</loc>
-         <lastmod>2024-07-30</lastmod>
+         <lastmod>2024-08-07</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://deeporiginbio.github.io/deeporigin-client/ref/data-hub/low-level-api.html</loc>
-         <lastmod>2024-07-30</lastmod>
+         <lastmod>2024-08-07</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://deeporiginbio.github.io/deeporigin-client/ref/data-hub/types.html</loc>
-         <lastmod>2024-07-30</lastmod>
+         <lastmod>2024-08-07</lastmod>
          <changefreq>daily</changefreq>
     </url>
 </urlset>

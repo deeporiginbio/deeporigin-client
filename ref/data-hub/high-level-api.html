@@ -201,7 +201,7 @@
   
     
   
-  Getting started
+  Quickstart
 
         </a>
       </li>
@@ -342,7 +342,7 @@
               
   
   <span class="md-ellipsis">
-    Getting started
+    Quickstart
   </span>
   
 
@@ -358,7 +358,7 @@
         <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_1">
             <span class="md-nav__icon md-icon"></span>
-            Getting started
+            Quickstart
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
@@ -375,7 +375,7 @@
         
   
   <span class="md-ellipsis">
-    Installation
+    Install
   </span>
   
 
@@ -396,7 +396,7 @@
         
   
   <span class="md-ellipsis">
-    Configuration
+    Configure
   </span>
   
 
@@ -560,11 +560,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../../how-to/data-hub/inspect-data.html" class="md-nav__link">
+      <a href="../../how-to/data-hub/view-data.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Inspect data
+    View data
   </span>
   
 
@@ -581,11 +581,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../../how-to/data-hub/upload-data.html" class="md-nav__link">
+      <a href="../../how-to/data-hub/upload-files.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Upload data
+    Upload files
   </span>
   
 
@@ -916,6 +916,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#src.data_hub.api.get_notebook" class="md-nav__link">
+    <span class="md-ellipsis">
+      get_notebook
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#src.data_hub.api.get_row_data" class="md-nav__link">
     <span class="md-ellipsis">
       get_row_data
@@ -955,6 +964,15 @@
   <a href="#src.data_hub.api.set_cell_data" class="md-nav__link">
     <span class="md-ellipsis">
       set_cell_data
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#src.data_hub.api.set_data_in_cells" class="md-nav__link">
+    <span class="md-ellipsis">
+      set_data_in_cells
     </span>
   </a>
   
@@ -1145,6 +1163,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#src.data_hub.api.get_notebook" class="md-nav__link">
+    <span class="md-ellipsis">
+      get_notebook
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#src.data_hub.api.get_row_data" class="md-nav__link">
     <span class="md-ellipsis">
       get_row_data
@@ -1184,6 +1211,15 @@
   <a href="#src.data_hub.api.set_cell_data" class="md-nav__link">
     <span class="md-ellipsis">
       set_cell_data
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#src.data_hub.api.set_data_in_cells" class="md-nav__link">
+    <span class="md-ellipsis">
+      set_data_in_cells
     </span>
   </a>
   
@@ -1240,7 +1276,7 @@
     <div class="doc doc-contents first">
 
       <p>The <code>deeporigin.data_hub.api</code> module contains high-level functions for
-interacting with the Deep Origin data hub.</p>
+interacting with your Deep Origin data hub.</p>
 
 
 
@@ -1442,7 +1478,7 @@ interacting with the Deep Origin data hub.</p>
       <p>Download resources from Deep Origin and save them to
 a local destination.</p>
 <p>Download databases, objects and other entities from
-the Deep Origin data hub and save them to local disk.</p>
+your Deep Origin data hub and save them to local disk.</p>
 
 
 <details class="info" open>
@@ -1530,7 +1566,7 @@ the Deep Origin data hub and save them to local disk.</p>
     <div class="doc doc-contents ">
 
       <p>Download a database and save it to a CSV file on the local disk.</p>
-<p>Download a database from the Deep Origin data hub
+<p>Download a database from your Deep Origin data hub
 and save to local disk as a CSV file.</p>
 
 
@@ -1833,7 +1869,7 @@ human IDs and values are returned.</p>
     <div class="doc doc-contents ">
 
       <p>Generate a <code>pandas.DataFrame</code> or dictionary for a database.</p>
-<p>Download a database from the Deep Origin data hub
+<p>Download a database from your Deep Origin data hub
 and return it as a data frame or dictionary.</p>
 
 
@@ -1902,6 +1938,87 @@ and return it as a data frame or dictionary.</p>
             </td>
             <td>
                   <code>&#39;dataframe&#39;</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="src.data_hub.api.get_notebook" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>            <span class="doc doc-object-name doc-function-name">get_notebook</span>
+
+
+<a href="#src.data_hub.api.get_notebook" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">get_notebook</span><span class="p">(</span><span class="n">row_id</span><span class="p">:</span> <span class="n">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">client</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">list</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+      <p>Get the notebook of a row, if it exists</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code>row_id</code></td>
+            <td>
+                  <code>str</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>ID (or human ID) of a row on Deep Origin.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code>list</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The notebook of the row, returned as a list</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code>list</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>of blocks</p>
+              </div>
             </td>
           </tr>
       </tbody>
@@ -2383,6 +2500,32 @@ based on the parent, row type, or whether the parent is the root.</p>
 <div class="doc doc-object doc-function">
 
 
+<h2 id="src.data_hub.api.set_data_in_cells" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>            <span class="doc doc-object-name doc-function-name">set_data_in_cells</span>
+
+
+<a href="#src.data_hub.api.set_data_in_cells" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">set_data_in_cells</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">values</span><span class="p">:</span> <span class="n">list</span><span class="p">,</span>
+    <span class="n">row_ids</span><span class="p">:</span> <span class="n">list</span><span class="p">[</span><span class="n">str</span><span class="p">],</span>
+    <span class="n">column_id</span><span class="p">:</span> <span class="n">str</span><span class="p">,</span>
+    <span class="n">database_id</span><span class="p">:</span> <span class="n">str</span><span class="p">,</span>
+    <span class="n">client</span><span class="o">=</span><span class="kc">None</span>
+<span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+      <p>Set data in multiple cells to some value.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
 <h2 id="src.data_hub.api.upload_file" class="doc doc-heading">
 <code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>            <span class="doc doc-object-name doc-function-name">upload_file</span>
 
@@ -2394,8 +2537,8 @@ based on the parent, row type, or whether the parent is the root.</p>
     <div class="doc doc-contents ">
 
       <p>Upload a file to Deep Origin.</p>
-<p>This uploads to the "staging area" of the Deep Origin data hub.
-To assign this file to a cell, use <a class="autorefs autorefs-internal" href="#src.data_hub.api.assign_files_to_cell">assign_files_to_cell</a></p>
+<p>This upload files to your Deep Origin data hub.
+To assign this file to a cell, next run <a class="autorefs autorefs-internal" href="#src.data_hub.api.assign_files_to_cell">assign_files_to_cell</a></p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
