@@ -106,7 +106,7 @@ def _print_dict(
     else:
         # truncate values so that long strings
         # don't break the table
-        data = {key: _truncate(str(value)) for key, value in data.items()}
+        data = {key: _truncate(value) for key, value in data.items()}
 
         if transpose:
             data = data.items()
