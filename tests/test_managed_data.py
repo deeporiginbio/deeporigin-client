@@ -245,7 +245,7 @@ def test_convert_id_format(config):
         client=config["client"],
     )
 
-    with pytest.raises(DeepOriginException, match="non-None and a list of strings"):
+    with pytest.raises(DeepOriginException, match="should be a list of strings"):
         api.convert_id_format(client=config["client"])
 
 
@@ -334,7 +334,7 @@ def test_download_file(config):
     if config["mock"]:
         api.download_file(file_id=file_id, client=config["client"])
 
-        with pytest.raises(DeepOriginException, match="should be a path to a folder"):
+        with pytest.raises(DeepOriginException, match="should be a path for a folder"):
             api.download_file(
                 file_id=file_id,
                 client=config["client"],

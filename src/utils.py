@@ -170,7 +170,9 @@ def download_sync(url: str, save_path: str) -> None:
 
     with requests.get(url, stream=True) as response:
         if response.status_code != 200:
-            raise DeepOriginException(message=f"Failed to download file from {url}")
+            raise DeepOriginException(
+                message=f"File could not be downloaded from {url}"
+            )
 
         with open(save_path, "wb") as file:
             for chunk in response.iter_content(chunk_size=8192):

@@ -155,7 +155,7 @@ def authenticate() -> dict:
             or response.json().get("error", None) != "authorization_pending"
         ):
             raise DeepOriginException(
-                message="Sign in to the Deep Origin platform failed. Please try again."
+                message="Sign in to Deep Origin failed. Please try again."
             )
         time.sleep(sign_in_poll_interval_sec)
 

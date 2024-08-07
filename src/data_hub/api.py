@@ -56,7 +56,7 @@ def convert_id_format(
 
     if hids is None and ids is None:
         raise DeepOriginException(
-            message="Either `hids` or `ids` should be non-None and a list of strings"
+            message="Either the `hids` or `ids` argument should be a list of strings."
         )
 
     conversions = []
@@ -133,7 +133,7 @@ def download_file(
 
     if not os.path.isdir(destination):
         raise DeepOriginException(
-            message=f"{destination} should be a path to a folder."
+            message=f"Destination `{destination}` should be a path for a folder."
         )
 
     file_name = _api.describe_file(file_id=file_id, client=client).name
@@ -199,7 +199,7 @@ def upload_file(
         )
 
         if put_response.status_code != 200:
-            raise DeepOriginException(message="Error uploading file")
+            raise DeepOriginException(message="File could not be uploaded.")
 
     return response.file
 
@@ -225,7 +225,7 @@ def make_database_rows(
 
     if n_rows < 1:
         raise DeepOriginException(
-            message=f"n_rows must be at least 1. However, n_rows was {n_rows}"
+            message=f"n_rows must be at least 1. However, n_rows was {n_rows}."
         )
 
     return _api.ensure_rows(
@@ -447,7 +447,7 @@ def set_data_in_cells(
 
     if len(column) != 1:
         raise DeepOriginException(
-            message=f"Could not find column {column_id} in database {database_id}"
+            message=f"Column {column_id} could not be found in database {database_id}."
         )
 
     column = column[0]
@@ -510,7 +510,7 @@ def set_cell_data(
 
     if len(column) != 1:
         raise DeepOriginException(
-            message=f"Could not find column {column_id} in database {database_id}"
+            message=f"Column {column_id} could not be found in database {database_id}."
         )
 
     column = column[0]
@@ -552,14 +552,14 @@ def _validate_value_for_column(*, column: dict, value: Any):
             value = [""]
         else:
             raise DeepOriginException(
-                message="Attempting to write to a cell that is of type select. Values to be written here should be strings or lists of strings."
+                message=f"Value {value} could not be written to cell {column['name']} of type select. The value of the cell must be a string or list of strings."
             )
 
         options = column["configSelect"]["options"]
         for item in value:
             if item not in options:
                 raise DeepOriginException(
-                    message=f"Expected every item to be in the options list. However, `{item}` is not in {options}"
+                    message=f"`{item}` is not a valid option for cell {column['name']} of type select. The valid options are {options}."
                 )
 
         validated_value = dict(selectedOptions=value)
@@ -570,7 +570,7 @@ def _validate_value_for_column(*, column: dict, value: Any):
             validated_value = int(value)
         except ValueError:
             raise DeepOriginException(
-                message=f"Attempting to write to a cell that is of type integer. Value to be written here should be an integer. Instead, you attempted to write: {value}"
+                message=f"{value} is not valid for cell {column['name']} of type integer. The value must be an integer."
             )
 
     elif column["type"] == "float":
@@ -578,7 +578,7 @@ def _validate_value_for_column(*, column: dict, value: Any):
             validated_value = float(value)
         except ValueError:
             raise DeepOriginException(
-                message=f"Attempting to write to a cell that is of type float. Value to be written here should be an float. Instead, you attempted to write: {value}"
+                message=f"{value} is not valid for cell {column['name']} of type float. The value must be a float."
             )
 
     elif column["type"] == "boolean":
@@ -606,7 +606,7 @@ def _validate_value_for_column(*, column: dict, value: Any):
             validated_value = False
         else:
             raise DeepOriginException(
-                message=f"Attempting to write to a cell that is of type Boolean. Value to be written here should be a True, False or None. Instead, you attempted to write: {value}"
+                message=f"{value} is not valid for cell {column['name']} of type Boolean. The value must be a Boolean: true, false, 0, 1, yes, no, y, or n."
             )
     else:
         raise NotImplementedError("This data type is not yet supported")
@@ -643,7 +643,7 @@ def download(
 
     if not os.path.isdir(destination):
         raise DeepOriginException(
-            message=f"{destination} should be a path to a folder."
+            message=f"Destination `{destination}` should be a path for a folder."
         )
 
     source = source.replace(PREFIXES.DO, "")
@@ -699,7 +699,7 @@ def download_database(
 
     if not os.path.isdir(destination):
         raise DeepOriginException(
-            message=f"{destination} should be a path to a folder."
+            message=f"Destination `{destination}` should be a path for a folder."
         )
 
     if isinstance(source, str):
@@ -1089,7 +1089,7 @@ def get_row_data(
 
     if response.type != "row":
         raise DeepOriginException(
-            message=f"Expected `row_id` to resolve to a row, instead, it resolves to a `{response.type}`"
+            message=f"The row could not be retrieved because `{row_id}` is a `{response.type}`. row_id must be an ID for a row."
         )
 
     # ask parent for column names
@@ -1100,7 +1100,7 @@ def get_row_data(
 
     if parent_response.type != "database":
         raise DeepOriginException(
-            message=f"Expected parent of `{row_id}` to resolve to a database, instead, it resolves to a `{parent_response.type}`"
+            message=f"The row could not be retrieved because the parent of `{row_id}` is a `{parent_response.type}`. The parent of row_id must be a database."
         )
 
     # make a dictionary from column IDs to column names

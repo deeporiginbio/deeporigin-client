@@ -65,8 +65,8 @@ class ConfigController(cement.Controller):
         # check that key exists in the confuse template
         if key not in TEMPLATE.keys():
             raise DeepOriginException(
-                message=f"{key} is not a valid key for a configuration file.",
-                fix=f" Should be one of {', '.join(list(TEMPLATE.keys()))}",
+                message=f"{key} is not a valid configuration key.",
+                fix=f"The following configuration keys are supported: {', '.join(list(TEMPLATE.keys()))}",
             )
 
         # check if config file exists
@@ -99,13 +99,14 @@ class ConfigController(cement.Controller):
         name = self.app.pargs.profile
 
         # check if config file exists
-        if not os.path.isfile(CONFIG_YML_LOCATION):
-            raise DeepOriginException(
-                "Cannot save configuration for later use because no user configuration exists."
-            )
-
         save_location = os.path.expanduser(f"~/.deeporigin/{name}.yml")
-        shutil.copy(CONFIG_YML_LOCATION, save_location)
+
+        if os.path.isfile(CONFIG_YML_LOCATION):
+            shutil.copy(CONFIG_YML_LOCATION, save_location)
+        else:
+            with open(save_location, "w") as file:
+                yaml.dump({}, file, default_flow_style=False)
+
         print(f"✔︎ Configuration saved to {save_location}")
 
     @cement.ex(
@@ -124,7 +125,7 @@ class ConfigController(cement.Controller):
         # check if config file exists
         if not os.path.isfile(file_to_load):
             raise DeepOriginException(
-                "Cannot save configuration for later use because no user configuration exists."
+                f"Configuration '{name}' could not be loaded because it does not exist."
             )
 
         shutil.copy(file_to_load, CONFIG_YML_LOCATION)
