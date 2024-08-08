@@ -97,7 +97,7 @@ def create_workspace(
         hid = name
 
     data = dict(name=name, hid=hid, parentId=parent_id)
-    return _api.create_workspace(workspace=data)
+    return _api.create_workspace(workspace=data, client=client)
 
 
 @ensure_client
@@ -132,7 +132,7 @@ def create_database(
         hidPrefix=hid_prefix,
         parentId=parent_id,
     )
-    return _api.create_database(database=data)
+    return _api.create_database(database=data, client=client)
 
 
 @beartype
