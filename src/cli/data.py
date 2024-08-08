@@ -30,62 +30,6 @@ class DataController(cement.Controller):
             return client  # pragma: no cover
 
     @cement.ex(
-        help="Merge two or more databases into a single table, integrating their cross-references, and save the table to a CSV file",
-        arguments=[
-            (
-                ["--databases"],
-                {
-                    "help": "List of IDs of the databases to merge",
-                    "action": "store",
-                    "nargs": "*",
-                    "required": True,
-                },
-            ),
-            (
-                ["--destination"],
-                {
-                    "type": str,
-                    "required": True,
-                    "metavar": "<destination>",
-                    "help": "Local directory path to save the table to",
-                },
-            ),
-            (
-                ["--include-files"],
-                {
-                    "action": "store_true",
-                    "help": "Whether to download the files in the databases [default: False]",
-                },
-            ),
-        ],
-    )
-    def merge_db(self):
-        """Merge databases and save as CSV"""
-
-        databases = self.app.pargs.databases
-        destination = self.app.pargs.destination
-        dfs = []
-        save_name = "-".join(databases)
-        for db in databases:
-            df = api.get_dataframe(
-                db,
-                client=self._get_client(),
-            )
-            dfs.append(df)
-        df = api.merge_databases(dfs)
-
-        # save to CSV
-        df.to_csv(os.path.join(destination, f"merged-{save_name}.csv"))
-
-        if not self.app.pargs.include_files:
-            return
-
-        for df in dfs:
-            files = df.attrs["file_ids"]
-            for file in files:
-                api.download_file(file, destination=destination)
-
-    @cement.ex(
         help="Copy a file or database to or from your data hub",
         arguments=[
             (
@@ -492,6 +436,105 @@ class DataController(cement.Controller):
         )
 
         print(f"✔︎ Wrote {self.app.pargs.data} to database")
+
+    @cement.ex(
+        help="Create new folder or database",
+        arguments=[
+            (
+                ["--name"],
+                {
+                    "type": str,
+                    "required": True,
+                    "help": "Name of database to create",
+                },
+            ),
+            (
+                ["--parent-id"],
+                {
+                    "type": str,
+                    "required": False,
+                    "help": "ID of parent folder to create in",
+                },
+            ),
+            (
+                ["--folder"],
+                {
+                    "action": "store_true",
+                    "help": "Whether to make a new folder [default: False]",
+                },
+            ),
+            (
+                ["--database"],
+                {
+                    "action": "store_true",
+                    "help": "Whether to make a new database [default: False]",
+                },
+            ),
+            (
+                ["--json"],
+                {
+                    "action": "store_true",
+                    "help": "Whether to return data in JSON format [default: False]",
+                },
+            ),
+        ],
+    )
+    def new(self):
+        """Create a new database, column, or row in your Data Hub"""
+
+        if self.app.pargs.folder and self.app.pargs.database:
+            raise DeepOriginException(
+                "Cannot specify both --folder and --database",
+                fix="Choose either --database or --folder.",
+            )
+
+        if self.app.pargs.database:
+            api.create_database(
+                name=self.app.pargs.name,
+                client=self._get_client(),
+                parent_id=self.app.pargs.parent_id,
+            )
+            print(f"✔︎ Created a new database with name: {self.app.pargs.name}")
+        elif self.app.pargs.folder:
+            api.create_workspace(
+                name=self.app.pargs.name,
+                client=self._get_client(),
+                parent_id=self.app.pargs.parent_id,
+            )
+            print(f"✔︎ Created a new folder with name: {self.app.pargs.name}")
+        else:
+            raise DeepOriginException("Must specify either --database or --folder")
+
+    @cement.ex(
+        help="Delete rows, folders or databases",
+        arguments=[
+            (
+                ["--ids"],
+                {
+                    "type": str,
+                    "required": True,
+                    "nargs": "+",
+                    "help": "IDs of resources to delete",
+                },
+            ),
+            (
+                ["--json"],
+                {
+                    "action": "store_true",
+                    "help": "Whether to return data in JSON format [default: False]",
+                },
+            ),
+        ],
+    )
+    def delete(self):
+        """Delete rows, databases or folders"""
+
+        api.delete_rows(
+            row_ids=self.app.pargs.ids,
+            client=self._get_client(),
+        )
+
+        print(f"✔︎ Deleted {len(self.app.pargs.ids)} objects")
 
 
 CONTROLLERS = [

@@ -75,6 +75,66 @@ def convert_id_format(
     )
 
 
+@ensure_client
+@beartype
+def create_workspace(
+    *,
+    name: str,
+    client=None,
+    hid: Optional[str] = None,
+    parent_id: Optional[str] = None,
+):
+    """Create a new workspace (folder) in the Data Hub
+
+    A workspace contains can contain other workspaces and databases.
+
+    Args:
+        name: Name of the workspace to create
+        hid: Human ID. If not specified, the name will be used
+        parent_id: ID of the parent. If None, the workspace is created at the root level
+    """
+    if hid is None:
+        hid = name
+
+    data = dict(name=name, hid=hid, parentId=parent_id)
+    return _api.create_workspace(workspace=data)
+
+
+@ensure_client
+@beartype
+def create_database(
+    *,
+    name: str,
+    client=None,
+    parent_id: Optional[str] = None,
+    hid: Optional[str] = None,
+    hid_prefix: Optional[str] = None,
+):
+    """Create a new database in the Data Hub
+
+    A database contains rows of data.
+
+    Args:
+        name: Name of the database to create
+        hid: Human ID. If not specified, the name will be used
+        parent_id: ID of the parent. If None, the workspace is created at the root level
+        hid_prefix: Human ID prefix to be used for each row. If not specified, the name will be used
+    """
+    if hid_prefix is None:
+        hid_prefix = name
+
+    if hid is None:
+        hid = name
+
+    data = dict(
+        name=name,
+        hid=hid,
+        hidPrefix=hid_prefix,
+        parentId=parent_id,
+    )
+    return _api.create_database(database=data)
+
+
 @beartype
 @ensure_client
 def list_rows(
