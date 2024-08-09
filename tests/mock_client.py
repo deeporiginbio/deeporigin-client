@@ -203,7 +203,7 @@ class MockClient:
 
     def create_database(self, **kwargs):
         name = kwargs["database"]["name"]
-        parentId = kwargs["database"]["parent_id"]
+        parentId = kwargs["database"]["parentId"]
         return GenericModel(
             id="_database:FzTJKQ11i1VVRfqolWsFg",
             date_created="2024-07-18 13:36:18.017657",

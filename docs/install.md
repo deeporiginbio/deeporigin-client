@@ -5,7 +5,7 @@
 
 No installation needed!
 
-The Deep Origin CLI and Python client are installed in each workstation.
+The Deep Origin CLI and Python client are installed on every workstation.
 
 ## On your local computer
 

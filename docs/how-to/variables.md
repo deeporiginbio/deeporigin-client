@@ -1,6 +1,6 @@
-# Install variables and secrets into a workstation
+# Install variables and secrets 
 
-Variables and secrets specified in the Deep Orgin platform, either
+[Variables and secrets](https://docs.deeporigin.io/docs/os/variables-secrets) specified in the Deep Orgin platform, either
 at the organization level or the account level, can be installed into
 workstations by running the following command:
 
@@ -18,5 +18,5 @@ No variables were deleted
   EnvironmentVariable: foo
 ```
 
-!!! warning "Only on Deep Origin workstations"
-    This functionality is only meant for use in Deep Origin workstations.
+!!! info "Only on Deep Origin Workstations"
+    This function of the CLI only works on Deep Origin Workstations. This will not work on your local computer.

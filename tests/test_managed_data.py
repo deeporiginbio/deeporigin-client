@@ -91,7 +91,8 @@ def test_make_database_rows(config):
 def test_create_workspace(config):
     name = "test-" + str(uuid.uuid4())[:6]
     api.create_workspace(
-        workspace=dict(name=name, hid=name),
+        name=name,
+        hid=name,
         client=config["client"],
     )
 
@@ -99,12 +100,10 @@ def test_create_workspace(config):
 def test_create_database(config):
     unique_id = str(uuid.uuid4())[:6]
     api.create_database(
-        database=dict(
-            name="test-" + unique_id,
-            hid="test-" + unique_id,
-            hid_prefix="test" + unique_id,
-            parent_id=config["folders"][0],
-        ),
+        name="test-" + unique_id,
+        hid="test-" + unique_id,
+        hid_prefix="test" + unique_id,
+        parent_id=config["folders"][0],
         client=config["client"],
     )
 

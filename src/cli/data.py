@@ -1,12 +1,17 @@
 """this implements controllers and hooks to connect to
 data_hub.py"""
 
-import os
-
 import cement
 from deeporigin.data_hub import api
 from deeporigin.exceptions import DeepOriginException
-from deeporigin.utils import PREFIXES, _print_dict, _print_tree, _show_json, _truncate
+from deeporigin.utils import (
+    PREFIXES,
+    DataType,
+    _print_dict,
+    _print_tree,
+    _show_json,
+    _truncate,
+)
 
 
 class DataController(cement.Controller):
@@ -28,62 +33,6 @@ class DataController(cement.Controller):
             client = api._get_default_client()
 
             return client  # pragma: no cover
-
-    @cement.ex(
-        help="Merge two or more databases into a single table, integrating their cross-references, and save the table to a CSV file",
-        arguments=[
-            (
-                ["--databases"],
-                {
-                    "help": "List of IDs of the databases to merge",
-                    "action": "store",
-                    "nargs": "*",
-                    "required": True,
-                },
-            ),
-            (
-                ["--destination"],
-                {
-                    "type": str,
-                    "required": True,
-                    "metavar": "<destination>",
-                    "help": "Local directory path to save the table to",
-                },
-            ),
-            (
-                ["--include-files"],
-                {
-                    "action": "store_true",
-                    "help": "Whether to download the files in the databases [default: False]",
-                },
-            ),
-        ],
-    )
-    def merge_db(self):
-        """Merge databases and save as CSV"""
-
-        databases = self.app.pargs.databases
-        destination = self.app.pargs.destination
-        dfs = []
-        save_name = "-".join(databases)
-        for db in databases:
-            df = api.get_dataframe(
-                db,
-                client=self._get_client(),
-            )
-            dfs.append(df)
-        df = api.merge_databases(dfs)
-
-        # save to CSV
-        df.to_csv(os.path.join(destination, f"merged-{save_name}.csv"))
-
-        if not self.app.pargs.include_files:
-            return
-
-        for df in dfs:
-            files = df.attrs["file_ids"]
-            for file in files:
-                api.download_file(file, destination=destination)
 
     @cement.ex(
         help="Copy a file or database to or from your data hub",
@@ -260,9 +209,11 @@ class DataController(cement.Controller):
     def describe(self):
         """describe file or row or database"""
 
-        if PREFIXES.FILE in self.app.pargs.object_id:
-            key_label = "Property"
+        key_label = "Property"
 
+        col_data = None
+
+        if PREFIXES.FILE in self.app.pargs.object_id:
             data = api.describe_file(
                 file_id=self.app.pargs.object_id,
                 client=self._get_client(),
@@ -270,7 +221,6 @@ class DataController(cement.Controller):
             data = data.dict()
         else:
             # not a file
-            key_label = "Column"
 
             data = api.describe_row(
                 row_id=self.app.pargs.object_id,
@@ -285,18 +235,28 @@ class DataController(cement.Controller):
 
             if "cols" in data.keys() and data["cols"] is not None:
                 col_names = [col["name"] for col in data["cols"]]
-                col_keys = [col["key"] for col in data["cols"]]
+                col_types = [col["type"] for col in data["cols"]]
+                col_ids = [col["id"] for col in data["cols"]]
 
-                col_names = ", ".join(col_names)
-                col_keys = ", ".join(col_keys)
+                col_names_str = ", ".join(col_names)
+
+                col_data = dict(Name=col_names, Type=col_types, ID=col_ids)
 
                 if data["type"] == "database" and not self.app.pargs.json:
                     data["Column Names"] = _truncate(col_names)
-                    data["Column Keys"] = _truncate(col_keys)
+                    data["Column Keys"] = _truncate(col_names_str)
 
                     data.pop("cols", None)
 
         _print_dict(data, json=self.app.pargs.json, key_label=key_label)
+
+        if not self.app.pargs.json and col_data is not None:
+            print("Column information:")
+            _print_dict(
+                col_data,
+                json=False,
+                transpose=False,
+            )
 
     @cement.ex(
         help="Show a row or a database from your data hub",
@@ -492,6 +452,150 @@ class DataController(cement.Controller):
         )
 
         print(f"✔︎ Wrote {self.app.pargs.data} to database")
+
+    @cement.ex(
+        help="Create new folder, database or database column",
+        arguments=[
+            (["object_type"], {"help": "Type of resource to create"}),
+            (
+                ["--name"],
+                {
+                    "type": str,
+                    "required": True,
+                    "help": "Name of database to create",
+                },
+            ),
+            (
+                ["--parent-id"],
+                {
+                    "type": str,
+                    "required": False,
+                    "help": "ID of parent folder to create in",
+                },
+            ),
+            (
+                ["--database"],
+                {
+                    "type": str,
+                    "required": False,
+                    "help": "ID of database to create a column in",
+                },
+            ),
+            (
+                ["--key"],
+                {
+                    "type": str,
+                    "required": False,
+                    "help": "Key of column to create",
+                },
+            ),
+            (
+                ["--type"],
+                {
+                    "type": str,
+                    "required": False,
+                    "help": "Type of database column to create",
+                },
+            ),
+            (
+                ["--json"],
+                {
+                    "action": "store_true",
+                    "help": "Whether to return data in JSON format [default: False]",
+                },
+            ),
+        ],
+    )
+    def new(self):
+        """Create a new database, column, or row in your Data Hub"""
+
+        if self.app.pargs.object_type not in ["database", "folder", "column"]:
+            raise DeepOriginException(
+                "First argument should be one of [database, folder, column]"
+            )
+
+        if self.app.pargs.object_type == "database":
+            api.create_database(
+                name=self.app.pargs.name,
+                client=self._get_client(),
+                parent_id=self.app.pargs.parent_id,
+            )
+
+        elif self.app.pargs.object_type == "folder":
+            api.create_workspace(
+                name=self.app.pargs.name,
+                client=self._get_client(),
+                parent_id=self.app.pargs.parent_id,
+            )
+        elif self.app.pargs.object_type == "column":
+            if self.app.pargs.database is None:
+                raise DeepOriginException(
+                    "You must specify a database to create a column in using --database"
+                )
+            if self.app.pargs.key is None:
+                key = self.app.pargs.name
+            else:
+                key = self.app.pargs.key
+            if self.app.pargs.type is None:
+                raise DeepOriginException(
+                    f"You must specify a type for a column from one of {DataType} using --type"
+                )
+            api.add_database_column(
+                database_id=self.app.pargs.database,
+                key=key,
+                type=self.app.pargs.type,
+                name=self.app.pargs.name,
+            )
+
+        print(
+            f"✔︎ Created a new {self.app.pargs.object_type} with name: {self.app.pargs.name}"
+        )
+
+    @cement.ex(
+        help="Delete rows, columns, databases or folders",
+        arguments=[
+            (
+                ["--ids"],
+                {
+                    "type": str,
+                    "required": True,
+                    "nargs": "+",
+                    "help": "IDs of resources to delete",
+                },
+            ),
+            (
+                ["--json"],
+                {
+                    "action": "store_true",
+                    "help": "Whether to return data in JSON format [default: False]",
+                },
+            ),
+            (
+                ["--columns"],
+                {
+                    "action": "store_true",
+                    "help": "Whether to treat these IDs as column IDs [default: False]",
+                },
+            ),
+        ],
+    )
+    def delete(self):
+        """Delete rows, databases or folders"""
+
+        if self.app.pargs.columns:
+            for column_id in self.app.pargs.ids:
+                api.delete_database_column(
+                    column_id=column_id,
+                    client=self._get_client(),
+                )
+            print(f"✔︎ Deleted {len(self.app.pargs.ids)} columns")
+        else:
+            api.delete_rows(
+                row_ids=self.app.pargs.ids,
+                client=self._get_client(),
+            )
+
+            print(f"✔︎ Deleted {len(self.app.pargs.ids)} objects")
 
 
 CONTROLLERS = [

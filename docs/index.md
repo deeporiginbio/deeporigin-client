@@ -3,21 +3,20 @@
 
 <div class="grid cards" markdown>
 
-- :fontawesome-solid-handshake-simple: **Access your DO resources**  
-Work with your DO data, variables, secrets, and other resources through a CLI or Python.
+- :fontawesome-solid-handshake-simple: **Access Deep Origin resources**  <br>Work with your Deep Origin data, variables, secrets, and other resources through a CLI or Python.
 - :octicons-unlock-24: **Free and open-source**
-Install onto your computer to use your data, variables, secrets, and other resources outside DO.
+<br>Install onto your computer to use your data, variables, secrets, and other resources outside Deep Origin.
 - :material-download: **Easy to install**
-Just run `pip install deeporigin`.
+<br>Just run `pip install deeporigin`.
 - :fontawesome-brands-python: **Pure Python**
-Lightweight, written in pure Python. Works on any system that can run Python.
+<br>Lightweight, written in pure Python. Works on any system that can run Python.
 
 </div>
 
 ## Examples
 
 The Deep Origin CLI and Python client allow you to programmatically
-interact with the [Deep Origin OS](https://os.deeporigin.io/).
+interact with the [Deep Origin OS :octicons-link-external-16:](https://os.deeporigin.io/).
 The example below illustrates how to use the CLI and Python library to
 retrieve the database row with ID `data-1`.
 
