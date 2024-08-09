@@ -108,11 +108,11 @@ def _print_dict(
     if json:
         _show_json(data)
     else:
-        # truncate values so that long strings
-        # don't break the table
-        data = {key: _truncate(value) for key, value in data.items()}
-
         if transpose:
+            # truncate values so that long strings
+            # don't break the table
+            data = {key: _truncate(value) for key, value in data.items()}
+
             data = data.items()
             headers = [key_label, "Value"]
         else:

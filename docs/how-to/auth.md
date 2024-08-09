@@ -40,3 +40,7 @@ be used in subsequent interactions with Deep Origin.
 !!! info "Authenticating"
     In most cases, you only need to authenticate to the Deep Origin platform once.
     You do not need to authenticate every time you use the client or the CLI.
+
+
+!!! question "Authenticating on Deep Origin Workstations"
+    Automatic authentication is currently being worked on on Deep Origin Workstations. Presently, you will still have to authenticate (once) manually on Deep Origin Workstations.

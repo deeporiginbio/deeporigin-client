@@ -25,6 +25,7 @@ theme:
     - navigation.instant.prefetch
     - navigation.instant.preview
     - navigation.instant.progress
+    - navigation.sections
     - navigation.path
     - navigation.tabs
     - navigation.top
@@ -37,24 +38,29 @@ extra_css:
 
 nav:
 - Quickstart:
-  - Overview: index.md
+  - index.md
   - Install: install.md
   - Configure: configure.md
-- How to:
-  - Sign into Deep Origin: how-to/auth.md
-  - Data hub:
+  - Authenticate: how-to/auth.md
+- Data Hub: 
+  - data-hub/index.md
+  - How to:
+    - Create objects: how-to/data-hub/create.md
+    - Delete objects: how-to/data-hub/delete.md
     - List data: how-to/data-hub/list-data.md
     - View data: how-to/data-hub/view-data.md
     - Upload files: how-to/data-hub/upload-files.md
     - Write data: how-to/data-hub/write-data.md
-  - Install variables and secrets: how-to/variables.md
-  - Get info about your workstation: how-to/workstation-info.md
-  - Configure this package: how-to/config-package.md
-- API reference:
-  - Data hub:
+  - API reference:
     - High-level API: ref/data-hub/high-level-api.md
     - Low-level API: ref/data-hub/low-level-api.md
     - Types and constants: ref/data-hub/types.md
+- Compute Hub: 
+  - compute-hub/index.md
+  - How to:
+    - Install variables and secrets: how-to/variables.md
+    - Get info about your workstation: how-to/workstation-info.md
+- Support: https://www.support.deeporigin.com/servicedesk/customer/portals
 
 
 validation:
@@ -88,6 +94,7 @@ markdown_extensions:
       pygments_lang_class: true
   - pymdownx.tabbed:
       alternate_style: true
+
 
 plugins:
   - search
