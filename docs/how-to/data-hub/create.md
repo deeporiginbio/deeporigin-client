@@ -1,9 +1,8 @@
-This document describes how to create databases, columns in databases, and folders in the Deep Origin Data Hub. 
-
+This document describes how to create databases, columns in databases, and folders (workspaces) in the Deep Origin data hub.
 
 ## Folders
 
-Folders (or workspaces) can be created by specifying a name, and, optionally, a parent. 
+Folders can be created by specifying a name, and, optionally, a parent.
 
 === "CLI"
 
@@ -26,7 +25,7 @@ Folders (or workspaces) can be created by specifying a name, and, optionally, a 
 
     ```py
     from deeporigin.data_hub import api
-    api.create_workspace(name="test-workspace")
+    api.create_workspace(name="test-folder")
     ```
 
     To create a folder within another folder, specify the parent:
@@ -34,17 +33,16 @@ Folders (or workspaces) can be created by specifying a name, and, optionally, a 
 
     ```py
     api.create_workspace(
-        name="test-workspace-2",
+        name="test-folder-2",
         parent_id="parent-id",
     )
     ```
 
 ## Databases
 
-Databases can be created by specifying a name, and, optionally, a parent. 
+Databases can be created by specifying a name, and, optionally, a parent.
 
 === "CLI"
-
 
     If no parent is specified, the database will be created at the root level.
 
@@ -78,17 +76,14 @@ Databases can be created by specifying a name, and, optionally, a parent.
     )
     ```
 
-
 ## Database columns
 
 !!! warning "Work in progress"
-    There is limited support for creating database columns from the python client and CLI at this time. Not all features are supported yet. 
+    Currently, this package has limited support for creating database columns. We plan to expand the capabilities of this package.
 
-
-Create a new database column in an existing database using:
+To create a new database column in an existing database, run:
 
 === "CLI"
-
 
     ```bash
     deeporigin data new column \
@@ -97,9 +92,7 @@ Create a new database column in an existing database using:
         --type <type>
     ```
 
-
 === "Python"
-
 
     ```py
     from deeporigin.data_hub import api
@@ -111,5 +104,4 @@ Create a new database column in an existing database using:
     )
     ```
 
-
-This code creates a new column in that database. To configure the type of the column, use the `type` argument. The type must be one of [DataType](../../ref/data-hub/types.md#src.utils.DataType). 
+This code creates a new column in the existing database. To configure the type of the column, use the `type` argument. The type must a member of [DataType](../../ref/data-hub/types.md#src.utils.DataType).

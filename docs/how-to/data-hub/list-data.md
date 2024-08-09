@@ -1,6 +1,6 @@
 
 This page describes how to list resources on Deep Origin.
-Listing folders, databases, rows and files can be used
+Listing folders (workspaces), databases, rows and files can be used
 to discover the resources available on Deep Origin, and show
 their IDs for further queries.
 

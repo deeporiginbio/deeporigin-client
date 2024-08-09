@@ -1,74 +1,57 @@
-This document describes how to delete 
+This document describes how to delete objects in the Deep Origin data hub:
 
-- database rows
-- database columns
-- databases and 
-- folders 
-
-in the Deep Origin Data Hub. 
+- Database rows
+- Database columns
+- Databases
+- Folders (workspaces)
 
 !!! danger "Exercise caution"
-    - Deleting a workspace deletes all databases inside it. 
-    - Deleting a column destroys all data in that column, including all files assigned to cells in that column. 
-    - Deleting a database deletes all rows inside it. 
+    - Deleting a folder deletes all of the databases in the folder.
+    - Deleting a column destroys all of the data in that column, including all of the files assigned to the cells in that column.
+    - Deleting a database deletes all of the rows in the database.
 
     All resources will be deleted without asking for confirmation. 
 
 ## Delete database rows, databases, and folders
 
-=== "CLI"
+To delete multiple rows, databases and folders, run:
 
-    Multiple rows, databases and folders can be deleted using:
+=== "CLI"
 
     ```bash
     deeporigin data delete --ids <ids>
     ```
 
-
-
 === "Python"
-
-
 
     ```py
     from deeporigin.data_hub import api
-    api.delete_rows(row_ids=["row-1","database-1","workspace-1"])
+    api.delete_rows(row_ids=["row-1","database-1","folder-1"])
     ```
 
     !!! Info "Rows?"
-        Rows, workspaces and databases can all be deleted using the `delete_rows` method. 
+        Rows, folders and databases can all be deleted using the `delete_rows` method. 
 
+## Delete database columns
 
-
-
-
-## Delete database columns 
-
-Columns in databases can be deleted using:
+To delete columns in databases, run:
 
 === "CLI"
-
-    
 
     ```bash
     deeporigin data delete --ids <ids> --columns
     ```
 
     !!! warning "Column IDs"
-        Currently, columns can only be deleted using Column IDs, which are not the same as column names. To view the column IDs of a database, use 
+        Currently, columns can only be deleted using their IDs, which are distinct from their names. To view the IDs of the columns of a database, run: 
 
         ```bash
         deeporigin data describe <database-id>
         ```
 
-
-
 === "Python"
-
-
 
     ```py
     from deeporigin.data_hub import api
     api.delete_database_column(column_id="col-id")
     ```
-

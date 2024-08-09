@@ -29,7 +29,7 @@ __all__ = [
 
 
 class VariablesController(cement.Controller):
-    """controller to retrieve and install variables and secrets from the Deep Origin platform"""
+    """controller to retrieve and install variables and secrets from the Deep Origin OS"""
 
     class Meta:
         label = "variables"
@@ -43,7 +43,7 @@ class VariablesController(cement.Controller):
 
 
 class InstallVariablesController(cement.Controller):
-    """controller to retrieve and install variables and secrets from the Deep Origin platform"""
+    """controller to retrieve and install variables and secrets from the Deep Origin OS"""
 
     class Meta:
         label = "variables-install"
@@ -205,7 +205,7 @@ class InstallVariablesController(cement.Controller):
 
 
 class AutoInstallVariablesController(cement.Controller):
-    """controller to automatically install variables and secrets from the Deep Origin platform"""
+    """controller to automatically install variables and secrets from the Deep Origin OS"""
 
     class Meta:
         label = "variables-auto-install"
@@ -260,7 +260,7 @@ class AutoInstallVariablesController(cement.Controller):
                     "dest": "time_period_min",
                     "type": int,
                     "default": 30,
-                    "help": "Time period for updating variables from the Deep Origin platform [default: 30 min, units: min]",
+                    "help": "Time period for updating variables from the Deep Origin OS [default: 30 min, units: min]",
                 },
             ),
             (
@@ -309,7 +309,7 @@ class AutoInstallVariablesController(cement.Controller):
 
 
 class UninstallVariablesController(cement.Controller):
-    """controller to uninstall variables and secrets from the Deep Origin platform"""
+    """controller to uninstall variables and secrets from the Deep Origin OS"""
 
     class Meta:
         label = "variables-uninstall"

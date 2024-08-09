@@ -42,7 +42,7 @@ nav:
   - Install: install.md
   - Configure: configure.md
   - Authenticate: how-to/auth.md
-- Data Hub: 
+- Data hub: 
   - data-hub/index.md
   - How to:
     - Create objects: how-to/data-hub/create.md
@@ -55,7 +55,7 @@ nav:
     - High-level API: ref/data-hub/high-level-api.md
     - Low-level API: ref/data-hub/low-level-api.md
     - Types and constants: ref/data-hub/types.md
-- Compute Hub: 
+- Compute hub: 
   - compute-hub/index.md
   - How to:
     - Install variables and secrets: how-to/variables.md
