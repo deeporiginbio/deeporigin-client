@@ -456,7 +456,10 @@ class DataController(cement.Controller):
     @cement.ex(
         help="Create a new folder (workspace), database, or database column",
         arguments=[
-            (["object_type"], {"help": "Type of resource to create: folder, database, or column "}),
+            (
+                ["object_type"],
+                {"help": "Type of resource to create: folder, database, or column "},
+            ),
             (
                 ["--name"],
                 {
