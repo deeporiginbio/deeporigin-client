@@ -1250,8 +1250,6 @@ def add_database_column(
         databaseId=database_id,
     )
 
-    client = _api._get_default_client()
-
     response = client.post(
         "/AddDatabaseColumn",
         cast_to=httpx.Response,

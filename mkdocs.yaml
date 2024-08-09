@@ -46,7 +46,6 @@ nav:
   - data-hub/index.md
   - How to:
     - Create objects: how-to/data-hub/create.md
-    - Modify objects: how-to/data-hub/modify.md
     - Delete objects: how-to/data-hub/delete.md
     - List data: how-to/data-hub/list-data.md
     - View data: how-to/data-hub/view-data.md
@@ -61,7 +60,7 @@ nav:
   - How to:
     - Install variables and secrets: how-to/variables.md
     - Get info about your workstation: how-to/workstation-info.md
-  
+- Support: https://www.support.deeporigin.com/servicedesk/customer/portals
 
 
 validation:
@@ -95,6 +94,7 @@ markdown_extensions:
       pygments_lang_class: true
   - pymdownx.tabbed:
       alternate_style: true
+
 
 plugins:
   - search

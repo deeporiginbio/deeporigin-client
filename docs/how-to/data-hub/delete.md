@@ -7,7 +7,7 @@ This document describes how to delete
 
 in the Deep Origin Data Hub. 
 
-!!! warning "Exercise caution"
+!!! danger "Exercise caution"
     - Deleting a workspace deletes all databases inside it. 
     - Deleting a column destroys all data in that column, including all files assigned to cells in that column. 
     - Deleting a database deletes all rows inside it. 

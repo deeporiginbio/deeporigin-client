@@ -1,12 +1,17 @@
 """this implements controllers and hooks to connect to
 data_hub.py"""
 
-import os
-
 import cement
 from deeporigin.data_hub import api
 from deeporigin.exceptions import DeepOriginException
-from deeporigin.utils import PREFIXES, _print_dict, _print_tree, _show_json, _truncate
+from deeporigin.utils import (
+    PREFIXES,
+    DataType,
+    _print_dict,
+    _print_tree,
+    _show_json,
+    _truncate,
+)
 
 
 class DataController(cement.Controller):
@@ -449,8 +454,9 @@ class DataController(cement.Controller):
         print(f"✔︎ Wrote {self.app.pargs.data} to database")
 
     @cement.ex(
-        help="Create new folder or database",
+        help="Create new folder, database or database column",
         arguments=[
+            (["object_type"], {"help": "Type of resource to create"}),
             (
                 ["--name"],
                 {
@@ -468,17 +474,27 @@ class DataController(cement.Controller):
                 },
             ),
             (
-                ["--folder"],
+                ["--database"],
                 {
-                    "action": "store_true",
-                    "help": "Whether to make a new folder [default: False]",
+                    "type": str,
+                    "required": False,
+                    "help": "ID of database to create a column in",
                 },
             ),
             (
-                ["--database"],
+                ["--key"],
                 {
-                    "action": "store_true",
-                    "help": "Whether to make a new database [default: False]",
+                    "type": str,
+                    "required": False,
+                    "help": "Key of column to create",
+                },
+            ),
+            (
+                ["--type"],
+                {
+                    "type": str,
+                    "required": False,
+                    "help": "Type of database column to create",
                 },
             ),
             (
@@ -493,28 +509,47 @@ class DataController(cement.Controller):
     def new(self):
         """Create a new database, column, or row in your Data Hub"""
 
-        if self.app.pargs.folder and self.app.pargs.database:
+        if self.app.pargs.object_type not in ["database", "folder", "column"]:
             raise DeepOriginException(
-                "Cannot specify both --folder and --database",
-                fix="Choose either --database or --folder.",
+                "First argument should be one of [database, folder, column]"
             )
 
-        if self.app.pargs.database:
+        if self.app.pargs.object_type == "database":
             api.create_database(
                 name=self.app.pargs.name,
                 client=self._get_client(),
                 parent_id=self.app.pargs.parent_id,
             )
-            print(f"✔︎ Created a new database with name: {self.app.pargs.name}")
-        elif self.app.pargs.folder:
+
+        elif self.app.pargs.object_type == "folder":
             api.create_workspace(
                 name=self.app.pargs.name,
                 client=self._get_client(),
                 parent_id=self.app.pargs.parent_id,
             )
-            print(f"✔︎ Created a new folder with name: {self.app.pargs.name}")
-        else:
-            raise DeepOriginException("Must specify either --database or --folder")
+        elif self.app.pargs.object_type == "column":
+            if self.app.pargs.database is None:
+                raise DeepOriginException(
+                    "You must specify a database to create a column in using --database"
+                )
+            if self.app.pargs.key is None:
+                key = self.app.pargs.name
+            else:
+                key = self.app.pargs.key
+            if self.app.pargs.type is None:
+                raise DeepOriginException(
+                    f"You must specify a type for a column from one of {DataType} using --type"
+                )
+            api.add_database_column(
+                database_id=self.app.pargs.database,
+                key=key,
+                type=self.app.pargs.type,
+                name=self.app.pargs.name,
+            )
+
+        print(
+            f"✔︎ Created a new {self.app.pargs.object_type} with name: {self.app.pargs.name}"
+        )
 
     @cement.ex(
         help="Delete rows, columns, databases or folders",
