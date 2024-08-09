@@ -17,13 +17,12 @@ To use most of the functionality of the CLI or Python client, you must first run
 
 In either case, you will be presented with a prompt similar to below:
 
-```
-To connect to the Deep Origin platform, navigate your browser to 
+```shell
+To connect to the Deep Origin OS, navigate your browser to 
 
 https://<env>auth0.com/activate?user_code=VMPZ-PQFG
 
 and verify the confirmation code is "VMPZ-PQFG", and click the "Confirm" button.
-
 ```
 
 When you visit that URL, you will see a prompt that looks like:
@@ -38,9 +37,8 @@ After signing in, your access tokens will be cached to disk and then automatical
 be used in subsequent interactions with Deep Origin.
 
 !!! info "Authenticating"
-    In most cases, you only need to authenticate to the Deep Origin platform once.
+    In most cases, you only need to authenticate to the Deep Origin OS once.
     You do not need to authenticate every time you use the client or the CLI.
 
-
-!!! question "Authenticating on Deep Origin Workstations"
-    Automatic authentication is currently being worked on on Deep Origin Workstations. Presently, you will still have to authenticate (once) manually on Deep Origin Workstations.
+!!! question "Authenticating on Deep Origin workstations"
+    Presently, workstation users must authenticate (once) to the Deep Origin OS. We plan to develop the capability to automatically authenticate workstation users.

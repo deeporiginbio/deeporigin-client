@@ -31,11 +31,11 @@ class AwsProfile(Variable):
     )
 
     @classmethod
-    def from_platform(cls: type[T], platform_value: dict) -> T:
-        """Create an instance from a dictionary from the Deep Origin platform
+    def from_platform(cls: type[T], os_value: dict) -> T:
+        """Create an instance from a dictionary from the Deep Origin OS
 
         Args:
-            platform_value (:obj:`dict`): platform representation of the variable/secret
+            os_value (:obj:`dict`): OS representation of the variable/secret
 
         Returns:
             :obj:`AwsProfile`: Python instance of the variable/secret
@@ -44,12 +44,12 @@ class AwsProfile(Variable):
             :obj:`DeepOriginException`: if value is invalid
         """
         return cls(
-            drn=platform_value["drn"],
-            name=platform_value["name"],
-            profile=platform_value["profileName"],
-            access_key_id=platform_value["accessKey"],
-            secret_access_key=platform_value["secretKey"],
-            region=platform_value["defaultRegion"] or None,
+            drn=os_value["drn"],
+            name=os_value["name"],
+            profile=os_value["profileName"],
+            access_key_id=os_value["accessKey"],
+            secret_access_key=os_value["secretKey"],
+            region=os_value["defaultRegion"] or None,
         )
 
     def install(

@@ -42,7 +42,7 @@ nav:
   - Install: install.md
   - Configure: configure.md
   - Authenticate: how-to/auth.md
-- Data Hub: 
+- Data hub: 
   - data-hub/index.md
   - How to:
     - Create objects: how-to/data-hub/create.md

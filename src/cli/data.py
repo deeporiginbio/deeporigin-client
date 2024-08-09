@@ -80,7 +80,7 @@ class DataController(cement.Controller):
             )
 
     @cement.ex(
-        help="List the files, rows, databases, and/or folders in your Deep Origin data hub",
+        help="List the files, rows, databases, and/or folders (workspaces) in your Deep Origin data hub",
         arguments=[
             (
                 ["--files"],
@@ -454,15 +454,15 @@ class DataController(cement.Controller):
         print(f"✔︎ Wrote {self.app.pargs.data} to database")
 
     @cement.ex(
-        help="Create new folder, database or database column",
+        help="Create a new folder (workspace), database, or database column",
         arguments=[
-            (["object_type"], {"help": "Type of resource to create"}),
+            (["object_type"], {"help": "Type of resource to create: folder, database, or column "}),
             (
                 ["--name"],
                 {
                     "type": str,
                     "required": True,
-                    "help": "Name of database to create",
+                    "help": "Name of database, folder, or column to create",
                 },
             ),
             (
@@ -470,7 +470,7 @@ class DataController(cement.Controller):
                 {
                     "type": str,
                     "required": False,
-                    "help": "ID of parent folder to create in",
+                    "help": "ID of the parent folder to create the folder or database in",
                 },
             ),
             (
@@ -478,7 +478,7 @@ class DataController(cement.Controller):
                 {
                     "type": str,
                     "required": False,
-                    "help": "ID of database to create a column in",
+                    "help": "ID of database to create the column in",
                 },
             ),
             (
@@ -486,7 +486,7 @@ class DataController(cement.Controller):
                 {
                     "type": str,
                     "required": False,
-                    "help": "Key of column to create",
+                    "help": "Programmatic key of the column to create",
                 },
             ),
             (
@@ -494,7 +494,7 @@ class DataController(cement.Controller):
                 {
                     "type": str,
                     "required": False,
-                    "help": "Type of database column to create",
+                    "help": "Type of the column to create",
                 },
             ),
             (
@@ -507,7 +507,7 @@ class DataController(cement.Controller):
         ],
     )
     def new(self):
-        """Create a new database, column, or row in your Data Hub"""
+        """Create a new database, column, or row in your data hub"""
 
         if self.app.pargs.object_type not in ["database", "folder", "column"]:
             raise DeepOriginException(
@@ -552,7 +552,7 @@ class DataController(cement.Controller):
         )
 
     @cement.ex(
-        help="Delete rows, columns, databases or folders",
+        help="Delete rows, columns, databases and/or folders (workspaces)",
         arguments=[
             (
                 ["--ids"],
@@ -560,7 +560,14 @@ class DataController(cement.Controller):
                     "type": str,
                     "required": True,
                     "nargs": "+",
-                    "help": "IDs of resources to delete",
+                    "help": "IDs of the resources to delete",
+                },
+            ),
+            (
+                ["--columns"],
+                {
+                    "action": "store_true",
+                    "help": "Whether to delete columns or rows/databases/folders [default: False]",
                 },
             ),
             (
@@ -570,17 +577,10 @@ class DataController(cement.Controller):
                     "help": "Whether to return data in JSON format [default: False]",
                 },
             ),
-            (
-                ["--columns"],
-                {
-                    "action": "store_true",
-                    "help": "Whether to treat these IDs as column IDs [default: False]",
-                },
-            ),
         ],
     )
     def delete(self):
-        """Delete rows, databases or folders"""
+        """Delete rows, columns, databases and/or folders"""
 
         if self.app.pargs.columns:
             for column_id in self.app.pargs.ids:

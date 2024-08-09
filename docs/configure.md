@@ -20,7 +20,7 @@ To view the configuration for this package, run:
 deeporigin config show
 ```
 
-This will display a table like below:
+This will display a table such as below:
 
 ```
 ╭─────────────────────────────┬─────────────────────────────────────╮

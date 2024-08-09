@@ -246,7 +246,7 @@ class EnvironmentVariable(Variable):
             with open(bashrc_filename, "a") as file:
                 file.write("\n\n")
                 file.write("######## BEGIN DEEP ORIGIN CLI ########\n")
-                file.write("# Load variables from the Deep Origin platform\n")
+                file.write("# Load variables from the Deep Origin OS\n")
                 file.write("set -o allexport\n")
                 file.write(f"source {user_env_filename}\n")
                 file.write(f"source {system_env_filename}\n")
@@ -259,7 +259,7 @@ class EnvironmentVariable(Variable):
         is_user_variable: bool = True,
         user_home_dirname: str = os.path.expanduser("~"),
     ) -> str:
-        """Get the filename where platform managed environment variables should be stored
+        """Get the filename where OS managed environment variables should be stored
 
         Args:
             is_user_variable (:obj:`bool`, optional): whether the variable is a user or system variable

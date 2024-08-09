@@ -87,14 +87,14 @@ def create_workspace(
     hid: Optional[str] = None,
     parent_id: Optional[str] = None,
 ):
-    """Create a new workspace (folder) in the Data Hub
+    """Create a new folder (workspace) in the data hub
 
-    A workspace contains can contain other workspaces and databases.
+    A folder contains can contain other rows and databases.
 
     Args:
-        name: Name of the workspace to create
+        name: Name of the folder to create
         hid: Human ID. If not specified, the name will be used
-        parent_id: ID of the parent. If None, the workspace is created at the root level
+        parent_id: ID of the parent. If None, the folder is created at the root level
     """
     if hid is None:
         hid = name
@@ -113,14 +113,14 @@ def create_database(
     hid: Optional[str] = None,
     hid_prefix: Optional[str] = None,
 ):
-    """Create a new database in the Data Hub
+    """Create a new database in the data hub
 
     A database contains rows of data.
 
     Args:
         name: Name of the database to create
         hid: Human ID. If not specified, the name will be used
-        parent_id: ID of the parent. If None, the workspace is created at the root level
+        parent_id: ID of the parent. If None, the folder is created at the root level
         hid_prefix: Human ID prefix to be used for each row. If not specified, the name will be used
     """
     if hid_prefix is None:
@@ -147,7 +147,7 @@ def list_rows(
     parent_is_root: Optional[bool] = None,
     client=None,
 ) -> list:
-    """List rows in a database or folder.
+    """List rows in a database or folder (workspace).
 
     Returns a list of rows from folders and databases,
     based on the parent, row type, or whether the parent is the root.
@@ -183,7 +183,7 @@ def download_file(
     destination: str = os.getcwd(),
     client=None,
 ) -> None:
-    """Download a file to a destination folder.
+    """Download a file to a destination folder (workspace).
 
     Download a file synchronously from Deep Origin
     to folder on the local file system.
@@ -393,7 +393,7 @@ def get_tree(
     include_rows: bool = True,
     client=None,
 ) -> list:
-    """Construct a tree of all folders, databases and rows.
+    """Construct a tree of all folders (workspaces), databases and rows.
 
     Returns a tree that contains all folders, databases and
     (optionally) rows. The tree is returned as a dictionary,

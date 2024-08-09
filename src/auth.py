@@ -132,7 +132,7 @@ def authenticate() -> dict:
     # Prompt the user to sign into the Deep Origin platform
     print(
         (
-            "To connect to the Deep Origin platform, "
+            "To connect to the Deep Origin OS, "
             f"navigate your browser to \n\n{verification_url}\n\n"
             f'and verify the confirmation code is "{user_code}", '
             'and click the "Confirm" button.'
@@ -171,7 +171,7 @@ def authenticate() -> dict:
 
 
 def refresh_tokens(api_refresh_token: str) -> str:
-    """Refresh the access token for the DO platform
+    """Refresh the access token for the Deep Origin OS
 
     Args:
         api_refresh_token (:obj:`str`): API refresh token

@@ -91,7 +91,7 @@ def install_variables(
     overwrite: bool = False,
 ) -> dict[str, dict[str, typing.Union[str, VariableType]]]:
     """
-    Retrieve the variables and secrets for your workstation from the Deep Origin platform and
+    Retrieve the variables and secrets for your workstation from the Deep Origin OS and
     install them into the workstation. Includes your variables and secrets, as well as those of
     the parent organization of the workstation.
 
@@ -107,7 +107,7 @@ def install_variables(
     """
     prev_variables = get_variables_from_local()
 
-    # get variables from the DO platform
+    # get variables from the DO OS
     variables = get_variables_from_do_platform(user=user, org=org, types=types)
 
     # determine which variables were added, modified, removed, or unmodified
@@ -189,7 +189,7 @@ def get_variables_from_do_platform(
     types: typing.Iterable[VariableType] = tuple(VariableType.__members__.values()),
 ) -> list[Variable]:
     """
-    Retrieve the variables and secrets for your workstation from the Deep Origin platform.
+    Retrieve the variables and secrets for your workstation from the Deep Origin OS.
     Includes your variables and secrets, as well as those of the parent organization
     of the workstation.
 
@@ -364,14 +364,14 @@ def enable_variable_auto_updating(
 ) -> None:
     """
     Configure the variables and secrets for your workstation from the Deep Origin
-    platform to be automatically installed once added or modified. Includes your
+    OS to be automatically installed once added or modified. Includes your
     variables and secrets, as well as those of the parent organization of the workstation.
 
     Args:
         user (:obj:`bool`, optional): Whether to retrieve and install user variables and secrets
         org (:obj:`bool`, optional): Whether to retrieve and install organization variables and secrets
         types (:obj:`typing.Iterable`, optional): Types of variables and secrets to retrieve and install
-        time_period_min (:obj:`int`, optional): Time period for updating variables from the Deep Origin platform [default: 30, units: min]
+        time_period_min (:obj:`int`, optional): Time period for updating variables from the Deep Origin OS [default: 30, units: min]
         overwrite (:obj:`bool`, optional): Whether to overwrite direct changes to variables and secrets
     """
     # login
@@ -536,7 +536,7 @@ def uninstall_variables(
     overwrite: bool = False,
 ) -> None:
     """
-    Remove variables and secrets retrieved from the Deep Origin platform, including
+    Remove variables and secrets retrieved from the Deep Origin OS, including
     uninstalling variables and secrets.
 
     Args:

@@ -17,16 +17,16 @@ class Variable(abc.ABC, pydantic.BaseModel):
     name: str = pydantic.Field(default="", min_length=1, validate_default=True)
 
     @classmethod
-    def from_platform(cls: type[T], platform_value: dict) -> T:
-        """Create an instance from a dictionary from the Deep Origin platform
+    def from_platform(cls: type[T], os_value: dict) -> T:
+        """Create an instance from a dictionary from the Deep Origin OS
 
         Args:
-            platform_value (:obj:`dict`): platform representation of the variable/secret
+            os_value (:obj:`dict`): OS representation of the variable/secret
 
         Returns:
             :obj:`type[T]`: Python instance of the variable/secret
         """
-        return cls(**platform_value)
+        return cls(**os_value)
 
     @abc.abstractmethod
     def install(
