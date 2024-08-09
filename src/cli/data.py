@@ -204,9 +204,11 @@ class DataController(cement.Controller):
     def describe(self):
         """describe file or row or database"""
 
-        if PREFIXES.FILE in self.app.pargs.object_id:
-            key_label = "Property"
+        key_label = "Property"
 
+        col_data = None
+
+        if PREFIXES.FILE in self.app.pargs.object_id:
             data = api.describe_file(
                 file_id=self.app.pargs.object_id,
                 client=self._get_client(),
@@ -214,7 +216,6 @@ class DataController(cement.Controller):
             data = data.dict()
         else:
             # not a file
-            key_label = "Column"
 
             data = api.describe_row(
                 row_id=self.app.pargs.object_id,
@@ -229,18 +230,28 @@ class DataController(cement.Controller):
 
             if "cols" in data.keys() and data["cols"] is not None:
                 col_names = [col["name"] for col in data["cols"]]
-                col_keys = [col["key"] for col in data["cols"]]
+                col_types = [col["type"] for col in data["cols"]]
+                col_ids = [col["id"] for col in data["cols"]]
 
-                col_names = ", ".join(col_names)
-                col_keys = ", ".join(col_keys)
+                col_names_str = ", ".join(col_names)
+
+                col_data = dict(Name=col_names, Type=col_types, ID=col_ids)
 
                 if data["type"] == "database" and not self.app.pargs.json:
                     data["Column Names"] = _truncate(col_names)
-                    data["Column Keys"] = _truncate(col_keys)
+                    data["Column Keys"] = _truncate(col_names_str)
 
                     data.pop("cols", None)
 
         _print_dict(data, json=self.app.pargs.json, key_label=key_label)
+
+        if not self.app.pargs.json and col_data is not None:
+            print("Column information:")
+            _print_dict(
+                col_data,
+                json=False,
+                transpose=False,
+            )
 
     @cement.ex(
         help="Show a row or a database from your data hub",
@@ -506,7 +517,7 @@ class DataController(cement.Controller):
             raise DeepOriginException("Must specify either --database or --folder")
 
     @cement.ex(
-        help="Delete rows, folders or databases",
+        help="Delete rows, columns, databases or folders",
         arguments=[
             (
                 ["--ids"],
@@ -524,17 +535,32 @@ class DataController(cement.Controller):
                     "help": "Whether to return data in JSON format [default: False]",
                 },
             ),
+            (
+                ["--columns"],
+                {
+                    "action": "store_true",
+                    "help": "Whether to treat these IDs as column IDs [default: False]",
+                },
+            ),
         ],
     )
     def delete(self):
         """Delete rows, databases or folders"""
 
-        api.delete_rows(
-            row_ids=self.app.pargs.ids,
-            client=self._get_client(),
-        )
+        if self.app.pargs.columns:
+            for column_id in self.app.pargs.ids:
+                api.delete_database_column(
+                    column_id=column_id,
+                    client=self._get_client(),
+                )
+            print(f"✔︎ Deleted {len(self.app.pargs.ids)} columns")
+        else:
+            api.delete_rows(
+                row_ids=self.app.pargs.ids,
+                client=self._get_client(),
+            )
 
-        print(f"✔︎ Deleted {len(self.app.pargs.ids)} objects")
+            print(f"✔︎ Deleted {len(self.app.pargs.ids)} objects")
 
 
 CONTROLLERS = [

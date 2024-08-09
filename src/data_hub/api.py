@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any, Optional, Union
 from urllib.parse import urlparse, urlunparse
 
+import httpx
 from beartype import beartype
 
 # this import is to allow us to use functions
@@ -19,6 +20,8 @@ from deeporigin.data_hub._api import *  # noqa: F403
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.utils import (
     PREFIXES,
+    Cardinality,
+    DataType,
     DatabaseReturnType,
     IDFormat,
     RowType,
@@ -1208,3 +1211,51 @@ def get_row_data(
         row_data[column_name_mapper[column_id]] = value
 
     return row_data
+
+
+@ensure_client
+@beartype
+def add_database_column(
+    *,
+    database_id: str,
+    key: str,
+    type: DataType,
+    name: str,
+    cardinality: Cardinality = "one",
+    required: bool = False,
+    client=None,
+):
+    """Add a column to a database.
+
+    Args:
+        database_id: ID (or human ID) of a database on Deep Origin.
+        key: key of the column
+        type: type of the column. Should be one of [DataType](../data-hub/types.md#src.utils.DataType)
+        name: name of the column
+        cardinality: cardinality of the column. Specifies whether cells in this column can contain or many items. Should be one of "one" or "many"
+        required: whether the column is required. If True, cells in this column cannot be empty
+
+
+    """
+    column = dict(
+        name=name,
+        key=key,
+        type=type,
+        isRequired=required,
+        cardinality=cardinality,
+    )
+
+    body = dict(
+        column=column,
+        databaseId=database_id,
+    )
+
+    client = _api._get_default_client()
+
+    response = client.post(
+        "/AddDatabaseColumn",
+        cast_to=httpx.Response,
+        body=body,
+    )
+
+    return response.json()
