@@ -16,7 +16,7 @@
 ## Examples
 
 The Deep Origin CLI and Python client allow you to programmatically
-interact with the [Deep Origin OS](https://os.deeporigin.io/).
+interact with the [Deep Origin OS :octicons-link-external-16:](https://os.deeporigin.io/).
 The example below illustrates how to use the CLI and Python library to
 retrieve the database row with ID `data-1`.
 
