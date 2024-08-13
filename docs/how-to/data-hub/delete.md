@@ -34,7 +34,7 @@ To delete multiple rows, databases and folders, run:
 
 ## Delete database columns
 
-To delete columns in databases, specify the name of the column and the database it exists in:
+To delete columns in databases, run the following command, specifying the IDs of the columns to delete and their parent database:
 
 === "CLI"
 
