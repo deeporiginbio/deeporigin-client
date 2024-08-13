@@ -567,6 +567,14 @@ class DataController(cement.Controller):
                 },
             ),
             (
+                ["--database"],
+                {
+                    "type": str,
+                    "required": False,
+                    "help": "IDs of database that columns are in",
+                },
+            ),
+            (
                 ["--columns"],
                 {
                     "action": "store_true",
@@ -589,6 +597,7 @@ class DataController(cement.Controller):
             for column_id in self.app.pargs.ids:
                 api.delete_database_column(
                     column_id=column_id,
+                    database_id=self.app.pargs.database,
                     client=self._get_client(),
                 )
             print(f"✔︎ Deleted {len(self.app.pargs.ids)} columns")
