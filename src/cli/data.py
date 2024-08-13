@@ -571,7 +571,7 @@ class DataController(cement.Controller):
                 {
                     "type": str,
                     "required": False,
-                    "help": "IDs of database that columns are in",
+                    "help": "ID of database that columns are in",
                 },
             ),
             (
