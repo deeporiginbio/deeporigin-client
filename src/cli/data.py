@@ -581,13 +581,6 @@ class DataController(cement.Controller):
                     "help": "Whether to treat IDs as column IDs [default: False]",
                 },
             ),
-            (
-                ["--json"],
-                {
-                    "action": "store_true",
-                    "help": "Whether to return data in JSON format [default: False]",
-                },
-            ),
         ],
     )
     def delete(self):
