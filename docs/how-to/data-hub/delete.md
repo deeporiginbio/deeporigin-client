@@ -34,24 +34,23 @@ To delete multiple rows, databases and folders, run:
 
 ## Delete database columns
 
-To delete columns in databases, run:
+To delete columns in databases, run the following command, specifying the IDs of the columns to delete and their parent database:
 
 === "CLI"
 
     ```bash
-    deeporigin data delete --ids <ids> --columns
+    deeporigin data delete \
+        --ids <ids> \
+        --database <database-id> \
+        --columns
     ```
-
-    !!! warning "Column IDs"
-        Currently, columns can only be deleted using their IDs, which are distinct from their names. To view the IDs of the columns of a database, run: 
-
-        ```bash
-        deeporigin data describe <database-id>
-        ```
 
 === "Python"
 
     ```py
     from deeporigin.data_hub import api
-    api.delete_database_column(column_id="col-id")
+    api.delete_database_column(
+        column_id="col-id",
+        database_id="database-id",
+    )
     ```

@@ -567,17 +567,18 @@ class DataController(cement.Controller):
                 },
             ),
             (
-                ["--columns"],
+                ["--database"],
                 {
-                    "action": "store_true",
-                    "help": "Whether to delete columns or rows/databases/folders [default: False]",
+                    "type": str,
+                    "required": False,
+                    "help": "ID of database that columns are in",
                 },
             ),
             (
-                ["--json"],
+                ["--columns"],
                 {
                     "action": "store_true",
-                    "help": "Whether to return data in JSON format [default: False]",
+                    "help": "Whether to treat IDs as column IDs [default: False]",
                 },
             ),
         ],
@@ -586,9 +587,14 @@ class DataController(cement.Controller):
         """Delete rows, columns, databases and/or folders"""
 
         if self.app.pargs.columns:
+            if self.app.pargs.database is None:
+                raise DeepOriginException(
+                    "Use the --database argument to specify the parent database. To delete a column, the parent database must be specified."
+                )
             for column_id in self.app.pargs.ids:
                 api.delete_database_column(
                     column_id=column_id,
+                    database_id=self.app.pargs.database,
                     client=self._get_client(),
                 )
             print(f"✔︎ Deleted {len(self.app.pargs.ids)} columns")
