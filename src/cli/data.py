@@ -578,7 +578,7 @@ class DataController(cement.Controller):
                 ["--columns"],
                 {
                     "action": "store_true",
-                    "help": "Whether to delete columns or rows/databases/folders [default: False]",
+                    "help": "Whether to treat IDs as column IDs [default: False]",
                 },
             ),
             (
