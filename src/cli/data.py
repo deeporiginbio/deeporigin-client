@@ -596,7 +596,7 @@ class DataController(cement.Controller):
         if self.app.pargs.columns:
             if self.app.pargs.database is None:
                 raise DeepOriginException(
-                    "You must specify a database to delete columns in using --database"
+                    "Use the --database argument to specify the parent database. To delete a column, the parent database must be specified."
                 )
             for column_id in self.app.pargs.ids:
                 api.delete_database_column(
