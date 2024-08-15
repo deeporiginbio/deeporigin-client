@@ -505,7 +505,7 @@ def set_data_in_cells(
     column = [
         col
         for col in response.cols
-        if col["id"] == column_id or col["name"] == column_id or col["key"] == column_id
+        if col["id"] == column_id or col["name"] == column_id
     ]
 
     if len(column) != 1:
@@ -568,7 +568,7 @@ def set_cell_data(
     column = [
         col
         for col in response.cols
-        if col["id"] == column_id or col["name"] == column_id or col["key"] == column_id
+        if col["id"] == column_id or col["name"] == column_id
     ]
 
     if len(column) != 1:
@@ -867,9 +867,9 @@ def get_dataframe(
 
         # this import is here because we don't want to
         # import pandas unless we actually use this function
-        import pandas as pd
+        from deeporigin.data_hub.dataframe import DataFrame
 
-        df = pd.DataFrame(data)
+        df = DataFrame(data)
         df.attrs["file_ids"] = list(set(file_ids))
         df.attrs["reference_ids"] = list(set(reference_ids))
         df.attrs["id"] = database_id
@@ -1170,10 +1170,7 @@ def get_row_data(
     column_name_mapper = dict()
     column_cardinality_mapper = dict()
     for col in parent_response.cols:
-        if use_column_keys:
-            column_name_mapper[col["id"]] = col["key"]
-        else:
-            column_name_mapper[col["id"]] = col["name"]
+        column_name_mapper[col["id"]] = col["name"]
         column_cardinality_mapper[col["id"]] = col["cardinality"]
 
     # now use this to construct the required dictionary
@@ -1182,10 +1179,7 @@ def get_row_data(
     for col in parent_response.cols:
         if "systemType" in col.keys() and col["systemType"] == "bodyDocument":
             continue
-        if use_column_keys:
-            row_data[col["key"]] = None
-        else:
-            row_data[col["name"]] = None
+        row_data[col["name"]] = None
     if not hasattr(response, "fields"):
         return row_data
     for field in response.fields:
