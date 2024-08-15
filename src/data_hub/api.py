@@ -322,17 +322,8 @@ def assign_files_to_cell(
 
     """
 
-    if row_id is None:
-        data = make_database_rows(
-            database_id=database_id,
-            n_rows=1,
-            client=client,
-        )
-        row_id = data.rows[0].id
-
     rows = [
         {
-            "rowId": row_id,
             "row": {},
             "cells": [
                 {
@@ -342,6 +333,9 @@ def assign_files_to_cell(
             ],
         },
     ]
+
+    if row_id:
+        rows[0]["rowId"] = row_id
 
     return _api.ensure_rows(
         database_id=database_id,
@@ -505,7 +499,7 @@ def set_data_in_cells(
     column = [
         col
         for col in response.cols
-        if col["id"] == column_id or col["name"] == column_id or col["key"] == column_id
+        if col["id"] == column_id or col["name"] == column_id
     ]
 
     if len(column) != 1:
@@ -568,7 +562,7 @@ def set_cell_data(
     column = [
         col
         for col in response.cols
-        if col["id"] == column_id or col["name"] == column_id or col["key"] == column_id
+        if col["id"] == column_id or col["name"] == column_id
     ]
 
     if len(column) != 1:
