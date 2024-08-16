@@ -24,15 +24,28 @@ class DataFrame(pd.DataFrame):
             self.obj = obj
 
         def __getitem__(self, key):
-            # Intercept the get operation if needed
+            """intercept for the set operation"""
+
             return self.obj._get_value(*key)
 
         def __setitem__(self, key, value):
-            # Intercept the set operation
-            print(f"Setting value at {key} to {value}")
+            """intercept for the set operation""" ""
+
+            old_value = self.obj._get_value(*key)
+            if value == old_value:
+                # noop
+                return
+
+            rows = [key[0]]
+            columns = [key[1]]
 
             # Perform the actual setting operation
             self.obj._set_value(*key, value)
+
+            # now update the DB. note that self is an AtIndexer
+            # object, so we need to index into the pandas object
+            if self.obj.auto_sync:
+                self.obj.sync(columns=columns, rows=rows)
 
     @property
     def at(self):
@@ -65,7 +78,12 @@ class DataFrame(pd.DataFrame):
         df_representation = super().__repr__()
         return header + df_representation
 
-    def sync(self, *, columns: Optional[list] = None):
+    def sync(
+        self,
+        *,
+        columns: Optional[list] = None,
+        rows: Optional[list] = None,
+    ):
         """synchronize the Deep Origin database with the local dataframe"""
 
         if columns is None:
@@ -75,23 +93,27 @@ class DataFrame(pd.DataFrame):
             if column in ["Validation Status", "ID"]:
                 continue
 
-            print(column)
-
             column_metadata = [
                 col for col in self.attrs["metadata"]["cols"] if col["name"] == column
             ]
 
             if len(column_metadata) == 0:
-                raise NotImplementedError("Column metadata not found")
+                raise NotImplementedError(
+                    "Column metadata not found. This is likely because it's a new column"
+                )
 
             column_metadata = column_metadata[0]
 
             if column_metadata["type"] == "file":
                 continue
 
+            if rows is None:
+                # we're updating a whole column
+                rows = list(self.index)
+
             api.set_data_in_cells(
                 values=self[column],
-                row_ids=list(self.index),
+                row_ids=rows,
                 column_id=column,
                 database_id=self.attrs["id"],
             )
