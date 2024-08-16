@@ -5,24 +5,76 @@ from deeporigin.data_hub import api
 
 
 class DataFrame(pd.DataFrame):
+    auto_sync: bool = False
+
+    class AtIndexer:
+        """this class override is used to intercept calls to at indexer of a pandas dataframe"""
+
+        def __init__(self, obj):
+            self.obj = obj
+
+        def __getitem__(self, key):
+            # Intercept the get operation if needed
+            return self.obj._get_value(*key)
+
+        def __setitem__(self, key, value):
+            # Intercept the set operation
+            print(f"Setting value at {key} to {value}")
+
+            # Perform the actual setting operation
+            self.obj._set_value(*key, value)
+
+    @property
+    def at(self):
+        return self.AtIndexer(self)
+
+    def __setitem__(self, key, value):
+        """Override the __setitem__ method to update the Deep Origin database when changes are made to the local
+        dataframe"""
+
+        # first, call the pandas method
+        super().__setitem__(key, value)
+
+        # now, update the Deep Origin database with the changes
+        # we just made
+        if self.auto_sync:
+            self.sync(columns=[key])
+
     def _repr_html_(self):
-        header = "<h3>Deep Origin DataFrame</h3>"
+        """method override to customize printing in a Jupyter notebook"""
+
+        header = f'<h3>{self.attrs["metadata"]["hid"]}</h3>'
         df_html = super()._repr_html_()
         return header + df_html
 
     def __repr__(self):
-        header = "Deep Origin DataFrame\n"
+        header = f'{self.attrs["metadata"]["hid"]}\n'
         df_representation = super().__repr__()
         return header + df_representation
 
     def sync(self, *, columns: Optional[list] = None):
         print("Syncing...")
 
-        for column in self.columns:
-            if column == "Validation Status":
+        if columns is None:
+            columns = self.columns
+
+        for column in columns:
+            if column in ["Validation Status", "ID"]:
                 continue
 
             print(column)
+
+            column_metadata = [
+                col for col in self.attrs["metadata"]["cols"] if col["name"] == column
+            ]
+
+            if len(column_metadata) == 0:
+                raise NotImplementedError("Column metadata not found")
+
+            column_metadata = column_metadata[0]
+
+            if column_metadata["type"] == "file":
+                continue
 
             api.set_data_in_cells(
                 values=self[column],

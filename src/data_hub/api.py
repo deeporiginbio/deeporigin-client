@@ -873,8 +873,11 @@ def get_dataframe(
         df.attrs["file_ids"] = list(set(file_ids))
         df.attrs["reference_ids"] = list(set(reference_ids))
         df.attrs["id"] = database_id
+        df.attrs["metadata"] = dict(db_row)
 
-        return _type_and_cleanup_dataframe(df, columns)
+        df = _type_and_cleanup_dataframe(df, columns)
+        df.auto_sync = True
+        return df
 
     else:
         # rename keys
@@ -1000,7 +1003,7 @@ def _row_to_dict(row, *, use_file_names: bool = True):
 
 @beartype
 def _type_and_cleanup_dataframe(
-    df,  # pd.Dataframe, not typed to avoid pandas import
+    df,  # Dataframe, not typed to avoid pandas import
     columns: list[dict],
 ):
     """Internal function to type and clean a pandas dataframe
