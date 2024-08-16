@@ -6,10 +6,13 @@ updating of Deep Origin databases.
 Copyright 2024 Deep Origin Inc.
 """
 
+from datetime import datetime
 from typing import Optional
 
+import humanize
 import pandas as pd
 from deeporigin.data_hub import api
+from deeporigin.utils import construct_resource_url
 
 
 class DataFrame(pd.DataFrame):
@@ -67,9 +70,28 @@ class DataFrame(pd.DataFrame):
     def _repr_html_(self):
         """method override to customize printing in a Jupyter notebook"""
 
-        header = f'<h3>{self.attrs["metadata"]["hid"]}</h3>'
+        name = self.attrs["metadata"]["name"]
+        url = construct_resource_url(
+            name=name,
+            row_type="database",
+        )
+
+        # Convert the string to a datetime object
+        date_str = self.attrs["metadata"]["dateCreated"]
+        date_obj = datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S.%f")
+
+        now = datetime.now()
+
+        # Calculate the difference
+        time_diff = now - date_obj
+
+        # Convert the time difference into "x time ago" format
+        time_ago = humanize.naturaltime(time_diff)
+
+        header = f'<h4>{name} <a href = "{url}">🔗</a></h4>'
+        txt = f'<p style="font-size: 12px; color: #808080;">Created {time_ago}.</p>'
         df_html = super()._repr_html_()
-        return header + df_html
+        return header + txt + df_html
 
     def __repr__(self):
         """method override to customize printing in an interactive session"""

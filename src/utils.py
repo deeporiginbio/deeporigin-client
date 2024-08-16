@@ -64,6 +64,32 @@ class PREFIXES:
 
 
 @beartype
+def construct_resource_url(
+    *,
+    name: str,
+    row_type: RowType,
+) -> str:
+    """Constructs the URL for a resource
+
+    Args:
+        name (str): name of the resource
+        resource_type (str): type of the resource
+
+    Returns:
+        str: URL for the resource
+    """
+
+    env = get_value()["env"]
+    org = get_value()["organization_id"]
+    if env == "prod":
+        url = "https://os.deeporigin.io/org/{org}/data/{row_type}/{name}"
+    else:
+        url = f"https://os.{env}.deeporigin.io/org/{org}/data/{row_type}/{name}"
+
+    return url
+
+
+@beartype
 def _print_tree(tree: dict, offset: int = 0) -> None:
     """Helper function to pretty print a tree"""
     print(" " * offset + tree["hid"])
