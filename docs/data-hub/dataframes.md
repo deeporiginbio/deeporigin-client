@@ -76,4 +76,4 @@ To manually sync changes, use the `sync` method:
 df.sync()
 ```
 
-Read more about the sync method [here](../ref/data-hub/types.html#src.data_hub.dataframe.DataFrame.sync). 
+Read more about the sync method [here](../ref/data-hub/types.md#src.data_hub.dataframe.DataFrame.sync). 
