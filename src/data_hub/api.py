@@ -870,7 +870,12 @@ def get_dataframe(
         df.attrs["metadata"] = dict(db_row)
 
         df = _type_and_cleanup_dataframe(df, columns)
-        df.auto_sync = True
+
+        # if this code is running the lambda, we do not
+        # turn on auto_sync by default because we don't want
+        # side effects from code that the LLM writes
+        if os.environ.get("AWS_LAMBDA_FUNCTION_NAME") is None:
+            df.auto_sync = True
         return df
 
     else:
