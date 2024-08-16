@@ -1,3 +1,11 @@
+"""
+this module defines a class called DataFrame that is a drop-in
+replacement for a pandas DataFrame, but also allows automatic
+updating of Deep Origin databases.
+
+Copyright 2024 Deep Origin Inc.
+"""
+
 from typing import Optional
 
 import pandas as pd
@@ -5,6 +13,8 @@ from deeporigin.data_hub import api
 
 
 class DataFrame(pd.DataFrame):
+    """a subclass of pandas DataFrame that allows for automatic updates to Deep Origin databases"""
+
     auto_sync: bool = False
 
     class AtIndexer:
@@ -26,6 +36,7 @@ class DataFrame(pd.DataFrame):
 
     @property
     def at(self):
+        """Override the `at` property to return an AtIndexer"""
         return self.AtIndexer(self)
 
     def __setitem__(self, key, value):
@@ -48,12 +59,14 @@ class DataFrame(pd.DataFrame):
         return header + df_html
 
     def __repr__(self):
+        """method override to customize printing in an interactive session"""
+
         header = f'{self.attrs["metadata"]["hid"]}\n'
         df_representation = super().__repr__()
         return header + df_representation
 
     def sync(self, *, columns: Optional[list] = None):
-        print("Syncing...")
+        """synchronize the Deep Origin database with the local dataframe"""
 
         if columns is None:
             columns = self.columns
@@ -85,4 +98,6 @@ class DataFrame(pd.DataFrame):
 
     @property
     def _constructor(self):
+        """this method overrides the _constructor property to return a DataFrame and is required for compatibility with a pandas DataFrame"""
+
         return DataFrame
