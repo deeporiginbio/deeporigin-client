@@ -1,9 +1,7 @@
 """
-this module defines a class called DataFrame that is a drop-in
+This module defines a class called DataFrame that is a drop-in
 replacement for a pandas DataFrame, but also allows automatic
 updating of Deep Origin databases.
-
-Copyright 2024 Deep Origin Inc.
 """
 
 from datetime import datetime
@@ -16,9 +14,13 @@ from deeporigin.utils import construct_resource_url
 
 
 class DataFrame(pd.DataFrame):
-    """a subclass of pandas DataFrame that allows for automatic updates to Deep Origin databases"""
+    """A subclass of pandas DataFrame that allows for automatic updates to Deep Origin databases. This can be used as a drop-in replacement for a pandas DataFrame, and should support all methods a pandas DataFrame supports.
+
+    The primary method of creating an object of this type is to use the [api.get_dataframe][src.data_hub.api.get_dataframe] function.
+    """
 
     auto_sync: bool = False
+    """When True, changes made to the dataframe will be automatically synced to the Deep Origin database this dataframe represents."""
 
     class AtIndexer:
         """this class override is used to intercept calls to at indexer of a pandas dataframe"""
@@ -106,7 +108,17 @@ class DataFrame(pd.DataFrame):
         columns: Optional[list] = None,
         rows: Optional[list] = None,
     ):
-        """synchronize the Deep Origin database with the local dataframe"""
+        """Manually synchronize data in the dataframe to the underlying Deep Origin database.
+
+        !!! tip "Deep Origin DataFrames automatically synchronize"
+            Typically, you do not need to manually synchronize. If the `auto_sync` attribute of the dataframe is set to `True`, the dataframe will automatically synchronize when changes are made to the dataframe.
+
+
+        Args:
+            columns (list, optional): The columns of the dataframe to update. Defaults to None.
+            rows (list, optional): The rows to update. Defaults to None. When None, all rows in the relevant columns are updated.
+
+        """
 
         if columns is None:
             columns = self.columns

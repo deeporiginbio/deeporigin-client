@@ -1,3 +1,5 @@
+"""This module contains utility functions that are used internally by the Python Client and the CLI"""
+
 import json
 import os
 import shutil
@@ -17,10 +19,10 @@ __all__ = [
 
 
 RowType = Literal["row", "database", "workspace"]
-"""Type of a row"""
+"""Type of a row. In Deep Origin, a row can be a database row, a database or a workspace"""
 
 FileStatus = Literal["ready", "archived"]
-"""Status of a file"""
+"""Status of a file. Ready files are ready to be used, downloaded, and operated on."""
 
 DataType = Literal[
     "integer",
@@ -34,7 +36,7 @@ DataType = Literal[
     "float",
     "boolean",
 ]
-"""Type of a column"""
+"""Type of a column in a Deep Origin database. See [this page in the documentation](https://docs.deeporigin.io/docs/os/data-hub/databases/columns) for more information."""
 
 DATAFRAME_ATTRIBUTE_KEYS = {
     "file_ids",
@@ -44,12 +46,13 @@ DATAFRAME_ATTRIBUTE_KEYS = {
 
 
 Cardinality = Literal["one", "many"]
+"""The cardinality defines whether a cell in a database can contain one or multiple objects"""
 
 IDFormat = Literal["human-id", "system-id"]
 """Format of an ID"""
 
 DatabaseReturnType = Literal["dataframe", "dict"]
-"""Return type of a database"""
+"""Return type for [api.get_dataframe][src.data_hub.api.get_dataframe]"""
 
 
 @dataclass
@@ -73,7 +76,7 @@ def construct_resource_url(
 
     Args:
         name (str): name of the resource
-        resource_type (str): type of the resource
+        row_type (RowType): type of the resource
 
     Returns:
         str: URL for the resource
