@@ -19,7 +19,7 @@ from deeporigin import DataFrame
 df = DataFrame.from_deeporigin("database-id")
 ```
 
-In an interactive web-based environment such as Jupyter Lab, you should be able to view the DataFrame using:
+In a Jupyter Lab, you should be able to view the DataFrame using:
 
 ```py
 df
@@ -31,7 +31,7 @@ which should show you something like this:
 
 
 !!! tip "Information in the DataFrame"
-    In addition to information you would find in the rows and columns of a pandas DataFrame, a Deep Origin DataFrame also contains metadata about the underling database. In the view above we also see:
+    In addition to information you would find in the rows and columns of a pandas DataFrame, a Deep Origin DataFrame also contains metadata about the underlying database. In the view above we also see:
 
     - The name of the database on Deep Origin.
     - A link to the database on Deep Origin.
