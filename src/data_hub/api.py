@@ -24,7 +24,7 @@ from deeporigin.utils import (
     DataType,
     DatabaseReturnType,
     IDFormat,
-    RowType,
+    ObjectType,
     _parse_params_from_url,
     download_sync,
     find_last_updated_row,
@@ -144,7 +144,7 @@ def create_database(
 def list_rows(
     *,
     parent_id: Optional[str] = None,
-    row_type: RowType = None,
+    row_type: ObjectType = None,
     parent_is_root: Optional[bool] = None,
     client=None,
 ) -> list:

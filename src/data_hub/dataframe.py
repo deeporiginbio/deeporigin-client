@@ -141,6 +141,16 @@ class DataFrame(pd.DataFrame):
         return_type: DatabaseReturnType = "dataframe",
         client=None,
     ):
+        """Create a local Deep Origin DataFrame from a Deep Origin database.
+
+        Args:
+        database_id (str): The ID of the Deep Origin database.
+        use_file_names (bool, optional): Whether to use the file names in the Deep Origin database. Defaults to True.
+        reference_format (IDFormat, optional): The format of the IDs in the Deep Origin database. Defaults to "human-id".
+        return_type (DatabaseReturnType, optional): The type of return value. Defaults to "dataframe".
+
+        """
+
         return api.get_dataframe(
             database_id=database_id,
             use_file_names=use_file_names,

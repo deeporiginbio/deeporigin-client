@@ -21,7 +21,7 @@ __all__ = [
 
 T = TypeVar("T")
 
-RowType = Literal["row", "database", "workspace"]
+ObjectType = Literal["row", "database", "workspace"]
 """Type of a row. In Deep Origin, a row can be a database row, a database or a workspace"""
 
 FileStatus = Literal["ready", "archived"]
@@ -73,13 +73,13 @@ class PREFIXES:
 def construct_resource_url(
     *,
     name: str,
-    row_type: RowType,
+    row_type: ObjectType,
 ) -> str:
     """Constructs the URL for a resource
 
     Args:
         name (str): name of the resource
-        row_type (RowType): type of the resource
+        row_type (ObjectType): type of the resource
 
     Returns:
         str: URL for the resource
