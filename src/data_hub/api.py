@@ -27,6 +27,7 @@ from deeporigin.utils import (
     RowType,
     _parse_params_from_url,
     download_sync,
+    find_last_updated_row,
 )
 
 
@@ -871,11 +872,11 @@ def get_dataframe(
 
         df = _type_and_cleanup_dataframe(df, columns)
 
-        # if this code is running the lambda, we do not
-        # turn on auto_sync by default because we don't want
-        # side effects from code that the LLM writes
-        if os.environ.get("AWS_LAMBDA_FUNCTION_NAME") is None:
-            df.auto_sync = True
+        # find last updated row for pretty printing
+        df.attrs["last_updated_row"] = find_last_updated_row(rows)
+
+        df._deep_origin_out_of_sync = False
+        df._modified_columns = set()
         return df
 
     else:

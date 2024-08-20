@@ -1,4 +1,4 @@
-# Classes and Constants
+# Classes and constants
 
 This page lists some classes, types and constants used in this library.
 

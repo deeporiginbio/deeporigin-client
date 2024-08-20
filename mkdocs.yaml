@@ -56,7 +56,7 @@ nav:
   - API reference:
     - High-level API: ref/data-hub/high-level-api.md
     - Low-level API: ref/data-hub/low-level-api.md
-    - Classes & Constants: ref/data-hub/types.md
+    - Classes & constants: ref/data-hub/types.md
 - Compute hub: 
   - compute-hub/index.md
   - How to:

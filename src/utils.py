@@ -4,7 +4,8 @@ import json
 import os
 import shutil
 from dataclasses import dataclass
-from typing import Literal, Union
+from datetime import datetime
+from typing import List, Literal, TypeVar, Union
 from urllib.parse import parse_qs, urljoin, urlparse
 
 import requests
@@ -17,6 +18,8 @@ __all__ = [
     "expand_user",
 ]
 
+
+T = TypeVar("T")
 
 RowType = Literal["row", "database", "workspace"]
 """Type of a row. In Deep Origin, a row can be a database row, a database or a workspace"""
@@ -85,11 +88,29 @@ def construct_resource_url(
     env = get_value()["env"]
     org = get_value()["organization_id"]
     if env == "prod":
-        url = "https://os.deeporigin.io/org/{org}/data/{row_type}/{name}"
+        url = f"https://os.deeporigin.io/org/{org}/data/{row_type}/{name}"
     else:
         url = f"https://os.{env}.deeporigin.io/org/{org}/data/{row_type}/{name}"
 
     return url
+
+
+@beartype
+def find_last_updated_row(rows: List[T]) -> T:
+    """utility function to find the most recently updated row and return that object"""
+
+    most_recent_date = None
+    most_recent_row = rows[0]
+
+    # Iterate over the list of objects
+    for row in rows:
+        current_date = datetime.strptime(row.date_updated, "%Y-%m-%d %H:%M:%S.%f")
+
+        if most_recent_date is None or current_date > most_recent_date:
+            most_recent_date = current_date
+            most_recent_row = row
+
+    return most_recent_row
 
 
 @beartype

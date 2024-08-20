@@ -8,15 +8,15 @@ This page describes how to use Deep Origin DataFrames, which are the primary obj
 
 
 !!! question "What is a Deep Origin DataFrame?"
-    A Deep Origin DataFrame is a subclass of a [pandas.DataFrame](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html) that is backed by a Deep Origin database. Because it is a subclass of a pandas DataFrame, all pandas DataFrame methods work on Deep Origin DataFrames. 
+    A Deep Origin DataFrame is a subclass of a [pandas.DataFrame](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html) that is created from a Deep Origin database, and can easily write data back to it. Because it is a subclass of a pandas DataFrame, all pandas DataFrame methods work on Deep Origin DataFrames. 
 
 ## Create a DataFrame
 
 Create a DataFrame using:
 
 ```python
-from deeporigin.data_hub import api
-df = api.get_data_frame("database-id")
+from deeporigin import DataFrame
+df = DataFrame.from_deeporigin("database-id")
 ```
 
 In an interactive web-based environment such as Jupyter Lab, you should be able to view the DataFrame using:
