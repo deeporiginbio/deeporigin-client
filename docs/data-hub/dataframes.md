@@ -1,6 +1,6 @@
 # Using Deep Origin DataFrames
 
-This page describes how to use Deep Origin DataFrames, which are the primary object you will use to interact with databases on Deep Origin. This page will cover:
+This page describes how to a Deep Origin DataFrame, which are the primary object you will use to interact with a database on Deep Origin. This page will cover:
 
 - fetching data from a Deep Origin database
 - modifying data locally
@@ -67,6 +67,17 @@ In either case, when we view the DataFrame once more using `df`, we see the upda
 
 ## Write data back to Deep Origin
 
+!!! warning "Work in progress"
+    Writing data back to Deep Origin from a Deep Origin DataFrame is still a work in progress. The following functionality is not yet supported. To perform these functions, use the API directly instead. 
+
+    - Updating values of cells that contain files
+    - Updating values of cells that contain references
+    - Uploading files
+    - Modifying or deleting existing columns. To delete a column, use the GUI or the API and then use the `from_deeporigin` method.
+    - Creating new columns. To insert data into a new column, create a new column using the GUI or the API and then use the `from_deeporigin` method.
+    - Deleting rows
+    - Creating new databases
+
 ### Using the `to_deeporigin` method
 
 Local changes in the dataframe can be written back to Deep Origin using the `to_deeporigin` method:
@@ -76,6 +87,8 @@ df.to_deeporigin()
 
 # ✔︎ Wrote 9 rows in y^2 to Deep Origin database.
 ```
+
+The `to_deeporigin` method writes data that have been modified in the local dataframe back to the corresponding Deep Origin Database. 
 
 !!! tip "Intelligent writing"
     - Deep Origin DataFrames keep track of local changes, and only write columns back that have been modified locally. 
@@ -118,12 +131,7 @@ df
     - This can cause data loss.
     - Every change made to the database is written immediately, so modifying the local dataframe multiple times leads to multiple writes to a Deep Origin database.
 
-## Limitations
 
-
-- Creating new columns in the local dataframe will not create new columns in the Deep Origin database. To insert data into a new column, create a new column using the GUI or the API and then use the `from_deeporigin` method.
-- Deleting columns in the local dataframe will not delete columns in the Deep Origin database. To delete a column, use the GUI or the API and then use the `from_deeporigin` method.
-- Deleting or creating rows is not supported yet. 
 
 ## Reference
 

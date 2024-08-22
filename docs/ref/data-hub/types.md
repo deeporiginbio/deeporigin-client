@@ -5,8 +5,9 @@ This page lists some classes, types and constants used in this library.
 ::: src.data_hub.dataframe.DataFrame
     options:
       members: 
-        - sync
         - auto_sync
+        - from_deeporigin
+        - to_deeporigin
       filters:
         - "!^_"
 

@@ -1,6 +1,6 @@
 """
 This module defines a class called DataFrame that is a drop-in
-replacement for a pandas DataFrame, but also allows automatic
+replacement for a pandas DataFrame, but also allows for easy
 updating of Deep Origin databases.
 """
 
@@ -18,13 +18,13 @@ from deeporigin.utils import (
 
 
 class DataFrame(pd.DataFrame):
-    """A subclass of pandas DataFrame that allows for automatic updates to Deep Origin databases. This can be used as a drop-in replacement for a pandas DataFrame, and should support all methods a pandas DataFrame supports.
+    """A subclass of pandas DataFrame that allows for easy updating of a Deep Origin database. This can be used as a drop-in replacement for a pandas DataFrame, and should support all methods a pandas DataFrame supports.
 
-    The primary method of creating an object of this type is to use the [api.get_dataframe][src.data_hub.api.get_dataframe] function.
+    The primary method of creating an object of this type is to use the [from_deeporigin][src.data_hub.dataframe.DataFrame.from_deeporigin] class method.
     """
 
     auto_sync: bool = False
-    """When True, changes made to the dataframe will be automatically synced to the Deep Origin database this dataframe represents."""
+    """When `True`, changes made to the dataframe will be automatically synced to the Deep Origin database this dataframe represents."""
 
     _modified_columns: set = set()
     """if data is modified in a dataframe, and auto_sync is False, this list will contain the columns that have been modified so that the Deep Origin database can be updated. If an empty list, the Deep Origin database will not be updated, and the dataframe matches the Deep Origin database at the time of creation."""
@@ -144,10 +144,10 @@ class DataFrame(pd.DataFrame):
         """Create a local Deep Origin DataFrame from a Deep Origin database.
 
         Args:
-        database_id (str): The ID of the Deep Origin database.
-        use_file_names (bool, optional): Whether to use the file names in the Deep Origin database. Defaults to True.
-        reference_format (IDFormat, optional): The format of the IDs in the Deep Origin database. Defaults to "human-id".
-        return_type (DatabaseReturnType, optional): The type of return value. Defaults to "dataframe".
+            database_id (str): The ID of the Deep Origin database.
+            use_file_names (bool, optional): Whether to use the file names in the Deep Origin database. Defaults to True.
+            reference_format (IDFormat, optional): The format of the IDs in the Deep Origin database. Defaults to "human-id".
+            return_type (DatabaseReturnType, optional): The type of return value. Defaults to "dataframe".
 
         """
 
@@ -167,12 +167,12 @@ class DataFrame(pd.DataFrame):
     ):
         """Write data in dataframe to Deep Origin
 
-        !!! tip "Deep Origin DataFrames automatically synchronize"
-            Typically, you do not need to manually synchronize. If the `auto_sync` attribute of the dataframe is set to `True`, the dataframe will automatically synchronize when changes are made to the dataframe.
+        !!! tip "Deep Origin DataFrames can automatically synchronize"
+            To automatically save changes to local DataFrames to Deep Origin databases, set the `auto_sync` attribute of the dataframe `True`.
 
 
         Args:
-            columns (list, optional): The columns of the dataframe to update. Defaults to None.
+            columns (list, optional): The columns of the dataframe to update. When None, all modified columns are updated.
             rows (list, optional): The rows to update. Defaults to None. When None, all rows in the relevant columns are updated.
 
         """
