@@ -1,6 +1,16 @@
-# Types and constants
+# Classes and constants
 
-This page lists some types and constants used in this library.
+This page lists some classes, types and constants used in this library.
+
+::: src.data_hub.dataframe.DataFrame
+    options:
+      members: 
+        - auto_sync
+        - from_deeporigin
+        - to_deeporigin
+      filters:
+        - "!^_"
+
 
 ::: src.utils
     options:

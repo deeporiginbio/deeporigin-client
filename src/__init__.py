@@ -3,9 +3,9 @@ import pathlib
 import subprocess
 from pathlib import Path
 
-__all__ = [
-    "__version__",
-]
+from deeporigin.data_hub.dataframe import DataFrame
+
+__all__ = ["__version__", "DataFrame"]
 
 SRC_DIR = pathlib.Path(__file__).parent
 

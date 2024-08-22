@@ -24,9 +24,10 @@ from deeporigin.utils import (
     DataType,
     DatabaseReturnType,
     IDFormat,
-    RowType,
+    ObjectType,
     _parse_params_from_url,
     download_sync,
+    find_last_updated_row,
 )
 
 
@@ -143,7 +144,7 @@ def create_database(
 def list_rows(
     *,
     parent_id: Optional[str] = None,
-    row_type: RowType = None,
+    row_type: ObjectType = None,
     parent_is_root: Optional[bool] = None,
     client=None,
 ) -> list:
@@ -861,14 +862,22 @@ def get_dataframe(
 
         # this import is here because we don't want to
         # import pandas unless we actually use this function
-        import pandas as pd
+        from deeporigin.data_hub.dataframe import DataFrame
 
-        df = pd.DataFrame(data)
+        df = DataFrame(data)
         df.attrs["file_ids"] = list(set(file_ids))
         df.attrs["reference_ids"] = list(set(reference_ids))
         df.attrs["id"] = database_id
+        df.attrs["metadata"] = dict(db_row)
 
-        return _type_and_cleanup_dataframe(df, columns)
+        df = _type_and_cleanup_dataframe(df, columns)
+
+        # find last updated row for pretty printing
+        df.attrs["last_updated_row"] = find_last_updated_row(rows)
+
+        df._deep_origin_out_of_sync = False
+        df._modified_columns = set()
+        return df
 
     else:
         # rename keys
@@ -994,7 +1003,7 @@ def _row_to_dict(row, *, use_file_names: bool = True):
 
 @beartype
 def _type_and_cleanup_dataframe(
-    df,  # pd.Dataframe, not typed to avoid pandas import
+    df,  # Dataframe, not typed to avoid pandas import
     columns: list[dict],
 ):
     """Internal function to type and clean a pandas dataframe
@@ -1164,10 +1173,7 @@ def get_row_data(
     column_name_mapper = dict()
     column_cardinality_mapper = dict()
     for col in parent_response.cols:
-        if use_column_keys:
-            column_name_mapper[col["id"]] = col["key"]
-        else:
-            column_name_mapper[col["id"]] = col["name"]
+        column_name_mapper[col["id"]] = col["name"]
         column_cardinality_mapper[col["id"]] = col["cardinality"]
 
     # now use this to construct the required dictionary
@@ -1176,10 +1182,7 @@ def get_row_data(
     for col in parent_response.cols:
         if "systemType" in col.keys() and col["systemType"] == "bodyDocument":
             continue
-        if use_column_keys:
-            row_data[col["key"]] = None
-        else:
-            row_data[col["name"]] = None
+        row_data[col["name"]] = None
     if not hasattr(response, "fields"):
         return row_data
     for field in response.fields:

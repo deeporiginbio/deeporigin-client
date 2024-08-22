@@ -44,6 +44,8 @@ nav:
   - Authenticate: how-to/auth.md
 - Data hub: 
   - data-hub/index.md
+  - Deep Origin DataFrames:
+    - Tutorial: data-hub/dataframes.md
   - How to:
     - Create objects: how-to/data-hub/create.md
     - Delete objects: how-to/data-hub/delete.md
@@ -54,12 +56,13 @@ nav:
   - API reference:
     - High-level API: ref/data-hub/high-level-api.md
     - Low-level API: ref/data-hub/low-level-api.md
-    - Types and constants: ref/data-hub/types.md
+    - Classes & constants: ref/data-hub/types.md
 - Compute hub: 
   - compute-hub/index.md
   - How to:
     - Install variables and secrets: how-to/variables.md
     - Get info about your workstation: how-to/workstation-info.md
+- Changelog: changelog.md
 - Support: https://www.support.deeporigin.com/servicedesk/customer/portals
 
 

@@ -1,8 +1,11 @@
+"""This module contains utility functions that are used internally by the Python Client and the CLI"""
+
 import json
 import os
 import shutil
 from dataclasses import dataclass
-from typing import Literal, Union
+from datetime import datetime
+from typing import List, Literal, TypeVar, Union
 from urllib.parse import parse_qs, urljoin, urlparse
 
 import requests
@@ -16,11 +19,13 @@ __all__ = [
 ]
 
 
-RowType = Literal["row", "database", "workspace"]
-"""Type of a row"""
+T = TypeVar("T")
+
+ObjectType = Literal["row", "database", "workspace"]
+"""Type of a row. In Deep Origin, a row can be a database row, a database or a workspace"""
 
 FileStatus = Literal["ready", "archived"]
-"""Status of a file"""
+"""Status of a file. Ready files are ready to be used, downloaded, and operated on."""
 
 DataType = Literal[
     "integer",
@@ -34,7 +39,7 @@ DataType = Literal[
     "float",
     "boolean",
 ]
-"""Type of a column"""
+"""Type of a column in a Deep Origin database. See [this page in the documentation](https://docs.deeporigin.io/docs/os/data-hub/databases/columns) for more information."""
 
 DATAFRAME_ATTRIBUTE_KEYS = {
     "file_ids",
@@ -44,12 +49,13 @@ DATAFRAME_ATTRIBUTE_KEYS = {
 
 
 Cardinality = Literal["one", "many"]
+"""The cardinality defines whether a cell in a database can contain one or multiple objects"""
 
 IDFormat = Literal["human-id", "system-id"]
 """Format of an ID"""
 
 DatabaseReturnType = Literal["dataframe", "dict"]
-"""Return type of a database"""
+"""Return type for [api.get_dataframe][src.data_hub.api.get_dataframe]"""
 
 
 @dataclass
@@ -61,6 +67,50 @@ class PREFIXES:
     DB = "_database"
     ROW = "_row"
     FOLDER = "_workspace"
+
+
+@beartype
+def construct_resource_url(
+    *,
+    name: str,
+    row_type: ObjectType,
+) -> str:
+    """Constructs the URL for a resource
+
+    Args:
+        name (str): name of the resource
+        row_type (ObjectType): type of the resource
+
+    Returns:
+        str: URL for the resource
+    """
+
+    env = get_value()["env"]
+    org = get_value()["organization_id"]
+    if env == "prod":
+        url = f"https://os.deeporigin.io/org/{org}/data/{row_type}/{name}"
+    else:
+        url = f"https://os.{env}.deeporigin.io/org/{org}/data/{row_type}/{name}"
+
+    return url
+
+
+@beartype
+def find_last_updated_row(rows: List[T]) -> T:
+    """utility function to find the most recently updated row and return that object"""
+
+    most_recent_date = None
+    most_recent_row = rows[0]
+
+    # Iterate over the list of objects
+    for row in rows:
+        current_date = datetime.strptime(row.date_updated, "%Y-%m-%d %H:%M:%S.%f")
+
+        if most_recent_date is None or current_date > most_recent_date:
+            most_recent_date = current_date
+            most_recent_row = row
+
+    return most_recent_row
 
 
 @beartype
