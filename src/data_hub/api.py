@@ -869,18 +869,19 @@ def get_dataframe(
         )
 
     # make a dict that maps from file IDs to file names
-    file_id_mapper = dict()
-    for file_id in file_ids:
-        print(file_id)
-        file_id_mapper[file_id] = _api.describe_file(file_id=file_id).name
+    if use_file_names:
+        file_id_mapper = dict()
+        for file_id in file_ids:
+            print(file_id)
+            file_id_mapper[file_id] = _api.describe_file(file_id=file_id).name
 
-    for column in columns:
-        if column["type"] == "file":
-            inputs = data[column["id"]]
+        for column in columns:
+            if column["type"] == "file":
+                inputs = data[column["id"]]
 
-            data[column["id"]] = [
-                replace_with_mapper(item, file_id_mapper) for item in inputs
-            ]
+                data[column["id"]] = [
+                    replace_with_mapper(item, file_id_mapper) for item in inputs
+                ]
 
     if return_type == "dataframe":
         # make the dataframe
