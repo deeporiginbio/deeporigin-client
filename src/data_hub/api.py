@@ -1,6 +1,7 @@
 """The `deeporigin.data_hub.api` module contains high-level functions for
 interacting with your Deep Origin data hub."""
 
+import asyncio
 import mimetypes
 import os
 from pathlib import Path
@@ -8,6 +9,7 @@ from typing import Any, Optional, Union
 from urllib.parse import urlparse, urlunparse
 
 import httpx
+import nest_asyncio
 from beartype import beartype
 
 # this import is to allow us to use functions
@@ -30,6 +32,8 @@ from deeporigin.utils import (
     find_last_updated_row,
 )
 
+nest_asyncio.apply()
+
 
 def ensure_client(func):
     """decorator to make sure that the client is configured"""
@@ -40,6 +44,14 @@ def ensure_client(func):
         return func(*args, **kwargs)
 
     return wrapper
+
+
+async def describe_files(files: list[str]):
+    client = _api._get_default_client(use_async=True)
+
+    tasks = [client.describe_file(file_id=file_id) for file_id in files]
+    responses = await asyncio.gather(*tasks)
+    return responses
 
 
 @beartype
@@ -871,9 +883,14 @@ def get_dataframe(
     # make a dict that maps from file IDs to file names
     if use_file_names:
         file_id_mapper = dict()
-        for file_id in file_ids:
-            print(file_id)
-            file_id_mapper[file_id] = _api.describe_file(file_id=file_id).name
+
+        # for file_id in file_ids:
+        #     print(file_id)
+        #     file_id_mapper[file_id] = _api.describe_file(file_id=file_id).name
+
+        files = asyncio.run(describe_files(file_ids))
+        for file in files:
+            file_id_mapper[file.data.id] = file.data.name
 
         for column in columns:
             if column["type"] == "file":
