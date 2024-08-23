@@ -56,7 +56,7 @@ def _get_client_methods():
 def _get_default_client(
     *,
     client=None,
-    refresh: bool = True,
+    refresh: bool = False,
     debug: bool = False,
     use_async: bool = False,
 ):
