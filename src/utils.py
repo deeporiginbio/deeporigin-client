@@ -69,6 +69,18 @@ class PREFIXES:
     FOLDER = "_workspace"
 
 
+def _get_pypi_version():
+    """determines the latest version on PyPI"""
+
+    response = requests.get("https://pypi.org/pypi/deeporigin/json")
+
+    if response.status_code == 200:
+        data = response.json()
+        return data["info"]["version"]
+    else:
+        return None
+
+
 @beartype
 def construct_resource_url(
     *,

@@ -84,10 +84,19 @@ class DataFrame(pd.DataFrame):
         """method override to customize printing in a Jupyter notebook"""
 
         name = self.attrs["metadata"]["name"]
+        hid = self.attrs["metadata"]["hid"]
         url = construct_resource_url(
-            name=name,
+            name=hid,
             row_type="database",
         )
+
+        # extract org name from url
+        try:
+            url_parts = url.split("/")
+            print(url_parts.index("org"))
+            org_name = url_parts[url_parts.index("org") + 1]
+        except Exception:
+            org_name = ""
 
         # Convert the string to a datetime object
         date_str = self.attrs["metadata"]["dateCreated"]
@@ -106,7 +115,7 @@ class DataFrame(pd.DataFrame):
         )
         edited_time_ago = humanize.naturaltime(now - date_obj)
 
-        header = f'<h4>{name} <a href = "{url}">🔗</a></h4>'
+        header = f'<h4 style="color: #363636;">Deep Origin / {org_name} / <a href = "{url}">{name} </a></h4>'
         txt = f'<p style="font-size: 12px; color: #808080;">Created {created_time_ago}. Row {self.attrs["last_updated_row"].hid} was last edited {edited_time_ago}'
         try:
             txt += (
@@ -115,6 +124,8 @@ class DataFrame(pd.DataFrame):
                 + ".</p>"
             )
         except Exception:
+            # give up. this should not cause the dataframe to
+            # not print.
             txt += ".</p>"
 
         if self._modified_columns:

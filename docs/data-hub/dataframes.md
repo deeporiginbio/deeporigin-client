@@ -15,7 +15,7 @@ This page describes how to a Deep Origin DataFrame, which are the primary object
 Create a DataFrame using:
 
 ```python
-from deeporigin import DataFrame
+from deeporigin.data_hub.dataframe import DataFrame
 df = DataFrame.from_deeporigin("database-id")
 ```
 
