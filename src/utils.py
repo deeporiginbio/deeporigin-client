@@ -4,7 +4,7 @@ import json
 import os
 import shutil
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Literal, TypeVar, Union
 from urllib.parse import parse_qs, urljoin, urlparse
 
@@ -103,12 +103,23 @@ def find_last_updated_row(rows: List[T]) -> T:
     most_recent_row = rows[0]
 
     # Iterate over the list of objects
-    for row in rows:
-        current_date = datetime.strptime(row.date_updated, "%Y-%m-%d %H:%M:%S.%f")
+    try:
+        for row in rows:
+            try:
+                current_date = datetime.strptime(
+                    row.date_updated, "%Y-%m-%d %H:%M:%S.%f"
+                ).replace(tzinfo=timezone.utc)
+            except ValueError:
+                current_date = datetime.strptime(
+                    row.date_updated, "%Y-%m-%d %H:%M:%S"
+                ).replace(tzinfo=timezone.utc)
 
-        if most_recent_date is None or current_date > most_recent_date:
-            most_recent_date = current_date
-            most_recent_row = row
+            if most_recent_date is None or current_date > most_recent_date:
+                most_recent_date = current_date
+                most_recent_row = row
+    except Exception:
+        # give up, return something.
+        return most_recent_row
 
     return most_recent_row
 

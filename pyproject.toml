@@ -29,6 +29,7 @@ dependencies = [
     "httpx",
     "deeporigin-data-sdk==0.1.0a7",
     "humanize",
+    "nest_asyncio",
 ]
 dynamic = ["version"]
 
