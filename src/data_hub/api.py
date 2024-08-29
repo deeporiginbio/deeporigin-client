@@ -46,16 +46,6 @@ def ensure_client(func):
     return wrapper
 
 
-async def describe_files(files: list[str]):
-    """asynchronous function that calls DescribeFile for a list of file IDs"""
-
-    client = _api._get_default_client(use_async=True)
-
-    tasks = [client.describe_file(file_id=file_id) for file_id in files]
-    responses = await asyncio.gather(*tasks)
-    return responses
-
-
 @beartype
 @ensure_client
 def convert_id_format(
@@ -806,6 +796,36 @@ def _replace_with_mapper(item, mapper: dict):
     return mapper.get(item, item)
 
 
+async def describe_files(files: list[str]):
+    """asynchronous function that calls DescribeFile for a list of file IDs"""
+
+    client = _api._get_default_client(use_async=True)
+
+    tasks = [client.describe_file(file_id=file_id) for file_id in files]
+    return await asyncio.gather(*tasks)
+
+
+async def list_and_describe_database_row(database_row_id: str):
+    """async function to call ListDatabaseRows and DescribeRow on a database row in parallel"""
+
+    client = _api._get_default_client(use_async=True)
+
+    tasks = [
+        client.list_database_rows(database_row_id=database_row_id),
+        client.describe_row(row_id=database_row_id),
+    ]
+
+    responses = await asyncio.gather(*tasks)
+
+    # we need to figure out which response is which
+    from deeporigin_data import types
+
+    if isinstance(responses[1].data, types.database.Database):
+        return responses[1].data, responses[0].data
+    else:
+        return responses[0].data, responses[1].data
+
+
 @beartype
 def get_dataframe(
     database_id: str,
@@ -829,22 +849,28 @@ def get_dataframe(
 
     # TODO: list_database_rows and describe_row can be called in parallel
 
-    # figure out the rows
-    rows = _api.list_database_rows(
-        database_row_id=database_id,
-        client=client,
+    # # figure out the rows
+    # rows = _api.list_database_rows(
+    #     database_row_id=database_id,
+    #     client=client,
+    # )
+
+    # # figure out the column names and ID of the database
+    # db_row = _api.describe_row(
+    #     row_id=database_id,
+    #     client=client,
+    # )
+
+    db_row, rows = asyncio.run(
+        list_and_describe_database_row(
+            database_id,
+        )
     )
 
     # filter out template rows
     rows = [
         row for row in rows if not (hasattr(row, "is_template") and row.is_template)
     ]
-
-    # figure out the column names and ID of the database
-    db_row = _api.describe_row(
-        row_id=database_id,
-        client=client,
-    )
 
     if db_row.type != "database":
         raise DeepOriginException(
@@ -892,7 +918,9 @@ def get_dataframe(
         #     print(file_id)
         #     file_id_mapper[file_id] = _api.describe_file(file_id=file_id).name
 
+        print(f"Getting file names for {len(file_ids)} files...")
         files = asyncio.run(describe_files(file_ids))
+        print("Done")
         for file in files:
             file_id_mapper[file.data.id] = file.data.name
 
