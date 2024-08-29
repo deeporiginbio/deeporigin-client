@@ -1027,16 +1027,22 @@ def _type_and_cleanup_dataframe(
             df[col_id] = pd.to_datetime(df[col_id])
 
         # special treatment for string columns
-        if column["type"] in ["file", "text"]:
+        elif column["type"] in ["file", "text"]:
             df[col_id] = df[col_id].astype("string")
 
-        if column["type"] == "boolean":
+        elif column["type"] == "boolean":
             df[col_id] = df[col_id].astype("boolean")
 
         # special treatment of Select columns
-        if column["type"] == "select" and column["cardinality"] == "one":
+        elif column["type"] == "select" and column["cardinality"] == "one":
             categories = column["configSelect"]["options"]
             df[col_id] = pd.Categorical(df[col_id], categories=categories)
+
+        elif column["type"] == "integer":
+            df[col_id] = df[col_id].astype("Int64")
+
+        elif column["type"] == "float":
+            df[col_id] = df[col_id].astype("Float64")
 
     # rename columns
     df = df.rename(columns=column_mapper)
