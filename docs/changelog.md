@@ -1,5 +1,12 @@
 # Changelog
 
+### `deeporigin v2.1.1` 
+
+
+- fixed a bug where dataframe header links were sometimes broken
+- improved display of dataframe headers
+- improved typing in dataframes
+
 ### `deeporigin v2.1.0` 
 
 
