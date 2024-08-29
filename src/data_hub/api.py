@@ -9,6 +9,7 @@ from urllib.parse import urlparse, urlunparse
 
 import httpx
 from beartype import beartype
+from deeporigin import __version__
 
 # this import is to allow us to use functions
 # not marked in __all__ in _api
@@ -25,10 +26,21 @@ from deeporigin.utils import (
     DatabaseReturnType,
     IDFormat,
     ObjectType,
+    _get_pypi_version,
     _parse_params_from_url,
     download_sync,
     find_last_updated_row,
 )
+from packaging.version import Version
+
+try:
+    latest_pypi_version = Version(_get_pypi_version())
+    if Version(__version__) < latest_pypi_version:
+        print(
+            f"🎈 A new version of Deep Origin is available. You have version {__version__}. The latest version is {latest_pypi_version}. Please update to the newest version."
+        )
+except Exception:
+    pass
 
 
 def ensure_client(func):
