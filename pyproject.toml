@@ -27,7 +27,7 @@ dependencies = [
     "tabulate",
     "filetype",
     "httpx",
-    "deeporigin-data-sdk==0.1.0a7",
+    "deeporigin-data-sdk==0.1.0a8",
     "humanize",
     "packaging",
 ]
