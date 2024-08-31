@@ -119,7 +119,10 @@ def _create_function(method_path):
         **kwargs,
     ):
         if client is None:
-            client = _get_default_client(debug=debug)
+            client = _get_default_client(
+                debug=debug,
+                refresh=False,
+            )
         method = _get_method(client, method_path)
         # call the low level API method
 
@@ -132,6 +135,7 @@ def _create_function(method_path):
                 tokens["access"] = auth.refresh_tokens(tokens["refresh"])
                 auth.cache_tokens(tokens)
                 client.token = tokens["access"]
+                method = _get_method(client, method_path)
                 response = method(**kwargs)
             else:
                 raise error

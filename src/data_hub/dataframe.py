@@ -93,7 +93,6 @@ class DataFrame(pd.DataFrame):
         # extract org name from url
         try:
             url_parts = url.split("/")
-            print(url_parts.index("org"))
             org_name = url_parts[url_parts.index("org") + 1]
         except Exception:
             org_name = ""
