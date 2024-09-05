@@ -70,18 +70,12 @@ jobs:
 
       - run: echo '${{ steps.cached_python_setup.outputs.cache-hit }}'
 
-      - run: 'mkdir ~/.deeporigin/'
-        shell: bash
-
-
-      - name: run tests
+      - name: "run tests without ~/.deeporigin/"
         run: |
           pip install --upgrade pip
           pip install --upgrade setuptools
           pip install -e .[test]
-          make test-github
-
-
+          make test-github 
 
 
   
