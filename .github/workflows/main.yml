@@ -77,18 +77,6 @@ jobs:
           pip install -e .[test]
           make test-github 
 
-      - run: 'mkdir ~/.deeporigin/'
-        shell: bash
-
-
-      - name: run tests
-        run: |
-          pip install --upgrade pip
-          pip install --upgrade setuptools
-          pip install -e .[test]
-          make test-github
-
-
 
   
 
