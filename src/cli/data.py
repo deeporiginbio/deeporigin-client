@@ -7,11 +7,14 @@ from deeporigin.exceptions import DeepOriginException
 from deeporigin.utils import (
     PREFIXES,
     DataType,
+    _ensure_do_folder,
     _print_dict,
     _print_tree,
     _show_json,
     _truncate,
 )
+
+_ensure_do_folder()
 
 
 class DataController(cement.Controller):

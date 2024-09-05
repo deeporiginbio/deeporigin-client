@@ -11,7 +11,9 @@ from deeporigin.config import (
     get_value,
 )
 from deeporigin.exceptions import DeepOriginException
-from deeporigin.utils import _print_dict
+from deeporigin.utils import _ensure_do_folder, _print_dict
+
+_ensure_do_folder()
 
 
 class ConfigController(cement.Controller):

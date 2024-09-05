@@ -5,6 +5,7 @@ import os
 import shutil
 from dataclasses import dataclass
 from datetime import datetime
+from pathlib import Path
 from typing import List, Literal, TypeVar, Union
 from urllib.parse import parse_qs, urljoin, urlparse
 
@@ -271,3 +272,12 @@ def _get_method(obj, method_path):
         obj = getattr(obj, method)
 
     return obj
+
+
+def _ensure_do_folder():
+    """makes sure that ~/.deeporigin exists"""
+
+    deeporigin_path = Path.home() / ".deeporigin"
+
+    if not deeporigin_path.exists():
+        deeporigin_path.mkdir(parents=True)
