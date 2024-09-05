@@ -1,13 +1,12 @@
-import io
 import json
-from contextlib import redirect_stderr, redirect_stdout
 from typing import Union
 
 import pytest
 from beartype import beartype
-from deeporigin import cli
 from deeporigin.data_hub import api
 from mock_client import MockClient
+
+from tests.utils import _run_cli_command
 
 # this allows us to try every CLI command with both
 # multiple options using pytest.mark.parametrize
@@ -127,20 +126,6 @@ def test_show_db(config, json_option):
 
     if json_option == ["--json"]:
         _check_json(stdout)
-
-
-@beartype
-def _run_cli_command(argv: list[str], client) -> str:
-    """helper function to run a CLI command, parse output and return"""
-    stdout = io.StringIO()
-    stderr = io.StringIO()
-
-    with redirect_stdout(stdout), redirect_stderr(stderr):
-        with cli.App(argv=argv) as app:
-            app.client = client
-            app.run()
-
-    return stdout.getvalue().strip()
 
 
 @beartype
