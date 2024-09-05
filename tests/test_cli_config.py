@@ -1,8 +1,4 @@
-import json
-from typing import Union
-
 import pytest
-from beartype import beartype
 from deeporigin.data_hub import api
 from mock_client import MockClient
 
@@ -49,6 +45,8 @@ def config(pytestconfig):
 
 def test_set_config(config):
     stdout = _run_cli_command(
-        ["config", "set", "organization_id", "foo"],
+        ["config", "set", "organization_id", "foo_3423"],
         config["client"],
     )
+
+    assert "foo_3423" in stdout, "Failed to set organization_id"

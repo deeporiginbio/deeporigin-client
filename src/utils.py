@@ -277,8 +277,7 @@ def _get_method(obj, method_path):
 def _ensure_do_folder():
     """makes sure that ~/.deeporigin exists"""
 
-    pass
-    # deeporigin_path = Path.home() / ".deeporigin"
+    deeporigin_path = Path.home() / ".deeporigin"
 
-    # if not deeporigin_path.exists():
-    #     deeporigin_path.mkdir(parents=True)
+    if not deeporigin_path.exists():
+        deeporigin_path.mkdir(parents=True)
