@@ -36,7 +36,7 @@ def _get_pep440_version():
 
 
 with open(version_filename, "r") as file:
-    __version__ = file.read()
+    __version__ = file.read().strip()
 
     if __version__ == "0.0.0.dev0":
         # in dev mode. we use git to get a "version number"
