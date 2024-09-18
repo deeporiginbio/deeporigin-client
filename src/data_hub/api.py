@@ -883,7 +883,7 @@ def get_dataframe(
         )
 
     # make a dict that maps from file IDs to file names
-    if use_file_names:
+    if use_file_names and len(file_ids) > 0:
         file_id_mapper = dict()
 
         # determine file name for every file ID in the dataframe
