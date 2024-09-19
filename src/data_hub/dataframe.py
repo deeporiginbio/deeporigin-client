@@ -85,13 +85,16 @@ class DataFrame(pd.DataFrame):
 
         name = self.attrs["metadata"]["name"]
         hid = self.attrs["metadata"]["hid"]
-        url = construct_resource_url(
-            name=hid,
-            row_type="database",
-        )
+
+        # placeholder URL, only used if something goes wrong
+        url = "https://os.deeporigin.com/"
 
         # extract org name from url
         try:
+            url = construct_resource_url(
+                name=hid,
+                row_type="database",
+            )
             url_parts = url.split("/")
             org_name = url_parts[url_parts.index("org") + 1]
         except Exception:
