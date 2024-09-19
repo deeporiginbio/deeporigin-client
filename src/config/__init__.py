@@ -71,6 +71,7 @@ def get_value(
                 organization_id=os.environ.get("DEEP_ORIGIN_ORGANIZATION_ID"),
                 api_endpoint=os.environ.get("DEEP_ORIGIN_API_ENDPOINT"),
                 nucleus_api_route=os.environ.get("DEEP_ORIGIN_NUCLEUS_API_ROUTE"),
+                env=os.environ.get("DEEP_ORIGIN_ENV"),
             )
         )
 
