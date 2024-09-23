@@ -153,6 +153,40 @@ def create_database(
 
 @beartype
 @ensure_client
+def list_files(
+    *,
+    assigned_row_ids: Optional[list[str]] = None,
+    is_unassigned: Optional[bool] = None,
+    client=None,
+) -> list:
+    """List rows in a database or folder (workspace).
+
+    Returns a list of rows from folders and databases,
+    based on the parent, row type, or whether the parent is the root.
+
+    Args:
+        parent_id: ID (or human ID) or the parent.
+        row_type: One of `row`, `folder`, or `database`.
+        parent_is_root: If `True` only rows that are children of the root will be returned.
+
+    Returns:
+        A list of objects, where each entry corresponds to a row.
+
+    """
+    filters = []
+
+    if assigned_row_ids is not None:
+        filters.append(dict(assigned_row_ids=assigned_row_ids))
+
+    if is_unassigned:
+        filters.append(dict(is_unassigned=is_unassigned))
+
+    files = _api.list_files(filters=filters, client=client)
+    return [file.file for file in files]
+
+
+@beartype
+@ensure_client
 def list_rows(
     *,
     parent_id: Optional[str] = None,
