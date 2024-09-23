@@ -163,6 +163,7 @@ class MockClient:
     def list_files(self, filters: list = []):
         assignments = None
         if filters == [dict(is_unassigned=False)]:
+            # return assigned files, so we need assignments
             assignments = [
                 types.list_files_response.DataAssignment(
                     rowId="_row:HmeXSzMWo96G0Or6HpEXK"

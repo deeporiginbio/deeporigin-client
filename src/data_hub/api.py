@@ -176,11 +176,10 @@ def list_files(
     if assigned_row_ids is not None:
         filters.append(dict(assigned_row_ids=assigned_row_ids))
 
-    if is_unassigned:
+    if is_unassigned is not None:
         filters.append(dict(is_unassigned=is_unassigned))
 
-    files = _api.list_files(filters=filters, client=client)
-    return [file.file for file in files]
+    return _api.list_files(filters=filters, client=client)
 
 
 @beartype

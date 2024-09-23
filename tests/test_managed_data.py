@@ -159,7 +159,7 @@ def test_list_rows_by_type(config):
 
 def test_list_files_unassigned(config):
     files = api.list_files(
-        filters=[dict(is_unassigned=True)],
+        is_unassigned=True,
         client=config["client"],
     )
 
@@ -173,7 +173,7 @@ def test_list_files_unassigned(config):
 
 def test_list_files_assigned(config):
     files = api.list_files(
-        filters=[dict(is_unassigned=False)],
+        is_unassigned=False,
         client=config["client"],
     )
 
