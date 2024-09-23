@@ -159,18 +159,16 @@ def list_files(
     is_unassigned: Optional[bool] = None,
     client=None,
 ) -> list:
-    """List rows in a database or folder (workspace).
+    """List files, with option to filter by assigned rows, assigned status
 
-    Returns a list of rows from folders and databases,
-    based on the parent, row type, or whether the parent is the root.
+    Returns a list of files.
 
     Args:
-        parent_id: ID (or human ID) or the parent.
-        row_type: One of `row`, `folder`, or `database`.
-        parent_is_root: If `True` only rows that are children of the root will be returned.
+        assigned_row_ids: List of IDs of rows that files are assigned to
+        is_unassigned:  If `True` only files that are unassigned will be returned
 
     Returns:
-        A list of objects, where each entry corresponds to a row.
+        A list of files, where each entry is an object that corresponds to a file on Deep Origin
 
     """
     filters = []
