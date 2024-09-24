@@ -72,15 +72,11 @@ def config(pytestconfig):
 
         for row in rows:
             if TEST_PREFIX in row.hid:
-                if row.type == "database":
-                    try:
+                try:
+                    if row.type == "database":
                         api.delete_database(database_id=row.hid)
-                    except Exception:
-                        # it's possible it doesn't exist
-                        pass
-                elif row.type == "workspace":
-                    try:
+                    elif row.type == "workspace":
                         api.delete_workspace(workspace_id=row.hid)
-                    except Exception:
-                        # it's possible it doesn't exist
-                        pass
+                except Exception:
+                    # it's possible it doesn't exist
+                    pass
