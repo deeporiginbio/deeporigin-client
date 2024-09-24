@@ -8,55 +8,14 @@ import pytest
 from deeporigin.data_hub import api
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.utils import DATAFRAME_ATTRIBUTE_KEYS, PREFIXES
-from mock_client import MockClient
+
+from tests.utils import config  # noqa: F401
 
 TEST_DB_NAME = "test-db-client-n23"
 TEST_WS_NAME = "test-ws-client-n23"
 
 
-@pytest.fixture(scope="session", autouse=True)
-def config(pytestconfig):
-    """this fixture performs some setup tasks
-    before all tests are run, and runs only once"""
-
-    data = dict()
-
-    # set up client
-    if pytestconfig.getoption("client") == "mock":
-        data["client"] = MockClient()
-        data["mock"] = True
-
-        # unpack mock data from client
-        data["folders"] = data["client"].folders
-        data["databases"] = data["client"].databases
-        data["rows"] = data["client"].rows
-        data["file"] = data["client"].file
-    else:
-        data["mock"] = False
-        client = api._get_default_client()
-
-        data["client"] = client
-
-        # if we're going to be making requests to a live
-        # instance, we need to make sensible requests
-        rows = api.list_rows()
-
-        data["databases"] = [row.hid for row in rows if row.type == "database"]
-        data["folders"] = [row.hid for row in rows if row.type == "workspace"]
-        data["rows"] = [row.hid for row in rows if row.type == "row"]
-
-        # get a list of all files
-        files = api.list_files()
-        if len(files) > 0:
-            data["file"] = files[0].file
-
-    # tests run on yield
-    yield data
-
-    # teardown tasks, if any
-
-
-def test_upload_file(config):
+def test_upload_file(config):  # noqa: F811
     full_path = os.path.abspath(__file__)
 
     from requests.exceptions import ConnectionError
@@ -74,7 +33,7 @@ def test_upload_file(config):
         )
 
 
-def test_make_database_rows(config):
+def test_make_database_rows(config):  # noqa: F811
     with pytest.raises(DeepOriginException, match="must be at least 1"):
         api.make_database_rows(
             config["databases"][0],
@@ -91,7 +50,7 @@ def test_make_database_rows(config):
         assert row.type == "row", "Expected rows to be created."
 
 
-def test_create_workspace(config):
+def test_create_workspace(config):  # noqa: F811
     name = "test-" + str(uuid.uuid4())[:6]
     api.create_workspace(
         name=name,
@@ -100,7 +59,7 @@ def test_create_workspace(config):
     )
 
 
-def test_create_database(config):
+def test_create_database(config):  # noqa: F811
     unique_id = str(uuid.uuid4())[:6]
     api.create_database(
         name="test-" + unique_id,
@@ -111,7 +70,7 @@ def test_create_database(config):
     )
 
 
-def test_delete_workspace(config):
+def test_delete_workspace(config):  # noqa: F811
     try:
         api.create_workspace(
             name=TEST_WS_NAME,
@@ -127,7 +86,7 @@ def test_delete_workspace(config):
     )
 
 
-def test_delete_database(config):
+def test_delete_database(config):  # noqa: F811
     """delete folders and databases"""
 
     try:
@@ -145,7 +104,7 @@ def test_delete_database(config):
     )
 
 
-def test_list_rows(config):
+def test_list_rows(config):  # noqa: F811
     rows = api.list_rows(
         parent_id=config["databases"][0],
         client=config["client"],
@@ -155,7 +114,7 @@ def test_list_rows(config):
         assert row.type == "row"
 
 
-def test_list_rows_root_parent(config):
+def test_list_rows_root_parent(config):  # noqa: F811
     root = api.list_rows(
         parent_is_root=True,
         client=config["client"],
@@ -166,7 +125,7 @@ def test_list_rows_root_parent(config):
     assert root.parent_id is None, "Expected root to have no parent"
 
 
-def test_list_rows_by_type(config):
+def test_list_rows_by_type(config):  # noqa: F811
     rows = api.list_rows(
         row_type="workspace",
         client=config["client"],
@@ -180,7 +139,7 @@ def test_list_rows_by_type(config):
         ), f"Expected to get a list of folders, but {row} is not a folder"
 
 
-def test_list_files_unassigned(config):
+def test_list_files_unassigned(config):  # noqa: F811
     files = api.list_files(
         is_unassigned=True,
         client=config["client"],
@@ -194,7 +153,7 @@ def test_list_files_unassigned(config):
         ), f"Expected not to see an assignments key for this file, but instead found {file}"
 
 
-def test_list_files_assigned(config):
+def test_list_files_assigned(config):  # noqa: F811
     files = api.list_files(
         is_unassigned=False,
         client=config["client"],
@@ -214,7 +173,7 @@ def test_list_files_assigned(config):
             ), f"Expected to find a row_id in assignments, but instead found {assignment}"
 
 
-def test_describe_database_stats(config):
+def test_describe_database_stats(config):  # noqa: F811
     stats = api.describe_database_stats(
         database_id=config["databases"][0],
         client=config["client"],
@@ -223,7 +182,7 @@ def test_describe_database_stats(config):
     assert stats.row_count >= 0, "Expected a positive number of rows"
 
 
-def test_describe_row(config):
+def test_describe_row(config):  # noqa: F811
     """test describe_row, using mocked response"""
 
     row = api.describe_row(
@@ -250,7 +209,7 @@ def test_describe_row(config):
     )
 
 
-def test_convert_id_format(config):
+def test_convert_id_format(config):  # noqa: F811
     conversions = api.convert_id_format(
         hids=config["rows"],
         client=config["client"],
@@ -271,14 +230,14 @@ def test_convert_id_format(config):
         api.convert_id_format(client=config["client"])
 
 
-def test_list_database_rows(config):
+def test_list_database_rows(config):  # noqa: F811
     api.list_database_rows(
         database_row_id=config["databases"][0],
         client=config["client"],
     )
 
 
-def test_get_dataframe(config):
+def test_get_dataframe(config):  # noqa: F811
     if config["mock"]:
         return
 
@@ -306,7 +265,7 @@ def test_get_dataframe(config):
     assert isinstance(data, dict), "Expected return type to be a dict"
 
 
-def test_list_mentions(config):
+def test_list_mentions(config):  # noqa: F811
     data = api.list_mentions(
         query=config["rows"][0],
         client=config["client"],
@@ -319,7 +278,7 @@ def test_list_mentions(config):
     assert isinstance(data.mentions, list), "Expected `mentions` to be a list"
 
 
-def test_get_tree(config):
+def test_get_tree(config):  # noqa: F811
     tree = api.get_tree(client=config["client"])
 
     tree = tree[0]
@@ -335,7 +294,7 @@ def test_get_tree(config):
     tree.pop("children")
 
 
-def test_create_file_download_url(config):
+def test_create_file_download_url(config):  # noqa: F811
     file_id = config["file"].id
     data = api.create_file_download_url(
         file_id=file_id,
@@ -347,7 +306,7 @@ def test_create_file_download_url(config):
     ), "Expected to find `download_url` in data response"
 
 
-def test_download_file(config):
+def test_download_file(config):  # noqa: F811
     if "file" not in config.keys():
         return
 
@@ -369,7 +328,7 @@ def test_download_file(config):
         os.remove(data.name)
 
 
-def test_describe_file(config):
+def test_describe_file(config):  # noqa: F811
     file_id = config["file"].id
 
     api.describe_file(
@@ -378,7 +337,7 @@ def test_describe_file(config):
     )
 
 
-def test_get_row_data(config):
+def test_get_row_data(config):  # noqa: F811
     row_id = config["rows"][0]
 
     data1 = api.get_row_data(
@@ -397,7 +356,7 @@ def test_get_row_data(config):
     assert isinstance(data2, dict), "Expected return type to be a dict"
 
 
-def test_get_cell_data(config):
+def test_get_cell_data(config):  # noqa: F811
     row_id = config["rows"][0]
     data = api.get_row_data(
         row_id=row_id,
@@ -411,7 +370,7 @@ def test_get_cell_data(config):
     )
 
 
-def test_download_database(config):
+def test_download_database(config):  # noqa: F811
     db_id = config["databases"][0]
     api.download_database(
         db_id,
