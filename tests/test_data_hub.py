@@ -1,4 +1,4 @@
-"""this tests low level functions in the data API"""
+"""this tests functions used to interact with the data hub"""
 
 import os
 import uuid
