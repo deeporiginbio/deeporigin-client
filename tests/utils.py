@@ -66,20 +66,21 @@ def config(pytestconfig):
     yield data
 
     # clean up all the object we created
-    print("Cleaning up...")
-    rows = api.list_rows()
+    if pytestconfig.getoption("client") != "mock":
+        print("Cleaning up...")
+        rows = api.list_rows()
 
-    for row in rows:
-        if TEST_PREFIX in row.hid:
-            if row.type == "database":
-                try:
-                    api.delete_database(database_id=row.hid)
-                except Exception:
-                    # it's possible it doesn't exist
-                    pass
-            elif row.type == "workspace":
-                try:
-                    api.delete_workspace(workspace_id=row.hid)
-                except Exception:
-                    # it's possible it doesn't exist
-                    pass
+        for row in rows:
+            if TEST_PREFIX in row.hid:
+                if row.type == "database":
+                    try:
+                        api.delete_database(database_id=row.hid)
+                    except Exception:
+                        # it's possible it doesn't exist
+                        pass
+                elif row.type == "workspace":
+                    try:
+                        api.delete_workspace(workspace_id=row.hid)
+                    except Exception:
+                        # it's possible it doesn't exist
+                        pass
