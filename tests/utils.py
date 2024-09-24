@@ -7,6 +7,10 @@ from deeporigin import cli
 from deeporigin.data_hub import api
 from mock_client import MockClient
 
+TEST_PREFIX = "tc-4Qzkrn57rM-"
+TEST_DB_NAME = TEST_PREFIX + "db"
+TEST_WS_NAME = TEST_PREFIX + "ws"
+
 
 @beartype
 def _run_cli_command(argv: list[str], client) -> str:
@@ -61,4 +65,21 @@ def config(pytestconfig):
     # tests run on yield
     yield data
 
-    # teardown tasks, if any
+    # clean up all the object we created
+    print("Cleaning up...")
+    rows = api.list_rows()
+
+    for row in rows:
+        if TEST_PREFIX in row.hid:
+            if row.type == "database":
+                try:
+                    api.delete_database(database_id=row.hid)
+                except Exception:
+                    # it's possible it doesn't exist
+                    pass
+            elif row.type == "workspace":
+                try:
+                    api.delete_workspace(workspace_id=row.hid)
+                except Exception:
+                    # it's possible it doesn't exist
+                    pass

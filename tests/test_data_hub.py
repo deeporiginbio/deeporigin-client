@@ -9,10 +9,7 @@ from deeporigin.data_hub import api
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.utils import DATAFRAME_ATTRIBUTE_KEYS, PREFIXES
 
-from tests.utils import config  # noqa: F401
-
-TEST_DB_NAME = "test-db-client-n23"
-TEST_WS_NAME = "test-ws-client-n23"
+from tests.utils import TEST_DB_NAME, TEST_PREFIX, TEST_WS_NAME, config  # noqa: F401
 
 
 def test_upload_file(config):  # noqa: F811
@@ -51,7 +48,7 @@ def test_make_database_rows(config):  # noqa: F811
 
 
 def test_create_workspace(config):  # noqa: F811
-    name = "test-" + str(uuid.uuid4())[:6]
+    name = TEST_PREFIX + str(uuid.uuid4())[:6]
     api.create_workspace(
         name=name,
         hid=name,
@@ -62,8 +59,8 @@ def test_create_workspace(config):  # noqa: F811
 def test_create_database(config):  # noqa: F811
     unique_id = str(uuid.uuid4())[:6]
     api.create_database(
-        name="test-" + unique_id,
-        hid="test-" + unique_id,
+        name=TEST_PREFIX + unique_id,
+        hid=TEST_PREFIX + unique_id,
         hid_prefix="test" + unique_id,
         parent_id=config["folders"][0],
         client=config["client"],
@@ -383,7 +380,7 @@ def test_download_database(config):  # noqa: F811
     os.remove(file_name)
 
 
-def test_download(config):
+def test_download(config):  # noqa: F811
     db_id = config["databases"][0]
     api.download(
         db_id,
