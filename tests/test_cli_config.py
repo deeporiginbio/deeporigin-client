@@ -1,4 +1,5 @@
 import pytest
+from deeporigin.config import get_value
 from deeporigin.data_hub import api
 from mock_client import MockClient
 
@@ -44,9 +45,19 @@ def config(pytestconfig):
 
 
 def test_set_config(config):
+    org_id = get_value()["organization_id"]
+
     stdout = _run_cli_command(
         ["config", "set", "organization_id", "foo_3423"],
         config["client"],
     )
 
     assert "foo_3423" in stdout, "Failed to set organization_id"
+
+    # reset to what it was before
+    stdout = _run_cli_command(
+        ["config", "set", "organization_id", org_id],
+        config["client"],
+    )
+
+    assert org_id in stdout, "Failed to set organization_id"
