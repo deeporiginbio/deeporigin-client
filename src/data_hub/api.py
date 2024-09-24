@@ -667,12 +667,17 @@ def _validate_value_for_column(*, column: dict, value: Any):
     elif column["type"] == "text":
         validated_value = str(value)
     elif column["type"] == "integer":
-        try:
-            validated_value = int(value)
-        except ValueError:
-            raise DeepOriginException(
-                message=f"{value} is not valid for cell {column['name']} of type integer. The value must be an integer."
-            )
+        from pandas._libs.missing import NAType
+
+        if isinstance(value, NAType):
+            validated_value = None
+        else:
+            try:
+                validated_value = int(value)
+            except ValueError:
+                raise DeepOriginException(
+                    message=f"{value} is not valid for cell {column['name']} of type integer. The value must be an integer."
+                )
 
     elif column["type"] == "float":
         from pandas._libs.missing import NAType

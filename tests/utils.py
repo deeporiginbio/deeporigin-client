@@ -26,6 +26,24 @@ def _run_cli_command(argv: list[str], client) -> str:
     return stdout.getvalue().strip()
 
 
+def clean_up_test_objects():
+    """utility function to clean up objects that have been created by tests"""
+
+    print("Cleaning up...")
+    rows = api.list_rows()
+
+    for row in rows:
+        if TEST_PREFIX in row.hid:
+            try:
+                if row.type == "database":
+                    api.delete_database(database_id=row.hid)
+                elif row.type == "workspace":
+                    api.delete_workspace(workspace_id=row.hid)
+            except Exception:
+                # it's possible it doesn't exist
+                pass
+
+
 @pytest.fixture(scope="session", autouse=True)
 def config(pytestconfig):
     """this fixture performs some setup tasks
@@ -67,16 +85,4 @@ def config(pytestconfig):
 
     # clean up all the object we created
     if pytestconfig.getoption("client") != "mock":
-        print("Cleaning up...")
-        rows = api.list_rows()
-
-        for row in rows:
-            if TEST_PREFIX in row.hid:
-                try:
-                    if row.type == "database":
-                        api.delete_database(database_id=row.hid)
-                    elif row.type == "workspace":
-                        api.delete_workspace(workspace_id=row.hid)
-                except Exception:
-                    # it's possible it doesn't exist
-                    pass
+        clean_up_test_objects()

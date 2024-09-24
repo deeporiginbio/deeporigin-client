@@ -6,11 +6,11 @@ import shutil
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import List, Literal, TypeVar, Union
 from urllib.parse import parse_qs, urljoin, urlparse
 
 import requests
 from beartype import beartype
+from beartype.typing import List, Literal, TypeVar, Union
 from deeporigin.config import get_value
 from deeporigin.exceptions import DeepOriginException
 from tabulate import tabulate
