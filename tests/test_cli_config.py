@@ -45,9 +45,12 @@ def config(pytestconfig):
 
 
 def test_set_config(config):
-    org_id = get_value()["organization_id"]
-    if org_id is None:
-        org_id = "foo_1234"
+    org_id = "foo_1234"
+    try:
+        org_id = get_value()["organization_id"]
+    except Exception:
+        # this may not work on github actions
+        pass
 
     stdout = _run_cli_command(
         ["config", "set", "organization_id", "foo_3423"],
