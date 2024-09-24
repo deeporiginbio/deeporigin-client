@@ -10,6 +10,9 @@ from deeporigin.exceptions import DeepOriginException
 from deeporigin.utils import DATAFRAME_ATTRIBUTE_KEYS, PREFIXES
 from mock_client import MockClient
 
+TEST_DB_NAME = "test-db-client-n23"
+TEST_WS_NAME = "test-ws-client-n23"
+
 
 @pytest.fixture(scope="session", autouse=True)
 def config(pytestconfig):
@@ -108,18 +111,32 @@ def test_create_database(config):
     )
 
 
-def test_delete_rows(config):
+def test_delete_workspace(config):
+    try:
+        api.create_workspace(name=TEST_WS_NAME)
+    except DeepOriginException:
+        # this may already exist, but we don't care
+        pass
+
+    api.delete_workspace(
+        workspace_id=TEST_WS_NAME,
+        client=config["client"],
+    )
+
+
+def test_delete_database(config):
     """delete folders and databases"""
 
-    for row_type in ["workspace", "database"]:
-        rows = api.list_rows(row_type=row_type, client=config["client"])
-        row_ids = [row.id for row in rows if "test" in row.hid]
+    try:
+        api.create_database(name=TEST_DB_NAME)
+    except DeepOriginException:
+        # this may already exist, but we don't care
+        pass
 
-        if len(row_ids) > 0:
-            api.delete_rows(
-                row_ids=row_ids,
-                client=config["client"],
-            )
+    api.delete_database(
+        database_id=TEST_DB_NAME,
+        client=config["client"],
+    )
 
 
 def test_list_rows(config):

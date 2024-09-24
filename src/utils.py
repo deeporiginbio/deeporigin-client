@@ -43,9 +43,10 @@ DataType = Literal[
 """Type of a column in a Deep Origin database. See [this page in the documentation](https://docs.deeporigin.io/docs/os/data-hub/databases/columns) for more information."""
 
 DATAFRAME_ATTRIBUTE_KEYS = {
-    "file_ids",
+    "metadata",
     "id",
     "reference_ids",
+    "last_updated_row",
 }
 
 
