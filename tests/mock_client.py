@@ -277,6 +277,9 @@ class MockClient:
     def delete_database(self, **kwargs):
         return dict()
 
+    def delete_workspace(self, **kwargs):
+        return dict()
+
     def list_mentions(self, **kwargs):
         return types.list_mentions_response.Data(
             mentions=[
