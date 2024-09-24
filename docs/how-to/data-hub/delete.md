@@ -12,9 +12,9 @@ This document describes how to delete objects in the Deep Origin data hub:
 
     All resources will be deleted without asking for confirmation. 
 
-## Delete database rows, databases, and folders
+## Delete database rows
 
-To delete multiple rows, databases and folders, run:
+To delete rows in a database, run:
 
 === "CLI"
 
@@ -29,8 +29,43 @@ To delete multiple rows, databases and folders, run:
     api.delete_rows(row_ids=["row-1","database-1","folder-1"])
     ```
 
-    !!! Info "Rows?"
-        Rows, folders and databases can all be deleted using the `delete_rows` method. 
+
+## Delete databases
+
+To delete an entire database, run:
+
+=== "CLI"
+
+    ```bash
+    deeporigin data delete --ids <ids>
+    ```
+
+=== "Python"
+
+    ```py
+    from deeporigin.data_hub import api
+    api.delete_database(database_id=<row-ID>)
+    ```
+
+
+## Delete folders (workspaces)
+
+To delete an entire folder, including all contained databases, run:
+
+=== "CLI"
+
+    ```bash
+    deeporigin data delete --ids <ids>
+    ```
+
+=== "Python"
+
+    ```py
+    from deeporigin.data_hub import api
+    api.delete_workspace(workspace_id=<folder-ID>)
+    ```
+
+
 
 ## Delete database columns
 

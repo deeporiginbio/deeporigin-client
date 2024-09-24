@@ -68,7 +68,8 @@ def config(pytestconfig):
     yield data
 
     # teardown code
-    clean_up_test_objects()
+    if pytestconfig.getoption("client") != "mock":
+        clean_up_test_objects()
 
 
 def test_dataframe_operations(config):
