@@ -113,7 +113,10 @@ def test_create_database(config):
 
 def test_delete_workspace(config):
     try:
-        api.create_workspace(name=TEST_WS_NAME)
+        api.create_workspace(
+            name=TEST_WS_NAME,
+            client=config["client"],
+        )
     except DeepOriginException:
         # this may already exist, but we don't care
         pass
@@ -128,7 +131,10 @@ def test_delete_database(config):
     """delete folders and databases"""
 
     try:
-        api.create_database(name=TEST_DB_NAME)
+        api.create_database(
+            name=TEST_DB_NAME,
+            client=config["client"],
+        )
     except DeepOriginException:
         # this may already exist, but we don't care
         pass
