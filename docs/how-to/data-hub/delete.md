@@ -14,20 +14,28 @@ This document describes how to delete objects in the Deep Origin data hub:
 
 ## Delete database rows
 
-To delete rows in a database, run:
+To delete a row in a database, run:
 
 === "CLI"
 
     ```bash
-    deeporigin data delete --ids <ids>
+    deeporigin data delete \
+        --row <row-id> \
+        --database <database-id>
+
     ```
 
 === "Python"
 
+
+
     ```py
     from deeporigin.data_hub import api
-    api.delete_rows(row_ids=["row-1","database-1","folder-1"])
+    api.delete_rows(row_ids=["row-1", "row-2"], database_id="database-id")
     ```
+
+    !!! tip "Deleting multiple rows"
+        Note that the python client allows you to delete multiple rows at once.
 
 
 ## Delete databases
@@ -37,14 +45,17 @@ To delete an entire database, run:
 === "CLI"
 
     ```bash
-    deeporigin data delete --ids <ids>
+    deeporigin data delete --database <db-id>
     ```
+
+    !!! tip "Aliases"
+        The following alias also works: `deeporigin data delete -d <db-id>`.
 
 === "Python"
 
     ```py
     from deeporigin.data_hub import api
-    api.delete_database(database_id=<row-ID>)
+    api.delete_database(database_id=<db-id>)
     ```
 
 
@@ -55,29 +66,31 @@ To delete an entire folder, including all contained databases, run:
 === "CLI"
 
     ```bash
-    deeporigin data delete --ids <ids>
+    deeporigin data delete --folder <id>
     ```
+
+    !!! tip "Aliases"
+        The following aliases also work `--workspace`, `-w`, `--ws`, `-f` instead of `--folder`.
 
 === "Python"
 
     ```py
     from deeporigin.data_hub import api
-    api.delete_workspace(workspace_id=<folder-ID>)
+    api.delete_workspace(workspace_id=<folder-id>)
     ```
 
 
 
-## Delete database columns
+## Delete database column
 
-To delete columns in databases, run the following command, specifying the IDs of the columns to delete and their parent database:
+To delete a column in a databas, run the following command, specifying the ID of the column to delete and its parent database:
 
 === "CLI"
 
     ```bash
     deeporigin data delete \
-        --ids <ids> \
+        --column <ids> \
         --database <database-id> \
-        --columns
     ```
 
 === "Python"
