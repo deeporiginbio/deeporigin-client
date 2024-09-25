@@ -69,7 +69,7 @@ def config(pytestconfig):
 
     # teardown code
     if pytestconfig.getoption("client") != "mock":
-        clean_up_test_objects()
+        clean_up_test_objects(TEST_PREFIX)
 
 
 def test_dataframe_operations(config):

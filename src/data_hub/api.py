@@ -904,6 +904,9 @@ def get_dataframe(
 
     # remove notebook columns because they are not
     # shown in the UI as columns
+    if columns is None:
+        return None
+
     columns = [
         col
         for col in columns

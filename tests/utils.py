@@ -26,14 +26,17 @@ def _run_cli_command(argv: list[str], client) -> str:
     return stdout.getvalue().strip()
 
 
-def clean_up_test_objects():
+def clean_up_test_objects(test_prefix: str = None):
     """utility function to clean up objects that have been created by tests"""
 
     print("Cleaning up...")
     rows = api.list_rows()
 
+    if test_prefix is None:
+        test_prefix = TEST_PREFIX
+
     for row in rows:
-        if TEST_PREFIX in row.hid:
+        if test_prefix in row.hid:
             try:
                 if row.type == "database":
                     api.delete_database(database_id=row.hid)
