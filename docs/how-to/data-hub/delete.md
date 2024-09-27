@@ -12,37 +12,85 @@ This document describes how to delete objects in the Deep Origin data hub:
 
     All resources will be deleted without asking for confirmation. 
 
-## Delete database rows, databases, and folders
+## Delete database rows
 
-To delete multiple rows, databases and folders, run:
-
-=== "CLI"
-
-    ```bash
-    deeporigin data delete --ids <ids>
-    ```
-
-=== "Python"
-
-    ```py
-    from deeporigin.data_hub import api
-    api.delete_rows(row_ids=["row-1","database-1","folder-1"])
-    ```
-
-    !!! Info "Rows?"
-        Rows, folders and databases can all be deleted using the `delete_rows` method. 
-
-## Delete database columns
-
-To delete columns in databases, run the following command, specifying the IDs of the columns to delete and their parent database:
+To delete a row in a database, run:
 
 === "CLI"
 
     ```bash
     deeporigin data delete \
-        --ids <ids> \
+        --row <row-id> \
+        --database <database-id>
+
+    ```
+
+=== "Python"
+
+
+
+    ```py
+    from deeporigin.data_hub import api
+    api.delete_rows(row_ids=["row-1", "row-2"], database_id="database-id")
+    ```
+
+    !!! tip "Deleting multiple rows"
+        Note that the python client allows you to delete multiple rows at once.
+
+
+## Delete databases
+
+To delete an entire database, run:
+
+=== "CLI"
+
+    ```bash
+    deeporigin data delete --database <db-id>
+    ```
+
+    !!! tip "Aliases"
+        The following alias also works: `deeporigin data delete -d <db-id>`.
+
+=== "Python"
+
+    ```py
+    from deeporigin.data_hub import api
+    api.delete_database(database_id=<db-id>)
+    ```
+
+
+## Delete folders (workspaces)
+
+To delete an entire folder, including all contained databases, run:
+
+=== "CLI"
+
+    ```bash
+    deeporigin data delete --folder <id>
+    ```
+
+    !!! tip "Aliases"
+        The following aliases also work `--workspace`, `-w`, `--ws`, `-f` instead of `--folder`.
+
+=== "Python"
+
+    ```py
+    from deeporigin.data_hub import api
+    api.delete_workspace(workspace_id=<folder-id>)
+    ```
+
+
+
+## Delete database column
+
+To delete a column in a databas, run the following command, specifying the ID of the column to delete and its parent database:
+
+=== "CLI"
+
+    ```bash
+    deeporigin data delete \
+        --column <ids> \
         --database <database-id> \
-        --columns
     ```
 
 === "Python"

@@ -6,11 +6,11 @@ import shutil
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import List, Literal, TypeVar, Union
 from urllib.parse import parse_qs, urljoin, urlparse
 
 import requests
 from beartype import beartype
+from beartype.typing import List, Literal, TypeVar, Union
 from deeporigin.config import get_value
 from deeporigin.exceptions import DeepOriginException
 from tabulate import tabulate
@@ -43,9 +43,10 @@ DataType = Literal[
 """Type of a column in a Deep Origin database. See [this page in the documentation](https://docs.deeporigin.io/docs/os/data-hub/databases/columns) for more information."""
 
 DATAFRAME_ATTRIBUTE_KEYS = {
-    "file_ids",
+    "metadata",
     "id",
     "reference_ids",
+    "last_updated_row",
 }
 
 

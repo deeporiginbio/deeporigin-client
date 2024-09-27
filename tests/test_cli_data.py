@@ -3,10 +3,11 @@ from typing import Union
 
 import pytest
 from beartype import beartype
-from deeporigin.data_hub import api
-from mock_client import MockClient
 
-from tests.utils import _run_cli_command
+from tests.utils import (
+    _run_cli_command,
+    config,  # noqa: F401
+)
 
 # this allows us to try every CLI command with both
 # multiple options using pytest.mark.parametrize
@@ -26,45 +27,7 @@ LIST_OPTIONS = (
 )
 
 
-@pytest.fixture(scope="session", autouse=True)
-def config(pytestconfig):
-    """this fixture performs some setup tasks
-    before all tests are run, and runs only once"""
-
-    data = dict()
-
-    # set up client
-    if pytestconfig.getoption("client") == "mock":
-        data["client"] = MockClient()
-
-        # unpack mock data from client
-        data["folders"] = data["client"].folders
-        data["databases"] = data["client"].databases
-        data["rows"] = data["client"].rows
-        data["file"] = data["client"].file
-    else:
-        client = api._get_default_client()
-        data["client"] = client
-
-        # if we're going to be making requests to a live
-        # instance, we need to make sensible requests
-        databases = api.list_rows(row_type="database")
-        data["databases"] = [db.hid for db in databases]
-        rows = api.list_rows(row_type="row")
-        data["rows"] = [row.id for row in rows]
-
-        # get a list of all files
-        files = api.list_files()
-        if len(files) > 0:
-            data["file"] = files[0].file
-
-    # tests run on yield
-    yield data
-
-    # teardown tasks, if any
-
-
-def test_data(config):
+def test_data(config):  # noqa: F811
     stdout = _run_cli_command(
         ["data"],
         config["client"],
@@ -74,7 +37,7 @@ def test_data(config):
 
 
 @pytest.mark.parametrize("json_option", JSON_OPTIONS)
-def test_describe_file(config, json_option):
+def test_describe_file(config, json_option):  # noqa: F811
     file_id = config["file"].id
 
     stdout = _run_cli_command(
@@ -88,7 +51,7 @@ def test_describe_file(config, json_option):
 
 
 @pytest.mark.parametrize("option", JSON_OPTIONS)
-def test_describe_row(config, option):
+def test_describe_row(config, option):  # noqa: F811
     row_id = config["rows"][0]
 
     stdout = _run_cli_command(
@@ -101,12 +64,14 @@ def test_describe_row(config, option):
     if option == ["--json"]:
         data = _check_json(stdout)
 
-        assert data["id"] == row_id, "Expected row ID to match"
+        assert (
+            data["hid"] == row_id
+        ), f"Expected row ID to match. However, got {data['id']} vs. {row_id}"
 
 
 @pytest.mark.parametrize("json_option", JSON_OPTIONS)
 @pytest.mark.parametrize("list_option", LIST_OPTIONS)
-def test_list(config, list_option, json_option):
+def test_list(config, list_option, json_option):  # noqa: F811
     stdout = _run_cli_command(
         ["data", "list"] + list_option + json_option,
         config["client"],
@@ -118,7 +83,7 @@ def test_list(config, list_option, json_option):
 
 
 @pytest.mark.parametrize("json_option", JSON_OPTIONS)
-def test_show_db(config, json_option):
+def test_show_db(config, json_option):  # noqa: F811
     stdout = _run_cli_command(
         ["data", "show", config["databases"][0]] + json_option,
         config["client"],

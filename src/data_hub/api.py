@@ -153,6 +153,37 @@ def create_database(
 
 @beartype
 @ensure_client
+def list_files(
+    *,
+    assigned_row_ids: Optional[list[str]] = None,
+    is_unassigned: Optional[bool] = None,
+    client=None,
+) -> list:
+    """List files, with option to filter by assigned rows, assigned status
+
+    Returns a list of files.
+
+    Args:
+        assigned_row_ids: List of IDs of rows that files are assigned to
+        is_unassigned:  If `True` only files that are unassigned will be returned
+
+    Returns:
+        A list of files, where each entry is an object that corresponds to a file on Deep Origin
+
+    """
+    filters = []
+
+    if assigned_row_ids is not None:
+        filters.append(dict(assigned_row_ids=assigned_row_ids))
+
+    if is_unassigned is not None:
+        filters.append(dict(is_unassigned=is_unassigned))
+
+    return _api.list_files(filters=filters, client=client)
+
+
+@beartype
+@ensure_client
 def list_rows(
     *,
     parent_id: Optional[str] = None,
@@ -636,20 +667,30 @@ def _validate_value_for_column(*, column: dict, value: Any):
     elif column["type"] == "text":
         validated_value = str(value)
     elif column["type"] == "integer":
-        try:
-            validated_value = int(value)
-        except ValueError:
-            raise DeepOriginException(
-                message=f"{value} is not valid for cell {column['name']} of type integer. The value must be an integer."
-            )
+        from pandas._libs.missing import NAType
+
+        if isinstance(value, NAType):
+            validated_value = None
+        else:
+            try:
+                validated_value = int(value)
+            except ValueError:
+                raise DeepOriginException(
+                    message=f"{value} is not valid for cell {column['name']} of type integer. The value must be an integer."
+                )
 
     elif column["type"] == "float":
-        try:
-            validated_value = float(value)
-        except ValueError:
-            raise DeepOriginException(
-                message=f"{value} is not valid for cell {column['name']} of type float. The value must be a float."
-            )
+        from pandas._libs.missing import NAType
+
+        if isinstance(value, NAType):
+            validated_value = None
+        else:
+            try:
+                validated_value = float(value)
+            except ValueError:
+                raise DeepOriginException(
+                    message=f"{value} is not valid for cell {column['name']} of type float. The value must be a float."
+                )
 
     elif column["type"] == "boolean":
         if isinstance(value, bool) or value is None:
@@ -863,6 +904,9 @@ def get_dataframe(
 
     # remove notebook columns because they are not
     # shown in the UI as columns
+    if columns is None:
+        return None
+
     columns = [
         col
         for col in columns

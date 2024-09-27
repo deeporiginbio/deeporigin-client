@@ -10,6 +10,7 @@ from typing import Optional
 import humanize
 import pandas as pd
 from deeporigin.data_hub import api
+from deeporigin.platform.api import get_last_edited_user_name
 from deeporigin.utils import (
     DatabaseReturnType,
     IDFormat,
@@ -120,11 +121,8 @@ class DataFrame(pd.DataFrame):
         header = f'<h4 style="color: #363636;">Deep Origin / {org_name} / <a href = "{url}">{name} </a></h4>'
         txt = f'<p style="font-size: 12px; color: #808080;">Created {created_time_ago}. Row {self.attrs["last_updated_row"].hid} was last edited {edited_time_ago}'
         try:
-            txt += (
-                "  by "
-                + self.attrs["last_updated_row"].edited_by_user_drn.split("|")[1]
-                + ".</p>"
-            )
+            last_edited_by = get_last_edited_user_name(self.attrs["last_updated_row"])
+            txt += "  by " + last_edited_by + ".</p>"
         except Exception:
             # give up. this should not cause the dataframe to
             # not print.

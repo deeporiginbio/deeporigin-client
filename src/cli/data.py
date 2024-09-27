@@ -561,27 +561,35 @@ class DataController(cement.Controller):
         help="Delete rows, columns, databases and/or folders (workspaces)",
         arguments=[
             (
-                ["--ids"],
-                {
-                    "type": str,
-                    "required": True,
-                    "nargs": "+",
-                    "help": "IDs of the resources to delete",
-                },
-            ),
-            (
-                ["--database"],
+                ["--database", "-d"],
                 {
                     "type": str,
                     "required": False,
-                    "help": "ID of database that columns are in",
+                    "help": "ID of the database to delete",
                 },
             ),
             (
-                ["--columns"],
+                ["--folder", "--workspace", "-w", "--ws", "-f"],
                 {
-                    "action": "store_true",
-                    "help": "Whether to treat IDs as column IDs [default: False]",
+                    "type": str,
+                    "required": False,
+                    "help": "ID of folder to delete",
+                },
+            ),
+            (
+                ["--column", "-c"],
+                {
+                    "type": str,
+                    "required": False,
+                    "help": "Column ID to delete",
+                },
+            ),
+            (
+                ["--row", "-r"],
+                {
+                    "type": str,
+                    "required": False,
+                    "help": "Row ID to delete",
                 },
             ),
         ],
@@ -589,25 +597,44 @@ class DataController(cement.Controller):
     def delete(self):
         """Delete rows, columns, databases and/or folders"""
 
-        if self.app.pargs.columns:
+        if self.app.pargs.column:
             if self.app.pargs.database is None:
                 raise DeepOriginException(
                     "Use the --database argument to specify the parent database. To delete a column, the parent database must be specified."
                 )
-            for column_id in self.app.pargs.ids:
-                api.delete_database_column(
-                    column_id=column_id,
-                    database_id=self.app.pargs.database,
-                    client=self._get_client(),
-                )
-            print(f"✔︎ Deleted {len(self.app.pargs.ids)} columns")
-        else:
-            api.delete_rows(
-                row_ids=self.app.pargs.ids,
+            api.delete_database_column(
+                column_id=self.app.pargs.column,
+                database_id=self.app.pargs.database,
                 client=self._get_client(),
             )
-
-            print(f"✔︎ Deleted {len(self.app.pargs.ids)} objects")
+            print(
+                f"✔︎ Deleted column: {self.app.pargs.column} in database: {self.app.pargs.database}"
+            )
+        elif self.app.pargs.row:
+            if self.app.pargs.database is None:
+                raise DeepOriginException(
+                    "Use the --database argument to specify the parent database. To delete a row, the parent database must be specified."
+                )
+            api.delete_rows(
+                row_ids=[self.app.pargs.row],
+                database_id=self.app.pargs.database,
+                client=self._get_client(),
+            )
+            print(
+                f"✔︎ Deleted row: {self.app.pargs.row} in database: {self.app.pargs.database}"
+            )
+        elif self.app.pargs.database:
+            api.delete_database(
+                database_id=self.app.pargs.database,
+                client=self._get_client(),
+            )
+            print(f"✔︎ Deleted database: {self.app.pargs.database}")
+        elif self.app.pargs.folder:
+            api.delete_workspace(
+                workspace_id=self.app.pargs.folder,
+                client=self._get_client(),
+            )
+            print(f"✔︎ Deleted folder: {self.app.pargs.folder}")
 
 
 CONTROLLERS = [
