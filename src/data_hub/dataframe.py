@@ -81,6 +81,20 @@ class DataFrame(pd.DataFrame):
         else:
             self._modified_columns.add(key)
 
+    def head(self, n=5):
+        """Override the `head` method so that we don't display a spurious modified warning"""
+
+        df = super().head(n)
+        df._modified_columns = None
+        return df
+
+    def tail(self, n=5):
+        """Override the `tail` method so that we don't display a spurious modified warning"""
+
+        df = super().tail(n)
+        df._modified_columns = None
+        return df
+
     def _repr_html_(self):
         """method override to customize printing in a Jupyter notebook"""
 

@@ -65,6 +65,7 @@ In either case, when we view the DataFrame once more using `df`, we see the upda
 
 ![DataFrame with warning telling us about local changes that have not been written back to Deep Origin](../images/dataframe-1.png)
 
+
 ## Write data back to Deep Origin
 
 !!! warning "Work in progress"
