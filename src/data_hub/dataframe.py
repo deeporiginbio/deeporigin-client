@@ -231,19 +231,23 @@ class DataFrame(pd.DataFrame):
 
             if len(column_metadata) == 0:
                 # infer column type
+                column_type = _infer_column_type(self[column])
 
                 # make a new column
-                api.add_database_column(
+                response = api.add_database_column(
                     database_id=self.attrs["metadata"]["hid"],
-                    type="integer",
+                    type=column_type,
                     name=column,
                     key=column,
                 )
 
-            column_metadata = column_metadata[0]
+                # add column metadata to column
+                self.attrs["metadata"]["cols"].append(response["data"]["column"])
+            else:
+                column_metadata = column_metadata[0]
 
-            if column_metadata["type"] == "file":
-                continue
+                if column_metadata["type"] == "file":
+                    continue
 
             if rows is None:
                 # we're updating a whole column
@@ -316,5 +320,5 @@ def _infer_column_type(column: pd.Series):
         if result:
             return dtype
 
-    # If no clear type is found, return "mixed"
-    return "mixed"
+    # no clear type, fall back to string
+    return "string"
