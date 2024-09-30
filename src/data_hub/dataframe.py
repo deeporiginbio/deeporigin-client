@@ -165,12 +165,13 @@ class DataFrame(pd.DataFrame):
     def __repr__(self):
         """method override to customize printing in an interactive session"""
 
+        df_representation = super().__repr__()
         try:
             header = f'{self.attrs["metadata"]["hid"]}\n'
-            df_representation = super().__repr__()
-            return header + df_representation
         except Exception:
-            return super().__repr__()
+            header = ""
+
+        return header + df_representation
 
     @classmethod
     def from_deeporigin(
