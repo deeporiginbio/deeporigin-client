@@ -902,11 +902,11 @@ def get_dataframe(
     reference_ids = []
     file_ids = []
 
-    # remove notebook columns because they are not
-    # shown in the UI as columns
     if columns is None:
         return None
 
+    # remove notebook columns because they are not
+    # shown in the UI as columns
     columns = [
         col
         for col in columns
