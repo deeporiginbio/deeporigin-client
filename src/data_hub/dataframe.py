@@ -263,6 +263,12 @@ class DataFrame(pd.DataFrame):
             print(f"✔︎ Wrote {len(rows)} rows in {column} to Deep Origin database.")
             self._modified_columns.discard(column)
 
+        # fetch info for the last modified row so we can update what we show
+        try:
+            self.attrs["last_updated_row"] = api.describe_row(row_id=rows[-1])
+        except Exception:
+            pass
+
     @property
     def _constructor(self):
         """this method overrides the _constructor property to return a DataFrame and is required for compatibility with a pandas DataFrame"""

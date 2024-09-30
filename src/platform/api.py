@@ -9,14 +9,14 @@ from deeporigin import auth
 from deeporigin.config import get_value
 
 
-def resolve_user(user_id: str):
-    """get details about a user in the platform"""
+def _make_request(endpoint: str) -> dict:
+    """make a request to the platform API"""
+
+    if not endpoint.startswith("/"):
+        endpoint = "/" + endpoint
 
     tokens = auth.get_tokens(refresh=False)
     access_token = tokens["access"]
-
-    value = get_value()
-    org_id = value["organization_id"]
 
     headers = {
         "accept": "application/json",
@@ -26,9 +26,9 @@ def resolve_user(user_id: str):
 
     env = get_value()["env"]
     if env == "prod":
-        url = f"https://os.deeporigin.io/api/organizations/{org_id}/users/{user_id}"
+        url = f"https://os.deeporigin.io/api/{endpoint}"
     else:
-        f"https://{env}.deeporigin.io/api/organizations/{org_id}/users/{user_id}"
+        f"https://{env}.deeporigin.io/api/{endpoint}"
 
     response = requests.get(
         url,
@@ -36,6 +36,23 @@ def resolve_user(user_id: str):
     )
 
     return response.json()
+
+
+def resolve_user(user_id: str):
+    """get details about a user in the platform"""
+
+    value = get_value()
+    org_id = value["organization_id"]
+
+    endpoint = f"/organizations/{org_id}/users/{user_id}"
+
+    return _make_request(endpoint)
+
+
+def whoami():
+    """get details about currently signed in user"""
+
+    return _make_request("/users/me")
 
 
 @beartype
