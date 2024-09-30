@@ -137,7 +137,7 @@ class DataFrame(pd.DataFrame):
             )
             edited_time_ago = humanize.naturaltime(now - date_obj)
 
-            header = f'<h4 style="color: #363636;">Deep Origin / {org_name} / <a href = "{url}">{name} </a></h4>'
+            header = f'<h4 style="color: #808080;">Deep Origin / {org_name} / <a href = "{url}">{name} </a></h4>'
             txt = f'<p style="font-size: 12px; color: #808080;">Created {created_time_ago}. Row {self.attrs["last_updated_row"].hid} was last edited {edited_time_ago}'
             try:
                 last_edited_by = get_last_edited_user_name(
