@@ -30,6 +30,7 @@ dependencies = [
     "deeporigin-data-sdk==0.1.0a11",
     "humanize",
     "packaging",
+    "diskcache",
 ]
 dynamic = ["version"]
 

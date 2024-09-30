@@ -1,6 +1,10 @@
 """module to interact with the platform API"""
 
+import os
+
+import diskcache as dc
 import requests
+from beartype import beartype
 from deeporigin import auth
 from deeporigin.config import get_value
 
@@ -34,12 +38,22 @@ def resolve_user(user_id: str):
     return response.json()
 
 
-def get_user_name(user_id: str):
-    """get user name from user DRN"""
+@beartype
+def get_user_name(user_id: str) -> str:
+    """get user name from user ID"""
+
+    CACHE_PATH = os.path.expanduser("~/.deeporigin/user_ids")
+
+    cache = dc.Cache(CACHE_PATH)
+
+    if cache.get(user_id) is not None:
+        return cache.get(user_id)
 
     response = resolve_user(user_id)
 
-    return response["data"]["attributes"]["name"]
+    name = response["data"]["attributes"]["name"]
+    cache.set(user_id, name)
+    return name
 
 
 def get_last_edited_user_name(row):
