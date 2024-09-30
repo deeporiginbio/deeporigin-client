@@ -38,13 +38,16 @@ def _make_request(endpoint: str) -> dict:
     return response.json()
 
 
+@beartype
+def _get_org_id() -> str:
+    value = get_value()
+    return value["organization_id"]
+
+
 def resolve_user(user_id: str):
     """get details about a user in the platform"""
 
-    value = get_value()
-    org_id = value["organization_id"]
-
-    endpoint = f"/organizations/{org_id}/users/{user_id}"
+    endpoint = f"/organizations/{_get_org_id()}/users/{user_id}"
 
     return _make_request(endpoint)
 
@@ -53,6 +56,11 @@ def whoami():
     """get details about currently signed in user"""
 
     return _make_request("/users/me")
+
+
+def get_workstations():
+    """get information about all workstations in the organization"""
+    return _make_request(f"/computebenches/{_get_org_id()}")
 
 
 @beartype
