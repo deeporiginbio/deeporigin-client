@@ -26,9 +26,9 @@ def _make_request(endpoint: str) -> dict:
 
     env = get_value()["env"]
     if env == "prod":
-        url = f"https://os.deeporigin.io/api/{endpoint}"
+        url = f"https://os.deeporigin.io/api{endpoint}"
     else:
-        f"https://{env}.deeporigin.io/api/{endpoint}"
+        f"https://{env}.deeporigin.io/api{endpoint}"
 
     response = requests.get(
         url,
