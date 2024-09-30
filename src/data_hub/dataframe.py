@@ -41,7 +41,7 @@ class DataFrame(pd.DataFrame):
 
             return self.obj._get_value(*key)
 
-        def __setitem__(self, key, value):
+        def __setitem__(self, key, value) -> None:
             """intercept for the set operation""" ""
 
             old_value = self.obj._get_value(*key)
@@ -84,63 +84,75 @@ class DataFrame(pd.DataFrame):
     def _repr_html_(self):
         """method override to customize printing in a Jupyter notebook"""
 
-        name = self.attrs["metadata"]["name"]
-        hid = self.attrs["metadata"]["hid"]
-
-        # placeholder URL, only used if something goes wrong
-        url = "https://os.deeporigin.com/"
-
-        # extract org name from url
+        # the entirety of this code is in a try/catch
+        # block because pretty printing may fail,
+        # and failure to pretty print should never
+        # block other more mission critical code
         try:
-            url = construct_resource_url(
-                name=hid,
-                row_type="database",
+            name = self.attrs["metadata"]["name"]
+            hid = self.attrs["metadata"]["hid"]
+
+            # placeholder URL, only used if something goes wrong
+            url = "https://os.deeporigin.com/"
+
+            # extract org name from url
+            try:
+                url = construct_resource_url(
+                    name=hid,
+                    row_type="database",
+                )
+                url_parts = url.split("/")
+                org_name = url_parts[url_parts.index("org") + 1]
+            except Exception:
+                org_name = ""
+
+            # Convert the string to a datetime object
+            date_str = self.attrs["metadata"]["dateCreated"]
+            date_obj = datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S.%f").replace(
+                tzinfo=timezone.utc
             )
-            url_parts = url.split("/")
-            org_name = url_parts[url_parts.index("org") + 1]
+
+            now = datetime.now(timezone.utc)
+
+            # Convert the time difference into "x time ago" format
+            created_time_ago = humanize.naturaltime(now - date_obj)
+
+            date_str = self.attrs["last_updated_row"].date_updated
+            date_obj = datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S.%f").replace(
+                tzinfo=timezone.utc
+            )
+            edited_time_ago = humanize.naturaltime(now - date_obj)
+
+            header = f'<h4 style="color: #363636;">Deep Origin / {org_name} / <a href = "{url}">{name} </a></h4>'
+            txt = f'<p style="font-size: 12px; color: #808080;">Created {created_time_ago}. Row {self.attrs["last_updated_row"].hid} was last edited {edited_time_ago}'
+            try:
+                last_edited_by = get_last_edited_user_name(
+                    self.attrs["last_updated_row"]
+                )
+                txt += "  by " + last_edited_by + ".</p>"
+            except Exception:
+                # give up. this should not cause the dataframe to
+                # not print.
+                txt += ".</p>"
+
+            if self._modified_columns:
+                txt += '<p style="color: #808080; font-size: 12px">⚠️ This dataframe contains changes that have not been written back to the Deep Origin database.</p>'
+            elif self.auto_sync:
+                txt += '<p style="color: #808080; font-size: 12px">🧬 This dataframe will automatically write changes made to it back to Deep Origin.</p>'
+            df_html = super()._repr_html_()
+            return header + txt + df_html
         except Exception:
-            org_name = ""
-
-        # Convert the string to a datetime object
-        date_str = self.attrs["metadata"]["dateCreated"]
-        date_obj = datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S.%f").replace(
-            tzinfo=timezone.utc
-        )
-
-        now = datetime.now(timezone.utc)
-
-        # Convert the time difference into "x time ago" format
-        created_time_ago = humanize.naturaltime(now - date_obj)
-
-        date_str = self.attrs["last_updated_row"].date_updated
-        date_obj = datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S.%f").replace(
-            tzinfo=timezone.utc
-        )
-        edited_time_ago = humanize.naturaltime(now - date_obj)
-
-        header = f'<h4 style="color: #363636;">Deep Origin / {org_name} / <a href = "{url}">{name} </a></h4>'
-        txt = f'<p style="font-size: 12px; color: #808080;">Created {created_time_ago}. Row {self.attrs["last_updated_row"].hid} was last edited {edited_time_ago}'
-        try:
-            last_edited_by = get_last_edited_user_name(self.attrs["last_updated_row"])
-            txt += "  by " + last_edited_by + ".</p>"
-        except Exception:
-            # give up. this should not cause the dataframe to
-            # not print.
-            txt += ".</p>"
-
-        if self._modified_columns:
-            txt += '<p style="color: #808080; font-size: 12px">⚠️ This dataframe contains changes that have not been written back to the Deep Origin database.</p>'
-        elif self.auto_sync:
-            txt += '<p style="color: #808080; font-size: 12px">🧬 This dataframe will automatically write changes made to it back to Deep Origin.</p>'
-        df_html = super()._repr_html_()
-        return header + txt + df_html
+            return super()._repr_html_()
 
     def __repr__(self):
         """method override to customize printing in an interactive session"""
 
-        header = f'{self.attrs["metadata"]["hid"]}\n'
-        df_representation = super().__repr__()
-        return header + df_representation
+        try:
+            header = f'{self.attrs["metadata"]["hid"]}\n'
+            df_representation = super().__repr__()
+            return header + df_representation
+        except Exception:
+            return super().__repr__()
 
     @classmethod
     def from_deeporigin(
