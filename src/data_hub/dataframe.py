@@ -4,11 +4,15 @@ replacement for a pandas DataFrame, but also allows for easy
 updating of Deep Origin databases.
 """
 
+import re
 from datetime import datetime, timezone
 from typing import Optional
 
 import humanize
+import numpy as np
 import pandas as pd
+from beartype import beartype
+from dateutil.parser import parse
 from deeporigin.data_hub import api
 from deeporigin.platform.api import get_last_edited_user_name
 from deeporigin.utils import (
@@ -41,7 +45,7 @@ class DataFrame(pd.DataFrame):
 
             return self.obj._get_value(*key)
 
-        def __setitem__(self, key, value):
+        def __setitem__(self, key, value) -> None:
             """intercept for the set operation""" ""
 
             old_value = self.obj._get_value(*key)
@@ -81,65 +85,92 @@ class DataFrame(pd.DataFrame):
         else:
             self._modified_columns.add(key)
 
+    def head(self, n=5):
+        """Override the `head` method so that we don't display a spurious modified warning"""
+
+        df = super().head(n)
+        df._modified_columns = None
+        return df
+
+    def tail(self, n=5):
+        """Override the `tail` method so that we don't display a spurious modified warning"""
+
+        df = super().tail(n)
+        df._modified_columns = None
+        return df
+
     def _repr_html_(self):
         """method override to customize printing in a Jupyter notebook"""
 
-        name = self.attrs["metadata"]["name"]
-        hid = self.attrs["metadata"]["hid"]
-
-        # placeholder URL, only used if something goes wrong
-        url = "https://os.deeporigin.com/"
-
-        # extract org name from url
+        # the entirety of this code is in a try/catch
+        # block because pretty printing may fail,
+        # and failure to pretty print should never
+        # block other more mission critical code
         try:
-            url = construct_resource_url(
-                name=hid,
-                row_type="database",
+            name = self.attrs["metadata"]["name"]
+            hid = self.attrs["metadata"]["hid"]
+
+            # placeholder URL, only used if something goes wrong
+            url = "https://os.deeporigin.com/"
+
+            # extract org name from url
+            try:
+                url = construct_resource_url(
+                    name=hid,
+                    row_type="database",
+                )
+                url_parts = url.split("/")
+                org_name = url_parts[url_parts.index("org") + 1]
+            except Exception:
+                org_name = ""
+
+            # Convert the string to a datetime object
+            date_str = self.attrs["metadata"]["dateCreated"]
+            date_obj = datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S.%f").replace(
+                tzinfo=timezone.utc
             )
-            url_parts = url.split("/")
-            org_name = url_parts[url_parts.index("org") + 1]
+
+            now = datetime.now(timezone.utc)
+
+            # Convert the time difference into "x time ago" format
+            created_time_ago = humanize.naturaltime(now - date_obj)
+
+            date_str = self.attrs["last_updated_row"].date_updated
+            date_obj = datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S.%f").replace(
+                tzinfo=timezone.utc
+            )
+            edited_time_ago = humanize.naturaltime(now - date_obj)
+
+            header = f'<h4 style="color: #808080;">Deep Origin / {org_name} / <a href = "{url}">{name} </a></h4>'
+            txt = f'<p style="font-size: 12px; color: #808080;">Created {created_time_ago}. Row {self.attrs["last_updated_row"].hid} was last edited {edited_time_ago}'
+            try:
+                last_edited_by = get_last_edited_user_name(
+                    self.attrs["last_updated_row"]
+                )
+                txt += "  by " + last_edited_by + ".</p>"
+            except Exception:
+                # give up. this should not cause the dataframe to
+                # not print.
+                txt += ".</p>"
+
+            if self._modified_columns:
+                txt += '<p style="color: #808080; font-size: 12px">⚠️ This dataframe contains changes that have not been written back to the Deep Origin database.</p>'
+            elif self.auto_sync:
+                txt += '<p style="color: #808080; font-size: 12px">🧬 This dataframe will automatically write changes made to it back to Deep Origin.</p>'
+            df_html = super()._repr_html_()
+            return header + txt + df_html
         except Exception:
-            org_name = ""
-
-        # Convert the string to a datetime object
-        date_str = self.attrs["metadata"]["dateCreated"]
-        date_obj = datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S.%f").replace(
-            tzinfo=timezone.utc
-        )
-
-        now = datetime.now(timezone.utc)
-
-        # Convert the time difference into "x time ago" format
-        created_time_ago = humanize.naturaltime(now - date_obj)
-
-        date_str = self.attrs["last_updated_row"].date_updated
-        date_obj = datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S.%f").replace(
-            tzinfo=timezone.utc
-        )
-        edited_time_ago = humanize.naturaltime(now - date_obj)
-
-        header = f'<h4 style="color: #363636;">Deep Origin / {org_name} / <a href = "{url}">{name} </a></h4>'
-        txt = f'<p style="font-size: 12px; color: #808080;">Created {created_time_ago}. Row {self.attrs["last_updated_row"].hid} was last edited {edited_time_ago}'
-        try:
-            last_edited_by = get_last_edited_user_name(self.attrs["last_updated_row"])
-            txt += "  by " + last_edited_by + ".</p>"
-        except Exception:
-            # give up. this should not cause the dataframe to
-            # not print.
-            txt += ".</p>"
-
-        if self._modified_columns:
-            txt += '<p style="color: #808080; font-size: 12px">⚠️ This dataframe contains changes that have not been written back to the Deep Origin database.</p>'
-        elif self.auto_sync:
-            txt += '<p style="color: #808080; font-size: 12px">🧬 This dataframe will automatically write changes made to it back to Deep Origin.</p>'
-        df_html = super()._repr_html_()
-        return header + txt + df_html
+            return super()._repr_html_()
 
     def __repr__(self):
         """method override to customize printing in an interactive session"""
 
-        header = f'{self.attrs["metadata"]["hid"]}\n'
         df_representation = super().__repr__()
+        try:
+            header = f'{self.attrs["metadata"]["hid"]}\n'
+        except Exception:
+            header = ""
+
         return header + df_representation
 
     @classmethod
@@ -200,14 +231,24 @@ class DataFrame(pd.DataFrame):
             ]
 
             if len(column_metadata) == 0:
-                raise NotImplementedError(
-                    "Column metadata not found. This is likely because it's a new column"
+                # infer column type
+                column_type = _infer_column_type(self[column])
+
+                # make a new column
+                response = api.add_database_column(
+                    database_id=self.attrs["metadata"]["hid"],
+                    type=column_type,
+                    name=column,
+                    key=column,
                 )
 
-            column_metadata = column_metadata[0]
+                # add column metadata to column
+                self.attrs["metadata"]["cols"].append(response["data"]["column"])
+            else:
+                column_metadata = column_metadata[0]
 
-            if column_metadata["type"] == "file":
-                continue
+                if column_metadata["type"] == "file":
+                    continue
 
             if rows is None:
                 # we're updating a whole column
@@ -223,8 +264,68 @@ class DataFrame(pd.DataFrame):
             print(f"✔︎ Wrote {len(rows)} rows in {column} to Deep Origin database.")
             self._modified_columns.discard(column)
 
+        # fetch info for the last modified row so we can update what we show
+        try:
+            self.attrs["last_updated_row"] = api.describe_row(row_id=rows[-1])
+        except Exception:
+            pass
+
     @property
     def _constructor(self):
         """this method overrides the _constructor property to return a DataFrame and is required for compatibility with a pandas DataFrame"""
 
         return DataFrame
+
+
+@beartype
+def _infer_column_type(column: pd.Series):
+    """utility function to infer type of data in a pandas column"""
+
+    non_null_values = column.dropna()
+
+    if non_null_values.empty:
+        return "string"
+
+    # Helper functions for more complex checks
+    def is_bool(val):
+        if isinstance(val, str):
+            val = val.lower()
+            return val in ["true", "false"]
+        return isinstance(val, bool)
+
+    def is_int(val):
+        try:
+            return float(val).is_integer()
+        except (ValueError, TypeError):
+            return False
+
+    def is_float(val):
+        try:
+            float(val)
+            return True
+        except (ValueError, TypeError):
+            return False
+
+    def is_date(val):
+        try:
+            parse(val, fuzzy=False)
+            return True
+        except (ValueError, TypeError):
+            return False
+
+    # Inference checks
+    types = {
+        "boolean": non_null_values.apply(is_bool).all(),
+        "integer": non_null_values.apply(lambda x: is_int(x)).all(),
+        "float": non_null_values.apply(lambda x: is_float(x)).all(),
+        "date": non_null_values.apply(lambda x: is_date(x)).all(),
+        "string": non_null_values.apply(lambda x: isinstance(x, str)).all(),
+    }
+
+    # Priority order of types (boolean -> integer -> float -> date -> string)
+    for dtype, result in types.items():
+        if result:
+            return dtype
+
+    # no clear type, fall back to string
+    return "string"

@@ -1,18 +1,22 @@
 """module to interact with the platform API"""
 
+import os
+
+import diskcache as dc
 import requests
+from beartype import beartype
 from deeporigin import auth
 from deeporigin.config import get_value
 
 
-def resolve_user(user_id: str):
-    """get details about a user in the platform"""
+def _make_request(endpoint: str) -> dict:
+    """make a request to the platform API"""
+
+    if not endpoint.startswith("/"):
+        endpoint = "/" + endpoint
 
     tokens = auth.get_tokens(refresh=False)
     access_token = tokens["access"]
-
-    value = get_value()
-    org_id = value["organization_id"]
 
     headers = {
         "accept": "application/json",
@@ -22,9 +26,9 @@ def resolve_user(user_id: str):
 
     env = get_value()["env"]
     if env == "prod":
-        url = f"https://os.deeporigin.io/api/organizations/{org_id}/users/{user_id}"
+        url = f"https://os.deeporigin.io/api{endpoint}"
     else:
-        f"https://{env}.deeporigin.io/api/organizations/{org_id}/users/{user_id}"
+        f"https://{env}.deeporigin.io/api{endpoint}"
 
     response = requests.get(
         url,
@@ -34,12 +38,47 @@ def resolve_user(user_id: str):
     return response.json()
 
 
-def get_user_name(user_id: str):
-    """get user name from user DRN"""
+@beartype
+def _get_org_id() -> str:
+    value = get_value()
+    return value["organization_id"]
+
+
+def resolve_user(user_id: str):
+    """get details about a user in the platform"""
+
+    endpoint = f"/organizations/{_get_org_id()}/users/{user_id}"
+
+    return _make_request(endpoint)
+
+
+def whoami():
+    """get details about currently signed in user"""
+
+    return _make_request("/users/me")
+
+
+def get_workstations():
+    """get information about all workstations in the organization"""
+    return _make_request(f"/computebenches/{_get_org_id()}")
+
+
+@beartype
+def get_user_name(user_id: str) -> str:
+    """get user name from user ID"""
+
+    CACHE_PATH = os.path.expanduser("~/.deeporigin/user_ids")
+
+    cache = dc.Cache(CACHE_PATH)
+
+    if cache.get(user_id) is not None:
+        return cache.get(user_id)
 
     response = resolve_user(user_id)
 
-    return response["data"]["attributes"]["name"]
+    name = response["data"]["attributes"]["name"]
+    cache.set(user_id, name)
+    return name
 
 
 def get_last_edited_user_name(row):
