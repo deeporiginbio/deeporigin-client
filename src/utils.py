@@ -292,9 +292,8 @@ def _download_nucleus_api_spec():
 
     deeporigin_path = Path.home() / ".deeporigin"
 
-    url = urljoin(_get_domain_name(), "nucleus-api/api/openapi.json")
+    url = urljoin(_get_domain_name(), "data-hub/api/openapi.json")
 
-    print(url)
     spec_file = deeporigin_path / "nucleus_spec.json"
 
     with open(deeporigin_path / "api_tokens", "r") as file:
