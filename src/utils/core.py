@@ -147,9 +147,9 @@ def expand_user(path, user_home_dirname: str = os.path.expanduser("~")) -> str:
 
 @beartype
 def _ensure_do_folder() -> Path:
-    """makes sure that ~/.deeporigin exists"""
+    """makes sure that the deeporigin scratch folder exists
 
-    # TODO: should return path, and should also work on AWS
+    If it doesn't exist, the folder is created. The location of this folder is typically in the home directory, but may be elsewhere if running in AWS Lambda"""
 
     if in_aws_lambda():
         deeporigin_path = Path("/tmp") / ".deeporigin"
@@ -158,3 +158,5 @@ def _ensure_do_folder() -> Path:
 
     if not deeporigin_path.exists():
         deeporigin_path.mkdir(parents=True)
+
+    return deeporigin_path
