@@ -1,5 +1,6 @@
 """This module contains utility functions that are used internally by the Python Client and the CLI"""
 
+import base64
 import json
 import os
 import shutil
@@ -275,10 +276,61 @@ def _get_method(obj, method_path):
     return obj
 
 
-def _ensure_do_folder():
+def _ensure_do_folder() -> None:
     """makes sure that ~/.deeporigin exists"""
 
     deeporigin_path = Path.home() / ".deeporigin"
 
     if not deeporigin_path.exists():
         deeporigin_path.mkdir(parents=True)
+
+
+def _download_nucleus_api_spec():
+    """downloads the data hub API spec and saves to disk"""
+
+    _ensure_do_folder()
+
+    deeporigin_path = Path.home() / ".deeporigin"
+
+    url = urljoin(_get_domain_name(), "nucleus-api/api/openapi.json")
+
+    print(url)
+    spec_file = deeporigin_path / "nucleus_spec.json"
+
+    with open(deeporigin_path / "api_tokens", "r") as file:
+        data = json.loads(file.read())
+    token = data["access"]
+
+    headers = {
+        "accept": "application/json",
+        "authorization": f"Bearer {token}",
+        "content-type": "application/json",
+    }
+
+    response = requests.get(url, headers=headers)
+
+    # Write the dictionary to a JSON file
+    with open(spec_file, "w") as json_file:
+        json.dump(response.json(), json_file, indent=2)
+
+
+def _get_domain_name() -> str:
+    """utility function to get domain name based on env"""
+
+    env = get_value()["env"]
+    if env == "prod":
+        return "https://os.deeporigin.io"
+    else:
+        return f"https://os.{env}.deeporigin.io"
+
+
+def sha256_checksum(file_path):
+    """compute sha256 hash of a file"""
+
+    import hashlib
+
+    sha256_hash = hashlib.sha256()
+    with open(file_path, "rb") as f:
+        for byte_block in iter(lambda: f.read(4096), b""):
+            sha256_hash.update(byte_block)
+    return base64.b64encode(sha256_hash.digest()).decode()

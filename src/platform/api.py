@@ -1,12 +1,14 @@
 """module to interact with the platform API"""
 
 import os
+from urllib.parse import urljoin
 
 import diskcache as dc
 import requests
 from beartype import beartype
 from deeporigin import auth
 from deeporigin.config import get_value
+from deeporigin.utils import _get_domain_name
 
 
 def _make_request(endpoint: str) -> dict:
@@ -24,14 +26,8 @@ def _make_request(endpoint: str) -> dict:
         "cache-control": "no-cache",
     }
 
-    env = get_value()["env"]
-    if env == "prod":
-        url = f"https://os.deeporigin.io/api{endpoint}"
-    else:
-        f"https://{env}.deeporigin.io/api{endpoint}"
-
     response = requests.get(
-        url,
+        urljoin(_get_domain_name(), "api", endpoint),
         headers=headers,
     )
 

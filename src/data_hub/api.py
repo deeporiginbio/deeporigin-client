@@ -1,7 +1,6 @@
 """The `deeporigin.data_hub.api` module contains high-level functions for
 interacting with your Deep Origin data hub."""
 
-import mimetypes
 import os
 from pathlib import Path
 from typing import Any, Optional, Union
@@ -30,6 +29,7 @@ from deeporigin.utils import (
     _parse_params_from_url,
     download_sync,
     find_last_updated_row,
+    sha256_checksum,
 )
 from packaging.version import Version
 
@@ -268,14 +268,19 @@ def upload_file(
 
     """
 
+    import mimetypes
+
     # attempt to guess the content type
     mime_type, _ = mimetypes.guess_type(file_path)
     content_type = mime_type if mime_type else "application/octet-stream"
 
     content_length = os.path.getsize(file_path)
 
+    hash = sha256_checksum(file_path)
+
     response = _api.create_file_upload(
         name=os.path.basename(file_path),
+        checksum_sha256=hash,
         content_type=content_type,
         content_length=str(content_length),
         client=client,
@@ -293,6 +298,7 @@ def upload_file(
         "Connection": "keep-alive",
         "Content-Length": str(content_length),
         "Content-Type": content_type,
+        "x-amz-checksum-sha256": hash,
     }
 
     with open(file_path, "rb") as file:
