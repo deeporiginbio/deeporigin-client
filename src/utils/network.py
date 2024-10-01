@@ -1,3 +1,5 @@
+"""this module contains network related utility functions"""
+
 import json
 from urllib.parse import parse_qs, urljoin, urlparse
 

@@ -1,3 +1,5 @@
+"""this module contains some core utility functions that in turn do not depend on anything else in this library"""
+
 import base64
 import json
 import os

@@ -1,3 +1,5 @@
+"""this module contains constants used in the rest of this library"""
+
 from dataclasses import dataclass
 
 from beartype.typing import Literal

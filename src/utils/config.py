@@ -1,4 +1,4 @@
-"""This module contains utility functions that are used internally by the Python Client and the CLI"""
+"""This module contains utility functions that are used internally by the Python Client and the CLI, reliant on the config module"""
 
 from urllib.parse import urljoin
 
