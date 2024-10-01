@@ -1,6 +1,7 @@
 import os
 
-from ... import utils
+from deeporigin.utils.core import expand_user
+
 from ..base_type import Variable
 from .env_var import EnvironmentVariable
 from .secret_file_value import SecretFileValue
@@ -41,7 +42,7 @@ class XpressLicenseFile(SecretFileValue):
             overwrite=overwrite,
         )
 
-        filename = utils.expand_user(self.FILENAME, user_home_dirname=user_home_dirname)
+        filename = expand_user(self.FILENAME, user_home_dirname=user_home_dirname)
         EnvironmentVariable.install_env_var(
             self.name,
             self.KEY,
@@ -70,7 +71,7 @@ class XpressLicenseFile(SecretFileValue):
             user_home_dirname=user_home_dirname, overwrite=overwrite
         )
 
-        filename = utils.expand_user(self.FILENAME, user_home_dirname=user_home_dirname)
+        filename = expand_user(self.FILENAME, user_home_dirname=user_home_dirname)
         EnvironmentVariable.uninstall_env_var(
             self.name,
             self.KEY,

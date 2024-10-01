@@ -1,9 +1,10 @@
 import functools
 import os
 import pathlib
-from typing import Any, Optional
+from typing import Optional
 
 import confuse
+from deeporigin.utils.core import in_aws_lambda
 
 from ..exceptions import DeepOriginException
 
@@ -65,7 +66,7 @@ def get_value(
 
     # if we're running on AWS lambda, read config values
     # from env and return those.
-    if os.environ.get("AWS_LAMBDA_FUNCTION_NAME"):
+    if in_aws_lambda():
         return confuse.AttrDict(
             dict(
                 organization_id=os.environ.get("DEEP_ORIGIN_ORGANIZATION_ID"),

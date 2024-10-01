@@ -4,8 +4,8 @@ import tempfile
 import typing
 
 import pydantic
+from deeporigin.utils.core import expand_user
 
-from ...utils import expand_user
 from .secret_file import SecretFile
 
 T = typing.TypeVar("T")

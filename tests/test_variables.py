@@ -11,8 +11,9 @@ from contextlib import redirect_stderr, redirect_stdout
 
 import crontab
 import pydantic
-from deeporigin import auth, cli, config, feature_flags, utils, variables
+from deeporigin import auth, cli, config, feature_flags, variables
 from deeporigin.exceptions import DeepOriginException
+from deeporigin.utils.core import expand_user
 from deeporigin.variables import core as variables_core
 from deeporigin.variables import types as variables_types
 from deeporigin.warnings import DeepOriginWarning
@@ -547,9 +548,7 @@ class TestCase(unittest.TestCase):
             ),
         )
 
-        bashrc_filename = utils.expand_user(
-            os.path.join("~", ".bashrc"), user_home_dirname
-        )
+        bashrc_filename = expand_user(os.path.join("~", ".bashrc"), user_home_dirname)
         with open(bashrc_filename, "r") as file:
             lines = file.read().split("\n")
         self.assertEqual(10, len(lines))
@@ -1027,34 +1026,32 @@ class TestCase(unittest.TestCase):
 
     def test_expand_user(self):
         user_home_dirname = "/home/user"
-        self.assertEqual(user_home_dirname, utils.expand_user("~", user_home_dirname))
+        self.assertEqual(user_home_dirname, expand_user("~", user_home_dirname))
         self.assertEqual(
             os.path.join(user_home_dirname, "subdir"),
-            utils.expand_user(os.path.join("~", "subdir"), user_home_dirname),
+            expand_user(os.path.join("~", "subdir"), user_home_dirname),
         )
-        self.assertEqual("subdir", utils.expand_user("subdir", user_home_dirname))
-        self.assertEqual("subdir~", utils.expand_user("subdir~", user_home_dirname))
-        self.assertEqual("~subdir", utils.expand_user("~subdir", user_home_dirname))
+        self.assertEqual("subdir", expand_user("subdir", user_home_dirname))
+        self.assertEqual("subdir~", expand_user("subdir~", user_home_dirname))
+        self.assertEqual("~subdir", expand_user("~subdir", user_home_dirname))
 
         user_home_dirname = str(pathlib.Path().home())
-        self.assertEqual(
-            os.path.expanduser("~"), utils.expand_user("~", user_home_dirname)
-        )
+        self.assertEqual(os.path.expanduser("~"), expand_user("~", user_home_dirname))
         self.assertEqual(
             os.path.expanduser(os.path.join("~", "subdir")),
-            utils.expand_user(os.path.join("~", "subdir"), user_home_dirname),
+            expand_user(os.path.join("~", "subdir"), user_home_dirname),
         )
         self.assertEqual(
             os.path.expanduser("subdir"),
-            utils.expand_user("subdir", user_home_dirname),
+            expand_user("subdir", user_home_dirname),
         )
         self.assertEqual(
             os.path.expanduser("subdir~"),
-            utils.expand_user("subdir~", user_home_dirname),
+            expand_user("subdir~", user_home_dirname),
         )
         self.assertEqual(
             os.path.expanduser("~subdir"),
-            utils.expand_user("~subdir", user_home_dirname),
+            expand_user("~subdir", user_home_dirname),
         )
 
     def test_install_variables(self):
@@ -2375,7 +2372,7 @@ class TestCase(unittest.TestCase):
             drn="drn:123", name="123", value="z"
         )
         var_xpress.install(None, user_home_dirname)
-        expected_system_env[var_xpress.KEY] = utils.expand_user(
+        expected_system_env[var_xpress.KEY] = expand_user(
             var_xpress.FILENAME, user_home_dirname=user_home_dirname
         )
         self.assertEqual(
@@ -2454,9 +2451,7 @@ class TestCase(unittest.TestCase):
         self.assertEqual(
             sorted(expected_filenames), sorted(os.listdir(user_home_dirname))
         )
-        with open(
-            utils.expand_user(var_gurobi.FILENAME, user_home_dirname), "r"
-        ) as file:
+        with open(expand_user(var_gurobi.FILENAME, user_home_dirname), "r") as file:
             self.assertEqual(var_gurobi.value, file.read())
 
         var_mosek = variables_types.MosekLicenseFile(
@@ -2469,9 +2464,7 @@ class TestCase(unittest.TestCase):
         self.assertEqual(
             sorted(expected_filenames), sorted(os.listdir(user_home_dirname))
         )
-        with open(
-            utils.expand_user(var_mosek.FILENAME, user_home_dirname), "r"
-        ) as file:
+        with open(expand_user(var_mosek.FILENAME, user_home_dirname), "r") as file:
             self.assertEqual(var_mosek.value, file.read())
 
         var_xpress = variables_types.XpressLicenseFile(
@@ -2486,9 +2479,7 @@ class TestCase(unittest.TestCase):
         self.assertEqual(
             sorted(expected_filenames), sorted(os.listdir(user_home_dirname))
         )
-        with open(
-            utils.expand_user(var_xpress.FILENAME, user_home_dirname), "r"
-        ) as file:
+        with open(expand_user(var_xpress.FILENAME, user_home_dirname), "r") as file:
             self.assertEqual(var_xpress.value, file.read())
 
         var_gurobi.uninstall(user_home_dirname=user_home_dirname)
@@ -2497,7 +2488,7 @@ class TestCase(unittest.TestCase):
             sorted(expected_filenames), sorted(os.listdir(user_home_dirname))
         )
         self.assertFalse(
-            os.path.isfile(utils.expand_user(var_gurobi.FILENAME, user_home_dirname))
+            os.path.isfile(expand_user(var_gurobi.FILENAME, user_home_dirname))
         )
 
         var_mosek.uninstall(user_home_dirname=user_home_dirname)
@@ -2505,7 +2496,7 @@ class TestCase(unittest.TestCase):
             sorted(expected_filenames), sorted(os.listdir(user_home_dirname))
         )
         self.assertFalse(
-            os.path.isfile(utils.expand_user(var_mosek.FILENAME, user_home_dirname))
+            os.path.isfile(expand_user(var_mosek.FILENAME, user_home_dirname))
         )
 
         var_xpress.uninstall(user_home_dirname=user_home_dirname)
@@ -2514,5 +2505,5 @@ class TestCase(unittest.TestCase):
             sorted(expected_filenames), sorted(os.listdir(user_home_dirname))
         )
         self.assertFalse(
-            os.path.isfile(utils.expand_user(var_xpress.FILENAME, user_home_dirname))
+            os.path.isfile(expand_user(var_xpress.FILENAME, user_home_dirname))
         )

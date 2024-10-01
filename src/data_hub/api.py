@@ -18,18 +18,22 @@ from deeporigin.data_hub import _api
 # functions in _api are available in api (this module)
 from deeporigin.data_hub._api import *  # noqa: F403
 from deeporigin.exceptions import DeepOriginException
-from deeporigin.utils import (
+from deeporigin.utils.constants import (
     PREFIXES,
     Cardinality,
     DataType,
     DatabaseReturnType,
     IDFormat,
     ObjectType,
+)
+from deeporigin.utils.core import (
+    find_last_updated_row,
+    sha256_checksum,
+)
+from deeporigin.utils.network import (
     _get_pypi_version,
     _parse_params_from_url,
     download_sync,
-    find_last_updated_row,
-    sha256_checksum,
 )
 from packaging.version import Version
 

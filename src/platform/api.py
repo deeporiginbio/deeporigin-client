@@ -8,7 +8,7 @@ import requests
 from beartype import beartype
 from deeporigin import auth
 from deeporigin.config import get_value
-from deeporigin.utils import _get_domain_name
+from deeporigin.utils.network import _get_domain_name
 
 
 def _make_request(endpoint: str) -> dict:

@@ -4,21 +4,19 @@ replacement for a pandas DataFrame, but also allows for easy
 updating of Deep Origin databases.
 """
 
-import re
 from datetime import datetime, timezone
 from typing import Optional
 
 import humanize
-import numpy as np
 import pandas as pd
 from beartype import beartype
 from dateutil.parser import parse
 from deeporigin.data_hub import api
 from deeporigin.platform.api import get_last_edited_user_name
-from deeporigin.utils import (
+from deeporigin.utils.config import construct_resource_url
+from deeporigin.utils.constants import (
     DatabaseReturnType,
     IDFormat,
-    construct_resource_url,
 )
 
 
