@@ -26,14 +26,14 @@ def construct_resource_url(
         str: URL for the resource
     """
 
-    env = get_value()["env"]
     org = get_value()["organization_id"]
-    if env == "prod":
-        url = f"https://os.deeporigin.io/org/{org}/data/{row_type}/{name}"
-    else:
-        url = f"https://os.{env}.deeporigin.io/org/{org}/data/{row_type}/{name}"
 
-    return url
+    return urljoin(
+        _get_domain_name(),
+        "org",
+        org,
+        "/data/{row_type}/{name}",
+    )
 
 
 @beartype
