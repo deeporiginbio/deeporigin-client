@@ -152,7 +152,7 @@ def _ensure_do_folder() -> Path:
     If it doesn't exist, the folder is created. The location of this folder is typically in the home directory, but may be elsewhere if running in AWS Lambda"""
 
     if in_aws_lambda():
-        deeporigin_path = Path("/tmp") / ".deeporigin"
+        deeporigin_path = Path("/tmp/.deeporigin")
     else:
         deeporigin_path = Path.home() / ".deeporigin"
 
