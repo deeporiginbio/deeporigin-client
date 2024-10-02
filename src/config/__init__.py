@@ -1,21 +1,16 @@
 import functools
 import os
 import pathlib
-from typing import Any, Optional
+from typing import Optional
 
 import confuse
+from deeporigin.utils.core import _ensure_do_folder, in_aws_lambda
 
 from ..exceptions import DeepOriginException
 
 CONFIG_DIR = pathlib.Path(__file__).parent
 DEFAULT_CONFIG_FILENAME = os.path.join(CONFIG_DIR, "default.yml")
-CONFIG_YML_LOCATION = os.path.expanduser(
-    os.path.join(
-        "~",
-        ".deeporigin",
-        "config.yml",
-    )
-)
+CONFIG_YML_LOCATION = _ensure_do_folder() / "default.yml"
 
 __all__ = ["get_value"]
 
@@ -65,7 +60,7 @@ def get_value(
 
     # if we're running on AWS lambda, read config values
     # from env and return those.
-    if os.environ.get("AWS_LAMBDA_FUNCTION_NAME"):
+    if in_aws_lambda():
         return confuse.AttrDict(
             dict(
                 organization_id=os.environ.get("DEEP_ORIGIN_ORGANIZATION_ID"),

@@ -3,7 +3,7 @@ import sys
 
 from deeporigin import auth
 from deeporigin.exceptions import DeepOriginException
-from deeporigin.utils import _get_method, _print_dict
+from deeporigin.utils.core import _get_method, _print_dict
 from deeporigin_data import (
     AuthenticationError,
     ConflictError,

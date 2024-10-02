@@ -11,9 +11,7 @@ from deeporigin.config import (
     get_value,
 )
 from deeporigin.exceptions import DeepOriginException
-from deeporigin.utils import _ensure_do_folder, _print_dict
-
-_ensure_do_folder()
+from deeporigin.utils.core import _ensure_do_folder, _print_dict
 
 
 class ConfigController(cement.Controller):
@@ -101,7 +99,7 @@ class ConfigController(cement.Controller):
         name = self.app.pargs.profile
 
         # check if config file exists
-        save_location = os.path.expanduser(f"~/.deeporigin/{name}.yml")
+        save_location = _ensure_do_folder() / f"{name}.yml"
 
         if os.path.isfile(CONFIG_YML_LOCATION):
             shutil.copy(CONFIG_YML_LOCATION, save_location)

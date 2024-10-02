@@ -7,7 +7,7 @@ import pandas as pd
 import pytest
 from deeporigin.data_hub import api
 from deeporigin.exceptions import DeepOriginException
-from deeporigin.utils import DATAFRAME_ATTRIBUTE_KEYS, PREFIXES
+from deeporigin.utils.constants import DATAFRAME_ATTRIBUTE_KEYS, PREFIXES
 
 from tests.utils import TEST_DB_NAME, TEST_PREFIX, TEST_WS_NAME, config  # noqa: F401
 
