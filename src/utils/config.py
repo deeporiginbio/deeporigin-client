@@ -28,12 +28,7 @@ def construct_resource_url(
 
     org = get_value()["organization_id"]
 
-    return urljoin(
-        _get_domain_name(),
-        "org",
-        org,
-        "/data/{row_type}/{name}",
-    )
+    return urljoin(_get_domain_name(), f"org/{org}/data/{row_type}/{name}")
 
 
 @beartype
