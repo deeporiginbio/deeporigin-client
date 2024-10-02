@@ -302,7 +302,7 @@ def upload_file(
         "Connection": "keep-alive",
         "Content-Length": str(content_length),
         "Content-Type": content_type,
-        "x-amz-checksum-sha256": hash,
+        # "x-amz-checksum-sha256": hash, # TODO: add checksum
     }
 
     with open(file_path, "rb") as file:
