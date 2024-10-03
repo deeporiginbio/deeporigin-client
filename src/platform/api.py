@@ -92,7 +92,7 @@ def get_last_edited_user_name(row):
 
 
 @beartype
-def get_secrets() -> list[dict]:
+def get_variables_and_secrets() -> list[dict]:
     """get variables and secrets for user and org"""
 
     # we don't need to provide a bench ID, so pass a placeholder

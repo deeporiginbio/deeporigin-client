@@ -3,18 +3,14 @@ import enum
 import getpass
 import os
 import stat
-import string
 import sys
 import typing
 import warnings
-from urllib.parse import urljoin
 
 import crontab
 import pydantic
-import requests
 import yaml
-from deeporigin import auth
-from deeporigin.platform.api import get_secrets
+from deeporigin.platform.api import get_variables_and_secrets
 from deeporigin.utils.core import _get_api_tokens_filepath
 
 from ..config import get_value as get_config
@@ -210,7 +206,7 @@ def get_variables_from_do_platform(
 
     classes = tuple([type.value for type in types])
 
-    secrets = get_secrets()
+    secrets = get_variables_and_secrets()
 
     # reshape secrets to match what we had in the old
     # graph QL response
