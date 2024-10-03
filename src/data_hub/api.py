@@ -280,11 +280,11 @@ def upload_file(
 
     content_length = os.path.getsize(file_path)
 
-    hash = sha256_checksum(file_path)
+    # hash = sha256_checksum(file_path)
 
     response = _api.create_file_upload(
         name=os.path.basename(file_path),
-        checksum_sha256=hash,
+        # checksum_sha256=hash,
         content_type=content_type,
         content_length=str(content_length),
         client=client,
