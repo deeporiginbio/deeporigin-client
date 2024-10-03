@@ -11,56 +11,6 @@ auth_audience: https://os.deeporigin.io/api
 auth_grant_type: urn:ietf:params:oauth:grant-type:device_code
 auth_client_id: m3iyUcrANcIap2ogzWKpnYxCNujOrW3s
 auth_client_secret: cQcZclTqMHMuovyXV-DD15tEiL-KH_2XD36vsppULRBuq7AjwyI4dh5ag11O_K1S
-list_workstation_variables_query_template: |
-  query {
-    listBenchSecrets(drn: "${workstation_drn}") {
-      ... on EnvironmentValueOutput {
-        drn
-        type
-        name
-        key
-        value
-      }
-      ... on ConfigurationValueOutput {
-        drn
-        type
-        name
-        filename
-        value
-      }
-      ... on AwsSecretOutput {
-        drn
-        type
-        name
-        profileName
-        accessKey
-        secretKey
-        defaultRegion
-      }
-      ... on GitSecretOutput {
-        drn
-        type
-        name
-        repository
-        username
-        password
-      }
-      ... on GPGSecretOutput {
-        drn
-        type
-        name
-        value
-      }
-      ... on SshSecretOutput {
-        drn
-        type
-        name
-        filename
-        value
-      }
-    }
-  }
-api_tokens_filename: ~/.deeporigin/api_tokens
 variables_cache_filename: ~/.deeporigin/variables.yml
 auto_install_variables_filename: ~/.deeporigin/auto-install-variables.sh
 feature_flags: null

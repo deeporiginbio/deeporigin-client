@@ -45,8 +45,6 @@ class ConfigController(cement.Controller):
 
         data = get_value()
 
-        data.pop("list_workstation_variables_query_template", None)
-
         _print_dict(data, json=self.app.pargs.json, key_label="Variable")
 
     @cement.ex(

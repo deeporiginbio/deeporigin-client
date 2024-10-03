@@ -31,6 +31,8 @@ dependencies = [
     "humanize",
     "packaging",
     "diskcache",
+    "pyjwt",
+    "cryptography",
 ]
 dynamic = ["version"]
 

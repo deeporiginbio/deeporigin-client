@@ -160,3 +160,30 @@ def _ensure_do_folder() -> Path:
         deeporigin_path.mkdir(parents=True)
 
     return deeporigin_path
+
+
+@beartype
+def decode_access_token() -> dict:
+    """decode token and extract info"""
+
+    import jwt
+
+    tokens = read_cached_tokens()
+
+    return jwt.decode(tokens["access"], options={"verify_signature": False})
+
+
+@beartype
+def _get_api_tokens_filepath() -> Path:
+    """get location of the api tokens file"""
+
+    return _ensure_do_folder() / "api_tokens"
+
+
+@beartype
+def read_cached_tokens() -> dict:
+    """Read cached API tokens"""
+
+    with open(_get_api_tokens_filepath(), "r") as file:
+        tokens = json.load(file)
+    return tokens

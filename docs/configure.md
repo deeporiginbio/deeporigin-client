@@ -39,7 +39,6 @@ This will display a table such as below:
 │ auth_grant_type             │ urn:ietf:params:device_code         │
 │ auth_client_id              │ <secret>                            │
 │ auth_client_secret          │ <secret>                            │
-│ api_tokens_filename         │ ~/api_tokens                        │
 │ variables_cache_filename    │ ~/variables.yml                     │
 │ feature_flags               │                                     │
 ╰─────────────────────────────┴─────────────────────────────────────╯

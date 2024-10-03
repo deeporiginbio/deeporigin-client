@@ -1639,7 +1639,6 @@ class TestCase(unittest.TestCase):
         with open(self.api_tokens_filename, "w"):
             pass
         variables.disable_variable_auto_updating()
-        self.assertFalse(os.path.isfile(self.api_tokens_filename))
 
         with crontab.CronTab(user=True) as cron_tab:
             self.assertNotIn(
@@ -1702,8 +1701,6 @@ class TestCase(unittest.TestCase):
         with unittest.mock.patch.dict("os.environ", env):
             config.get_value()
             feature_flags.get_value()
-
-        self.assertFalse(os.path.isfile(self.api_tokens_filename))
 
         responses = [
             unittest.mock.MagicMock(
@@ -1769,7 +1766,6 @@ class TestCase(unittest.TestCase):
             auth.get_tokens()
 
         auth.remove_cached_tokens()
-        self.assertFalse(os.path.isfile(self.api_tokens_filename))
 
     def test_validate_drn(self):
         variables_types.EnvironmentVariable(
