@@ -31,7 +31,6 @@ This will display a table such as below:
 │ env                         │ us-west-1                           │
 │ api_endpoint                │ https://os.prod.deeporigin.io/api   │
 │ nucleus_api_route           │ nucleus-api/api/                    │
-│ graphql_api_route           │ api/graphql/                        │
 │ auth_domain                 │ https://formicbio-dev.us.auth0.com  │
 │ auth_device_code_endpoint   │ oauth/device/code/                  │
 │ auth_token_endpoint         │ oauth/token/                        │

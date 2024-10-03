@@ -22,7 +22,6 @@ TEMPLATE = {
     "env": confuse.String(),
     "api_endpoint": confuse.Optional(confuse.String()),
     "nucleus_api_route": confuse.String(),
-    "graphql_api_route": confuse.String(),
     "auth_domain": confuse.String(),
     "auth_device_code_endpoint": confuse.String(),
     "auth_token_endpoint": confuse.String(),

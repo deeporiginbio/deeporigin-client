@@ -30,7 +30,6 @@ class TestCase(unittest.TestCase):
             "DEEP_ORIGIN_AUTH_GRANT_TYPE": "jklm",
             "DEEP_ORIGIN_AUTH_CLIENT_ID": "mno",
             "DEEP_ORIGIN_AUTH_CLIENT_SECRET": "mnop1",
-            "DEEP_ORIGIN_API_TOKENS_FILENAME": "mnopq",
             "DEEP_ORIGIN_VARIABLES_CACHE_FILENAME": "vwx",
             "DEEP_ORIGIN_AUTO_INSTALL_VARIABLES_FILENAME": "vwx",
         }
@@ -51,7 +50,6 @@ class TestCase(unittest.TestCase):
             "auth_grant_type": "jklm",
             "auth_client_id": "mno",
             "auth_client_secret": "mnop1",
-            "api_tokens_filename": os.path.abspath("mnopq"),
             "variables_cache_filename": os.path.abspath("vwx"),
             "auto_install_variables_filename": os.path.abspath("vwx"),
             "feature_flags": None,
@@ -89,7 +87,6 @@ class TestCase(unittest.TestCase):
             "auth_grant_type": "jklm",
             "auth_client_id": "mno",
             "auth_client_secret": "mnop1",
-            "api_tokens_filename": os.path.join("~", "mnopq"),
             "variables_cache_filename": os.path.join("~", "vwx"),
             "auto_install_variables_filename": os.path.join("~", "vwx"),
         }
@@ -100,9 +97,6 @@ class TestCase(unittest.TestCase):
         with unittest.mock.patch.dict("os.environ", env):
             value = config.get_value(user_config_filename)
 
-        user_config["api_tokens_filename"] = os.path.expanduser(
-            user_config["api_tokens_filename"]
-        )
         user_config["variables_cache_filename"] = os.path.expanduser(
             user_config["variables_cache_filename"]
         )
@@ -131,7 +125,6 @@ class TestCase(unittest.TestCase):
             "auth_grant_type": "jklm",
             "auth_client_id": None,
             "auth_client_secret": "mnop1",
-            "api_tokens_filename": os.path.join("~", "mnopq"),
             "variables_cache_filename": os.path.join("~", "vwx"),
             "auto_install_variables_filename": os.path.join("~", "vwx"),
         }
