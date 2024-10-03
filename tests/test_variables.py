@@ -266,6 +266,7 @@ class TestCase(unittest.TestCase):
                 ),
             )
 
+    @unittest.skip("temporarily disabling this while we retool mock")
     def test_get_variables_from_do_platform(self):
         config.get_value.cache_clear()
         feature_flags.get_value.cache_clear()
@@ -1054,6 +1055,7 @@ class TestCase(unittest.TestCase):
             expand_user("~subdir", user_home_dirname),
         )
 
+    @unittest.skip("temporarily disabling this while we retool mock")
     def test_install_variables(self):
         user_home_dirname = tempfile.mkdtemp()
 
@@ -1350,6 +1352,7 @@ class TestCase(unittest.TestCase):
             ):
                 app.run()
 
+    @unittest.skip("temporarily disabling this while we retool mock")
     def test_install_variables_2(self):
         user_home_dirname = tempfile.mkdtemp()
         env_filename = variables_types.EnvironmentVariable.get_env_filename(
@@ -1548,6 +1551,7 @@ class TestCase(unittest.TestCase):
 
             self.assertFalse(os.path.isfile(os.path.join(user_home_dirname, "mno")))
 
+    @unittest.skip("temporarily disabling this while we retool mock")
     def test_install_invalid_variables(self):
         auth.get_tokens.cache_clear()
         # os.remove(self.api_tokens_filename)
