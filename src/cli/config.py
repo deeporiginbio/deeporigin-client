@@ -11,7 +11,11 @@ from deeporigin.config import (
     get_value,
 )
 from deeporigin.exceptions import DeepOriginException
-from deeporigin.utils.core import _ensure_do_folder, _print_dict
+from deeporigin.utils.core import (
+    _ensure_do_folder,
+    _get_api_tokens_filepath,
+    _print_dict,
+)
 
 
 class ConfigController(cement.Controller):
@@ -118,7 +122,7 @@ class ConfigController(cement.Controller):
 
         name = self.app.pargs.profile
 
-        file_to_load = os.path.expanduser(f"~/.deeporigin/{name}.yml")
+        file_to_load = _ensure_do_folder / f"{name}.yml"
 
         # check if config file exists
         if not os.path.isfile(file_to_load):
@@ -131,7 +135,7 @@ class ConfigController(cement.Controller):
 
         # loading a config should remove api_tokens to trigger a re-authentication
         try:
-            os.remove(os.path.expanduser("~/.deeporigin/api_tokens"))
+            os.remove(_get_api_tokens_filepath())
         except FileNotFoundError:
             pass
 

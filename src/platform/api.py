@@ -1,6 +1,5 @@
 """module to interact with the platform API"""
 
-import os
 from urllib.parse import urljoin
 
 import diskcache as dc
@@ -8,6 +7,7 @@ import requests
 from beartype import beartype
 from deeporigin import auth
 from deeporigin.config import get_value
+from deeporigin.utils.core import _ensure_do_folder
 from deeporigin.utils.network import _get_domain_name
 
 
@@ -65,7 +65,7 @@ def get_workstations():
 def get_user_name(user_id: str) -> str:
     """get user name from user ID"""
 
-    CACHE_PATH = os.path.expanduser("~/.deeporigin/user_ids")
+    CACHE_PATH = _ensure_do_folder() / "user_ids"
 
     cache = dc.Cache(CACHE_PATH)
 

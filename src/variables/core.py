@@ -500,9 +500,6 @@ def disable_variable_auto_updating() -> None:
         for job in cron_tab.find_comment(comment=cron_job_id):
             job.enable(False)
 
-    if os.path.isfile(_get_api_tokens_filepath()):
-        auth.remove_cached_tokens()
-
 
 def get_auto_install_variables_cronjob_id() -> str:
     """Get the id for the cron job for auto updating Deep Origin variables
