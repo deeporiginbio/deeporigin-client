@@ -12,7 +12,7 @@ This page lists some classes, types and constants used in this library.
         - "!^_"
 
 
-::: src.utils
+::: src.utils.constants
     options:
       filters:
         - "!^_"
