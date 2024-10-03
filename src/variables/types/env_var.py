@@ -5,7 +5,7 @@ import warnings
 
 import dotenv
 import pydantic
-from deeporigin.utils.core import expand_user
+from deeporigin.utils.core import _ensure_do_folder, expand_user
 
 from ...warnings import DeepOriginWarning
 from ..base_type import Variable
@@ -269,8 +269,6 @@ class EnvironmentVariable(Variable):
             :obj:`str`: Environment variable filename
         """
         if is_user_variable:
-            return os.path.join(user_home_dirname, ".deeporigin", "user-variables.env")
+            return _ensure_do_folder() / "user-variables.env"
         else:
-            return os.path.join(
-                user_home_dirname, ".deeporigin", "system-variables.env"
-            )
+            return _ensure_do_folder() / "system-variables.env"

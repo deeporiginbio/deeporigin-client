@@ -1,6 +1,5 @@
 """module to interact with the platform API"""
 
-import os
 from urllib.parse import urljoin
 
 import diskcache as dc
@@ -8,10 +7,11 @@ import requests
 from beartype import beartype
 from deeporigin import auth
 from deeporigin.config import get_value
+from deeporigin.utils.core import _ensure_do_folder
 from deeporigin.utils.network import _get_domain_name
 
 
-def _make_request(endpoint: str) -> dict:
+def _make_get_request(endpoint: str) -> dict:
     """make a request to the platform API"""
 
     if not endpoint.startswith("/"):
@@ -26,8 +26,10 @@ def _make_request(endpoint: str) -> dict:
         "cache-control": "no-cache",
     }
 
+    url = urljoin(_get_domain_name(), f"api/{endpoint}")
+
     response = requests.get(
-        urljoin(_get_domain_name(), "api", endpoint),
+        url,
         headers=headers,
     )
 
@@ -45,25 +47,25 @@ def resolve_user(user_id: str):
 
     endpoint = f"/organizations/{_get_org_id()}/users/{user_id}"
 
-    return _make_request(endpoint)
+    return _make_get_request(endpoint)
 
 
 def whoami():
     """get details about currently signed in user"""
 
-    return _make_request("/users/me")
+    return _make_get_request("/users/me")
 
 
 def get_workstations():
     """get information about all workstations in the organization"""
-    return _make_request(f"/computebenches/{_get_org_id()}")
+    return _make_get_request(f"/computebenches/{_get_org_id()}")
 
 
 @beartype
 def get_user_name(user_id: str) -> str:
     """get user name from user ID"""
 
-    CACHE_PATH = os.path.expanduser("~/.deeporigin/user_ids")
+    CACHE_PATH = _ensure_do_folder() / "user_ids"
 
     cache = dc.Cache(CACHE_PATH)
 
@@ -87,3 +89,13 @@ def get_last_edited_user_name(row):
     else:
         user_id = row.edited_by_user_drn.split(":")[-1]
     return get_user_name(user_id)
+
+
+@beartype
+def get_variables_and_secrets() -> list[dict]:
+    """get variables and secrets for user and org"""
+
+    # we don't need to provide a bench ID, so pass a placeholder
+    response = _make_get_request(f"/computebenches/{_get_org_id()}/placeholder/secrets")
+
+    return response["data"]

@@ -6,6 +6,7 @@ from urllib.parse import urljoin
 
 import requests
 from beartype import beartype
+from deeporigin.utils.core import _get_api_tokens_filepath, read_cached_tokens
 
 from .config import get_value as get_config
 from .exceptions import DeepOriginException
@@ -13,7 +14,6 @@ from .exceptions import DeepOriginException
 __all__ = [
     "get_tokens",
     "cache_tokens",
-    "read_cached_tokens",
     "remove_cached_tokens",
     "authenticate",
     "refresh_tokens",
@@ -23,8 +23,8 @@ __all__ = [
 @beartype
 def tokens_exist() -> bool:
     """Check if the cached API tokens exist"""
-    config = get_config()
-    return os.path.isfile(config.api_tokens_filename)
+
+    return os.path.isfile(_get_api_tokens_filepath())
 
 
 @functools.cache
@@ -38,7 +38,7 @@ def get_tokens(
 
 
     If an access token exists in the ENV, then it is used before
-    anything else. If not, then ~/.deeporigin/api_tokens is
+    anything else. If not, then tokens file is
     checked for access tokens, and used if they exist.
     On first use (within a Python session), tokens are
     refreshed if refresh_tokens is `True`. On subsequent uses,
@@ -80,26 +80,16 @@ def cache_tokens(tokens: dict) -> None:
     Args:
         token: dictionary with access and refresh tokens
     """
-    config = get_config()
 
-    os.makedirs(os.path.dirname(config.api_tokens_filename), exist_ok=True)
-    with open(config.api_tokens_filename, "w") as file:
+    with open(_get_api_tokens_filepath(), "w") as file:
         json.dump(tokens, file)
-
-
-def read_cached_tokens() -> dict[str, str]:
-    """Read cached API tokens"""
-    config = get_config()
-    with open(config.api_tokens_filename, "r") as file:
-        tokens = json.load(file)
-    return tokens
 
 
 def remove_cached_tokens():
     """Remove cached API tokens"""
-    config = get_config()
-    if os.path.isfile(config.api_tokens_filename):
-        os.remove(config.api_tokens_filename)
+
+    if os.path.isfile(_get_api_tokens_filepath()):
+        os.remove(_get_api_tokens_filepath())
 
 
 @beartype

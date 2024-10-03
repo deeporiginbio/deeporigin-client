@@ -22,7 +22,6 @@ TEMPLATE = {
     "env": confuse.String(),
     "api_endpoint": confuse.Optional(confuse.String()),
     "nucleus_api_route": confuse.String(),
-    "graphql_api_route": confuse.String(),
     "auth_domain": confuse.String(),
     "auth_device_code_endpoint": confuse.String(),
     "auth_token_endpoint": confuse.String(),
@@ -30,8 +29,6 @@ TEMPLATE = {
     "auth_grant_type": confuse.String(),
     "auth_client_id": confuse.String(),
     "auth_client_secret": confuse.String(),
-    "list_workstation_variables_query_template": confuse.String(),
-    "api_tokens_filename": confuse.Filename(),
     "variables_cache_filename": confuse.Filename(),
     "auto_install_variables_filename": confuse.Filename(),
     "feature_flags": confuse.Optional(

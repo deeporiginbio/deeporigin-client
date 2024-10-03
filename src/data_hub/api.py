@@ -302,7 +302,7 @@ def upload_file(
         "Connection": "keep-alive",
         "Content-Length": str(content_length),
         "Content-Type": content_type,
-        "x-amz-checksum-sha256": hash,
+        # "x-amz-checksum-sha256": hash, # TODO: add checksum
     }
 
     with open(file_path, "rb") as file:
@@ -316,7 +316,10 @@ def upload_file(
         )
 
         if put_response.status_code != 200:
-            raise DeepOriginException(message="File could not be uploaded.")
+            raise DeepOriginException(
+                title=f"❌ File could not be uploaded! [{put_response.status_code}]",
+                message=f"The response was: {put_response.text}",
+            )
 
     return response.file
 

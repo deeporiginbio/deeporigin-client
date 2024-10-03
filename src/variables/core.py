@@ -3,17 +3,15 @@ import enum
 import getpass
 import os
 import stat
-import string
 import sys
 import typing
 import warnings
-from urllib.parse import urljoin
 
 import crontab
 import pydantic
-import requests
 import yaml
-from deeporigin import auth
+from deeporigin.platform.api import get_variables_and_secrets
+from deeporigin.utils.core import _get_api_tokens_filepath
 
 from ..config import get_value as get_config
 from ..exceptions import DeepOriginException
@@ -207,41 +205,28 @@ def get_variables_from_do_platform(
         return []
 
     classes = tuple([type.value for type in types])
-    config = get_config()
 
-    # Get an access token for the Deep Origin API
-    tokens = auth.get_tokens()
+    secrets = get_variables_and_secrets()
 
-    # Query variables API endpoint.
-    #
-    # TODO Support filtering for
-    # - Just user's variables
-    # - Just organization variables
-    workstation_drn = (
-        f"drn:compute:{config.organization_id}:computebench:{config.bench_id}"
-    )
-    query = string.Template(
-        config.list_workstation_variables_query_template
-    ).substitute(workstation_drn=workstation_drn)
-
-    response = requests.post(
-        urljoin(config.api_endpoint, config.graphql_api_route),
-        json={
-            "query": query,
-        },
-        headers={
-            "Authorization": f"Bearer {tokens['access']}",
-        },
-    )
-    response.raise_for_status()
-    response_json = response.json()
+    # reshape secrets to match what we had in the old
+    # graph QL response
+    reshaped_secrets = []
+    keys = ["key", "filename"]
+    for secret in secrets:
+        data = dict()
+        data["name"] = secret["attributes"]["name"]
+        data["type"] = secret["attributes"]["type"]
+        for key in keys:
+            if key in secret["attributes"].keys():
+                data[key] = secret["attributes"][key]
+        data["value"] = secret["attributes"]["value"]
+        data["drn"] = "drn:variable:" + secret["id"]
+        reshaped_secrets.append(data)
 
     # Parse GraphQL response
     variables = []
     invalid_variables = []
-    for serialized_variable in (response_json.get("data", {}) or {}).get(
-        "listBenchSecrets", []
-    ):
+    for serialized_variable in reshaped_secrets:
         try:
             variable = deserialize_variable(serialized_variable)
 
@@ -274,6 +259,8 @@ def deserialize_variable(serialized: dict) -> Variable:
     Returns:
         :obj:`Variable`: variable
     """
+    serialized = serialized.copy()
+
     type_platform_id = serialized.pop("type")
 
     for cls in VariableType.__members__.values():
@@ -406,12 +393,10 @@ def enable_variable_auto_updating(
         escaped_auth_grant_type = config.auth_grant_type.replace("'", "\\'")
         escaped_auth_client_id = config.auth_client_id.replace("'", "\\'")
         escaped_auth_client_secret = config.auth_client_secret.replace("'", "\\'")
-        escaped_list_workstation_variables_query_template = (
-            config.list_workstation_variables_query_template.replace("\n", " ").replace(
-                "'", "\\'"
-            )
+
+        escaped_api_tokens_filename = str(_get_api_tokens_filepath()).replace(
+            "'", "\\'"
         )
-        escaped_api_tokens_filename = config.api_tokens_filename.replace("'", "\\'")
         escaped_variables_cache_filename = config.variables_cache_filename.replace(
             "'", "\\'"
         )
@@ -446,9 +431,6 @@ def enable_variable_auto_updating(
         commands.append(f"export DEEP_ORIGIN_AUTH_CLIENT_ID='{escaped_auth_client_id}'")
         commands.append(
             f"export DEEP_ORIGIN_AUTH_CLIENT_SECRET='{escaped_auth_client_secret}'"
-        )
-        commands.append(
-            f"export DEEP_ORIGIN_LIST_WORKSTATION_VARIABLES_QUERY_TEMPLATE='{escaped_list_workstation_variables_query_template}'"
         )
 
         commands.append(
@@ -513,10 +495,6 @@ def disable_variable_auto_updating() -> None:
         cron_job_id = get_auto_install_variables_cronjob_id()
         for job in cron_tab.find_comment(comment=cron_job_id):
             job.enable(False)
-
-    config = get_config()
-    if os.path.isfile(config.api_tokens_filename):
-        auth.remove_cached_tokens()
 
 
 def get_auto_install_variables_cronjob_id() -> str:
