@@ -162,15 +162,15 @@ def _ensure_do_folder() -> Path:
     return deeporigin_path
 
 
-@beartype
-def decode_access_token() -> dict:
-    """decode token and extract info"""
+# @beartype
+# def decode_access_token() -> dict:
+#     """decode token and extract info"""
 
-    import jwt
+#     import jwt
 
-    tokens = read_cached_tokens()
+#     tokens = read_cached_tokens()
 
-    return jwt.decode(tokens["access"], options={"verify_signature": False})
+#     return jwt.decode(tokens["access"], options={"verify_signature": False})
 
 
 @beartype
