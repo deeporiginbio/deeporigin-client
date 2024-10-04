@@ -1,6 +1,7 @@
 """The `deeporigin.data_hub.api` module contains high-level functions for
 interacting with your Deep Origin data hub."""
 
+import asyncio
 import os
 from pathlib import Path
 from typing import Any, Optional, Union
@@ -26,11 +27,9 @@ from deeporigin.utils.constants import (
     IDFormat,
     ObjectType,
 )
-from deeporigin.utils.core import (
-    find_last_updated_row,
-    sha256_checksum,
-)
+from deeporigin.utils.core import find_last_updated_row
 from deeporigin.utils.network import (
+    _download_files_async,
     _get_pypi_version,
     _parse_params_from_url,
     download_sync,
@@ -161,6 +160,7 @@ def list_files(
     *,
     assigned_row_ids: Optional[list[str]] = None,
     is_unassigned: Optional[bool] = None,
+    file_ids: Optional[list[str]] = None,
     client=None,
 ) -> list:
     """List files, with option to filter by assigned rows, assigned status
@@ -176,6 +176,9 @@ def list_files(
 
     """
     filters = []
+
+    if file_ids is not None:
+        filters.append(dict(file_ids=file_ids))
 
     if assigned_row_ids is not None:
         filters.append(dict(assigned_row_ids=assigned_row_ids))
@@ -254,6 +257,42 @@ def download_file(
     save_path = os.path.join(destination, file_name)
 
     download_sync(url, save_path)
+
+
+@beartype
+def download_files(
+    file_ids: list[str],
+    names: Optional[list[str]] = None,
+):
+    """download multiple files in parallel using asyncio
+
+    If you want to download a single file, use download_file as it has lower overhead.
+
+    Args:
+        file_ids: IDs of the files on Deep Origin
+        names: Names of the files. Optional. If None, names will be retrieved from Deep Origin
+
+    Returns:
+        None
+
+    """
+
+    # we need nest_asynio to allow this work
+    # in a jupyter kernel
+    import nest_asyncio
+
+    nest_asyncio.apply()
+
+    if names is None:
+        # names not provided, determine names from Deep Origin
+        files = list_files(file_ids=file_ids)
+        names = [item.file.name for item in files]
+
+    # create presigned URLs for all files in parallel
+    urls = asyncio.run(_create_file_download_urls_async(file_ids))
+
+    # download files in parallel
+    asyncio.run(_download_files_async(urls, names))
 
 
 @beartype
@@ -991,6 +1030,24 @@ def get_dataframe(
             renamed_data[new_key] = data[key]
             renamed_data.pop(key, None)
         return renamed_data
+
+
+async def _create_file_download_urls_async(file_ids: list[str]) -> list[str]:
+    """async method to create file download URLs for a list of files.
+
+    Do not use this method. This is called internally by the
+    `download_files` method."""
+
+    async_client = _api._get_default_client(use_async=True)
+
+    tasks = []
+    for file_id in file_ids:
+        tasks.append(
+            _api.create_file_download_url(file_id=file_id, client=async_client)
+        )
+    data = await asyncio.gather(*tasks)
+    urls = [item.data.download_url for item in data]
+    return urls
 
 
 def add_row_to_data(

@@ -59,6 +59,7 @@ def _get_default_client(
     client=None,
     refresh: bool = True,
     debug: bool = False,
+    use_async: bool = False,
 ):
     """Internal function to instantiate client
 
@@ -88,11 +89,20 @@ def _get_default_client(
             value["nucleus_api_route"],
         )
 
-        client = DeeporiginData(
-            token=access_token,
-            org_id=org_id,
-            base_url=base_url,
-        )
+        if use_async:
+            from deeporigin_data import AsyncDeeporiginData
+
+            client = AsyncDeeporiginData(
+                token=access_token,
+                org_id=org_id,
+                base_url=base_url,
+            )
+        else:
+            client = DeeporiginData(
+                token=access_token,
+                org_id=org_id,
+                base_url=base_url,
+            )
 
         if debug:
             client = client.with_raw_response

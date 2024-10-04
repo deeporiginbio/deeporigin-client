@@ -1,8 +1,10 @@
 """this module contains network related utility functions"""
 
+import asyncio
 import json
 from urllib.parse import parse_qs, urljoin, urlparse
 
+import aiohttp
 import requests
 from beartype import beartype
 from deeporigin.exceptions import DeepOriginException
@@ -29,6 +31,33 @@ def download_sync(url: str, save_path: str) -> None:
             for chunk in response.iter_content(chunk_size=8192):
                 if chunk:  # Filter out keep-alive new chunks
                     file.write(chunk)
+
+
+async def _download_async(session, url, save_path) -> None:
+    """Downloads a single file asynchronously and saves it to the specified path.
+
+    Do not use this. Use the synchronous wrapper function
+    download_files instead."""
+
+    async with session.get(url) as response:
+        with open(save_path, "wb") as file:
+            async for chunk in response.content.iter_chunked(8192):
+                if chunk:  # Filter out keep-alive chunks
+                    file.write(chunk)
+
+
+async def _download_files_async(urls: list[str], save_paths: list[str]) -> None:
+    """Downloads multiple files asynchronously.
+
+    Do not use this. Use the synchronous wrapper function
+    download_files instead."""
+
+    async with aiohttp.ClientSession() as session:
+        tasks = []
+        for url, save_path in zip(urls, save_paths):
+            tasks.append(_download_async(session, url, save_path))
+
+        await asyncio.gather(*tasks)
 
 
 def _get_pypi_version():
@@ -63,7 +92,8 @@ def _parse_params_from_url(url: str) -> dict:
     return params
 
 
-def _download_nucleus_api_spec():
+@beartype
+def _download_nucleus_api_spec() -> None:
     """downloads the data hub API spec and saves to disk"""
 
     deeporigin_path = _ensure_do_folder()
