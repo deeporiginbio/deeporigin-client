@@ -33,6 +33,7 @@ from deeporigin.utils.network import (
     _parse_params_from_url,
     download_sync,
 )
+from deeporigin_data import types
 from packaging.version import Version
 from tqdm import tqdm
 
@@ -806,7 +807,7 @@ def download(
 
 @beartype
 def download_database(
-    source: str,
+    source,
     destination: str = os.getcwd(),
     *,
     include_files: bool = False,
@@ -999,13 +1000,27 @@ def get_dataframe(
 @beartype
 @ensure_client
 def download_files(
-    file_ids: List[str],
-    save_paths: List[str],
+    files: list[types.list_files_response.Data] | list[str],
+    save_to_dir: Path | str = Path("."),
+    *,
+    use_file_names: bool = True,
     client=None,
-):
-    """Generates file download URLs and downloads the files in parallel with a progress bar."""
+) -> None:
+    """download multiple files in parallel to local disk
 
-    # Progress bar for the number of files to download
+    Args:
+        files: list of files to download. These can be of type `types.list_files_response.Data` (as returned by api.list_files) or can be a list of strings of file IDs.
+        save_to_dir: directory to save files to on local computer
+    """
+
+    file_ids = [item.file.id for item in files]
+    if use_file_names:
+        save_paths = [save_to_dir / item.file.name for item in files]
+    else:
+        save_paths = [
+            save_to_dir / item.file.id.replace("_file:", "") for item in files
+        ]
+
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = []
         for file_id, save_path in zip(file_ids, save_paths):
