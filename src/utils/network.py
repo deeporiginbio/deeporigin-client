@@ -33,33 +33,6 @@ def download_sync(url: str, save_path: str) -> None:
                     file.write(chunk)
 
 
-async def _download_async(session, url, save_path) -> None:
-    """Downloads a single file asynchronously and saves it to the specified path.
-
-    Do not use this. Use the synchronous wrapper function
-    download_files instead."""
-
-    async with session.get(url) as response:
-        with open(save_path, "wb") as file:
-            async for chunk in response.content.iter_chunked(8192):
-                if chunk:  # Filter out keep-alive chunks
-                    file.write(chunk)
-
-
-async def _download_files_async(urls: list[str], save_paths: list[str]) -> None:
-    """Downloads multiple files asynchronously.
-
-    Do not use this. Use the synchronous wrapper function
-    download_files instead."""
-
-    async with aiohttp.ClientSession() as session:
-        tasks = []
-        for url, save_path in zip(urls, save_paths):
-            tasks.append(_download_async(session, url, save_path))
-
-        await asyncio.gather(*tasks)
-
-
 def _get_pypi_version():
     """determines the latest version on PyPI"""
 

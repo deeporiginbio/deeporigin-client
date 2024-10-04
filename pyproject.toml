@@ -31,8 +31,7 @@ dependencies = [
     "humanize",
     "packaging",
     "diskcache",
-    "aiohttp",
-    "nest_asyncio",
+    "tqdm",
 ]
 dynamic = ["version"]
 
