@@ -11,6 +11,7 @@
 - support for new (breaking) syntax for deleting databases, folders, rows, and columns
 - better support for caching tokens in filesystem
 - numerous bug fixes and small improvements
+- dropped support for Python 3.9
 - better syntax for interacting with the `api.list_files` function
 - Improvements to Deep Origin DataFrames, including:
     - ability to create new columns in dataframes and push them to a database
