@@ -46,7 +46,6 @@ nav:
   - platform/index.md
   - How to:
     - Get user information: how-to/platform/user-info.md
-    - Get variables ands secrets: how-to/platform/variables.md
     - Get workstation information: how-to/platform/workstation-info.md
 - Data hub: 
   - data-hub/index.md

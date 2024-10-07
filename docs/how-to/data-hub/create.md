@@ -104,4 +104,4 @@ To create a new database column in an existing database, run:
     )
     ```
 
-This code creates a new column in the existing database. To configure the type of the column, use the `type` argument. The type must a member of [DataType](../../ref/data-hub/types.md#src.utils.DataType).
+This code creates a new column in the existing database. To configure the type of the column, use the `type` argument. The type must a member of [DataType](../../ref/data-hub/types.md#src.utils.constants.DataType).

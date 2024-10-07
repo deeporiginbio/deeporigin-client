@@ -807,7 +807,7 @@ def download(
 
 @beartype
 def download_database(
-    source,
+    source: Any,
     destination: str = os.getcwd(),
     *,
     include_files: bool = False,
@@ -1000,7 +1000,7 @@ def get_dataframe(
 @beartype
 @ensure_client
 def download_files(
-    files: list[ListFilesResponse] | ListFilesResponse,
+    files: Optional[list[ListFilesResponse] | ListFilesResponse] = None,
     *,
     save_to_dir: Path | str = Path("."),
     use_file_names: bool = True,
@@ -1012,6 +1012,9 @@ def download_files(
         files: list of files to download. These can be of type `types.list_files_response.Data` (as returned by api.list_files) or can be a list of strings of file IDs.
         save_to_dir: directory to save files to on local computer
     """
+
+    if files is None:
+        files = list_files(client=client)
 
     if isinstance(files, ListFilesResponse):
         files = [files]
@@ -1337,7 +1340,7 @@ def add_database_column(
     Args:
         database_id: ID (or human ID) of a database on Deep Origin.
         key: key of the column
-        type: type of the column. Should be one of [DataType](../data-hub/types.md#src.utils.DataType)
+        type: type of the column. Should be one of [DataType](../data-hub/types.md#src.utils.constants.DataType)
         name: name of the column
         cardinality: cardinality of the column. Specifies whether cells in this column can contain or many items. Should be one of "one" or "many"
         required: whether the column is required. If True, cells in this column cannot be empty

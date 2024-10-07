@@ -136,4 +136,4 @@ df
 
 ## Reference
 
-Read more about the `to_deeporigin` method [here](../ref/data-hub/types.md#src.data_hub.dataframe.DataFrame.sync). 
+Read more about the `to_deeporigin` method [here](../ref/data-hub/types.md#src.data_hub.dataframe.DataFrame.to_deeporigin). 
