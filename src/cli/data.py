@@ -61,8 +61,6 @@ class DataController(cement.Controller):
 
         print(self.app.pargs.assigned_row_ids)
 
-        return
-
         files = api.list_files(
             file_ids=self.app.pargs.file_ids,
             assigned_row_ids=self.app.pargs.assigned_row_ids,
