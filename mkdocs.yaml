@@ -45,7 +45,7 @@ nav:
 - Platform: 
   - platform/index.md
   - How to:
-    - Get user information: how-to/platform/users.md
+    - Get user information: how-to/platform/user-info.md
     - Get variables ands secrets: how-to/platform/variables.md
     - Get workstation information: how-to/platform/workstation-info.md
 - Data hub: 
@@ -67,8 +67,8 @@ nav:
 - Compute hub: 
   - compute-hub/index.md
   - How to:
-    - Install variables and secrets: how-to/variables.md
-    - Get info about your workstation: how-to/workstation-info.md
+    - Install variables and secrets: how-to/compute-hub/variables.md
+    - Get info about your workstation: how-to/compute-hub/workstation-info.md
 - Changelog: changelog.md
 - Support: https://www.support.deeporigin.com/servicedesk/customer/portals
 

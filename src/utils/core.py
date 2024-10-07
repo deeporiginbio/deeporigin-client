@@ -26,6 +26,14 @@ def _get_method(obj, method_path):
     return obj
 
 
+def humanize_file_size(file_size: int):
+    """humanizes a file size in bytes"""
+    for unit_prefix in ["", "K", "M", "G", "T", "P", "E", "Z", "Y"]:
+        if file_size < 1024.0:
+            return f"{file_size:.2f} {unit_prefix}B"
+        file_size /= 1024.0
+
+
 def sha256_checksum(file_path):
     """compute sha256 hash of a file"""
 

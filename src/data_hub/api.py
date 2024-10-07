@@ -4,7 +4,7 @@ interacting with your Deep Origin data hub."""
 import concurrent.futures
 import os
 from pathlib import Path
-from typing import Any, List, Optional, Union
+from typing import Any, Optional, Union
 from urllib.parse import urlparse, urlunparse
 
 import httpx
@@ -33,7 +33,7 @@ from deeporigin.utils.network import (
     _parse_params_from_url,
     download_sync,
 )
-from deeporigin_data import types
+from deeporigin.utils.types import ListFilesResponse
 from packaging.version import Version
 from tqdm import tqdm
 
@@ -1000,9 +1000,9 @@ def get_dataframe(
 @beartype
 @ensure_client
 def download_files(
-    files: list[types.list_files_response.Data] | list[str],
-    save_to_dir: Path | str = Path("."),
+    files: list[ListFilesResponse] | ListFilesResponse,
     *,
+    save_to_dir: Path | str = Path("."),
     use_file_names: bool = True,
     client=None,
 ) -> None:
@@ -1013,7 +1013,15 @@ def download_files(
         save_to_dir: directory to save files to on local computer
     """
 
-    file_ids = [item.file.id for item in files]
+    if isinstance(files, ListFilesResponse):
+        files = [files]
+
+    if isinstance(save_to_dir, str):
+        save_to_dir = Path(save_to_dir)
+
+    if isinstance(files[0], ListFilesResponse):
+        file_ids = [item.file.id for item in files]
+
     if use_file_names:
         save_paths = [save_to_dir / item.file.name for item in files]
     else:

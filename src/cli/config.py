@@ -122,7 +122,7 @@ class ConfigController(cement.Controller):
 
         name = self.app.pargs.profile
 
-        file_to_load = _ensure_do_folder / f"{name}.yml"
+        file_to_load = _ensure_do_folder() / f"{name}.yml"
 
         # check if config file exists
         if not os.path.isfile(file_to_load):

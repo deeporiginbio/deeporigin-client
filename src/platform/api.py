@@ -7,6 +7,7 @@ import requests
 from beartype import beartype
 from deeporigin import auth
 from deeporigin.config import get_value
+from deeporigin.exceptions import DeepOriginException
 from deeporigin.utils.core import _ensure_do_folder
 from deeporigin.utils.network import _get_domain_name
 
@@ -33,7 +34,15 @@ def _make_get_request(endpoint: str) -> dict:
         headers=headers,
     )
 
-    return response.json()
+    if response.status_code != 200:
+        raise DeepOriginException(message=response.text, fix=url)
+
+    data = response.json()
+    if "data" in data.keys():
+        return data["data"]
+
+    else:
+        return data
 
 
 @beartype
@@ -50,13 +59,13 @@ def resolve_user(user_id: str):
     return _make_get_request(endpoint)
 
 
-def whoami():
+def whoami() -> dict:
     """get details about currently signed in user"""
 
     return _make_get_request("/users/me")
 
 
-def get_workstations():
+def get_workstations() -> list[dict]:
     """get information about all workstations in the organization"""
     return _make_get_request(f"/computebenches/{_get_org_id()}")
 

@@ -3,157 +3,42 @@
 This page describes how to download files from Deep Origin to your local computer. 
 
 
-## Download a file from the Data hub
+## Download one or many files from the Data hub
 
-To download a file to the Deep Origin data hub, run the following commands:
+To download file(s) to the Deep Origin data hub, run the following commands:
 
 === "CLI"
 
     ```bash
-    deeporigin data download /path/to/test.fasta
+    deeporigin data download-files
     ```
 
-    This will upload the file to your data hub, but the
-    file will not yet be assigned to any database or cell. An example
-    response is shown below:
+    This will download all files on Deep Origin to the current folder. 
 
-    ```
-    ╭──────────────────┬──────────────────────────────╮
-    │ Property         │ Value                        │
-    ├──────────────────┼──────────────────────────────┤
-    │ name             │ test.fasta                   │
-    │ contentType      │ data/fasta                   │
-    │ contentLength    │ 554588                       │
-    │ id               │ _file:36ufKT2Sej22coSEOizpK  │
-    │ status           │ ready                        │
-    │ uri              │ s3://foo                     │
-    │ dateCreated      │ 2024-06-18T14:48:33.501Z     │
-    │ dateUpdated      │ 2024-06-18T14:48:33.501Z     │
-    │ createdByUserDrn │ levins@deeporigin.com        │
-    ╰──────────────────┴──────────────────────────────╯
+    To download files that have been assigned to a particular row, use:
 
-
+    ```bash
+    deeporigin data download-files --assigned-row-ids <row-id-1>  <row-id-2> ...
     ```
 
-    ??? tip "JSON output with `--json`"
-        [JSON](https://www.json.org/) output can be requested by adding `--json`, and allows
-        you to pipe out to a JSON processor like [jq](https://jqlang.github.io/jq/):
+    To download specific files, pass the file IDs using:
 
-        ```bash
-        deeporigin upload /path/to/test.fasta | jq
-        ```
 
-        ```json
-        {
-          "name": "test.fasta",
-          "contentType": "data/fasta",
-          "contentLength": 554588,
-          "id": "_file:36ufKT2Sej22coSEOizpK",
-          "status": "ready",
-          "uri": "s3://foo",
-          "dateCreated": "2024-06-18T14:51:43.876Z",
-          "dateUpdated": "2024-06-18T14:51:43.876Z",
-          "createdByUserDrn": "levins@deeporigin.com"
-        }
-
-        ```
+    ```bash
+    deeporigin data download-files --file-ids <file-1> <file-1> ...
+    ```
+    
 
 === "Python"
 
     ```py
     from deeporigin.data_hub import api
-    api.upload_file("/path/to/file.fasta")
+    api.download_files(files)
     ```
 
-    This will upload the file to your data hub. An example is shown below:
+    `files` is a list of files to download, and is a list of `ListFilesResponse` objects. To obtain this list, use `api.list_files()`, the output of which can be used as an input to `download_files`. 
 
-    ```json
-    {
-        "name": "file.fasta",
-        "contentType": "data/foo",
-        "contentLength": 55454688,
-        "id": "_file:6Hdhyc3t8xZ6pmyCrQy1t",
-        "status": "ready",
-        "uri": "s3://data.<org-name>/_file:6Hdhyc3t8xZ6pmyCrQy1t",
-        "dateCreated": "2024-06-18T14:18:37.409Z",
-        "dateUpdated": "2024-06-18T14:18:37.409Z",
-        "createdByUserDrn": "haldane@deeporigin.com",
-    }
-    ```
+    !!! Tip "Download all files"
+        To download all files, call `api.list_files()` and pass the output to `download_files`.
 
 
-## Download multiple files from the Data hub
-
-=== "CLI"
-
-    ```bash
-    deeporigin data download /path/to/test.fasta
-    ```
-
-    This will upload the file to your data hub, but the
-    file will not yet be assigned to any database or cell. An example
-    response is shown below:
-
-    ```
-    ╭──────────────────┬──────────────────────────────╮
-    │ Property         │ Value                        │
-    ├──────────────────┼──────────────────────────────┤
-    │ name             │ test.fasta                   │
-    │ contentType      │ data/fasta                   │
-    │ contentLength    │ 554588                       │
-    │ id               │ _file:36ufKT2Sej22coSEOizpK  │
-    │ status           │ ready                        │
-    │ uri              │ s3://foo                     │
-    │ dateCreated      │ 2024-06-18T14:48:33.501Z     │
-    │ dateUpdated      │ 2024-06-18T14:48:33.501Z     │
-    │ createdByUserDrn │ levins@deeporigin.com        │
-    ╰──────────────────┴──────────────────────────────╯
-
-
-    ```
-
-    ??? tip "JSON output with `--json`"
-        [JSON](https://www.json.org/) output can be requested by adding `--json`, and allows
-        you to pipe out to a JSON processor like [jq](https://jqlang.github.io/jq/):
-
-        ```bash
-        deeporigin upload /path/to/test.fasta | jq
-        ```
-
-        ```json
-        {
-          "name": "test.fasta",
-          "contentType": "data/fasta",
-          "contentLength": 554588,
-          "id": "_file:36ufKT2Sej22coSEOizpK",
-          "status": "ready",
-          "uri": "s3://foo",
-          "dateCreated": "2024-06-18T14:51:43.876Z",
-          "dateUpdated": "2024-06-18T14:51:43.876Z",
-          "createdByUserDrn": "levins@deeporigin.com"
-        }
-
-        ```
-
-=== "Python"
-
-    ```py
-    from deeporigin.data_hub import api
-    api.upload_file("/path/to/file.fasta")
-    ```
-
-    This will upload the file to your data hub. An example is shown below:
-
-    ```json
-    {
-        "name": "file.fasta",
-        "contentType": "data/foo",
-        "contentLength": 55454688,
-        "id": "_file:6Hdhyc3t8xZ6pmyCrQy1t",
-        "status": "ready",
-        "uri": "s3://data.<org-name>/_file:6Hdhyc3t8xZ6pmyCrQy1t",
-        "dateCreated": "2024-06-18T14:18:37.409Z",
-        "dateUpdated": "2024-06-18T14:18:37.409Z",
-        "createdByUserDrn": "haldane@deeporigin.com",
-    }
-    ```
