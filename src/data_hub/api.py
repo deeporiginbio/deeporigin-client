@@ -27,7 +27,7 @@ from deeporigin.utils.constants import (
     IDFormat,
     ObjectType,
 )
-from deeporigin.utils.core import find_last_updated_row
+from deeporigin.utils.core import find_last_updated_row, sha256_checksum
 from deeporigin.utils.network import (
     _get_pypi_version,
     _parse_params_from_url,
@@ -265,6 +265,8 @@ def download_file(
 def upload_file(
     file_path: str,
     client=None,
+    *,
+    compute_hash: bool = True,
 ) -> None:
     """Upload a file to Deep Origin.
 
@@ -284,15 +286,18 @@ def upload_file(
 
     content_length = os.path.getsize(file_path)
 
-    # hash = sha256_checksum(file_path)
-
-    response = _api.create_file_upload(
+    args = dict(
         name=os.path.basename(file_path),
-        # checksum_sha256=hash,
         content_type=content_type,
         content_length=str(content_length),
         client=client,
     )
+
+    if compute_hash:
+        hash = sha256_checksum(file_path)
+        args["checksum_sha256"] = hash
+
+    response = _api.create_file_upload(**args)
 
     # extract pre-signed URL to upload to
     url = urlparse(response.upload_url)
@@ -306,8 +311,10 @@ def upload_file(
         "Connection": "keep-alive",
         "Content-Length": str(content_length),
         "Content-Type": content_type,
-        # "x-amz-checksum-sha256": hash, # TODO: add checksum
     }
+
+    if compute_hash:
+        headers["x-amz-checksum-sha256"] = hash
 
     with open(file_path, "rb") as file:
         import requests
