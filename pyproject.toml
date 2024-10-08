@@ -31,6 +31,7 @@ dependencies = [
     "humanize",
     "packaging",
     "diskcache",
+    "tqdm",
 ]
 dynamic = ["version"]
 

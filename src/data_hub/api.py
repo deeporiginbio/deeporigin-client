@@ -1,6 +1,7 @@
 """The `deeporigin.data_hub.api` module contains high-level functions for
 interacting with your Deep Origin data hub."""
 
+import concurrent.futures
 import os
 from pathlib import Path
 from typing import Any, Optional, Union
@@ -26,16 +27,15 @@ from deeporigin.utils.constants import (
     IDFormat,
     ObjectType,
 )
-from deeporigin.utils.core import (
-    find_last_updated_row,
-    sha256_checksum,
-)
+from deeporigin.utils.core import find_last_updated_row
 from deeporigin.utils.network import (
     _get_pypi_version,
     _parse_params_from_url,
     download_sync,
 )
+from deeporigin.utils.types import ListFilesResponse
 from packaging.version import Version
+from tqdm import tqdm
 
 try:
     latest_pypi_version = Version(_get_pypi_version())
@@ -161,6 +161,7 @@ def list_files(
     *,
     assigned_row_ids: Optional[list[str]] = None,
     is_unassigned: Optional[bool] = None,
+    file_ids: Optional[list[str]] = None,
     client=None,
 ) -> list:
     """List files, with option to filter by assigned rows, assigned status
@@ -176,6 +177,9 @@ def list_files(
 
     """
     filters = []
+
+    if file_ids is not None:
+        filters.append(dict(file_ids=file_ids))
 
     if assigned_row_ids is not None:
         filters.append(dict(assigned_row_ids=assigned_row_ids))
@@ -803,7 +807,7 @@ def download(
 
 @beartype
 def download_database(
-    source: str,
+    source: Any,
     destination: str = os.getcwd(),
     *,
     include_files: bool = False,
@@ -991,6 +995,65 @@ def get_dataframe(
             renamed_data[new_key] = data[key]
             renamed_data.pop(key, None)
         return renamed_data
+
+
+@beartype
+@ensure_client
+def download_files(
+    files: Optional[list[ListFilesResponse] | ListFilesResponse] = None,
+    *,
+    save_to_dir: Path | str = Path("."),
+    use_file_names: bool = True,
+    client=None,
+) -> None:
+    """download multiple files in parallel to local disk
+
+    Args:
+        files: list of files to download. These can be of type `types.list_files_response.Data` (as returned by api.list_files) or can be a list of strings of file IDs.
+        save_to_dir: directory to save files to on local computer
+    """
+
+    if files is None:
+        files = list_files(client=client)
+
+    if isinstance(files, ListFilesResponse):
+        files = [files]
+
+    if isinstance(save_to_dir, str):
+        save_to_dir = Path(save_to_dir)
+
+    if isinstance(files[0], ListFilesResponse):
+        file_ids = [item.file.id for item in files]
+
+    if use_file_names:
+        save_paths = [save_to_dir / item.file.name for item in files]
+    else:
+        save_paths = [
+            save_to_dir / item.file.id.replace("_file:", "") for item in files
+        ]
+
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        futures = []
+        for file_id, save_path in zip(file_ids, save_paths):
+            futures.append(
+                executor.submit(
+                    lambda file_id, save_path: download_sync(
+                        _api.create_file_download_url(
+                            file_id=file_id, client=client
+                        ).download_url,
+                        save_path,
+                    ),
+                    file_id,
+                    save_path,
+                )
+            )
+
+        for _ in tqdm(
+            concurrent.futures.as_completed(futures),
+            total=len(futures),
+            desc="Downloading files from Deep Origin",
+        ):
+            pass
 
 
 def add_row_to_data(
@@ -1277,7 +1340,7 @@ def add_database_column(
     Args:
         database_id: ID (or human ID) of a database on Deep Origin.
         key: key of the column
-        type: type of the column. Should be one of [DataType](../data-hub/types.md#src.utils.DataType)
+        type: type of the column. Should be one of [DataType](../data-hub/types.md#src.utils.constants.DataType)
         name: name of the column
         cardinality: cardinality of the column. Specifies whether cells in this column can contain or many items. Should be one of "one" or "many"
         required: whether the column is required. If True, cells in this column cannot be empty

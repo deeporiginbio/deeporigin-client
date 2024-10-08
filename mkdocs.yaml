@@ -42,6 +42,11 @@ nav:
   - Install: install.md
   - Configure: configure.md
   - Authenticate: how-to/auth.md
+- Platform: 
+  - platform/index.md
+  - How to:
+    - Get user information: how-to/platform/user-info.md
+    - Get workstation information: how-to/platform/workstation-info.md
 - Data hub: 
   - data-hub/index.md
   - Deep Origin DataFrames:
@@ -52,6 +57,7 @@ nav:
     - List data: how-to/data-hub/list-data.md
     - View data: how-to/data-hub/view-data.md
     - Upload files: how-to/data-hub/upload-files.md
+    - Download files: how-to/data-hub/download-files.md
     - Write data: how-to/data-hub/write-data.md
   - API reference:
     - High-level API: ref/data-hub/high-level-api.md
@@ -60,8 +66,8 @@ nav:
 - Compute hub: 
   - compute-hub/index.md
   - How to:
-    - Install variables and secrets: how-to/variables.md
-    - Get info about your workstation: how-to/workstation-info.md
+    - Install variables and secrets: how-to/compute-hub/variables.md
+    - Get info about your workstation: how-to/compute-hub/workstation-info.md
 - Changelog: changelog.md
 - Support: https://www.support.deeporigin.com/servicedesk/customer/portals
 

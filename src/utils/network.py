@@ -1,6 +1,7 @@
 """this module contains network related utility functions"""
 
 import json
+from pathlib import Path
 from urllib.parse import parse_qs, urljoin, urlparse
 
 import requests
@@ -11,7 +12,7 @@ from deeporigin.utils.core import _ensure_do_folder
 
 
 @beartype
-def download_sync(url: str, save_path: str) -> None:
+def download_sync(url: str, save_path: str | Path) -> None:
     """Concrete method to download a resource using GET and save to disk
 
     Args:
@@ -22,7 +23,8 @@ def download_sync(url: str, save_path: str) -> None:
     with requests.get(url, stream=True) as response:
         if response.status_code != 200:
             raise DeepOriginException(
-                message=f"File could not be downloaded from {url}"
+                message=f"File could not be downloaded from {url}. The message is {response.text}",
+                title=f"Deep Origin Error: [{response.status_code}]",
             )
 
         with open(save_path, "wb") as file:
@@ -63,7 +65,8 @@ def _parse_params_from_url(url: str) -> dict:
     return params
 
 
-def _download_nucleus_api_spec():
+@beartype
+def _download_nucleus_api_spec() -> None:
     """downloads the data hub API spec and saves to disk"""
 
     deeporigin_path = _ensure_do_folder()

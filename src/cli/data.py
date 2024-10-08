@@ -13,6 +13,7 @@ from deeporigin.utils.core import (
     _print_tree,
     _show_json,
     _truncate,
+    humanize_file_size,
 )
 
 
@@ -35,6 +36,41 @@ class DataController(cement.Controller):
             client = api._get_default_client()
 
             return client  # pragma: no cover
+
+    @cement.ex(
+        help="Download files from Deep Origin to local computer",
+        arguments=[
+            (
+                ["--file-ids"],
+                {
+                    "help": "IDs of files to download",
+                    "nargs": "+",
+                },
+            ),
+            (
+                ["--assigned-row-ids"],
+                {
+                    "help": "IDs of rows that files are assigned to to download.",
+                    "nargs": "+",
+                },
+            ),
+        ],
+    )
+    def download_files(self):
+        """Download multiple files from Deep Origin"""
+
+        print(self.app.pargs.assigned_row_ids)
+
+        files = api.list_files(
+            file_ids=self.app.pargs.file_ids,
+            assigned_row_ids=self.app.pargs.assigned_row_ids,
+        )
+
+        total_size = humanize_file_size(sum(file.file.content_length for file in files))
+
+        print(f"{len(files)} files ({total_size}) will be downloaded")
+
+        api.download_files(files)
 
     @cement.ex(
         help="Copy a file or database to or from your data hub",
