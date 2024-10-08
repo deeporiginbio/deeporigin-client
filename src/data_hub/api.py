@@ -266,7 +266,7 @@ def upload_file(
     file_path: str,
     client=None,
     *,
-    compute_hash: bool = False,
+    compute_hash: bool = True,
 ) -> None:
     """Upload a file to Deep Origin.
 
