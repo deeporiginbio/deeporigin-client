@@ -1,3 +1,5 @@
+"""class to handle files as variables"""
+
 import os
 import typing
 import warnings

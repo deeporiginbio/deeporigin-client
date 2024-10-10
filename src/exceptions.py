@@ -1,3 +1,5 @@
+"""custom exceptions to surface better errors"""
+
 import sys
 import textwrap
 from typing import Optional

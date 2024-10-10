@@ -1,3 +1,5 @@
+"""class to handle AWS profile"""
+
 import os
 import re
 import subprocess

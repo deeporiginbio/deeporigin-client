@@ -1,3 +1,5 @@
+"""base type for variables and secrets"""
+
 import abc
 import os
 import typing

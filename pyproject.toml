@@ -111,7 +111,6 @@ ignore-magic = true
 ignore-semiprivate = true
 ignore-private = true
 ignore-property-decorators = true
-ignore-module = true
 ignore-nested-functions = true
 ignore-nested-classes = true
 ignore-setters = false

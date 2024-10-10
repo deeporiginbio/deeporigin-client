@@ -1,3 +1,5 @@
+"""class to handle Mosek license file"""
+
 from .secret_file_value import SecretFileValue
 
 

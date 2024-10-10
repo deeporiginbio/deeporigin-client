@@ -1,3 +1,5 @@
+"""class to handle secret files"""
+
 import abc
 import os
 import typing

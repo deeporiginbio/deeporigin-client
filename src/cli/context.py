@@ -1,3 +1,5 @@
+"""controllers for context information in the CLI"""
+
 import cement
 
 from ..context import (

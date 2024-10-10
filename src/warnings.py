@@ -1,3 +1,5 @@
+"""custom classes for warnings"""
+
 __all__ = ["DeepOriginWarning"]
 
 

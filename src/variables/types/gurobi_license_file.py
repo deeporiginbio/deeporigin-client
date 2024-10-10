@@ -1,3 +1,5 @@
+"""class to handle gurobi license file"""
+
 from .secret_file_value import SecretFileValue
 
 

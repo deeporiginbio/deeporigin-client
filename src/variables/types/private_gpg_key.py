@@ -1,3 +1,5 @@
+"""class to handle GPG keys"""
+
 import os
 import subprocess
 import tempfile
