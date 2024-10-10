@@ -1,3 +1,5 @@
+"""class to handle environment variables"""
+
 import collections
 import os
 import typing

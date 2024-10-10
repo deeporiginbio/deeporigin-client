@@ -1,3 +1,5 @@
+"""utility functions to fetch variables and secrets"""
+
 import copy
 import enum
 import getpass

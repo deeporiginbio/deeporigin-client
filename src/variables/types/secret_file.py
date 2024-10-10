@@ -1,3 +1,5 @@
+"""class to handle secret files"""
+
 from .file import File
 
 

@@ -1,3 +1,5 @@
+"""class to handle Anthropic API key"""
+
 import pydantic
 
 from .secret_env_var_value import SecretEnvironmentVariableValue

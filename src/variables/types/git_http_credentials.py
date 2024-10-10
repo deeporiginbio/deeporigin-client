@@ -1,3 +1,5 @@
+"""class to handle git HTTP credentials"""
+
 import os
 import typing
 import urllib.parse

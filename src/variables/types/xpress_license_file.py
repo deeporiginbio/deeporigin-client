@@ -1,3 +1,5 @@
+"""class to handle xpress license files"""
+
 import os
 
 from deeporigin.utils.core import expand_user

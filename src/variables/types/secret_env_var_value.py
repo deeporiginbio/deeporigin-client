@@ -1,3 +1,5 @@
+"""class to handle secret env variables"""
+
 import abc
 import os
 import typing

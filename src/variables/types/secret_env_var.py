@@ -1,3 +1,5 @@
+"""class to handle secret env variables"""
+
 from .env_var import EnvironmentVariable
 
 

@@ -1,3 +1,5 @@
+"""class to handle OpenAI API keys"""
+
 import pydantic
 
 from .secret_env_var_value import SecretEnvironmentVariableValue

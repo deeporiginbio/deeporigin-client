@@ -1,3 +1,6 @@
+"""this module handles authentication actions and interactions
+with tokens"""
+
 import functools
 import json
 import os

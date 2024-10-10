@@ -1,3 +1,9 @@
+"""low level hooks into auto-generated API code
+
+Functions here should not be used directly. Rather, interact
+with these functions via api.py
+"""
+
 import inspect
 import sys
 

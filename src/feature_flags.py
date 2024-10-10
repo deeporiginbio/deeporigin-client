@@ -1,3 +1,5 @@
+"""module to interact with feature flags"""
+
 import dataclasses
 import functools
 

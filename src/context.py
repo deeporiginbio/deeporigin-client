@@ -1,3 +1,5 @@
+"""this module provides functions used by the CLI to provide context within a Deep Origin workstation"""
+
 import dataclasses
 import functools
 import json

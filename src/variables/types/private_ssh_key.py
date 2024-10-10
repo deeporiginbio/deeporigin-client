@@ -1,3 +1,5 @@
+"""class to handle SSH keys"""
+
 import os
 import subprocess
 import tempfile
