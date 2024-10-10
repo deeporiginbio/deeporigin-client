@@ -144,8 +144,19 @@ def _create_function(method_path):
                 print("⚠️ Token expired. Refreshing credentials...")
                 tokens = auth.read_cached_tokens()
                 tokens["access"] = auth.refresh_tokens(tokens["refresh"])
+
+                # cache to disk
                 auth.cache_tokens(tokens)
+
+                # clear the cache from memory
+                # so that we force the client to read the new
+                # token from disk
+                auth.get_tokens.cache_clear()
+
+                # configure the client to use the new access
+                # token
                 client.token = tokens["access"]
+
                 method = _get_method(client, method_path)
                 response = method(**kwargs)
             else:
