@@ -1,8 +1,11 @@
 """module to interact with the platform API"""
 
+import functools
+from typing import Optional
 from urllib.parse import urljoin
 
 import diskcache as dc
+import jwt
 import requests
 from beartype import beartype
 from deeporigin import auth
@@ -10,6 +13,7 @@ from deeporigin.config import get_value
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.utils.core import _ensure_do_folder
 from deeporigin.utils.network import _get_domain_name
+from jwt.algorithms import RSAAlgorithm
 
 
 def _make_get_request(endpoint: str) -> dict:
@@ -108,3 +112,42 @@ def get_variables_and_secrets() -> list[dict]:
     response = _make_get_request(f"/computebenches/{_get_org_id()}/placeholder/secrets")
 
     return response["data"]
+
+
+@functools.cache
+@beartype
+def get_public_keys() -> list[dict]:
+    """get public keys from public endpoint"""
+
+    jwks_url = urljoin(get_value()["auth_domain"], ".well-known/jwks.json")
+    data = requests.get(jwks_url).json()
+    return data["keys"]
+
+
+@beartype
+def decode_access_token(token: Optional[str] = None) -> dict:
+    """decode access token into human readable data"""
+
+    if token is None:
+        tokens = auth.get_tokens()
+        token = tokens["access"]
+
+    # Get the JWT header to extract the Key ID
+    unverified_header = jwt.get_unverified_header(token)
+    kid = unverified_header["kid"]
+
+    # Get the public key using the Key ID
+    public_keys = get_public_keys()
+    for key in public_keys:
+        if key["kid"] == kid:
+            public_key = RSAAlgorithm.from_jwk(key)
+            break
+        raise Exception(f"Key ID {kid} not found in JWKS.")
+
+    # Decode the JWT using the public key
+    return jwt.decode(
+        token,
+        public_key,
+        algorithms=["RS256"],
+        options={"verify_aud": False},  # matches what platform does
+    )
