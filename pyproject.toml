@@ -33,6 +33,7 @@ dependencies = [
     "diskcache",
     "tqdm",
     "pyjwt",
+    "cryptography",
 ]
 dynamic = ["version"]
 
