@@ -1,6 +1,7 @@
 """module to interact with the platform API"""
 
 import functools
+from typing import Optional
 from urllib.parse import urljoin
 
 import diskcache as dc
@@ -124,11 +125,12 @@ def get_public_keys() -> list[dict]:
 
 
 @beartype
-def decode_access_token() -> dict:
+def decode_access_token(token: Optional[str] = None) -> dict:
     """decode access token into human readable data"""
 
-    tokens = auth.get_tokens()
-    token = tokens["access"]
+    if token is None:
+        tokens = auth.get_tokens()
+        token = tokens["access"]
 
     # Get the JWT header to extract the Key ID
     unverified_header = jwt.get_unverified_header(token)
