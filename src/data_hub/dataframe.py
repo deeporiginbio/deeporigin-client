@@ -18,6 +18,9 @@ from deeporigin.utils.constants import (
     DatabaseReturnType,
     IDFormat,
 )
+from deeporigin.utils.network import check_for_updates
+
+check_for_updates()
 
 
 class DataFrame(pd.DataFrame):

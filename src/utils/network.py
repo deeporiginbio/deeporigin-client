@@ -1,14 +1,32 @@
 """this module contains network related utility functions"""
 
+import functools
 import json
 from pathlib import Path
 from urllib.parse import parse_qs, urljoin, urlparse
 
 import requests
 from beartype import beartype
+from deeporigin import __version__
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.utils.config import _get_domain_name
-from deeporigin.utils.core import _ensure_do_folder
+from deeporigin.utils.core import _ensure_do_folder, in_aws_lambda
+from packaging.version import Version
+
+
+@functools.cache
+def check_for_updates():
+    """check if a new version is available. If so, print an message"""
+    if not in_aws_lambda():
+        try:
+            latest_pypi_version = Version(_get_pypi_version())
+            if Version(__version__) < latest_pypi_version:
+                print(
+                    f"🎈 A new version of Deep Origin is available. You have version {__version__}. The latest version is {latest_pypi_version}. Please update to the newest version."
+                )
+
+        except Exception:
+            pass
 
 
 @beartype

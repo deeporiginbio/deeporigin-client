@@ -12,8 +12,10 @@ from deeporigin import auth
 from deeporigin.config import get_value
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.utils.core import _ensure_do_folder
-from deeporigin.utils.network import _get_domain_name
+from deeporigin.utils.network import _get_domain_name, check_for_updates
 from jwt.algorithms import RSAAlgorithm
+
+check_for_updates()
 
 
 def _make_get_request(endpoint: str) -> dict:
