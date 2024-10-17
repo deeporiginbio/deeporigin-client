@@ -106,10 +106,9 @@ def delete_terminated_workstations():
         for name in names:
             futures.append(
                 executor.submit(
-                    _make_request(
-                        f"computebenches/{org_id}/{name}:delete",
-                        verb="POST",
-                    )
+                    _make_request,
+                    f"computebenches/{org_id}/{name}:delete",
+                    "POST",
                 )
             )
 
