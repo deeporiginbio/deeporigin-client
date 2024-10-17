@@ -1,5 +1,6 @@
-"""module to interact with the platform API"""
+"""experimental module to interact with the platform API"""
 
+import concurrent.futures
 import functools
 from typing import Optional
 from urllib.parse import urljoin
@@ -8,17 +9,27 @@ import diskcache as dc
 import jwt
 import requests
 from beartype import beartype
+from beartype.typing import Literal
 from deeporigin import auth
 from deeporigin.config import get_value
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.utils.core import _ensure_do_folder
 from deeporigin.utils.network import _get_domain_name, check_for_updates
 from jwt.algorithms import RSAAlgorithm
+from tqdm import tqdm
 
 check_for_updates()
 
 
-def _make_get_request(endpoint: str) -> dict:
+HTTP_VERB = Literal["GET", "POST", "PUT", "PATCH", "DELETE"]
+
+
+@beartype
+def _make_request(
+    endpoint: str,
+    *,
+    verb: HTTP_VERB = "GET",
+) -> dict | list[dict]:
     """make a request to the platform API"""
 
     if not endpoint.startswith("/"):
@@ -35,13 +46,25 @@ def _make_get_request(endpoint: str) -> dict:
 
     url = urljoin(_get_domain_name(), f"api/{endpoint}")
 
-    response = requests.get(
-        url,
-        headers=headers,
-    )
+    if verb == "GET":
+        response = requests.get(
+            url,
+            headers=headers,
+        )
+    elif verb == "POST":
+        response = requests.post(
+            url,
+            headers=headers,
+        )
+    else:
+        raise NotImplementedError(f"HTTP verb {verb} not supported")
 
-    if response.status_code != 200:
-        raise DeepOriginException(message=response.text, fix=url)
+    if response.status_code >= 400:
+        raise DeepOriginException(
+            title=f"Error: {response.status_code}",
+            message=response.text,
+            fix=url,
+        )
 
     data = response.json()
     if "data" in data.keys():
@@ -52,28 +75,78 @@ def _make_get_request(endpoint: str) -> dict:
 
 
 @beartype
+def delete_workstation(workstation: str):
+    """delete a workstation"""
+
+    return _make_request(
+        f"computebenches/{_get_org_id()}/{workstation}:delete", verb="POST"
+    )
+
+
+@beartype
+def delete_terminated_workstations():
+    """delete all terminated workstation"""
+
+    workstations = get_workstations()
+
+    names = [
+        ws["attributes"]["name"]
+        for ws in workstations
+        if ws["attributes"]["status"] == "TERMINATED"
+    ]
+
+    if len(names) == 0:
+        print("No workstations to delete")
+        return
+
+    org_id = _get_org_id()
+
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        futures = []
+        for name in names:
+            futures.append(
+                executor.submit(
+                    _make_request(
+                        f"computebenches/{org_id}/{name}:delete",
+                        verb="POST",
+                    )
+                )
+            )
+
+        for _ in tqdm(
+            concurrent.futures.as_completed(futures),
+            total=len(futures),
+            desc="Deleting terminated workstations...",
+        ):
+            pass
+
+
+@beartype
 def _get_org_id() -> str:
     value = get_value()
     return value["organization_id"]
 
 
+@beartype
 def resolve_user(user_id: str):
     """get details about a user in the platform"""
 
     endpoint = f"/organizations/{_get_org_id()}/users/{user_id}"
 
-    return _make_get_request(endpoint)
+    return _make_request(endpoint)
 
 
+@beartype
 def whoami() -> dict:
     """get details about currently signed in user"""
 
-    return _make_get_request("/users/me")
+    return _make_request("/users/me")
 
 
+@beartype
 def get_workstations() -> list[dict]:
     """get information about all workstations in the organization"""
-    return _make_get_request(f"/computebenches/{_get_org_id()}")
+    return _make_request(f"/computebenches/{_get_org_id()}")
 
 
 @beartype
@@ -111,7 +184,7 @@ def get_variables_and_secrets() -> list[dict]:
     """get variables and secrets for user and org"""
 
     # we don't need to provide a bench ID, so pass a placeholder
-    response = _make_get_request(f"/computebenches/{_get_org_id()}/placeholder/secrets")
+    response = _make_request(f"/computebenches/{_get_org_id()}/placeholder/secrets")
 
     return response["data"]
 
