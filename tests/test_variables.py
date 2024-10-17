@@ -11,6 +11,7 @@ from contextlib import redirect_stderr, redirect_stdout
 
 import crontab
 import pydantic
+import pytest
 from deeporigin import auth, cli, config, feature_flags, variables
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.utils.core import expand_user
@@ -2174,6 +2175,9 @@ class TestCase(unittest.TestCase):
         with self.assertRaises(pydantic.ValidationError):
             variables_types.XpressLicenseFile(drn="drn:123", name="123")
 
+    @pytest.mark.skipif(
+        sys.version_info > (3, 12), reason="requires Python 3.12 or lower"
+    )
     def test_secret_env_var_value_key(self):
         var = variables_types.OpenAiApiKey(drn="drn:123", name="123", value="z")
         self.assertEqual(var.KEY, "OPENAI_API_KEY")
@@ -2181,6 +2185,9 @@ class TestCase(unittest.TestCase):
         var = variables_types.AnthropicApiKey(drn="drn:123", name="123", value="z")
         self.assertEqual(var.KEY, "ANTHROPIC_API_KEY")
 
+    @pytest.mark.skipif(
+        sys.version_info > (3, 12), reason="requires Python 3.12 or lower"
+    )
     def test_secret_file_value_filename(self):
         var = variables_types.GurobiLicenseFile(drn="drn:123", name="123", value="z")
         self.assertEqual(var.FILENAME, "~/gurobi.lic")
@@ -2191,6 +2198,9 @@ class TestCase(unittest.TestCase):
         var = variables_types.GurobiLicenseFile(drn="drn:123", name="123", value="z")
         self.assertEqual(var.FILENAME, "~/gurobi.lic")
 
+    @pytest.mark.skipif(
+        sys.version_info > (3, 12), reason="requires Python 3.12 or lower"
+    )
     def test_xpress_license_file_filename_key(self):
         var = variables_types.XpressLicenseFile(drn="drn:123", name="123", value="z")
         self.assertEqual(var.FILENAME, "~/xpauth.xpr")
@@ -2323,6 +2333,9 @@ class TestCase(unittest.TestCase):
             ),
         )
 
+    @pytest.mark.skipif(
+        sys.version_info > (3, 12), reason="requires Python 3.12 or lower"
+    )
     def test_install_secret_file_value(self):
         user_home_dirname = tempfile.mkdtemp()
 
