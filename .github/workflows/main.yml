@@ -41,7 +41,7 @@ jobs:
 
       - name: Check docstrings using interrogate
         run: |
-          pip install interrogate --break-system-packages
+          pip install interrogate 
           if [ $(interrogate -c pyproject.toml -v . -f 100 | grep "FAILED" | wc -l) = 1 ]; then
              echo "necessary docstrings missing:"
              interrogate -vv . -f 100 
@@ -55,7 +55,7 @@ jobs:
       fail-fast: true
       matrix:
         os: [ubuntu-latest, windows-latest]
-        python-version: ["3.10", "3.11", "3.12"]
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
 
     needs: [code-formatting-syntax-and-docstrings]
     steps:
