@@ -46,18 +46,11 @@ def _make_request(
 
     url = urljoin(_get_domain_name(), f"api/{endpoint}")
 
-    if verb == "GET":
-        response = requests.get(
-            url,
-            headers=headers,
-        )
-    elif verb == "POST":
-        response = requests.post(
-            url,
-            headers=headers,
-        )
-    else:
-        raise NotImplementedError(f"HTTP verb {verb} not supported")
+    response = requests.request(
+        verb,
+        url,
+        headers=headers,
+    )
 
     if response.status_code >= 400:
         raise DeepOriginException(
