@@ -1089,7 +1089,7 @@ def _row_to_dict(row, *, file_ids: list):
             continue
         if field.value is None:
             value = None
-        elif field.type in ["float", "int", "boolean"]:
+        elif field.type in ["float", "integer", "boolean"]:
             value = field.value
         elif field.type == "select":
             value = field.value.selected_options
@@ -1100,7 +1100,10 @@ def _row_to_dict(row, *, file_ids: list):
         elif field.type == "file":
             value = field.value.file_ids
             file_ids.extend(value)
+        elif field.type == "expression":
+            value = field.value.result
         else:
+            # fallback. this should never happen
             value = field.value
         values[field.column_id] = value
     return values
