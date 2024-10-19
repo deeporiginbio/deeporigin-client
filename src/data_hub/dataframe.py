@@ -232,6 +232,7 @@ class DataFrame(pd.DataFrame):
             ]
 
             if len(column_metadata) == 0:
+                print("Creating new column...")
                 # infer column type
                 column_type = _infer_column_type(self[column])
 
@@ -260,6 +261,7 @@ class DataFrame(pd.DataFrame):
                 row_ids=rows,
                 column_id=column,
                 database_id=self.attrs["id"],
+                columns=self.attrs["metadata"]["cols"],
             )
 
             print(f"✔︎ Wrote {len(rows)} rows in {column} to Deep Origin database.")

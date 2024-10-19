@@ -547,19 +547,22 @@ def set_data_in_cells(
     row_ids: list[str],
     column_id: str,
     database_id: str,
+    columns: Optional[list[dict]] = None,
     client=None,
 ):
     """Set data in multiple cells to some value."""
-    # first, get the type of the column
-    response = _api.describe_row(
-        row_id=database_id,
-        client=client,
-    )
+
+    if columns is None:
+        # we need to get the columns and their types
+        response = _api.describe_row(
+            row_id=database_id,
+            client=client,
+        )
+
+        columns = response.cols
 
     column = [
-        col
-        for col in response.cols
-        if col["id"] == column_id or col["name"] == column_id
+        col for col in columns if col["id"] == column_id or col["name"] == column_id
     ]
 
     if len(column) != 1:
