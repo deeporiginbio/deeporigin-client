@@ -79,4 +79,4 @@ docs-deploy:
 	    deactivate
 
 test-github:
-	python3 -m coverage run -m pytest -k "cli_config" --client $(client)
+	python3 -m coverage run -m pytest -k "test_cli_data.py" --client $(client)
