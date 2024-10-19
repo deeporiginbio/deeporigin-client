@@ -64,7 +64,7 @@ class DataFrame(pd.DataFrame):
             # object, so we need to index into the pandas object
             if self.obj.auto_sync:
                 # auto sync enabled, simply write ASAP
-                self.obj.to_deeporigin(columns=columns, rows=rows)
+                self.obj.to_deeporigin()
             else:
                 # auto sync not enabled, so we need to
                 # keep track of changes in _modified_columns
@@ -90,7 +90,7 @@ class DataFrame(pd.DataFrame):
         # now, update the Deep Origin database with the changes
         # we just made
         if self.auto_sync:
-            self.to_deeporigin(columns=[key])
+            self.to_deeporigin()
         else:
             # an empty set means "all "
             self._modified_columns[key] = set()
