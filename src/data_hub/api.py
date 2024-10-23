@@ -1002,7 +1002,7 @@ def get_dataframe(
         df.attrs["last_updated_row"] = find_last_updated_row(rows)
 
         df._deep_origin_out_of_sync = False
-        df._modified_columns = set()
+        df._modified_columns = dict()
         return df
 
     else:

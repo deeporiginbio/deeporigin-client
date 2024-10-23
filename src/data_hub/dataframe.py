@@ -55,7 +55,7 @@ class DataFrame(pd.DataFrame):
                 return
 
             rows = [key[0]]
-            columns = [key[1]]
+            column = key[1]
 
             # Perform the actual setting operation
             self.obj._set_value(*key, value)
@@ -68,12 +68,12 @@ class DataFrame(pd.DataFrame):
             else:
                 # auto sync not enabled, so we need to
                 # keep track of changes in _modified_columns
-                if key[1] not in self.obj._modified_columns.keys():
+                if column not in self.obj._modified_columns.keys():
                     # this is the first time we're modifying this column
-                    self.obj._modified_columns[key[1]] = set(rows)
+                    self.obj._modified_columns[column] = set(rows)
                 else:
                     # we've already modified this column before, so update the rows we're touched
-                    self.obj._modified_columns[key[1]].update(set(rows))
+                    self.obj._modified_columns[column].update(set(rows))
 
     @property
     def at(self):
