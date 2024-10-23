@@ -5,7 +5,6 @@ updating of Deep Origin databases.
 """
 
 from datetime import datetime, timezone
-from typing import Optional
 
 import humanize
 import pandas as pd
@@ -14,10 +13,7 @@ from dateutil.parser import parse
 from deeporigin.data_hub import api
 from deeporigin.platform.api import get_last_edited_user_name
 from deeporigin.utils.config import construct_resource_url
-from deeporigin.utils.constants import (
-    DatabaseReturnType,
-    IDFormat,
-)
+from deeporigin.utils.constants import IDFormat
 from deeporigin.utils.network import check_for_updates
 
 check_for_updates()
@@ -198,7 +194,6 @@ class DataFrame(pd.DataFrame):
             database_id (str): The ID of the Deep Origin database.
             use_file_names (bool, optional): Whether to use the file names in the Deep Origin database. Defaults to True.
             reference_format (IDFormat, optional): The format of the IDs in the Deep Origin database. Defaults to "human-id".
-            return_type (DatabaseReturnType, optional): The type of return value. Defaults to "dataframe".
 
         """
 
