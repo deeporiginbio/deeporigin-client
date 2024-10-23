@@ -68,11 +68,6 @@ jobs:
           cache: 'pip'
           cache-dependency-path: pyproject.toml
 
-      - name: "Copy config file into deeporigin folder" 
-        run: |
-          mkdir -p ~/.deeporigin
-          cp tests/fixtures/config.yml ~/.deeporigin/config.yml
-
       - name: "run tests without ~/.deeporigin/"
         run: |
           pip install --upgrade pip
