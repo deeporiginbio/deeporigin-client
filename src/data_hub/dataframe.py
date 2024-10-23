@@ -5,7 +5,6 @@ updating of Deep Origin databases.
 """
 
 from datetime import datetime, timezone
-from typing import Optional
 
 import humanize
 import pandas as pd
@@ -14,10 +13,7 @@ from dateutil.parser import parse
 from deeporigin.data_hub import api
 from deeporigin.platform.api import get_last_edited_user_name
 from deeporigin.utils.config import construct_resource_url
-from deeporigin.utils.constants import (
-    DatabaseReturnType,
-    IDFormat,
-)
+from deeporigin.utils.constants import IDFormat
 from deeporigin.utils.network import check_for_updates
 
 check_for_updates()
@@ -32,7 +28,7 @@ class DataFrame(pd.DataFrame):
     auto_sync: bool = False
     """When `True`, changes made to the dataframe will be automatically synced to the Deep Origin database this dataframe represents."""
 
-    _modified_columns: set = set()
+    _modified_columns: dict = dict()
     """if data is modified in a dataframe, and auto_sync is False, this list will contain the columns that have been modified so that the Deep Origin database can be updated. If an empty list, the Deep Origin database will not be updated, and the dataframe matches the Deep Origin database at the time of creation."""
 
     class AtIndexer:
@@ -55,7 +51,7 @@ class DataFrame(pd.DataFrame):
                 return
 
             rows = [key[0]]
-            columns = [key[1]]
+            column = key[1]
 
             # Perform the actual setting operation
             self.obj._set_value(*key, value)
@@ -63,9 +59,17 @@ class DataFrame(pd.DataFrame):
             # now update the DB. note that self is an AtIndexer
             # object, so we need to index into the pandas object
             if self.obj.auto_sync:
-                self.obj.to_deeporigin(columns=columns, rows=rows)
+                # auto sync enabled, simply write ASAP
+                self.obj.to_deeporigin()
             else:
-                self.obj._modified_columns.add(key[1])
+                # auto sync not enabled, so we need to
+                # keep track of changes in _modified_columns
+                if column not in self.obj._modified_columns.keys():
+                    # this is the first time we're modifying this column
+                    self.obj._modified_columns[column] = set(rows)
+                else:
+                    # we've already modified this column before, so update the rows we're touched
+                    self.obj._modified_columns[column].update(set(rows))
 
     @property
     def at(self):
@@ -74,7 +78,7 @@ class DataFrame(pd.DataFrame):
 
     def __setitem__(self, key, value):
         """Override the __setitem__ method to update the Deep Origin database when changes are made to the local
-        dataframe"""
+        dataframe. This method is called when an entire column is being updated"""
 
         # first, call the pandas method
         super().__setitem__(key, value)
@@ -82,9 +86,10 @@ class DataFrame(pd.DataFrame):
         # now, update the Deep Origin database with the changes
         # we just made
         if self.auto_sync:
-            self.to_deeporigin(columns=[key])
+            self.to_deeporigin()
         else:
-            self._modified_columns.add(key)
+            # an empty set means "all "
+            self._modified_columns[key] = set()
 
     def head(self, n=5):
         """Override the `head` method so that we don't display a spurious modified warning"""
@@ -181,7 +186,6 @@ class DataFrame(pd.DataFrame):
         *,
         use_file_names: bool = True,
         reference_format: IDFormat = "human-id",
-        return_type: DatabaseReturnType = "dataframe",
         client=None,
     ):
         """Create a local Deep Origin DataFrame from a Deep Origin database.
@@ -190,7 +194,6 @@ class DataFrame(pd.DataFrame):
             database_id (str): The ID of the Deep Origin database.
             use_file_names (bool, optional): Whether to use the file names in the Deep Origin database. Defaults to True.
             reference_format (IDFormat, optional): The format of the IDs in the Deep Origin database. Defaults to "human-id".
-            return_type (DatabaseReturnType, optional): The type of return value. Defaults to "dataframe".
 
         """
 
@@ -198,40 +201,32 @@ class DataFrame(pd.DataFrame):
             database_id=database_id,
             use_file_names=use_file_names,
             reference_format=reference_format,
-            return_type=return_type,
+            return_type="dataframe",  # we need this
             client=client,
         )
 
-    def to_deeporigin(
-        self,
-        *,
-        columns: Optional[list] = None,
-        rows: Optional[list] = None,
-    ):
+    def to_deeporigin(self):
         """Write data in dataframe to Deep Origin
 
         !!! tip "Deep Origin DataFrames can automatically synchronize"
             To automatically save changes to local DataFrames to Deep Origin databases, set the `auto_sync` attribute of the dataframe `True`.
-
-
-        Args:
-            columns (list, optional): The columns of the dataframe to update. When None, all modified columns are updated.
-            rows (list, optional): The rows to update. Defaults to None. When None, all rows in the relevant columns are updated.
-
         """
 
-        if columns is None:
-            columns = self._modified_columns.copy()
+        columns = self._modified_columns.copy()
 
-        for column in columns:
+        for column in columns.keys():
             if column in ["Validation Status", "ID"]:
                 continue
+
+            rows = columns[column]
 
             column_metadata = [
                 col for col in self.attrs["metadata"]["cols"] if col["name"] == column
             ]
 
             if len(column_metadata) == 0:
+                # new column to add
+                print("Creating new column...")
                 # infer column type
                 column_type = _infer_column_type(self[column])
 
@@ -246,12 +241,13 @@ class DataFrame(pd.DataFrame):
                 # add column metadata to column
                 self.attrs["metadata"]["cols"].append(response["data"]["column"])
             else:
+                # column already exists
                 column_metadata = column_metadata[0]
 
                 if column_metadata["type"] == "file":
                     continue
 
-            if rows is None:
+            if rows == set():
                 # we're updating a whole column
                 rows = list(self.index)
 
@@ -260,10 +256,13 @@ class DataFrame(pd.DataFrame):
                 row_ids=rows,
                 column_id=column,
                 database_id=self.attrs["id"],
+                columns=self.attrs["metadata"]["cols"],
             )
 
             print(f"✔︎ Wrote {len(rows)} rows in {column} to Deep Origin database.")
-            self._modified_columns.discard(column)
+
+            # remove this from modified columns
+            self._modified_columns.pop(column, None)
 
         # fetch info for the last modified row so we can update what we show
         try:

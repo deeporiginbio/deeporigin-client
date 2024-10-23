@@ -11,7 +11,6 @@ repo=$(shell basename $(CURDIR))
 client="mock"
 chosen_tests=""
 
-
 lint:
 	@source $(CURDIR)/venv/bin/activate && \
 		ruff format && \
@@ -20,28 +19,16 @@ lint:
 
 test:
 ifeq ($(client), "mock")
-	@source $(CURDIR)/venv/bin/activate && \
-		interrogate -c pyproject.toml -v . -f 100 && \
-		python3 -m coverage run -m pytest -x --failed-first -k $(chosen_tests) --client $(client) && \
-		python3 -m coverage html && \
-		deactivate
-	@if [ "$(uname)" = "Linux" ]; then \
-		xdg-open htmlcov/index.html; \
-	else \
-		open htmlcov/index.html; \
-	fi
+	$(eval n_workers=1)
 else 
-	@source $(CURDIR)/venv/bin/activate && \
-		interrogate -c pyproject.toml -v . -f 100 && \
-		python3 -m coverage run -m pytest --failed-first -k $(chosen_tests) --client $(client) -n auto && \
-		python3 -m coverage html && \
-		deactivate
-	@if [ "$(uname)" = "Linux" ]; then \
-		xdg-open htmlcov/index.html; \
-	else \
-		open htmlcov/index.html; \
-	fi
+	$(eval n_workers="auto")
 endif 
+	@source $(CURDIR)/venv/bin/activate && \
+	interrogate -c pyproject.toml -v . -f 100 && \
+	python3 -m coverage run -m pytest -x -n $(n_workers) --failed-first -k $(chosen_tests) --client $(client) && \
+	python3 -m coverage html && \
+	deactivate && \
+	open htmlcov/index.html; \
 
 # set up jupyter dev kernel
 jupyter:

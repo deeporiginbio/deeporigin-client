@@ -5,7 +5,7 @@ import pytest
 from deeporigin.data_hub import api
 from deeporigin.data_hub.dataframe import DataFrame
 
-from tests.utils import clean_up_test_objects
+from tests.utils import clean_up_test_objects, minimal_config
 
 TEST_PREFIX = "tc-x1zrncgf6F-"
 TEST_DB_NAME = TEST_PREFIX + "db"
@@ -72,7 +72,7 @@ def config(pytestconfig):
         clean_up_test_objects(TEST_PREFIX)
 
 
-def test_dataframe_operations(config):
+def test_dataframe_operations(config):  # noqa: F811
     """this function tests our ability to fetch data, modify it, and write it back"""
 
     if config["mock"]:

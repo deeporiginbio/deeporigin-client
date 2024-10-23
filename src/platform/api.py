@@ -154,7 +154,7 @@ def get_user_name(user_id: str) -> str:
 
     response = resolve_user(user_id)
 
-    name = response["data"]["attributes"]["name"]
+    name = response["attributes"]["name"]
     cache.set(user_id, name)
     return name
 

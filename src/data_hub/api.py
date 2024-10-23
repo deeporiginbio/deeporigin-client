@@ -18,6 +18,7 @@ from deeporigin.data_hub import _api
 # functions in _api are available in api (this module)
 from deeporigin.data_hub._api import *  # noqa: F403
 from deeporigin.exceptions import DeepOriginException
+from deeporigin.platform.api import get_user_name
 from deeporigin.utils.constants import (
     PREFIXES,
     Cardinality,
@@ -546,19 +547,23 @@ def set_data_in_cells(
     row_ids: list[str],
     column_id: str,
     database_id: str,
+    columns: Optional[list[dict]] = None,
     client=None,
 ):
     """Set data in multiple cells to some value."""
     # first, get the type of the column
-    response = _api.describe_row(
-        row_id=database_id,
-        client=client,
-    )
+
+    if columns is None:
+        # we need to get the columns and their types
+        response = _api.describe_row(
+            row_id=database_id,
+            client=client,
+        )
+
+        columns = response.cols
 
     column = [
-        col
-        for col in response.cols
-        if col["id"] == column_id or col["name"] == column_id
+        col for col in columns if col["id"] == column_id or col["name"] == column_id
     ]
 
     if len(column) != 1:
@@ -839,6 +844,7 @@ def download_database(
     df = get_dataframe(
         database_id,
         use_file_names=True,
+        reference_format="system-id",
         client=client,
     )
 
@@ -934,11 +940,13 @@ def get_dataframe(
 
     for row in rows:
         # warning: add_row_to_data mutates file_ids
+        # and reference_ids
         add_row_to_data(
             data=data,
             row=row,
             columns=columns,
             file_ids=file_ids,
+            reference_ids=reference_ids,
         )
 
     # make a dict that maps from file IDs to file names
@@ -961,6 +969,21 @@ def get_dataframe(
                     _replace_with_mapper(item, file_id_mapper) for item in inputs
                 ]
 
+    # make a dict that maps row system IDs to human IDs
+    if reference_format == "human-id":
+        ref_id_mapper = dict()
+        conversions = convert_id_format(ids=reference_ids)
+        for conversion in conversions:
+            ref_id_mapper[conversion.id] = conversion.hid
+
+        for column in columns:
+            if column["type"] == "reference":
+                inputs = data[column["id"]]
+
+                data[column["id"]] = [
+                    _replace_with_mapper(item, ref_id_mapper) for item in inputs
+                ]
+
     if return_type == "dataframe":
         # make the dataframe
 
@@ -979,7 +1002,7 @@ def get_dataframe(
         df.attrs["last_updated_row"] = find_last_updated_row(rows)
 
         df._deep_origin_out_of_sync = False
-        df._modified_columns = set()
+        df._modified_columns = dict()
         return df
 
     else:
@@ -1060,9 +1083,14 @@ def add_row_to_data(
     row,
     columns: list,
     file_ids: list,
+    reference_ids: list,
 ):
     """utility function to combine data from a row into a dataframe"""
-    row_data = _row_to_dict(row, file_ids=file_ids)
+    row_data = _row_to_dict(
+        row,
+        file_ids=file_ids,
+        reference_ids=reference_ids,
+    )
     data["ID"].append(row_data["ID"])
     data["Validation Status"].append(row_data["Validation Status"])
 
@@ -1077,7 +1105,12 @@ def add_row_to_data(
             data[col_id].append(None)
 
 
-def _row_to_dict(row, *, file_ids: list):
+def _row_to_dict(
+    row,
+    *,
+    file_ids: list,
+    reference_ids: list,
+):
     """utility function to convert a row to a dictionary"""
     fields = row.fields
 
@@ -1089,17 +1122,24 @@ def _row_to_dict(row, *, file_ids: list):
             continue
         if field.value is None:
             value = None
-        elif field.type in ["float", "int", "boolean"]:
+        elif field.type in ["float", "integer", "boolean"]:
             value = field.value
         elif field.type == "select":
             value = field.value.selected_options
 
         elif field.type == "reference":
             value = field.value.row_ids
-
+            reference_ids.extend(value)
         elif field.type == "file":
             value = field.value.file_ids
             file_ids.extend(value)
+        elif field.type == "expression":
+            value = field.value.result
+        elif field.type == "user":
+            user_ids = field.value.user_drns
+
+            # convert to names using the platform API
+            value = [get_user_name(user_id) for user_id in user_ids]
         else:
             value = field.value
         values[field.column_id] = value

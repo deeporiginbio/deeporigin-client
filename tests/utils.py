@@ -89,3 +89,24 @@ def config(pytestconfig):
     # clean up all the object we created
     if pytestconfig.getoption("client") != "mock":
         clean_up_test_objects()
+
+
+@pytest.fixture(scope="session", autouse=True)
+def minimal_config(pytestconfig):
+    """this fixture is a minimal config for working
+    with DBs on a live instance where the config happens
+    in the test"""
+
+    data = dict()
+
+    # set up client
+    if pytestconfig.getoption("client") == "mock":
+        data["client"] = MockClient()
+        data["mock"] = True
+
+    else:
+        data["mock"] = False
+        data["client"] = api._get_default_client()
+
+    # tests run on yield
+    yield data
