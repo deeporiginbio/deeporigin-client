@@ -1129,7 +1129,7 @@ def _row_to_dict(
 
         elif field.type == "reference":
             value = field.value.row_ids
-
+            reference_ids.extend(value)
         elif field.type == "file":
             value = field.value.file_ids
             file_ids.extend(value)
