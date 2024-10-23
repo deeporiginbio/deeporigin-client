@@ -68,8 +68,6 @@ jobs:
           cache: 'pip'
           cache-dependency-path: pyproject.toml
 
-      - run: echo '${{ steps.cached_python_setup.outputs.cache-hit }}'
-
       - name: "run tests without ~/.deeporigin/"
         run: |
           pip install --upgrade pip
