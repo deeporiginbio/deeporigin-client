@@ -240,6 +240,7 @@ def test_get_dataframe(config):  # noqa: F811
 
     df = api.get_dataframe(
         config["databases"][0],
+        reference_format="system-id",
         client=config["client"],
     )
 
@@ -255,6 +256,7 @@ def test_get_dataframe(config):  # noqa: F811
 
     data = api.get_dataframe(
         config["databases"][0],
+        reference_format="system-id",
         client=config["client"],
         return_type="dict",
     )

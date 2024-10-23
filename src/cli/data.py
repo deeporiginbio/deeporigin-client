@@ -343,6 +343,7 @@ class DataController(cement.Controller):
             data = api.get_dataframe(
                 self.app.pargs.object_id,
                 return_type="dict",
+                reference_format="system-id",
                 client=self._get_client(),
             )
 

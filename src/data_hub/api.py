@@ -844,6 +844,7 @@ def download_database(
     df = get_dataframe(
         database_id,
         use_file_names=True,
+        reference_format="system-id",
         client=client,
     )
 
@@ -966,6 +967,21 @@ def get_dataframe(
 
                 data[column["id"]] = [
                     _replace_with_mapper(item, file_id_mapper) for item in inputs
+                ]
+
+    # make a dict that maps row system IDs to human IDs
+    if reference_format == "human-id":
+        ref_id_mapper = dict()
+        conversions = convert_id_format(ids=reference_ids)
+        for conversion in conversions:
+            ref_id_mapper[conversion.id] = conversion.hid
+
+        for column in columns:
+            if column["type"] == "reference":
+                inputs = data[column["id"]]
+
+                data[column["id"]] = [
+                    _replace_with_mapper(item, ref_id_mapper) for item in inputs
                 ]
 
     if return_type == "dataframe":
