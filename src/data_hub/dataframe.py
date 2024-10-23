@@ -31,6 +31,24 @@ class DataFrame(pd.DataFrame):
     _modified_columns: dict = dict()
     """if data is modified in a dataframe, and auto_sync is False, this list will contain the columns that have been modified so that the Deep Origin database can be updated. If an empty list, the Deep Origin database will not be updated, and the dataframe matches the Deep Origin database at the time of creation."""
 
+    @property
+    def loc(self):
+        class _LocIndexer:
+            def __init__(self, df):
+                self.df = df
+
+            def __getitem__(self, key):
+                # first call the superclass method
+                df = super(DataFrame, self.df).loc[key]
+
+                # inherit attributes
+                df.attrs = self.df.attrs
+
+                return df
+
+        # Return the custom _LocIndexer instance
+        return _LocIndexer(self)
+
     class AtIndexer:
         """this class override is used to intercept calls to at indexer of a pandas dataframe"""
 
