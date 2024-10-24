@@ -7,7 +7,7 @@ import pytest
 from deeporigin.data_hub import api
 from deeporigin.data_hub.dataframe import DataFrame
 
-from tests.utils import minimal_config as config
+from tests.utils import minimal_config as config  # noqa: F401
 
 
 def skip_if_unavailable(cfg):

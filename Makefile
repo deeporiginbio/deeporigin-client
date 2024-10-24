@@ -27,8 +27,7 @@ endif
 	interrogate -c pyproject.toml -v . -f 100 && \
 	python3 -m coverage run -m pytest -x -n $(n_workers) --failed-first -k $(chosen_tests) --client $(client) && \
 	python3 -m coverage html && \
-	deactivate && \
-	open htmlcov/index.html; \
+	deactivate
 
 # set up jupyter dev kernel
 jupyter:
