@@ -3535,6 +3535,7 @@ based on the parent, row type, or whether the parent is the root.</p>
     <span class="n">row_ids</span><span class="p">:</span> <span class="n">list</span><span class="p">[</span><span class="n">str</span><span class="p">],</span>
     <span class="n">column_id</span><span class="p">:</span> <span class="n">str</span><span class="p">,</span>
     <span class="n">database_id</span><span class="p">:</span> <span class="n">str</span><span class="p">,</span>
+    <span class="n">columns</span><span class="p">:</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n">list</span><span class="p">[</span><span class="n">dict</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">client</span><span class="o">=</span><span class="kc">None</span>
 <span class="p">)</span>
 </code></pre></div>
@@ -3555,7 +3556,12 @@ based on the parent, row type, or whether the parent is the root.</p>
 
 
 <a href="#src.data_hub.api.upload_file" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">upload_file</span><span class="p">(</span><span class="n">file_path</span><span class="p">:</span> <span class="n">str</span><span class="p">,</span> <span class="n">client</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">upload_file</span><span class="p">(</span>
+    <span class="n">file_path</span><span class="p">:</span> <span class="n">str</span><span class="p">,</span>
+    <span class="n">client</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">compute_hash</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">

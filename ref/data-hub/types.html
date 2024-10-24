@@ -1736,7 +1736,6 @@
     <span class="o">*</span><span class="p">,</span>
     <span class="n">use_file_names</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">reference_format</span><span class="p">:</span> <span class="n"><span title="deeporigin.utils.constants.IDFormat">IDFormat</span></span> <span class="o">=</span> <span class="s2">&quot;human-id&quot;</span><span class="p">,</span>
-    <span class="n">return_type</span><span class="p">:</span> <span class="n"><span title="deeporigin.utils.constants.DatabaseReturnType">DatabaseReturnType</span></span> <span class="o">=</span> <span class="s2">&quot;dataframe&quot;</span><span class="p">,</span>
     <span class="n">client</span><span class="o">=</span><span class="kc">None</span>
 <span class="p">)</span>
 </code></pre></div>
@@ -1799,20 +1798,6 @@
                   <code>&#39;human-id&#39;</code>
             </td>
           </tr>
-          <tr class="doc-section-item">
-            <td><code>return_type</code></td>
-            <td>
-                  <code><span title="deeporigin.utils.constants.DatabaseReturnType">DatabaseReturnType</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>The type of return value. Defaults to "dataframe".</p>
-              </div>
-            </td>
-            <td>
-                  <code>&#39;dataframe&#39;</code>
-            </td>
-          </tr>
       </tbody>
     </table>
 
@@ -1828,11 +1813,7 @@
 
 
 <a href="#src.data_hub.dataframe.DataFrame.to_deeporigin" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">to_deeporigin</span><span class="p">(</span>
-    <span class="o">*</span><span class="p">,</span>
-    <span class="n">columns</span><span class="p">:</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">rows</span><span class="p">:</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-<span class="p">)</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">to_deeporigin</span><span class="p">()</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -1842,49 +1823,6 @@
 <p class="admonition-title">Deep Origin DataFrames can automatically synchronize</p>
 <p>To automatically save changes to local DataFrames to Deep Origin databases, set the <code>auto_sync</code> attribute of the dataframe <code>True</code>.</p>
 </div>
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td><code>columns</code></td>
-            <td>
-                  <code>list</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>The columns of the dataframe to update. When None, all modified columns are updated.</p>
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td><code>rows</code></td>
-            <td>
-                  <code>list</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>The rows to update. Defaults to None. When None, all rows in the relevant columns are updated.</p>
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
-            </td>
-          </tr>
-      </tbody>
-    </table>
 
     </div>
 

@@ -1328,6 +1328,48 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#deeporigin-v240" class="md-nav__link">
+    <span class="md-ellipsis">
+      deeporigin v2.4.0
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="deeporigin v2.4.0">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#bugfixes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Bugfixes
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#new-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      New features
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#miscellaneous" class="md-nav__link">
+    <span class="md-ellipsis">
+      Miscellaneous
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#deeporigin-v221" class="md-nav__link">
     <span class="md-ellipsis">
       deeporigin v2.2.1
@@ -1411,6 +1453,48 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#deeporigin-v240" class="md-nav__link">
+    <span class="md-ellipsis">
+      deeporigin v2.4.0
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="deeporigin v2.4.0">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#bugfixes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Bugfixes
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#new-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      New features
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#miscellaneous" class="md-nav__link">
+    <span class="md-ellipsis">
+      Miscellaneous
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#deeporigin-v221" class="md-nav__link">
     <span class="md-ellipsis">
       deeporigin v2.2.1
@@ -1456,6 +1540,31 @@
 
 
 <h1 id="changelog">Changelog<a class="headerlink" href="#changelog" title="Permanent link">&para;</a></h1>
+<h2 id="deeporigin-v240"><code>deeporigin v2.4.0</code><a class="headerlink" href="#deeporigin-v240" title="Permanent link">&para;</a></h2>
+<h3 id="bugfixes">Bugfixes<a class="headerlink" href="#bugfixes" title="Permanent link">&para;</a></h3>
+<ul>
+<li>fixed a bug in how tokens were refreshed</li>
+<li>fixed a bug in CLI config use</li>
+</ul>
+<h3 id="new-features">New features<a class="headerlink" href="#new-features" title="Permanent link">&para;</a></h3>
+<ul>
+<li>added the ability to download files in parallel</li>
+<li>added ability to upload files with file hashes </li>
+<li>added the ability to decode user tokens</li>
+<li>support for a async client for the Deep Origin Data Hub API</li>
+<li>reference IDs now tracked in dataframes </li>
+<li>dataframes now support expressions and users </li>
+<li>dataframe slicing now restricts addition of new rows to slice</li>
+<li>dataframe updates more atomic: a single cell change only triggers updating that cell</li>
+<li>ability to delete terminated workstations </li>
+<li>package wide ability to check for latest versions on PyPI</li>
+</ul>
+<h3 id="miscellaneous">Miscellaneous<a class="headerlink" href="#miscellaneous" title="Permanent link">&para;</a></h3>
+<ul>
+<li>testing now includes python 3.13</li>
+<li>Data Hub API route now set to <code>datahub-api/api/</code></li>
+<li>improved test coverage</li>
+</ul>
 <h2 id="deeporigin-v221"><code>deeporigin v2.2.1</code><a class="headerlink" href="#deeporigin-v221" title="Permanent link">&para;</a></h2>
 <ul>
 <li>added the ability to interact with the platform, including<ul>
