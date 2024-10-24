@@ -1,6 +1,33 @@
 # Changelog
 
 
+## `deeporigin v2.4.0`
+
+### Bugfixes
+
+- fixed a bug in how tokens were refreshed
+- fixed a bug in CLI config use
+
+
+### New features
+
+- added the ability to download files in parallel
+- added ability to upload files with file hashes 
+- added the ability to decode user tokens
+- support for a async client for the Deep Origin Data Hub API
+- reference IDs now tracked in dataframes 
+- dataframes now support expressions and users 
+- dataframe slicing now restricts addition of new rows to slice
+- dataframe updates more atomic: a single cell change only triggers updating that cell
+- ability to delete terminated workstations 
+- package wide ability to check for latest versions on PyPI
+
+### Miscellaneous
+
+- testing now includes python 3.13
+- Data Hub API route now set to `datahub-api/api/`
+- improved test coverage
+
 ## `deeporigin v2.2.1`
 
 - added the ability to interact with the platform, including
