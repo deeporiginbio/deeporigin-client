@@ -19,6 +19,9 @@ from deeporigin.utils.network import check_for_updates
 check_for_updates()
 
 
+__NO_NEW_ROWS_MSG__ = "Adding rows is not allowed, because this dataframe corresponds to a subset of the rows in the corresponding database."
+
+
 class DataFrame(pd.DataFrame):
     """A subclass of pandas DataFrame that allows for easy updating of a Deep Origin database. This can be used as a drop-in replacement for a pandas DataFrame, and should support all methods a pandas DataFrame supports.
 
@@ -30,6 +33,9 @@ class DataFrame(pd.DataFrame):
 
     _modified_columns: dict = dict()
     """if data is modified in a dataframe, and auto_sync is False, this list will contain the columns that have been modified so that the Deep Origin database can be updated. If an empty list, the Deep Origin database will not be updated, and the dataframe matches the Deep Origin database at the time of creation."""
+
+    _allow_adding_rows: bool = True
+    """If `True`, new rows can be added to the dataframe. If `False`, new rows cannot be added to the dataframe."""
 
     @property
     def loc(self):
@@ -44,7 +50,22 @@ class DataFrame(pd.DataFrame):
                 # inherit attributes
                 df.attrs = self.df.attrs
 
+                # disallow adding rows
+                df._allow_adding_rows = False
+
+                df._modified_columns = self.df._modified_columns
+
                 return df
+
+            def __setitem__(self, key, value):
+                if not self.df._allow_adding_rows:
+                    # adding rows is not allowed
+                    if isinstance(key, (list, pd.Index)):
+                        if not all(k in self.df.index for k in key):
+                            raise ValueError(__NO_NEW_ROWS_MSG__)
+                    elif key not in self.df.index:
+                        raise ValueError(__NO_NEW_ROWS_MSG__)
+                super(DataFrame, self.df).loc[key] = value
 
         # Return the custom _LocIndexer instance
         return _LocIndexer(self)
@@ -61,7 +82,14 @@ class DataFrame(pd.DataFrame):
             return self.obj._get_value(*key)
 
         def __setitem__(self, key, value) -> None:
-            """intercept for the set operation""" ""
+            """intercept for the set operation"""
+
+            if (
+                isinstance(value, pd.Series)
+                and len(value) > len(self)
+                and not self._allow_adding_rows
+            ):
+                raise ValueError(__NO_NEW_ROWS_MSG__)
 
             old_value = self.obj._get_value(*key)
             if value == old_value:
@@ -122,6 +150,19 @@ class DataFrame(pd.DataFrame):
         df = super().tail(n)
         df._modified_columns = None
         return df
+
+    def append(
+        self,
+        other,
+        ignore_index=False,
+        verify_integrity=False,
+        sort=False,
+    ):
+        """Override the `append` method"""
+        if self._allow_adding_rows:
+            return super().append(other, ignore_index, verify_integrity, sort)
+        else:
+            raise ValueError(__NO_NEW_ROWS_MSG__)
 
     def _repr_html_(self):
         """method override to customize printing in a Jupyter notebook"""
