@@ -58,6 +58,8 @@ class DataFrame(pd.DataFrame):
                 return df
 
             def __setitem__(self, key, value):
+                """callback for adding a new row, typically"""
+
                 if not self.df._allow_adding_rows:
                     # adding rows is not allowed
                     if isinstance(key, (list, pd.Index)):
@@ -66,6 +68,8 @@ class DataFrame(pd.DataFrame):
                     elif key not in self.df.index:
                         raise ValueError(__NO_NEW_ROWS_MSG__)
                 super(DataFrame, self.df).loc[key] = value
+
+                # TODO we need to mark that every column has been modified, but only this row
 
         # Return the custom _LocIndexer instance
         return _LocIndexer(self)
