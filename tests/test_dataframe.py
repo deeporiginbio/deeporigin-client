@@ -30,12 +30,14 @@ def config(pytestconfig):
         data["mock"] = True
 
         # Create the DataFrame
-        data["df"] = pd.DataFrame(
-            {
-                "integer": np.random.randint(1, 100, size=10),
-                "float": np.random.random(10),
-            },
-            index=[f"x-{i}" for i in range(1, 11)],
+        data["df"] = DataFrame(
+            pd.DataFrame(
+                {
+                    "integer": np.random.randint(1, 100, size=10),
+                    "float": np.random.random(10),
+                },
+                index=[f"x-{i}" for i in range(1, 11)],
+            )
         )
 
     else:
