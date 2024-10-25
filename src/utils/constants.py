@@ -12,7 +12,6 @@ FileStatus = Literal["ready", "archived"]
 
 DataType = Literal[
     "integer",
-    "str",
     "select",
     "date",
     "text",

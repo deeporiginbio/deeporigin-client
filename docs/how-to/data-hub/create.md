@@ -98,7 +98,6 @@ To create a new database column in an existing database, run:
     from deeporigin.data_hub import api
     api.add_database_column(
         database_id="existing-database-id",
-        key="unique-key",
         type="integer",
         name="unique-name",
     )

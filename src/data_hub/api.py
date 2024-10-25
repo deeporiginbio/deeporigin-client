@@ -1366,7 +1366,6 @@ def get_row_data(
 def add_database_column(
     *,
     database_id: str,
-    key: str,
     type: DataType,
     name: str,
     cardinality: Cardinality = "one",
@@ -1377,7 +1376,6 @@ def add_database_column(
 
     Args:
         database_id: ID (or human ID) of a database on Deep Origin.
-        key: key of the column
         type: type of the column. Should be one of [DataType](../data-hub/types.md#src.utils.constants.DataType)
         name: name of the column
         cardinality: cardinality of the column. Specifies whether cells in this column can contain or many items. Should be one of "one" or "many"
@@ -1387,7 +1385,6 @@ def add_database_column(
     """
     column = dict(
         name=name,
-        key=key,
         type=type,
         isRequired=required,
         cardinality=cardinality,

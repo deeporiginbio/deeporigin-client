@@ -13,7 +13,7 @@ from dateutil.parser import parse
 from deeporigin.data_hub import api
 from deeporigin.platform.api import get_last_edited_user_name
 from deeporigin.utils.config import construct_resource_url
-from deeporigin.utils.constants import IDFormat
+from deeporigin.utils.constants import DataType, IDFormat
 from deeporigin.utils.network import check_for_updates
 
 check_for_updates()
@@ -298,7 +298,6 @@ class DataFrame(pd.DataFrame):
                     database_id=self.attrs["metadata"]["hid"],
                     type=column_type,
                     name=column,
-                    key=column,
                 )
 
                 # add column metadata to column
@@ -341,7 +340,7 @@ class DataFrame(pd.DataFrame):
 
 
 @beartype
-def _infer_column_type(column: pd.Series):
+def _infer_column_type(column: pd.Series) -> DataType:
     """utility function to infer type of data in a pandas column"""
 
     non_null_values = column.dropna()
@@ -382,7 +381,7 @@ def _infer_column_type(column: pd.Series):
         "integer": non_null_values.apply(lambda x: is_int(x)).all(),
         "float": non_null_values.apply(lambda x: is_float(x)).all(),
         "date": non_null_values.apply(lambda x: is_date(x)).all(),
-        "string": non_null_values.apply(lambda x: isinstance(x, str)).all(),
+        "text": non_null_values.apply(lambda x: isinstance(x, str)).all(),
     }
 
     # Priority order of types (boolean -> integer -> float -> date -> string)
@@ -391,4 +390,4 @@ def _infer_column_type(column: pd.Series):
             return dtype
 
     # no clear type, fall back to string
-    return "string"
+    return "text"
