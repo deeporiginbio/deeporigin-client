@@ -1,3 +1,6 @@
+"""module to make plots from a Deep Origin dataframe"""
+
+from beartype import beartype
 from bokeh.io import show
 from bokeh.layouts import column, row
 from bokeh.models import ColumnDataSource, CustomJS, Select
@@ -5,10 +8,12 @@ from bokeh.plotting import figure
 from deeporigin.data_hub.dataframe import DataFrame
 
 
+@beartype
 def create_interactive_scatter(df: DataFrame):
     """function to make a scatter plot from a Deep Origin dataframe"""
 
     figure_width = 500
+    select_width = int(figure_width * 0.3)
 
     if df.shape[1] < 2:
         raise ValueError("DataFrame must contain at least two columns.")
@@ -56,19 +61,19 @@ def create_interactive_scatter(df: DataFrame):
         title="X-Axis",
         value=initial_x,
         options=cols,
-        width=int(figure_width * 0.3),
+        width=select_width,
     )
     y_select = Select(
         title="Y-Axis",
         value=initial_y,
         options=cols,
-        width=int(figure_width * 0.3),
+        width=select_width,
     )
     size_select = Select(
         title="Size",
         value=initial_size,
         options=cols,
-        width=int(figure_width * 0.3),
+        width=select_width,
     )
 
     # JavaScript callback to update data, axis labels, and point sizes on select change
