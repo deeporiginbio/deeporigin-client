@@ -381,7 +381,7 @@ def _infer_column_type(column: pd.Series):
         "integer": non_null_values.apply(lambda x: is_int(x)).all(),
         "float": non_null_values.apply(lambda x: is_float(x)).all(),
         "date": non_null_values.apply(lambda x: is_date(x)).all(),
-        "string": non_null_values.apply(lambda x: isinstance(x, str)).all(),
+        "text": non_null_values.apply(lambda x: isinstance(x, str)).all(),
     }
 
     # Priority order of types (boolean -> integer -> float -> date -> string)
