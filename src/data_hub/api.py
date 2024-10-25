@@ -1366,7 +1366,6 @@ def get_row_data(
 def add_database_column(
     *,
     database_id: str,
-    key: str,
     type: DataType,
     name: str,
     cardinality: Cardinality = "one",
@@ -1387,7 +1386,6 @@ def add_database_column(
     """
     column = dict(
         name=name,
-        key=key,
         type=type,
         isRequired=required,
         cardinality=cardinality,

@@ -12,7 +12,7 @@ from tests.utils import clean_up_test_objects
 
 TEST_PREFIX = "tc-"
 
-COLUMNS = ["float", "integer"]
+NUMERIC_COLUMNS = ["float", "integer"]
 
 SKIP_MSG = "Skipping this test because we can't test this well using a mocked client"
 
@@ -50,19 +50,17 @@ def config(pytestconfig):
         api.create_database(name=TEST_DB_NAME)
 
         # make columns for values and squared values
-        for column in COLUMNS:
+        for column in NUMERIC_COLUMNS:
             api.add_database_column(
                 database_id=TEST_DB_NAME,
                 name=column,
                 type=column,
-                key=column,
             )
 
             api.add_database_column(
                 database_id=TEST_DB_NAME,
                 name="sq_" + column,
                 type=column,
-                key="sq_" + column,
             )
 
         # make rows. we'll only fill some rows
@@ -96,7 +94,7 @@ def config(pytestconfig):
         clean_up_test_objects(TEST_PREFIX + salt)
 
 
-@pytest.mark.parametrize("column", COLUMNS)
+@pytest.mark.parametrize("column", NUMERIC_COLUMNS)
 def test_dataframe_read_modify(config, column):  # noqa: F811
     """this function tests our ability to fetch data, modify it, and write it back"""
 
@@ -108,7 +106,7 @@ def test_dataframe_read_modify(config, column):  # noqa: F811
     df.to_deeporigin()
 
 
-@pytest.mark.parametrize("column", COLUMNS)
+@pytest.mark.parametrize("column", NUMERIC_COLUMNS)
 def test_dataframe_write_new_columns(config, column):  # noqa: F811
     """this function tests our ability to write new columns to a database"""
 

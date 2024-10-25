@@ -584,7 +584,6 @@ class DataController(cement.Controller):
                 )
             api.add_database_column(
                 database_id=self.app.pargs.database,
-                key=key,
                 type=self.app.pargs.type,
                 name=self.app.pargs.name,
             )

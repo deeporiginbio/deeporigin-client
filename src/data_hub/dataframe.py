@@ -298,7 +298,6 @@ class DataFrame(pd.DataFrame):
                     database_id=self.attrs["metadata"]["hid"],
                     type=column_type,
                     name=column,
-                    key=column,
                 )
 
                 # add column metadata to column
