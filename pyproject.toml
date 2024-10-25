@@ -60,6 +60,7 @@ docs = [
     "mkdocstrings-python",
     "black"
 ]
+plots = ["bokeh"]
 
 [tool.setuptools]
 package-dir = {"deeporigin" = "src"}
