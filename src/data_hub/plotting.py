@@ -1,12 +1,10 @@
 """module to make plots from a Deep Origin dataframe"""
 
-import importlib.resources
-
 from beartype import beartype
 from beartype.typing import Optional
 from bokeh.io import show
 from bokeh.layouts import column, row
-from bokeh.models import ColumnDataSource, CustomJS, Select
+from bokeh.models import ColumnDataSource, CustomJS, HoverTool, Select, TapTool
 from bokeh.plotting import figure
 from deeporigin.data_hub.dataframe import DataFrame
 from deeporigin.exceptions import DeepOriginException
@@ -47,14 +45,16 @@ def scatter(
     initial_y = y
     initial_size = size
 
-    # Create a ColumnDataSource with initial data
-    source = ColumnDataSource(
-        data={
-            "x": df[initial_x],
-            "y": df[initial_y],
-            "size": df[initial_size],
-        }
+    # CDS for scatter data
+    data = dict(
+        x=list(df[initial_x]),
+        y=list(df[initial_y]),
+        size=list(df[initial_size]),
     )
+
+    scatter_source = ColumnDataSource(data)
+
+    marker_source = ColumnDataSource(_first_element_in_dict(data))
 
     # Create the scatter plot figure
     p = figure(
@@ -64,13 +64,25 @@ def scatter(
     )
     p.toolbar.logo = None
 
-    p.scatter(
+    # make scatter plot of data
+    scatter_glyphs = p.scatter(
         x="x",
         y="y",
-        source=source,
+        source=scatter_source,
         size="size",
         color="blue",
         alpha=0.6,
+    )
+
+    # draw the marker
+    p.scatter(
+        x="x",
+        y="y",
+        size=10,
+        fill_color=None,
+        color="red",
+        source=marker_source,
+        line_width=3,
     )
 
     # Set initial axis labels
@@ -99,12 +111,12 @@ def scatter(
 
     # JavaScript callback to update data, axis labels, and point sizes on select change
 
-    with importlib.resources.open_text("deeporigin.data_hub", "callback.js") as f:
-        js_code = f.read()
+    with importlib.resources.open_text("deeporigin.data_hub", "axes_callback.js") as f:
+        axes_callback_js = f.read()
 
-    callback = CustomJS(
+    axes_callback = CustomJS(
         args=dict(
-            source=source,
+            source=scatter_source,
             x_select=x_select,
             y_select=y_select,
             size_select=size_select,
@@ -112,13 +124,38 @@ def scatter(
             x_axis=p.xaxis[0],
             y_axis=p.yaxis[0],
         ),
-        code=js_code,
+        code=axes_callback_js,
     )
 
+    # JS code, will run in browser
+    # this updates the value of the slider to the currently
+    # hovered point
+    code = """
+    
+        """
+
+    callback = CustomJS(
+        code=code,
+        args=dict(
+            marker_source=marker_source,
+            scatter_source=scatter_source,
+        ),
+    )
+
+    # custom hover tool to ignore marker glyphs
+    # see this for an explanation of why we do this
+    # https://discourse.bokeh.org/t/deactivate-hovertool-for-specific-glyphs/9931/2
+    hvr = HoverTool(
+        tooltips=None,
+        callback=callback,
+    )
+    hvr.renderers = [scatter_glyphs]
+    p.add_tools(hvr)
+
     # Attach the callback to the select widgets
-    x_select.js_on_change("value", callback)
-    y_select.js_on_change("value", callback)
-    size_select.js_on_change("value", callback)
+    x_select.js_on_change("value", axes_callback)
+    y_select.js_on_change("value", axes_callback)
+    size_select.js_on_change("value", axes_callback)
 
     # Layout widgets and plot
     layout = column(
@@ -126,3 +163,43 @@ def scatter(
         p,
     )
     show(layout)
+
+
+@beartype
+def _first_element_in_dict(data: dict) -> dict:
+    """utility function that only includes the first element
+    of lists in a dict, useful for building a marker-based
+    CDS"""
+
+    out_data = dict()
+    for key in data.keys():
+        out_data[key] = [data[key][0]]
+
+    return out_data
+
+
+def _read_js_code() -> dict:
+    """utility function to read JS code"""
+
+    files = _list_files("js")
+    js_code = dict()
+
+    for key in files.keys():
+        with open(files[key], "r") as f:
+            js_code[key] = f.read()
+
+    return js_code
+
+
+@beartype
+def _list_files(ext: str = "js") -> dict:
+    """utility function that lists all files by extension in the package data"""
+
+    import importlib.resources
+
+    files = []
+    with importlib.resources.files("deeporigin") as package_files:
+        for file in package_files.rglob("*." + ext):
+            files.append(file)
+
+    return {path.stem: path for path in files}
