@@ -27,6 +27,6 @@ source.change.emit();
 // callback to update selection in database
 if (typeof window.deeporigin !== "undefined") {
     var id = source.data['id'][index];
-    deeporigin.dataHub.primaryDatabase.selectByRowsAndColumns({ selections: [{ rowId: id }] })
+    deeporigin.dataHub.primaryDatabase.addSelection({ selections: [{ rowId: id }] })
     
 }
