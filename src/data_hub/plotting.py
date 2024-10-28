@@ -7,6 +7,7 @@ from bokeh.layouts import column, row
 from bokeh.models import ColumnDataSource, CustomJS, Select
 from bokeh.plotting import figure
 from deeporigin.data_hub.dataframe import DataFrame
+from deeporigin.exceptions import DeepOriginException
 
 
 @beartype
@@ -27,10 +28,22 @@ def scatter(
     cols = df.attrs["metadata"]["cols"]
     cols = [col["name"] for col in cols if col["type"] in ["float", "integer"]]
 
+    if len(cols) < 2:
+        raise DeepOriginException(
+            "DataFrame must contain at least two numeric columns."
+        )
+
+    if x is None:
+        x = cols[0]
+    if y is None:
+        y = cols[1]
+    if size is None:
+        size = cols[0]
+
     # Set up initial data for scatter plot
-    initial_x = cols[0]
-    initial_y = cols[1]
-    initial_size = cols[0]
+    initial_x = x
+    initial_y = y
+    initial_size = size
 
     # Create a ColumnDataSource with initial data
     source = ColumnDataSource(
