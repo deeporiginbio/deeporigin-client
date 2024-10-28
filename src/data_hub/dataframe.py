@@ -19,11 +19,6 @@ from deeporigin.utils.network import check_for_updates
 check_for_updates()
 
 
-try:
-    from icecream import ic
-except ImportError:  # Graceful fallback if IceCream isn't installed.
-    ic = lambda *a: None if not a else (a[0] if len(a) == 1 else a)  # noqa
-
 __NO_NEW_ROWS_MSG__ = "Adding rows is not allowed, because this dataframe corresponds to a subset of the rows in the corresponding database."
 
 
