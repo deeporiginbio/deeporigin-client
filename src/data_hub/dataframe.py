@@ -138,8 +138,12 @@ class DataFrame(pd.DataFrame):
         if self.auto_sync:
             self.to_deeporigin()
         else:
-            # an empty set means "all "
-            self._modified_columns[key] = set()
+            if isinstance(key, str):
+                # an empty set means "all "
+                self._modified_columns[key] = set()
+            elif isinstance(key, list):
+                for item in key:
+                    self._modified_columns[item] = set()
 
     def head(self, n=5):
         """Override the `head` method so that we don't display a spurious modified warning"""

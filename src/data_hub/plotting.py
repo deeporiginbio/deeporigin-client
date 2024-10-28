@@ -1,16 +1,23 @@
 """module to make plots from a Deep Origin dataframe"""
 
 from beartype import beartype
+from beartype.typing import Optional
 from bokeh.io import show
 from bokeh.layouts import column, row
 from bokeh.models import ColumnDataSource, CustomJS, Select
 from bokeh.plotting import figure
 from deeporigin.data_hub.dataframe import DataFrame
+from deeporigin.exceptions import DeepOriginException
 
 
 @beartype
-def create_interactive_scatter(df: DataFrame):
-    """function to make a scatter plot from a Deep Origin dataframe"""
+def scatter(
+    df: DataFrame,
+    x: Optional[str] = None,
+    y: Optional[str] = None,
+    size: Optional[str] = None,
+):
+    """function to make a scatter plot from a Deep Origin dataframe, with support for interactivity"""
 
     figure_width = 500
     select_width = int(figure_width * 0.3)
@@ -21,10 +28,22 @@ def create_interactive_scatter(df: DataFrame):
     cols = df.attrs["metadata"]["cols"]
     cols = [col["name"] for col in cols if col["type"] in ["float", "integer"]]
 
+    if len(cols) < 2:
+        raise DeepOriginException(
+            "DataFrame must contain at least two numeric columns."
+        )
+
+    if x is None:
+        x = cols[0]
+    if y is None:
+        y = cols[1]
+    if size is None:
+        size = cols[0]
+
     # Set up initial data for scatter plot
-    initial_x = cols[0]
-    initial_y = cols[1]
-    initial_size = cols[0]
+    initial_x = x
+    initial_y = y
+    initial_size = size
 
     # Create a ColumnDataSource with initial data
     source = ColumnDataSource(
