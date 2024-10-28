@@ -43,7 +43,7 @@ install:
 	@python3 -m venv venv
 	@source $(CURDIR)/venv/bin/activate && \
 		pip install --upgrade pip && \
-	    pip install -e .[lint,test,jupyter,docs,plots] && \
+	    pip install -e .[lint,test,dev,docs,plots] && \
 	    deactivate
 	@-mkdir -p ~/.deeporigin
 	@test -f ~/.deeporigin/deeporigin || ln -s $(CURDIR)/venv/bin/deeporigin ~/.deeporigin/deeporigin
