@@ -1,6 +1,7 @@
 """module to make plots from a Deep Origin dataframe"""
 
 from beartype import beartype
+from beartype.typing import Optional
 from bokeh.io import show
 from bokeh.layouts import column, row
 from bokeh.models import ColumnDataSource, CustomJS, Select
@@ -9,8 +10,13 @@ from deeporigin.data_hub.dataframe import DataFrame
 
 
 @beartype
-def create_interactive_scatter(df: DataFrame):
-    """function to make a scatter plot from a Deep Origin dataframe"""
+def scatter(
+    df: DataFrame,
+    x: Optional[str] = None,
+    y: Optional[str] = None,
+    size: Optional[str] = None,
+):
+    """function to make a scatter plot from a Deep Origin dataframe, with support for interactivity"""
 
     figure_width = 500
     select_width = int(figure_width * 0.3)
