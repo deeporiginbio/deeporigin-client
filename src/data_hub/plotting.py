@@ -1,5 +1,7 @@
 """module to make plots from a Deep Origin dataframe"""
 
+import importlib.resources
+
 from beartype import beartype
 from beartype.typing import Optional
 from bokeh.io import show
@@ -96,6 +98,10 @@ def scatter(
     )
 
     # JavaScript callback to update data, axis labels, and point sizes on select change
+
+    with importlib.resources.open_text("deeporigin.data_hub", "callback.js") as f:
+        js_code = f.read()
+
     callback = CustomJS(
         args=dict(
             source=source,
@@ -106,30 +112,7 @@ def scatter(
             x_axis=p.xaxis[0],
             y_axis=p.yaxis[0],
         ),
-        code="""
-        const x_data = df[x_select.value];
-        const y_data = df[y_select.value];
-        const size_data = df[size_select.value];
-        
-        // Normalize size data for better visualization (e.g., map values to a range)
-        const min_size = Math.min(...size_data);
-        const max_size = Math.max(...size_data);
-        
-        // Define a scaling function for sizes
-        const sizes = size_data.map(value => {
-            return 2 + 15 * (value - min_size) / (max_size - min_size); // Scale sizes between 10 and 40
-        });
-        
-        // Update the data source
-        source.data = {'x': x_data, 'y': y_data, 'size': sizes};
-        
-        // Update the axis labels
-        x_axis.axis_label = x_select.value;
-        y_axis.axis_label = y_select.value;
-        
-        // Trigger data change
-        source.change.emit();
-    """,
+        code=js_code,
     )
 
     # Attach the callback to the select widgets
