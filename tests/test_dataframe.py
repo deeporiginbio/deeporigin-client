@@ -150,7 +150,8 @@ def test_slice_and_modify(config):
     assert df._allow_adding_rows is False, "Expected _allow_adding_rows to be False"
 
     # we should be allowed to modify a slice
-    df.iloc[0]["integer"] = 100
+    row_id = df.index[0]
+    df.at[row_id, "integer"] = 100
 
     if config["mock"]:
         return
@@ -181,3 +182,27 @@ def test_slice_and_extend_loc(config):
     # should not be possible to add a new row
     with pytest.raises(ValueError, match="Adding rows is not allowed"):
         df.loc[row_prefix + "-" + str(len(df) + 1)] = list(df.loc[df.index[0]])
+
+
+@pytest.mark.parametrize("row", [0, -1])
+def test_modify_cell(config, row):
+    """test that we can modify a cell, write to it, and check that the changes stick on the remote DB
+
+    we are parameterizing over first and last row because
+    the first row has non-missing data, and the last row has missing data"""
+
+    if config["mock"]:
+        pytest.skip(SKIP_MSG)
+
+    df = DataFrame.from_deeporigin(config["db-name"])
+    row_id = df.index[row]
+
+    # modify
+    salt = np.random.random()
+    df.at[row_id, "float"] = salt
+    df.to_deeporigin()
+
+    df = DataFrame.from_deeporigin(config["db-name"])
+    assert (
+        df.at[row_id, "float"] == salt
+    ), "Failed to successfully modify a cell using the at syntax and write to DB"
