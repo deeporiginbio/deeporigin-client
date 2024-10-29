@@ -5,6 +5,7 @@
 const x_data = df[x_select.value];
 const y_data = df[y_select.value];
 const size_data = df[size_select.value];
+const id_data = df[ID.value];
 
 // Normalize size data for better visualization (e.g., map values to a range)
 const min_size = Math.min(...size_data);
@@ -16,7 +17,7 @@ const sizes = size_data.map(value => {
 });
 
 // Update the data source
-scatter_source.data = { 'x': x_data, 'y': y_data, 'size': sizes };
+scatter_source.data = { 'x': x_data, 'y': y_data, 'size': sizes, 'id': id_data };
 
 // Update the axis labels
 x_axis.axis_label = x_select.value;

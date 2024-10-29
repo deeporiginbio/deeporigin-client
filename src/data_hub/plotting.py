@@ -23,6 +23,7 @@ def scatter(
     x: Optional[str] = None,
     y: Optional[str] = None,
     size: Optional[str] = None,
+    hover_callback_code: Optional[str] = None,
 ):
     """function to make a scatter plot from a Deep Origin dataframe, with support for interactivity
 
@@ -31,6 +32,7 @@ def scatter(
         x (Optional[str], optional): name of column to use for x axis. Defaults to None.
         y (Optional[str], optional): name of column to use for y axis. Defaults to None.
         size (Optional[str], optional): name of column to use for size. Defaults to None.
+        hover_callback_code: Optional[str], optional): JavaScript callback to use for hover tool. Defaults to None.
 
     `df` should be a Deep Origin dataframe with at least two numeric columns.
 
@@ -193,7 +195,7 @@ def scatter(
             x_select=x_select,
             y_select=y_select,
             size_select=size_select,
-            df=df.to_dict("list"),
+            df=df.reset_index().to_dict("list"),
             x_axis=p.xaxis[0],
             y_axis=p.yaxis[0],
         ),
@@ -204,8 +206,11 @@ def scatter(
     # this updates the value of the slider to the currently
     # hovered point
 
+    if hover_callback_code is None:
+        hover_callback_code = js_code["hover_callback"]
+
     hover_callback = CustomJS(
-        code=js_code["hover_callback"],
+        code=hover_callback_code,
         args=dict(
             marker_source=marker_source,
             scatter_source=scatter_source,
