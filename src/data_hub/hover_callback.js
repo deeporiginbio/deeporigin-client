@@ -16,9 +16,10 @@ if (cb_data.index.indices.length > 0) {
     marker_source.change.emit();
 
     // callback to update selection in database
+    var id = scatter_source.data['id'][chosen_index];
     if (typeof window.deeporigin !== "undefined") {
-        var id = source.data['id'][index];
-        deeporigin.dataHub.primaryDatabase.addSelection({ selections: [{ rowId: id }] })
+        deeporigin.dataHub.primaryDatabase.clearRangeSelection();
+        deeporigin.dataHub.primaryDatabase.addSelection({ selections: [{ rowId: id }] });
     
     }
 

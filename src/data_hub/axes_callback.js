@@ -16,11 +16,11 @@ const sizes = size_data.map(value => {
 });
 
 // Update the data source
-source.data = { 'x': x_data, 'y': y_data, 'size': sizes };
+scatter_source.data = { 'x': x_data, 'y': y_data, 'size': sizes };
 
 // Update the axis labels
 x_axis.axis_label = x_select.value;
 y_axis.axis_label = y_select.value;
 
 // Trigger data change
-source.change.emit();
+scatter_source.change.emit();
