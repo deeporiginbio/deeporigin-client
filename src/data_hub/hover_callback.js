@@ -1,26 +1,28 @@
-// callback when a user hovers over a point in the scatter plot
+// Callback when a user hovers over a point in the scatter plot
+if (cb_data.index && cb_data.index.indices && cb_data.index.indices.length > 0) {
+    // User is actually hovering over a point. 
+    // Bokeh allows hovering over multiple points; we select the first.
+    const chosenIndex = cb_data.index.indices[0];
 
-if (cb_data.index.indices.length > 0) {
-    // user is actually hovering over a point. 
-    // bokeh has an annoying "feature" where you can hover
-    // over more than 1 point, which we don't want.
-    // we're going to arbitarily choose the first point
-    var chosen_index = (cb_data.index.indices[0]);
-
-    // update the red circle marker on all linked plots
-    // to indicate the currently hovered point
+    // Update the red circle marker on all linked plots to indicate the hovered point
     for (const key in marker_source.data) {
-        marker_source.data[key][0] = scatter_source.data[key][chosen_index];
-    }   
+        if (scatter_source.data[key]) {
+            marker_source.data[key][0] = scatter_source.data[key][chosenIndex];
+        }
+    }
 
     marker_source.change.emit();
 
-    // callback to update selection in database
-    var id = scatter_source.data['id'][chosen_index];
-    if (typeof window.deeporigin !== "undefined") {
-        deeporigin.dataHub.primaryDatabase.clearRangeSelection();
-        deeporigin.dataHub.primaryDatabase.addSelection({ selections: [{ rowId: id }] });
-    
+    // Callback to update selection in the database
+    const id = scatter_source.data['id'] ? scatter_source.data['id'][chosenIndex] : null;
+    if (id && typeof window.deeporigin !== "undefined") {
+        try {
+            deeporigin.dataHub.primaryDatabase.clearRangeSelection();
+            deeporigin.dataHub.primaryDatabase.addSelection({ selections: [{ rowId: id }] });
+        } catch (error) {
+            console.error("Error updating selection in database:", error);
+        }
     }
 
-};
+    console.log("Hovered point ID:", id);
+}

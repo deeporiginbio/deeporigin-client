@@ -11,16 +11,6 @@ console.log("Will write to this column:", labelColumn);
 const rowIds = selectedData.ids;
 
 if (typeof window.deeporigin !== "undefined") {
-    // Reset selections for all the rows in question
-    const resetChanges = rowIds.map(rowId => ({
-        rowId: rowId,
-        fieldChangeEvents: [{
-            columnId: labelColumn,
-            newValue: { selectedOptions: [] } 
-        }]
-    }));
-
-    deeporigin.dataHub.primaryDatabase.editRows({ changes: resetChanges });
 
     // Write the new value
     const updateChanges = rowIds.map(rowId => ({
