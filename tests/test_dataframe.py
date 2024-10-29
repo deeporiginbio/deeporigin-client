@@ -91,7 +91,7 @@ def config(pytestconfig):
 
     # teardown code
     if pytestconfig.getoption("client") != "mock":
-        clean_up_test_objects(TEST_PREFIX + salt)
+        clean_up_test_objects(TEST_DB_NAME)
 
 
 @pytest.mark.parametrize("column", NUMERIC_COLUMNS)
