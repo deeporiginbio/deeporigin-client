@@ -1125,7 +1125,11 @@ def _row_to_dict(
         elif field.type in ["float", "integer", "boolean"]:
             value = field.value
         elif field.type == "select":
-            value = field.value.selected_options
+            value = field.value
+            if isinstance(value, dict):
+                value = value["selectedOptions"]
+            else:
+                value = value.selected_options
 
         elif field.type == "reference":
             value = field.value.row_ids

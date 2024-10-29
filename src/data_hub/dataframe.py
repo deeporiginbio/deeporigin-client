@@ -96,9 +96,18 @@ class DataFrame(pd.DataFrame):
                 raise ValueError(__NO_NEW_ROWS_MSG__)
 
             old_value = self.obj._get_value(*key)
-            if value == old_value:
-                # noop
-                return
+
+            # the reason this is in a try block is because
+            # this can fail for any number of reasons.
+            # for example, types of the two things may be
+            # different, or the old or new value may be missing,
+            # in which case an equality is meaningless.
+            try:
+                if value == old_value:
+                    # noop
+                    return
+            except Exception:
+                pass
 
             rows = [key[0]]
             column = key[1]
@@ -318,7 +327,7 @@ class DataFrame(pd.DataFrame):
                 rows = list(self.index)
 
             api.set_data_in_cells(
-                values=self[column],
+                values=self[column][list(rows)],
                 row_ids=rows,
                 column_id=column,
                 database_id=self.attrs["id"],
