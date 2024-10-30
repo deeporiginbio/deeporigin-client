@@ -2,10 +2,16 @@
 // this is called every time the user makes a selection
 // on what column of the dataframe to plot onto what axes
 
+
+console.log(df);
+console.log(df["ID"]);
+
 const x_data = df[x_select.value];
 const y_data = df[y_select.value];
 const size_data = df[size_select.value];
-const id_data = df[ID.value];
+const id_data = df["ID"];
+
+
 
 // Normalize size data for better visualization (e.g., map values to a range)
 const min_size = Math.min(...size_data);
