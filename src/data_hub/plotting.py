@@ -4,14 +4,16 @@ import pandas as pd
 from beartype import beartype
 from beartype.typing import Optional
 from bokeh.io import show
-from bokeh.layouts import column, row
+from bokeh.layouts import Spacer, column, row
 from bokeh.models import (
     Button,
     ColumnDataSource,
     CustomJS,
+    DataTable,
     HoverTool,
     LassoSelectTool,
     Select,
+    TableColumn,
 )
 from bokeh.palettes import Category10
 from bokeh.plotting import figure
@@ -25,9 +27,8 @@ def scatter(
     x: Optional[str] = None,
     y: Optional[str] = None,
     size: Optional[str] = None,
-    hover_callback_code: Optional[str] = None,
-    button_callback_code: Optional[str] = None,
     label_column: Optional[str] = None,
+    js_code: Optional[dict] = None,
 ):
     """function to make a scatter plot from a Deep Origin dataframe, with support for interactivity
 
@@ -45,7 +46,8 @@ def scatter(
     # constants for this plot
     figure_width = 500
     select_width = int(figure_width * 0.3)
-    js_code = _read_js_code()
+    if js_code is None:
+        js_code = _read_js_code()
     default_label = "None"
     default_color = "blue"
 
@@ -123,8 +125,27 @@ def scatter(
         legend_labels=legend_labels,
     )
 
+    # also add every column to the data
+    for col in df.columns:
+        data[col] = list(df[col])
+
     # CDS for scatter plot
     scatter_source = ColumnDataSource(data)
+
+    # we want to make a table with two columns that will
+    # show the currently hovered point
+    table_source = ColumnDataSource(data={"Column Name": [], "Value": []})
+    columns = [
+        TableColumn(field="Column Name", title="Column Name"),
+        TableColumn(field="Value", title="Value"),
+    ]
+    data_table = DataTable(
+        source=table_source,
+        columns=columns,
+        width=250,
+        height=figure_width,
+        index_position=None,
+    )
 
     # CDS for marker
     marker_source = ColumnDataSource(_first_element_in_dict(data))
@@ -214,17 +235,12 @@ def scatter(
     # this updates the value of the slider to the currently
     # hovered point
 
-    if hover_callback_code is None:
-        hover_callback_code = js_code["hover_callback"]
-
-    if button_callback_code is None:
-        button_callback_code = js_code["button_callback"]
-
     hover_callback = CustomJS(
-        code=hover_callback_code,
+        code=js_code["hover_callback"],
         args=dict(
             marker_source=marker_source,
             scatter_source=scatter_source,
+            table_source=table_source,
         ),
     )
 
@@ -259,8 +275,9 @@ def scatter(
     p.legend.title = "Label"
 
     # Button to access selected data from selected_source
+    select_row = row(x_select, y_select, size_select)
     if label_column:
-        label_button = Button(label="+Label")
+        label_button = Button(label="Add")
         button_callback = CustomJS(
             args=dict(
                 lasso_selection_source=lasso_selection_source,
@@ -269,23 +286,22 @@ def scatter(
                 color_map=color_map,
                 label_column=label_column,
             ),
-            code=button_callback_code,
+            code=js_code["button_callback"],
         )
         label_button.js_on_click(button_callback)
-
-        layout = column(
-            row(x_select, y_select, size_select),
-            p,
-            row(
-                label_select,
+        select_row.children.append(Spacer(width=30))
+        select_row.children.append(label_select)
+        select_row.children.append(
+            column(
+                Spacer(width=10, height=20),
                 label_button,
-            ),
+            )
         )
-    else:
-        layout = column(
-            row(x_select, y_select, size_select),
-            p,
-        )
+
+    layout = column(
+        select_row,
+        row(p, data_table),
+    )
     show(layout)
 
 

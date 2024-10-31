@@ -28,7 +28,7 @@ if (window.deeporigin) {
         rowId,
         fieldChangeEvents: [
             {
-                columnId: labelColumn,
+                columnId: label_column,
                 newValue: { selectedOptions: [label] }
             }
         ]
