@@ -1,9 +1,13 @@
 // Callback to update labels in the scatter plot Bokeh figure
+// when the button is pressed
 
+// get the points within the lasso selection
 const selectedData = lasso_selection_source.data;
+
+// get the label we need to assign
 const label = label_select.value;
 
-console.log(scatter_source.data);
+console.log("Assigning label:", label);
 
 // Update colors for points in the lasso selection
 scatter_source.data.id.forEach((id, i) => {
@@ -16,7 +20,9 @@ scatter_source.change.emit();
 
 const rowIds = selectedData.ids;
 
-// Update external data if `deeporigin` is defined
+console.log("Assigning to rows:", rowIds);
+
+// write changes to the deep origin database
 if (window.deeporigin) {
     const updateChanges = rowIds.map(rowId => ({
         rowId,
