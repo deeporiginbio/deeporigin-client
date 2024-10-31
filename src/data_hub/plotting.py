@@ -42,16 +42,19 @@ def scatter(
 
     """
 
+    # constants for this plot
     figure_width = 500
     select_width = int(figure_width * 0.3)
     js_code = _read_js_code()
+    default_label = "None"
+    default_color = "blue"
 
     cols = df.attrs["metadata"]["cols"]
     numeric_cols = [col["name"] for col in cols if col["type"] in ["float", "integer"]]
 
     # make placeholder lists for legends and colors
-    legend_labels = ["None" for _ in range(len(df))]
-    colors = ["blue" for _ in range(len(df))]
+    legend_labels = [default_label for _ in range(len(df))]
+    colors = [default_color for _ in range(len(df))]
 
     if label_column is not None:
         select_cols = [
@@ -83,14 +86,13 @@ def scatter(
         cat10_colors[2] = cat10_colors[3][:2]
         cat10_colors = cat10_colors[len(labels)]
         color_map = {label: color for label, color in zip(labels, cat10_colors)}
-        color_map["None"] = "blue"
+        color_map[default_label] = default_color
 
-        legend_labels = ["None" if pd.isna(x) else x for x in df[label_column].tolist()]
+        legend_labels = [
+            default_label if pd.isna(x) else x for x in df[label_column].tolist()
+        ]
 
         colors = [color_map[label] for label in legend_labels]
-
-        print("!!!!debug:")
-        print(set(colors))
 
     if len(numeric_cols) < 2:
         raise DeepOriginException(
@@ -112,8 +114,6 @@ def scatter(
     sizes = [2 + 15 * (value - min_size) / (max_size - min_size) for value in sizes]
 
     # CDS for scatter data
-    print("!!!!debug:")
-    print(set(colors))
     data = dict(
         x=list(df[x]),
         y=list(df[y]),
