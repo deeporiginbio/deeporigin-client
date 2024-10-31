@@ -3,9 +3,6 @@
 // on what column of the dataframe to plot onto what axes
 
 
-console.log(df);
-console.log(df["ID"]);
-
 const x_data = df[x_select.value];
 const y_data = df[y_select.value];
 const size_data = df[size_select.value];

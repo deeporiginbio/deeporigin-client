@@ -1,5 +1,6 @@
 """module to make plots from a Deep Origin dataframe"""
 
+import pandas as pd
 from beartype import beartype
 from beartype.typing import Optional
 from bokeh.io import show
@@ -14,7 +15,6 @@ from bokeh.models import (
 )
 from bokeh.palettes import Category10
 from bokeh.plotting import figure
-from bokeh.transform import factor_cmap
 from deeporigin.data_hub.dataframe import DataFrame
 from deeporigin.exceptions import DeepOriginException
 
@@ -49,6 +49,10 @@ def scatter(
     cols = df.attrs["metadata"]["cols"]
     numeric_cols = [col["name"] for col in cols if col["type"] in ["float", "integer"]]
 
+    # make placeholder lists for legends and colors
+    legend_labels = ["None" for _ in range(len(df))]
+    colors = ["blue" for _ in range(len(df))]
+
     if label_column is not None:
         select_cols = [
             col for col in df.attrs["metadata"]["cols"] if col["type"] == "select"
@@ -63,12 +67,30 @@ def scatter(
 
         labels = df[label_column].cat.categories.tolist()
 
+        if len(labels) == 0:
+            raise DeepOriginException(
+                f"The column {label_column} has no options configured, and therefore cannot be used to label data."
+            )
+
+        if len(labels) > 10:
+            raise DeepOriginException(
+                f"The column {label_column} has too many ({len(labels)}) options configured, and therefore cannot be used to label data."
+            )
+
         # make color map
-        colors = Category10
-        colors[1] = colors[3][:1]
-        colors[2] = colors[3][:2]
-        colors = colors[len(labels)]
-        color_map = {label: color for label, color in zip(labels, colors)}
+        cat10_colors = Category10
+        cat10_colors[1] = cat10_colors[3][:1]
+        cat10_colors[2] = cat10_colors[3][:2]
+        cat10_colors = cat10_colors[len(labels)]
+        color_map = {label: color for label, color in zip(labels, cat10_colors)}
+        color_map["None"] = "blue"
+
+        legend_labels = ["None" if pd.isna(x) else x for x in df[label_column].tolist()]
+
+        colors = [color_map[label] for label in legend_labels]
+
+        print("!!!!debug:")
+        print(set(colors))
 
     if len(numeric_cols) < 2:
         raise DeepOriginException(
@@ -88,16 +110,17 @@ def scatter(
     min_size = min(sizes)
     max_size = max(sizes)
     sizes = [2 + 15 * (value - min_size) / (max_size - min_size) for value in sizes]
-    colors = ["blue" for _ in range(len(sizes))]
 
     # CDS for scatter data
+    print("!!!!debug:")
+    print(set(colors))
     data = dict(
         x=list(df[x]),
         y=list(df[y]),
         size=sizes,
         id=df.index,
         colors=colors,
-        legend_labels=["None" for _ in range(len(df))],
+        legend_labels=legend_labels,
     )
 
     # CDS for scatter plot
