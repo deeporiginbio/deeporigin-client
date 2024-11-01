@@ -34,5 +34,8 @@ if (window.deeporigin) {
         ]
     }));
 
-    deeporigin.dataHub.primaryDatabase.editRows({ changes: updateChanges });
+    deeporigin.dataHub.primaryDatabase.editRows({
+        checkPreviousValue: false, 
+        changes: updateChanges
+    });
 }
