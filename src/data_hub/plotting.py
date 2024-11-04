@@ -1,17 +1,21 @@
 """module to make plots from a Deep Origin dataframe"""
 
+import pandas as pd
 from beartype import beartype
 from beartype.typing import Optional
 from bokeh.io import show
-from bokeh.layouts import column, row
+from bokeh.layouts import Spacer, column, row
 from bokeh.models import (
     Button,
     ColumnDataSource,
     CustomJS,
+    DataTable,
     HoverTool,
     LassoSelectTool,
     Select,
+    TableColumn,
 )
+from bokeh.palettes import Category10
 from bokeh.plotting import figure
 from deeporigin.data_hub.dataframe import DataFrame
 from deeporigin.exceptions import DeepOriginException
@@ -23,7 +27,8 @@ def scatter(
     x: Optional[str] = None,
     y: Optional[str] = None,
     size: Optional[str] = None,
-    hover_callback_code: Optional[str] = None,
+    label_column: Optional[str] = None,
+    js_code: Optional[dict] = None,
 ):
     """function to make a scatter plot from a Deep Origin dataframe, with support for interactivity
 
@@ -38,22 +43,58 @@ def scatter(
 
     """
 
+    # constants for this plot
     figure_width = 500
     select_width = int(figure_width * 0.3)
-    js_code = _read_js_code()
+    if js_code is None:
+        js_code = _read_js_code()
+    default_label = "None"
+    default_color = "blue"
 
     cols = df.attrs["metadata"]["cols"]
     numeric_cols = [col["name"] for col in cols if col["type"] in ["float", "integer"]]
 
-    label_data = None
+    # make placeholder lists for legends and colors
+    legend_labels = [default_label for _ in range(len(df))]
+    colors = [default_color for _ in range(len(df))]
 
-    select_cols = [
-        col for col in df.attrs["metadata"]["cols"] if col["type"] == "select"
-    ]
-    if len(select_cols) > 0:
-        select_col_names = [col["name"] for col in select_cols]
-        select_col_options = [col["configSelect"]["options"] for col in select_cols]
-        label_data = dict(zip(select_col_names, select_col_options))
+    if label_column is not None:
+        select_cols = [
+            col for col in df.attrs["metadata"]["cols"] if col["type"] == "select"
+        ]
+        if len(select_cols) == 0:
+            raise DeepOriginException("No select columns detected in the dataframe.")
+        select_cols = [col["name"] for col in select_cols]
+        if label_column not in select_cols:
+            raise DeepOriginException(
+                f"Column '{label_column}' is not a select column in the dataframe."
+            )
+
+        labels = df[label_column].cat.categories.tolist()
+
+        if len(labels) == 0:
+            raise DeepOriginException(
+                f"The column {label_column} has no options configured, and therefore cannot be used to label data."
+            )
+
+        if len(labels) > 10:
+            raise DeepOriginException(
+                f"The column {label_column} has too many ({len(labels)}) options configured, and therefore cannot be used to label data."
+            )
+
+        # make color map
+        cat10_colors = Category10
+        cat10_colors[1] = cat10_colors[3][:1]
+        cat10_colors[2] = cat10_colors[3][:2]
+        cat10_colors = cat10_colors[len(labels)]
+        color_map = {label: color for label, color in zip(labels, cat10_colors)}
+        color_map[default_label] = default_color
+
+        legend_labels = [
+            default_label if pd.isna(x) else x for x in df[label_column].tolist()
+        ]
+
+        colors = [color_map[label] for label in legend_labels]
 
     if len(numeric_cols) < 2:
         raise DeepOriginException(
@@ -80,20 +121,37 @@ def scatter(
         y=list(df[y]),
         size=sizes,
         id=df.index,
+        colors=colors,
+        legend_labels=legend_labels,
     )
+
+    # also add every column to the data
+    for col in df.columns:
+        data[col] = list(df[col])
 
     # CDS for scatter plot
     scatter_source = ColumnDataSource(data)
+
+    # we want to make a table with two columns that will
+    # show the currently hovered point
+    table_source = ColumnDataSource(data={"Column Name": [], "Value": []})
+    columns = [
+        TableColumn(field="Column Name", title="Column Name"),
+        TableColumn(field="Value", title="Value"),
+    ]
+    data_table = DataTable(
+        source=table_source,
+        columns=columns,
+        width=250,
+        height=figure_width,
+        index_position=None,
+    )
 
     # CDS for marker
     marker_source = ColumnDataSource(_first_element_in_dict(data))
 
     # CDS to store lasso selection data
     lasso_selection_source = ColumnDataSource(dict(ids=[]))
-
-    # CDS to store labels
-    if label_data:
-        label_source = ColumnDataSource(label_data)
 
     # Create the scatter plot figure
     p = figure(
@@ -109,8 +167,9 @@ def scatter(
         y="y",
         source=scatter_source,
         size="size",
-        color="blue",
+        color="colors",
         alpha=0.6,
+        legend_field="legend_labels",
     )
 
     # draw the marker
@@ -149,43 +208,13 @@ def scatter(
     )
 
     # create dropdown selectors for label column
-    if label_data:
-        first_col = list(label_data.keys())[0]
-        label_column_select = Select(
-            title="Label Column",
-            value=first_col,
-            options=list(label_data.keys()),
-            width=select_width,
-        )
-
+    if label_column:
         label_select = Select(
             title="Label",
-            value=label_data[first_col][0],
-            options=list(set(label_data[first_col])),
+            value=labels[0],
+            options=labels,
             width=select_width,
         )
-
-        # JavaScript callback to update the second select tool based on the selected column
-        label_select_callback = CustomJS(
-            args=dict(
-                label_source=label_source,
-                label_column_select=label_column_select,
-                label_select=label_select,
-            ),
-            code="""
-            // Get selected column name from first select widget
-            const column = label_column_select.value;
-            
-            // Update options of the second select based on unique values of the selected column
-            const column_data = label_source.data[column];
-            const unique_values = Array.from(new Set(column_data));
-            
-            label_select.options = unique_values;
-            label_select.value = unique_values[0];  // Set default to the first unique value
-        """,
-        )
-
-        label_column_select.js_on_change("value", label_select_callback)
 
     # JavaScript callback to update data, axis labels, and point sizes on select change
 
@@ -206,14 +235,12 @@ def scatter(
     # this updates the value of the slider to the currently
     # hovered point
 
-    if hover_callback_code is None:
-        hover_callback_code = js_code["hover_callback"]
-
     hover_callback = CustomJS(
-        code=hover_callback_code,
+        code=js_code["hover_callback"],
         args=dict(
             marker_source=marker_source,
             scatter_source=scatter_source,
+            table_source=table_source,
         ),
     )
 
@@ -244,35 +271,37 @@ def scatter(
     p.add_tools(lasso_tool)
     scatter_source.selected.js_on_change("indices", lasso_callback)
 
+    # legend
+    p.legend.title = "Label"
+
     # Button to access selected data from selected_source
-    if label_data:
-        label_button = Button(label="+Label")
+    select_row = row(x_select, y_select, size_select)
+    if label_column:
+        label_button = Button(label="Add")
         button_callback = CustomJS(
             args=dict(
                 lasso_selection_source=lasso_selection_source,
                 label_select=label_select,
-                label_column_select=label_column_select,
+                scatter_source=scatter_source,
+                color_map=color_map,
+                label_column=label_column,
             ),
             code=js_code["button_callback"],
         )
         label_button.js_on_click(button_callback)
-
-    # Layout widgets and plot
-    if label_data:
-        layout = column(
-            row(x_select, y_select, size_select),
-            p,
-            row(
-                label_column_select,
-                label_select,
+        select_row.children.append(Spacer(width=30))
+        select_row.children.append(label_select)
+        select_row.children.append(
+            column(
+                Spacer(width=10, height=20),
                 label_button,
-            ),
+            )
         )
-    else:
-        layout = column(
-            row(x_select, y_select, size_select),
-            p,
-        )
+
+    layout = column(
+        select_row,
+        row(p, data_table),
+    )
     show(layout)
 
 

@@ -13,6 +13,28 @@ if (cb_data.index && cb_data.index.indices && cb_data.index.indices.length > 0) 
 
     marker_source.change.emit();
 
+
+    // now update the table
+    const hidden_cols = ["Validation Status", "colors", "legend_labels"];
+    const data = scatter_source.data;
+    const columns = Object.keys(data);
+    const columnNames = [];
+    const values = [];
+    for (const col of columns) {
+        if (hidden_cols.includes(col)) { continue; }
+
+        columnNames.push(col);
+        // round floats so they don't look ugly
+        var value = data[col][chosenIndex];
+
+        if (typeof value === 'number' && !Number.isInteger(value)) {
+            value = value.toFixed(3);
+        }
+        values.push(value);
+    }
+    table_source.data = { 'Column Name': columnNames, 'Value': values };
+    table_source.change.emit();
+
     // Callback to update selection in the database
     const id = scatter_source.data['id'] ? scatter_source.data['id'][chosenIndex] : null;
     if (id && typeof window.deeporigin !== "undefined") {

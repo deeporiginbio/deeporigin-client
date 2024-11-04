@@ -1,25 +1,41 @@
-// Callback when a user presses the button to update labels in the scatter plot Bokeh figure
+// Callback to update labels in the scatter plot Bokeh figure
+// when the button is pressed
 
+// get the points within the lasso selection
 const selectedData = lasso_selection_source.data;
-const label = label_select.value;
-const labelColumn = label_column_select.value;
 
-console.log("Will write to these rows:", selectedData.ids);
-console.log("Will write this label:", label);
-console.log("Will write to this column:", labelColumn);
+// get the label we need to assign
+const label = label_select.value;
+
+console.log("Assigning label:", label);
+
+// Update colors for points in the lasso selection
+scatter_source.data.id.forEach((id, i) => {
+    if (selectedData.ids.includes(id)) {
+        scatter_source.data.colors[i] = color_map[label];
+        scatter_source.data.legend_labels[i] = label;
+    }
+});
+scatter_source.change.emit();
 
 const rowIds = selectedData.ids;
 
-if (typeof window.deeporigin !== "undefined") {
+console.log("Assigning to rows:", rowIds);
 
-    // Write the new value
+// write changes to the deep origin database
+if (window.deeporigin) {
     const updateChanges = rowIds.map(rowId => ({
-        rowId: rowId,
-        fieldChangeEvents: [{
-            columnId: labelColumn,
-            newValue: { selectedOptions: [label] } 
-        }]
+        rowId,
+        fieldChangeEvents: [
+            {
+                columnId: label_column,
+                newValue: { selectedOptions: [label] }
+            }
+        ]
     }));
 
-    deeporigin.dataHub.primaryDatabase.editRows({ changes: updateChanges });
+    deeporigin.dataHub.primaryDatabase.editRows({
+        checkPreviousValue: false, 
+        changes: updateChanges
+    });
 }
