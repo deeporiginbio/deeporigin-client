@@ -2,7 +2,7 @@
 
 import pytest
 from beartype.roar import BeartypeCallHintParamViolation
-from deeporigin.utils import types
+from deeporigin.data_hub import filters
 from pydantic import ValidationError
 
 valid_operators = [
@@ -33,7 +33,7 @@ invalid_arguments = [
 def test_numeric_condition_valid_operators(
     operator,
 ):
-    types.numeric_condition(
+    filters.numeric_condition(
         column_id="foo",
         value=100,
         operator=operator,
@@ -44,7 +44,7 @@ def test_numeric_condition_valid_operators(
 def test_numeric_condition_valid_numbers(
     number,
 ):
-    types.numeric_condition(
+    filters.numeric_condition(
         column_id="foo",
         value=number,
         operator=valid_operators[0],
@@ -57,7 +57,8 @@ def test_numeric_condition_valid_numbers(
 )
 def test_numeric_condition_invalid(column_id, value, operator):
     with pytest.raises((ValidationError, BeartypeCallHintParamViolation)):
-        types.numeric_condition(
+        # constructing this should raise an error
+        filters.numeric_condition(
             column_id=column_id,
             value=value,
             operator=operator,
