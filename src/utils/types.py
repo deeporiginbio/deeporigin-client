@@ -17,7 +17,17 @@ def numeric_condition(
     value: float | int,
     operator: str,
 ) -> dict:
-    """function to create a valid numeric filter"""
+    """function to create a valid numeric filter
+
+
+    Args:
+        column_id (str): id of the column
+        value (float | int): value to filter
+        operator (str): operator to use.
+
+    Returns:
+        A dictionary containing a valid condition that can be used to filter database rows
+    """
 
     data = dict(
         column_id=column_id,
