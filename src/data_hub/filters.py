@@ -1,7 +1,10 @@
 """module to create filters and conditions to filter rows in databases on the data hub"""
 
 from beartype import beartype
-from deeporigin_data.types.client_list_database_rows_params import FilterRowFilterNumber
+from deeporigin_data.types.client_list_database_rows_params import (
+    FilterRowFilterBoolean,
+    FilterRowFilterNumber,
+)
 from pydantic import TypeAdapter
 
 
@@ -27,6 +30,27 @@ def numeric_condition(
     data = dict(
         column_id=column_id,
         filter_type="number",
+        filter_value=value,
+        operator=operator,
+    )
+
+    # use type checks from SDK definition, which
+    # ultimately derives from the openAPI spec
+    adapter = TypeAdapter(FilterRowFilterNumber)
+    adapter.validate_python(data)
+
+    return data
+
+
+def select_condition(
+    *,
+    column_id: str,
+    value: float | int,
+    operator: str,
+) -> dict:
+    data = dict(
+        column_id=column_id,
+        filter_type="set",
         filter_value=value,
         operator=operator,
     )
