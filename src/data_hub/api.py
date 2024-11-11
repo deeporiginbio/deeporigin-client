@@ -873,6 +873,7 @@ def get_dataframe(
     use_file_names: bool = True,
     reference_format: IDFormat = "human-id",
     return_type: DatabaseReturnType = "dataframe",
+    filter: Optional[dict] = None,
     client=None,
 ):
     """Generate a `pandas.DataFrame` or dictionary for a database.
@@ -890,10 +891,17 @@ def get_dataframe(
     # TODO: list_database_rows and describe_row can be called in parallel
 
     # figure out the rows
-    rows = _api.list_database_rows(
-        database_row_id=database_id,
-        client=client,
-    )
+    if filter is None:
+        rows = _api.list_database_rows(
+            database_row_id=database_id,
+            client=client,
+        )
+    else:
+        rows = _api.list_database_rows(
+            database_row_id=database_id,
+            client=client,
+            filter=filter,
+        )
 
     # figure out the column names and ID of the database
     db_row = _api.describe_row(
@@ -1135,7 +1143,14 @@ def _row_to_dict(
             value = field.value.row_ids
             reference_ids.extend(value)
         elif field.type == "file":
-            value = field.value.file_ids
+            value = field.value
+            if isinstance(value, dict):
+                if "fileIds" in value.keys():
+                    value = value["fileIds"]
+                else:
+                    value = value["file_ids"]
+            else:
+                value = value.file_ids
             file_ids.extend(value)
         elif field.type == "expression":
             value = field.value.result
