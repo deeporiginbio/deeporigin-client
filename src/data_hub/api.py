@@ -221,39 +221,6 @@ def list_rows(
 
 @beartype
 @ensure_client
-def download_file(
-    file_id: str,
-    *,
-    destination: str = os.getcwd(),
-    client=None,
-) -> None:
-    """Download a file to a destination folder (workspace).
-
-    Download a file synchronously from Deep Origin
-    to folder on the local file system.
-
-    Args:
-        file_id: ID of the file on Deep Origin
-        destination: Path to the destination folder
-
-    """
-
-    if not os.path.isdir(destination):
-        raise DeepOriginException(
-            message=f"Destination `{destination}` should be a path for a folder."
-        )
-
-    file_name = _api.describe_file(file_id=file_id, client=client).name
-
-    url = _api.create_file_download_url(file_id=file_id, client=client).download_url
-
-    save_path = os.path.join(destination, file_name)
-
-    download_sync(url, save_path)
-
-
-@beartype
-@ensure_client
 def upload_file(
     file_path: str,
     client=None,
@@ -783,10 +750,8 @@ def download(
     if PREFIXES.FILE in source:
         # this is a file
 
-        download_file(
-            file_id=source,
-            destination=destination,
-            client=client,
+        raise NotImplementedError(
+            "Downloading this type of data object has not been implemented yet"
         )
         return
 
@@ -853,7 +818,11 @@ def download_database(
         file_ids = df.attrs["file_ids"]
 
         for file_id in file_ids:
-            download_file(file_id, destination, client=client)
+            download_files(
+                file_id,
+                save_to_dir=destination,
+                client=client,
+            )
 
     df.to_csv(os.path.join(destination, database_hid + ".csv"))
 

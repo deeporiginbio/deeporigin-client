@@ -39,7 +39,7 @@ def column_item(idx: int = 1):
 def list_files_response(assignments=None):
     return [
         types.list_files_response.Data(
-            file=types.list_files_response.DataFile(
+            file=types.list_files_response.File(
                 id="_file:09fwpdPqHtVdt4jj43ywC",
                 contentLength=1343642.0,
                 dateCreated="2024-07-03 23:45:44.214",
@@ -363,7 +363,7 @@ class MockClient:
         )
 
     def describe_file(self, file_id: str):
-        return types.describe_file_response.Data(
+        return types.shared.file.File(
             id=file_id,
             content_length=56.0,
             name="local database.csv",
