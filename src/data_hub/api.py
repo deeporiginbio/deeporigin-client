@@ -1146,7 +1146,12 @@ def _row_to_dict(
                 value = value.file_ids
             file_ids.extend(value)
         elif field.type == "expression":
-            value = field.value.result
+            value = field.value
+            if isinstance(value, dict):
+                value = value["result"]
+            else:
+                value = value.result
+
         elif field.type == "user":
             value = field.value
             if isinstance(value, dict):
