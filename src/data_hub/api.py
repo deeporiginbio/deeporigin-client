@@ -1132,15 +1132,27 @@ def _row_to_dict(
                 value = value.selected_options
 
         elif field.type == "reference":
-            value = field.value.row_ids
+            value = field.value
+            if isinstance(value, dict):
+                value = value["rowIds"]
+            else:
+                value = value.row_ids
             reference_ids.extend(value)
         elif field.type == "file":
-            value = field.value.file_ids
+            value = field.value
+            if isinstance(value, dict):
+                value = value["fileIds"]
+            else:
+                value = value.file_ids
             file_ids.extend(value)
         elif field.type == "expression":
             value = field.value.result
         elif field.type == "user":
-            user_ids = field.value.user_drns
+            value = field.value
+            if isinstance(value, dict):
+                user_ids = value["userDrns"]
+            else:
+                user_ids = value.user_drns
 
             # convert to names using the platform API
             value = [get_user_name(user_id) for user_id in user_ids]
