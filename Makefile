@@ -68,5 +68,5 @@ test-github:
 	python3 -m coverage run -m pytest -k $(chosen_tests) --client $(client)
 
 test-github-live:
-	python3 -m coverage run -m pytest --ignore=test_config.py --ignore=test_context.py --client default -n "auto"
+	python3 -m coverage run -m pytest --ignore=tests/test_config.py --ignore=tests/test_context.py --client default -n "auto"
 
