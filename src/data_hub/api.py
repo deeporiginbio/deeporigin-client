@@ -541,7 +541,6 @@ def get_cell_data(
     return data[column_name]
 
 
-@beartype
 def set_data_in_cells(
     *,
     values: list,
