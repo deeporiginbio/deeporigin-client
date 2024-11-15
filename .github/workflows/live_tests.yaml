@@ -28,9 +28,9 @@ jobs:
           cache: 'pip'
           cache-dependency-path: pyproject.toml
 
-      - name: "run tests without ~/.deeporigin/"
+      - name: "Running tests against a live instance..."
         run: |
           pip install --upgrade pip
           pip install --upgrade setuptools
           pip install -e .[test]
-          make test-github client=default
+          make test-github-live
