@@ -327,8 +327,8 @@ class DataFrame(pd.DataFrame):
                 rows = list(self.index)
 
             api.set_data_in_cells(
-                values=self[column][list(rows)],
-                row_ids=rows,
+                values=self[column][list(rows)].to_list(),
+                row_ids=list(rows),
                 column_id=column,
                 database_id=self.attrs["id"],
                 columns=self.attrs["metadata"]["cols"],
