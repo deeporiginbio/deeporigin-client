@@ -1,0 +1,8 @@
+{
+    "{\"database_id\": \"db-protocol\"}": {
+        "rowCount": 29
+    },
+    "{\"database_id\": \"kitchen-sink\"}": {
+        "rowCount": 102
+    }
+}

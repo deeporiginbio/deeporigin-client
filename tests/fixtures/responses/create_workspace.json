@@ -1,0 +1,109 @@
+{
+    "{\"workspace\": {\"hid\": \"tc-4Qzkrn57rM-0a5d17\", \"name\": \"tc-4Qzkrn57rM-0a5d17\", \"parentId\": null}}": {
+        "id": "_workspace:oOMWGEY8h5J5aD4HsbuvO",
+        "date_created": "2024-11-18 15:33:31.30899",
+        "hid": "tc-4Qzkrn57rM-0a5d17",
+        "name": "tc-4Qzkrn57rM-0a5d17",
+        "type": "workspace",
+        "created_by_user_drn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
+        "creation_block_id": null,
+        "creation_parent_id": null,
+        "date_updated": "2024-11-18 15:33:31.30899",
+        "edited_by_user_drn": null,
+        "editor": null,
+        "parent_id": null,
+        "dateCreated": "2024-11-18 15:33:31.30899",
+        "dateUpdated": "2024-11-18 15:33:31.30899",
+        "createdByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com"
+    },
+    "{\"workspace\": {\"hid\": \"tc-4Qzkrn57rM-ws\", \"name\": \"tc-4Qzkrn57rM-ws\", \"parentId\": null}}": {
+        "id": "_workspace:Sid6K8Smmj0BMI4rk9mgC",
+        "type": "workspace",
+        "hid": "tc-4Qzkrn57rM-ws",
+        "name": "tc-4Qzkrn57rM-ws",
+        "dateCreated": "2024-11-18 16:26:07.743742",
+        "dateUpdated": "2024-11-18 16:26:07.743742",
+        "createdByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com"
+    },
+    "{\"workspace\": {\"hid\": \"tc-4Qzkrn57rM-d64c9f\", \"name\": \"tc-4Qzkrn57rM-d64c9f\", \"parentId\": null}}": {
+        "id": "_workspace:2vK65TTm45DluAlm0iFjy",
+        "type": "workspace",
+        "hid": "tc-4Qzkrn57rM-d64c9f",
+        "name": "tc-4Qzkrn57rM-d64c9f",
+        "dateCreated": "2024-11-18 15:53:51.035289",
+        "dateUpdated": "2024-11-18 15:53:51.035289",
+        "createdByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com"
+    },
+    "{\"workspace\": {\"hid\": \"tc-4Qzkrn57rM-0f6e4e\", \"name\": \"tc-4Qzkrn57rM-0f6e4e\", \"parentId\": null}}": {
+        "id": "_workspace:rqiFaKV4J4ikBZfHA2O24",
+        "type": "workspace",
+        "hid": "tc-4Qzkrn57rM-0f6e4e",
+        "name": "tc-4Qzkrn57rM-0f6e4e",
+        "dateCreated": "2024-11-18 15:56:33.344735",
+        "dateUpdated": "2024-11-18 15:56:33.344735",
+        "createdByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com"
+    },
+    "{\"workspace\": {\"hid\": \"tc-4Qzkrn57rM-b58b08\", \"name\": \"tc-4Qzkrn57rM-b58b08\", \"parentId\": null}}": {
+        "id": "_workspace:MWfzhDuXx40Ro3p1MDVNw",
+        "type": "workspace",
+        "hid": "tc-4Qzkrn57rM-b58b08",
+        "name": "tc-4Qzkrn57rM-b58b08",
+        "dateCreated": "2024-11-18 15:57:47.608936",
+        "dateUpdated": "2024-11-18 15:57:47.608936",
+        "createdByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com"
+    },
+    "{\"workspace\": {\"hid\": \"tc-4Qzkrn57rM-1931ed\", \"name\": \"tc-4Qzkrn57rM-1931ed\", \"parentId\": null}}": {
+        "id": "_workspace:o9lFgliIWcr8VK7vlHKey",
+        "type": "workspace",
+        "hid": "tc-4Qzkrn57rM-1931ed",
+        "name": "tc-4Qzkrn57rM-1931ed",
+        "dateCreated": "2024-11-18 15:59:39.028279",
+        "dateUpdated": "2024-11-18 15:59:39.028279",
+        "createdByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com"
+    },
+    "{\"workspace\": {\"hid\": \"tc-4Qzkrn57rM-f23fc5\", \"name\": \"tc-4Qzkrn57rM-f23fc5\", \"parentId\": null}}": {
+        "id": "_workspace:FroFcQSbP1NDJVmawsBgL",
+        "type": "workspace",
+        "hid": "tc-4Qzkrn57rM-f23fc5",
+        "name": "tc-4Qzkrn57rM-f23fc5",
+        "dateCreated": "2024-11-18 16:00:54.173953",
+        "dateUpdated": "2024-11-18 16:00:54.173953",
+        "createdByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com"
+    },
+    "{\"workspace\": {\"hid\": \"tc-4Qzkrn57rM-8b0303\", \"name\": \"tc-4Qzkrn57rM-8b0303\", \"parentId\": null}}": {
+        "id": "_workspace:yCliR81tmsMtE4qsJkEys",
+        "type": "workspace",
+        "hid": "tc-4Qzkrn57rM-8b0303",
+        "name": "tc-4Qzkrn57rM-8b0303",
+        "dateCreated": "2024-11-18 16:06:10.511823",
+        "dateUpdated": "2024-11-18 16:06:10.511823",
+        "createdByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com"
+    },
+    "{\"workspace\": {\"hid\": \"tc-4Qzkrn57rM-f750f4\", \"name\": \"tc-4Qzkrn57rM-f750f4\", \"parentId\": null}}": {
+        "id": "_workspace:75AMmkpmosfixjnc73XWl",
+        "type": "workspace",
+        "hid": "tc-4Qzkrn57rM-f750f4",
+        "name": "tc-4Qzkrn57rM-f750f4",
+        "dateCreated": "2024-11-18 16:21:20.773934",
+        "dateUpdated": "2024-11-18 16:21:20.773934",
+        "createdByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com"
+    },
+    "{\"workspace\": {\"hid\": \"tc-4Qzkrn57rM-399fbd\", \"name\": \"tc-4Qzkrn57rM-399fbd\", \"parentId\": null}}": {
+        "id": "_workspace:W4c5t312NiX71qKQNFjTO",
+        "type": "workspace",
+        "hid": "tc-4Qzkrn57rM-399fbd",
+        "name": "tc-4Qzkrn57rM-399fbd",
+        "dateCreated": "2024-11-18 16:22:00.567227",
+        "dateUpdated": "2024-11-18 16:22:00.567227",
+        "createdByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com"
+    },
+    "{\"workspace\": {\"hid\": \"tc-4Qzkrn57rM-0eed00\", \"name\": \"tc-4Qzkrn57rM-0eed00\", \"parentId\": null}}": {
+        "id": "_workspace:hN0T6Ckr3TIIIwhJk3LUe",
+        "type": "workspace",
+        "hid": "tc-4Qzkrn57rM-0eed00",
+        "name": "tc-4Qzkrn57rM-0eed00",
+        "dateCreated": "2024-11-18 16:26:09.584909",
+        "dateUpdated": "2024-11-18 16:26:09.584909",
+        "createdByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com"
+    }
+}

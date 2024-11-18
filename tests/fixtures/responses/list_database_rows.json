@@ -1,0 +1,3210 @@
+{
+    "{\"database_row_id\": \"db-protocol\"}": [
+        {
+            "type": "row",
+            "id": "_row:ISOpttpNcSqxN1DHbY25v",
+            "hid": "proto-1",
+            "parentId": "_database:swAdQAPmv1DaxeqOFKioi",
+            "name": "Transformation protocol",
+            "dateCreated": "2024-06-18 17:31:55.402213",
+            "dateUpdated": "2024-06-18 20:44:34.003",
+            "createdByUserDrn": "drn:identity::user:google-apps|aguru@deeporigin.com",
+            "editedByUserDrn": "drn:identity::user:google-apps|aguru@deeporigin.com",
+            "validationStatus": "valid",
+            "fields": [
+                {
+                    "columnId": "_column:ZqzkPPk0CMNaqzJETk3vy",
+                    "type": "text",
+                    "value": "Transformation protocol",
+                    "version": 1,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:tetm59lnwi1TjsxYKwhvB",
+                    "type": "editor",
+                    "value": {
+                        "topLevelBlocks": [
+                            {
+                                "id": "e0d21c00-9d51-43ea-a1e2-e358726df874",
+                                "type": "heading",
+                                "props": {
+                                    "level": 1,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "Bacterial Transformation Protocol",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "0efe3833-f598-4297-a145-cc01aea0bd40",
+                                "type": "heading",
+                                "props": {
+                                    "level": 3,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "Date: 06/17/2024",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "67951f82-ab51-4035-a858-f6a1a8d29948",
+                                "type": "heading",
+                                "props": {
+                                    "level": 3,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "Experimenter: Akash Guru",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "a36c9308-aa90-4459-b165-7e559463cf65",
+                                "type": "heading",
+                                "props": {
+                                    "level": 2,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "Objective:",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "339ec949-8e49-4642-857d-6dfc65caa384",
+                                "type": "paragraph",
+                                "props": {
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "To introduce foreign plasmid DNA into a bacterial cell and use the transformed bacteria to express the plasmid-encoded gene(s).",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "e67de508-228e-475e-899c-fc6bd720dcfe",
+                                "type": "heading",
+                                "props": {
+                                    "level": 2,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "Materials:",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "61684a78-d503-4cd1-9069-8786ee6e51b0",
+                                "type": "bulletListItem",
+                                "props": {
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "Competent E. coli cells (e.g., DH5\u03b1, TOP10, or similar)",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "0f8d9828-81d4-45e5-901c-b6602a6977ff",
+                                "type": "bulletListItem",
+                                "props": {
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "Plasmid DNA",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "3d72212a-df1b-4cb7-9344-101e8b3f26aa",
+                                "type": "bulletListItem",
+                                "props": {
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "LB broth",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "95fcdce8-ede0-4708-9046-66a47ea2ee98",
+                                "type": "bulletListItem",
+                                "props": {
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "LB agar plates with appropriate antibiotic",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "4496e631-6422-4843-ba6e-a525c44dc9b3",
+                                "type": "bulletListItem",
+                                "props": {
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "Ice bucket with ice",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "d1a50568-fbfa-4159-8c01-a774d02f8497",
+                                "type": "bulletListItem",
+                                "props": {
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "Water bath set to 42\u00b0C",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "133f9352-6535-4a54-b660-d36c23c89acb",
+                                "type": "bulletListItem",
+                                "props": {
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "SOC medium (optional)",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "d24c8531-5c05-433a-ad02-3619381a3600",
+                                "type": "bulletListItem",
+                                "props": {
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "Microcentrifuge tubes",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "31bcf897-9280-461a-bd2f-41d07e9b9590",
+                                "type": "bulletListItem",
+                                "props": {
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "Pipettes and tips",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "5fceb762-b382-4664-9ead-6a042ea4c7b9",
+                                "type": "bulletListItem",
+                                "props": {
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "Incubator set to 37\u00b0C",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "7b2a01bc-e6d6-4441-9c95-bfea7490ec54",
+                                "type": "heading",
+                                "props": {
+                                    "level": 2,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "Protocol:",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "35ef9dbb-6c5d-4848-a360-9eaaf919c7f6",
+                                "type": "heading",
+                                "props": {
+                                    "level": 3,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "1. Preparation of Competent Cells:",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "a2d0d41e-d1bd-4921-8ddd-28968a968d3f",
+                                "type": "paragraph",
+                                "props": {
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "(If competent cells are already prepared, skip to step 2)",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "ec5c5150-1c49-4e9c-9609-37b97e579343",
+                                "type": "checkListItem",
+                                "props": {
+                                    "checked": false,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "1.1 Grow a single colony of E. coli in 5 mL of LB broth overnight at 37\u00b0C with shaking.",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "820f1c2b-2fa4-457b-a5f0-42a15ba6c87d",
+                                "type": "checkListItem",
+                                "props": {
+                                    "checked": false,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "1.2 Inoculate 50 mL of LB broth with 500 \u00b5L of the overnight culture.",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "2cdb57f0-f327-42e3-ad35-ff51ad460bcd",
+                                "type": "checkListItem",
+                                "props": {
+                                    "checked": false,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "1.3 Grow the culture at 37\u00b0C with shaking until the OD600 reaches 0.4-0.6 (log phase).",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "f76569a2-f060-4767-8ccf-aa99968b8873",
+                                "type": "checkListItem",
+                                "props": {
+                                    "checked": false,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "1.4 Chill the culture on ice for 15-20 minutes.",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "7c24305b-1bdf-4d17-a87f-b10144800deb",
+                                "type": "checkListItem",
+                                "props": {
+                                    "checked": false,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "1.5 Pellet the cells by centrifugation at 4,000 x g for 10 minutes at 4\u00b0C.",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "19bf2e19-4ec4-4b76-8218-62cb5ccfdd73",
+                                "type": "checkListItem",
+                                "props": {
+                                    "checked": false,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "1.6 Resuspend the pellet in 20 mL of ice-cold 0.1 M CaCl2.",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "dde81e6f-c901-4792-9c27-f85d1aa556d5",
+                                "type": "checkListItem",
+                                "props": {
+                                    "checked": false,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "1.7 Incubate on ice for 30 minutes.",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "01ba9a70-4902-459b-8d37-9d026bb24d74",
+                                "type": "checkListItem",
+                                "props": {
+                                    "checked": false,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "1.8 Pellet the cells again by centrifugation at 4,000 x g for 10 minutes at 4\u00b0C.",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "cb66617e-f206-479c-a5d0-667bc46783ff",
+                                "type": "checkListItem",
+                                "props": {
+                                    "checked": false,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "1.9 Resuspend the pellet in 5 mL of ice-cold 0.1 M CaCl2 containing 15% glycerol.",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "14a7d281-316f-485a-833c-2b5a75e87ac5",
+                                "type": "checkListItem",
+                                "props": {
+                                    "checked": false,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "1.10 Aliquot the cells into microcentrifuge tubes (100 \u00b5L per tube) and freeze at -80\u00b0C.",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "343d5071-9211-4dab-b2fe-7b297a5d3f40",
+                                "type": "heading",
+                                "props": {
+                                    "level": 3,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "2. Transformation:",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "3610eafc-b3c8-421a-9c30-e974713ecf24",
+                                "type": "checkListItem",
+                                "props": {
+                                    "checked": false,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "2.1 Thaw competent cells on ice (if using frozen competent cells).",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "5d72c17d-f188-40bb-92af-9d0660dc8574",
+                                "type": "checkListItem",
+                                "props": {
+                                    "checked": false,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "2.2 Add 1-5 \u00b5L (10 pg - 100 ng) of plasmid DNA to the competent cells. Gently mix by flicking the tube.",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "b827276b-50dc-4da0-b3b8-93697913ca79",
+                                "type": "checkListItem",
+                                "props": {
+                                    "checked": false,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "2.3 Incubate the mixture on ice for 30 minutes.",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "9218f2ab-41d2-4c24-96d6-65e2fedfe89a",
+                                "type": "checkListItem",
+                                "props": {
+                                    "checked": false,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "2.4 Heat shock the cells by placing the tube in a 42\u00b0C water bath for 45 seconds.",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "fa993456-a4b2-4814-816c-36b35c67d6dd",
+                                "type": "checkListItem",
+                                "props": {
+                                    "checked": false,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "2.5 Immediately transfer the tube back to ice and incubate for 2 minutes.",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "8f9e6c83-3f4b-46b7-b801-90fe1a1809e1",
+                                "type": "checkListItem",
+                                "props": {
+                                    "checked": false,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "2.6 Add 250 \u00b5L of SOC medium or LB broth to the tube.",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "ebe8c2d1-e8e0-4e94-9c42-18e7f7d9096d",
+                                "type": "checkListItem",
+                                "props": {
+                                    "checked": false,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "2.7 Incubate the cells at 37\u00b0C for 1 hour with shaking (250 rpm) to allow for recovery and expression of the antibiotic resistance gene.",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "2d309913-ed72-4dc4-8088-83058592c7a0",
+                                "type": "heading",
+                                "props": {
+                                    "level": 3,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "3. Plating and Incubation:",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "343d59af-a05a-434d-994b-00df954917ce",
+                                "type": "checkListItem",
+                                "props": {
+                                    "checked": false,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "3.1 Plate 50-200 \u00b5L of the transformation mixture onto LB agar plates containing the appropriate antibiotic.",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "73379ae8-1203-45ab-8723-c52f9450a4c1",
+                                "type": "checkListItem",
+                                "props": {
+                                    "checked": false,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "3.2 Spread the cells evenly using a sterile spreader.",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "6c824cdd-2d18-434b-9901-baddaa196442",
+                                "type": "checkListItem",
+                                "props": {
+                                    "checked": false,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "3.3 Incubate the plates upside down at 37\u00b0C overnight.",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "2f77dec7-b78f-408d-a925-7deca492a301",
+                                "type": "heading",
+                                "props": {
+                                    "level": 3,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "4. Analysis:",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "3747be5e-3c6c-43b6-bb28-68aeec84a79f",
+                                "type": "checkListItem",
+                                "props": {
+                                    "checked": false,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "4.1 Check the plates for colonies.",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "30ab500f-7aa0-4e72-be47-c3765225c2fe",
+                                "type": "checkListItem",
+                                "props": {
+                                    "checked": false,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "4.2 Pick single colonies and culture them in LB broth with the appropriate antibiotic for further analysis (e.g., plasmid isolation, restriction digest, PCR, or sequencing).",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "7122e902-9f89-4c5e-aa4d-3274843de44f",
+                                "type": "heading",
+                                "props": {
+                                    "level": 3,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "Notes:",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "47916832-9eb2-43ca-9a3a-aed1fd443f4e",
+                                "type": "bulletListItem",
+                                "props": {
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "Ensure that all solutions and materials are sterile to prevent contamination.",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "1fb47bb7-363b-4c59-b443-ab5886e13321",
+                                "type": "bulletListItem",
+                                "props": {
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "Use appropriate aseptic techniques during the entire procedure.",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "18b01f86-3866-4e0d-83c3-242dc94f4168",
+                                "type": "bulletListItem",
+                                "props": {
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "The efficiency of transformation can vary depending on the plasmid size and the competency of the cells.",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "07f7fafd-57bf-41d8-85a8-37b8003fa80a",
+                                "type": "heading",
+                                "props": {
+                                    "level": 2,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "Results:",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "4cc3412e-0398-4767-b054-6b9a2c033c46",
+                                "type": "paragraph",
+                                "props": {
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [],
+                                "children": []
+                            },
+                            {
+                                "id": "f4bdd7b5-7756-4e1f-b681-ab9fe22e6e0c",
+                                "type": "paragraph",
+                                "props": {
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [],
+                                "children": []
+                            },
+                            {
+                                "id": "902f3483-9fcb-4f4f-acbb-8cd3fdc3b7bf",
+                                "type": "image",
+                                "props": {
+                                    "url": "https://static.igem.org/mediawiki/2019/9/9d/T--Marburg--beforeAI.jpg",
+                                    "name": "",
+                                    "caption": "",
+                                    "showPreview": true,
+                                    "previewWidth": 453,
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "children": []
+                            },
+                            {
+                                "id": "f978ce87-f54e-4360-a7d2-8b8f38727cae",
+                                "type": "paragraph",
+                                "props": {
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [],
+                                "children": []
+                            },
+                            {
+                                "id": "9e5eacae-efd4-4b1b-98e1-15704401f975",
+                                "type": "paragraph",
+                                "props": {
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [],
+                                "children": []
+                            },
+                            {
+                                "id": "5a7a3239-039e-4c14-84f4-b6be839faafd",
+                                "type": "file",
+                                "props": {
+                                    "url": "doFileId://_file:sGl8tqdFZcxsGpJwUHNf6",
+                                    "name": "Pitchdeck_cell culture (1).pdf",
+                                    "caption": "",
+                                    "backgroundColor": "default"
+                                },
+                                "children": []
+                            },
+                            {
+                                "id": "17e28106-f16d-4202-ac5a-a1f2f564492b",
+                                "type": "heading",
+                                "props": {
+                                    "level": 2,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "Conclusion:",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "0c3bb5eb-46b7-4a2d-af9e-0676091dbdc1",
+                                "type": "paragraph",
+                                "props": {
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "Summarize the success of the transformation, any troubleshooting steps taken, and potential improvements for future experiments.",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "f8e93eac-3efd-4c72-8f42-bf6911c52286",
+                                "type": "paragraph",
+                                "props": {
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [],
+                                "children": []
+                            },
+                            {
+                                "id": "452adf3d-6afb-40d0-b841-b69392ea60dd",
+                                "type": "paragraph",
+                                "props": {
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [],
+                                "children": []
+                            },
+                            {
+                                "id": "088e50f5-5f41-443b-94ac-3e25592dc0af",
+                                "type": "paragraph",
+                                "props": {
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [],
+                                "children": []
+                            },
+                            {
+                                "id": "ccc1e156-3f00-4665-bc72-56ad37df8198",
+                                "type": "executableCode",
+                                "props": {
+                                    "code": "import matplotlib.pyplot as plt\r\nimport numpy as np\r\n\r\n# Generate random data\r\nnp.random.seed(0)  # For reproducibility\r\nx = np.random.rand(100)\r\ny = np.random.rand(100)\r\n\r\n# Create scatterplot\r\nplt.figure(figsize=(10, 6))\r\nplt.scatter(x, y, alpha=0.7, edgecolors='w', linewidth=0.5)\r\nplt.title('Random Scatterplot')\r\nplt.xlabel('X-axis')\r\nplt.ylabel('Y-axis')\r\nplt.grid(True)\r\nplt.show()\r\n",
+                                    "codeExecutionId": "_code-exec:euktsKlmlbrhCJmdWoFb1"
+                                },
+                                "children": []
+                            },
+                            {
+                                "id": "aef3b571-41ab-4c25-8762-d4ad75e8c850",
+                                "type": "paragraph",
+                                "props": {
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [],
+                                "children": []
+                            }
+                        ]
+                    },
+                    "version": 1,
+                    "validationStatus": "valid"
+                }
+            ]
+        },
+        {
+            "type": "row",
+            "id": "_row:NPYycvc8QxkutBSpP15Yu",
+            "hid": "proto-26",
+            "parentId": "_database:swAdQAPmv1DaxeqOFKioi",
+            "dateCreated": "2024-11-15 16:46:41.859382",
+            "dateUpdated": "2024-11-15 16:46:41.859382",
+            "createdByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
+            "validationStatus": "valid"
+        },
+        {
+            "type": "row",
+            "id": "_row:h9MFY1tiXyUc2aBeTK1xe",
+            "hid": "proto-28",
+            "parentId": "_database:swAdQAPmv1DaxeqOFKioi",
+            "dateCreated": "2024-11-15 17:46:59.464875",
+            "dateUpdated": "2024-11-15 17:46:59.464875",
+            "createdByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
+            "validationStatus": "valid"
+        },
+        {
+            "type": "row",
+            "id": "_row:PIYAlprVQjmyj1eV2Zj6z",
+            "hid": "proto-17",
+            "parentId": "_database:swAdQAPmv1DaxeqOFKioi",
+            "dateCreated": "2024-10-23 15:39:05.933167",
+            "dateUpdated": "2024-10-23 15:39:05.933167",
+            "createdByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
+            "validationStatus": "valid"
+        },
+        {
+            "type": "row",
+            "id": "_row:exHGCUs6zyjn4R7mBuKAj",
+            "hid": "proto-18",
+            "parentId": "_database:swAdQAPmv1DaxeqOFKioi",
+            "dateCreated": "2024-10-23 15:45:55.480422",
+            "dateUpdated": "2024-10-23 15:45:55.480422",
+            "createdByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
+            "validationStatus": "valid"
+        },
+        {
+            "type": "row",
+            "id": "_row:9ppv4Q3uGlLUHLGQAKpYw",
+            "hid": "proto-27",
+            "parentId": "_database:swAdQAPmv1DaxeqOFKioi",
+            "dateCreated": "2024-11-15 17:43:28.537273",
+            "dateUpdated": "2024-11-15 17:43:28.537273",
+            "createdByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
+            "validationStatus": "valid"
+        },
+        {
+            "type": "row",
+            "id": "_row:jilgtqKEg5i0XkySCexIx",
+            "hid": "proto-20",
+            "parentId": "_database:swAdQAPmv1DaxeqOFKioi",
+            "dateCreated": "2024-10-23 18:28:02.701454",
+            "dateUpdated": "2024-10-23 18:28:02.701454",
+            "createdByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
+            "validationStatus": "valid"
+        },
+        {
+            "type": "row",
+            "id": "_row:yyaoZ9Xg5feENNZCj1VJ3",
+            "hid": "proto-6",
+            "parentId": "_database:swAdQAPmv1DaxeqOFKioi",
+            "dateCreated": "2024-09-24 13:02:42.909392",
+            "dateUpdated": "2024-09-24 13:02:42.909392",
+            "createdByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
+            "validationStatus": "valid"
+        },
+        {
+            "type": "row",
+            "id": "_row:pl7nUeIO0UK9FPXcN8WzX",
+            "hid": "proto-2",
+            "parentId": "_database:swAdQAPmv1DaxeqOFKioi",
+            "dateCreated": "2024-09-24 12:52:48.598752",
+            "dateUpdated": "2024-09-24 12:52:48.598752",
+            "createdByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
+            "validationStatus": "valid"
+        },
+        {
+            "type": "row",
+            "id": "_row:6CjPDPOPKT63NAMsQc4xS",
+            "hid": "proto-7",
+            "parentId": "_database:swAdQAPmv1DaxeqOFKioi",
+            "dateCreated": "2024-09-24 14:12:55.368545",
+            "dateUpdated": "2024-09-24 14:12:55.368545",
+            "createdByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
+            "validationStatus": "valid"
+        }
+    ],
+    "{\"database_row_id\": \"_database:swAdQAPmv1DaxeqOFKioi\"}": [
+        {
+            "type": "row",
+            "id": "_row:ISOpttpNcSqxN1DHbY25v",
+            "hid": "proto-1",
+            "parentId": "_database:swAdQAPmv1DaxeqOFKioi",
+            "name": "Transformation protocol",
+            "dateCreated": "2024-06-18 17:31:55.402213",
+            "dateUpdated": "2024-06-18 20:44:34.003",
+            "createdByUserDrn": "drn:identity::user:google-apps|aguru@deeporigin.com",
+            "editedByUserDrn": "drn:identity::user:google-apps|aguru@deeporigin.com",
+            "validationStatus": "valid",
+            "fields": [
+                {
+                    "columnId": "_column:ZqzkPPk0CMNaqzJETk3vy",
+                    "type": "text",
+                    "value": "Transformation protocol",
+                    "version": 1,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:tetm59lnwi1TjsxYKwhvB",
+                    "type": "editor",
+                    "value": {
+                        "topLevelBlocks": [
+                            {
+                                "id": "e0d21c00-9d51-43ea-a1e2-e358726df874",
+                                "type": "heading",
+                                "props": {
+                                    "level": 1,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "Bacterial Transformation Protocol",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "0efe3833-f598-4297-a145-cc01aea0bd40",
+                                "type": "heading",
+                                "props": {
+                                    "level": 3,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "Date: 06/17/2024",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "67951f82-ab51-4035-a858-f6a1a8d29948",
+                                "type": "heading",
+                                "props": {
+                                    "level": 3,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "Experimenter: Akash Guru",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "a36c9308-aa90-4459-b165-7e559463cf65",
+                                "type": "heading",
+                                "props": {
+                                    "level": 2,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "Objective:",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "339ec949-8e49-4642-857d-6dfc65caa384",
+                                "type": "paragraph",
+                                "props": {
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "To introduce foreign plasmid DNA into a bacterial cell and use the transformed bacteria to express the plasmid-encoded gene(s).",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "e67de508-228e-475e-899c-fc6bd720dcfe",
+                                "type": "heading",
+                                "props": {
+                                    "level": 2,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "Materials:",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "61684a78-d503-4cd1-9069-8786ee6e51b0",
+                                "type": "bulletListItem",
+                                "props": {
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "Competent E. coli cells (e.g., DH5\u03b1, TOP10, or similar)",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "0f8d9828-81d4-45e5-901c-b6602a6977ff",
+                                "type": "bulletListItem",
+                                "props": {
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "Plasmid DNA",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "3d72212a-df1b-4cb7-9344-101e8b3f26aa",
+                                "type": "bulletListItem",
+                                "props": {
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "LB broth",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "95fcdce8-ede0-4708-9046-66a47ea2ee98",
+                                "type": "bulletListItem",
+                                "props": {
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "LB agar plates with appropriate antibiotic",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "4496e631-6422-4843-ba6e-a525c44dc9b3",
+                                "type": "bulletListItem",
+                                "props": {
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "Ice bucket with ice",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "d1a50568-fbfa-4159-8c01-a774d02f8497",
+                                "type": "bulletListItem",
+                                "props": {
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "Water bath set to 42\u00b0C",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "133f9352-6535-4a54-b660-d36c23c89acb",
+                                "type": "bulletListItem",
+                                "props": {
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "SOC medium (optional)",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "d24c8531-5c05-433a-ad02-3619381a3600",
+                                "type": "bulletListItem",
+                                "props": {
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "Microcentrifuge tubes",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "31bcf897-9280-461a-bd2f-41d07e9b9590",
+                                "type": "bulletListItem",
+                                "props": {
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "Pipettes and tips",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "5fceb762-b382-4664-9ead-6a042ea4c7b9",
+                                "type": "bulletListItem",
+                                "props": {
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "Incubator set to 37\u00b0C",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "7b2a01bc-e6d6-4441-9c95-bfea7490ec54",
+                                "type": "heading",
+                                "props": {
+                                    "level": 2,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "Protocol:",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "35ef9dbb-6c5d-4848-a360-9eaaf919c7f6",
+                                "type": "heading",
+                                "props": {
+                                    "level": 3,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "1. Preparation of Competent Cells:",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "a2d0d41e-d1bd-4921-8ddd-28968a968d3f",
+                                "type": "paragraph",
+                                "props": {
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "(If competent cells are already prepared, skip to step 2)",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "ec5c5150-1c49-4e9c-9609-37b97e579343",
+                                "type": "checkListItem",
+                                "props": {
+                                    "checked": false,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "1.1 Grow a single colony of E. coli in 5 mL of LB broth overnight at 37\u00b0C with shaking.",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "820f1c2b-2fa4-457b-a5f0-42a15ba6c87d",
+                                "type": "checkListItem",
+                                "props": {
+                                    "checked": false,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "1.2 Inoculate 50 mL of LB broth with 500 \u00b5L of the overnight culture.",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "2cdb57f0-f327-42e3-ad35-ff51ad460bcd",
+                                "type": "checkListItem",
+                                "props": {
+                                    "checked": false,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "1.3 Grow the culture at 37\u00b0C with shaking until the OD600 reaches 0.4-0.6 (log phase).",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "f76569a2-f060-4767-8ccf-aa99968b8873",
+                                "type": "checkListItem",
+                                "props": {
+                                    "checked": false,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "1.4 Chill the culture on ice for 15-20 minutes.",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "7c24305b-1bdf-4d17-a87f-b10144800deb",
+                                "type": "checkListItem",
+                                "props": {
+                                    "checked": false,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "1.5 Pellet the cells by centrifugation at 4,000 x g for 10 minutes at 4\u00b0C.",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "19bf2e19-4ec4-4b76-8218-62cb5ccfdd73",
+                                "type": "checkListItem",
+                                "props": {
+                                    "checked": false,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "1.6 Resuspend the pellet in 20 mL of ice-cold 0.1 M CaCl2.",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "dde81e6f-c901-4792-9c27-f85d1aa556d5",
+                                "type": "checkListItem",
+                                "props": {
+                                    "checked": false,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "1.7 Incubate on ice for 30 minutes.",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "01ba9a70-4902-459b-8d37-9d026bb24d74",
+                                "type": "checkListItem",
+                                "props": {
+                                    "checked": false,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "1.8 Pellet the cells again by centrifugation at 4,000 x g for 10 minutes at 4\u00b0C.",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "cb66617e-f206-479c-a5d0-667bc46783ff",
+                                "type": "checkListItem",
+                                "props": {
+                                    "checked": false,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "1.9 Resuspend the pellet in 5 mL of ice-cold 0.1 M CaCl2 containing 15% glycerol.",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "14a7d281-316f-485a-833c-2b5a75e87ac5",
+                                "type": "checkListItem",
+                                "props": {
+                                    "checked": false,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "1.10 Aliquot the cells into microcentrifuge tubes (100 \u00b5L per tube) and freeze at -80\u00b0C.",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "343d5071-9211-4dab-b2fe-7b297a5d3f40",
+                                "type": "heading",
+                                "props": {
+                                    "level": 3,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "2. Transformation:",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "3610eafc-b3c8-421a-9c30-e974713ecf24",
+                                "type": "checkListItem",
+                                "props": {
+                                    "checked": false,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "2.1 Thaw competent cells on ice (if using frozen competent cells).",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "5d72c17d-f188-40bb-92af-9d0660dc8574",
+                                "type": "checkListItem",
+                                "props": {
+                                    "checked": false,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "2.2 Add 1-5 \u00b5L (10 pg - 100 ng) of plasmid DNA to the competent cells. Gently mix by flicking the tube.",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "b827276b-50dc-4da0-b3b8-93697913ca79",
+                                "type": "checkListItem",
+                                "props": {
+                                    "checked": false,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "2.3 Incubate the mixture on ice for 30 minutes.",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "9218f2ab-41d2-4c24-96d6-65e2fedfe89a",
+                                "type": "checkListItem",
+                                "props": {
+                                    "checked": false,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "2.4 Heat shock the cells by placing the tube in a 42\u00b0C water bath for 45 seconds.",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "fa993456-a4b2-4814-816c-36b35c67d6dd",
+                                "type": "checkListItem",
+                                "props": {
+                                    "checked": false,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "2.5 Immediately transfer the tube back to ice and incubate for 2 minutes.",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "8f9e6c83-3f4b-46b7-b801-90fe1a1809e1",
+                                "type": "checkListItem",
+                                "props": {
+                                    "checked": false,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "2.6 Add 250 \u00b5L of SOC medium or LB broth to the tube.",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "ebe8c2d1-e8e0-4e94-9c42-18e7f7d9096d",
+                                "type": "checkListItem",
+                                "props": {
+                                    "checked": false,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "2.7 Incubate the cells at 37\u00b0C for 1 hour with shaking (250 rpm) to allow for recovery and expression of the antibiotic resistance gene.",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "2d309913-ed72-4dc4-8088-83058592c7a0",
+                                "type": "heading",
+                                "props": {
+                                    "level": 3,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "3. Plating and Incubation:",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "343d59af-a05a-434d-994b-00df954917ce",
+                                "type": "checkListItem",
+                                "props": {
+                                    "checked": false,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "3.1 Plate 50-200 \u00b5L of the transformation mixture onto LB agar plates containing the appropriate antibiotic.",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "73379ae8-1203-45ab-8723-c52f9450a4c1",
+                                "type": "checkListItem",
+                                "props": {
+                                    "checked": false,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "3.2 Spread the cells evenly using a sterile spreader.",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "6c824cdd-2d18-434b-9901-baddaa196442",
+                                "type": "checkListItem",
+                                "props": {
+                                    "checked": false,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "3.3 Incubate the plates upside down at 37\u00b0C overnight.",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "2f77dec7-b78f-408d-a925-7deca492a301",
+                                "type": "heading",
+                                "props": {
+                                    "level": 3,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "4. Analysis:",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "3747be5e-3c6c-43b6-bb28-68aeec84a79f",
+                                "type": "checkListItem",
+                                "props": {
+                                    "checked": false,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "4.1 Check the plates for colonies.",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "30ab500f-7aa0-4e72-be47-c3765225c2fe",
+                                "type": "checkListItem",
+                                "props": {
+                                    "checked": false,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "4.2 Pick single colonies and culture them in LB broth with the appropriate antibiotic for further analysis (e.g., plasmid isolation, restriction digest, PCR, or sequencing).",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "7122e902-9f89-4c5e-aa4d-3274843de44f",
+                                "type": "heading",
+                                "props": {
+                                    "level": 3,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "Notes:",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "47916832-9eb2-43ca-9a3a-aed1fd443f4e",
+                                "type": "bulletListItem",
+                                "props": {
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "Ensure that all solutions and materials are sterile to prevent contamination.",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "1fb47bb7-363b-4c59-b443-ab5886e13321",
+                                "type": "bulletListItem",
+                                "props": {
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "Use appropriate aseptic techniques during the entire procedure.",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "18b01f86-3866-4e0d-83c3-242dc94f4168",
+                                "type": "bulletListItem",
+                                "props": {
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "The efficiency of transformation can vary depending on the plasmid size and the competency of the cells.",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "07f7fafd-57bf-41d8-85a8-37b8003fa80a",
+                                "type": "heading",
+                                "props": {
+                                    "level": 2,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "Results:",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "4cc3412e-0398-4767-b054-6b9a2c033c46",
+                                "type": "paragraph",
+                                "props": {
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [],
+                                "children": []
+                            },
+                            {
+                                "id": "f4bdd7b5-7756-4e1f-b681-ab9fe22e6e0c",
+                                "type": "paragraph",
+                                "props": {
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [],
+                                "children": []
+                            },
+                            {
+                                "id": "902f3483-9fcb-4f4f-acbb-8cd3fdc3b7bf",
+                                "type": "image",
+                                "props": {
+                                    "url": "https://static.igem.org/mediawiki/2019/9/9d/T--Marburg--beforeAI.jpg",
+                                    "name": "",
+                                    "caption": "",
+                                    "showPreview": true,
+                                    "previewWidth": 453,
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "children": []
+                            },
+                            {
+                                "id": "f978ce87-f54e-4360-a7d2-8b8f38727cae",
+                                "type": "paragraph",
+                                "props": {
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [],
+                                "children": []
+                            },
+                            {
+                                "id": "9e5eacae-efd4-4b1b-98e1-15704401f975",
+                                "type": "paragraph",
+                                "props": {
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [],
+                                "children": []
+                            },
+                            {
+                                "id": "5a7a3239-039e-4c14-84f4-b6be839faafd",
+                                "type": "file",
+                                "props": {
+                                    "url": "doFileId://_file:sGl8tqdFZcxsGpJwUHNf6",
+                                    "name": "Pitchdeck_cell culture (1).pdf",
+                                    "caption": "",
+                                    "backgroundColor": "default"
+                                },
+                                "children": []
+                            },
+                            {
+                                "id": "17e28106-f16d-4202-ac5a-a1f2f564492b",
+                                "type": "heading",
+                                "props": {
+                                    "level": 2,
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "Conclusion:",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "0c3bb5eb-46b7-4a2d-af9e-0676091dbdc1",
+                                "type": "paragraph",
+                                "props": {
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [
+                                    {
+                                        "text": "Summarize the success of the transformation, any troubleshooting steps taken, and potential improvements for future experiments.",
+                                        "type": "text",
+                                        "styles": {}
+                                    }
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": "f8e93eac-3efd-4c72-8f42-bf6911c52286",
+                                "type": "paragraph",
+                                "props": {
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [],
+                                "children": []
+                            },
+                            {
+                                "id": "452adf3d-6afb-40d0-b841-b69392ea60dd",
+                                "type": "paragraph",
+                                "props": {
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [],
+                                "children": []
+                            },
+                            {
+                                "id": "088e50f5-5f41-443b-94ac-3e25592dc0af",
+                                "type": "paragraph",
+                                "props": {
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [],
+                                "children": []
+                            },
+                            {
+                                "id": "ccc1e156-3f00-4665-bc72-56ad37df8198",
+                                "type": "executableCode",
+                                "props": {
+                                    "code": "import matplotlib.pyplot as plt\r\nimport numpy as np\r\n\r\n# Generate random data\r\nnp.random.seed(0)  # For reproducibility\r\nx = np.random.rand(100)\r\ny = np.random.rand(100)\r\n\r\n# Create scatterplot\r\nplt.figure(figsize=(10, 6))\r\nplt.scatter(x, y, alpha=0.7, edgecolors='w', linewidth=0.5)\r\nplt.title('Random Scatterplot')\r\nplt.xlabel('X-axis')\r\nplt.ylabel('Y-axis')\r\nplt.grid(True)\r\nplt.show()\r\n",
+                                    "codeExecutionId": "_code-exec:euktsKlmlbrhCJmdWoFb1"
+                                },
+                                "children": []
+                            },
+                            {
+                                "id": "aef3b571-41ab-4c25-8762-d4ad75e8c850",
+                                "type": "paragraph",
+                                "props": {
+                                    "textColor": "default",
+                                    "textAlignment": "left",
+                                    "backgroundColor": "default"
+                                },
+                                "content": [],
+                                "children": []
+                            }
+                        ]
+                    },
+                    "version": 1,
+                    "validationStatus": "valid"
+                }
+            ]
+        },
+        {
+            "type": "row",
+            "id": "_row:NPYycvc8QxkutBSpP15Yu",
+            "hid": "proto-26",
+            "parentId": "_database:swAdQAPmv1DaxeqOFKioi",
+            "dateCreated": "2024-11-15 16:46:41.859382",
+            "dateUpdated": "2024-11-15 16:46:41.859382",
+            "createdByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
+            "validationStatus": "valid"
+        },
+        {
+            "type": "row",
+            "id": "_row:h9MFY1tiXyUc2aBeTK1xe",
+            "hid": "proto-28",
+            "parentId": "_database:swAdQAPmv1DaxeqOFKioi",
+            "dateCreated": "2024-11-15 17:46:59.464875",
+            "dateUpdated": "2024-11-15 17:46:59.464875",
+            "createdByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
+            "validationStatus": "valid"
+        },
+        {
+            "type": "row",
+            "id": "_row:PIYAlprVQjmyj1eV2Zj6z",
+            "hid": "proto-17",
+            "parentId": "_database:swAdQAPmv1DaxeqOFKioi",
+            "dateCreated": "2024-10-23 15:39:05.933167",
+            "dateUpdated": "2024-10-23 15:39:05.933167",
+            "createdByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
+            "validationStatus": "valid"
+        },
+        {
+            "type": "row",
+            "id": "_row:exHGCUs6zyjn4R7mBuKAj",
+            "hid": "proto-18",
+            "parentId": "_database:swAdQAPmv1DaxeqOFKioi",
+            "dateCreated": "2024-10-23 15:45:55.480422",
+            "dateUpdated": "2024-10-23 15:45:55.480422",
+            "createdByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
+            "validationStatus": "valid"
+        },
+        {
+            "type": "row",
+            "id": "_row:9ppv4Q3uGlLUHLGQAKpYw",
+            "hid": "proto-27",
+            "parentId": "_database:swAdQAPmv1DaxeqOFKioi",
+            "dateCreated": "2024-11-15 17:43:28.537273",
+            "dateUpdated": "2024-11-15 17:43:28.537273",
+            "createdByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
+            "validationStatus": "valid"
+        },
+        {
+            "type": "row",
+            "id": "_row:jilgtqKEg5i0XkySCexIx",
+            "hid": "proto-20",
+            "parentId": "_database:swAdQAPmv1DaxeqOFKioi",
+            "dateCreated": "2024-10-23 18:28:02.701454",
+            "dateUpdated": "2024-10-23 18:28:02.701454",
+            "createdByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
+            "validationStatus": "valid"
+        },
+        {
+            "type": "row",
+            "id": "_row:yyaoZ9Xg5feENNZCj1VJ3",
+            "hid": "proto-6",
+            "parentId": "_database:swAdQAPmv1DaxeqOFKioi",
+            "dateCreated": "2024-09-24 13:02:42.909392",
+            "dateUpdated": "2024-09-24 13:02:42.909392",
+            "createdByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
+            "validationStatus": "valid"
+        },
+        {
+            "type": "row",
+            "id": "_row:pl7nUeIO0UK9FPXcN8WzX",
+            "hid": "proto-2",
+            "parentId": "_database:swAdQAPmv1DaxeqOFKioi",
+            "dateCreated": "2024-09-24 12:52:48.598752",
+            "dateUpdated": "2024-09-24 12:52:48.598752",
+            "createdByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
+            "validationStatus": "valid"
+        },
+        {
+            "type": "row",
+            "id": "_row:6CjPDPOPKT63NAMsQc4xS",
+            "hid": "proto-7",
+            "parentId": "_database:swAdQAPmv1DaxeqOFKioi",
+            "dateCreated": "2024-09-24 14:12:55.368545",
+            "dateUpdated": "2024-09-24 14:12:55.368545",
+            "createdByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
+            "validationStatus": "valid"
+        }
+    ],
+    "{\"database_row_id\": \"_database:swAKhqQzxqTB7cm2FeVcW\"}": [
+        {
+            "type": "row",
+            "id": "_row:K9C8iFDeZkOLnW6lK2rms",
+            "hid": "ks-34",
+            "parentId": "_database:swAKhqQzxqTB7cm2FeVcW",
+            "dateCreated": "2024-10-18 13:30:47.103189",
+            "dateUpdated": "2024-11-16 00:11:51.802721",
+            "createdByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
+            "editedByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
+            "validationStatus": "valid",
+            "fields": [
+                {
+                    "columnId": "_column:z6QzWODldQbQlEk7bKIP5",
+                    "type": "boolean",
+                    "value": false,
+                    "version": 17,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:MDfMnvJ5eIQG4eIXewMGF",
+                    "type": "float",
+                    "value": 15.60159002378363,
+                    "version": 36,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:i3NTGFiGmbbvpB8tCszJJ",
+                    "type": "integer",
+                    "value": 215,
+                    "version": 75,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:orvcMwBnadxNsaN3nsvh8",
+                    "type": "text",
+                    "value": "pms0km",
+                    "version": 4,
+                    "validationStatus": "valid"
+                }
+            ]
+        },
+        {
+            "type": "row",
+            "id": "_row:HaF0njudy1UiS44LfbTY8",
+            "hid": "ks-95",
+            "parentId": "_database:swAKhqQzxqTB7cm2FeVcW",
+            "dateCreated": "2024-10-18 13:30:47.103189",
+            "dateUpdated": "2024-11-16 00:11:51.802721",
+            "createdByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
+            "editedByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
+            "validationStatus": "valid",
+            "fields": [
+                {
+                    "columnId": "_column:z6QzWODldQbQlEk7bKIP5",
+                    "type": "boolean",
+                    "value": true,
+                    "version": 11,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:MDfMnvJ5eIQG4eIXewMGF",
+                    "type": "float",
+                    "value": 43.34685374593745,
+                    "version": 20,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:i3NTGFiGmbbvpB8tCszJJ",
+                    "type": "integer",
+                    "value": 992,
+                    "version": 36,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:orvcMwBnadxNsaN3nsvh8",
+                    "type": "text",
+                    "value": "iwevpw",
+                    "version": 4,
+                    "validationStatus": "valid"
+                }
+            ]
+        },
+        {
+            "type": "row",
+            "id": "_row:XowwgsYLjqtVWbQgYXDgW",
+            "hid": "ks-96",
+            "parentId": "_database:swAKhqQzxqTB7cm2FeVcW",
+            "dateCreated": "2024-10-18 13:30:47.103189",
+            "dateUpdated": "2024-11-16 00:11:51.802721",
+            "createdByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
+            "editedByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
+            "validationStatus": "valid",
+            "fields": [
+                {
+                    "columnId": "_column:z6QzWODldQbQlEk7bKIP5",
+                    "type": "boolean",
+                    "value": true,
+                    "version": 11,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:MDfMnvJ5eIQG4eIXewMGF",
+                    "type": "float",
+                    "value": 95.08975984711299,
+                    "version": 20,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:i3NTGFiGmbbvpB8tCszJJ",
+                    "type": "integer",
+                    "value": 493,
+                    "version": 36,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:orvcMwBnadxNsaN3nsvh8",
+                    "type": "text",
+                    "value": "bdchel",
+                    "version": 4,
+                    "validationStatus": "valid"
+                }
+            ]
+        },
+        {
+            "type": "row",
+            "id": "_row:SCHkGyWn6Q8HKtLbJHRae",
+            "hid": "ks-97",
+            "parentId": "_database:swAKhqQzxqTB7cm2FeVcW",
+            "dateCreated": "2024-10-18 13:30:47.103189",
+            "dateUpdated": "2024-11-16 00:11:51.802721",
+            "createdByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
+            "editedByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
+            "validationStatus": "valid",
+            "fields": [
+                {
+                    "columnId": "_column:z6QzWODldQbQlEk7bKIP5",
+                    "type": "boolean",
+                    "value": false,
+                    "version": 11,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:MDfMnvJ5eIQG4eIXewMGF",
+                    "type": "float",
+                    "value": 86.85128953229663,
+                    "version": 20,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:i3NTGFiGmbbvpB8tCszJJ",
+                    "type": "integer",
+                    "value": 330,
+                    "version": 36,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:orvcMwBnadxNsaN3nsvh8",
+                    "type": "text",
+                    "value": "nbbr49",
+                    "version": 4,
+                    "validationStatus": "valid"
+                }
+            ]
+        },
+        {
+            "type": "row",
+            "id": "_row:vMkkZoVne2KiaJ2K5BdlY",
+            "hid": "ks-25",
+            "parentId": "_database:swAKhqQzxqTB7cm2FeVcW",
+            "dateCreated": "2024-10-18 13:30:47.103189",
+            "dateUpdated": "2024-11-16 00:11:51.802721",
+            "createdByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
+            "editedByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
+            "validationStatus": "valid",
+            "fields": [
+                {
+                    "columnId": "_column:z6QzWODldQbQlEk7bKIP5",
+                    "type": "boolean",
+                    "value": false,
+                    "version": 11,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:MDfMnvJ5eIQG4eIXewMGF",
+                    "type": "float",
+                    "value": 9.249614179762611,
+                    "version": 20,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:i3NTGFiGmbbvpB8tCszJJ",
+                    "type": "integer",
+                    "value": 192,
+                    "version": 43,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:orvcMwBnadxNsaN3nsvh8",
+                    "type": "text",
+                    "value": "o1l81a",
+                    "version": 4,
+                    "validationStatus": "valid"
+                }
+            ]
+        },
+        {
+            "type": "row",
+            "id": "_row:4lSHzko50SqYu1fGeLfsT",
+            "hid": "ks-26",
+            "parentId": "_database:swAKhqQzxqTB7cm2FeVcW",
+            "dateCreated": "2024-10-18 13:30:47.103189",
+            "dateUpdated": "2024-11-16 00:11:51.802721",
+            "createdByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
+            "editedByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
+            "validationStatus": "valid",
+            "fields": [
+                {
+                    "columnId": "_column:z6QzWODldQbQlEk7bKIP5",
+                    "type": "boolean",
+                    "value": false,
+                    "version": 11,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:MDfMnvJ5eIQG4eIXewMGF",
+                    "type": "float",
+                    "value": 96.83094830563796,
+                    "version": 20,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:i3NTGFiGmbbvpB8tCszJJ",
+                    "type": "integer",
+                    "value": 830,
+                    "version": 43,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:orvcMwBnadxNsaN3nsvh8",
+                    "type": "text",
+                    "value": "famr0e",
+                    "version": 4,
+                    "validationStatus": "valid"
+                }
+            ]
+        },
+        {
+            "type": "row",
+            "id": "_row:I0OzNRIVuf0sUelW3f9G4",
+            "hid": "ks-27",
+            "parentId": "_database:swAKhqQzxqTB7cm2FeVcW",
+            "dateCreated": "2024-10-18 13:30:47.103189",
+            "dateUpdated": "2024-11-16 00:11:51.802721",
+            "createdByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
+            "editedByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
+            "validationStatus": "valid",
+            "fields": [
+                {
+                    "columnId": "_column:z6QzWODldQbQlEk7bKIP5",
+                    "type": "boolean",
+                    "value": false,
+                    "version": 11,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:MDfMnvJ5eIQG4eIXewMGF",
+                    "type": "float",
+                    "value": 68.54572671325553,
+                    "version": 20,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:i3NTGFiGmbbvpB8tCszJJ",
+                    "type": "integer",
+                    "value": 555,
+                    "version": 43,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:orvcMwBnadxNsaN3nsvh8",
+                    "type": "text",
+                    "value": "otzl0k",
+                    "version": 4,
+                    "validationStatus": "valid"
+                }
+            ]
+        },
+        {
+            "type": "row",
+            "id": "_row:zwNfvRapu2rzgfbWrxf4g",
+            "hid": "ks-28",
+            "parentId": "_database:swAKhqQzxqTB7cm2FeVcW",
+            "dateCreated": "2024-10-18 13:30:47.103189",
+            "dateUpdated": "2024-11-16 00:11:51.802721",
+            "createdByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
+            "editedByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
+            "validationStatus": "valid",
+            "fields": [
+                {
+                    "columnId": "_column:z6QzWODldQbQlEk7bKIP5",
+                    "type": "boolean",
+                    "value": false,
+                    "version": 11,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:MDfMnvJ5eIQG4eIXewMGF",
+                    "type": "float",
+                    "value": 64.92620219762271,
+                    "version": 20,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:i3NTGFiGmbbvpB8tCszJJ",
+                    "type": "integer",
+                    "value": 512,
+                    "version": 43,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:orvcMwBnadxNsaN3nsvh8",
+                    "type": "text",
+                    "value": "mqym70",
+                    "version": 4,
+                    "validationStatus": "valid"
+                }
+            ]
+        },
+        {
+            "type": "row",
+            "id": "_row:55lijgUD4kzLQXnVrfy4Y",
+            "hid": "ks-29",
+            "parentId": "_database:swAKhqQzxqTB7cm2FeVcW",
+            "dateCreated": "2024-10-18 13:30:47.103189",
+            "dateUpdated": "2024-11-16 00:11:51.802721",
+            "createdByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
+            "editedByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
+            "validationStatus": "valid",
+            "fields": [
+                {
+                    "columnId": "_column:z6QzWODldQbQlEk7bKIP5",
+                    "type": "boolean",
+                    "value": true,
+                    "version": 11,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:MDfMnvJ5eIQG4eIXewMGF",
+                    "type": "float",
+                    "value": 45.41640009372922,
+                    "version": 20,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:i3NTGFiGmbbvpB8tCszJJ",
+                    "type": "integer",
+                    "value": 685,
+                    "version": 43,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:orvcMwBnadxNsaN3nsvh8",
+                    "type": "text",
+                    "value": "ftx6a3",
+                    "version": 4,
+                    "validationStatus": "valid"
+                }
+            ]
+        },
+        {
+            "type": "row",
+            "id": "_row:dKgpwZstHUzoDKV6S579b",
+            "hid": "ks-3",
+            "parentId": "_database:swAKhqQzxqTB7cm2FeVcW",
+            "dateCreated": "2024-10-18 13:30:47.103189",
+            "dateUpdated": "2024-11-16 00:11:51.802721",
+            "createdByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
+            "editedByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
+            "validationStatus": "valid",
+            "fields": [
+                {
+                    "columnId": "_column:z6QzWODldQbQlEk7bKIP5",
+                    "type": "boolean",
+                    "value": true,
+                    "version": 11,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:MDfMnvJ5eIQG4eIXewMGF",
+                    "type": "float",
+                    "value": 98.9301609006846,
+                    "version": 20,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:i3NTGFiGmbbvpB8tCszJJ",
+                    "type": "integer",
+                    "value": 474,
+                    "version": 63,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:NqV7cxhwYTvPjS3n0gHbk",
+                    "type": "select",
+                    "value": {
+                        "selectedOptions": [
+                            "T-34"
+                        ]
+                    },
+                    "version": 1,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:M3O0b0g3SCeJCYag0Dj73",
+                    "type": "select",
+                    "value": {
+                        "selectedOptions": [
+                            "Stalingrad",
+                            "Barbarossa"
+                        ]
+                    },
+                    "version": 2,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:orvcMwBnadxNsaN3nsvh8",
+                    "type": "text",
+                    "value": "4na8vn",
+                    "version": 4,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:TCGSXHCKRCAVTAoqdmiMs",
+                    "type": "user",
+                    "value": {
+                        "userDrns": [
+                            "918ddd65-aa97-4400-9e14-7a8bc1216754"
+                        ]
+                    },
+                    "version": 1,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:hIBjMxvQod4te59XIXjPv",
+                    "type": "reference",
+                    "value": {
+                        "rowIds": [
+                            "_row:eqoQHpfvA53KjWIOHkfL3"
+                        ]
+                    },
+                    "version": 1,
+                    "validationStatus": "valid"
+                }
+            ]
+        }
+    ],
+    "{\"database_row_id\": \"kitchen-sink\"}": [
+        {
+            "type": "row",
+            "id": "_row:K9C8iFDeZkOLnW6lK2rms",
+            "hid": "ks-34",
+            "parentId": "_database:swAKhqQzxqTB7cm2FeVcW",
+            "dateCreated": "2024-10-18 13:30:47.103189",
+            "dateUpdated": "2024-11-16 00:11:51.802721",
+            "createdByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
+            "editedByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
+            "validationStatus": "valid",
+            "fields": [
+                {
+                    "columnId": "_column:z6QzWODldQbQlEk7bKIP5",
+                    "type": "boolean",
+                    "value": false,
+                    "version": 17,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:MDfMnvJ5eIQG4eIXewMGF",
+                    "type": "float",
+                    "value": 15.60159002378363,
+                    "version": 36,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:i3NTGFiGmbbvpB8tCszJJ",
+                    "type": "integer",
+                    "value": 215,
+                    "version": 75,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:orvcMwBnadxNsaN3nsvh8",
+                    "type": "text",
+                    "value": "pms0km",
+                    "version": 4,
+                    "validationStatus": "valid"
+                }
+            ]
+        },
+        {
+            "type": "row",
+            "id": "_row:HaF0njudy1UiS44LfbTY8",
+            "hid": "ks-95",
+            "parentId": "_database:swAKhqQzxqTB7cm2FeVcW",
+            "dateCreated": "2024-10-18 13:30:47.103189",
+            "dateUpdated": "2024-11-16 00:11:51.802721",
+            "createdByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
+            "editedByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
+            "validationStatus": "valid",
+            "fields": [
+                {
+                    "columnId": "_column:z6QzWODldQbQlEk7bKIP5",
+                    "type": "boolean",
+                    "value": true,
+                    "version": 11,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:MDfMnvJ5eIQG4eIXewMGF",
+                    "type": "float",
+                    "value": 43.34685374593745,
+                    "version": 20,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:i3NTGFiGmbbvpB8tCszJJ",
+                    "type": "integer",
+                    "value": 992,
+                    "version": 36,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:orvcMwBnadxNsaN3nsvh8",
+                    "type": "text",
+                    "value": "iwevpw",
+                    "version": 4,
+                    "validationStatus": "valid"
+                }
+            ]
+        },
+        {
+            "type": "row",
+            "id": "_row:XowwgsYLjqtVWbQgYXDgW",
+            "hid": "ks-96",
+            "parentId": "_database:swAKhqQzxqTB7cm2FeVcW",
+            "dateCreated": "2024-10-18 13:30:47.103189",
+            "dateUpdated": "2024-11-16 00:11:51.802721",
+            "createdByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
+            "editedByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
+            "validationStatus": "valid",
+            "fields": [
+                {
+                    "columnId": "_column:z6QzWODldQbQlEk7bKIP5",
+                    "type": "boolean",
+                    "value": true,
+                    "version": 11,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:MDfMnvJ5eIQG4eIXewMGF",
+                    "type": "float",
+                    "value": 95.08975984711299,
+                    "version": 20,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:i3NTGFiGmbbvpB8tCszJJ",
+                    "type": "integer",
+                    "value": 493,
+                    "version": 36,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:orvcMwBnadxNsaN3nsvh8",
+                    "type": "text",
+                    "value": "bdchel",
+                    "version": 4,
+                    "validationStatus": "valid"
+                }
+            ]
+        },
+        {
+            "type": "row",
+            "id": "_row:SCHkGyWn6Q8HKtLbJHRae",
+            "hid": "ks-97",
+            "parentId": "_database:swAKhqQzxqTB7cm2FeVcW",
+            "dateCreated": "2024-10-18 13:30:47.103189",
+            "dateUpdated": "2024-11-16 00:11:51.802721",
+            "createdByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
+            "editedByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
+            "validationStatus": "valid",
+            "fields": [
+                {
+                    "columnId": "_column:z6QzWODldQbQlEk7bKIP5",
+                    "type": "boolean",
+                    "value": false,
+                    "version": 11,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:MDfMnvJ5eIQG4eIXewMGF",
+                    "type": "float",
+                    "value": 86.85128953229663,
+                    "version": 20,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:i3NTGFiGmbbvpB8tCszJJ",
+                    "type": "integer",
+                    "value": 330,
+                    "version": 36,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:orvcMwBnadxNsaN3nsvh8",
+                    "type": "text",
+                    "value": "nbbr49",
+                    "version": 4,
+                    "validationStatus": "valid"
+                }
+            ]
+        },
+        {
+            "type": "row",
+            "id": "_row:vMkkZoVne2KiaJ2K5BdlY",
+            "hid": "ks-25",
+            "parentId": "_database:swAKhqQzxqTB7cm2FeVcW",
+            "dateCreated": "2024-10-18 13:30:47.103189",
+            "dateUpdated": "2024-11-16 00:11:51.802721",
+            "createdByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
+            "editedByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
+            "validationStatus": "valid",
+            "fields": [
+                {
+                    "columnId": "_column:z6QzWODldQbQlEk7bKIP5",
+                    "type": "boolean",
+                    "value": false,
+                    "version": 11,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:MDfMnvJ5eIQG4eIXewMGF",
+                    "type": "float",
+                    "value": 9.249614179762611,
+                    "version": 20,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:i3NTGFiGmbbvpB8tCszJJ",
+                    "type": "integer",
+                    "value": 192,
+                    "version": 43,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:orvcMwBnadxNsaN3nsvh8",
+                    "type": "text",
+                    "value": "o1l81a",
+                    "version": 4,
+                    "validationStatus": "valid"
+                }
+            ]
+        },
+        {
+            "type": "row",
+            "id": "_row:4lSHzko50SqYu1fGeLfsT",
+            "hid": "ks-26",
+            "parentId": "_database:swAKhqQzxqTB7cm2FeVcW",
+            "dateCreated": "2024-10-18 13:30:47.103189",
+            "dateUpdated": "2024-11-16 00:11:51.802721",
+            "createdByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
+            "editedByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
+            "validationStatus": "valid",
+            "fields": [
+                {
+                    "columnId": "_column:z6QzWODldQbQlEk7bKIP5",
+                    "type": "boolean",
+                    "value": false,
+                    "version": 11,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:MDfMnvJ5eIQG4eIXewMGF",
+                    "type": "float",
+                    "value": 96.83094830563796,
+                    "version": 20,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:i3NTGFiGmbbvpB8tCszJJ",
+                    "type": "integer",
+                    "value": 830,
+                    "version": 43,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:orvcMwBnadxNsaN3nsvh8",
+                    "type": "text",
+                    "value": "famr0e",
+                    "version": 4,
+                    "validationStatus": "valid"
+                }
+            ]
+        },
+        {
+            "type": "row",
+            "id": "_row:I0OzNRIVuf0sUelW3f9G4",
+            "hid": "ks-27",
+            "parentId": "_database:swAKhqQzxqTB7cm2FeVcW",
+            "dateCreated": "2024-10-18 13:30:47.103189",
+            "dateUpdated": "2024-11-16 00:11:51.802721",
+            "createdByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
+            "editedByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
+            "validationStatus": "valid",
+            "fields": [
+                {
+                    "columnId": "_column:z6QzWODldQbQlEk7bKIP5",
+                    "type": "boolean",
+                    "value": false,
+                    "version": 11,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:MDfMnvJ5eIQG4eIXewMGF",
+                    "type": "float",
+                    "value": 68.54572671325553,
+                    "version": 20,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:i3NTGFiGmbbvpB8tCszJJ",
+                    "type": "integer",
+                    "value": 555,
+                    "version": 43,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:orvcMwBnadxNsaN3nsvh8",
+                    "type": "text",
+                    "value": "otzl0k",
+                    "version": 4,
+                    "validationStatus": "valid"
+                }
+            ]
+        },
+        {
+            "type": "row",
+            "id": "_row:zwNfvRapu2rzgfbWrxf4g",
+            "hid": "ks-28",
+            "parentId": "_database:swAKhqQzxqTB7cm2FeVcW",
+            "dateCreated": "2024-10-18 13:30:47.103189",
+            "dateUpdated": "2024-11-16 00:11:51.802721",
+            "createdByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
+            "editedByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
+            "validationStatus": "valid",
+            "fields": [
+                {
+                    "columnId": "_column:z6QzWODldQbQlEk7bKIP5",
+                    "type": "boolean",
+                    "value": false,
+                    "version": 11,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:MDfMnvJ5eIQG4eIXewMGF",
+                    "type": "float",
+                    "value": 64.92620219762271,
+                    "version": 20,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:i3NTGFiGmbbvpB8tCszJJ",
+                    "type": "integer",
+                    "value": 512,
+                    "version": 43,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:orvcMwBnadxNsaN3nsvh8",
+                    "type": "text",
+                    "value": "mqym70",
+                    "version": 4,
+                    "validationStatus": "valid"
+                }
+            ]
+        },
+        {
+            "type": "row",
+            "id": "_row:55lijgUD4kzLQXnVrfy4Y",
+            "hid": "ks-29",
+            "parentId": "_database:swAKhqQzxqTB7cm2FeVcW",
+            "dateCreated": "2024-10-18 13:30:47.103189",
+            "dateUpdated": "2024-11-16 00:11:51.802721",
+            "createdByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
+            "editedByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
+            "validationStatus": "valid",
+            "fields": [
+                {
+                    "columnId": "_column:z6QzWODldQbQlEk7bKIP5",
+                    "type": "boolean",
+                    "value": true,
+                    "version": 11,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:MDfMnvJ5eIQG4eIXewMGF",
+                    "type": "float",
+                    "value": 45.41640009372922,
+                    "version": 20,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:i3NTGFiGmbbvpB8tCszJJ",
+                    "type": "integer",
+                    "value": 685,
+                    "version": 43,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:orvcMwBnadxNsaN3nsvh8",
+                    "type": "text",
+                    "value": "ftx6a3",
+                    "version": 4,
+                    "validationStatus": "valid"
+                }
+            ]
+        },
+        {
+            "type": "row",
+            "id": "_row:dKgpwZstHUzoDKV6S579b",
+            "hid": "ks-3",
+            "parentId": "_database:swAKhqQzxqTB7cm2FeVcW",
+            "dateCreated": "2024-10-18 13:30:47.103189",
+            "dateUpdated": "2024-11-16 00:11:51.802721",
+            "createdByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
+            "editedByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
+            "validationStatus": "valid",
+            "fields": [
+                {
+                    "columnId": "_column:z6QzWODldQbQlEk7bKIP5",
+                    "type": "boolean",
+                    "value": true,
+                    "version": 11,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:MDfMnvJ5eIQG4eIXewMGF",
+                    "type": "float",
+                    "value": 98.9301609006846,
+                    "version": 20,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:i3NTGFiGmbbvpB8tCszJJ",
+                    "type": "integer",
+                    "value": 474,
+                    "version": 63,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:NqV7cxhwYTvPjS3n0gHbk",
+                    "type": "select",
+                    "value": {
+                        "selectedOptions": [
+                            "T-34"
+                        ]
+                    },
+                    "version": 1,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:M3O0b0g3SCeJCYag0Dj73",
+                    "type": "select",
+                    "value": {
+                        "selectedOptions": [
+                            "Stalingrad",
+                            "Barbarossa"
+                        ]
+                    },
+                    "version": 2,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:orvcMwBnadxNsaN3nsvh8",
+                    "type": "text",
+                    "value": "4na8vn",
+                    "version": 4,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:TCGSXHCKRCAVTAoqdmiMs",
+                    "type": "user",
+                    "value": {
+                        "userDrns": [
+                            "918ddd65-aa97-4400-9e14-7a8bc1216754"
+                        ]
+                    },
+                    "version": 1,
+                    "validationStatus": "valid"
+                },
+                {
+                    "columnId": "_column:hIBjMxvQod4te59XIXjPv",
+                    "type": "reference",
+                    "value": {
+                        "rowIds": [
+                            "_row:eqoQHpfvA53KjWIOHkfL3"
+                        ]
+                    },
+                    "version": 1,
+                    "validationStatus": "valid"
+                }
+            ]
+        }
+    ]
+}

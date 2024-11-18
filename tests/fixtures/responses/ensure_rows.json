@@ -1,0 +1,30 @@
+{
+    "{\"database_id\": \"db-protocol\", \"rows\": [{\"row\": {}}]}": {
+        "rows": [
+            {
+                "type": "row",
+                "id": "_row:C7Cb3LvJQ70TCV0XdKdon",
+                "hid": "proto-30",
+                "parentId": "_database:swAdQAPmv1DaxeqOFKioi",
+                "dateCreated": "2024-11-18 16:06:10.810177",
+                "dateUpdated": "2024-11-18 16:06:10.810177",
+                "createdByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
+                "validationStatus": "valid"
+            }
+        ]
+    },
+    "{\"database_id\": \"kitchen-sink\", \"rows\": [{\"row\": {}}]}": {
+        "rows": [
+            {
+                "type": "row",
+                "id": "_row:d1EpkDWMJUTwCsqbJR7No",
+                "hid": "ks-111",
+                "parentId": "_database:swAKhqQzxqTB7cm2FeVcW",
+                "dateCreated": "2024-11-18 16:26:09.364371",
+                "dateUpdated": "2024-11-18 16:26:09.364371",
+                "createdByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
+                "validationStatus": "valid"
+            }
+        ]
+    }
+}

@@ -5,6 +5,8 @@ from mock_client import MockClient
 
 from tests.utils import _run_cli_command
 
+STASH = True
+
 
 @pytest.fixture(scope="session", autouse=True)
 def config(pytestconfig):
@@ -28,13 +30,21 @@ def config(pytestconfig):
 
         # if we're going to be making requests to a live
         # instance, we need to make sensible requests
-        databases = api.list_rows(row_type="database")
+        databases = api.list_rows(
+            row_type="database",
+            _stash=STASH,
+        )
         data["databases"] = [db.hid for db in databases]
-        rows = api.list_rows(row_type="row")
+        rows = api.list_rows(
+            row_type="row",
+            _stash=STASH,
+        )
         data["rows"] = [row.id for row in rows]
 
         # get a list of all files
-        files = api.list_files()
+        files = api.list_files(
+            _stash=STASH,
+        )
         if len(files) > 0:
             data["file"] = files[0].file
 

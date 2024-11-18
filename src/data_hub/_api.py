@@ -5,11 +5,17 @@ with these functions via api.py
 """
 
 import inspect
+import json
 import sys
+from pathlib import Path
 
+from box import Box
 from deeporigin import auth
 from deeporigin.exceptions import DeepOriginException
-from deeporigin.utils.core import _get_method, _print_dict
+from deeporigin.utils.core import (
+    PersistentDict,
+    _get_method,
+)
 from deeporigin_data import (
     AuthenticationError,
     ConflictError,
@@ -48,7 +54,7 @@ def _get_client_methods():
     # the only reason we're creating this client is to
     # extract methods from it. So no need to
     # authenticate
-    client = DeeporiginData(token="", org_id="")
+    client = DeeporiginData(token="", org_id="").with_raw_response
     methods = set(
         [
             attr
@@ -64,7 +70,6 @@ def _get_default_client(
     *,
     client=None,
     refresh: bool = True,
-    debug: bool = False,
     use_async: bool = False,
 ):
     """Internal function to instantiate client
@@ -108,10 +113,7 @@ def _get_default_client(
                 token=access_token,
                 org_id=org_id,
                 base_url=base_url,
-            )
-
-        if debug:
-            client = client.with_raw_response
+            ).with_raw_response
 
     return client
 
@@ -124,7 +126,7 @@ def _create_function(method_path):
     # of inspecting its methods and extracting
     # function signatures. So we don't need any
     # authentication
-    client = DeeporiginData(token="", org_id="")
+    client = DeeporiginData(token="", org_id="").with_raw_response
     method = _get_method(client, method_path)
 
     signature = inspect.signature(method)
@@ -132,12 +134,11 @@ def _create_function(method_path):
     def dynamic_function(
         *,
         client=None,
-        debug: bool = False,
+        _stash: bool = False,
         **kwargs,
     ):
         if client is None:
             client = _get_default_client(
-                debug=debug,
                 refresh=False,
             )
         method = _get_method(client, method_path)
@@ -182,18 +183,37 @@ def _create_function(method_path):
                 title="Deep Origin error: [Name conflicts]",
             )
 
-        if debug:
-            print(f"Response request = {response.http_request}")
-            print("Response headers:")
-            _print_dict(dict(response.headers), json=False)
-            print(f"Response = {response.http_response}")
-            response = response.json()
+        response = response.json()
 
-        if hasattr(response, "data"):
-            return response.data
+        if "data" in response.keys():
+            response = response["data"]
+            if isinstance(response, list):
+                response = [Box(item) for item in response]
+            else:
+                response = Box(response)
         else:
-            # this should never happen
-            return response
+            response = Box(response)
+
+        if _stash:
+            print("Stashing response")
+            stash_loc = (
+                Path(__file__).resolve().parent.parent.parent
+                / "tests"
+                / "fixtures"
+                / "responses"
+                / f"{method_path}.json"
+            )
+            stashed_data = PersistentDict(stash_loc)
+            key = json.dumps(kwargs, sort_keys=True)
+
+            if isinstance(response, list):
+                stashed_response = response[:10]
+            else:
+                stashed_response = response
+
+            stashed_data[key] = stashed_response
+
+        return response
 
     # attach the signature of the underlying method to the
     # function so that IDEs can display it properly

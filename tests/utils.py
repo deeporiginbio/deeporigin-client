@@ -12,6 +12,9 @@ TEST_DB_NAME = TEST_PREFIX + "db"
 TEST_WS_NAME = TEST_PREFIX + "ws"
 
 
+STASH = True
+
+
 @beartype
 def _run_cli_command(argv: list[str], client) -> str:
     """helper function to run a CLI command, parse output and return"""
@@ -72,14 +75,19 @@ def config(pytestconfig):
 
         # if we're going to be making requests to a live
         # instance, we need to make sensible requests
-        rows = api.list_rows()
+        rows = api.list_rows(
+            _stash=STASH,
+        )
 
-        data["databases"] = [row.hid for row in rows if row.type == "database"]
+        # assume that this exists
+        data["databases"] = ["kitchen-sink"]
         data["folders"] = [row.hid for row in rows if row.type == "workspace"]
         data["rows"] = [row.hid for row in rows if row.type == "row"]
 
         # get a list of all files
-        files = api.list_files()
+        files = api.list_files(
+            _stash=STASH,
+        )
         if len(files) > 0:
             data["file"] = files[0].file
 

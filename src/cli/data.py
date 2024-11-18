@@ -174,7 +174,6 @@ class DataController(cement.Controller):
                     pdata["ID"].append(item.file.id)
                 _print_dict(pdata, json=False, transpose=False)
             else:
-                files = [file.dict() for file in files]
                 _show_json(files)
             return
 
@@ -192,7 +191,6 @@ class DataController(cement.Controller):
                     _print_tree(branch)
             else:
                 rows = api.list_rows(client=self._get_client())
-                rows = [row.dict() for row in rows]
                 _show_json(rows)
 
             return
@@ -225,7 +223,6 @@ class DataController(cement.Controller):
                 pdata["ID"].append(item.hid)
             _print_dict(pdata, json=False, transpose=False)
         else:
-            rows = [row.dict() for row in rows]
             _show_json(rows)
 
     @cement.ex(
@@ -256,7 +253,7 @@ class DataController(cement.Controller):
                 file_id=self.app.pargs.object_id,
                 client=self._get_client(),
             )
-            data = data.dict()
+
         else:
             # not a file
 
@@ -264,8 +261,6 @@ class DataController(cement.Controller):
                 row_id=self.app.pargs.object_id,
                 client=self._get_client(),
             )
-
-            data = dict(data)
 
             data.pop("row_json_schema", None)
             data.pop("rowJsonSchema", None)
@@ -278,7 +273,11 @@ class DataController(cement.Controller):
 
                 col_names_str = ", ".join(col_names)
 
-                col_data = dict(Name=col_names, Type=col_types, ID=col_ids)
+                col_data = dict(
+                    Name=col_names,
+                    Type=col_types,
+                    ID=col_ids,
+                )
 
                 if data["type"] == "database" and not self.app.pargs.json:
                     data["Column Names"] = _truncate(col_names)
@@ -414,7 +413,7 @@ class DataController(cement.Controller):
 
         if not self.app.pargs.database:
             # we are not making an assignment, so abort
-            _print_dict(data.dict(), json=self.app.pargs.json, key_label="Property")
+            _print_dict(data, json=self.app.pargs.json, key_label="Property")
             return
 
         if self.app.pargs.column and self.app.pargs.database:
@@ -425,9 +424,8 @@ class DataController(cement.Controller):
                 row_id=self.app.pargs.row,
             )
 
-            data = data.rows
+            data = data.rows[0]
 
-            data = [row.dict() for row in data][0]
             data.pop("fields", None)
 
             _print_dict(

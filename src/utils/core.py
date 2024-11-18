@@ -15,6 +15,110 @@ from tabulate import tabulate
 T = typing.TypeVar("T")
 
 
+class PersistentDict:
+    """
+    A class that behaves like a dictionary but persists its data to a JSON file.
+    """
+
+    def __init__(self, file_path):
+        """
+        Initialize the PersistentDict.
+
+        Args:
+            file_path (str or Path): The path to the JSON file.
+        """
+        self.file_path = Path(file_path)
+        self._data = self._load_or_initialize()
+
+    def _load_or_initialize(self):
+        """
+        Load data from the JSON file if it exists, or initialize an empty dict.
+        """
+        if self.file_path.exists():
+            with self.file_path.open("r", encoding="utf-8") as f:
+                return json.load(f)
+        else:
+            self.file_path.parent.mkdir(
+                parents=True, exist_ok=True
+            )  # Ensure the directory exists
+            self._save({})
+            return {}
+
+    def _save(self, data):
+        """
+        Save the current data to the JSON file.
+        """
+        with self.file_path.open("w", encoding="utf-8") as f:
+            json.dump(data, f, indent=4)
+
+    def __getitem__(self, key):
+        """return item by key"""
+        return self._data[key]
+
+    def __setitem__(self, key, value):
+        """set item"""
+
+        self._data[key] = value
+        self._save(self._data)
+
+    def __delitem__(self, key):
+        """delete item in dict"""
+
+        del self._data[key]
+        self._save(self._data)
+
+    def __contains__(self, key):
+        """check if key is in dict"""
+
+        return key in self._data
+
+    def __iter__(self):
+        """return iterator"""
+
+        return iter(self._data)
+
+    def __len__(self):
+        """return length"""
+
+        return len(self._data)
+
+    def __repr__(self):
+        """return repr"""
+
+        return repr(self._data)
+
+    def keys(self):
+        """return keys"""
+
+        return self._data.keys()
+
+    def values(self):
+        """return values"""
+
+        return self._data.values()
+
+    def items(self):
+        """return items"""
+
+        return self._data.items()
+
+    def get(self, key, default=None):
+        """return item by key"""
+
+        return self._data.get(key, default)
+
+    def update(self, *args, **kwargs):
+        """update dict"""
+        self._data.update(*args, **kwargs)
+        self._save(self._data)
+
+    def clear(self):
+        """clear dict"""
+
+        self._data.clear()
+        self._save(self._data)
+
+
 def _get_method(obj, method_path):
     # Split the method path into components
     methods = method_path.split(".")
@@ -61,7 +165,7 @@ def find_last_updated_row(rows: List[T]) -> T:
 
     # Iterate over the list of objects
     for row in rows:
-        current_date = datetime.strptime(row.date_updated, "%Y-%m-%d %H:%M:%S.%f")
+        current_date = datetime.strptime(row.dateUpdated, "%Y-%m-%d %H:%M:%S.%f")
 
         if most_recent_date is None or current_date > most_recent_date:
             most_recent_date = current_date

@@ -11,6 +11,8 @@ from deeporigin.utils.constants import DATAFRAME_ATTRIBUTE_KEYS, PREFIXES
 
 from tests.utils import TEST_DB_NAME, TEST_PREFIX, TEST_WS_NAME, config  # noqa: F401
 
+STASH = True
+
 
 def test_upload_file(config):  # noqa: F811
     full_path = os.path.abspath(__file__)
@@ -27,6 +29,7 @@ def test_upload_file(config):  # noqa: F811
         api.upload_file(
             full_path,
             client=config["client"],
+            _stash=STASH,
         )
 
 
@@ -36,11 +39,13 @@ def test_make_database_rows(config):  # noqa: F811
             config["databases"][0],
             n_rows=0,
             client=config["client"],
+            _stash=STASH,
         )
 
     response = api.make_database_rows(
         config["databases"][0],
         client=config["client"],
+        _stash=STASH,
     )
 
     for row in response.rows:
@@ -53,6 +58,7 @@ def test_create_workspace(config):  # noqa: F811
         name=name,
         hid=name,
         client=config["client"],
+        _stash=STASH,
     )
 
 
@@ -64,6 +70,7 @@ def test_create_database(config):  # noqa: F811
         hid_prefix="test" + unique_id,
         parent_id=config["folders"][0],
         client=config["client"],
+        _stash=STASH,
     )
 
 
@@ -72,6 +79,7 @@ def test_delete_workspace(config):  # noqa: F811
         api.create_workspace(
             name=TEST_WS_NAME,
             client=config["client"],
+            _stash=STASH,
         )
     except DeepOriginException:
         # this may already exist, but we don't care
@@ -80,6 +88,7 @@ def test_delete_workspace(config):  # noqa: F811
     api.delete_workspace(
         workspace_id=TEST_WS_NAME,
         client=config["client"],
+        _stash=STASH,
     )
 
 
@@ -90,6 +99,7 @@ def test_delete_database(config):  # noqa: F811
         api.create_database(
             name=TEST_DB_NAME,
             client=config["client"],
+            _stash=STASH,
         )
     except DeepOriginException:
         # this may already exist, but we don't care
@@ -97,6 +107,7 @@ def test_delete_database(config):  # noqa: F811
 
     api.delete_database(
         database_id=TEST_DB_NAME,
+        _stash=STASH,
         client=config["client"],
     )
 
@@ -105,6 +116,7 @@ def test_list_rows(config):  # noqa: F811
     rows = api.list_rows(
         parent_id=config["databases"][0],
         client=config["client"],
+        _stash=STASH,
     )
 
     for row in rows:
@@ -115,17 +127,19 @@ def test_list_rows_root_parent(config):  # noqa: F811
     root = api.list_rows(
         parent_is_root=True,
         client=config["client"],
+        _stash=STASH,
     )
 
     root = root[0]
 
-    assert root.parent_id is None, "Expected root to have no parent"
+    assert root.parentId is None, "Expected root to have no parent"
 
 
 def test_list_rows_by_type(config):  # noqa: F811
     rows = api.list_rows(
         row_type="workspace",
         client=config["client"],
+        _stash=STASH,
     )
 
     assert len(rows) > 0, "Expected at least one folder"
@@ -140,6 +154,7 @@ def test_list_files_unassigned(config):  # noqa: F811
     files = api.list_files(
         is_unassigned=True,
         client=config["client"],
+        _stash=STASH,
     )
 
     assert len(files) > 0, "Expected to find at least 1 unassigned files"
@@ -154,6 +169,7 @@ def test_list_files_assigned(config):  # noqa: F811
     files = api.list_files(
         is_unassigned=False,
         client=config["client"],
+        _stash=STASH,
     )
 
     assert len(files) > 0, "Expected to find at least 1 assigned files"
@@ -166,17 +182,18 @@ def test_list_files_assigned(config):  # noqa: F811
 
         for assignment in assignments:
             assert (
-                assignment.row_id is not None
-            ), f"Expected to find a row_id in assignments, but instead found {assignment}"
+                assignment.rowId is not None
+            ), f"Expected to find a rowId in assignments, but instead found {assignment}"
 
 
 def test_describe_database_stats(config):  # noqa: F811
     stats = api.describe_database_stats(
         database_id=config["databases"][0],
         client=config["client"],
+        _stash=STASH,
     )
 
-    assert stats.row_count >= 0, "Expected a positive number of rows"
+    assert stats.rowCount >= 0, "Expected a positive number of rows"
 
 
 def test_describe_row(config):  # noqa: F811
@@ -186,6 +203,7 @@ def test_describe_row(config):  # noqa: F811
         row_id=config["rows"][0],
         client=config["client"],
         fields=True,
+        _stash=STASH,
     )
 
     # this doesn't seem to always be true
@@ -195,6 +213,7 @@ def test_describe_row(config):  # noqa: F811
         row_id=config["rows"][0],
         client=config["client"],
         fields=False,
+        _stash=STASH,
     )
 
     assert not hasattr(row, "fields"), "Expected to NOT find fields in response"
@@ -203,6 +222,7 @@ def test_describe_row(config):  # noqa: F811
     row = api.describe_row(
         row_id=config["databases"][0],
         client=config["client"],
+        _stash=STASH,
     )
 
 
@@ -210,6 +230,7 @@ def test_convert_id_format(config):  # noqa: F811
     conversions = api.convert_id_format(
         hids=config["rows"],
         client=config["client"],
+        _stash=STASH,
     )
 
     system_ids = []
@@ -221,6 +242,7 @@ def test_convert_id_format(config):  # noqa: F811
     conversions = api.convert_id_format(
         ids=system_ids,
         client=config["client"],
+        _stash=STASH,
     )
 
     with pytest.raises(DeepOriginException, match="should be a list of strings"):
@@ -231,6 +253,7 @@ def test_list_database_rows(config):  # noqa: F811
     api.list_database_rows(
         database_row_id=config["databases"][0],
         client=config["client"],
+        _stash=STASH,
     )
 
 
@@ -238,10 +261,13 @@ def test_get_dataframe(config):  # noqa: F811
     if config["mock"]:
         return
 
+    print(config["databases"][0])
+
     df = api.get_dataframe(
         config["databases"][0],
         reference_format="system-id",
         client=config["client"],
+        _stash=STASH,
     )
 
     assert isinstance(df, pd.DataFrame), "Expected return type to be a pandas Dataframe"
@@ -259,6 +285,7 @@ def test_get_dataframe(config):  # noqa: F811
         reference_format="system-id",
         client=config["client"],
         return_type="dict",
+        _stash=STASH,
     )
 
     assert isinstance(data, dict), "Expected return type to be a dict"
@@ -268,6 +295,7 @@ def test_list_mentions(config):  # noqa: F811
     data = api.list_mentions(
         query=config["rows"][0],
         client=config["client"],
+        _stash=STASH,
     )
 
     assert hasattr(
@@ -278,17 +306,20 @@ def test_list_mentions(config):  # noqa: F811
 
 
 def test_get_tree(config):  # noqa: F811
-    tree = api.get_tree(client=config["client"])
+    tree = api.get_tree(
+        client=config["client"],
+        _stash=STASH,
+    )
 
     tree = tree[0]
 
-    assert tree["parent_id"] is None, "Expected the root of the tree to have no parent"
+    assert tree.parentId is None, "Expected the root of the tree to have no parent"
 
     tree.pop("children")
 
     tree = api.get_tree(client=config["client"], include_rows=False)
     tree = tree[0]
-    assert tree["parent_id"] is None, "Expected the root of the tree to have no parent"
+    assert tree.parentId is None, "Expected the root of the tree to have no parent"
 
     tree.pop("children")
 
@@ -298,11 +329,12 @@ def test_create_file_download_url(config):  # noqa: F811
     data = api.create_file_download_url(
         file_id=file_id,
         client=config["client"],
+        _stash=STASH,
     )
 
-    assert hasattr(
-        data, "download_url"
-    ), "Expected to find `download_url` in data response"
+    assert (
+        "downloadUrl" in data.keys()
+    ), "Expected to find `downloadUrl` in data response"
 
 
 def test_download_file(config):  # noqa: F811
@@ -322,8 +354,16 @@ def test_download_file(config):  # noqa: F811
             )
 
     else:
-        api.download_file(file_id=file_id, client=config["client"])
-        data = api.describe_file(file_id=file_id)
+        api.download_file(
+            file_id=file_id,
+            client=config["client"],
+            _stash=STASH,
+        )
+        data = api.describe_file(
+            file_id=file_id,
+            _stash=STASH,
+            client=config["client"],
+        )
         os.remove(data.name)
 
 
@@ -333,23 +373,26 @@ def test_describe_file(config):  # noqa: F811
     api.describe_file(
         file_id=file_id,
         client=config["client"],
+        _stash=STASH,
     )
 
 
 def test_get_row_data(config):  # noqa: F811
-    row_id = config["rows"][0]
+    rowId = config["rows"][0]
 
     data1 = api.get_row_data(
-        row_id=row_id,
+        row_id=rowId,
         client=config["client"],
+        _stash=STASH,
     )
 
     assert isinstance(data1, dict), "Expected return type to be a dict"
 
     data2 = api.get_row_data(
-        row_id,
+        rowId,
         client=config["client"],
         use_column_keys=True,
+        _stash=STASH,
     )
 
     assert isinstance(data2, dict), "Expected return type to be a dict"
@@ -360,12 +403,14 @@ def test_get_cell_data(config):  # noqa: F811
     data = api.get_row_data(
         row_id=row_id,
         client=config["client"],
+        _stash=STASH,
     )
     column_name = list(data.keys())[0]
     data = api.get_cell_data(
         row_id=row_id,
         column_name=column_name,
         client=config["client"],
+        _stash=STASH,
     )
 
 
@@ -375,6 +420,7 @@ def test_download_database(config):  # noqa: F811
         db_id,
         include_files=False,
         client=config["client"],
+        _stash=STASH,
     )
 
     file_name = db_id + ".csv"
@@ -388,6 +434,7 @@ def test_download(config):  # noqa: F811
         db_id,
         destination=os.getcwd(),
         client=config["client"],
+        _stash=STASH,
     )
 
     file_name = db_id + ".csv"
@@ -398,6 +445,7 @@ def test_download(config):  # noqa: F811
         f"{PREFIXES.DO}{db_id}",
         destination=os.getcwd(),
         client=config["client"],
+        _stash=STASH,
     )
 
     file_name = db_id + ".csv"
