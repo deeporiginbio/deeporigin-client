@@ -528,7 +528,8 @@ def get_tree(
     for obj in folders + databases:
         obj["children"] = []
 
-    root_objects = [obj for obj in objects if obj.parentId is None]
+    # sometimes, parentId is missing (in which case it should be treated as  root object)
+    root_objects = [obj for obj in objects if getattr(obj, "parentId", None) is None]
 
     for root_object in root_objects:
         _add_children(root_object, folders)
@@ -551,7 +552,9 @@ def _add_children(node: dict, objects: list[dict]) -> None:
         Do not use this function.
 
     """
-    node["children"] = [obj for obj in objects if obj.parentId == node.id]
+    node["children"] = [
+        obj for obj in objects if getattr(obj, "parentId", None) == node.id
+    ]
 
 
 @beartype

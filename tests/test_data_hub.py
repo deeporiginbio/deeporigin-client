@@ -132,7 +132,9 @@ def test_list_rows_root_parent(config):  # noqa: F811
 
     root = root[0]
 
-    assert root.parentId is None, "Expected root to have no parent"
+    assert (
+        "parentId" not in root.keys() or root.parentId is None
+    ), "Expected root to have no parent"
 
 
 def test_list_rows_by_type(config):  # noqa: F811
@@ -161,7 +163,7 @@ def test_list_files_unassigned(config):  # noqa: F811
 
     for file in files:
         assert (
-            file.assignments is None
+            "assignments" not in file.keys() or file.assignments is None
         ), f"Expected not to see an assignments key for this file, but instead found {file}"
 
 
@@ -313,13 +315,17 @@ def test_get_tree(config):  # noqa: F811
 
     tree = tree[0]
 
-    assert tree.parentId is None, "Expected the root of the tree to have no parent"
+    assert (
+        "parentId" not in tree.keys() or tree.parentId is None
+    ), "Expected the root of the tree to have no parent"
 
     tree.pop("children")
 
     tree = api.get_tree(client=config["client"], include_rows=False)
     tree = tree[0]
-    assert tree.parentId is None, "Expected the root of the tree to have no parent"
+    assert (
+        "parentId" not in tree.keys() or tree.parentId is None
+    ), "Expected the root of the tree to have no parent"
 
     tree.pop("children")
 
@@ -361,7 +367,6 @@ def test_download_file(config):  # noqa: F811
         )
         data = api.describe_file(
             file_id=file_id,
-            _stash=STASH,
             client=config["client"],
         )
         os.remove(data.name)
