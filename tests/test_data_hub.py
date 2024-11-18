@@ -1,6 +1,7 @@
 """this tests functions used to interact with the data hub"""
 
 import os
+import tempfile
 
 import pandas as pd
 import pytest
@@ -324,7 +325,11 @@ def test_download_file(config):  # noqa: F811
     file_id = config["file"].id
 
     if config["mock"]:
-        api.download_file(file_id=file_id, client=config["client"])
+        api.download_file(
+            file_id=file_id,
+            client=config["client"],
+            destination=tempfile.TemporaryDirectory(),
+        )
 
         with pytest.raises(DeepOriginException, match="should be a path for a folder"):
             api.download_file(
@@ -338,12 +343,8 @@ def test_download_file(config):  # noqa: F811
             file_id=file_id,
             client=config["client"],
             _stash=config["stash"],
+            destination=tempfile.TemporaryDirectory(),
         )
-        data = api.describe_file(
-            file_id=file_id,
-            client=config["client"],
-        )
-        os.remove(data.name)
 
 
 def test_describe_file(config):  # noqa: F811
