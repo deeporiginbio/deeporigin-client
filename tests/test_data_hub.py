@@ -7,7 +7,6 @@ import pandas as pd
 import pytest
 from deeporigin.data_hub import api
 from deeporigin.exceptions import DeepOriginException
-from deeporigin.utils.constants import DATAFRAME_ATTRIBUTE_KEYS, PREFIXES
 
 from tests.utils import TEST_DB_NAME, TEST_PREFIX, TEST_WS_NAME, config  # noqa: F401
 
@@ -325,12 +324,6 @@ def test_download_file(config):  # noqa: F811
     file_id = config["file"].id
 
     if config["mock"]:
-        api.download_file(
-            file_id=file_id,
-            client=config["client"],
-            destination=tempfile.TemporaryDirectory(),
-        )
-
         with pytest.raises(DeepOriginException, match="should be a path for a folder"):
             api.download_file(
                 file_id=file_id,

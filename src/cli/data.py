@@ -218,7 +218,8 @@ class DataController(cement.Controller):
             pdata = dict(Name=[], Type=[], ID=[])
 
             for item in rows:
-                pdata["Name"].append(item.name)
+                pdata["Name"].append(getattr(item, "name", None))
+
                 pdata["Type"].append(item.type)
                 pdata["ID"].append(item.hid)
             _print_dict(pdata, json=False, transpose=False)
