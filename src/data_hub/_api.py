@@ -183,7 +183,8 @@ def _create_function(method_path):
                 title="Deep Origin error: [Name conflicts]",
             )
 
-        response = response.json()
+        if not isinstance(response, dict):
+            response = response.json()
 
         if "data" in response.keys():
             response = response["data"]

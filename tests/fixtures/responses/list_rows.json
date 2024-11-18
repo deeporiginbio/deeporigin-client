@@ -106,12 +106,6 @@
             "hid": "kenny",
             "type": "workspace",
             "name": "kenny"
-        },
-        {
-            "id": "_workspace:oOY5YO00Yfo9IsRvbOGvC",
-            "hid": "tc-4Qzkrn57rM-070491",
-            "type": "workspace",
-            "name": "tc-4Qzkrn57rM-070491"
         }
     ],
     "{\"filters\": [{\"parent\": {\"id\": \"db-protocol\"}}]}": [
@@ -225,15 +219,21 @@
             "hid": "teerere",
             "type": "database",
             "name": "test-124"
-        },
-        {
-            "id": "_workspace:oOY5YO00Yfo9IsRvbOGvC",
-            "hid": "tc-4Qzkrn57rM-070491",
-            "type": "workspace",
-            "name": "tc-4Qzkrn57rM-070491"
         }
     ],
     "{\"filters\": [{\"parent\": {\"id\": \"kitchen-sink\"}}]}": [
+        {
+            "id": "_row:3vYzh6x7cZVusfAtOG8Zz",
+            "parentId": "_database:swAKhqQzxqTB7cm2FeVcW",
+            "hid": "ks-121",
+            "type": "row"
+        },
+        {
+            "id": "_row:kOAAMl0z3XONV4qmjE9jw",
+            "parentId": "_database:swAKhqQzxqTB7cm2FeVcW",
+            "hid": "ks-122",
+            "type": "row"
+        },
         {
             "id": "_row:K9C8iFDeZkOLnW6lK2rms",
             "parentId": "_database:swAKhqQzxqTB7cm2FeVcW",
@@ -259,6 +259,18 @@
             "type": "row"
         },
         {
+            "id": "_row:Rm616vGofFhnKirBE3Dfm",
+            "parentId": "_database:swAKhqQzxqTB7cm2FeVcW",
+            "hid": "ks-123",
+            "type": "row"
+        },
+        {
+            "id": "_row:bWc2CHn4trPnGaDutc7zf",
+            "parentId": "_database:swAKhqQzxqTB7cm2FeVcW",
+            "hid": "ks-124",
+            "type": "row"
+        },
+        {
             "id": "_row:vMkkZoVne2KiaJ2K5BdlY",
             "parentId": "_database:swAKhqQzxqTB7cm2FeVcW",
             "hid": "ks-25",
@@ -269,29 +281,204 @@
             "parentId": "_database:swAKhqQzxqTB7cm2FeVcW",
             "hid": "ks-26",
             "type": "row"
-        },
+        }
+    ],
+    "{\"filters\": [{\"parent\": {\"id\": \"kitchen-sink\"}}, {\"row_type\": \"row\"}]}": [
         {
-            "id": "_row:I0OzNRIVuf0sUelW3f9G4",
+            "id": "_row:3vYzh6x7cZVusfAtOG8Zz",
             "parentId": "_database:swAKhqQzxqTB7cm2FeVcW",
-            "hid": "ks-27",
+            "hid": "ks-121",
             "type": "row"
         },
         {
-            "id": "_row:zwNfvRapu2rzgfbWrxf4g",
+            "id": "_row:kOAAMl0z3XONV4qmjE9jw",
             "parentId": "_database:swAKhqQzxqTB7cm2FeVcW",
-            "hid": "ks-28",
+            "hid": "ks-122",
             "type": "row"
         },
         {
-            "id": "_row:55lijgUD4kzLQXnVrfy4Y",
+            "id": "_row:K9C8iFDeZkOLnW6lK2rms",
             "parentId": "_database:swAKhqQzxqTB7cm2FeVcW",
-            "hid": "ks-29",
+            "hid": "ks-34",
             "type": "row"
         },
         {
-            "id": "_row:dKgpwZstHUzoDKV6S579b",
+            "id": "_row:HaF0njudy1UiS44LfbTY8",
             "parentId": "_database:swAKhqQzxqTB7cm2FeVcW",
-            "hid": "ks-3",
+            "hid": "ks-95",
+            "type": "row"
+        },
+        {
+            "id": "_row:XowwgsYLjqtVWbQgYXDgW",
+            "parentId": "_database:swAKhqQzxqTB7cm2FeVcW",
+            "hid": "ks-96",
+            "type": "row"
+        },
+        {
+            "id": "_row:SCHkGyWn6Q8HKtLbJHRae",
+            "parentId": "_database:swAKhqQzxqTB7cm2FeVcW",
+            "hid": "ks-97",
+            "type": "row"
+        },
+        {
+            "id": "_row:Rm616vGofFhnKirBE3Dfm",
+            "parentId": "_database:swAKhqQzxqTB7cm2FeVcW",
+            "hid": "ks-123",
+            "type": "row"
+        },
+        {
+            "id": "_row:bWc2CHn4trPnGaDutc7zf",
+            "parentId": "_database:swAKhqQzxqTB7cm2FeVcW",
+            "hid": "ks-124",
+            "type": "row"
+        },
+        {
+            "id": "_row:vMkkZoVne2KiaJ2K5BdlY",
+            "parentId": "_database:swAKhqQzxqTB7cm2FeVcW",
+            "hid": "ks-25",
+            "type": "row"
+        },
+        {
+            "id": "_row:4lSHzko50SqYu1fGeLfsT",
+            "parentId": "_database:swAKhqQzxqTB7cm2FeVcW",
+            "hid": "ks-26",
+            "type": "row"
+        }
+    ],
+    "{\"filters\": [{\"parent\": {\"id\": \"kitchen-sink\"}}, {\"row_type\": \"workspace\"}]}": [],
+    "{\"filters\": [{\"parent\": {\"id\": \"kitchen-sink\"}}, {\"row_type\": \"database\"}]}": [],
+    "{\"filters\": [{\"row_type\": \"database\"}]}": [
+        {
+            "id": "_database:swAdQAPmv1DaxeqOFKioi",
+            "parentId": "_workspace:57xVgPwGWdhxP5DoQGT30",
+            "hid": "db-protocol",
+            "type": "database",
+            "name": "Protocols"
+        },
+        {
+            "id": "_database:3dEHsf9ofB8Wvqi13wffB",
+            "parentId": "_workspace:gRrmQ9z14diV39ZwgvRx6",
+            "hid": "srinivas-db",
+            "type": "database",
+            "name": "srinivas-db"
+        },
+        {
+            "id": "_database:jeWMK8pVA6XHD9Ht6tGrM",
+            "parentId": "_workspace:gRrmQ9z14diV39ZwgvRx6",
+            "hid": "xy",
+            "type": "database",
+            "name": "XY"
+        },
+        {
+            "id": "_database:ssXMHPSMMO1Od1FBcGXhC",
+            "parentId": "_workspace:6Itm013yHkt4VRt9ycYOw",
+            "hid": "notes",
+            "type": "database",
+            "name": "notes"
+        },
+        {
+            "id": "_database:qFP88gnlXOdIZDHFOovCd",
+            "parentId": "_workspace:57xVgPwGWdhxP5DoQGT30",
+            "hid": "plasmids",
+            "type": "database",
+            "name": "Plasmids"
+        },
+        {
+            "id": "_database:Ejak2rBeRaZZfdhHLH8Lh",
+            "parentId": "_workspace:6Itm013yHkt4VRt9ycYOw",
+            "hid": "kdb-a",
+            "type": "database",
+            "name": "kdbA"
+        },
+        {
+            "id": "_database:swAKhqQzxqTB7cm2FeVcW",
+            "parentId": "_workspace:gRrmQ9z14diV39ZwgvRx6",
+            "hid": "kitchen-sink",
+            "type": "database",
+            "name": "kitchen-sink"
+        },
+        {
+            "id": "_database:kanxwmNthHw4iXBvaeqxn",
+            "parentId": "_workspace:57xVgPwGWdhxP5DoQGT30",
+            "hid": "db-experiments",
+            "type": "database",
+            "name": "Experiments"
+        },
+        {
+            "id": "_database:IpWYEnJE0uIx2TchRVVLQ",
+            "parentId": "_workspace:57xVgPwGWdhxP5DoQGT30",
+            "hid": "db-dna",
+            "type": "database",
+            "name": "DNA"
+        },
+        {
+            "id": "_database:2INLsipn2BfL2Cr61dVgK",
+            "parentId": "_workspace:gRrmQ9z14diV39ZwgvRx6",
+            "hid": "db-with-a-space-in-it",
+            "type": "database",
+            "name": "DB with a space in it"
+        }
+    ],
+    "{\"filters\": [{\"row_type\": \"row\"}]}": [
+        {
+            "id": "_row:cbOepriiytSaPfpqetT4C",
+            "parentId": "_database:4ibXqbV1wIwUUIxKmbRpi",
+            "hid": "dfsd-306",
+            "type": "row"
+        },
+        {
+            "id": "_row:rakyaiwKrKsS4JT9IJsXn",
+            "parentId": "_database:kanxwmNthHw4iXBvaeqxn",
+            "hid": "exp-1",
+            "type": "row",
+            "name": "a"
+        },
+        {
+            "id": "_row:ku2ZdpZ0VkYgOj1Y37rSi",
+            "parentId": "_database:IpWYEnJE0uIx2TchRVVLQ",
+            "hid": "dna-8",
+            "type": "row"
+        },
+        {
+            "id": "_row:2oh4IvrL8d70zAQ3wYteJ",
+            "parentId": "_database:IpWYEnJE0uIx2TchRVVLQ",
+            "hid": "dna-1",
+            "type": "row"
+        },
+        {
+            "id": "_row:QpPhchFq05jBt6AcyMFTy",
+            "parentId": "_database:IpWYEnJE0uIx2TchRVVLQ",
+            "hid": "dna-11",
+            "type": "row"
+        },
+        {
+            "id": "_row:RETrlQNnPAPNSC8q21toF",
+            "parentId": "_database:IpWYEnJE0uIx2TchRVVLQ",
+            "hid": "dna-12",
+            "type": "row"
+        },
+        {
+            "id": "_row:g3d2rqj1ZpBwP5Tu45gWB",
+            "parentId": "_database:IpWYEnJE0uIx2TchRVVLQ",
+            "hid": "dna-24",
+            "type": "row"
+        },
+        {
+            "id": "_row:tD2BSuzkxsZ3yhpAovASn",
+            "parentId": "_database:IpWYEnJE0uIx2TchRVVLQ",
+            "hid": "dna-5",
+            "type": "row"
+        },
+        {
+            "id": "_row:enIM7BKE4D7H5RkobXtX7",
+            "parentId": "_database:IpWYEnJE0uIx2TchRVVLQ",
+            "hid": "dna-10",
+            "type": "row"
+        },
+        {
+            "id": "_row:HmeXSzMWo96G0Or6HpEXK",
+            "parentId": "_database:IpWYEnJE0uIx2TchRVVLQ",
+            "hid": "dna-7",
             "type": "row"
         }
     ]

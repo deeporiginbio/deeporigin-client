@@ -317,5 +317,21 @@
             "required": [],
             "properties": {}
         }
+    },
+    "{\"database\": {\"hid\": \"tc-4Qzkrn57rM-db\", \"hidPrefix\": \"tc-4Qzkrn57rM-db\", \"name\": \"tc-4Qzkrn57rM-db\", \"parentId\": \"registry\"}}": {
+        "id": "_database:WrOAWYHIuIqqvy0nbGb5u",
+        "type": "database",
+        "hid": "tc-4Qzkrn57rM-db",
+        "name": "tc-4Qzkrn57rM-db",
+        "dateCreated": "2024-11-18 20:26:20.145809",
+        "dateUpdated": "2024-11-18 20:26:20.145809",
+        "createdByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
+        "parentId": "_workspace:IYTHdIjtuSvnOekwQjUlN",
+        "hidPrefix": "tc-4Qzkrn57rM-db",
+        "rowJsonSchema": {
+            "type": "object",
+            "required": [],
+            "properties": {}
+        }
     }
 }
