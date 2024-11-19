@@ -7,7 +7,6 @@ from pathlib import Path
 from typing import Any, Optional, Union
 from urllib.parse import urlparse, urlunparse
 
-import httpx
 from beartype import beartype
 
 # this import is to allow us to use functions
@@ -33,7 +32,6 @@ from deeporigin.utils.network import (
     check_for_updates,
     download_sync,
 )
-from deeporigin.utils.types import ListFilesResponse
 from tqdm import tqdm
 
 check_for_updates()
@@ -57,6 +55,7 @@ def convert_id_format(
     hids: Optional[Union[list[str], set[str]]] = None,
     ids: Optional[Union[list[str], set[str]]] = None,
     client=None,
+    _stash: bool = False,
 ) -> list[dict]:
     """Convert a list of human IDs to IDs or vice versa.
 
@@ -84,6 +83,7 @@ def convert_id_format(
     return _api.convert_id_format(
         conversions=conversions,
         client=client,
+        _stash=_stash,
     )
 
 
@@ -92,9 +92,10 @@ def convert_id_format(
 def create_workspace(
     *,
     name: str,
-    client=None,
     hid: Optional[str] = None,
     parent_id: Optional[str] = None,
+    client=None,
+    _stash: bool = False,
 ):
     """Create a new folder (workspace) in the data hub
 
@@ -109,7 +110,11 @@ def create_workspace(
         hid = name
 
     data = dict(name=name, hid=hid, parentId=parent_id)
-    return _api.create_workspace(workspace=data, client=client)
+    return _api.create_workspace(
+        workspace=data,
+        client=client,
+        _stash=_stash,
+    )
 
 
 @ensure_client
@@ -118,6 +123,7 @@ def create_database(
     *,
     name: str,
     client=None,
+    _stash: bool = False,
     parent_id: Optional[str] = None,
     hid: Optional[str] = None,
     hid_prefix: Optional[str] = None,
@@ -144,7 +150,11 @@ def create_database(
         hidPrefix=hid_prefix,
         parentId=parent_id,
     )
-    return _api.create_database(database=data, client=client)
+    return _api.create_database(
+        database=data,
+        client=client,
+        _stash=_stash,
+    )
 
 
 @beartype
@@ -155,6 +165,7 @@ def list_files(
     is_unassigned: Optional[bool] = None,
     file_ids: Optional[list[str]] = None,
     client=None,
+    _stash: bool = False,
 ) -> list:
     """List files, with option to filter by assigned rows, assigned status
 
@@ -179,7 +190,11 @@ def list_files(
     if is_unassigned is not None:
         filters.append(dict(is_unassigned=is_unassigned))
 
-    return _api.list_files(filters=filters, client=client)
+    return _api.list_files(
+        filters=filters,
+        client=client,
+        _stash=_stash,
+    )
 
 
 @beartype
@@ -190,6 +205,7 @@ def list_rows(
     row_type: ObjectType = None,
     parent_is_root: Optional[bool] = None,
     client=None,
+    _stash: bool = False,
 ) -> list:
     """List rows in a database or folder (workspace).
 
@@ -216,7 +232,11 @@ def list_rows(
     if row_type:
         filters.append(dict(row_type=row_type))
 
-    return _api.list_rows(filters=filters, client=client)
+    return _api.list_rows(
+        filters=filters,
+        client=client,
+        _stash=_stash,
+    )
 
 
 @beartype
@@ -224,8 +244,9 @@ def list_rows(
 def download_file(
     file_id: str,
     *,
-    destination: str = os.getcwd(),
+    destination: str | Path = os.getcwd(),
     client=None,
+    _stash: bool = False,
 ) -> None:
     """Download a file to a destination folder (workspace).
 
@@ -243,9 +264,17 @@ def download_file(
             message=f"Destination `{destination}` should be a path for a folder."
         )
 
-    file_name = _api.describe_file(file_id=file_id, client=client).name
+    file_name = _api.describe_file(
+        file_id=file_id,
+        client=client,
+        _stash=_stash,
+    ).name
 
-    url = _api.create_file_download_url(file_id=file_id, client=client).download_url
+    url = _api.create_file_download_url(
+        file_id=file_id,
+        client=client,
+        _stash=_stash,
+    ).downloadUrl
 
     save_path = os.path.join(destination, file_name)
 
@@ -256,8 +285,9 @@ def download_file(
 @ensure_client
 def upload_file(
     file_path: str,
-    client=None,
     *,
+    client=None,
+    _stash: bool = False,
     compute_hash: bool = True,
 ) -> None:
     """Upload a file to Deep Origin.
@@ -283,6 +313,7 @@ def upload_file(
         content_type=content_type,
         content_length=str(content_length),
         client=client,
+        _stash=_stash,
     )
 
     if compute_hash:
@@ -292,11 +323,11 @@ def upload_file(
     response = _api.create_file_upload(**args)
 
     # extract pre-signed URL to upload to
-    url = urlparse(response.upload_url)
+    url = urlparse(response.uploadUrl)
     url = urlunparse((url.scheme, url.netloc, url.path, "", "", ""))
 
     # extract params
-    params = _parse_params_from_url(response.upload_url)
+    params = _parse_params_from_url(response.uploadUrl)
 
     headers = {
         "Accept": "application/json, text/plain, */*",
@@ -333,6 +364,7 @@ def make_database_rows(
     database_id: str,
     n_rows: int = 1,
     client=None,
+    _stash: bool = False,
 ) -> dict:
     """Makes one or several new row(s) in a database table
 
@@ -353,6 +385,7 @@ def make_database_rows(
 
     return _api.ensure_rows(
         client=client,
+        _stash=_stash,
         rows=[{"row": {}} for _ in range(n_rows)],
         database_id=database_id,
     )
@@ -366,6 +399,7 @@ def assign_files_to_cell(
     column_id: str,
     row_id: Optional[str] = None,
     client=None,
+    _stash: bool = False,
 ):
     """Assign existing file(s) to a cell
 
@@ -401,6 +435,7 @@ def assign_files_to_cell(
         database_id=database_id,
         rows=rows,
         client=client,
+        _stash=_stash,
     )
 
 
@@ -412,6 +447,7 @@ def upload_file_to_new_database_row(
     file_path: str,
     column_id: str,
     client=None,
+    _stash: bool = False,
 ):
     """Upload a file to a new row in a database.
 
@@ -438,6 +474,7 @@ def upload_file_to_new_database_row(
         database_id=database_id,
         column_id=column_id,
         client=client,
+        _stash=_stash,
     )
 
 
@@ -446,6 +483,7 @@ def get_tree(
     *,
     include_rows: bool = True,
     client=None,
+    _stash: bool = False,
 ) -> list:
     """Construct a tree of all folders (workspaces), databases and rows.
 
@@ -466,23 +504,31 @@ def get_tree(
 
     if include_rows:
         # we need to fetch everything, so use a single call
-        objects = list_rows(client=client)
-        rows = [obj.dict() for obj in objects if obj.type == "row"]
+        objects = list_rows(
+            client=client,
+            _stash=_stash,
+        )
+        rows = [obj for obj in objects if obj.type == "row"]
         folders = [obj for obj in objects if obj.type == "workspace"]
         databases = [obj for obj in objects if obj.type == "database"]
     else:
-        folders = list_rows(row_type="workspace", client=client)
-        databases = list_rows(row_type="database", client=client)
+        folders = list_rows(
+            row_type="workspace",
+            client=client,
+            _stash=_stash,
+        )
+        databases = list_rows(
+            row_type="database",
+            client=client,
+            _stash=_stash,
+        )
         objects = folders + databases
-
-    # convert everything into a dict
-    folders = [obj.dict() for obj in folders]
-    databases = [obj.dict() for obj in databases]
 
     for obj in folders + databases:
         obj["children"] = []
 
-    root_objects = [obj.dict() for obj in objects if obj.parent_id is None]
+    # sometimes, parentId is missing (in which case it should be treated as  root object)
+    root_objects = [obj for obj in objects if getattr(obj, "parentId", None) is None]
 
     for root_object in root_objects:
         _add_children(root_object, folders)
@@ -505,7 +551,9 @@ def _add_children(node: dict, objects: list[dict]) -> None:
         Do not use this function.
 
     """
-    node["children"] = [obj for obj in objects if obj["parent_id"] == node["id"]]
+    node["children"] = [
+        obj for obj in objects if getattr(obj, "parentId", None) == node.id
+    ]
 
 
 @beartype
@@ -514,6 +562,7 @@ def get_cell_data(
     row_id: str,
     column_name: str,
     client=None,
+    _stash: bool = False,
 ) -> Any:
     """Extract data from a cell in a database, referenced
     by `row_id` and `column_name`.
@@ -549,6 +598,7 @@ def set_data_in_cells(
     database_id: str,
     columns: Optional[list[dict]] = None,
     client=None,
+    _stash: bool = False,
 ):
     """Set data in multiple cells to some value."""
     # first, get the type of the column
@@ -558,6 +608,7 @@ def set_data_in_cells(
         response = _api.describe_row(
             row_id=database_id,
             client=client,
+            _stash=_stash,
         )
 
         columns = response.cols
@@ -590,11 +641,32 @@ def set_data_in_cells(
         for (row_id, validated_value) in zip(row_ids, validated_values)
     ]
 
-    return _api.ensure_rows(
-        rows=rows,
-        client=client,
-        database_id=database_id,
-    )
+    # we cannot write more than a 1000 rows at once.
+    # if there are more than 1000 rows, we need to chunk it
+    max_size = 1000
+    if len(rows) > max_size:
+        chunks = [rows[i : i + max_size] for i in range(0, len(rows), max_size)]
+
+        all_responses = []
+        for chunk in chunks:
+            all_responses.append(
+                _api.ensure_rows(
+                    rows=chunk,
+                    client=client,
+                    _stash=_stash,
+                    database_id=database_id,
+                )
+            )
+
+            return all_responses
+
+    else:
+        return _api.ensure_rows(
+            rows=rows,
+            client=client,
+            _stash=_stash,
+            database_id=database_id,
+        )
 
 
 def set_cell_data(
@@ -604,6 +676,7 @@ def set_cell_data(
     row_id: str,
     column_id: str,
     client=None,
+    _stash: bool = False,
 ) -> Any:
     """Set data in a cell to some value.
 
@@ -621,6 +694,7 @@ def set_cell_data(
     response = _api.describe_row(
         row_id=database_id,
         client=client,
+        _stash=_stash,
     )
 
     column = [
@@ -656,6 +730,7 @@ def set_cell_data(
     return _api.ensure_rows(
         rows=rows,
         client=client,
+        _stash=_stash,
         database_id=database_id,
     )
 
@@ -752,6 +827,7 @@ def download(
     *,
     include_files: bool = False,
     client=None,
+    _stash: bool = False,
 ) -> None:
     """Download resources from Deep Origin and save them to
     a local destination.
@@ -787,6 +863,7 @@ def download(
             file_id=source,
             destination=destination,
             client=client,
+            _stash=_stash,
         )
         return
 
@@ -794,6 +871,7 @@ def download(
     obj = _api.describe_row(
         row_id=source,
         client=client,
+        _stash=_stash,
     )
     if obj.type == "database":
         download_database(
@@ -801,6 +879,7 @@ def download(
             destination,
             include_files=include_files,
             client=client,
+            _stash=_stash,
         )
     else:
         raise NotImplementedError(
@@ -815,6 +894,7 @@ def download_database(
     *,
     include_files: bool = False,
     client=None,
+    _stash: bool = False,
 ) -> None:
     """Download a database and save it to a CSV file on the local disk.
 
@@ -837,6 +917,7 @@ def download_database(
         source = _api.describe_row(
             row_id=source,
             client=client,
+            _stash=_stash,
         )
 
     database_id = source.id
@@ -846,6 +927,7 @@ def download_database(
         use_file_names=True,
         reference_format="system-id",
         client=client,
+        _stash=_stash,
     )
 
     # now download all files in the database
@@ -873,7 +955,9 @@ def get_dataframe(
     use_file_names: bool = True,
     reference_format: IDFormat = "human-id",
     return_type: DatabaseReturnType = "dataframe",
+    filter: Optional[dict] = None,
     client=None,
+    _stash: bool = False,
 ):
     """Generate a `pandas.DataFrame` or dictionary for a database.
 
@@ -890,15 +974,25 @@ def get_dataframe(
     # TODO: list_database_rows and describe_row can be called in parallel
 
     # figure out the rows
-    rows = _api.list_database_rows(
-        database_row_id=database_id,
-        client=client,
-    )
+    if filter is None:
+        rows = _api.list_database_rows(
+            database_row_id=database_id,
+            client=client,
+            _stash=_stash,
+        )
+    else:
+        rows = _api.list_database_rows(
+            database_row_id=database_id,
+            client=client,
+            _stash=_stash,
+            filter=filter,
+        )
 
     # figure out the column names and ID of the database
     db_row = _api.describe_row(
         row_id=database_id,
         client=client,
+        _stash=_stash,
     )
 
     # filter out template rows
@@ -957,6 +1051,7 @@ def get_dataframe(
         files = _api.list_files(
             filters=[dict(fileIds=file_ids)],
             client=client,
+            _stash=_stash,
         )
         for file in files:
             file_id_mapper[file.file.id] = file.file.name
@@ -1021,11 +1116,12 @@ def get_dataframe(
 @beartype
 @ensure_client
 def download_files(
-    files: Optional[list[ListFilesResponse] | ListFilesResponse] = None,
+    files: Optional[list | dict] = None,
     *,
     save_to_dir: Path | str = Path("."),
     use_file_names: bool = True,
     client=None,
+    _stash: bool = False,
 ) -> None:
     """download multiple files in parallel to local disk
 
@@ -1037,13 +1133,13 @@ def download_files(
     if files is None:
         files = list_files(client=client)
 
-    if isinstance(files, ListFilesResponse):
+    if isinstance(files, dict):
         files = [files]
 
     if isinstance(save_to_dir, str):
         save_to_dir = Path(save_to_dir)
 
-    if isinstance(files[0], ListFilesResponse):
+    if isinstance(files[0], dict):
         file_ids = [item.file.id for item in files]
 
     if use_file_names:
@@ -1091,6 +1187,9 @@ def add_row_to_data(
         file_ids=file_ids,
         reference_ids=reference_ids,
     )
+    if row_data is None:
+        return
+
     data["ID"].append(row_data["ID"])
     data["Validation Status"].append(row_data["Validation Status"])
 
@@ -1112,58 +1211,41 @@ def _row_to_dict(
     reference_ids: list,
 ):
     """utility function to convert a row to a dictionary"""
+    if "fields" not in row.keys():
+        return None
+
     fields = row.fields
 
-    values = {"ID": row.hid, "Validation Status": row.validation_status}
+    values = {"ID": row.hid, "Validation Status": row.validationStatus}
     if fields is None:
         return values
     for field in fields:
-        if field.system_type == "bodyDocument":
+        if "systemType" in field.keys() and field.systemType == "bodyDocument":
             continue
         if field.value is None:
             value = None
         elif field.type in ["float", "integer", "boolean"]:
             value = field.value
         elif field.type == "select":
-            value = field.value
-            if isinstance(value, dict):
-                value = value["selectedOptions"]
-            else:
-                value = value.selected_options
+            value = field.value.selectedOptions
 
         elif field.type == "reference":
-            value = field.value
-            if isinstance(value, dict):
-                value = value["rowIds"]
-            else:
-                value = value.row_ids
+            value = field.value.rowIds
             reference_ids.extend(value)
         elif field.type == "file":
-            value = field.value
-            if isinstance(value, dict):
-                value = value["fileIds"]
-            else:
-                value = value.file_ids
+            value = field.value.fileIds
             file_ids.extend(value)
         elif field.type == "expression":
-            value = field.value
-            if isinstance(value, dict):
-                value = value["result"]
-            else:
-                value = value.result
+            value = field.value.result
 
         elif field.type == "user":
-            value = field.value
-            if isinstance(value, dict):
-                user_ids = value["userDrns"]
-            else:
-                user_ids = value.user_drns
+            user_ids = field.value.userDrns
 
             # convert to names using the platform API
             value = [get_user_name(user_id) for user_id in user_ids]
         else:
             value = field.value
-        values[field.column_id] = value
+        values[field.columnId] = value
     return values
 
 
@@ -1245,6 +1327,7 @@ def get_columns(
     row_id: str,
     *,
     client=None,
+    _stash: bool = False,
 ) -> list[dict]:
     """Get information about the columns of a row or database.
 
@@ -1260,6 +1343,7 @@ def get_columns(
         row_id=row_id,
         fields=True,
         client=client,
+        _stash=_stash,
     )
 
     assert response["type"] in [
@@ -1275,7 +1359,12 @@ def get_columns(
 
 
 @beartype
-def get_notebook(row_id: str, *, client=None) -> list:
+def get_notebook(
+    row_id: str,
+    *,
+    client=None,
+    _stash: bool = False,
+) -> list:
     """Get the notebook of a row, if it exists
 
     Args:
@@ -1291,6 +1380,7 @@ def get_notebook(row_id: str, *, client=None) -> list:
         row_id=row_id,
         fields=True,
         client=client,
+        _stash=_stash,
     )
 
     for field in response.fields:
@@ -1304,6 +1394,7 @@ def get_row_data(
     *,
     use_column_keys: bool = False,
     client=None,
+    _stash: bool = False,
 ) -> dict:
     """Get the data in a row.
 
@@ -1323,6 +1414,7 @@ def get_row_data(
         row_id=row_id,
         fields=True,
         client=client,
+        _stash=_stash,
     )
 
     if response.type != "row":
@@ -1332,8 +1424,9 @@ def get_row_data(
 
     # ask parent for column names
     parent_response = _api.describe_row(
-        row_id=response.parent_id,
+        row_id=response.parentId,
         client=client,
+        _stash=_stash,
     )
 
     if parent_response.type != "database":
@@ -1392,6 +1485,7 @@ def add_database_column(
     cardinality: Cardinality = "one",
     required: bool = False,
     client=None,
+    _stash: bool = False,
 ):
     """Add a column to a database.
 
@@ -1411,15 +1505,11 @@ def add_database_column(
         cardinality=cardinality,
     )
 
-    body = dict(
+    response = _api.add_database_column(
         column=column,
-        databaseId=database_id,
+        database_id=database_id,
+        client=client,
+        _stash=_stash,
     )
 
-    response = client.post(
-        "/AddDatabaseColumn",
-        cast_to=httpx.Response,
-        body=body,
-    )
-
-    return response.json()
+    return response

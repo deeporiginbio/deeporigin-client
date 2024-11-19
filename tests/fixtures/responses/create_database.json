@@ -1,0 +1,18 @@
+{
+    "{\"database\": {\"hid\": \"tc-4Qzkrn57rM-db\", \"hidPrefix\": \"tc-4Qzkrn57rM-db\", \"name\": \"tc-4Qzkrn57rM-db\", \"parentId\": \"registry\"}}": {
+        "id": "_database:zN9taqV6WxLzjWxKtxwce",
+        "type": "database",
+        "hid": "tc-4Qzkrn57rM-db",
+        "name": "tc-4Qzkrn57rM-db",
+        "dateCreated": "2024-11-19 03:19:28.539577",
+        "dateUpdated": "2024-11-19 03:19:28.539577",
+        "createdByUserDrn": "<redacted>",
+        "parentId": "_workspace:IYTHdIjtuSvnOekwQjUlN",
+        "hidPrefix": "tc-4Qzkrn57rM-db",
+        "rowJsonSchema": {
+            "type": "object",
+            "required": [],
+            "properties": {}
+        }
+    }
+}

@@ -30,7 +30,7 @@ LIST_OPTIONS = (
 def test_data(config):  # noqa: F811
     stdout = _run_cli_command(
         ["data"],
-        config["client"],
+        client=config["client"],
     )
 
     assert "List data in the data hub on Deep Origin" in stdout, "Unexpected output"
@@ -42,7 +42,7 @@ def test_describe_file(config, json_option):  # noqa: F811
 
     stdout = _run_cli_command(
         ["data", "describe", file_id] + json_option,
-        config["client"],
+        client=config["client"],
     )
 
     if json_option == ["--json"]:
@@ -56,7 +56,7 @@ def test_describe_row(config, option):  # noqa: F811
 
     stdout = _run_cli_command(
         ["data", "describe", row_id] + option,
-        config["client"],
+        client=config["client"],
     )
     assert row_id in stdout, "Expected to see row_id in output"
 
@@ -74,7 +74,7 @@ def test_describe_row(config, option):  # noqa: F811
 def test_list(config, list_option, json_option):  # noqa: F811
     stdout = _run_cli_command(
         ["data", "list"] + list_option + json_option,
-        config["client"],
+        client=config["client"],
     )
 
     # check that we can parse into JSON
@@ -86,7 +86,7 @@ def test_list(config, list_option, json_option):  # noqa: F811
 def test_show_db(config, json_option):  # noqa: F811
     stdout = _run_cli_command(
         ["data", "show", config["databases"][0]] + json_option,
-        config["client"],
+        client=config["client"],
     )
 
     if json_option == ["--json"]:

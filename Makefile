@@ -10,12 +10,7 @@ repo=$(shell basename $(CURDIR))
 # a live instance 
 client="mock"
 chosen_tests=""
-
-lint:
-	@source $(CURDIR)/venv/bin/activate && \
-		ruff format && \
-		ruff check --select I && \
-		deactivate
+responses="pass"
 
 test:
 ifeq ($(client), "mock")
@@ -25,7 +20,7 @@ else
 endif 
 	@source $(CURDIR)/venv/bin/activate && \
 	interrogate -c pyproject.toml -v . -f 100 && \
-	python3 -m coverage run -m pytest -x -n $(n_workers) --failed-first -k $(chosen_tests) --client $(client) && \
+	python3 -m coverage run -m pytest -x -n $(n_workers) --failed-first -k $(chosen_tests) --client $(client) --responses $(responses) && \
 	python3 -m coverage html && \
 	deactivate
 

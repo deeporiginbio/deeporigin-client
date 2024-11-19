@@ -1,0 +1,47 @@
+{
+    "{\"checksum_sha256\": \"HBtzo8llBxCz+VTKiadjW1i/tcLGq8kOafOJXPcW3+g=\", \"content_length\": \"10486\", \"content_type\": \"text/x-python\", \"name\": \"test_data_hub.py\"}": {
+        "uploadUrl": "<redacted>",
+        "file": {
+            "name": "test_data_hub.py",
+            "contentType": "text/x-python",
+            "contentLength": 10486,
+            "checksumSha256": "HBtzo8llBxCz+VTKiadjW1i/tcLGq8kOafOJXPcW3+g=",
+            "id": "_file:g54aETXShq6G0mpZolLoe",
+            "status": "ready",
+            "uri": "<redacted>",
+            "dateCreated": "2024-11-19T03:15:59.229Z",
+            "dateUpdated": "2024-11-19T03:15:59.229Z",
+            "createdByUserDrn": "<redacted>"
+        }
+    },
+    "{\"checksum_sha256\": \"SwpFVvSNFh8Tr3d9cBpHWuGwZugAE+NRayPTBDkyyoA=\", \"content_length\": \"10650\", \"content_type\": \"text/x-python\", \"name\": \"test_data_hub.py\"}": {
+        "uploadUrl": "<redacted>",
+        "file": {
+            "name": "test_data_hub.py",
+            "contentType": "text/x-python",
+            "contentLength": 10650,
+            "checksumSha256": "SwpFVvSNFh8Tr3d9cBpHWuGwZugAE+NRayPTBDkyyoA=",
+            "id": "_file:pweyqxww16aCJrxMdlP8e",
+            "status": "ready",
+            "uri": "<redacted>",
+            "dateCreated": "2024-11-19T03:18:19.518Z",
+            "dateUpdated": "2024-11-19T03:18:19.518Z",
+            "createdByUserDrn": "<redacted>"
+        }
+    },
+    "{\"checksum_sha256\": \"0NFytWcN4vLz85y4aeNTuJpHEFWfc2YF3NJedyYiCG8=\", \"content_length\": \"10673\", \"content_type\": \"text/x-python\", \"name\": \"test_data_hub.py\"}": {
+        "uploadUrl": "<redacted>",
+        "file": {
+            "name": "test_data_hub.py",
+            "contentType": "text/x-python",
+            "contentLength": 10673,
+            "checksumSha256": "0NFytWcN4vLz85y4aeNTuJpHEFWfc2YF3NJedyYiCG8=",
+            "id": "_file:pMiGX2dEnBEEWFPTCUPSg",
+            "status": "ready",
+            "uri": "<redacted>",
+            "dateCreated": "2024-11-19T03:19:28.397Z",
+            "dateUpdated": "2024-11-19T03:19:28.397Z",
+            "createdByUserDrn": "<redacted>"
+        }
+    }
+}

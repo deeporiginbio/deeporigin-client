@@ -1,0 +1,16 @@
+{
+    "{\"database_id\": \"kitchen-sink\", \"rows\": [{\"row\": {}}]}": {
+        "rows": [
+            {
+                "type": "row",
+                "id": "_row:OIy39TGcV7jqLbCHsdhTO",
+                "hid": "ks-136",
+                "parentId": "_database:swAKhqQzxqTB7cm2FeVcW",
+                "dateCreated": "2024-11-19 03:19:29.007535",
+                "dateUpdated": "2024-11-19 03:19:29.007535",
+                "createdByUserDrn": "<redacted>",
+                "validationStatus": "valid"
+            }
+        ]
+    }
+}

@@ -13,7 +13,11 @@ TEST_WS_NAME = TEST_PREFIX + "ws"
 
 
 @beartype
-def _run_cli_command(argv: list[str], client) -> str:
+def _run_cli_command(
+    argv: list[str],
+    *,
+    client,
+) -> str:
     """helper function to run a CLI command, parse output and return"""
     stdout = io.StringIO()
     stderr = io.StringIO()
@@ -52,36 +56,39 @@ def config(pytestconfig):
     """this fixture performs some setup tasks
     before all tests are run, and runs only once"""
 
-    data = dict()
+    data = dict(
+        databases=["kitchen-sink"],
+        stash=pytestconfig.getoption("responses") == "stash",
+    )
 
     # set up client
     if pytestconfig.getoption("client") == "mock":
-        data["client"] = MockClient()
+        client = MockClient()
         data["mock"] = True
 
-        # unpack mock data from client
-        data["folders"] = data["client"].folders
-        data["databases"] = data["client"].databases
-        data["rows"] = data["client"].rows
-        data["file"] = data["client"].file
     else:
         data["mock"] = False
         client = api._get_default_client()
 
-        data["client"] = client
+    data["client"] = client
 
-        # if we're going to be making requests to a live
-        # instance, we need to make sensible requests
-        rows = api.list_rows()
+    # generate lists of objects used in tests
+    rows = api.list_rows(
+        row_type="workspace",
+        client=client,
+    )
+    data["folders"] = [row.hid for row in rows]
 
-        data["databases"] = [row.hid for row in rows if row.type == "database"]
-        data["folders"] = [row.hid for row in rows if row.type == "workspace"]
-        data["rows"] = [row.hid for row in rows if row.type == "row"]
+    rows = api.list_rows(
+        row_type="row",
+        client=client,
+    )
+    data["rows"] = [row.hid for row in rows]
 
-        # get a list of all files
-        files = api.list_files()
-        if len(files) > 0:
-            data["file"] = files[0].file
+    # get a list of all files
+    files = api.list_files(client=client)
+    if len(files) > 0:
+        data["file"] = files[0].file
 
     # tests run on yield
     yield data
@@ -97,7 +104,9 @@ def minimal_config(pytestconfig):
     with DBs on a live instance where the config happens
     in the test"""
 
-    data = dict()
+    data = dict(
+        stash=pytestconfig.getoption("responses") == "stash",
+    )
 
     # set up client
     if pytestconfig.getoption("client") == "mock":

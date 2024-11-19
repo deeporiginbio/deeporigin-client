@@ -168,7 +168,7 @@ def test_slice_and_extend_loc(config):
         row_prefix = "x"
     else:
         df = DataFrame.from_deeporigin(config["db-name"])
-        row_prefix = df.attrs["metadata"]["hid_prefix"]
+        row_prefix = df.attrs["metadata"]["hidPrefix"]
 
     # should be possible to add a new row
     df.loc[row_prefix + "-" + str(len(df) + 1)] = list(df.loc[df.index[0]])

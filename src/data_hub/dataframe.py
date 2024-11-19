@@ -9,6 +9,7 @@ from datetime import datetime, timezone
 import humanize
 import pandas as pd
 from beartype import beartype
+from beartype.typing import Optional
 from dateutil.parser import parse
 from deeporigin.data_hub import api
 from deeporigin.platform.api import get_last_edited_user_name
@@ -217,7 +218,7 @@ class DataFrame(pd.DataFrame):
             # Convert the time difference into "x time ago" format
             created_time_ago = humanize.naturaltime(now - date_obj)
 
-            date_str = self.attrs["last_updated_row"].date_updated
+            date_str = self.attrs["last_updated_row"].dateUpdated
             date_obj = datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S.%f").replace(
                 tzinfo=timezone.utc
             )
@@ -230,9 +231,10 @@ class DataFrame(pd.DataFrame):
                     self.attrs["last_updated_row"]
                 )
                 txt += "  by " + last_edited_by + ".</p>"
-            except Exception:
+            except Exception as error:
                 # give up. this should not cause the dataframe to
                 # not print.
+                print(error)
                 txt += ".</p>"
 
             if self._modified_columns:
@@ -241,7 +243,8 @@ class DataFrame(pd.DataFrame):
                 txt += '<p style="color: #808080; font-size: 12px">🧬 This dataframe will automatically write changes made to it back to Deep Origin.</p>'
             df_html = super()._repr_html_()
             return header + txt + df_html
-        except Exception:
+        except Exception as error:
+            print(error)
             return super()._repr_html_()
 
     def __repr__(self):
@@ -262,6 +265,7 @@ class DataFrame(pd.DataFrame):
         *,
         use_file_names: bool = True,
         reference_format: IDFormat = "human-id",
+        filter: Optional[dict] = None,
         client=None,
     ):
         """Create a local Deep Origin DataFrame from a Deep Origin database.
@@ -279,6 +283,7 @@ class DataFrame(pd.DataFrame):
             reference_format=reference_format,
             return_type="dataframe",  # we need this
             client=client,
+            filter=filter,
         )
 
     def to_deeporigin(self):
@@ -314,7 +319,7 @@ class DataFrame(pd.DataFrame):
                 )
 
                 # add column metadata to column
-                self.attrs["metadata"]["cols"].append(response["data"]["column"])
+                self.attrs["metadata"]["cols"].append(response.column)
             else:
                 # column already exists
                 column_metadata = column_metadata[0]

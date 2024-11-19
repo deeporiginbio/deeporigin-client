@@ -1,0 +1,540 @@
+{
+    "{\"filters\": [{\"is_unassigned\": true}]}": [
+        {
+            "file": {
+                "id": "_file:09fwpdPqHtVdt4jj43ywC",
+                "uri": "<redacted>",
+                "name": "science.ade2574_sm.pdf",
+                "status": "ready",
+                "contentLength": 1343642,
+                "contentType": "application/pdf",
+                "dateCreated": "2024-07-03 23:45:44.214",
+                "dateUpdated": "2024-07-03 23:45:44.214",
+                "createdByUserDrn": "<redacted>"
+            }
+        },
+        {
+            "file": {
+                "id": "_file:0L8RRix17eejBVlMzNHoC",
+                "uri": "<redacted>",
+                "name": "purple.png",
+                "status": "ready",
+                "contentLength": 554588,
+                "contentType": "image/png",
+                "dateCreated": "2024-06-18 14:36:20.148",
+                "dateUpdated": "2024-06-18 14:36:20.148",
+                "createdByUserDrn": "<redacted>"
+            }
+        },
+        {
+            "file": {
+                "id": "_file:1g3xaXmAQR6Qb2hpAlRKE",
+                "uri": "<redacted>",
+                "name": "Screenshot 2024-10-17 at 3.21.09\u202fPM.png",
+                "status": "ready",
+                "contentLength": 280857,
+                "contentType": "image/png",
+                "checksumSha256": "xvTTVIPTmxqJOXIPX0kTHieid/ZGESjG/45lYFCwB8g=",
+                "dateCreated": "2024-10-17 19:21:52.028",
+                "dateUpdated": "2024-10-17 19:21:52.028",
+                "createdByUserDrn": "<redacted>"
+            }
+        },
+        {
+            "file": {
+                "id": "_file:1JR6qrwYKIE2sYg9gtqcK",
+                "uri": "<redacted>",
+                "name": "test_data_hub.py",
+                "status": "ready",
+                "contentLength": 11086,
+                "contentType": "text/x-python",
+                "dateCreated": "2024-09-24 12:54:31.292",
+                "dateUpdated": "2024-09-24 12:54:31.292",
+                "createdByUserDrn": "<redacted>"
+            }
+        },
+        {
+            "file": {
+                "id": "_file:1PrkOfHqCZjXRwbrHavXU",
+                "uri": "<redacted>",
+                "name": "1gag (1).pdb",
+                "status": "ready",
+                "contentLength": 253287,
+                "contentType": "",
+                "dateCreated": "2024-05-08 15:30:18.754",
+                "dateUpdated": "2024-05-08 15:30:18.754",
+                "createdByUserDrn": "<redacted>"
+            }
+        },
+        {
+            "file": {
+                "id": "_file:1puUFY7q9shQqSvoxv5A1",
+                "uri": "<redacted>",
+                "name": "test_managed_data.py",
+                "status": "ready",
+                "contentLength": 11197,
+                "contentType": "text/x-python",
+                "dateCreated": "2024-07-29 19:00:04.375",
+                "dateUpdated": "2024-07-29 19:00:04.375",
+                "createdByUserDrn": "<redacted>"
+            }
+        },
+        {
+            "file": {
+                "id": "_file:2cZ19cnc25M03p63aamax",
+                "uri": "<redacted>",
+                "name": "test_data_hub.py",
+                "status": "ready",
+                "contentLength": 11086,
+                "contentType": "text/x-python",
+                "dateCreated": "2024-09-24 12:52:57.571",
+                "dateUpdated": "2024-09-24 12:52:57.571",
+                "createdByUserDrn": "<redacted>"
+            }
+        },
+        {
+            "file": {
+                "id": "_file:2xisJivEvjWD75gIQC3zH",
+                "uri": "<redacted>",
+                "name": "test_data_hub.py",
+                "status": "ready",
+                "contentLength": 11630,
+                "contentType": "text/x-python",
+                "checksumSha256": "riF2bmiWUGK03lvq5h0Ux0YHX+BmNZ7kE458VuZH6oA=",
+                "dateCreated": "2024-11-18 16:26:09.579",
+                "dateUpdated": "2024-11-18 16:26:09.579",
+                "createdByUserDrn": "<redacted>"
+            }
+        },
+        {
+            "file": {
+                "id": "_file:2ygPpAsbHxVSVBNiKpehU",
+                "uri": "<redacted>",
+                "name": "test_data_hub.py",
+                "status": "ready",
+                "contentLength": 10743,
+                "contentType": "text/x-python",
+                "checksumSha256": "0mveZ1Nr7KTKAPhTng9w9rBvyk3YNLStUiebd43sjZI=",
+                "dateCreated": "2024-11-18 20:26:25.6",
+                "dateUpdated": "2024-11-18 20:26:25.6",
+                "createdByUserDrn": "<redacted>"
+            }
+        },
+        {
+            "file": {
+                "id": "_file:36ufKT2Sej22coSEOizpK",
+                "uri": "<redacted>",
+                "name": "purple.png",
+                "status": "ready",
+                "contentLength": 554588,
+                "contentType": "image/png",
+                "dateCreated": "2024-06-18 14:48:33.501",
+                "dateUpdated": "2024-06-18 14:48:33.501",
+                "createdByUserDrn": "<redacted>"
+            }
+        }
+    ],
+    "{\"filters\": [{\"is_unassigned\": false}]}": [
+        {
+            "file": {
+                "id": "_file:6Hdhyc3t8xZ6pmyCrQy1t",
+                "uri": "<redacted>",
+                "name": "purple.png",
+                "status": "ready",
+                "contentLength": 554588,
+                "contentType": "image/png",
+                "dateCreated": "2024-06-18 14:18:37.409",
+                "dateUpdated": "2024-06-18 14:18:37.409",
+                "createdByUserDrn": "<redacted>"
+            },
+            "assignments": [
+                {
+                    "rowId": "_row:e45OeJGV5WlXNUHAw3DTk"
+                }
+            ]
+        },
+        {
+            "file": {
+                "id": "_file:8wKbrOon9QKC6TKT9GUvx",
+                "uri": "<redacted>",
+                "name": "lenticrispr_v2_1.gb",
+                "status": "ready",
+                "contentLength": 25474,
+                "contentType": "",
+                "dateCreated": "2024-05-08 15:27:48.978",
+                "dateUpdated": "2024-05-08 15:27:48.978",
+                "createdByUserDrn": "<redacted>"
+            },
+            "assignments": [
+                {
+                    "rowId": "_row:tPeawkhvygmgkUHiyrbCZ"
+                }
+            ]
+        },
+        {
+            "file": {
+                "id": "_file:ACdAFzNITUKMyenyh9KNA",
+                "uri": "<redacted>",
+                "name": "purple.png",
+                "status": "ready",
+                "contentLength": 554588,
+                "contentType": "image/png",
+                "dateCreated": "2024-06-19 16:14:54.341",
+                "dateUpdated": "2024-06-19 16:14:54.341",
+                "createdByUserDrn": "<redacted>"
+            },
+            "assignments": [
+                {
+                    "rowId": "_row:e45OeJGV5WlXNUHAw3DTk"
+                }
+            ]
+        },
+        {
+            "file": {
+                "id": "_file:B1au60tEqqmegFPvWapkN",
+                "uri": "<redacted>",
+                "name": "3xFLAG-dCas9 pCMV-7.1.dna",
+                "status": "ready",
+                "contentLength": 34122,
+                "contentType": "",
+                "checksumSha256": "IlAZTXmsh/tiZWhHB9ZdgzxlVjRsN1NSW1U5zharRrQ=",
+                "dateCreated": "2024-10-18 17:29:33.013",
+                "dateUpdated": "2024-10-18 17:29:33.013",
+                "createdByUserDrn": "<redacted>"
+            },
+            "assignments": [
+                {
+                    "rowId": "_row:eqoQHpfvA53KjWIOHkfL3"
+                }
+            ]
+        },
+        {
+            "file": {
+                "id": "_file:GJ4Ga4aUdXUrFkFXYzxMV",
+                "uri": "<redacted>",
+                "name": "purple.png",
+                "status": "ready",
+                "contentLength": 554588,
+                "contentType": "image/png",
+                "dateCreated": "2024-06-18 14:45:14.908",
+                "dateUpdated": "2024-06-18 14:45:14.908",
+                "createdByUserDrn": "<redacted>"
+            },
+            "assignments": [
+                {
+                    "rowId": "_row:ku2ZdpZ0VkYgOj1Y37rSi"
+                }
+            ]
+        },
+        {
+            "file": {
+                "id": "_file:jKzOlrER7Vy8gMQttuAzq",
+                "uri": "<redacted>",
+                "name": "addgene-plasmid-12260-sequence-433301.gbk",
+                "status": "ready",
+                "contentLength": 23404,
+                "contentType": "",
+                "checksumSha256": "AQeE5LhZ1Qni1a72YyWdlG1wKsqoR7/z2ycKkgaZFao=",
+                "dateCreated": "2024-10-18 18:08:54.822",
+                "dateUpdated": "2024-10-18 18:08:54.822",
+                "createdByUserDrn": "<redacted>"
+            },
+            "assignments": [
+                {
+                    "rowId": "_row:wvy5yc08qQskiILGuGKcV"
+                }
+            ]
+        },
+        {
+            "file": {
+                "id": "_file:kaB05bPyZ0p9Nng8bOHbE",
+                "uri": "<redacted>",
+                "name": "1gag (1).pdb",
+                "status": "ready",
+                "contentLength": 253287,
+                "contentType": "",
+                "dateCreated": "2024-05-08 15:28:15.356",
+                "dateUpdated": "2024-05-08 15:28:15.356",
+                "createdByUserDrn": "<redacted>"
+            },
+            "assignments": [
+                {
+                    "rowId": "_row:N8hZzZGfoJwPtY6c1MDLv"
+                }
+            ]
+        },
+        {
+            "file": {
+                "id": "_file:Kb9tYlYR0JlXX58mLdByV",
+                "uri": "<redacted>",
+                "name": "artemis_pocket1_holo_0007_realdb_selective_hits.sdf",
+                "status": "ready",
+                "contentLength": 84386,
+                "contentType": "",
+                "dateCreated": "2024-06-20 19:21:59.217",
+                "dateUpdated": "2024-06-20 19:21:59.217",
+                "createdByUserDrn": "<redacted>"
+            },
+            "assignments": [
+                {
+                    "rowId": "_row:xQuDrLzIxFLqa26oA5xbn"
+                },
+                {
+                    "rowId": "_row:k0okQigiru5g6jc8IFfEj"
+                },
+                {
+                    "rowId": "_row:aSuUKxA84uKzvAHlqOyaS"
+                }
+            ]
+        },
+        {
+            "file": {
+                "id": "_file:n5KIWEhnTBuDqnDPJvlFv",
+                "uri": "<redacted>",
+                "name": "1gag (1).pdb",
+                "status": "ready",
+                "contentLength": 253287,
+                "contentType": "",
+                "dateCreated": "2024-05-07 15:28:38.790543",
+                "dateUpdated": "2024-05-07 15:28:38.790543"
+            },
+            "assignments": [
+                {
+                    "rowId": "_row:2oh4IvrL8d70zAQ3wYteJ"
+                }
+            ]
+        },
+        {
+            "file": {
+                "id": "_file:NGYvLukEeIQwPdrnv0WN2",
+                "uri": "<redacted>",
+                "name": "01-Plot-Sanger-DNA-sequence-trace-electropherogram.ipynb",
+                "status": "ready",
+                "contentLength": 10243,
+                "contentType": "application/x-ipynb+json",
+                "checksumSha256": "zzLRvvUyKr5gneOLaC5asHYOmJDmMwc0ZbehDeMQ5co=",
+                "dateCreated": "2024-10-18 18:08:50.721",
+                "dateUpdated": "2024-10-18 18:08:50.721",
+                "createdByUserDrn": "<redacted>"
+            },
+            "assignments": [
+                {
+                    "rowId": "_row:wvy5yc08qQskiILGuGKcV"
+                }
+            ]
+        }
+    ],
+    "{\"filters\": [{\"fileIds\": [\"_file:nu12FPLhBGKrlhwpIg75C\", \"_file:NGYvLukEeIQwPdrnv0WN2\", \"_file:jKzOlrER7Vy8gMQttuAzq\", \"_file:B1au60tEqqmegFPvWapkN\"]}]}": [
+        {
+            "file": {
+                "id": "_file:NGYvLukEeIQwPdrnv0WN2",
+                "uri": "<redacted>",
+                "name": "01-Plot-Sanger-DNA-sequence-trace-electropherogram.ipynb",
+                "status": "ready",
+                "contentLength": 10243,
+                "contentType": "application/x-ipynb+json",
+                "checksumSha256": "zzLRvvUyKr5gneOLaC5asHYOmJDmMwc0ZbehDeMQ5co=",
+                "dateCreated": "2024-10-18 18:08:50.721",
+                "dateUpdated": "2024-10-18 18:08:50.721",
+                "createdByUserDrn": "<redacted>"
+            },
+            "assignments": [
+                {
+                    "rowId": "_row:wvy5yc08qQskiILGuGKcV"
+                }
+            ]
+        },
+        {
+            "file": {
+                "id": "_file:nu12FPLhBGKrlhwpIg75C",
+                "uri": "<redacted>",
+                "name": "addgene-plasmid-85400-sequence-429030.gbk",
+                "status": "ready",
+                "contentLength": 34361,
+                "contentType": "",
+                "checksumSha256": "Nnja6hz/+kecDPkqz1Qgw1ow1E8a9+6kHsdVCQsdbro=",
+                "dateCreated": "2024-10-18 17:29:22.526",
+                "dateUpdated": "2024-10-18 17:29:22.526",
+                "createdByUserDrn": "<redacted>"
+            },
+            "assignments": [
+                {
+                    "rowId": "_row:wvy5yc08qQskiILGuGKcV"
+                }
+            ]
+        },
+        {
+            "file": {
+                "id": "_file:jKzOlrER7Vy8gMQttuAzq",
+                "uri": "<redacted>",
+                "name": "addgene-plasmid-12260-sequence-433301.gbk",
+                "status": "ready",
+                "contentLength": 23404,
+                "contentType": "",
+                "checksumSha256": "AQeE5LhZ1Qni1a72YyWdlG1wKsqoR7/z2ycKkgaZFao=",
+                "dateCreated": "2024-10-18 18:08:54.822",
+                "dateUpdated": "2024-10-18 18:08:54.822",
+                "createdByUserDrn": "<redacted>"
+            },
+            "assignments": [
+                {
+                    "rowId": "_row:wvy5yc08qQskiILGuGKcV"
+                }
+            ]
+        },
+        {
+            "file": {
+                "id": "_file:B1au60tEqqmegFPvWapkN",
+                "uri": "<redacted>",
+                "name": "3xFLAG-dCas9 pCMV-7.1.dna",
+                "status": "ready",
+                "contentLength": 34122,
+                "contentType": "",
+                "checksumSha256": "IlAZTXmsh/tiZWhHB9ZdgzxlVjRsN1NSW1U5zharRrQ=",
+                "dateCreated": "2024-10-18 17:29:33.013",
+                "dateUpdated": "2024-10-18 17:29:33.013",
+                "createdByUserDrn": "<redacted>"
+            },
+            "assignments": [
+                {
+                    "rowId": "_row:eqoQHpfvA53KjWIOHkfL3"
+                }
+            ]
+        }
+    ],
+    "{\"filters\": []}": [
+        {
+            "file": {
+                "id": "_file:09fwpdPqHtVdt4jj43ywC",
+                "uri": "<redacted>",
+                "name": "science.ade2574_sm.pdf",
+                "status": "ready",
+                "contentLength": 1343642,
+                "contentType": "application/pdf",
+                "dateCreated": "2024-07-03 23:45:44.214",
+                "dateUpdated": "2024-07-03 23:45:44.214",
+                "createdByUserDrn": "<redacted>"
+            }
+        },
+        {
+            "file": {
+                "id": "_file:0L8RRix17eejBVlMzNHoC",
+                "uri": "<redacted>",
+                "name": "purple.png",
+                "status": "ready",
+                "contentLength": 554588,
+                "contentType": "image/png",
+                "dateCreated": "2024-06-18 14:36:20.148",
+                "dateUpdated": "2024-06-18 14:36:20.148",
+                "createdByUserDrn": "<redacted>"
+            }
+        },
+        {
+            "file": {
+                "id": "_file:1g3xaXmAQR6Qb2hpAlRKE",
+                "uri": "<redacted>",
+                "name": "Screenshot 2024-10-17 at 3.21.09\u202fPM.png",
+                "status": "ready",
+                "contentLength": 280857,
+                "contentType": "image/png",
+                "checksumSha256": "xvTTVIPTmxqJOXIPX0kTHieid/ZGESjG/45lYFCwB8g=",
+                "dateCreated": "2024-10-17 19:21:52.028",
+                "dateUpdated": "2024-10-17 19:21:52.028",
+                "createdByUserDrn": "<redacted>"
+            }
+        },
+        {
+            "file": {
+                "id": "_file:1JR6qrwYKIE2sYg9gtqcK",
+                "uri": "<redacted>",
+                "name": "test_data_hub.py",
+                "status": "ready",
+                "contentLength": 11086,
+                "contentType": "text/x-python",
+                "dateCreated": "2024-09-24 12:54:31.292",
+                "dateUpdated": "2024-09-24 12:54:31.292",
+                "createdByUserDrn": "<redacted>"
+            }
+        },
+        {
+            "file": {
+                "id": "_file:1PrkOfHqCZjXRwbrHavXU",
+                "uri": "<redacted>",
+                "name": "1gag (1).pdb",
+                "status": "ready",
+                "contentLength": 253287,
+                "contentType": "",
+                "dateCreated": "2024-05-08 15:30:18.754",
+                "dateUpdated": "2024-05-08 15:30:18.754",
+                "createdByUserDrn": "<redacted>"
+            }
+        },
+        {
+            "file": {
+                "id": "_file:1puUFY7q9shQqSvoxv5A1",
+                "uri": "<redacted>",
+                "name": "test_managed_data.py",
+                "status": "ready",
+                "contentLength": 11197,
+                "contentType": "text/x-python",
+                "dateCreated": "2024-07-29 19:00:04.375",
+                "dateUpdated": "2024-07-29 19:00:04.375",
+                "createdByUserDrn": "<redacted>"
+            }
+        },
+        {
+            "file": {
+                "id": "_file:2cZ19cnc25M03p63aamax",
+                "uri": "<redacted>",
+                "name": "test_data_hub.py",
+                "status": "ready",
+                "contentLength": 11086,
+                "contentType": "text/x-python",
+                "dateCreated": "2024-09-24 12:52:57.571",
+                "dateUpdated": "2024-09-24 12:52:57.571",
+                "createdByUserDrn": "<redacted>"
+            }
+        },
+        {
+            "file": {
+                "id": "_file:2xisJivEvjWD75gIQC3zH",
+                "uri": "<redacted>",
+                "name": "test_data_hub.py",
+                "status": "ready",
+                "contentLength": 11630,
+                "contentType": "text/x-python",
+                "checksumSha256": "riF2bmiWUGK03lvq5h0Ux0YHX+BmNZ7kE458VuZH6oA=",
+                "dateCreated": "2024-11-18 16:26:09.579",
+                "dateUpdated": "2024-11-18 16:26:09.579",
+                "createdByUserDrn": "<redacted>"
+            }
+        },
+        {
+            "file": {
+                "id": "_file:2ygPpAsbHxVSVBNiKpehU",
+                "uri": "<redacted>",
+                "name": "test_data_hub.py",
+                "status": "ready",
+                "contentLength": 10743,
+                "contentType": "text/x-python",
+                "checksumSha256": "0mveZ1Nr7KTKAPhTng9w9rBvyk3YNLStUiebd43sjZI=",
+                "dateCreated": "2024-11-18 20:26:25.6",
+                "dateUpdated": "2024-11-18 20:26:25.6",
+                "createdByUserDrn": "<redacted>"
+            }
+        },
+        {
+            "file": {
+                "id": "_file:36ufKT2Sej22coSEOizpK",
+                "uri": "<redacted>",
+                "name": "purple.png",
+                "status": "ready",
+                "contentLength": 554588,
+                "contentType": "image/png",
+                "dateCreated": "2024-06-18 14:48:33.501",
+                "dateUpdated": "2024-06-18 14:48:33.501",
+                "createdByUserDrn": "<redacted>"
+            }
+        }
+    ]
+}
