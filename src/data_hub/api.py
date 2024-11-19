@@ -642,12 +642,32 @@ def set_data_in_cells(
         for (row_id, validated_value) in zip(row_ids, validated_values)
     ]
 
-    return _api.ensure_rows(
-        rows=rows,
-        client=client,
-        _stash=_stash,
-        database_id=database_id,
-    )
+    # we cannot write more than a 1000 rows at once.
+    # if there are more than 1000 rows, we need to chunk it
+    max_size = 1000
+    if len(rows) > max_size:
+        chunks = [rows[i : i + max_size] for i in range(0, len(rows), max_size)]
+
+        all_responses = []
+        for chunk in chunks:
+            all_responses.append(
+                _api.ensure_rows(
+                    rows=chunk,
+                    client=client,
+                    _stash=_stash,
+                    database_id=database_id,
+                )
+            )
+
+            return all_responses
+
+    else:
+        return _api.ensure_rows(
+            rows=rows,
+            client=client,
+            _stash=_stash,
+            database_id=database_id,
+        )
 
 
 def set_cell_data(
@@ -1486,15 +1506,11 @@ def add_database_column(
         cardinality=cardinality,
     )
 
-    body = dict(
+    response = _api.add_database_column(
         column=column,
-        databaseId=database_id,
+        database_id=database_id,
+        client=client,
+        _stash=_stash,
     )
 
-    response = client.post(
-        "/AddDatabaseColumn",
-        cast_to=httpx.Response,
-        body=body,
-    )
-
-    return response.json()
+    return response

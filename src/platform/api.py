@@ -159,15 +159,15 @@ def get_user_name(user_id: str) -> str:
     return name
 
 
-def get_last_edited_user_name(row):
+def get_last_edited_user_name(row: dict):
     """given a row object, return a human readable user name
     of the user who last edited the row"""
 
-    if row.edited_by_user_drn is None:
+    if getattr(row, "editedByUserDrn", None) is None:
         # fall back to created by user
-        user_id = row.created_by_user_drn.split(":")[-1]
+        user_id = row.createdByUserDrn.split(":")[-1]
     else:
-        user_id = row.edited_by_user_drn.split(":")[-1]
+        user_id = row.editedByUserDrn.split(":")[-1]
     return get_user_name(user_id)
 
 
