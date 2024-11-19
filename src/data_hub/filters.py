@@ -63,25 +63,3 @@ def text_condition(
     adapter.validate_python(data)
 
     return data
-
-
-# def select_condition(
-#     *,
-#     column_id: str,
-#     value: float | int,
-#     operator: str,
-# ) -> dict:
-#     """function to create a valid select filter"""
-#     data = dict(
-#         column_id=column_id,
-#         filter_type="set",
-#         filter_value=value,
-#         operator=operator,
-#     )
-
-#     # use type checks from SDK definition, which
-#     # ultimately derives from the openAPI spec
-#     adapter = TypeAdapter(FilterRowFilterNumber)
-#     adapter.validate_python(data)
-
-#     return data

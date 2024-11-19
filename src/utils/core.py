@@ -4,15 +4,12 @@ import base64
 import json
 import os
 import shutil
-import typing
 from datetime import datetime
 from pathlib import Path
 
 from beartype import beartype
 from beartype.typing import List, Union
 from tabulate import tabulate
-
-T = typing.TypeVar("T")
 
 
 class PersistentDict:
@@ -52,69 +49,51 @@ class PersistentDict:
             json.dump(data, f, indent=4)
 
     def __getitem__(self, key):
-        """return item by key"""
         return self._data[key]
 
     def __setitem__(self, key, value):
-        """set item"""
-
         self._data[key] = value
         self._save(self._data)
 
     def __delitem__(self, key):
-        """delete item in dict"""
-
         del self._data[key]
         self._save(self._data)
 
     def __contains__(self, key):
-        """check if key is in dict"""
-
         return key in self._data
 
     def __iter__(self):
-        """return iterator"""
-
         return iter(self._data)
 
     def __len__(self):
-        """return length"""
-
         return len(self._data)
 
     def __repr__(self):
-        """return repr"""
-
         return repr(self._data)
 
     def keys(self):
-        """return keys"""
-
+        """method to return the keys of this dict"""
         return self._data.keys()
 
     def values(self):
-        """return values"""
-
+        """method to return the values of the underlying dict"""
         return self._data.values()
 
     def items(self):
-        """return items"""
-
+        """method to return the items of the underlying dict"""
         return self._data.items()
 
     def get(self, key, default=None):
-        """return item by key"""
-
+        """method to get a value by key"""
         return self._data.get(key, default)
 
     def update(self, *args, **kwargs):
-        """update dict"""
+        """method to update a value in the underlying dict"""
         self._data.update(*args, **kwargs)
         self._save(self._data)
 
     def clear(self):
-        """clear dict"""
-
+        """method to clear the underlying dict"""
         self._data.clear()
         self._save(self._data)
 
@@ -157,7 +136,7 @@ def in_aws_lambda():
 
 
 @beartype
-def find_last_updated_row(rows: List[T]) -> T:
+def find_last_updated_row(rows: List[dict]) -> dict:
     """utility function to find the most recently updated row and return that object"""
 
     most_recent_date = None
