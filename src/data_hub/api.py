@@ -7,7 +7,6 @@ from pathlib import Path
 from typing import Any, Optional, Union
 from urllib.parse import urlparse, urlunparse
 
-import httpx
 from beartype import beartype
 
 # this import is to allow us to use functions
