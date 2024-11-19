@@ -3,7 +3,6 @@ interacting with your Deep Origin data hub."""
 
 import concurrent.futures
 import os
-import tempfile
 from pathlib import Path
 from typing import Any, Optional, Union
 from urllib.parse import urlparse, urlunparse
@@ -246,7 +245,7 @@ def list_rows(
 def download_file(
     file_id: str,
     *,
-    destination: str | Path | tempfile.TemporaryDirectory = os.getcwd(),
+    destination: str | Path = os.getcwd(),
     client=None,
     _stash: bool = False,
 ) -> None:
@@ -261,9 +260,7 @@ def download_file(
 
     """
 
-    if not isinstance(destination, tempfile.TemporaryDirectory) and not os.path.isdir(
-        destination
-    ):
+    if not os.path.isdir(destination):
         raise DeepOriginException(
             message=f"Destination `{destination}` should be a path for a folder."
         )
@@ -1102,7 +1099,7 @@ def get_dataframe(
 def download_files(
     files: Optional[list | dict] = None,
     *,
-    save_to_dir: Path | str | tempfile.TemporaryDirectory = Path("."),
+    save_to_dir: Path | str = Path("."),
     use_file_names: bool = True,
     client=None,
     _stash: bool = False,

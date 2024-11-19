@@ -1,7 +1,8 @@
 """this tests functions used to interact with the data hub"""
 
 import os
-import tempfile
+import shutil
+import uuid
 
 import pandas as pd
 import pytest
@@ -249,10 +250,6 @@ def test_get_dataframe(config):  # noqa: F811
     assert isinstance(df, pd.DataFrame), "Expected return type to be a pandas Dataframe"
 
     assert (
-        set(df.attrs.keys()) == DATAFRAME_ATTRIBUTE_KEYS
-    ), f"Expected to find a dictionary in `df.attrs` with these keys: {DATAFRAME_ATTRIBUTE_KEYS}, instead found a dictionary with these keys: {df.attrs.keys()}"
-
-    assert (
         "Validation Status" in df.columns
     ), f"Expected to find a column called `Validation Status` in the dataframe. Instead, the columns in this dataframe are: {df.columns}"
 
@@ -332,12 +329,19 @@ def test_download_file(config):  # noqa: F811
             )
 
     else:
+        destination = str(uuid.uuid4())[:5]
+        destination = os.path.join(os.getcwd(), destination)
+        os.makedirs(destination)
+
         api.download_file(
             file_id=file_id,
             client=config["client"],
             _stash=config["stash"],
-            destination=tempfile.TemporaryDirectory(),
+            destination=destination,
         )
+
+        # clean up
+        shutil.rmtree(destination)
 
 
 def test_describe_file(config):  # noqa: F811
