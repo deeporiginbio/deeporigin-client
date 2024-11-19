@@ -12,8 +12,6 @@ valid_operators = [
     "lessThanOrEqual",
     "greaterThan",
     "greaterThanOrEqual",
-    "blank",
-    "notBlank",
 ]
 
 
