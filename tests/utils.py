@@ -13,7 +13,11 @@ TEST_WS_NAME = TEST_PREFIX + "ws"
 
 
 @beartype
-def _run_cli_command(argv: list[str], client) -> str:
+def _run_cli_command(
+    argv: list[str],
+    *,
+    client,
+) -> str:
     """helper function to run a CLI command, parse output and return"""
     stdout = io.StringIO()
     stderr = io.StringIO()
@@ -100,7 +104,9 @@ def minimal_config(pytestconfig):
     with DBs on a live instance where the config happens
     in the test"""
 
-    data = dict()
+    data = dict(
+        stash=pytestconfig.getoption("responses") == "stash",
+    )
 
     # set up client
     if pytestconfig.getoption("client") == "mock":

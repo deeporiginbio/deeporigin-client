@@ -261,6 +261,7 @@ class DataController(cement.Controller):
             data = api.describe_row(
                 row_id=self.app.pargs.object_id,
                 client=self._get_client(),
+                fields=False,
             )
 
             data.pop("row_json_schema", None)
