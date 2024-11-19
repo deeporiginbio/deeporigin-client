@@ -130,6 +130,14 @@ def test_list_rows_by_type(config):  # noqa: F811
         ), f"Expected to get a list of folders, but {row} is not a folder"
 
 
+def test_list_files(config):  # noqa: F811
+    """simple listing of all files with no args"""
+    api.list_files(
+        client=config["client"],
+        _stash=config["stash"],
+    )
+
+
 def test_list_files_unassigned(config):  # noqa: F811
     files = api.list_files(
         is_unassigned=True,

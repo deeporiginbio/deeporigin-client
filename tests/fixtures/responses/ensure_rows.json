@@ -1,28 +1,14 @@
 {
-    "{\"database_id\": \"db-protocol\", \"rows\": [{\"row\": {}}]}": {
-        "rows": [
-            {
-                "type": "row",
-                "id": "_row:C7Cb3LvJQ70TCV0XdKdon",
-                "hid": "proto-30",
-                "parentId": "_database:swAdQAPmv1DaxeqOFKioi",
-                "dateCreated": "2024-11-18 16:06:10.810177",
-                "dateUpdated": "2024-11-18 16:06:10.810177",
-                "createdByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
-                "validationStatus": "valid"
-            }
-        ]
-    },
     "{\"database_id\": \"kitchen-sink\", \"rows\": [{\"row\": {}}]}": {
         "rows": [
             {
                 "type": "row",
-                "id": "_row:dEKQy0zs4KtvubW3kfOZq",
-                "hid": "ks-133",
+                "id": "_row:OIy39TGcV7jqLbCHsdhTO",
+                "hid": "ks-136",
                 "parentId": "_database:swAKhqQzxqTB7cm2FeVcW",
-                "dateCreated": "2024-11-19 02:31:40.246771",
-                "dateUpdated": "2024-11-19 02:31:40.246771",
-                "createdByUserDrn": "drn:identity::user:google-apps|srinivas@deeporigin.com",
+                "dateCreated": "2024-11-19 03:19:29.007535",
+                "dateUpdated": "2024-11-19 03:19:29.007535",
+                "createdByUserDrn": "<redacted>",
                 "validationStatus": "valid"
             }
         ]

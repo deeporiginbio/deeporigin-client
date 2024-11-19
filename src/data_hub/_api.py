@@ -12,10 +12,7 @@ from pathlib import Path
 from box import Box
 from deeporigin import auth
 from deeporigin.exceptions import DeepOriginException
-from deeporigin.utils.core import (
-    PersistentDict,
-    _get_method,
-)
+from deeporigin.utils.core import PersistentDict, _get_method, _redact_responses
 from deeporigin_data import (
     AuthenticationError,
     ConflictError,
@@ -212,7 +209,7 @@ def _create_function(method_path):
             else:
                 stashed_response = response
 
-            stashed_data[key] = stashed_response
+            stashed_data[key] = _redact_responses(stashed_response)
 
         return response
 

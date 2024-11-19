@@ -12,6 +12,37 @@ from beartype.typing import List, Union
 from tabulate import tabulate
 
 
+@beartype
+def _redact_responses(data: dict | list) -> dict | list:
+    """utility function to redact responses of identifying information"""
+
+    patterns = ["https://s3", "s3://data", "drn:identity::"]
+    for pattern in patterns:
+        data = _redact_data_in_dict(data, pattern)
+
+    return data
+
+
+def _redact_data_in_dict(
+    data: dict | list,
+    pattern: str = "https://s3",
+):
+    """Utility function to redacts patterns in a list or dict"""
+    if isinstance(data, dict):
+        return {
+            key: _redact_data_in_dict(value, pattern) for key, value in data.items()
+        }
+    elif isinstance(data, list):
+        return [_redact_data_in_dict(item, pattern) for item in data]
+    elif isinstance(data, str) and pattern in data:
+        return "<redacted>"
+
+    else:
+        # Leave other data types untouched
+
+        return data
+
+
 class PersistentDict:
     """
     A class that behaves like a dictionary but persists its data to a JSON file.
