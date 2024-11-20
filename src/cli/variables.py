@@ -108,9 +108,6 @@ class InstallVariablesController(cement.Controller):
 
         args = self.app.pargs
 
-        # TODO: Enable updating variables only for users or only for organizations
-        # user = not args.no_user
-        # org = not args.no_org
         user = True
         org = True
 
@@ -224,21 +221,6 @@ class AutoInstallVariablesController(cement.Controller):
             "changes, include the `--overwrite` argument."
         )
         arguments = [
-            # TODO: Enable updating variables only for users or only for organizations
-            # (
-            #     ["--no-user"],
-            #     {
-            #         "action": "store_true",
-            #         "help": "Whether to not pull and install your user variables and secrets [default: False]",
-            #     },
-            # ),
-            # (
-            #     ["--no-org"],
-            #     {
-            #         "action": "store_true",
-            #         "help": "Whether to not pull and install the variables and secrets for the parent organization of your workstation [default: False]",
-            #     },
-            # ),
             (
                 ["--type"],
                 {
