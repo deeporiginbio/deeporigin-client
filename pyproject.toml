@@ -35,7 +35,7 @@ dependencies = [
     "pyjwt",
     "cryptography",
     "python-box",
-    "do_sdk_platform @ file:///Users/srinivas/code/generated-sdks/deeporigin-platform-sdk"
+    "do-sdk-platform",
 ]
 dynamic = ["version"]
 
