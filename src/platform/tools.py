@@ -1,4 +1,4 @@
-"""bridge module to interact with the platform users api"""
+"""bridge module to interact with the platform tools api"""
 
 import sys
 
@@ -8,7 +8,7 @@ from deeporigin.platform.utils import (
     _get_client_methods,
 )
 
-API_NAME = "UsersApi"
+API_NAME = "ToolsApi"
 
 
 this_module_name = sys.modules[__name__]
