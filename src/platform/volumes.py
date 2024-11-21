@@ -4,12 +4,9 @@ import sys
 
 from deeporigin.platform.utils import add_functions_to_module
 
-API_NAME = "VolumesApi"
-
-
 methods = add_functions_to_module(
     module=sys.modules[__name__],
-    api_name=API_NAME,
+    api_name="VolumesApi",
 )
 
 __all__ = list(methods)
