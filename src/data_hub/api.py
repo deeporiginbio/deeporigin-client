@@ -359,6 +359,73 @@ def upload_file(
 
 
 @beartype
+def add_database_rows(
+    *,
+    database_id: str,
+    data: dict,
+    client=None,
+    _stash: bool = False,
+) -> list[str]:
+    """Add new data to a database.
+
+    Args:
+        database_id: ID of the database
+        data: A dictionary where each key is a column name and each value is a list of values. All values should have the same length. Key names should match column names in the database.
+
+    Returns:
+        A list of row IDs
+
+    """
+    # check that dict has columns that make sense
+    db = _api.describe_row(
+        row_id=database_id,
+        client=client,
+        _stash=_stash,
+    )
+
+    col_names = [col.name for col in db.cols]
+
+    for col in data.keys():
+        if col not in col_names:
+            raise DeepOriginException(
+                message=f"Column `{col}` does not exist in database `{database_id}`."
+            )
+
+    # check that dict has all keys of the same length
+    value_lengths = []
+    for col in data.keys():
+        value_lengths.append(len(data[col]))
+
+    if len(set(value_lengths)) > 1:
+        raise DeepOriginException(
+            message="All rows must have the same number of values."
+        )
+
+    response = make_database_rows(
+        database_id=database_id,
+        n_rows=value_lengths[0],
+        client=client,
+        _stash=_stash,
+    )
+
+    row_ids = [row.id for row in response.rows]
+    row_hids = [row.hid for row in response.rows]
+
+    for col in data.keys():
+        set_data_in_cells(
+            values=data[col],
+            row_ids=row_ids,
+            column_id=col,
+            database_id=database_id,
+            columns=db.cols,
+            client=client,
+            _stash=_stash,
+        )
+
+    return row_hids
+
+
+@beartype
 @ensure_client
 def make_database_rows(
     database_id: str,
