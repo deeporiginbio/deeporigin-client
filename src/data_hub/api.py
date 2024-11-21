@@ -1033,7 +1033,7 @@ def get_dataframe(
         data[column["id"]] = []
 
     for row in rows:
-        # warning: add_row_to_data mutates file_ids
+        # warning: add_row_to_data mutates data, file_ids
         # and reference_ids
         add_row_to_data(
             data=data,
@@ -1173,21 +1173,26 @@ def download_files(
             pass
 
 
+@beartype
 def add_row_to_data(
     *,
     data: dict,
-    row,
+    row: dict,
     columns: list,
     file_ids: list,
     reference_ids: list,
 ):
     """utility function to combine data from a row into a dataframe"""
-    row_data = _row_to_dict(
+    row_data = row_to_dict(
         row,
         file_ids=file_ids,
         reference_ids=reference_ids,
     )
     if row_data is None:
+        for column in columns:
+            col_id = column["id"]
+            data[col_id].append(None)
+
         return
 
     data["ID"].append(row_data["ID"])
@@ -1204,21 +1209,39 @@ def add_row_to_data(
             data[col_id].append(None)
 
 
-def _row_to_dict(
+@beartype
+def row_to_dict(
     row,
     *,
-    file_ids: list,
-    reference_ids: list,
-):
-    """utility function to convert a row to a dictionary"""
-    if "fields" not in row.keys():
-        return None
+    file_ids: Optional[list] = None,
+    reference_ids: Optional[list] = None,
+) -> dict:
+    """convert a database row (as returned by api.list_database_rows) to a dictionary where keys are column IDs and values are the values in the row
+
+    Danger: This function mutates inputs
+        This function mutates file_ids and reference_ids
+
+    Args:
+        row: database row (as returned by api.list_database_rows)
+        file_ids: list of file IDs, will be mutated in-place
+        reference_ids: list of reference IDs, will be mutated in-place
+
+    Returns:
+        dict
+    """
+
+    if file_ids is None:
+        file_ids = []
+    if reference_ids is None:
+        reference_ids = []
+
+    values = {"ID": row.hid, "Validation Status": row.validationStatus}
+
+    if "fields" not in row.keys() or row.fields is None:
+        return values
 
     fields = row.fields
 
-    values = {"ID": row.hid, "Validation Status": row.validationStatus}
-    if fields is None:
-        return values
     for field in fields:
         if "systemType" in field.keys() and field.systemType == "bodyDocument":
             continue
