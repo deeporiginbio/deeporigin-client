@@ -9,6 +9,7 @@ import json
 import sys
 from pathlib import Path
 
+from beartype import beartype
 from box import Box
 from deeporigin import auth
 from deeporigin.exceptions import DeepOriginException
@@ -47,7 +48,8 @@ OVERRIDDEN_METHODS = {
 }
 
 
-def _get_client_methods():
+@beartype
+def _get_client_methods() -> set:
     # the only reason we're creating this client is to
     # extract methods from it. So no need to
     # authenticate

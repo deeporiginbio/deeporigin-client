@@ -129,7 +129,7 @@ class PersistentDict:
         self._save(self._data)
 
 
-def _get_method(obj, method_path):
+def _get_method(obj, method_path: str):
     # Split the method path into components
     methods = method_path.split(".")
 

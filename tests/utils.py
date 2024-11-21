@@ -1,3 +1,5 @@
+"""helper module to set up tests"""
+
 import io
 from contextlib import redirect_stderr, redirect_stdout
 
