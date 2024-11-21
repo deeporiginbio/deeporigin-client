@@ -11,6 +11,34 @@ from deeporigin.config import get_value
 from deeporigin.utils.core import _get_method
 
 
+def add_functions_to_module(
+    module: str,
+    api_name: str,
+) -> set:
+    methods = _get_client_methods(
+        _get_api_client(
+            api_name=api_name,
+        )
+    )
+
+    for method in methods:
+        # clean up the name so that it's more readable
+        sanitized_method_name = method.split("controller")[0].rstrip("_")
+
+        # add this function as an attribute to this module
+        # so that we can call it
+        setattr(
+            module,
+            sanitized_method_name,
+            _create_function(
+                method_path=method,
+                api_name=api_name,
+            ),
+        )
+
+    return methods
+
+
 @beartype
 def _get_api_client(*, api_name: str, configure: bool = True):
     """return a configured client for the API we want to access
