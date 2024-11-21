@@ -11,10 +11,22 @@ from deeporigin.config import get_value
 from deeporigin.utils.core import _get_method
 
 
+@beartype
 def add_functions_to_module(
     module: str,
     api_name: str,
 ) -> set:
+    """utility function to dynamically add functions to a module
+
+    This function works by calling setattr on the module.
+
+    Args:
+        module (str): name of the module
+        api_name (str): name of the API
+
+    Returns:
+        set of methods that were added
+    """
     methods = _get_client_methods(
         _get_api_client(
             api_name=api_name,
