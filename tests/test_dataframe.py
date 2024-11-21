@@ -5,6 +5,7 @@ import uuid
 import numpy as np
 import pandas as pd
 import pytest
+from box import BoxList
 from deeporigin.data_hub import api
 from deeporigin.data_hub.dataframe import DataFrame
 
@@ -39,6 +40,39 @@ def config(pytestconfig):
                 index=[f"x-{i}" for i in range(1, 11)],
             )
         )
+
+        data["df"].attrs["id"] = "placeholder"
+        data["df"].attrs["metadata"] = {
+            "id": "_database:jeWMK8pVA6XHD9Ht6tGrM",
+            "type": "database",
+            "hid": "xy",
+            "name": "XY",
+            "dateCreated": "2024-10-23 20:17:32.602123",
+            "dateUpdated": "2024-10-23 20:17:32.602123",
+            "createdByUserDrn": "drn:identity::user:google-apps|user@deeporigin.com",
+            "parentId": "_workspace:gRrmQ9z14diV39ZwgvRx6",
+            "hidPrefix": "xy",
+            "cols": BoxList(
+                [
+                    {
+                        "id": "_column:TbQYk64PIxSjk5QcaO95V",
+                        "parentId": "_database:jeWMK8pVA6XHD9Ht6tGrM",
+                        "name": "float",
+                        "type": "float",
+                        "cardinality": "one",
+                        "configNumeric": {},
+                    },
+                    {
+                        "id": "_column:Vesbs3ViQGJC47N8JgGRh",
+                        "parentId": "_database:jeWMK8pVA6XHD9Ht6tGrM",
+                        "name": "integer",
+                        "type": "integer",
+                        "cardinality": "one",
+                        "configNumeric": {},
+                    },
+                ]
+            ),
+        }
 
     else:
         data["mock"] = False
@@ -92,6 +126,48 @@ def config(pytestconfig):
     # teardown code
     if pytestconfig.getoption("client") != "mock":
         clean_up_test_objects(TEST_DB_NAME)
+
+
+def test_df_loc_indexer_1(config):  # noqa: F811
+    """check that we can modify a row using the loc indexer"""
+
+    if config["mock"]:
+        df = config["df"]
+    else:
+        df = DataFrame.from_deeporigin(config["db-name"])
+
+    # should be able to modify an existing row
+    first_row = df.index[0]
+    last_row = df.index[-1]
+    df.loc[first_row] = list(df.loc[last_row])
+
+    assert (
+        df._modified_columns != {}
+    ), "Failed to successfully modify a row using the loc indexer"
+
+    if not config["mock"]:
+        df.to_deeporigin()
+
+
+def test_df_loc_indexer_2(config):  # noqa: F811
+    """check that we can modify 2 rows using the loc indexer"""
+
+    if config["mock"]:
+        df = config["df"]
+    else:
+        df = DataFrame.from_deeporigin(config["db-name"])
+
+    # should be able to modify an existing row
+    first_row = df.index[0]
+    last_row = df.index[-1]
+    df.loc[[first_row, last_row]] = list(df.loc[last_row])
+
+    assert (
+        df._modified_columns != {}
+    ), "Failed to successfully modify a row using the loc indexer"
+
+    if not config["mock"]:
+        df.to_deeporigin()
 
 
 @pytest.mark.parametrize("column", NUMERIC_COLUMNS)

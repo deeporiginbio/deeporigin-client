@@ -33,11 +33,11 @@ def test_kitchen_sink_db_int(config):  # noqa: F811
     df = DataFrame.from_deeporigin("kitchen-sink")
 
     # test writing a single value
-    df.at["ks-34", "Int"] = np.random.randint(100)
+    df.at["ks-34", "Int"] = np.random.randint(len(df))
     df.to_deeporigin()
 
     # test writing entire columns
-    df["Int"] = np.random.randint(50, 999, 100)
+    df["Int"] = np.random.randint(50, 999, len(df))
     df.to_deeporigin()
 
 
@@ -54,7 +54,7 @@ def test_kitchen_sink_db_float(config):  # noqa: F811
     df.to_deeporigin()
 
     # test writing entire columns
-    df["Float"] = np.random.random(100) * 100
+    df["Float"] = np.random.random(len(df)) * 100
     df.to_deeporigin()
 
 
@@ -71,6 +71,6 @@ def test_kitchen_sink_db_bool(config):  # noqa: F811
     df.to_deeporigin()
 
     # test writing entire columns
-    df["Bool"] = [random.choice([True, False]) for _ in range(100)]
+    df["Bool"] = [random.choice([True, False]) for _ in range(len(df))]
 
     df.to_deeporigin()

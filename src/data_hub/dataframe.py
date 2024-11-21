@@ -12,6 +12,7 @@ from beartype import beartype
 from beartype.typing import Optional
 from dateutil.parser import parse
 from deeporigin.data_hub import api
+from deeporigin.exceptions import DeepOriginException
 from deeporigin.platform.api import get_last_edited_user_name
 from deeporigin.utils.config import construct_resource_url
 from deeporigin.utils.constants import DataType, IDFormat
@@ -20,7 +21,10 @@ from deeporigin.utils.network import check_for_updates
 check_for_updates()
 
 
-__NO_NEW_ROWS_MSG__ = "Adding rows to Deep Origin DataFrames is not allowed. If you want to add rows to the underlying database, use `api.add_database_rows()`."
+__NO_NEW_ROWS_MSG__ = "Adding rows to Deep Origin DataFrames is not allowed. "
+__NO_NEW_ROWS_FIX__ = (
+    "If you want to add rows to the underlying database, use `api.add_database_rows()`."
+)
 
 
 class DataFrame(pd.DataFrame):
@@ -77,9 +81,39 @@ class DataFrame(pd.DataFrame):
                 return df
 
             def __setitem__(self, key, value):
-                """callback for adding a new row, typically. we disallow adding new rows"""
+                """callback for adding a new row or modifying data in existing rows"""
 
-                raise ValueError(__NO_NEW_ROWS_MSG__)
+                # disallow making new rows
+                if isinstance(key, (list, pd.Index)):
+                    rows = key
+                    if not all(k in self.df.index for k in key):
+                        raise DeepOriginException(
+                            message=__NO_NEW_ROWS_MSG__,
+                            fix=__NO_NEW_ROWS_FIX__,
+                        )
+                else:
+                    rows = [key]
+                    if key not in self.df.index:
+                        raise DeepOriginException(
+                            message=__NO_NEW_ROWS_MSG__,
+                            fix=__NO_NEW_ROWS_FIX__,
+                        )
+
+                # first check if the new value is the same as
+                # the old value
+                old_value = list(self.df.loc[key])
+
+                try:
+                    if value == old_value:
+                        # noop
+                        return
+                except Exception:
+                    pass
+
+                super(DataFrame, self.df).loc[key] = value
+
+                for col in self.df.columns:
+                    self.df._track_changes(col, rows)
 
         # Return the custom _LocIndexer instance
         return _LocIndexer(self)
@@ -99,7 +133,11 @@ class DataFrame(pd.DataFrame):
             """intercept for the set operation"""
 
             if isinstance(value, pd.Series) and len(value) > len(self):
-                raise ValueError(__NO_NEW_ROWS_MSG__)
+                raise DeepOriginException(
+                    title="Adding rows to a DataFrame not allowed",
+                    message=__NO_NEW_ROWS_MSG__,
+                    fix=__NO_NEW_ROWS_FIX__,
+                )
 
             old_value = self.df._get_value(*key)
 
@@ -170,7 +208,11 @@ class DataFrame(pd.DataFrame):
         sort=False,
     ):
         """Override the `append` method"""
-        raise ValueError(__NO_NEW_ROWS_MSG__)
+        raise DeepOriginException(
+            title="Adding rows to a DataFrame not allowed",
+            message=__NO_NEW_ROWS_MSG__,
+            fix=__NO_NEW_ROWS_FIX__,
+        )
 
     def _repr_html_(self):
         """method override to customize printing in a Jupyter notebook"""
