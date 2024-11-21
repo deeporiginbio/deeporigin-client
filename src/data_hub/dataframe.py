@@ -38,6 +38,28 @@ class DataFrame(pd.DataFrame):
     _allow_adding_rows: bool = True
     """If `True`, new rows can be added to the dataframe. If `False`, new rows cannot be added to the dataframe."""
 
+    def _track_changes(self, column: str, rows: list):
+        """callback that tracks changes made to the DB, and responds appropriately. if auto_sync is true, changes
+        are written immediately to DB. if not, then they're tracked in _modified_columns
+
+        Args:
+            column (str): the name of the column that was modified
+            rows (list): the IDs of rows that were modified
+        """
+
+        if self.auto_sync:
+            # auto sync enabled, simply write ASAP
+            self.to_deeporigin()
+        else:
+            # auto sync not enabled, so we need to
+            # keep track of changes in _modified_columns
+            if column not in self._modified_columns.keys():
+                # this is the first time we're modifying this column
+                self._modified_columns[column] = set(rows)
+            else:
+                # we've already modified this column before, so update the rows we're touched
+                self._modified_columns[column].update(set(rows))
+
     @property
     def loc(self):
         class _LocIndexer:
@@ -45,6 +67,8 @@ class DataFrame(pd.DataFrame):
                 self.df = df
 
             def __getitem__(self, key):
+                """this function is called when we slice a DB, so we need to disallow appending rows"""
+
                 # first call the superclass method
                 df = super(DataFrame, self.df).loc[key]
 
@@ -70,7 +94,8 @@ class DataFrame(pd.DataFrame):
                         raise ValueError(__NO_NEW_ROWS_MSG__)
                 super(DataFrame, self.df).loc[key] = value
 
-                # TODO we need to mark that every column has been modified, but only this row
+                for column in self.df.columns:
+                    self.df._track_changes(column, [key])
 
         # Return the custom _LocIndexer instance
         return _LocIndexer(self)
@@ -78,13 +103,13 @@ class DataFrame(pd.DataFrame):
     class AtIndexer:
         """this class override is used to intercept calls to at indexer of a pandas dataframe"""
 
-        def __init__(self, obj):
-            self.obj = obj
+        def __init__(self, df):
+            self.df = df
 
         def __getitem__(self, key):
             """intercept for the set operation"""
 
-            return self.obj._get_value(*key)
+            return self.df._get_value(*key)
 
         def __setitem__(self, key, value) -> None:
             """intercept for the set operation"""
@@ -96,7 +121,7 @@ class DataFrame(pd.DataFrame):
             ):
                 raise ValueError(__NO_NEW_ROWS_MSG__)
 
-            old_value = self.obj._get_value(*key)
+            old_value = self.df._get_value(*key)
 
             # the reason this is in a try block is because
             # this can fail for any number of reasons.
@@ -114,22 +139,10 @@ class DataFrame(pd.DataFrame):
             column = key[1]
 
             # Perform the actual setting operation
-            self.obj._set_value(*key, value)
+            self.df._set_value(*key, value)
 
-            # now update the DB. note that self is an AtIndexer
-            # object, so we need to index into the pandas object
-            if self.obj.auto_sync:
-                # auto sync enabled, simply write ASAP
-                self.obj.to_deeporigin()
-            else:
-                # auto sync not enabled, so we need to
-                # keep track of changes in _modified_columns
-                if column not in self.obj._modified_columns.keys():
-                    # this is the first time we're modifying this column
-                    self.obj._modified_columns[column] = set(rows)
-                else:
-                    # we've already modified this column before, so update the rows we're touched
-                    self.obj._modified_columns[column].update(set(rows))
+            # now update the DB.
+            self.df._track_changes(column, rows)
 
     @property
     def at(self):

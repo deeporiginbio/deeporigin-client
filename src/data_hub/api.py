@@ -363,6 +363,7 @@ def upload_file(
 def make_database_rows(
     database_id: str,
     n_rows: int = 1,
+    *,
     client=None,
     _stash: bool = False,
 ) -> dict:
