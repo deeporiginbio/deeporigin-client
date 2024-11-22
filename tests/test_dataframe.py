@@ -129,7 +129,8 @@ def config(pytestconfig):
         clean_up_test_objects(TEST_DB_NAME)
 
 
-def test_empty_db(config):  # noqa: F811
+@pytest.mark.parametrize("add_column", [True, False])
+def test_empty_db(config, add_column):  # noqa: F811
     """check that we can create a dataframe from an empty database"""
 
     if config["mock"]:
@@ -139,6 +140,13 @@ def test_empty_db(config):  # noqa: F811
 
     try:
         api.create_database(name=name)
+
+        if add_column:
+            api.add_database_column(
+                database_id=name,
+                name="float",
+                type="float",
+            )
 
         df = DataFrame.from_deeporigin(name)
         html = df._repr_html_()
