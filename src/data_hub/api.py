@@ -359,10 +359,80 @@ def upload_file(
 
 
 @beartype
+def add_database_rows(
+    *,
+    database_id: str,
+    data: dict,
+    client=None,
+    _stash: bool = False,
+) -> list[str]:
+    """Add new data to a database.
+
+    Use this function to add new rows, or fragments of rows, to a Deep Origin database.
+
+    Args:
+        database_id: Human ID or System ID of the database
+        data: A dictionary where each key is a column name and each value is a list of values. All values should have the same length. Key names should match column names in the database.
+
+    Returns:
+        A list of row IDs
+
+    """
+    # check that dict has columns that make sense
+    db = _api.describe_database(
+        database_id=database_id,
+        client=client,
+        _stash=_stash,
+    )
+
+    col_names = [col.name for col in db.cols]
+
+    for col in data.keys():
+        if col not in col_names:
+            raise DeepOriginException(
+                message=f"Column `{col}` does not exist in database `{database_id}`."
+            )
+
+    # check that dict has all keys of the same length
+    value_lengths = []
+    for col in data.keys():
+        value_lengths.append(len(data[col]))
+
+    if len(set(value_lengths)) > 1:
+        raise DeepOriginException(
+            message="All rows must have the same number of values."
+        )
+
+    response = make_database_rows(
+        database_id=database_id,
+        n_rows=value_lengths[0],
+        client=client,
+        _stash=_stash,
+    )
+
+    row_ids = [row.id for row in response.rows]
+    row_hids = [row.hid for row in response.rows]
+
+    for col in data.keys():
+        set_data_in_cells(
+            values=data[col],
+            row_ids=row_ids,
+            column_id=col,
+            database_id=database_id,
+            columns=db.cols,
+            client=client,
+            _stash=_stash,
+        )
+
+    return row_hids
+
+
+@beartype
 @ensure_client
 def make_database_rows(
     database_id: str,
     n_rows: int = 1,
+    *,
     client=None,
     _stash: bool = False,
 ) -> dict:
@@ -1005,6 +1075,23 @@ def get_dataframe(
             f"Expected database_id: {database_id} to resolve to a database, but instead, it resolved to a {db_row.type}"
         )
 
+    # early exit for empty DB
+    if "cols" not in db_row.keys() or db_row.cols is None:
+        data = dict()
+        if return_type == "dataframe":
+            # this import is here because we don't want to
+            # import pandas unless we actually use this function
+            df = _make_deeporigin_dataframe(
+                data=data,
+                reference_ids=None,
+                db_row=db_row,
+                rows=None,
+                columns=None,
+            )
+            return df
+        else:
+            return dict()
+
     columns = db_row.cols
     database_id = db_row.id
 
@@ -1016,9 +1103,6 @@ def get_dataframe(
     # keep track of all files and references in this database
     reference_ids = []
     file_ids = []
-
-    if columns is None:
-        return None
 
     # remove notebook columns because they are not
     # shown in the UI as columns
@@ -1033,7 +1117,7 @@ def get_dataframe(
         data[column["id"]] = []
 
     for row in rows:
-        # warning: add_row_to_data mutates file_ids
+        # warning: add_row_to_data mutates data, file_ids
         # and reference_ids
         add_row_to_data(
             data=data,
@@ -1082,22 +1166,13 @@ def get_dataframe(
     if return_type == "dataframe":
         # make the dataframe
 
-        # this import is here because we don't want to
-        # import pandas unless we actually use this function
-        from deeporigin.data_hub.dataframe import DataFrame
-
-        df = DataFrame(data)
-        df.attrs["reference_ids"] = list(set(reference_ids))
-        df.attrs["id"] = database_id
-        df.attrs["metadata"] = dict(db_row)
-
-        df = _type_and_cleanup_dataframe(df, columns)
-
-        # find last updated row for pretty printing
-        df.attrs["last_updated_row"] = find_last_updated_row(rows)
-
-        df._deep_origin_out_of_sync = False
-        df._modified_columns = dict()
+        df = _make_deeporigin_dataframe(
+            data=data,
+            reference_ids=reference_ids,
+            db_row=db_row,
+            rows=rows,
+            columns=columns,
+        )
         return df
 
     else:
@@ -1111,6 +1186,38 @@ def get_dataframe(
             renamed_data[new_key] = data[key]
             renamed_data.pop(key, None)
         return renamed_data
+
+
+def _make_deeporigin_dataframe(
+    *,
+    data: dict,
+    reference_ids: Optional[list],
+    db_row: dict,
+    columns: Optional[list],
+    rows: Optional[list],
+):
+    # this import is here because we don't want to
+    # import pandas unless we actually use this function
+    from deeporigin.data_hub.dataframe import DataFrame
+
+    df = DataFrame(data)
+    if reference_ids is not None:
+        df.attrs["reference_ids"] = list(set(reference_ids))
+    df.attrs["id"] = db_row.id
+    df.attrs["metadata"] = dict(db_row)
+
+    if columns is not None:
+        df = _type_and_cleanup_dataframe(df, columns)
+
+    # find last updated row for pretty printing
+    if len(df) > 0:
+        df.attrs["last_updated_row"] = find_last_updated_row(rows)
+    else:
+        df.attrs["last_updated_row"] = db_row
+
+    df._deep_origin_out_of_sync = False
+    df._modified_columns = dict()
+    return df
 
 
 @beartype
@@ -1173,21 +1280,26 @@ def download_files(
             pass
 
 
+@beartype
 def add_row_to_data(
     *,
     data: dict,
-    row,
+    row: dict,
     columns: list,
     file_ids: list,
     reference_ids: list,
 ):
     """utility function to combine data from a row into a dataframe"""
-    row_data = _row_to_dict(
+    row_data = row_to_dict(
         row,
         file_ids=file_ids,
         reference_ids=reference_ids,
     )
     if row_data is None:
+        for column in columns:
+            col_id = column["id"]
+            data[col_id].append(None)
+
         return
 
     data["ID"].append(row_data["ID"])
@@ -1204,21 +1316,39 @@ def add_row_to_data(
             data[col_id].append(None)
 
 
-def _row_to_dict(
-    row,
+@beartype
+def row_to_dict(
+    row: dict,
     *,
-    file_ids: list,
-    reference_ids: list,
-):
-    """utility function to convert a row to a dictionary"""
-    if "fields" not in row.keys():
-        return None
+    file_ids: Optional[list] = None,
+    reference_ids: Optional[list] = None,
+) -> dict:
+    """convert a database row (as returned by api.list_database_rows) to a dictionary where keys are column IDs and values are the values in the row
+
+    Danger: This function mutates inputs
+        This function mutates file_ids and reference_ids
+
+    Args:
+        row: database row (as returned by api.list_database_rows)
+        file_ids: list of file IDs, will be mutated in-place
+        reference_ids: list of reference IDs, will be mutated in-place
+
+    Returns:
+        dict
+    """
+
+    if file_ids is None:
+        file_ids = []
+    if reference_ids is None:
+        reference_ids = []
+
+    values = {"ID": row.hid, "Validation Status": row.validationStatus}
+
+    if "fields" not in row.keys() or row.fields is None:
+        return values
 
     fields = row.fields
 
-    values = {"ID": row.hid, "Validation Status": row.validationStatus}
-    if fields is None:
-        return values
     for field in fields:
         if "systemType" in field.keys() and field.systemType == "bodyDocument":
             continue

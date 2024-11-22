@@ -13,7 +13,7 @@ from deeporigin.utils.core import _get_method
 
 @beartype
 def add_functions_to_module(
-    module: str,
+    module,
     api_name: str,
 ) -> set:
     """utility function to dynamically add functions to a module

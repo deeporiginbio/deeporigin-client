@@ -167,8 +167,11 @@ def in_aws_lambda():
 
 
 @beartype
-def find_last_updated_row(rows: List[dict]) -> dict:
+def find_last_updated_row(rows: List[dict]) -> dict | None:
     """utility function to find the most recently updated row and return that object"""
+
+    if len(rows) == 0:
+        return None
 
     most_recent_date = None
     most_recent_row = rows[0]

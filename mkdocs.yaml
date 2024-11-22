@@ -59,6 +59,7 @@ nav:
     - Upload files: how-to/data-hub/upload-files.md
     - Download files: how-to/data-hub/download-files.md
     - Write data: how-to/data-hub/write-data.md
+    - Add data to database: how-to/data-hub/add-data.md
   - API reference:
     - High-level API: ref/data-hub/high-level-api.md
     - Low-level API: ref/data-hub/low-level-api.md
@@ -112,7 +113,7 @@ plugins:
       handlers:
         python:
           paths: ["."]
-          options:            
+          options:   
             annotations_path: brief
             show_source: false
             docstring_options:

@@ -12,6 +12,7 @@ from beartype import beartype
 from beartype.typing import Optional
 from dateutil.parser import parse
 from deeporigin.data_hub import api
+from deeporigin.exceptions import DeepOriginException
 from deeporigin.platform.api import get_last_edited_user_name
 from deeporigin.utils.config import construct_resource_url
 from deeporigin.utils.constants import DataType, IDFormat
@@ -20,7 +21,10 @@ from deeporigin.utils.network import check_for_updates
 check_for_updates()
 
 
-__NO_NEW_ROWS_MSG__ = "Adding rows is not allowed, because this dataframe corresponds to a subset of the rows in the corresponding database."
+__NO_NEW_ROWS_MSG__ = "Adding rows to Deep Origin DataFrames is not allowed. "
+__NO_NEW_ROWS_FIX__ = (
+    "If you want to add rows to the underlying database, use `api.add_database_rows()`."
+)
 
 
 class DataFrame(pd.DataFrame):
@@ -35,8 +39,27 @@ class DataFrame(pd.DataFrame):
     _modified_columns: dict = dict()
     """if data is modified in a dataframe, and auto_sync is False, this list will contain the columns that have been modified so that the Deep Origin database can be updated. If an empty list, the Deep Origin database will not be updated, and the dataframe matches the Deep Origin database at the time of creation."""
 
-    _allow_adding_rows: bool = True
-    """If `True`, new rows can be added to the dataframe. If `False`, new rows cannot be added to the dataframe."""
+    def _track_changes(self, column: str, rows: list):
+        """callback that tracks changes made to the DB, and responds appropriately. if auto_sync is true, changes
+        are written immediately to DB. if not, then they're tracked in _modified_columns
+
+        Args:
+            column (str): the name of the column that was modified
+            rows (list): the IDs of rows that were modified
+        """
+
+        if self.auto_sync:
+            # auto sync enabled, simply write ASAP
+            self.to_deeporigin()
+        else:
+            # auto sync not enabled, so we need to
+            # keep track of changes in _modified_columns
+            if column not in self._modified_columns.keys():
+                # this is the first time we're modifying this column
+                self._modified_columns[column] = set(rows)
+            else:
+                # we've already modified this column before, so update the rows we're touched
+                self._modified_columns[column].update(set(rows))
 
     @property
     def loc(self):
@@ -45,32 +68,52 @@ class DataFrame(pd.DataFrame):
                 self.df = df
 
             def __getitem__(self, key):
+                """this function is called when we slice a DB, so we need to disallow appending rows"""
+
                 # first call the superclass method
                 df = super(DataFrame, self.df).loc[key]
 
                 # inherit attributes
                 df.attrs = self.df.attrs
 
-                # disallow adding rows
-                df._allow_adding_rows = False
-
                 df._modified_columns = self.df._modified_columns
 
                 return df
 
             def __setitem__(self, key, value):
-                """callback for adding a new row, typically"""
+                """callback for adding a new row or modifying data in existing rows"""
 
-                if not self.df._allow_adding_rows:
-                    # adding rows is not allowed
-                    if isinstance(key, (list, pd.Index)):
-                        if not all(k in self.df.index for k in key):
-                            raise ValueError(__NO_NEW_ROWS_MSG__)
-                    elif key not in self.df.index:
-                        raise ValueError(__NO_NEW_ROWS_MSG__)
+                # disallow making new rows
+                if isinstance(key, (list, pd.Index)):
+                    rows = key
+                    if not all(k in self.df.index for k in key):
+                        raise DeepOriginException(
+                            message=__NO_NEW_ROWS_MSG__,
+                            fix=__NO_NEW_ROWS_FIX__,
+                        )
+                else:
+                    rows = [key]
+                    if key not in self.df.index:
+                        raise DeepOriginException(
+                            message=__NO_NEW_ROWS_MSG__,
+                            fix=__NO_NEW_ROWS_FIX__,
+                        )
+
+                # first check if the new value is the same as
+                # the old value
+                old_value = list(self.df.loc[key])
+
+                try:
+                    if value == old_value:
+                        # noop
+                        return
+                except Exception:
+                    pass
+
                 super(DataFrame, self.df).loc[key] = value
 
-                # TODO we need to mark that every column has been modified, but only this row
+                for col in self.df.columns:
+                    self.df._track_changes(col, rows)
 
         # Return the custom _LocIndexer instance
         return _LocIndexer(self)
@@ -78,25 +121,25 @@ class DataFrame(pd.DataFrame):
     class AtIndexer:
         """this class override is used to intercept calls to at indexer of a pandas dataframe"""
 
-        def __init__(self, obj):
-            self.obj = obj
+        def __init__(self, df):
+            self.df = df
 
         def __getitem__(self, key):
             """intercept for the set operation"""
 
-            return self.obj._get_value(*key)
+            return self.df._get_value(*key)
 
         def __setitem__(self, key, value) -> None:
             """intercept for the set operation"""
 
-            if (
-                isinstance(value, pd.Series)
-                and len(value) > len(self)
-                and not self._allow_adding_rows
-            ):
-                raise ValueError(__NO_NEW_ROWS_MSG__)
+            if isinstance(value, pd.Series) and len(value) > len(self):
+                raise DeepOriginException(
+                    title="Adding rows to a DataFrame not allowed",
+                    message=__NO_NEW_ROWS_MSG__,
+                    fix=__NO_NEW_ROWS_FIX__,
+                )
 
-            old_value = self.obj._get_value(*key)
+            old_value = self.df._get_value(*key)
 
             # the reason this is in a try block is because
             # this can fail for any number of reasons.
@@ -114,22 +157,10 @@ class DataFrame(pd.DataFrame):
             column = key[1]
 
             # Perform the actual setting operation
-            self.obj._set_value(*key, value)
+            self.df._set_value(*key, value)
 
-            # now update the DB. note that self is an AtIndexer
-            # object, so we need to index into the pandas object
-            if self.obj.auto_sync:
-                # auto sync enabled, simply write ASAP
-                self.obj.to_deeporigin()
-            else:
-                # auto sync not enabled, so we need to
-                # keep track of changes in _modified_columns
-                if column not in self.obj._modified_columns.keys():
-                    # this is the first time we're modifying this column
-                    self.obj._modified_columns[column] = set(rows)
-                else:
-                    # we've already modified this column before, so update the rows we're touched
-                    self.obj._modified_columns[column].update(set(rows))
+            # now update the DB.
+            self.df._track_changes(column, rows)
 
     @property
     def at(self):
@@ -177,10 +208,11 @@ class DataFrame(pd.DataFrame):
         sort=False,
     ):
         """Override the `append` method"""
-        if self._allow_adding_rows:
-            return super().append(other, ignore_index, verify_integrity, sort)
-        else:
-            raise ValueError(__NO_NEW_ROWS_MSG__)
+        raise DeepOriginException(
+            title="Adding rows to a DataFrame not allowed",
+            message=__NO_NEW_ROWS_MSG__,
+            fix=__NO_NEW_ROWS_FIX__,
+        )
 
     def _repr_html_(self):
         """method override to customize printing in a Jupyter notebook"""
