@@ -1,6 +1,8 @@
 # Changelog
 
 
+## `deeporigin v3.0.0`
+
 ## `deeporigin v2.4.0`
 
 ### Bugfixes
