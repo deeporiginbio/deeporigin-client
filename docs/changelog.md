@@ -1,6 +1,29 @@
 # Changelog
 
 
+## `deeporigin v3.0.0`
+
+!!! warning "Breaking changes"
+    This release is a breaking change. Responses to all functions are no longer objects, but are now dictionaries wrapped in python [Boxes](https://pypi.org/project/python-box/). 
+
+### Bugfixes
+
+- Fixed a bug where writing more than 1000 rows failed
+- Fixed a bug where constructing a dataframe from an empty DB failed
+
+
+### New features
+
+- Ability to add new data to existing dataframes
+- Support for Deep Origin platform SDK
+- Deep Origin dataframes now disallow adding rows
+- Better support for writing data back to databases
+
+### Miscellaneous 
+
+- Initial support for integration tests with Deep Origin Data Hub
+- Large refactor of testing
+
 ## `deeporigin v2.4.0`
 
 ### Bugfixes
