@@ -129,6 +129,29 @@ def config(pytestconfig):
         clean_up_test_objects(TEST_DB_NAME)
 
 
+def test_empty_db(config):  # noqa: F811
+    """check that we can create a dataframe from an empty database"""
+
+    if config["mock"]:
+        pytest.skip(SKIP_MSG)
+
+    name = "tc-" + str(uuid.uuid4())[:8]
+
+    try:
+        api.create_database(name=name)
+
+        df = DataFrame.from_deeporigin(name)
+        html = df._repr_html_()
+
+        assert "was last edited" in html, "Malformed view of empty dataframe"
+
+        assert len(df) == 0, "Empty dataframe should have no rows"
+
+    finally:
+        # clean up
+        api.delete_database(database_id=name)
+
+
 def test_df_loc_indexer_1(config):  # noqa: F811
     """check that we can modify a row using the loc indexer"""
 
