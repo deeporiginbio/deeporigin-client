@@ -7,7 +7,6 @@ with these functions via api.py
 import inspect
 import json
 import sys
-from json import JSONDecodeError
 from pathlib import Path
 
 from beartype import beartype
@@ -184,20 +183,21 @@ def _create_function(method_path):
             )
 
         if not isinstance(response, dict):
-            try:
+            if "json" in response.headers["content-type"]:
                 response = response.json()
-            except JSONDecodeError:
-                response = dict(data=response.text())
-
-        if "data" in response.keys():
-            response = response["data"]
-            if isinstance(response, list):
-                response = [Box(item) for item in response]
-            elif isinstance(response, str):
-                return response
+            elif "text" in response.headers["content-type"]:
+                response = response.text()
             else:
-                response = Box(response)
-        else:
+                raise DeepOriginException(
+                    f"Uncertain response type: {response.headers}"
+                )
+
+        if isinstance(response, dict) and "data" in response.keys():
+            response = response["data"]
+
+        if isinstance(response, list):
+            response = [Box(item) for item in response]
+        elif isinstance(response, dict):
             response = Box(response)
 
         if _stash:
