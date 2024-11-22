@@ -8,6 +8,7 @@ import pytest
 from box import BoxList
 from deeporigin.data_hub import api
 from deeporigin.data_hub.dataframe import DataFrame
+from deeporigin.exceptions import DeepOriginException
 
 from tests.utils import clean_up_test_objects
 
@@ -168,6 +169,24 @@ def test_df_loc_indexer_2(config):  # noqa: F811
 
     if not config["mock"]:
         df.to_deeporigin()
+
+
+def test_df_loc_indexer_3(config):  # noqa: F811
+    """check that we cannot add rows to a dataframe"""
+
+    if config["mock"]:
+        df = config["df"]
+    else:
+        df = DataFrame.from_deeporigin(config["db-name"])
+
+    # should be able to modify an existing row
+    first_row = df.index[0]
+
+    with pytest.raises(
+        DeepOriginException,
+        match="Adding rows to Deep Origin DataFrames is not allowed",
+    ):
+        df.loc["new-row"] = list(df.loc[first_row])
 
 
 @pytest.mark.parametrize("column", NUMERIC_COLUMNS)

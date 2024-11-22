@@ -1073,6 +1073,23 @@ def get_dataframe(
             f"Expected database_id: {database_id} to resolve to a database, but instead, it resolved to a {db_row.type}"
         )
 
+    # early exit for empty DB
+    if "cols" not in db_row.keys() or db_row.cols is None:
+        data = dict()
+        if return_type == "dataframe":
+            # this import is here because we don't want to
+            # import pandas unless we actually use this function
+            df = _make_deeporigin_dataframe(
+                data=data,
+                reference_ids=None,
+                db_row=db_row,
+                rows=None,
+                columns=None,
+            )
+            return df
+        else:
+            return dict()
+
     columns = db_row.cols
     database_id = db_row.id
 
@@ -1084,9 +1101,6 @@ def get_dataframe(
     # keep track of all files and references in this database
     reference_ids = []
     file_ids = []
-
-    if columns is None:
-        return None
 
     # remove notebook columns because they are not
     # shown in the UI as columns
@@ -1150,22 +1164,13 @@ def get_dataframe(
     if return_type == "dataframe":
         # make the dataframe
 
-        # this import is here because we don't want to
-        # import pandas unless we actually use this function
-        from deeporigin.data_hub.dataframe import DataFrame
-
-        df = DataFrame(data)
-        df.attrs["reference_ids"] = list(set(reference_ids))
-        df.attrs["id"] = database_id
-        df.attrs["metadata"] = dict(db_row)
-
-        df = _type_and_cleanup_dataframe(df, columns)
-
-        # find last updated row for pretty printing
-        df.attrs["last_updated_row"] = find_last_updated_row(rows)
-
-        df._deep_origin_out_of_sync = False
-        df._modified_columns = dict()
+        df = _make_deeporigin_dataframe(
+            data=data,
+            reference_ids=reference_ids,
+            db_row=db_row,
+            rows=rows,
+            columns=columns,
+        )
         return df
 
     else:
@@ -1179,6 +1184,38 @@ def get_dataframe(
             renamed_data[new_key] = data[key]
             renamed_data.pop(key, None)
         return renamed_data
+
+
+def _make_deeporigin_dataframe(
+    *,
+    data: dict,
+    reference_ids: Optional[list],
+    db_row: dict,
+    columns: Optional[list],
+    rows: Optional[list],
+):
+    # this import is here because we don't want to
+    # import pandas unless we actually use this function
+    from deeporigin.data_hub.dataframe import DataFrame
+
+    df = DataFrame(data)
+    if reference_ids is not None:
+        df.attrs["reference_ids"] = list(set(reference_ids))
+    df.attrs["id"] = db_row.id
+    df.attrs["metadata"] = dict(db_row)
+
+    if columns is not None:
+        df = _type_and_cleanup_dataframe(df, columns)
+
+    # find last updated row for pretty printing
+    if len(df) > 0:
+        df.attrs["last_updated_row"] = find_last_updated_row(rows)
+    else:
+        df.attrs["last_updated_row"] = db_row
+
+    df._deep_origin_out_of_sync = False
+    df._modified_columns = dict()
+    return df
 
 
 @beartype
