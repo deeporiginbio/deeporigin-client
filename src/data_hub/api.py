@@ -368,8 +368,10 @@ def add_database_rows(
 ) -> list[str]:
     """Add new data to a database.
 
+    Use this function to add new rows, or fragments of rows, to a Deep Origin database.
+
     Args:
-        database_id: ID of the database
+        database_id: Human ID or System ID of the database
         data: A dictionary where each key is a column name and each value is a list of values. All values should have the same length. Key names should match column names in the database.
 
     Returns:
@@ -1316,7 +1318,7 @@ def add_row_to_data(
 
 @beartype
 def row_to_dict(
-    row,
+    row: dict,
     *,
     file_ids: Optional[list] = None,
     reference_ids: Optional[list] = None,
