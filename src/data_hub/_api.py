@@ -7,6 +7,7 @@ with these functions via api.py
 import inspect
 import json
 import sys
+from json import JSONDecodeError
 from pathlib import Path
 
 from beartype import beartype
@@ -183,12 +184,17 @@ def _create_function(method_path):
             )
 
         if not isinstance(response, dict):
-            response = response.json()
+            try:
+                response = response.json()
+            except JSONDecodeError:
+                response = dict(data=response.text())
 
         if "data" in response.keys():
             response = response["data"]
             if isinstance(response, list):
                 response = [Box(item) for item in response]
+            elif isinstance(response, str):
+                return response
             else:
                 response = Box(response)
         else:
