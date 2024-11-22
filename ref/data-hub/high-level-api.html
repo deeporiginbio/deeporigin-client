@@ -13,14 +13,14 @@
         <link rel="canonical" href="https://client-docs.deeporigin.io/ref/data-hub/high-level-api.html">
       
       
-        <link rel="prev" href="../../how-to/data-hub/write-data.html">
+        <link rel="prev" href="../../how-to/data-hub/add-data.html">
       
       
         <link rel="next" href="low-level-api.html">
       
       
       <link rel="icon" href="../../images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.30">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.45">
     
     
       
@@ -28,7 +28,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.3cba04c6.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.0253249f.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
@@ -54,7 +54,7 @@
     
       <link rel="stylesheet" href="../../stylesheets/extra.css">
     
-    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -99,7 +99,7 @@
     </a>
     <label class="md-header__button md-icon" for="__drawer">
       
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
     </label>
     <div class="md-header__title" data-md-component="header-title">
       <div class="md-header__ellipsis">
@@ -125,7 +125,7 @@
     
       <label class="md-header__button md-icon" for="__search">
         
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
       </label>
       <div class="md-search" data-md-component="search" role="dialog">
   <label class="md-search__overlay" for="__search"></label>
@@ -134,15 +134,15 @@
       <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
       <label class="md-search__icon md-icon" for="__search">
         
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
         
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
       </label>
       <nav class="md-search__options" aria-label="Search">
         
         <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
           
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
         </button>
       </nav>
       
@@ -167,7 +167,7 @@
         <a href="https://github.com/deeporiginbio/deeporigin-client" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
   </div>
   <div class="md-source__repository">
     deeporiginbio/deeporigin-client
@@ -339,7 +339,7 @@
       <a href="https://github.com/deeporiginbio/deeporigin-client" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
   </div>
   <div class="md-source__repository">
     deeporiginbio/deeporigin-client
@@ -808,6 +808,8 @@
       
         
       
+        
+      
     
     
       
@@ -991,6 +993,27 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/data-hub/add-data.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Add data to database
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1110,6 +1133,15 @@
   <a href="#src.data_hub.api.add_database_column" class="md-nav__link">
     <span class="md-ellipsis">
       add_database_column
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#src.data_hub.api.add_database_rows" class="md-nav__link">
+    <span class="md-ellipsis">
+      add_database_rows
     </span>
   </a>
   
@@ -1263,6 +1295,15 @@
   <a href="#src.data_hub.api.make_database_rows" class="md-nav__link">
     <span class="md-ellipsis">
       make_database_rows
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#src.data_hub.api.row_to_dict" class="md-nav__link">
+    <span class="md-ellipsis">
+      row_to_dict
     </span>
   </a>
   
@@ -1609,6 +1650,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#src.data_hub.api.add_database_rows" class="md-nav__link">
+    <span class="md-ellipsis">
+      add_database_rows
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#src.data_hub.api.assign_files_to_cell" class="md-nav__link">
     <span class="md-ellipsis">
       assign_files_to_cell
@@ -1762,6 +1812,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#src.data_hub.api.row_to_dict" class="md-nav__link">
+    <span class="md-ellipsis">
+      row_to_dict
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#src.data_hub.api.set_cell_data" class="md-nav__link">
     <span class="md-ellipsis">
       set_cell_data
@@ -1829,8 +1888,13 @@
 
     <div class="doc doc-contents first">
 
-      <p>The <code>deeporigin.data_hub.api</code> module contains high-level functions for
+        <p>The <code>deeporigin.data_hub.api</code> module contains high-level functions for
 interacting with your Deep Origin data hub.</p>
+
+
+
+
+
 
 
 
@@ -1859,13 +1923,14 @@ interacting with your Deep Origin data hub.</p>
     <span class="n">name</span><span class="p">:</span> <span class="n">str</span><span class="p">,</span>
     <span class="n">cardinality</span><span class="p">:</span> <span class="n"><span title="deeporigin.utils.constants.Cardinality">Cardinality</span></span> <span class="o">=</span> <span class="s2">&quot;one&quot;</span><span class="p">,</span>
     <span class="n">required</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">client</span><span class="o">=</span><span class="kc">None</span>
+    <span class="n">client</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">_stash</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
-      <p>Add a column to a database.</p>
+        <p>Add a column to a database.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -1880,7 +1945,9 @@ interacting with your Deep Origin data hub.</p>
       </thead>
       <tbody>
           <tr class="doc-section-item">
-            <td><code>database_id</code></td>
+            <td>
+                <code>database_id</code>
+            </td>
             <td>
                   <code>str</code>
             </td>
@@ -1894,7 +1961,9 @@ interacting with your Deep Origin data hub.</p>
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code>type</code></td>
+            <td>
+                <code>type</code>
+            </td>
             <td>
                   <code><span title="deeporigin.utils.constants.DataType">DataType</span></code>
             </td>
@@ -1908,7 +1977,9 @@ interacting with your Deep Origin data hub.</p>
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code>name</code></td>
+            <td>
+                <code>name</code>
+            </td>
             <td>
                   <code>str</code>
             </td>
@@ -1922,7 +1993,9 @@ interacting with your Deep Origin data hub.</p>
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code>cardinality</code></td>
+            <td>
+                <code>cardinality</code>
+            </td>
             <td>
                   <code><span title="deeporigin.utils.constants.Cardinality">Cardinality</span></code>
             </td>
@@ -1936,7 +2009,9 @@ interacting with your Deep Origin data hub.</p>
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code>required</code></td>
+            <td>
+                <code>required</code>
+            </td>
             <td>
                   <code>bool</code>
             </td>
@@ -1947,6 +2022,102 @@ interacting with your Deep Origin data hub.</p>
             </td>
             <td>
                   <code>False</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="src.data_hub.api.add_database_rows" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>            <span class="doc doc-object-name doc-function-name">add_database_rows</span>
+
+
+<a href="#src.data_hub.api.add_database_rows" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">add_database_rows</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">database_id</span><span class="p">:</span> <span class="n">str</span><span class="p">,</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">dict</span><span class="p">,</span>
+    <span class="n">client</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">_stash</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">list</span><span class="p">[</span><span class="n">str</span><span class="p">]</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Add new data to a database.</p>
+<p>Use this function to add new rows, or fragments of rows, to a Deep Origin database.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>database_id</code>
+            </td>
+            <td>
+                  <code>str</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Human ID or System ID of the database</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>data</code>
+            </td>
+            <td>
+                  <code>dict</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A dictionary where each key is a column name and each value is a list of values. All values should have the same length. Key names should match column names in the database.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code>list[str]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A list of row IDs</p>
+              </div>
             </td>
           </tr>
       </tbody>
@@ -1970,13 +2141,14 @@ interacting with your Deep Origin data hub.</p>
     <span class="n">database_id</span><span class="p">:</span> <span class="n">str</span><span class="p">,</span>
     <span class="n">column_id</span><span class="p">:</span> <span class="n">str</span><span class="p">,</span>
     <span class="n">row_id</span><span class="p">:</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">client</span><span class="o">=</span><span class="kc">None</span>
+    <span class="n">client</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">_stash</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
-      <p>Assign existing file(s) to a cell</p>
+        <p>Assign existing file(s) to a cell</p>
 <p>Assign files to a cell in a database table, where the cell is identified by the database ID, row ID, and column ID.</p>
 <p>If row_id is <code>None</code>, a new row will be created.</p>
 
@@ -1993,7 +2165,9 @@ interacting with your Deep Origin data hub.</p>
       </thead>
       <tbody>
           <tr class="doc-section-item">
-            <td><code>file_ids</code></td>
+            <td>
+                <code>file_ids</code>
+            </td>
             <td>
                   <code>list[str]</code>
             </td>
@@ -2007,7 +2181,9 @@ interacting with your Deep Origin data hub.</p>
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code>database_id</code></td>
+            <td>
+                <code>database_id</code>
+            </td>
             <td>
                   <code>str</code>
             </td>
@@ -2021,7 +2197,9 @@ interacting with your Deep Origin data hub.</p>
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code>column_id</code></td>
+            <td>
+                <code>column_id</code>
+            </td>
             <td>
                   <code>str</code>
             </td>
@@ -2035,7 +2213,9 @@ interacting with your Deep Origin data hub.</p>
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code>row_id</code></td>
+            <td>
+                <code>row_id</code>
+            </td>
             <td>
                   <code><span title="typing.Optional">Optional</span>[str]</code>
             </td>
@@ -2067,13 +2247,14 @@ interacting with your Deep Origin data hub.</p>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">hids</span><span class="p">:</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n"><span title="typing.Union">Union</span></span><span class="p">[</span><span class="n">list</span><span class="p">[</span><span class="n">str</span><span class="p">],</span> <span class="n">set</span><span class="p">[</span><span class="n">str</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">ids</span><span class="p">:</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n"><span title="typing.Union">Union</span></span><span class="p">[</span><span class="n">list</span><span class="p">[</span><span class="n">str</span><span class="p">],</span> <span class="n">set</span><span class="p">[</span><span class="n">str</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">client</span><span class="o">=</span><span class="kc">None</span>
+    <span class="n">client</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">_stash</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">list</span><span class="p">[</span><span class="n">dict</span><span class="p">]</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
-      <p>Convert a list of human IDs to IDs or vice versa.</p>
+        <p>Convert a list of human IDs to IDs or vice versa.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -2088,7 +2269,9 @@ interacting with your Deep Origin data hub.</p>
       </thead>
       <tbody>
           <tr class="doc-section-item">
-            <td><code>hids</code></td>
+            <td>
+                <code>hids</code>
+            </td>
             <td>
                   <code><span title="typing.Optional">Optional</span>[<span title="typing.Union">Union</span>[list[str], set[str]]]</code>
             </td>
@@ -2102,7 +2285,9 @@ interacting with your Deep Origin data hub.</p>
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code>ids</code></td>
+            <td>
+                <code>ids</code>
+            </td>
             <td>
                   <code><span title="typing.Optional">Optional</span>[<span title="typing.Union">Union</span>[list[str], set[str]]]</code>
             </td>
@@ -2134,6 +2319,7 @@ interacting with your Deep Origin data hub.</p>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">name</span><span class="p">:</span> <span class="n">str</span><span class="p">,</span>
     <span class="n">client</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">_stash</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">parent_id</span><span class="p">:</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">hid</span><span class="p">:</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">hid_prefix</span><span class="p">:</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
@@ -2142,7 +2328,7 @@ interacting with your Deep Origin data hub.</p>
 
     <div class="doc doc-contents ">
 
-      <p>Create a new database in the data hub</p>
+        <p>Create a new database in the data hub</p>
 <p>A database contains rows of data.</p>
 
 
@@ -2158,7 +2344,9 @@ interacting with your Deep Origin data hub.</p>
       </thead>
       <tbody>
           <tr class="doc-section-item">
-            <td><code>name</code></td>
+            <td>
+                <code>name</code>
+            </td>
             <td>
                   <code>str</code>
             </td>
@@ -2172,7 +2360,9 @@ interacting with your Deep Origin data hub.</p>
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code>hid</code></td>
+            <td>
+                <code>hid</code>
+            </td>
             <td>
                   <code><span title="typing.Optional">Optional</span>[str]</code>
             </td>
@@ -2186,7 +2376,9 @@ interacting with your Deep Origin data hub.</p>
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code>parent_id</code></td>
+            <td>
+                <code>parent_id</code>
+            </td>
             <td>
                   <code><span title="typing.Optional">Optional</span>[str]</code>
             </td>
@@ -2200,7 +2392,9 @@ interacting with your Deep Origin data hub.</p>
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code>hid_prefix</code></td>
+            <td>
+                <code>hid_prefix</code>
+            </td>
             <td>
                   <code><span title="typing.Optional">Optional</span>[str]</code>
             </td>
@@ -2231,15 +2425,16 @@ interacting with your Deep Origin data hub.</p>
 <div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">create_workspace</span><span class="p">(</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">name</span><span class="p">:</span> <span class="n">str</span><span class="p">,</span>
-    <span class="n">client</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">hid</span><span class="p">:</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">parent_id</span><span class="p">:</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">parent_id</span><span class="p">:</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">client</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">_stash</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
-      <p>Create a new folder (workspace) in the data hub</p>
+        <p>Create a new folder (workspace) in the data hub</p>
 <p>A folder contains can contain other rows and databases.</p>
 
 
@@ -2255,7 +2450,9 @@ interacting with your Deep Origin data hub.</p>
       </thead>
       <tbody>
           <tr class="doc-section-item">
-            <td><code>name</code></td>
+            <td>
+                <code>name</code>
+            </td>
             <td>
                   <code>str</code>
             </td>
@@ -2269,7 +2466,9 @@ interacting with your Deep Origin data hub.</p>
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code>hid</code></td>
+            <td>
+                <code>hid</code>
+            </td>
             <td>
                   <code><span title="typing.Optional">Optional</span>[str]</code>
             </td>
@@ -2283,7 +2482,9 @@ interacting with your Deep Origin data hub.</p>
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code>parent_id</code></td>
+            <td>
+                <code>parent_id</code>
+            </td>
             <td>
                   <code><span title="typing.Optional">Optional</span>[str]</code>
             </td>
@@ -2316,13 +2517,14 @@ interacting with your Deep Origin data hub.</p>
     <span class="n">destination</span><span class="p">:</span> <span class="n">str</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">include_files</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">client</span><span class="o">=</span><span class="kc">None</span>
+    <span class="n">client</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">_stash</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
-      <p>Download resources from Deep Origin and save them to
+        <p>Download resources from Deep Origin and save them to
 a local destination.</p>
 <p>Download databases, objects and other entities from
 your Deep Origin data hub and save them to local disk.</p>
@@ -2345,7 +2547,9 @@ your Deep Origin data hub and save them to local disk.</p>
       </thead>
       <tbody>
           <tr class="doc-section-item">
-            <td><code>source</code></td>
+            <td>
+                <code>source</code>
+            </td>
             <td>
                   <code>str</code>
             </td>
@@ -2359,7 +2563,9 @@ your Deep Origin data hub and save them to local disk.</p>
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code>destination</code></td>
+            <td>
+                <code>destination</code>
+            </td>
             <td>
                   <code>str</code>
             </td>
@@ -2373,7 +2579,9 @@ your Deep Origin data hub and save them to local disk.</p>
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code>include_files</code></td>
+            <td>
+                <code>include_files</code>
+            </td>
             <td>
                   <code>bool</code>
             </td>
@@ -2403,16 +2611,17 @@ your Deep Origin data hub and save them to local disk.</p>
 <a href="#src.data_hub.api.download_database" class="headerlink" title="Permanent link">&para;</a></h2>
 <div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">download_database</span><span class="p">(</span>
     <span class="n">source</span><span class="p">:</span> <span class="n"><span title="typing.Any">Any</span></span><span class="p">,</span>
-    <span class="n">destination</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span>
+    <span class="n">destination</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="n"><span title="os.getcwd">getcwd</span></span><span class="p">(),</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">include_files</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">client</span><span class="o">=</span><span class="kc">None</span>
+    <span class="n">client</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">_stash</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
-      <p>Download a database and save it to a CSV file on the local disk.</p>
+        <p>Download a database and save it to a CSV file on the local disk.</p>
 <p>Download a database from your Deep Origin data hub
 and save to local disk as a CSV file.</p>
 
@@ -2429,7 +2638,9 @@ and save to local disk as a CSV file.</p>
       </thead>
       <tbody>
           <tr class="doc-section-item">
-            <td><code>source</code></td>
+            <td>
+                <code>source</code>
+            </td>
             <td>
                   <code><span title="typing.Any">Any</span></code>
             </td>
@@ -2443,7 +2654,9 @@ and save to local disk as a CSV file.</p>
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code>destination</code></td>
+            <td>
+                <code>destination</code>
+            </td>
             <td>
                   <code>str</code>
             </td>
@@ -2457,7 +2670,9 @@ and save to local disk as a CSV file.</p>
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code>include_files</code></td>
+            <td>
+                <code>include_files</code>
+            </td>
             <td>
                   <code>bool</code>
             </td>
@@ -2488,14 +2703,15 @@ and save to local disk as a CSV file.</p>
 <div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">download_file</span><span class="p">(</span>
     <span class="n">file_id</span><span class="p">:</span> <span class="n">str</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">destination</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span>
-    <span class="n">client</span><span class="o">=</span><span class="kc">None</span>
+    <span class="n">destination</span><span class="p">:</span> <span class="n">str</span> <span class="o">|</span> <span class="n"><span title="pathlib.Path">Path</span></span> <span class="o">=</span> <span class="n"><span title="os.getcwd">getcwd</span></span><span class="p">(),</span>
+    <span class="n">client</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">_stash</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
-      <p>Download a file to a destination folder (workspace).</p>
+        <p>Download a file to a destination folder (workspace).</p>
 <p>Download a file synchronously from Deep Origin
 to folder on the local file system.</p>
 
@@ -2512,7 +2728,9 @@ to folder on the local file system.</p>
       </thead>
       <tbody>
           <tr class="doc-section-item">
-            <td><code>file_id</code></td>
+            <td>
+                <code>file_id</code>
+            </td>
             <td>
                   <code>str</code>
             </td>
@@ -2526,9 +2744,11 @@ to folder on the local file system.</p>
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code>destination</code></td>
             <td>
-                  <code>str</code>
+                <code>destination</code>
+            </td>
+            <td>
+                  <code>str | <span title="pathlib.Path">Path</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -2555,19 +2775,18 @@ to folder on the local file system.</p>
 
 <a href="#src.data_hub.api.download_files" class="headerlink" title="Permanent link">&para;</a></h2>
 <div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">download_files</span><span class="p">(</span>
-    <span class="n">files</span><span class="p">:</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span>
-        <span class="n">list</span><span class="p">[</span><span class="n"><span title="deeporigin.utils.types.ListFilesResponse">ListFilesResponse</span></span><span class="p">]</span> <span class="o">|</span> <span class="n"><span title="deeporigin.utils.types.ListFilesResponse">ListFilesResponse</span></span>
-    <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">files</span><span class="p">:</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n">list</span> <span class="o">|</span> <span class="n">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">save_to_dir</span><span class="p">:</span> <span class="n"><span title="pathlib.Path">Path</span></span> <span class="o">|</span> <span class="n">str</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">),</span>
+    <span class="n">save_to_dir</span><span class="p">:</span> <span class="n"><span title="pathlib.Path">Path</span></span> <span class="o">|</span> <span class="n">str</span> <span class="o">=</span> <span class="n"><span title="pathlib.Path">Path</span></span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">),</span>
     <span class="n">use_file_names</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="n">client</span><span class="o">=</span><span class="kc">None</span>
+    <span class="n">client</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">_stash</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
-      <p>download multiple files in parallel to local disk</p>
+        <p>download multiple files in parallel to local disk</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -2582,9 +2801,11 @@ to folder on the local file system.</p>
       </thead>
       <tbody>
           <tr class="doc-section-item">
-            <td><code>files</code></td>
             <td>
-                  <code><span title="typing.Optional">Optional</span>[list[<span title="deeporigin.utils.types.ListFilesResponse">ListFilesResponse</span>] | <span title="deeporigin.utils.types.ListFilesResponse">ListFilesResponse</span>]</code>
+                <code>files</code>
+            </td>
+            <td>
+                  <code><span title="typing.Optional">Optional</span>[list | dict]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -2596,7 +2817,9 @@ to folder on the local file system.</p>
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code>save_to_dir</code></td>
+            <td>
+                <code>save_to_dir</code>
+            </td>
             <td>
                   <code><span title="pathlib.Path">Path</span> | str</code>
             </td>
@@ -2625,13 +2848,17 @@ to folder on the local file system.</p>
 
 <a href="#src.data_hub.api.get_cell_data" class="headerlink" title="Permanent link">&para;</a></h2>
 <div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">get_cell_data</span><span class="p">(</span>
-    <span class="o">*</span><span class="p">,</span> <span class="n">row_id</span><span class="p">:</span> <span class="n">str</span><span class="p">,</span> <span class="n">column_name</span><span class="p">:</span> <span class="n">str</span><span class="p">,</span> <span class="n">client</span><span class="o">=</span><span class="kc">None</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">row_id</span><span class="p">:</span> <span class="n">str</span><span class="p">,</span>
+    <span class="n">column_name</span><span class="p">:</span> <span class="n">str</span><span class="p">,</span>
+    <span class="n">client</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">_stash</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><span title="typing.Any">Any</span></span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
-      <p>Extract data from a cell in a database, referenced
+        <p>Extract data from a cell in a database, referenced
 by <code>row_id</code> and <code>column_name</code>.</p>
 <p>Returns the value in a single cell in a database.</p>
 
@@ -2657,7 +2884,9 @@ of cells from a row. It will be faster to call
       </thead>
       <tbody>
           <tr class="doc-section-item">
-            <td><code>row_id</code></td>
+            <td>
+                <code>row_id</code>
+            </td>
             <td>
                   <code>str</code>
             </td>
@@ -2671,7 +2900,9 @@ of cells from a row. It will be faster to call
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code>column_name</code></td>
+            <td>
+                <code>column_name</code>
+            </td>
             <td>
                   <code>str</code>
             </td>
@@ -2722,12 +2953,14 @@ of cells from a row. It will be faster to call
 
 
 <a href="#src.data_hub.api.get_columns" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">get_columns</span><span class="p">(</span><span class="n">row_id</span><span class="p">:</span> <span class="n">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">client</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">list</span><span class="p">[</span><span class="n">dict</span><span class="p">]</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">get_columns</span><span class="p">(</span>
+    <span class="n">row_id</span><span class="p">:</span> <span class="n">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">client</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">_stash</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">list</span><span class="p">[</span><span class="n">dict</span><span class="p">]</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
-      <p>Get information about the columns of a row or database.</p>
+        <p>Get information about the columns of a row or database.</p>
 <p>If <code>row_id</code> is a database, then column metadata and names
 are returned. If <code>row_id</code> is a row, then a dictionary of
 human IDs and values are returned.</p>
@@ -2745,7 +2978,9 @@ human IDs and values are returned.</p>
       </thead>
       <tbody>
           <tr class="doc-section-item">
-            <td><code>row_id</code></td>
+            <td>
+                <code>row_id</code>
+            </td>
             <td>
                   <code>str</code>
             </td>
@@ -2779,13 +3014,15 @@ human IDs and values are returned.</p>
     <span class="n">use_file_names</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">reference_format</span><span class="p">:</span> <span class="n"><span title="deeporigin.utils.constants.IDFormat">IDFormat</span></span> <span class="o">=</span> <span class="s2">&quot;human-id&quot;</span><span class="p">,</span>
     <span class="n">return_type</span><span class="p">:</span> <span class="n"><span title="deeporigin.utils.constants.DatabaseReturnType">DatabaseReturnType</span></span> <span class="o">=</span> <span class="s2">&quot;dataframe&quot;</span><span class="p">,</span>
-    <span class="n">client</span><span class="o">=</span><span class="kc">None</span>
+    <span class="nb">filter</span><span class="p">:</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">client</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">_stash</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
-      <p>Generate a <code>pandas.DataFrame</code> or dictionary for a database.</p>
+        <p>Generate a <code>pandas.DataFrame</code> or dictionary for a database.</p>
 <p>Download a database from your Deep Origin data hub
 and return it as a data frame or dictionary.</p>
 
@@ -2802,7 +3039,9 @@ and return it as a data frame or dictionary.</p>
       </thead>
       <tbody>
           <tr class="doc-section-item">
-            <td><code>database_id</code></td>
+            <td>
+                <code>database_id</code>
+            </td>
             <td>
                   <code>str</code>
             </td>
@@ -2816,7 +3055,9 @@ and return it as a data frame or dictionary.</p>
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code>use_file_names</code></td>
+            <td>
+                <code>use_file_names</code>
+            </td>
             <td>
                   <code>bool</code>
             </td>
@@ -2830,7 +3071,9 @@ and return it as a data frame or dictionary.</p>
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code>reference_format</code></td>
+            <td>
+                <code>reference_format</code>
+            </td>
             <td>
                   <code><span title="deeporigin.utils.constants.IDFormat">IDFormat</span></code>
             </td>
@@ -2844,7 +3087,9 @@ and return it as a data frame or dictionary.</p>
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code>return_type</code></td>
+            <td>
+                <code>return_type</code>
+            </td>
             <td>
                   <code><span title="deeporigin.utils.constants.DatabaseReturnType">DatabaseReturnType</span></code>
             </td>
@@ -2872,12 +3117,14 @@ and return it as a data frame or dictionary.</p>
 
 
 <a href="#src.data_hub.api.get_notebook" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">get_notebook</span><span class="p">(</span><span class="n">row_id</span><span class="p">:</span> <span class="n">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">client</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">list</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">get_notebook</span><span class="p">(</span>
+    <span class="n">row_id</span><span class="p">:</span> <span class="n">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">client</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">_stash</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">list</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
-      <p>Get the notebook of a row, if it exists</p>
+        <p>Get the notebook of a row, if it exists</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -2892,7 +3139,9 @@ and return it as a data frame or dictionary.</p>
       </thead>
       <tbody>
           <tr class="doc-section-item">
-            <td><code>row_id</code></td>
+            <td>
+                <code>row_id</code>
+            </td>
             <td>
                   <code>str</code>
             </td>
@@ -2957,13 +3206,14 @@ and return it as a data frame or dictionary.</p>
     <span class="n">row_id</span><span class="p">:</span> <span class="n">str</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">use_column_keys</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">client</span><span class="o">=</span><span class="kc">None</span>
+    <span class="n">client</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">_stash</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">dict</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
-      <p>Get the data in a row.</p>
+        <p>Get the data in a row.</p>
 <p>Read data from a row, and return it as a dictionary, where
 the keys are column names (or keys), and the values are the values of those
 cells.</p>
@@ -2981,7 +3231,9 @@ cells.</p>
       </thead>
       <tbody>
           <tr class="doc-section-item">
-            <td><code>row_id</code></td>
+            <td>
+                <code>row_id</code>
+            </td>
             <td>
                   <code>str</code>
             </td>
@@ -2995,7 +3247,9 @@ cells.</p>
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code>use_column_keys</code></td>
+            <td>
+                <code>use_column_keys</code>
+            </td>
             <td>
                   <code>bool</code>
             </td>
@@ -3046,12 +3300,17 @@ cells.</p>
 
 
 <a href="#src.data_hub.api.get_tree" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">get_tree</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">include_rows</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">client</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">list</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">get_tree</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">include_rows</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">client</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">_stash</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">list</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
-      <p>Construct a tree of all folders (workspaces), databases and rows.</p>
+        <p>Construct a tree of all folders (workspaces), databases and rows.</p>
 <p>Returns a tree that contains all folders, databases and
 (optionally) rows. The tree is returned as a dictionary,
 and children of each object are contained in a field
@@ -3070,7 +3329,9 @@ called <code>children</code>.</p>
       </thead>
       <tbody>
           <tr class="doc-section-item">
-            <td><code>include_rows</code></td>
+            <td>
+                <code>include_rows</code>
+            </td>
             <td>
                   <code>bool</code>
             </td>
@@ -3136,13 +3397,14 @@ called <code>children</code>.</p>
     <span class="n">assigned_row_ids</span><span class="p">:</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n">list</span><span class="p">[</span><span class="n">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">is_unassigned</span><span class="p">:</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">file_ids</span><span class="p">:</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n">list</span><span class="p">[</span><span class="n">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">client</span><span class="o">=</span><span class="kc">None</span>
+    <span class="n">client</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">_stash</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">list</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
-      <p>List files, with option to filter by assigned rows, assigned status</p>
+        <p>List files, with option to filter by assigned rows, assigned status</p>
 <p>Returns a list of files.</p>
 
 
@@ -3158,7 +3420,9 @@ called <code>children</code>.</p>
       </thead>
       <tbody>
           <tr class="doc-section-item">
-            <td><code>assigned_row_ids</code></td>
+            <td>
+                <code>assigned_row_ids</code>
+            </td>
             <td>
                   <code><span title="typing.Optional">Optional</span>[list[str]]</code>
             </td>
@@ -3172,7 +3436,9 @@ called <code>children</code>.</p>
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code>is_unassigned</code></td>
+            <td>
+                <code>is_unassigned</code>
+            </td>
             <td>
                   <code><span title="typing.Optional">Optional</span>[bool]</code>
             </td>
@@ -3228,13 +3494,14 @@ called <code>children</code>.</p>
     <span class="n">parent_id</span><span class="p">:</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">row_type</span><span class="p">:</span> <span class="n"><span title="deeporigin.utils.constants.ObjectType">ObjectType</span></span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">parent_is_root</span><span class="p">:</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">client</span><span class="o">=</span><span class="kc">None</span>
+    <span class="n">client</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">_stash</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">list</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
-      <p>List rows in a database or folder (workspace).</p>
+        <p>List rows in a database or folder (workspace).</p>
 <p>Returns a list of rows from folders and databases,
 based on the parent, row type, or whether the parent is the root.</p>
 
@@ -3251,7 +3518,9 @@ based on the parent, row type, or whether the parent is the root.</p>
       </thead>
       <tbody>
           <tr class="doc-section-item">
-            <td><code>parent_id</code></td>
+            <td>
+                <code>parent_id</code>
+            </td>
             <td>
                   <code><span title="typing.Optional">Optional</span>[str]</code>
             </td>
@@ -3265,7 +3534,9 @@ based on the parent, row type, or whether the parent is the root.</p>
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code>row_type</code></td>
+            <td>
+                <code>row_type</code>
+            </td>
             <td>
                   <code><span title="deeporigin.utils.constants.ObjectType">ObjectType</span></code>
             </td>
@@ -3279,7 +3550,9 @@ based on the parent, row type, or whether the parent is the root.</p>
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code>parent_is_root</code></td>
+            <td>
+                <code>parent_is_root</code>
+            </td>
             <td>
                   <code><span title="typing.Optional">Optional</span>[bool]</code>
             </td>
@@ -3331,13 +3604,17 @@ based on the parent, row type, or whether the parent is the root.</p>
 
 <a href="#src.data_hub.api.make_database_rows" class="headerlink" title="Permanent link">&para;</a></h2>
 <div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">make_database_rows</span><span class="p">(</span>
-    <span class="n">database_id</span><span class="p">:</span> <span class="n">str</span><span class="p">,</span> <span class="n">n_rows</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">client</span><span class="o">=</span><span class="kc">None</span>
+    <span class="n">database_id</span><span class="p">:</span> <span class="n">str</span><span class="p">,</span>
+    <span class="n">n_rows</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">client</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">_stash</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">dict</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
-      <p>Makes one or several new row(s) in a database table</p>
+        <p>Makes one or several new row(s) in a database table</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -3352,7 +3629,9 @@ based on the parent, row type, or whether the parent is the root.</p>
       </thead>
       <tbody>
           <tr class="doc-section-item">
-            <td><code>database_id</code></td>
+            <td>
+                <code>database_id</code>
+            </td>
             <td>
                   <code>str</code>
             </td>
@@ -3366,7 +3645,9 @@ based on the parent, row type, or whether the parent is the root.</p>
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code>n_rows</code></td>
+            <td>
+                <code>n_rows</code>
+            </td>
             <td>
                   <code>int</code>
             </td>
@@ -3412,6 +3693,121 @@ based on the parent, row type, or whether the parent is the root.</p>
 <div class="doc doc-object doc-function">
 
 
+<h2 id="src.data_hub.api.row_to_dict" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>            <span class="doc doc-object-name doc-function-name">row_to_dict</span>
+
+
+<a href="#src.data_hub.api.row_to_dict" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">row_to_dict</span><span class="p">(</span>
+    <span class="n">row</span><span class="p">:</span> <span class="n">dict</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">file_ids</span><span class="p">:</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">reference_ids</span><span class="p">:</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">dict</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>convert a database row (as returned by api.list_database_rows) to a dictionary where keys are column IDs and values are the values in the row</p>
+
+
+<details class="danger" open>
+  <summary>This function mutates inputs</summary>
+  <p>This function mutates file_ids and reference_ids</p>
+</details>
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>row</code>
+            </td>
+            <td>
+                  <code>dict</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>database row (as returned by api.list_database_rows)</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>file_ids</code>
+            </td>
+            <td>
+                  <code><span title="typing.Optional">Optional</span>[list]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>list of file IDs, will be mutated in-place</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>reference_ids</code>
+            </td>
+            <td>
+                  <code><span title="typing.Optional">Optional</span>[list]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>list of reference IDs, will be mutated in-place</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code>dict</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>dict</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
 <h2 id="src.data_hub.api.set_cell_data" class="doc doc-heading">
 <code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>            <span class="doc doc-object-name doc-function-name">set_cell_data</span>
 
@@ -3423,13 +3819,14 @@ based on the parent, row type, or whether the parent is the root.</p>
     <span class="n">database_id</span><span class="p">:</span> <span class="n">str</span><span class="p">,</span>
     <span class="n">row_id</span><span class="p">:</span> <span class="n">str</span><span class="p">,</span>
     <span class="n">column_id</span><span class="p">:</span> <span class="n">str</span><span class="p">,</span>
-    <span class="n">client</span><span class="o">=</span><span class="kc">None</span>
+    <span class="n">client</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">_stash</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><span title="typing.Any">Any</span></span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
-      <p>Set data in a cell to some value.</p>
+        <p>Set data in a cell to some value.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -3444,7 +3841,9 @@ based on the parent, row type, or whether the parent is the root.</p>
       </thead>
       <tbody>
           <tr class="doc-section-item">
-            <td><code>value</code></td>
+            <td>
+                <code>value</code>
+            </td>
             <td>
                   <code><span title="typing.Any">Any</span></code>
             </td>
@@ -3458,7 +3857,9 @@ based on the parent, row type, or whether the parent is the root.</p>
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code>database_id</code></td>
+            <td>
+                <code>database_id</code>
+            </td>
             <td>
                   <code>str</code>
             </td>
@@ -3472,7 +3873,9 @@ based on the parent, row type, or whether the parent is the root.</p>
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code>row_id</code></td>
+            <td>
+                <code>row_id</code>
+            </td>
             <td>
                   <code>str</code>
             </td>
@@ -3486,7 +3889,9 @@ based on the parent, row type, or whether the parent is the root.</p>
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code>column_id</code></td>
+            <td>
+                <code>column_id</code>
+            </td>
             <td>
                   <code>str</code>
             </td>
@@ -3521,13 +3926,14 @@ based on the parent, row type, or whether the parent is the root.</p>
     <span class="n">column_id</span><span class="p">:</span> <span class="n">str</span><span class="p">,</span>
     <span class="n">database_id</span><span class="p">:</span> <span class="n">str</span><span class="p">,</span>
     <span class="n">columns</span><span class="p">:</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n">list</span><span class="p">[</span><span class="n">dict</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">client</span><span class="o">=</span><span class="kc">None</span>
+    <span class="n">client</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">_stash</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
-      <p>Set data in multiple cells to some value.</p>
+        <p>Set data in multiple cells to some value.</p>
 
     </div>
 
@@ -3543,15 +3949,16 @@ based on the parent, row type, or whether the parent is the root.</p>
 <a href="#src.data_hub.api.upload_file" class="headerlink" title="Permanent link">&para;</a></h2>
 <div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">upload_file</span><span class="p">(</span>
     <span class="n">file_path</span><span class="p">:</span> <span class="n">str</span><span class="p">,</span>
-    <span class="n">client</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
+    <span class="n">client</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">_stash</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">compute_hash</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="kc">True</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
-      <p>Upload a file to Deep Origin.</p>
+        <p>Upload a file to Deep Origin.</p>
 <p>This upload files to your Deep Origin data hub.
 To assign this file to a cell, next run <a class="autorefs autorefs-internal" href="#src.data_hub.api.assign_files_to_cell">assign_files_to_cell</a></p>
 
@@ -3568,7 +3975,9 @@ To assign this file to a cell, next run <a class="autorefs autorefs-internal" hr
       </thead>
       <tbody>
           <tr class="doc-section-item">
-            <td><code>file_path</code></td>
+            <td>
+                <code>file_path</code>
+            </td>
             <td>
                   <code>str</code>
             </td>
@@ -3601,13 +4010,14 @@ To assign this file to a cell, next run <a class="autorefs autorefs-internal" hr
     <span class="n">database_id</span><span class="p">:</span> <span class="n">str</span><span class="p">,</span>
     <span class="n">file_path</span><span class="p">:</span> <span class="n">str</span><span class="p">,</span>
     <span class="n">column_id</span><span class="p">:</span> <span class="n">str</span><span class="p">,</span>
-    <span class="n">client</span><span class="o">=</span><span class="kc">None</span>
+    <span class="n">client</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">_stash</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
-      <p>Upload a file to a new row in a database.</p>
+        <p>Upload a file to a new row in a database.</p>
 <p>Upload a file to a new row in a database. This utility
 function wraps two other functions:</p>
 <ul>
@@ -3628,7 +4038,9 @@ function wraps two other functions:</p>
       </thead>
       <tbody>
           <tr class="doc-section-item">
-            <td><code>database_id</code></td>
+            <td>
+                <code>database_id</code>
+            </td>
             <td>
                   <code>str</code>
             </td>
@@ -3642,7 +4054,9 @@ function wraps two other functions:</p>
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code>file_path</code></td>
+            <td>
+                <code>file_path</code>
+            </td>
             <td>
                   <code>str</code>
             </td>
@@ -3656,7 +4070,9 @@ function wraps two other functions:</p>
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code>column_id</code></td>
+            <td>
+                <code>column_id</code>
+            </td>
             <td>
                   <code>str</code>
             </td>
@@ -3700,14 +4116,14 @@ function wraps two other functions:</p>
             </div>
           
           
-  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var tab,labels=set.querySelector(".tabbed-labels");for(tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
 
 <script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
         </div>
         
           <button type="button" class="md-top md-icon" data-md-component="top" hidden>
   
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12Z"/></svg>
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
   Back to top
 </button>
         
@@ -3720,17 +4136,17 @@ function wraps two other functions:</p>
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../../how-to/data-hub/write-data.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Write data">
+          <a href="../../how-to/data-hub/add-data.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Add data to database">
             <div class="md-footer__button md-icon">
               
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
             </div>
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Previous
               </span>
               <div class="md-ellipsis">
-                Write data
+                Add data to database
               </div>
             </div>
           </a>
@@ -3748,7 +4164,7 @@ function wraps two other functions:</p>
             </div>
             <div class="md-footer__button md-icon">
               
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
             </div>
           </a>
         
@@ -3779,10 +4195,10 @@ function wraps two other functions:</p>
       <div class="md-progress" data-md-component="progress" role="progressbar"></div>
     
     
-    <script id="__config" type="application/json">{"base": "../..", "features": ["announce.dismiss", "content.code.annotate", "content.code.copy", "content.tabs.link", "content.tooltips", "navigation.footer", "navigation.indexes", "navigation.instant", "navigation.instant.prefetch", "navigation.instant.preview", "navigation.instant.progress", "navigation.sections", "navigation.path", "navigation.tabs", "navigation.top", "navigation.tracking", "search.suggest", "toc.follow"], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["announce.dismiss", "content.code.annotate", "content.code.copy", "content.tabs.link", "content.tooltips", "navigation.footer", "navigation.indexes", "navigation.instant", "navigation.instant.prefetch", "navigation.instant.preview", "navigation.instant.progress", "navigation.sections", "navigation.path", "navigation.tabs", "navigation.top", "navigation.tracking", "search.suggest", "toc.follow"], "search": "../../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.fe8b6f2b.min.js"></script>
+      <script src="../../assets/javascripts/bundle.83f73b43.min.js"></script>
       
     
   </body>

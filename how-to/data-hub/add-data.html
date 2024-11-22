@@ -10,13 +10,13 @@
         <meta name="author" content="Deep Origin">
       
       
-        <link rel="canonical" href="https://client-docs.deeporigin.io/how-to/data-hub/delete.html">
+        <link rel="canonical" href="https://client-docs.deeporigin.io/how-to/data-hub/add-data.html">
       
       
-        <link rel="prev" href="create.html">
+        <link rel="prev" href="write-data.html">
       
       
-        <link rel="next" href="list-data.html">
+        <link rel="next" href="../../ref/data-hub/high-level-api.html">
       
       
       <link rel="icon" href="../../images/favicon.png">
@@ -24,7 +24,7 @@
     
     
       
-        <title>Delete objects - CLI and Python client | Deep Origin</title>
+        <title>Add data to database - CLI and Python client | Deep Origin</title>
       
     
     
@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#delete-database-rows" class="md-skip">
+        <a href="#add-data-to-a-deep-origin-database" class="md-skip">
           Skip to content
         </a>
       
@@ -111,7 +111,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Delete objects
+              Add data to database
             
           </span>
         </div>
@@ -873,28 +873,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    Delete objects
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="delete.html" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="delete.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -903,62 +885,6 @@
   
 
       </a>
-      
-        
-
-  
-
-<nav class="md-nav md-nav--secondary" aria-label="Page contents">
-  
-  
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Page contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#delete-database-rows" class="md-nav__link">
-    <span class="md-ellipsis">
-      Delete database rows
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#delete-databases" class="md-nav__link">
-    <span class="md-ellipsis">
-      Delete databases
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#delete-folders-workspaces" class="md-nav__link">
-    <span class="md-ellipsis">
-      Delete folders (workspaces)
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#delete-database-column" class="md-nav__link">
-    <span class="md-ellipsis">
-      Delete database column
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1073,10 +999,30 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="add-data.html" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Add data to database
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="add-data.html" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -1085,6 +1031,55 @@
   
 
       </a>
+      
+        
+
+  
+
+<nav class="md-nav md-nav--secondary" aria-label="Page contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Page contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#add-new-rows" class="md-nav__link">
+    <span class="md-ellipsis">
+      Add new rows
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#add-fragments-of-new-rows" class="md-nav__link">
+    <span class="md-ellipsis">
+      Add fragments of new rows
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      Reference
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1447,6 +1442,8 @@
   
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -1455,36 +1452,27 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#delete-database-rows" class="md-nav__link">
+  <a href="#add-new-rows" class="md-nav__link">
     <span class="md-ellipsis">
-      Delete database rows
+      Add new rows
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#delete-databases" class="md-nav__link">
+  <a href="#add-fragments-of-new-rows" class="md-nav__link">
     <span class="md-ellipsis">
-      Delete databases
+      Add fragments of new rows
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#delete-folders-workspaces" class="md-nav__link">
+  <a href="#reference" class="md-nav__link">
     <span class="md-ellipsis">
-      Delete folders (workspaces)
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#delete-database-column" class="md-nav__link">
-    <span class="md-ellipsis">
-      Delete database column
+      Reference
     </span>
   </a>
   
@@ -1508,103 +1496,31 @@
   
 
 
-  <h1>Delete objects</h1>
-
-<p>This document describes how to delete objects in the Deep Origin data hub:</p>
-<ul>
-<li>Database rows</li>
-<li>Database columns</li>
-<li>Databases</li>
-<li>Folders (workspaces)</li>
-</ul>
-<div class="admonition danger">
-<p class="admonition-title">Exercise caution</p>
-<ul>
-<li>Deleting a folder deletes all of the databases in the folder.</li>
-<li>Deleting a column destroys all of the data in that column, including all of the files assigned to the cells in that column.</li>
-<li>Deleting a database deletes all of the rows in the database.</li>
-</ul>
-<p>All resources will be deleted without asking for confirmation. </p>
-</div>
-<h2 id="delete-database-rows">Delete database rows<a class="headerlink" href="#delete-database-rows" title="Permanent link">&para;</a></h2>
-<p>To delete a row in a database, run:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">CLI</label><label for="__tabbed_1_2">Python</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block">
-<div class="language-bash highlight"><pre><span></span><code>deeporigin<span class="w"> </span>data<span class="w"> </span>delete<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--row<span class="w"> </span>&lt;row-id&gt;<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--database<span class="w"> </span>&lt;database-id&gt;
+<h1 id="add-data-to-a-deep-origin-database">Add data to a Deep Origin Database<a class="headerlink" href="#add-data-to-a-deep-origin-database" title="Permanent link">&para;</a></h1>
+<p>This document describes how to add data to a Deep Origin Database.</p>
+<p>Consider the following dataframe constructed from a database using:</p>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">deeporigin.data_hub</span> <span class="kn">import</span> <span class="n">api</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="n">get_dataframe</span><span class="p">(</span><span class="s2">&quot;xy&quot;</span><span class="p">)</span>
+<span class="n">df</span>
 </code></pre></div>
-</div>
-<div class="tabbed-block">
-<div class="language-py highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">deeporigin.data_hub</span> <span class="kn">import</span> <span class="n">api</span>
-<span class="n">api</span><span class="o">.</span><span class="n">delete_rows</span><span class="p">(</span><span class="n">row_ids</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;row-1&quot;</span><span class="p">,</span> <span class="s2">&quot;row-2&quot;</span><span class="p">],</span> <span class="n">database_id</span><span class="o">=</span><span class="s2">&quot;database-id&quot;</span><span class="p">)</span>
+<p><img alt="" src="../../images/df-xy.png" /></p>
+<h2 id="add-new-rows">Add new rows<a class="headerlink" href="#add-new-rows" title="Permanent link">&para;</a></h2>
+<p>To add new rows to the underlying database, use the <code>add_databse_rows</code> function:</p>
+<div class="language-python highlight"><pre><span></span><code><span class="n">data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">Y</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+<span class="n">api</span><span class="o">.</span><span class="n">add_database_rows</span><span class="p">(</span><span class="n">database_id</span><span class="o">=</span><span class="s2">&quot;xy&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
 </code></pre></div>
-<div class="admonition tip">
-<p class="admonition-title">Deleting multiple rows</p>
-<p>Note that the python client allows you to delete multiple rows at once.</p>
-</div>
-</div>
-</div>
-</div>
-<h2 id="delete-databases">Delete databases<a class="headerlink" href="#delete-databases" title="Permanent link">&para;</a></h2>
-<p>To delete an entire database, run:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">CLI</label><label for="__tabbed_2_2">Python</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block">
-<div class="language-bash highlight"><pre><span></span><code>deeporigin<span class="w"> </span>data<span class="w"> </span>delete<span class="w"> </span>--database<span class="w"> </span>&lt;db-id&gt;
+<p><code>data</code> should be a dictionary where the keys are column names and the values are lists of values to be written to the corresponding columns. <code>add_database_rows</code> will add this data to the database, creating as many new rows as needed. </p>
+<p><code>add_database_rows</code> returns a list of the row IDs created during this process.</p>
+<h2 id="add-fragments-of-new-rows">Add fragments of new rows<a class="headerlink" href="#add-fragments-of-new-rows" title="Permanent link">&para;</a></h2>
+<p>Similarly, fragments of rows (subsets of columns) can be written to the database:</p>
+<div class="language-python highlight"><pre><span></span><code><span class="n">data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">])</span> <span class="c1"># note Y is not specified</span>
+<span class="n">api</span><span class="o">.</span><span class="n">add_database_rows</span><span class="p">(</span><span class="n">database_id</span><span class="o">=</span><span class="s2">&quot;xy&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
 </code></pre></div>
-<div class="admonition tip">
-<p class="admonition-title">Aliases</p>
-<p>The following alias also works: <code>deeporigin data delete -d &lt;db-id&gt;</code>.</p>
-</div>
-</div>
-<div class="tabbed-block">
-<div class="language-py highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">deeporigin.data_hub</span> <span class="kn">import</span> <span class="n">api</span>
-<span class="n">api</span><span class="o">.</span><span class="n">delete_database</span><span class="p">(</span><span class="n">database_id</span><span class="o">=&lt;</span><span class="n">db</span><span class="o">-</span><span class="nb">id</span><span class="o">&gt;</span><span class="p">)</span>
+<p><code>add_database_rows</code> returns a list of the row IDs created during this process, for example:</p>
+<div class="language-python highlight"><pre><span></span><code><span class="p">[</span><span class="s2">&quot;row-1&quot;</span><span class="p">,</span> <span class="s2">&quot;row-2&quot;</span><span class="p">]</span>
 </code></pre></div>
-</div>
-</div>
-</div>
-<h2 id="delete-folders-workspaces">Delete folders (workspaces)<a class="headerlink" href="#delete-folders-workspaces" title="Permanent link">&para;</a></h2>
-<p>To delete an entire folder, including all contained databases, run:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="3:2"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">CLI</label><label for="__tabbed_3_2">Python</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block">
-<div class="language-bash highlight"><pre><span></span><code>deeporigin<span class="w"> </span>data<span class="w"> </span>delete<span class="w"> </span>--folder<span class="w"> </span>&lt;id&gt;
-</code></pre></div>
-<div class="admonition tip">
-<p class="admonition-title">Aliases</p>
-<p>The following aliases also work <code>--workspace</code>, <code>-w</code>, <code>--ws</code>, <code>-f</code> instead of <code>--folder</code>.</p>
-</div>
-</div>
-<div class="tabbed-block">
-<div class="language-py highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">deeporigin.data_hub</span> <span class="kn">import</span> <span class="n">api</span>
-<span class="n">api</span><span class="o">.</span><span class="n">delete_workspace</span><span class="p">(</span><span class="n">workspace_id</span><span class="o">=&lt;</span><span class="n">folder</span><span class="o">-</span><span class="nb">id</span><span class="o">&gt;</span><span class="p">)</span>
-</code></pre></div>
-</div>
-</div>
-</div>
-<h2 id="delete-database-column">Delete database column<a class="headerlink" href="#delete-database-column" title="Permanent link">&para;</a></h2>
-<p>To delete a column in a databas, run the following command, specifying the ID of the column to delete and its parent database:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="4:2"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">CLI</label><label for="__tabbed_4_2">Python</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block">
-<div class="language-bash highlight"><pre><span></span><code>deeporigin<span class="w"> </span>data<span class="w"> </span>delete<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--column<span class="w"> </span>&lt;ids&gt;<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--database<span class="w"> </span>&lt;database-id&gt;<span class="w"> </span><span class="se">\</span>
-</code></pre></div>
-</div>
-<div class="tabbed-block">
-<div class="language-py highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">deeporigin.data_hub</span> <span class="kn">import</span> <span class="n">api</span>
-<span class="n">api</span><span class="o">.</span><span class="n">delete_database_column</span><span class="p">(</span>
-    <span class="n">column_id</span><span class="o">=</span><span class="s2">&quot;col-id&quot;</span><span class="p">,</span>
-    <span class="n">database_id</span><span class="o">=</span><span class="s2">&quot;database-id&quot;</span><span class="p">,</span>
-<span class="p">)</span>
-</code></pre></div>
-</div>
-</div>
-</div>
+<h2 id="reference">Reference<a class="headerlink" href="#reference" title="Permanent link">&para;</a></h2>
+<p>The reference documentation for <a href="../../ref/data-hub/high-level-api.html#src.data_hub.api.add_database_rows">add_database_rows</a></p>
 
 
 
@@ -1642,7 +1558,7 @@
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="create.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Create objects">
+          <a href="write-data.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Write data">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -1652,20 +1568,20 @@
                 Previous
               </span>
               <div class="md-ellipsis">
-                Create objects
+                Write data
               </div>
             </div>
           </a>
         
         
           
-          <a href="list-data.html" class="md-footer__link md-footer__link--next" aria-label="Next: List data">
+          <a href="../../ref/data-hub/high-level-api.html" class="md-footer__link md-footer__link--next" aria-label="Next: High-level API">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                List data
+                High-level API
               </div>
             </div>
             <div class="md-footer__button md-icon">
