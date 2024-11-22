@@ -35,7 +35,11 @@ data = dict(X=[10, 20]) # note Y is not specified
 api.add_database_rows(database_id="xy", data=data)
 ```
 
-`add_database_rows` returns a list of the row IDs created during this process.
+`add_database_rows` returns a list of the row IDs created during this process, for example:
+
+```python
+["row-1", "row-2"]
+```
 
 
 ## Reference

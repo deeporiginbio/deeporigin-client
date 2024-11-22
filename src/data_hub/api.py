@@ -379,8 +379,8 @@ def add_database_rows(
 
     """
     # check that dict has columns that make sense
-    db = _api.describe_row(
-        row_id=database_id,
+    db = _api.describe_database(
+        database_id=database_id,
         client=client,
         _stash=_stash,
     )
