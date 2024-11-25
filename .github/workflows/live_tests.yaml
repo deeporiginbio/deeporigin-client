@@ -9,14 +9,27 @@ on:
     - cron: "0 0 * * *" 
 
 jobs:
+  write-tokens:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create API Tokens File
+        run: |
+          mkdir -p ~/.deeporigin
+          echo '{
+            "refresh": "'$DEEP_ORIGIN_REFRESH_TOKEN'",
+            "access": "'$DEEP_ORIGIN_ACCESS_TOKEN'"
+          }' > ~/.deeporigin/api_tokens
+        env:
+          DEEP_ORIGIN_REFRESH_TOKEN: ${{ secrets.DEEP_ORIGIN_REFRESH_TOKEN }}
+          DEEP_ORIGIN_ACCESS_TOKEN: ${{ secrets.DEEP_ORIGIN_ACCESS_TOKEN }}
+
   test-against-live-instance:
     runs-on: ubuntu-latest
     env:
       DEEP_ORIGIN_ORGANIZATION_ID: ${{ secrets.DEEP_ORIGIN_ORGANIZATION_ID }}
       DEEP_ORIGIN_API_ENDPOINT: ${{ secrets.DEEP_ORIGIN_API_ENDPOINT }}
       DEEP_ORIGIN_NUCLEUS_API_ROUTE: ${{ secrets.DEEP_ORIGIN_NUCLEUS_API_ROUTE }}
-      DEEP_ORIGIN_ACCESS_TOKEN: ${{ secrets.DEEP_ORIGIN_ACCESS_TOKEN }}
-      DEEP_ORIGIN_REFRESH_TOKEN: ${{ secrets.DEEP_ORIGIN_REFRESH_TOKEN }}
+
 
 
     steps:
