@@ -1,36 +1,52 @@
 name: Tests against a Live Instance
 
 on:
-  # allow manual runs
+  # Allow manual runs
   workflow_dispatch:
 
-  # run every day
+  # Run every day
   schedule:
-    - cron: "0 0 * * *" 
+    - cron: "0 0 * * *"
 
 jobs:
-  test-against-live-instance:
+  test-live-instance:
     runs-on: ubuntu-latest
     env:
+      # Secrets for API and organization
+      REFRESH_TOKEN: ${{ secrets.DEEP_ORIGIN_REFRESH_TOKEN }}
+      ACCESS_TOKEN: ${{ secrets.DEEP_ORIGIN_ACCESS_TOKEN }}
       DEEP_ORIGIN_ORGANIZATION_ID: ${{ secrets.DEEP_ORIGIN_ORGANIZATION_ID }}
       DEEP_ORIGIN_API_ENDPOINT: ${{ secrets.DEEP_ORIGIN_API_ENDPOINT }}
       DEEP_ORIGIN_NUCLEUS_API_ROUTE: ${{ secrets.DEEP_ORIGIN_NUCLEUS_API_ROUTE }}
-      DEEP_ORIGIN_ACCESS_TOKEN: ${{ secrets.DEEP_ORIGIN_ACCESS_TOKEN }}
-
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
-        id: cached_python_setup
+      - name: Set up Python environment
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
           cache: 'pip'
           cache-dependency-path: pyproject.toml
 
-      - name: "Running tests against a live instance..."
+      - name: Create API Tokens File
+        run: |
+          mkdir -p ~/.deeporigin
+          echo '{
+            "refresh": "'$REFRESH_TOKEN'",
+            "access": "'$ACCESS_TOKEN'"
+          }' > ~/.deeporigin/api_tokens
+
+      - name: Install dependencies
         run: |
           pip install --upgrade pip
           pip install --upgrade setuptools
           pip install -e .[test]
-          make test-github-live
+
+      - name: Refresh API tokens using deeporigin.auth
+        run: |
+          python -c "from deeporigin import auth; auth.get_tokens(refresh=True)"
+
+      - name: Run tests against a live instance
+        run: make test-github-live
