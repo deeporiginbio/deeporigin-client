@@ -59,7 +59,7 @@ def get_tokens(
     if "DEEP_ORIGIN_ACCESS_TOKEN" in os.environ:
         tokens["access"] = os.environ["DEEP_ORIGIN_ACCESS_TOKEN"]
 
-    elif "DEEP_ORIGIN_REFRESH_TOKEN" in os.environ:
+    if "DEEP_ORIGIN_REFRESH_TOKEN" in os.environ:
         tokens["refresh"] = os.environ["DEEP_ORIGIN_REFRESH_TOKEN"]
 
     if len(tokens.keys()) > 0:
