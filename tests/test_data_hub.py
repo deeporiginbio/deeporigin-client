@@ -322,7 +322,7 @@ def test_create_file_download_url(config):  # noqa: F811
     ), "Expected to find `downloadUrl` in data response"
 
 
-def test_download_file(config):  # noqa: F811
+def test_download_files(config):  # noqa: F811
     if "file" not in config.keys():
         return
 
@@ -330,10 +330,10 @@ def test_download_file(config):  # noqa: F811
 
     if config["mock"]:
         with pytest.raises(DeepOriginException, match="should be a path for a folder"):
-            api.download_file(
-                file_id=file_id,
+            api.download_files(
+                file_ids=[file_id],
                 client=config["client"],
-                destination="non-existent-path",
+                save_to_dir="non-existent-path",
             )
 
     else:
@@ -341,11 +341,11 @@ def test_download_file(config):  # noqa: F811
         destination = os.path.join(os.getcwd(), destination)
         os.makedirs(destination)
 
-        api.download_file(
-            file_id=file_id,
+        api.download_files(
+            file_ids=[file_id],
             client=config["client"],
             _stash=config["stash"],
-            destination=destination,
+            save_to_dir=destination,
         )
 
         # clean up

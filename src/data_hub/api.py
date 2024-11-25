@@ -241,48 +241,6 @@ def list_rows(
 
 @beartype
 @ensure_client
-def download_file(
-    file_id: str,
-    *,
-    destination: str | Path = os.getcwd(),
-    client=None,
-    _stash: bool = False,
-) -> None:
-    """Download a file to a destination folder (workspace).
-
-    Download a file synchronously from Deep Origin
-    to folder on the local file system.
-
-    Args:
-        file_id: ID of the file on Deep Origin
-        destination: Path to the destination folder
-
-    """
-
-    if not os.path.isdir(destination):
-        raise DeepOriginException(
-            message=f"Destination `{destination}` should be a path for a folder."
-        )
-
-    file_name = _api.describe_file(
-        file_id=file_id,
-        client=client,
-        _stash=_stash,
-    ).name
-
-    url = _api.create_file_download_url(
-        file_id=file_id,
-        client=client,
-        _stash=_stash,
-    ).downloadUrl
-
-    save_path = os.path.join(destination, file_name)
-
-    download_sync(url, save_path)
-
-
-@beartype
-@ensure_client
 def upload_file(
     file_path: str,
     *,
@@ -929,9 +887,9 @@ def download(
     if PREFIXES.FILE in source:
         # this is a file
 
-        download_file(
-            file_id=source,
-            destination=destination,
+        download_files(
+            file_ids=[source],
+            save_to_dir=destination,
             client=client,
             _stash=_stash,
         )
@@ -1002,10 +960,11 @@ def download_database(
 
     # now download all files in the database
     if include_files:
-        file_ids = df.attrs["file_ids"]
-
-        for file_id in file_ids:
-            download_file(file_id, destination, client=client)
+        download_files(
+            file_ids=df.attrs["file_ids"],
+            save_to_dir=destination,
+            client=client,
+        )
 
     df.to_csv(os.path.join(destination, database_hid + ".csv"))
 
@@ -1084,6 +1043,7 @@ def get_dataframe(
             df = _make_deeporigin_dataframe(
                 data=data,
                 reference_ids=None,
+                file_ids=None,
                 db_row=db_row,
                 rows=None,
                 columns=None,
@@ -1169,6 +1129,7 @@ def get_dataframe(
         df = _make_deeporigin_dataframe(
             data=data,
             reference_ids=reference_ids,
+            file_ids=file_ids,
             db_row=db_row,
             rows=rows,
             columns=columns,
@@ -1192,6 +1153,7 @@ def _make_deeporigin_dataframe(
     *,
     data: dict,
     reference_ids: Optional[list],
+    file_ids: Optional[list],
     db_row: dict,
     columns: Optional[list],
     rows: Optional[list],
@@ -1203,6 +1165,12 @@ def _make_deeporigin_dataframe(
     df = DataFrame(data)
     if reference_ids is not None:
         df.attrs["reference_ids"] = list(set(reference_ids))
+        df.attrs["reference_ids"].sort()
+
+    if file_ids is not None:
+        df.attrs["file_ids"] = list(set(file_ids))
+        df.attrs["file_ids"].sort()
+
     df.attrs["id"] = db_row.id
     df.attrs["metadata"] = dict(db_row)
 
@@ -1223,8 +1191,9 @@ def _make_deeporigin_dataframe(
 @beartype
 @ensure_client
 def download_files(
-    files: Optional[list | dict] = None,
     *,
+    files: Optional[list[dict]] = None,
+    file_ids: Optional[list[str]] = None,
     save_to_dir: Path | str = Path("."),
     use_file_names: bool = True,
     client=None,
@@ -1233,21 +1202,37 @@ def download_files(
     """download multiple files in parallel to local disk
 
     Args:
-        files: list of files to download. These can be of type `types.list_files_response.Data` (as returned by api.list_files) or can be a list of strings of file IDs.
+        files: list of files to download. These can be a list of file_ids or a list of files as returned by api.list_files
         save_to_dir: directory to save files to on local computer
+        use_file_names: If `True`, refer to files by name rather than ID.
     """
 
-    if files is None:
-        files = list_files(client=client)
+    if not os.path.isdir(save_to_dir):
+        raise DeepOriginException(
+            message=f"Destination `{save_to_dir}` should be a path for a folder."
+        )
 
-    if isinstance(files, dict):
-        files = [files]
+    if files is None and file_ids is None:
+        # nothing provided, download everything
+        files = list_files(client=client, _stash=_stash)
+    elif files is not None and file_ids is None:
+        # list of files provided
+        pass
+    elif files is None and file_ids is not None:
+        # list of file IDs provided
+        files = list_files(
+            file_ids=file_ids,
+            client=client,
+            _stash=_stash,
+        )
+
+    else:
+        raise DeepOriginException("Only one of `files` or `file_ids` can be provided")
 
     if isinstance(save_to_dir, str):
         save_to_dir = Path(save_to_dir)
 
-    if isinstance(files[0], dict):
-        file_ids = [item.file.id for item in files]
+    file_ids = [item.file.id for item in files]
 
     if use_file_names:
         save_paths = [save_to_dir / item.file.name for item in files]
