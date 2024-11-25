@@ -54,14 +54,16 @@ def get_tokens(
         :obj:`tuple`: API access and refresh tokens
     """
 
-    if (
-        "DEEP_ORIGIN_ACCESS_TOKEN" in os.environ
-        and "DEEP_ORIGIN_REFRESH_TOKEN" in os.environ
-    ):
-        return dict(
-            access=os.environ["DEEP_ORIGIN_ACCESS_TOKEN"],
-            refresh=os.environ["DEEP_ORIGIN_REFRESH_TOKEN"],
-        )
+    tokens = dict()
+
+    if "DEEP_ORIGIN_ACCESS_TOKEN" in os.environ:
+        tokens["access"] = os.environ["DEEP_ORIGIN_ACCESS_TOKEN"]
+
+    elif "DEEP_ORIGIN_REFRESH_TOKEN" in os.environ:
+        tokens["refresh"] = os.environ["DEEP_ORIGIN_REFRESH_TOKEN"]
+
+    if len(tokens.keys()) > 0:
+        return tokens
 
     if tokens_exist():
         # tokens exist on disk
