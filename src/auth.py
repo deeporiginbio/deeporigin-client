@@ -169,6 +169,7 @@ def authenticate() -> dict:
     return tokens
 
 
+@beartype
 def refresh_tokens(api_refresh_token: str) -> str:
     """Refresh the access token for the Deep Origin OS
 

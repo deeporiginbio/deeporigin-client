@@ -10,6 +10,7 @@ import sys
 from pathlib import Path
 
 from beartype import beartype
+from beartype.typing import Optional
 from box import Box
 from deeporigin import auth
 from deeporigin.exceptions import DeepOriginException
@@ -67,7 +68,7 @@ def _get_client_methods() -> set:
 
 def _get_default_client(
     *,
-    client=None,
+    access_token: Optional[str] = None,
     refresh: bool = True,
     use_async: bool = False,
 ):
@@ -84,35 +85,36 @@ def _get_default_client(
 
 
     """
-    if client is None:
+
+    if access_token is None:
         tokens = auth.get_tokens(refresh=refresh)
         access_token = tokens["access"]
 
-        import httpx
-        from deeporigin.config import get_value
+    import httpx
+    from deeporigin.config import get_value
 
-        value = get_value()
+    value = get_value()
 
-        org_id = value["organization_id"]
-        base_url = httpx.URL.join(
-            value["api_endpoint"],
-            value["nucleus_api_route"],
+    org_id = value["organization_id"]
+    base_url = httpx.URL.join(
+        value["api_endpoint"],
+        value["nucleus_api_route"],
+    )
+
+    if use_async:
+        from deeporigin_data import AsyncDeeporiginData
+
+        client = AsyncDeeporiginData(
+            token=access_token,
+            org_id=org_id,
+            base_url=base_url,
         )
-
-        if use_async:
-            from deeporigin_data import AsyncDeeporiginData
-
-            client = AsyncDeeporiginData(
-                token=access_token,
-                org_id=org_id,
-                base_url=base_url,
-            )
-        else:
-            client = DeeporiginData(
-                token=access_token,
-                org_id=org_id,
-                base_url=base_url,
-            ).with_raw_response
+    else:
+        client = DeeporiginData(
+            token=access_token,
+            org_id=org_id,
+            base_url=base_url,
+        ).with_raw_response
 
     return client
 
@@ -148,8 +150,12 @@ def _create_function(method_path):
         except AuthenticationError as error:
             if "expired token" in error.message:
                 print("⚠️ Token expired. Refreshing credentials...")
-                tokens = auth.read_cached_tokens()
+
+                tokens = auth.get_tokens(refresh=False)
                 tokens["access"] = auth.refresh_tokens(tokens["refresh"])
+
+                # create a new client with the new access token
+                client = _get_default_client(access_token=tokens["access"])
 
                 # cache to disk
                 auth.cache_tokens(tokens)
@@ -158,10 +164,6 @@ def _create_function(method_path):
                 # so that we force the client to read the new
                 # token from disk
                 auth.get_tokens.cache_clear()
-
-                # configure the client to use the new access
-                # token
-                client.token = tokens["access"]
 
                 method = _get_method(client, method_path)
                 response = method(**kwargs)
