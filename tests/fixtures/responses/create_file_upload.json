@@ -43,5 +43,20 @@
             "dateUpdated": "2024-11-19T03:19:28.397Z",
             "createdByUserDrn": "<redacted>"
         }
+    },
+    "{\"checksum_sha256\": \"rRS/5tR0d/MjICI1AdOr7CAyl1JIvgc79n3isXNAf9g=\", \"content_length\": \"10682\", \"content_type\": \"text/x-python\", \"name\": \"test_data_hub.py\"}": {
+        "uploadUrl": "<redacted>",
+        "file": {
+            "name": "test_data_hub.py",
+            "contentType": "text/x-python",
+            "contentLength": 10682,
+            "checksumSha256": "rRS/5tR0d/MjICI1AdOr7CAyl1JIvgc79n3isXNAf9g=",
+            "id": "_file:ZKPAZZ8H8eKtrXRwZ9CON",
+            "status": "ready",
+            "uri": "<redacted>",
+            "dateCreated": "2024-11-25T19:08:43.221Z",
+            "dateUpdated": "2024-11-25T19:08:43.221Z",
+            "createdByUserDrn": "<redacted>"
+        }
     }
 }
