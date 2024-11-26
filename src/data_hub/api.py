@@ -1034,7 +1034,6 @@ def get_dataframe(
             return dict()
 
     columns = db_row.cols
-    database_id = db_row.id
 
     # make a dictionary with all data in the database
     data = dict()
