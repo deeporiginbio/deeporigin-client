@@ -37,19 +37,7 @@ from tqdm import tqdm
 check_for_updates()
 
 
-def ensure_client(func):
-    """decorator to make sure that the client is configured"""
-
-    def wrapper(*args, **kwargs):
-        if "client" not in kwargs or kwargs["client"] is None:
-            kwargs["client"] = _api._get_default_client()
-        return func(*args, **kwargs)
-
-    return wrapper
-
-
 @beartype
-@ensure_client
 def convert_id_format(
     *,
     hids: Optional[Union[list[str], set[str]]] = None,
@@ -87,7 +75,6 @@ def convert_id_format(
     )
 
 
-@ensure_client
 @beartype
 def create_workspace(
     *,
@@ -117,7 +104,6 @@ def create_workspace(
     )
 
 
-@ensure_client
 @beartype
 def create_database(
     *,
@@ -158,7 +144,6 @@ def create_database(
 
 
 @beartype
-@ensure_client
 def list_files(
     *,
     assigned_row_ids: Optional[list[str]] = None,
@@ -198,7 +183,6 @@ def list_files(
 
 
 @beartype
-@ensure_client
 def list_rows(
     *,
     parent_id: Optional[str] = None,
@@ -240,14 +224,13 @@ def list_rows(
 
 
 @beartype
-@ensure_client
 def upload_file(
     file_path: str,
     *,
     client=None,
     _stash: bool = False,
     compute_hash: bool = True,
-) -> None:
+):
     """Upload a file to Deep Origin.
 
     This upload files to your Deep Origin data hub.
@@ -386,7 +369,6 @@ def add_database_rows(
 
 
 @beartype
-@ensure_client
 def make_database_rows(
     database_id: str,
     n_rows: int = 1,
@@ -468,7 +450,6 @@ def assign_files_to_cell(
 
 
 @beartype
-@ensure_client
 def upload_file_to_new_database_row(
     *,
     database_id: str,
@@ -1053,7 +1034,6 @@ def get_dataframe(
             return dict()
 
     columns = db_row.cols
-    database_id = db_row.id
 
     # make a dictionary with all data in the database
     data = dict()
@@ -1189,7 +1169,6 @@ def _make_deeporigin_dataframe(
 
 
 @beartype
-@ensure_client
 def download_files(
     *,
     files: Optional[list[dict]] = None,
@@ -1590,7 +1569,6 @@ def get_row_data(
     return row_data
 
 
-@ensure_client
 @beartype
 def add_database_column(
     *,
