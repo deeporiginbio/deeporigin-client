@@ -2,10 +2,10 @@
 interacting with your Deep Origin data hub."""
 
 import concurrent.futures
-import copy
 import json
 import os
 from functools import wraps
+from inspect import Parameter, signature
 from pathlib import Path
 from typing import Any, Optional, Union
 from urllib.parse import urlparse, urlunparse
@@ -13,7 +13,6 @@ from urllib.parse import urlparse, urlunparse
 import click
 import typer
 from beartype import beartype
-from box import Box
 
 # this import is to allow us to use functions
 # not marked in __all__ in _api
@@ -48,8 +47,24 @@ app = typer.Typer()
 def auto_print(func):
     """decorator to automatically print the result of a function when called from the CLI"""
 
+    sig = signature(func)
+    parameters = list(sig.parameters.values())
+
+    # Add the `table` parameter at the end
+    table_param = Parameter(
+        "table",
+        Parameter.KEYWORD_ONLY,
+        default=True,
+        annotation=bool,
+    )
+    parameters.append(table_param)
+
+    # Rebuild the signature with the modified parameters
+    new_sig = sig.replace(parameters=parameters)
+
     @wraps(func)
     def wrapper(*args, **kwargs):
+        kwargs.pop("table", None)
         # Check if being executed via Typer
         context = click.get_current_context(silent=True)
         result = func(*args, **kwargs)
@@ -58,7 +73,21 @@ def auto_print(func):
         if result is not None:
             typer.echo(json.dumps(result))
 
+    # Attach the new signature to the wrapper
+    wrapper.__signature__ = new_sig
     return wrapper
+
+
+@beartype
+@app.command()
+@auto_print
+def delete_database(
+    database_id: str,
+    *,
+    client=None,
+    _stash: bool = False,
+):
+    return _api.delete_database(database_id=database_id, client=client, _stash=_stash)
 
 
 @beartype
@@ -100,6 +129,8 @@ def convert_id_format(
 
 
 @beartype
+@app.command()
+@auto_print
 def create_workspace(
     *,
     name: str,
@@ -129,6 +160,8 @@ def create_workspace(
 
 
 @beartype
+@app.command()
+@auto_print
 def create_database(
     *,
     name: str,
