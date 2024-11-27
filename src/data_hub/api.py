@@ -2,12 +2,18 @@
 interacting with your Deep Origin data hub."""
 
 import concurrent.futures
+import copy
+import json
 import os
+from functools import wraps
 from pathlib import Path
 from typing import Any, Optional, Union
 from urllib.parse import urlparse, urlunparse
 
+import click
+import typer
 from beartype import beartype
+from box import Box
 
 # this import is to allow us to use functions
 # not marked in __all__ in _api
@@ -35,6 +41,31 @@ from deeporigin.utils.network import (
 from tqdm import tqdm
 
 check_for_updates()
+
+app = typer.Typer()
+
+
+def auto_print(func):
+    """decorator to automatically print the result of a function when called from the CLI"""
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        # Check if being executed via Typer
+        context = click.get_current_context(silent=True)
+        result = func(*args, **kwargs)
+        if context is None:
+            return result
+        if result is not None:
+            result = copy.deepcopy(result)
+            if isinstance(result, list):
+                result = [item.to_dict() for item in result]
+            elif isinstance(result, Box):
+                # this is so that Box objects can
+                # be converted into dict
+                result = result.to_dict()
+            typer.echo(json.dumps(result))
+
+    return wrapper
 
 
 @beartype
@@ -144,6 +175,8 @@ def create_database(
 
 
 @beartype
+@app.command()
+@auto_print
 def list_files(
     *,
     assigned_row_ids: Optional[list[str]] = None,
