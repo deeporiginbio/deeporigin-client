@@ -56,13 +56,6 @@ def auto_print(func):
         if context is None:
             return result
         if result is not None:
-            result = copy.deepcopy(result)
-            if isinstance(result, list):
-                result = [item.to_dict() for item in result]
-            elif isinstance(result, Box):
-                # this is so that Box objects can
-                # be converted into dict
-                result = result.to_dict()
             typer.echo(json.dumps(result))
 
     return wrapper
