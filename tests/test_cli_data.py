@@ -84,6 +84,8 @@ def test_list(config, list_option, json_option):  # noqa: F811
 
 @pytest.mark.parametrize("json_option", JSON_OPTIONS)
 def test_show_db(config, json_option):  # noqa: F811
+    print(config["databases"][0])
+
     stdout = _run_cli_command(
         ["data", "show", config["databases"][0]] + json_option,
         client=config["client"],

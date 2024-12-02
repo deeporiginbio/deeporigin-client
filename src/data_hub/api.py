@@ -1316,7 +1316,7 @@ def row_to_dict(
     for field in fields:
         if "systemType" in field.keys() and field.systemType == "bodyDocument":
             continue
-        if field.value is None:
+        if getattr(field, "value", None) is None:
             value = None
         elif field.type in ["float", "integer", "boolean"]:
             value = field.value
