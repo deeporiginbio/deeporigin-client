@@ -1330,7 +1330,10 @@ def row_to_dict(
             value = field.value.fileIds
             file_ids.extend(value)
         elif field.type == "expression":
-            value = field.value.result
+            try:
+                value = field.value.expression
+            except Exception:
+                value = None
 
         elif field.type == "user":
             user_ids = field.value.userDrns
