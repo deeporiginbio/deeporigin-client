@@ -119,7 +119,7 @@ make docs-serve
 
 `deeporigin` is [tested](https://github.com/deeporiginbio/deeporigin-client/actions/workflows/main.yml) against the following versions of Python in Ubuntu Linux and Windows:
 
-- 3.9
 - 3.10
 - 3.11
 - 3.12
+- 3.13
