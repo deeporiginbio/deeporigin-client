@@ -1202,15 +1202,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#src.data_hub.api.download_file" class="md-nav__link">
-    <span class="md-ellipsis">
-      download_file
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#src.data_hub.api.download_files" class="md-nav__link">
     <span class="md-ellipsis">
       download_files
@@ -1707,15 +1698,6 @@
   <a href="#src.data_hub.api.download_database" class="md-nav__link">
     <span class="md-ellipsis">
       download_database
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#src.data_hub.api.download_file" class="md-nav__link">
-    <span class="md-ellipsis">
-      download_file
     </span>
   </a>
   
@@ -2695,88 +2677,15 @@ and save to local disk as a CSV file.</p>
 <div class="doc doc-object doc-function">
 
 
-<h2 id="src.data_hub.api.download_file" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>            <span class="doc doc-object-name doc-function-name">download_file</span>
-
-
-<a href="#src.data_hub.api.download_file" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">download_file</span><span class="p">(</span>
-    <span class="n">file_id</span><span class="p">:</span> <span class="n">str</span><span class="p">,</span>
-    <span class="o">*</span><span class="p">,</span>
-    <span class="n">destination</span><span class="p">:</span> <span class="n">str</span> <span class="o">|</span> <span class="n"><span title="pathlib.Path">Path</span></span> <span class="o">=</span> <span class="n"><span title="os.getcwd">getcwd</span></span><span class="p">(),</span>
-    <span class="n">client</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">_stash</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="kc">False</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
-</code></pre></div>
-
-    <div class="doc doc-contents ">
-
-        <p>Download a file to a destination folder (workspace).</p>
-<p>Download a file synchronously from Deep Origin
-to folder on the local file system.</p>
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>file_id</code>
-            </td>
-            <td>
-                  <code>str</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>ID of the file on Deep Origin</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>destination</code>
-            </td>
-            <td>
-                  <code>str | <span title="pathlib.Path">Path</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Path to the destination folder</p>
-              </div>
-            </td>
-            <td>
-                  <code><span title="os.getcwd">getcwd</span>()</code>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
 <h2 id="src.data_hub.api.download_files" class="doc doc-heading">
 <code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>            <span class="doc doc-object-name doc-function-name">download_files</span>
 
 
 <a href="#src.data_hub.api.download_files" class="headerlink" title="Permanent link">&para;</a></h2>
 <div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">download_files</span><span class="p">(</span>
-    <span class="n">files</span><span class="p">:</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n">list</span> <span class="o">|</span> <span class="n">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
+    <span class="n">files</span><span class="p">:</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n">list</span><span class="p">[</span><span class="n">dict</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">file_ids</span><span class="p">:</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n">list</span><span class="p">[</span><span class="n">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">save_to_dir</span><span class="p">:</span> <span class="n"><span title="pathlib.Path">Path</span></span> <span class="o">|</span> <span class="n">str</span> <span class="o">=</span> <span class="n"><span title="pathlib.Path">Path</span></span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">),</span>
     <span class="n">use_file_names</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">client</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -2805,11 +2714,11 @@ to folder on the local file system.</p>
                 <code>files</code>
             </td>
             <td>
-                  <code><span title="typing.Optional">Optional</span>[list | dict]</code>
+                  <code><span title="typing.Optional">Optional</span>[list[dict]]</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>list of files to download. These can be of type <code>types.list_files_response.Data</code> (as returned by api.list_files) or can be a list of strings of file IDs.</p>
+                <p>list of files to download. These can be a list of file_ids or a list of files as returned by api.list_files</p>
               </div>
             </td>
             <td>
@@ -2830,6 +2739,22 @@ to folder on the local file system.</p>
             </td>
             <td>
                   <code><span title="pathlib.Path">Path</span>(&#39;.&#39;)</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>use_file_names</code>
+            </td>
+            <td>
+                  <code>bool</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If <code>True</code>, refer to files by name rather than ID.</p>
+              </div>
+            </td>
+            <td>
+                  <code>True</code>
             </td>
           </tr>
       </tbody>
@@ -3953,7 +3878,7 @@ based on the parent, row type, or whether the parent is the root.</p>
     <span class="n">client</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">_stash</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">compute_hash</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="kc">True</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+<span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
