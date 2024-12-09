@@ -37,6 +37,7 @@ dependencies = [
     "cryptography",
     "python-box",
     "do-sdk-platform==1.0.0",
+    "typer",
 ]
 dynamic = ["version"]
 
