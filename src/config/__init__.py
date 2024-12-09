@@ -10,7 +10,7 @@ from ..exceptions import DeepOriginException
 
 CONFIG_DIR = pathlib.Path(__file__).parent
 DEFAULT_CONFIG_FILENAME = os.path.join(CONFIG_DIR, "default.yml")
-CONFIG_YML_LOCATION = _ensure_do_folder() / "default.yml"
+CONFIG_YML_LOCATION = _ensure_do_folder() / "config.yml"
 
 __all__ = ["get_value"]
 
@@ -71,7 +71,6 @@ def get_value(
     value = confuse.Configuration("deep_origin", __name__)
 
     # read the default configuration
-    DEFAULT_CONFIG_FILENAME = os.path.join(CONFIG_DIR, "default.yml")
     value.set_file(DEFAULT_CONFIG_FILENAME, base_for_paths=True)
 
     # read configuration overrides from the user
