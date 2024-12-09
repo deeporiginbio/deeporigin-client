@@ -108,7 +108,6 @@ def authenticate() -> dict:
 
     # Get a link for the user to sign into the Deep Origin platform
     endpoint = urljoin(config.auth_domain, config.auth_device_code_endpoint)
-    print(endpoint)
     body = {
         "client_id": config.auth_client_id,
         "scope": "offline_access",
