@@ -132,7 +132,7 @@ def resolve_user(user_id: str):
 def whoami() -> dict:
     """get details about currently signed in user"""
 
-    return _make_request("/users/me")
+    return _make_request("/users/me", verb="PATCH")
 
 
 @beartype
