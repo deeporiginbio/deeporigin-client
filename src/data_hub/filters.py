@@ -1,6 +1,7 @@
 """module to create filters and conditions to filter rows in databases on the data hub"""
 
 from beartype import beartype
+from box import Box
 from deeporigin_data.types.client_list_database_rows_params import (
     FilterRowFilterNumber,
     FilterRowFilterText,
@@ -39,7 +40,7 @@ def numeric_condition(
     adapter = TypeAdapter(FilterRowFilterNumber)
     adapter.validate_python(data)
 
-    return data
+    return Box(data)
 
 
 @beartype
@@ -62,4 +63,4 @@ def text_condition(
     adapter = TypeAdapter(FilterRowFilterText)
     adapter.validate_python(data)
 
-    return data
+    return Box(data)

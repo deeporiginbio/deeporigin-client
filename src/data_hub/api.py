@@ -983,6 +983,13 @@ def get_dataframe(
 
     # TODO: list_database_rows and describe_row can be called in parallel
 
+    # figure out the column names and ID of the database
+    db_row = _api.describe_row(
+        row_id=database_id,
+        client=client,
+        _stash=_stash,
+    )
+
     # figure out the rows
     if filter is None:
         rows = _api.list_database_rows(
@@ -991,19 +998,25 @@ def get_dataframe(
             _stash=_stash,
         )
     else:
+        # we may have to resolve column names
+        column_ids = [col.id for col in db_row.cols]
+        column_names = [col.name for col in db_row.cols]
+        if filter.column_id not in column_ids:
+            column_id = [col.id for col in db_row.cols if col.name == filter.column_id]
+            if len(column_id) == 1:
+                filter.column_id = column_id[0]
+            else:
+                raise DeepOriginException(
+                    f"Filter column with ID or name: {filter.column_id} not found in database {database_id}",
+                    fix=f"Valid column names are: {column_names}",
+                )
+
         rows = _api.list_database_rows(
             database_row_id=database_id,
             client=client,
             _stash=_stash,
             filter=filter,
         )
-
-    # figure out the column names and ID of the database
-    db_row = _api.describe_row(
-        row_id=database_id,
-        client=client,
-        _stash=_stash,
-    )
 
     # filter out template rows
     rows = [

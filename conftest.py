@@ -1,6 +1,6 @@
 def pytest_addoption(parser):
     parser.addoption("--client", action="store", default="mock")
-    parser.addoption("--responses", action="store", default="pass", help="Set to stash to stash responses")
+    parser.addoption("--responses", action="store", default="pass", help="Set to store to stash responses")
 
 
 def pytest_generate_tests(metafunc):
