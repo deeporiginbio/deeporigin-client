@@ -47,12 +47,29 @@ def start_run(
     *,
     receptor: str | dict | Path = None,
     ligand: str | dict | Path = None,
-    search_space: dict = None,
-    docking: dict = None,
+    search_space: dict,
+    docking: dict,
     database_id: Optional[str] = None,
     row_id: Optional[str] = None,
 ) -> str:
     """starts an AutoDock Vina run"""
+
+    if docking.keys() != {"energy_range", "exhaustiveness", "num_modes"}:
+        raise ValueError(
+            "docking must be a dictionary with keys 'energy_range', 'exhaustiveness', and 'num_modes'"
+        )
+
+    if search_space.keys() != {
+        "center_x",
+        "center_y",
+        "center_z",
+        "size_x",
+        "size_y",
+        "size_z",
+    }:
+        raise ValueError(
+            "search_space must be a dictionary with keys 'center_x', 'center_y', 'center_z', 'size_x', 'size_y', and 'size_z'"
+        )
 
     if not database_id.startswith("_database"):
         data = api.resolve_ids(database_ids=[database_id])
@@ -82,19 +99,7 @@ def start_run(
                 "columnId": "_column:xoXnzZnT2bXOLBvzfcsxI",
                 "databaseId": database_id,
             },
-            "searchSpace": {
-                "center_x": 15.190,
-                "center_y": 53.903,
-                "center_z": 16.917,
-                "size_x": 1.1,
-                "size_y": 1.1,
-                "size_z": 1.1,
-            },
-            "docking": {
-                "energy_range": 0.3,
-                "exhaustiveness": 1,
-                "num_modes": 9,
-            },
+            "searchSpace": search_space,
         },
         "outputs": {
             "output_file": {
@@ -125,7 +130,7 @@ def query_run_status(job_id: str):
         job_id (str): job ID
 
     Returns:
-        One of "Queued", "Running", "Succeeded", or "Failed"
+        One of "Created", "Queued", "Running", "Succeeded", or "Failed"
 
     """
     response = requests.get(
