@@ -1,65 +1,53 @@
 """module to create filters and conditions to filter rows in databases on the data hub"""
 
+from typing import Any, Literal
+
 from beartype import beartype
-from deeporigin_data.types.client_list_database_rows_params import (
-    FilterRowFilterNumber,
-    FilterRowFilterText,
-)
-from pydantic import TypeAdapter
+from box import Box
+
+FilterType = Literal["number", "text", "boolean"]
+Operator = Literal[
+    "equals",
+    "notEqual",
+    "lessThan",
+    "lessThanOrEqual",
+    "greaterThan",
+    "greaterThanOrEqual",
+    "contains",
+    "notContains",
+    "startsWith",
+    "endsWith",
+    "substructure",
+    "in",
+    "notIn",
+    "isNull",
+    "isNotNull",
+]
 
 
 @beartype
-def numeric_condition(
+def filter(
     *,
+    filter_type: FilterType,
+    operator: Operator,
+    filter_value: Any,
     column_id: str,
-    value: float | int,
-    operator: str,
-) -> dict:
-    """function to create a valid numeric filter
-
+):
+    """function to create filters and conditions to filter rows in databases on the data hub
 
     Args:
-        column_id (str): id of the column
-        value (float | int): value to filter
-        operator (str): operator to use.
+        filter_type (FilterType): type of filter. can be one of number, text, boolean
+        operator (Operator): operator to apply
+        filter_value (Any): value of filter
+        column_id (str): id or name of column
 
-    Returns:
-        A dictionary containing a valid condition that can be used to filter database rows
+
     """
-
     data = dict(
         column_id=column_id,
-        filter_type="number",
-        filter_value=value,
+        filter_type=filter_type,
+        filter_value=filter_value,
         operator=operator,
     )
 
-    # use type checks from SDK definition, which
-    # ultimately derives from the openAPI spec
-    adapter = TypeAdapter(FilterRowFilterNumber)
-    adapter.validate_python(data)
-
-    return data
-
-
-@beartype
-def text_condition(
-    *,
-    column_id: str,
-    value: str,
-    operator: str,
-) -> dict:
-    """function to create a valid text filter"""
-    data = dict(
-        column_id=column_id,
-        filter_type="text",
-        filter_value=value,
-        operator=operator,
-    )
-
-    # use type checks from SDK definition, which
-    # ultimately derives from the openAPI spec
-    adapter = TypeAdapter(FilterRowFilterText)
-    adapter.validate_python(data)
-
-    return data
+    return Box(data)

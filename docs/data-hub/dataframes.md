@@ -39,6 +39,23 @@ which should show you something like this:
     - Information about the last edit made to the database. 
 
 
+!!! tip "Fetching only some rows"
+    If you have a particularly large database, you may want to fetch only certain rows using a filter. For example, to fetch only rows where column `x` is greater than `42`:
+
+    ```python
+    from deeporigin.data_hub import filters
+    filter = filters.filter(
+        column_id="x", # can be name or column
+        filter_value=42,
+        operator="greaterThan",
+        filter_type="number",
+    )
+    df = DataFrame.from_deeporigin("your-db-id",   filter=filter)
+    df
+```
+
+
+
 ## Modify data in the DataFrame
 
 Because a Deep Origin DataFrame is a subclass of a pandas DataFrame, all pandas DataFrame methods work on Deep Origin DataFrames. In this example, we modify values in one of the columns, or modify a single cell.
