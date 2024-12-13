@@ -51,7 +51,7 @@ def start_run(
     docking: dict = None,
     database_id: Optional[str] = None,
     row_id: Optional[str] = None,
-) -> dict:
+) -> str:
     """starts an AutoDock Vina run"""
 
     if not database_id.startswith("_database"):
@@ -112,8 +112,25 @@ def start_run(
         json=json_data,
     )
 
-    return response.json()
+    data = response.json()
+    job_id = data["data"]["id"]
+    print(f"🧬 Job started with ID: {job_id}")
+    return job_id
 
 
-def query_run():
-    pass
+def query_run_status(job_id: str):
+    """determine the status of a run, identified by job ID
+
+    Args:
+        job_id (str): job ID
+
+    Returns:
+        One of "Queued", "Running", "Succeeded", or "Failed"
+
+    """
+    response = requests.get(
+        f"https://os.edge.deeporigin.io/api/tools/likely-aardvark-ewo/{job_id}",
+        headers=headers,
+    )
+    data = response.json()
+    return data["data"]["attributes"]["status"]
