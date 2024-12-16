@@ -69,6 +69,13 @@ nav:
   - How to:
     - Install variables and secrets: how-to/compute-hub/variables.md
     - Get info about your workstation: how-to/compute-hub/workstation-info.md
+- Tools: 
+  - tools/index.md
+  - How to:
+    - List tools: how-to/tools/list-tools.md
+    - Run tools: how-to/tools/run-tools.md
+  - Available tools:
+    - Autodock Vina: tools/vina.md
 - Changelog: changelog.md
 - Support: https://www.support.deeporigin.com/servicedesk/customer/portals
 

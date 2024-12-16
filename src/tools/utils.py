@@ -31,13 +31,14 @@ def wait_for_job(job_id: str, *, poll_interval: int = 4):
 
     status = "Running"
     txt_length = 0
+    bs = "".join(["\b" for _ in range(txt_length)])
     while not (status == "Succeeded" or status == "Failed"):
+        print(bs, end="", flush=True)
         status = query_run_status(job_id)
         txt_length = len(status)
         print(status, end="", flush=True)
         time.sleep(poll_interval)
         bs = "".join(["\b" for _ in range(txt_length)])
-        print(bs, end="", flush=True)
 
 
 @beartype
