@@ -20,7 +20,7 @@ Run the command below for your favorite package manager to install the Deep Orig
 === "pixi"
 
     ```bash
-    pixi add deeporigin
+    pixi add --pypi deeporigin
     ```
 
 === "pipx"
@@ -45,12 +45,6 @@ Run the command below for your favorite package manager to install the Deep Orig
 
     ```bash
     uv pip install deeporigin
-    ```
-
-=== "micromamba"
-
-    ```bash
-    micromamba install -c https://repo.prefix.dev/deeporigin-public deeporigin
     ```
 
 === "flit"
