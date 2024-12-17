@@ -20,7 +20,7 @@ Run the command below for your favorite package manager to install the Deep Orig
 === "pixi"
 
     ```bash
-    pixi add deeporigin
+    pixi add --pypi deeporigin
     ```
 
 === "pipx"
