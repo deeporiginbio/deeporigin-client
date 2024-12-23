@@ -34,12 +34,12 @@ This section describes the parameters for a tool run, that are passed in the `st
 
 Defines the area of the receptor where docking will occur. This is critical for focusing on the active site or binding pocket.
 
-#### `center_x, center_y, center_z`:
+#### `center_x, center_y, center_z`
 
 - Coordinates of the center of the search box, specified in Ångstroms.
 - Should be based on the binding site of the receptor (obtained from experimental data or visual inspection).
 
-#### `size_x, size_y, size_z`:
+#### `size_x, size_y, size_z`
 
 - Dimensions of the search box along each axis (in Ångstroms).
 - Determines the search region’s size. A larger box covers more area but increases computation time.
@@ -52,13 +52,13 @@ Defines the area of the receptor where docking will occur. This is critical for 
 - The energy difference (in kcal/mol) between the best pose and the worst acceptable pose.
 - Smaller values prioritize only low-energy poses; larger values allow more diverse poses.
 
-#### `exhaustiveness`:
+#### `exhaustiveness`
 
 - Determines the thoroughness of the search.
 - Higher values increase the number of sampling attempts, improving accuracy but requiring more computational time.
 - Default is 8; lower values (e.g., 1-4) are faster but less exhaustive.
 
-#### `num_modes`:
+#### `num_modes`
 
 - The maximum number of docking poses to generate.
 - Vina will output up to this many unique poses for analysis.
