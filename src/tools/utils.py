@@ -2,10 +2,12 @@
 
 import functools
 import time
+from typing import Optional
 
 from beartype import beartype
 from deeporigin.config import get_value
 from deeporigin.platform import clusters, tools
+from deeporigin.platform.tools import execute_tool
 
 
 def query_run_status(job_id: str):
@@ -85,3 +87,72 @@ def _get_cluster_id() -> str:
     cluster = cluster[0]
     cluster_id = cluster.id
     return cluster_id
+
+
+@beartype
+def run_tool(data: dict):
+    """run any tool using provided DTO"""
+
+    if "clusterId" not in data.keys():
+        data["clusterId"] = _get_cluster_id()
+
+    return execute_tool(
+        org_friendly_id=get_value()["organization_id"],
+        execute_tool_dto=data,
+    )
+
+
+@beartype
+def make_payload(
+    *,
+    inputs: dict,
+    outputs: dict,
+    tool_id: str,
+    cluster_id: Optional[str] = None,
+    cols: Optional[list] = None,
+) -> dict:
+    """helper function to create payload for tool execution"""
+
+    if cluster_id is None:
+        cluster_id = _get_cluster_id()
+
+    payload = dict(
+        inputs=inputs,
+        outputs=outputs,
+        clusterId=cluster_id,
+        toolId=tool_id,
+    )
+
+    if cols:
+        payload = _column_name_to_column_id(payload, cols)
+
+    return payload
+
+
+@beartype
+def _column_name_to_column_id(data: dict, cols: list) -> dict:
+    """
+    Recursively update all values for the key 'columnId' in a nested dictionary.
+
+    Args:
+        d (dict): The dictionary to process.
+        func (callable): A function that takes the original value and returns the new value.
+
+    Returns:
+        dict: The modified dictionary.
+    """
+    for key, value in data.items():
+        if key == "columnId":
+            data[key] = _resolve_column_name(value, cols)
+        elif isinstance(value, dict):
+            data[key] = _column_name_to_column_id(
+                value, cols
+            )  # Recurse into nested dictionaries
+        elif isinstance(value, list):
+            data[key] = [
+                _column_name_to_column_id(item, cols)
+                if isinstance(item, dict)
+                else item
+                for item in value
+            ]
+    return data
