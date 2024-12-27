@@ -1,4 +1,4 @@
-"""module to run AutoDock Vina on Deep Origin"""
+"""module to run Draco on Deep Origin"""
 
 from beartype import beartype
 from deeporigin.config import get_value
@@ -39,10 +39,6 @@ def start_run(
     # resolve columns
     output_column_id = _resolve_column_name(output_column_name, cols)
     input_file_column_id = _resolve_column_name(input_file_column_name, cols)
-
-    if not row_id.startswith("_row"):
-        data = data = api.convert_id_format(hids=[row_id])
-        row_id = data[0].id
 
     json_data = {
         "toolId": "deeporigin/draco",
