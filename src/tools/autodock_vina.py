@@ -2,7 +2,7 @@
 
 from beartype import beartype
 from deeporigin.data_hub import api
-from deeporigin.tools.utils import _resolve_column_name, make_payload, run_tool
+from deeporigin.tools.utils import make_payload, run_tool
 
 
 @beartype
