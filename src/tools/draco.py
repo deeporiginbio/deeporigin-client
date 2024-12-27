@@ -15,7 +15,7 @@ def start_run(
     input_file_column_name: str,
     output_column_name: str,
 ) -> str:
-    """starts an AutoDock Vina run
+    """starts an Draco run
 
     Args:
         database_id (str): database ID or name of the database to source inputs from and write outputs to
