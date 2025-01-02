@@ -160,8 +160,9 @@ def _create_function(method_path):
                 auth.get_tokens.cache_clear()
 
                 # configure the client to use the new access
-                # token
-                client.token = tokens["access"]
+                # token. we need to regenerate the client
+                # because there's no way to modify the token
+                client = _get_default_client(refresh=False)
 
                 method = _get_method(client, method_path)
                 response = method(**kwargs)

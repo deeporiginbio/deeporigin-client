@@ -94,9 +94,9 @@ docking = {
 To start a tool run, use:
 
 ```python
-from deeporigin.tools import autodock_vina
+from deeporigin.tools import run
 
-job_id = autodock_vina.start_run(
+job_id = run.autodock_vina(
     database_id="<your-db-name>",
     row_id="<row-name>",
     search_space=search_space,
@@ -107,9 +107,9 @@ job_id = autodock_vina.start_run(
 )
 ```
 
-`start_run` returns the ID of the tool run, that can be used to monitor the status of the run and terminate it if needed. 
+`run.autodock_vina` returns the ID of the tool run, that can be used to monitor the status of the run and terminate it if needed. 
 
-`start_run` prints a message that looks like:
+`run.autodock_vina` prints a message that looks like:
 
 ```bash
 🧬 Job started with ID: 9f7a3741-e392-45fb-a349-804b7fca07d7

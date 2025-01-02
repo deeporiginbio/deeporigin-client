@@ -31,7 +31,7 @@ def check_for_updates():
 
 @beartype
 def download_sync(
-    url: str,
+    url: str | dict,
     save_path: str | Path,
 ) -> None:
     """Concrete method to download a resource using GET and save to disk
