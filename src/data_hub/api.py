@@ -1233,8 +1233,6 @@ def download_files(
             save_to_dir / item.file.id.replace("_file:", "") for item in files
         ]
 
-    print(save_paths)
-
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = []
         for file_id, save_path in zip(file_ids, save_paths):

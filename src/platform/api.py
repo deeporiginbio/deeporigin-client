@@ -145,6 +145,9 @@ def get_workstations() -> list[dict]:
 def get_user_name(user_id: str) -> str:
     """get user name from user ID"""
 
+    if "system" in user_id:
+        return "Deep Origin System"
+
     CACHE_PATH = _ensure_do_folder() / "user_ids"
 
     cache = dc.Cache(CACHE_PATH)
