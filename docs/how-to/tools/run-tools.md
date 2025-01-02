@@ -2,7 +2,7 @@ This document describes how to run tools on the Deep Origin platform.
 
 ## Running packaged tools
 
-In general, tools are best run by calling functions in the `tools` module. For example, to run [Autodock Vina](../../tools/vina.md), use:
+In general, tools are best run by calling the `start_run` function of the module for that tool in the `tools` module. For example, to run [Autodock Vina](../../tools/vina.md), use:
 
 ```python
 from deeporigin.tools import autodock_vina

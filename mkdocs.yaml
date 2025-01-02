@@ -78,6 +78,9 @@ nav:
     - Autodock Vina: tools/vina.md
     - PDBFixer: tools/pdbfixer.md
     - Ligand Prep (Meeko): tools/ligand-prep-meeko.md
+  - Reference: 
+    - Running tools: tools/run.md
+    - Utils: tools/utils.md
 - Changelog: changelog.md
 - Support: https://www.support.deeporigin.com/servicedesk/customer/portals
 
