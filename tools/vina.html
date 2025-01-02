@@ -16,7 +16,7 @@
         <link rel="prev" href="../how-to/tools/run-tools.html">
       
       
-        <link rel="next" href="../changelog.html">
+        <link rel="next" href="pdbfixer.html">
       
       
       <link rel="icon" href="../images/favicon.png">
@@ -1337,6 +1337,8 @@
       
         
       
+        
+      
     
     
       
@@ -1495,6 +1497,10 @@
       
         
       
+        
+      
+        
+      
     
     
       
@@ -1641,7 +1647,7 @@
           <li class="md-nav__item">
   <a href="#center_x-center_y-center_z" class="md-nav__link">
     <span class="md-ellipsis">
-      center_x, center_y, center_z:
+      center_x, center_y, center_z
     </span>
   </a>
   
@@ -1650,7 +1656,7 @@
           <li class="md-nav__item">
   <a href="#size_x-size_y-size_z" class="md-nav__link">
     <span class="md-ellipsis">
-      size_x, size_y, size_z:
+      size_x, size_y, size_z
     </span>
   </a>
   
@@ -1683,7 +1689,7 @@
           <li class="md-nav__item">
   <a href="#exhaustiveness" class="md-nav__link">
     <span class="md-ellipsis">
-      exhaustiveness:
+      exhaustiveness
     </span>
   </a>
   
@@ -1692,7 +1698,7 @@
           <li class="md-nav__item">
   <a href="#num_modes" class="md-nav__link">
     <span class="md-ellipsis">
-      num_modes:
+      num_modes
     </span>
   </a>
   
@@ -1769,6 +1775,147 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="pdbfixer.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    PDBFixer
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="ligand-prep-meeko.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Ligand Prep (Meeko)
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_4" id="__nav_5_4_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Reference
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_4">
+            <span class="md-nav__icon md-icon"></span>
+            Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="run.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Running tools
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="utils.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Utils
+  </span>
+  
+
+      </a>
     </li>
   
 
@@ -1913,7 +2060,7 @@
           <li class="md-nav__item">
   <a href="#center_x-center_y-center_z" class="md-nav__link">
     <span class="md-ellipsis">
-      center_x, center_y, center_z:
+      center_x, center_y, center_z
     </span>
   </a>
   
@@ -1922,7 +2069,7 @@
           <li class="md-nav__item">
   <a href="#size_x-size_y-size_z" class="md-nav__link">
     <span class="md-ellipsis">
-      size_x, size_y, size_z:
+      size_x, size_y, size_z
     </span>
   </a>
   
@@ -1955,7 +2102,7 @@
           <li class="md-nav__item">
   <a href="#exhaustiveness" class="md-nav__link">
     <span class="md-ellipsis">
-      exhaustiveness:
+      exhaustiveness
     </span>
   </a>
   
@@ -1964,7 +2111,7 @@
           <li class="md-nav__item">
   <a href="#num_modes" class="md-nav__link">
     <span class="md-ellipsis">
-      num_modes:
+      num_modes
     </span>
   </a>
   
@@ -2077,12 +2224,12 @@
 <p>This section describes the parameters for a tool run, that are passed in the <code>start_run</code> function.</p>
 <h3 id="search-space">Search Space<a class="headerlink" href="#search-space" title="Permanent link">&para;</a></h3>
 <p>Defines the area of the receptor where docking will occur. This is critical for focusing on the active site or binding pocket.</p>
-<h4 id="center_x-center_y-center_z"><code>center_x, center_y, center_z</code>:<a class="headerlink" href="#center_x-center_y-center_z" title="Permanent link">&para;</a></h4>
+<h4 id="center_x-center_y-center_z"><code>center_x, center_y, center_z</code><a class="headerlink" href="#center_x-center_y-center_z" title="Permanent link">&para;</a></h4>
 <ul>
 <li>Coordinates of the center of the search box, specified in Ångstroms.</li>
 <li>Should be based on the binding site of the receptor (obtained from experimental data or visual inspection).</li>
 </ul>
-<h4 id="size_x-size_y-size_z"><code>size_x, size_y, size_z</code>:<a class="headerlink" href="#size_x-size_y-size_z" title="Permanent link">&para;</a></h4>
+<h4 id="size_x-size_y-size_z"><code>size_x, size_y, size_z</code><a class="headerlink" href="#size_x-size_y-size_z" title="Permanent link">&para;</a></h4>
 <ul>
 <li>Dimensions of the search box along each axis (in Ångstroms).</li>
 <li>Determines the search region’s size. A larger box covers more area but increases computation time.</li>
@@ -2094,13 +2241,13 @@
 <li>The energy difference (in kcal/mol) between the best pose and the worst acceptable pose.</li>
 <li>Smaller values prioritize only low-energy poses; larger values allow more diverse poses.</li>
 </ul>
-<h4 id="exhaustiveness"><code>exhaustiveness</code>:<a class="headerlink" href="#exhaustiveness" title="Permanent link">&para;</a></h4>
+<h4 id="exhaustiveness"><code>exhaustiveness</code><a class="headerlink" href="#exhaustiveness" title="Permanent link">&para;</a></h4>
 <ul>
 <li>Determines the thoroughness of the search.</li>
 <li>Higher values increase the number of sampling attempts, improving accuracy but requiring more computational time.</li>
 <li>Default is 8; lower values (e.g., 1-4) are faster but less exhaustive.</li>
 </ul>
-<h4 id="num_modes"><code>num_modes</code>:<a class="headerlink" href="#num_modes" title="Permanent link">&para;</a></h4>
+<h4 id="num_modes"><code>num_modes</code><a class="headerlink" href="#num_modes" title="Permanent link">&para;</a></h4>
 <ul>
 <li>The maximum number of docking poses to generate.</li>
 <li>Vina will output up to this many unique poses for analysis.</li>
@@ -2126,9 +2273,9 @@
 <span class="p">}</span>
 </code></pre></div>
 <p>To start a tool run, use:</p>
-<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">deeporigin.tools</span> <span class="kn">import</span> <span class="n">autodock_vina</span>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">deeporigin.tools</span> <span class="kn">import</span> <span class="n">run</span>
 
-<span class="n">job_id</span> <span class="o">=</span> <span class="n">autodock_vina</span><span class="o">.</span><span class="n">start_run</span><span class="p">(</span>
+<span class="n">job_id</span> <span class="o">=</span> <span class="n">run</span><span class="o">.</span><span class="n">autodock_vina</span><span class="p">(</span>
     <span class="n">database_id</span><span class="o">=</span><span class="s2">&quot;&lt;your-db-name&gt;&quot;</span><span class="p">,</span>
     <span class="n">row_id</span><span class="o">=</span><span class="s2">&quot;&lt;row-name&gt;&quot;</span><span class="p">,</span>
     <span class="n">search_space</span><span class="o">=</span><span class="n">search_space</span><span class="p">,</span>
@@ -2138,8 +2285,8 @@
     <span class="n">ligand_column_name</span><span class="o">=</span><span class="s2">&quot;&lt;ligand-column-name&gt;&quot;</span><span class="p">,</span>
 <span class="p">)</span>
 </code></pre></div>
-<p><code>start_run</code> returns the ID of the tool run, that can be used to monitor the status of the run and terminate it if needed. </p>
-<p><code>start_run</code> prints a message that looks like:</p>
+<p><code>run.autodock_vina</code> returns the ID of the tool run, that can be used to monitor the status of the run and terminate it if needed. </p>
+<p><code>run.autodock_vina</code> prints a message that looks like:</p>
 <div class="language-bash highlight"><pre><span></span><code>🧬<span class="w"> </span>Job<span class="w"> </span>started<span class="w"> </span>with<span class="w"> </span>ID:<span class="w"> </span>9f7a3741-e392-45fb-a349-804b7fca07d7
 </code></pre></div>
 <p>To monitor the status of the tool run, use:</p>
@@ -2211,13 +2358,13 @@
         
         
           
-          <a href="../changelog.html" class="md-footer__link md-footer__link--next" aria-label="Next: Changelog">
+          <a href="pdbfixer.html" class="md-footer__link md-footer__link--next" aria-label="Next: PDBFixer">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Changelog
+                PDBFixer
               </div>
             </div>
             <div class="md-footer__button md-icon">

@@ -2,114 +2,130 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://client-docs.deeporigin.io/index.html</loc>
-         <lastmod>2024-12-17</lastmod>
+         <lastmod>2025-01-02</lastmod>
     </url>
     <url>
          <loc>https://client-docs.deeporigin.io/changelog.html</loc>
-         <lastmod>2024-12-17</lastmod>
+         <lastmod>2025-01-02</lastmod>
     </url>
     <url>
          <loc>https://client-docs.deeporigin.io/configure.html</loc>
-         <lastmod>2024-12-17</lastmod>
+         <lastmod>2025-01-02</lastmod>
     </url>
     <url>
          <loc>https://client-docs.deeporigin.io/install.html</loc>
-         <lastmod>2024-12-17</lastmod>
+         <lastmod>2025-01-02</lastmod>
     </url>
     <url>
          <loc>https://client-docs.deeporigin.io/compute-hub/index.html</loc>
-         <lastmod>2024-12-17</lastmod>
+         <lastmod>2025-01-02</lastmod>
     </url>
     <url>
          <loc>https://client-docs.deeporigin.io/data-hub/index.html</loc>
-         <lastmod>2024-12-17</lastmod>
+         <lastmod>2025-01-02</lastmod>
     </url>
     <url>
          <loc>https://client-docs.deeporigin.io/data-hub/dataframes.html</loc>
-         <lastmod>2024-12-17</lastmod>
+         <lastmod>2025-01-02</lastmod>
     </url>
     <url>
          <loc>https://client-docs.deeporigin.io/how-to/auth.html</loc>
-         <lastmod>2024-12-17</lastmod>
+         <lastmod>2025-01-02</lastmod>
     </url>
     <url>
          <loc>https://client-docs.deeporigin.io/how-to/compute-hub/variables.html</loc>
-         <lastmod>2024-12-17</lastmod>
+         <lastmod>2025-01-02</lastmod>
     </url>
     <url>
          <loc>https://client-docs.deeporigin.io/how-to/compute-hub/workstation-info.html</loc>
-         <lastmod>2024-12-17</lastmod>
+         <lastmod>2025-01-02</lastmod>
     </url>
     <url>
          <loc>https://client-docs.deeporigin.io/how-to/data-hub/add-data.html</loc>
-         <lastmod>2024-12-17</lastmod>
+         <lastmod>2025-01-02</lastmod>
     </url>
     <url>
          <loc>https://client-docs.deeporigin.io/how-to/data-hub/create.html</loc>
-         <lastmod>2024-12-17</lastmod>
+         <lastmod>2025-01-02</lastmod>
     </url>
     <url>
          <loc>https://client-docs.deeporigin.io/how-to/data-hub/delete.html</loc>
-         <lastmod>2024-12-17</lastmod>
+         <lastmod>2025-01-02</lastmod>
     </url>
     <url>
          <loc>https://client-docs.deeporigin.io/how-to/data-hub/download-files.html</loc>
-         <lastmod>2024-12-17</lastmod>
+         <lastmod>2025-01-02</lastmod>
     </url>
     <url>
          <loc>https://client-docs.deeporigin.io/how-to/data-hub/list-data.html</loc>
-         <lastmod>2024-12-17</lastmod>
+         <lastmod>2025-01-02</lastmod>
     </url>
     <url>
          <loc>https://client-docs.deeporigin.io/how-to/data-hub/upload-files.html</loc>
-         <lastmod>2024-12-17</lastmod>
+         <lastmod>2025-01-02</lastmod>
     </url>
     <url>
          <loc>https://client-docs.deeporigin.io/how-to/data-hub/view-data.html</loc>
-         <lastmod>2024-12-17</lastmod>
+         <lastmod>2025-01-02</lastmod>
     </url>
     <url>
          <loc>https://client-docs.deeporigin.io/how-to/data-hub/write-data.html</loc>
-         <lastmod>2024-12-17</lastmod>
+         <lastmod>2025-01-02</lastmod>
     </url>
     <url>
          <loc>https://client-docs.deeporigin.io/how-to/platform/user-info.html</loc>
-         <lastmod>2024-12-17</lastmod>
+         <lastmod>2025-01-02</lastmod>
     </url>
     <url>
          <loc>https://client-docs.deeporigin.io/how-to/platform/workstation-info.html</loc>
-         <lastmod>2024-12-17</lastmod>
+         <lastmod>2025-01-02</lastmod>
     </url>
     <url>
          <loc>https://client-docs.deeporigin.io/how-to/tools/list-tools.html</loc>
-         <lastmod>2024-12-17</lastmod>
+         <lastmod>2025-01-02</lastmod>
     </url>
     <url>
          <loc>https://client-docs.deeporigin.io/how-to/tools/run-tools.html</loc>
-         <lastmod>2024-12-17</lastmod>
+         <lastmod>2025-01-02</lastmod>
     </url>
     <url>
          <loc>https://client-docs.deeporigin.io/platform/index.html</loc>
-         <lastmod>2024-12-17</lastmod>
+         <lastmod>2025-01-02</lastmod>
     </url>
     <url>
          <loc>https://client-docs.deeporigin.io/ref/data-hub/high-level-api.html</loc>
-         <lastmod>2024-12-17</lastmod>
+         <lastmod>2025-01-02</lastmod>
     </url>
     <url>
          <loc>https://client-docs.deeporigin.io/ref/data-hub/low-level-api.html</loc>
-         <lastmod>2024-12-17</lastmod>
+         <lastmod>2025-01-02</lastmod>
     </url>
     <url>
          <loc>https://client-docs.deeporigin.io/ref/data-hub/types.html</loc>
-         <lastmod>2024-12-17</lastmod>
+         <lastmod>2025-01-02</lastmod>
     </url>
     <url>
          <loc>https://client-docs.deeporigin.io/tools/index.html</loc>
-         <lastmod>2024-12-17</lastmod>
+         <lastmod>2025-01-02</lastmod>
+    </url>
+    <url>
+         <loc>https://client-docs.deeporigin.io/tools/ligand-prep-meeko.html</loc>
+         <lastmod>2025-01-02</lastmod>
+    </url>
+    <url>
+         <loc>https://client-docs.deeporigin.io/tools/pdbfixer.html</loc>
+         <lastmod>2025-01-02</lastmod>
+    </url>
+    <url>
+         <loc>https://client-docs.deeporigin.io/tools/run.html</loc>
+         <lastmod>2025-01-02</lastmod>
+    </url>
+    <url>
+         <loc>https://client-docs.deeporigin.io/tools/utils.html</loc>
+         <lastmod>2025-01-02</lastmod>
     </url>
     <url>
          <loc>https://client-docs.deeporigin.io/tools/vina.html</loc>
-         <lastmod>2024-12-17</lastmod>
+         <lastmod>2025-01-02</lastmod>
     </url>
 </urlset>
