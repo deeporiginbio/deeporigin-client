@@ -1,5 +1,29 @@
 # Changelog
 
+## `deeporigin v3.1.0`
+
+!!! warning "Deleted functions"
+    The `data_hub.api.download_file`  function has been deleted. Use `data_hub.api.download_files` instead.
+
+### Bugfixes
+
+- Fixed a bug where documentation led pixi installs to use conda packages, not pypi packages
+- Fixed a bug where the package could be installed on old and unsupported versions of python
+- Fixed a bug where the default config file was always used
+- Fixed a bug where expired token wasn't being refreshed correctly
+- Fixed a bug where `download_files` wasn't working correctly
+
+### New features
+
+- Ability to run Deep Origin Tools
+- Ability to fetch only some rows of a database as a dataframe
+- Added modules for interacting with the platform API
+
+### Miscellaneous
+
+- Dropped support for Python 3.9, added support for Python 3.13
+- Switched auth server to login.deeporgin.io
+
 
 ## `deeporigin v3.0.0`
 
