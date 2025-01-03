@@ -8,6 +8,62 @@ from deeporigin.tools.utils import make_payload, run_tool
 
 
 @beartype
+def pdb_pdbqt_converter(
+    *,
+    database_id: str,
+    row_id: str,
+    output_column_name: str,
+    input_column_name: str,
+) -> str:
+    """starts a run of PDB to PDBQT converter using Open Babel on the Deep Origin platform.
+
+    Args:
+        database_id (str): ID or HID of the database
+        row_id (str): ID or HID of the row
+        output_column_name (str): name of the column to write results to (the prepared ligand)
+        input_column_name (str): name of the column in the database that contains the input PDB file
+
+    Returns:
+        str: ID of the job. This ID can be used to query status.
+
+    """
+
+    db = api.describe_database(database_id=database_id)
+    cols = db.cols
+
+    inputs = dict(
+        receptor=dict(
+            columnId=input_column_name,
+            databaseId=database_id,
+            rowId=row_id,
+        )
+    )
+
+    outputs = dict(
+        output_file=dict(
+            rowId=row_id,
+            columnId=output_column_name,
+            databaseId=database_id,
+        )
+    )
+
+    payload = make_payload(
+        inputs=inputs,
+        outputs=outputs,
+        tool_id="deeporigin/pdb-pdbqt-convert-obabel",
+        cols=cols,
+    )
+
+    response = run_tool(payload)
+
+    execution_id = response.attributes.executionId
+    job_id = response.id
+
+    print(f"🧬 Job started with ID: {job_id}, execution ID: {execution_id}")
+    return job_id
+
+
+@beartype
 def ligand_prep(
     *,
     database_id: str,
