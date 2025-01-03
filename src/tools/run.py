@@ -28,9 +28,6 @@ def pdb_pdbqt_converter(
 
     """
 
-    db = api.describe_database(database_id=database_id)
-    cols = db.cols
-
     inputs = dict(
         receptor=dict(
             columnId=input_column_name,
@@ -47,20 +44,14 @@ def pdb_pdbqt_converter(
         )
     )
 
-    payload = make_payload(
+    db = api.describe_database(database_id=database_id)
+
+    return _process_job(
+        cols=db.cols,
         inputs=inputs,
         outputs=outputs,
         tool_id="deeporigin/pdb-pdbqt-convert-obabel",
-        cols=cols,
     )
-
-    response = run_tool(payload)
-
-    execution_id = response.attributes.executionId
-    job_id = response.id
-
-    print(f"🧬 Job started with ID: {job_id}, execution ID: {execution_id}")
-    return job_id
 
 
 @beartype
@@ -84,9 +75,6 @@ def ligand_prep(
 
     """
 
-    db = api.describe_database(database_id=database_id)
-    cols = db.cols
-
     inputs = dict(
         ligand=dict(
             columnId=ligand_column_name,
@@ -103,20 +91,14 @@ def ligand_prep(
         )
     )
 
-    payload = make_payload(
+    db = api.describe_database(database_id=database_id)
+
+    return _process_job(
+        cols=db.cols,
         inputs=inputs,
         outputs=outputs,
         tool_id="deeporigin/ligand-prep",
-        cols=cols,
     )
-
-    response = run_tool(payload)
-
-    execution_id = response.attributes.executionId
-    job_id = response.id
-
-    print(f"🧬 Job started with ID: {job_id}, execution ID: {execution_id}")
-    return job_id
 
 
 @beartype
@@ -152,9 +134,6 @@ def receptor_prep(
 
     """
 
-    db = api.describe_database(database_id=database_id)
-    cols = db.cols
-
     inputs = {
         "receptor_pdb": dict(
             columnId=receptor_column_name,
@@ -178,19 +157,14 @@ def receptor_prep(
         )
     )
 
-    payload = make_payload(
+    db = api.describe_database(database_id=database_id)
+
+    return _process_job(
+        cols=db.cols,
         inputs=inputs,
         outputs=outputs,
         tool_id="deeporigin/receptor-prep",
-        cols=cols,
     )
-    response = run_tool(payload)
-
-    execution_id = response.attributes.executionId
-    job_id = response.id
-
-    print(f"🧬 Job started with ID: {job_id}, execution ID: {execution_id}")
-    return job_id
 
 
 @beartype
@@ -238,7 +212,6 @@ def autodock_vina(
             "search_space must be a dictionary with keys 'center_x', 'center_y', 'center_z', 'size_x', 'size_y', and 'size_z'"
         )
 
-    tool_id = "deeporigin/autodock-vina"
     inputs = dict(
         receptor={
             "rowId": row_id,
@@ -262,7 +235,24 @@ def autodock_vina(
     )
 
     db = api.describe_database(database_id=database_id)
-    cols = db.cols
+
+    return _process_job(
+        cols=db.cols,
+        inputs=inputs,
+        outputs=outputs,
+        tool_id="deeporigin/autodock-vina",
+    )
+
+
+@beartype
+def _process_job(
+    *,
+    inputs: dict,
+    outputs: dict,
+    tool_id: str,
+    cols,
+) -> str:
+    """helper function that uses inputs and outputs to construct a payload and run a tool"""
 
     payload = make_payload(
         outputs=outputs,
