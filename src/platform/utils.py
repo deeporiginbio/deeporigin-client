@@ -125,6 +125,11 @@ def _create_function(*, method_path: str, api_name: str):
         # call the low level API method
         response = method(**kwargs)
 
+        if 400 <= response.status < 600:
+            raise ValueError(
+                f"HTTP request failed with status: {response.status} - {response.reason}"
+            )
+
         if not isinstance(response, dict):
             response = response.json()
 
