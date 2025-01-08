@@ -1,6 +1,6 @@
 # Draco: a Chemical Data Extractor
 
-[Draco] is a tool that aims to extract chemical data (Molecules, Reactions, procedures, etc.) from documents. In its first version, Draco focuses at extracting molecules (fragments and complete structures) from PDF documents.
+[Draco] is a tool for extracting chemical data (Molecules, Reactions, procedures, etc.) from documents. In its first version, Draco focused on extracting molecules (fragments and complete structures) from PDF documents.
 
 ## File Inputs
 
