@@ -12,10 +12,6 @@ Upload a PDF file containing chemical structures to extract to the Data Hub.
 
 This section describes the parameters for a tool run, that are passed in the `start_run` function.
 
-### IUPAC name (OPTIONAL) - NOT YET AVAILABLE
-
-Use a model to predict the IUPAC name of the predicted structures
-
 ## Outputs
 
 ### Output Files
@@ -64,13 +60,5 @@ To wait for the tool run to finish, use:
 from deeporigin.tools.utils import wait_for_job
 wait_for_job("9f7a3741-e392-45fb-a349-804b7fca07d7")
 ```
-
-## RoadMap
-
-- Add Reaction extraction
-- Extraction from Text
-- TODO
-
-## TODO
 
 Show a template picture of the data hub
