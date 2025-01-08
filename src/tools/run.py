@@ -255,7 +255,7 @@ def draco(
 
     Args:
         database_id (str): database ID or name of the database to source inputs from and write outputs to
-        row_id (str, optional): row ID or name of the row to source inputs from and write outputs to.
+        row_id (str): row ID or name of the row to source inputs from and write outputs to.
         input_file_column_name (str): name of the column to source the input file from
         output_column_name (str): name of the column to write output file to
 
