@@ -30,14 +30,6 @@ To run Draco on Deep Origin, follow these steps:
 
 ### 2. Start a tool run on Deep Origin
 
-For this tool run, we will use the following parameters:
-
-```python
-parameters = {
-    "input_file": 'your_pdf_file',
-}
-```
-
 To start a tool run, use:
 
 ```python
