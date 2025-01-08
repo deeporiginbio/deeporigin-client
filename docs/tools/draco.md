@@ -56,5 +56,3 @@ To wait for the tool run to finish, use:
 from deeporigin.tools.utils import wait_for_job
 wait_for_job("9f7a3741-e392-45fb-a349-804b7fca07d7")
 ```
-
-Show a template picture of the data hub
