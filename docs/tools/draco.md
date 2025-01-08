@@ -10,7 +10,7 @@ Upload a PDF file containing chemical structures to extract to the Data Hub.
 
 ## Parameters
 
-This section describes the parameters for a tool run, that are passed in the `start_run` function.
+This section describes the parameters for a tool run, that are passed in the `run_draco` function.
 
 ## Outputs
 
@@ -29,9 +29,9 @@ To run Draco on Deep Origin, follow these steps:
 To start a tool run, use:
 
 ```python
-from deeporigin.tools import draco
+from deeporigin.tools import run
 
-job_id = draco.start_run(
+job_id = run.draco(
     database_id="<your-db-name>",
     row_id="<row-name>",
     input_file_column_name="<input-file-column-name>"
@@ -39,9 +39,9 @@ job_id = draco.start_run(
 )
 ```
 
-`start_run` returns the ID of the tool run, that can be used to monitor the status of the run and terminate it if needed. 
+`run.draco` returns the ID of the tool run, that can be used to monitor the status of the run and terminate it if needed. 
 
-`start_run` prints a message that looks like:
+`run.draco` prints a message that looks like:
 
 ```bash
 🧬 Job started with ID: 9f7a3741-e392-45fb-a349-804b7fca07d7
