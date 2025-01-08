@@ -8,10 +8,6 @@
 
 Upload a PDF file containing chemical structures to extract to the Data Hub.
 
-## Parameters
-
-This section describes the parameters for a tool run, that are passed in the `run_draco` function.
-
 ## Outputs
 
 ### Output Files
