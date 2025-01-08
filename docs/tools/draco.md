@@ -35,7 +35,7 @@ job_id = run.draco(
 )
 ```
 
-`run.draco` returns the ID of the tool run, that can be used to monitor the status of the run and terminate it if needed. 
+`run.draco` returns the ID of the tool run, which can be used to monitor the status of the run and terminate it if needed. 
 
 `run.draco` prints a message that looks like:
 
