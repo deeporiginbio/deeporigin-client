@@ -73,3 +73,7 @@ job_id = run.draco(
     output_column_name="Result"
 )
 ```
+
+## Notes
+- Only one input file per row is allowed
+- Restarting a job for a given row, which has already generated an output file will replace the output file with the latest generated one.
