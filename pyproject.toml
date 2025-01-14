@@ -37,6 +37,7 @@ dependencies = [
     "cryptography",
     "python-box",
     "do-sdk-platform==1.1.0",
+    "streamlit",
 ]
 dynamic = ["version"]
 
@@ -75,6 +76,7 @@ version = {file = ["src/VERSION"]}
 
 [project.scripts]
 deeporigin = "deeporigin.cli:main"
+do-tool-dashboard = "deeporigin.cli.dashboard:run"
 
 [build-system]
 requires = [
