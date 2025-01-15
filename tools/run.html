@@ -13,7 +13,7 @@
         <link rel="canonical" href="https://client-docs.deeporigin.io/tools/run.html">
       
       
-        <link rel="prev" href="ligand-prep-meeko.html">
+        <link rel="prev" href="draco.html">
       
       
         <link rel="next" href="utils.html">
@@ -1398,6 +1398,10 @@
       
         
       
+        
+      
+        
+      
     
     
       
@@ -1476,6 +1480,48 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-to/tools/check-status.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Check tool run status
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-to/tools/wait-for-run.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Wait for a tool run
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1492,6 +1538,10 @@
   
     
     
+      
+        
+      
+        
       
         
       
@@ -1567,7 +1617,7 @@
         
   
   <span class="md-ellipsis">
-    PDBFixer
+    Receptor Prep (PDBFixer)
   </span>
   
 
@@ -1589,6 +1639,48 @@
   
   <span class="md-ellipsis">
     Ligand Prep (Meeko)
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="pdb-to-pdbqt.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    PDB to PDBQT
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="draco.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Draco
   </span>
   
 
@@ -1721,9 +1813,27 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#src.tools.run.draco" class="md-nav__link">
+    <span class="md-ellipsis">
+      draco
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#src.tools.run.ligand_prep" class="md-nav__link">
     <span class="md-ellipsis">
       ligand_prep
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#src.tools.run.pdb_pdbqt_converter" class="md-nav__link">
+    <span class="md-ellipsis">
+      pdb_pdbqt_converter
     </span>
   </a>
   
@@ -1861,9 +1971,27 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#src.tools.run.draco" class="md-nav__link">
+    <span class="md-ellipsis">
+      draco
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#src.tools.run.ligand_prep" class="md-nav__link">
     <span class="md-ellipsis">
       ligand_prep
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#src.tools.run.pdb_pdbqt_converter" class="md-nav__link">
+    <span class="md-ellipsis">
+      pdb_pdbqt_converter
     </span>
   </a>
   
@@ -2110,6 +2238,133 @@
 <div class="doc doc-object doc-function">
 
 
+<h2 id="src.tools.run.draco" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>            <span class="doc doc-object-name doc-function-name">draco</span>
+
+
+<a href="#src.tools.run.draco" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">draco</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">database_id</span><span class="p">:</span> <span class="n">str</span><span class="p">,</span>
+    <span class="n">row_id</span><span class="p">:</span> <span class="n">str</span><span class="p">,</span>
+    <span class="n">input_file_column_name</span><span class="p">:</span> <span class="n">str</span><span class="p">,</span>
+    <span class="n">output_column_name</span><span class="p">:</span> <span class="n">str</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">str</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>starts an Draco run</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>database_id</code>
+            </td>
+            <td>
+                  <code>str</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>database ID or name of the database to source inputs from and write outputs to</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>row_id</code>
+            </td>
+            <td>
+                  <code>str</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>row ID or name of the row to source inputs from and write outputs to.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>input_file_column_name</code>
+            </td>
+            <td>
+                  <code>str</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>name of the column to source the input file from</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>output_column_name</code>
+            </td>
+            <td>
+                  <code>str</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>name of the column to write output file to</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>str</code></td>            <td>
+                  <code>str</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>job ID of the run</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
 <h2 id="src.tools.run.ligand_prep" class="doc doc-heading">
 <code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>            <span class="doc doc-object-name doc-function-name">ligand_prep</span>
 
@@ -2198,6 +2453,133 @@
             <td>
               <div class="doc-md-description">
                 <p>name of the column in the database that contains the input ligand</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>str</code></td>            <td>
+                  <code>str</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>ID of the job. This ID can be used to query status.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="src.tools.run.pdb_pdbqt_converter" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>            <span class="doc doc-object-name doc-function-name">pdb_pdbqt_converter</span>
+
+
+<a href="#src.tools.run.pdb_pdbqt_converter" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">pdb_pdbqt_converter</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">database_id</span><span class="p">:</span> <span class="n">str</span><span class="p">,</span>
+    <span class="n">row_id</span><span class="p">:</span> <span class="n">str</span><span class="p">,</span>
+    <span class="n">output_column_name</span><span class="p">:</span> <span class="n">str</span><span class="p">,</span>
+    <span class="n">input_column_name</span><span class="p">:</span> <span class="n">str</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">str</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>starts a run of PDB to PDBQT converter using Open Babel on the Deep Origin platform.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>database_id</code>
+            </td>
+            <td>
+                  <code>str</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>ID or HID of the database</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>row_id</code>
+            </td>
+            <td>
+                  <code>str</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>ID or HID of the row</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>output_column_name</code>
+            </td>
+            <td>
+                  <code>str</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>name of the column to write results to (the prepared ligand)</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>input_column_name</code>
+            </td>
+            <td>
+                  <code>str</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>name of the column in the database that contains the input PDB file</p>
               </div>
             </td>
             <td>
@@ -2507,7 +2889,7 @@
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="ligand-prep-meeko.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Ligand Prep (Meeko)">
+          <a href="draco.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Draco">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -2517,7 +2899,7 @@
                 Previous
               </span>
               <div class="md-ellipsis">
-                Ligand Prep (Meeko)
+                Draco
               </div>
             </div>
           </a>

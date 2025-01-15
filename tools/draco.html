@@ -10,28 +10,28 @@
         <meta name="author" content="Deep Origin">
       
       
-        <link rel="canonical" href="https://client-docs.deeporigin.io/how-to/compute-hub/variables.html">
+        <link rel="canonical" href="https://client-docs.deeporigin.io/tools/draco.html">
       
       
-        <link rel="prev" href="../../compute-hub/index.html">
+        <link rel="prev" href="pdb-to-pdbqt.html">
       
       
-        <link rel="next" href="workstation-info.html">
+        <link rel="next" href="run.html">
       
       
-      <link rel="icon" href="../../images/favicon.png">
+      <link rel="icon" href="../images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.45">
     
     
       
-        <title>Install variables and secrets - CLI and Python client | Deep Origin</title>
+        <title>Draco - CLI and Python client | Deep Origin</title>
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.0253249f.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.0253249f.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
       
       
 
@@ -50,11 +50,11 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
     
-      <link rel="stylesheet" href="../../stylesheets/extra.css">
+      <link rel="stylesheet" href="../stylesheets/extra.css">
     
-    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#install-variables-and-secrets" class="md-skip">
+        <a href="#draco-a-chemical-data-extractor" class="md-skip">
           Skip to content
         </a>
       
@@ -92,9 +92,9 @@
 
 <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../.." title="CLI and Python client | Deep Origin" class="md-header__button md-logo" aria-label="CLI and Python client | Deep Origin" data-md-component="logo">
+    <a href=".." title="CLI and Python client | Deep Origin" class="md-header__button md-logo" aria-label="CLI and Python client | Deep Origin" data-md-component="logo">
       
-  <img src="../../images/logo.svg" alt="logo">
+  <img src="../images/logo.svg" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -111,7 +111,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Install variables and secrets
+              Draco
             
           </span>
         </div>
@@ -196,7 +196,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../index.html" class="md-tabs__link">
+        <a href="../index.html" class="md-tabs__link">
           
   
     
@@ -216,7 +216,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../platform/index.html" class="md-tabs__link">
+        <a href="../platform/index.html" class="md-tabs__link">
           
   
     
@@ -236,12 +236,32 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../data-hub/index.html" class="md-tabs__link">
+        <a href="../data-hub/index.html" class="md-tabs__link">
           
   
     
   
   Data hub
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../compute-hub/index.html" class="md-tabs__link">
+          
+  
+    
+  
+  Compute hub
 
         </a>
       </li>
@@ -258,27 +278,7 @@
     
     
       <li class="md-tabs__item md-tabs__item--active">
-        <a href="../../compute-hub/index.html" class="md-tabs__link">
-          
-  
-    
-  
-  Compute hub
-
-        </a>
-      </li>
-    
-  
-
-      
-        
-  
-  
-  
-    
-    
-      <li class="md-tabs__item">
-        <a href="../../tools/index.html" class="md-tabs__link">
+        <a href="index.html" class="md-tabs__link">
           
   
     
@@ -296,7 +296,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../changelog.html" class="md-tabs__link">
+      <a href="../changelog.html" class="md-tabs__link">
         
   
     
@@ -347,9 +347,9 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="CLI and Python client | Deep Origin" class="md-nav__button md-logo" aria-label="CLI and Python client | Deep Origin" data-md-component="logo">
+    <a href=".." title="CLI and Python client | Deep Origin" class="md-nav__button md-logo" aria-label="CLI and Python client | Deep Origin" data-md-component="logo">
       
-  <img src="../../images/logo.svg" alt="logo">
+  <img src="../images/logo.svg" alt="logo">
 
     </a>
     CLI and Python client | Deep Origin
@@ -405,7 +405,7 @@
           
           
           <div class="md-nav__link md-nav__container">
-            <a href="../../index.html" class="md-nav__link ">
+            <a href="../index.html" class="md-nav__link ">
               
   
   <span class="md-ellipsis">
@@ -438,7 +438,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../install.html" class="md-nav__link">
+      <a href="../install.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -459,7 +459,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../configure.html" class="md-nav__link">
+      <a href="../configure.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -480,7 +480,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth.html" class="md-nav__link">
+      <a href="../how-to/auth.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -533,7 +533,7 @@
           
           
           <div class="md-nav__link md-nav__container">
-            <a href="../../platform/index.html" class="md-nav__link ">
+            <a href="../platform/index.html" class="md-nav__link ">
               
   
   <span class="md-ellipsis">
@@ -612,7 +612,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../platform/user-info.html" class="md-nav__link">
+      <a href="../how-to/platform/user-info.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -633,7 +633,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../platform/workstation-info.html" class="md-nav__link">
+      <a href="../how-to/platform/workstation-info.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -698,7 +698,7 @@
           
           
           <div class="md-nav__link md-nav__container">
-            <a href="../../data-hub/index.html" class="md-nav__link ">
+            <a href="../data-hub/index.html" class="md-nav__link ">
               
   
   <span class="md-ellipsis">
@@ -775,7 +775,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../data-hub/dataframes.html" class="md-nav__link">
+      <a href="../data-hub/dataframes.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -862,7 +862,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../data-hub/create.html" class="md-nav__link">
+      <a href="../how-to/data-hub/create.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -883,7 +883,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../data-hub/delete.html" class="md-nav__link">
+      <a href="../how-to/data-hub/delete.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -904,7 +904,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../data-hub/list-data.html" class="md-nav__link">
+      <a href="../how-to/data-hub/list-data.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -925,7 +925,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../data-hub/view-data.html" class="md-nav__link">
+      <a href="../how-to/data-hub/view-data.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -946,7 +946,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../data-hub/upload-files.html" class="md-nav__link">
+      <a href="../how-to/data-hub/upload-files.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -967,7 +967,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../data-hub/download-files.html" class="md-nav__link">
+      <a href="../how-to/data-hub/download-files.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -988,7 +988,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../data-hub/write-data.html" class="md-nav__link">
+      <a href="../how-to/data-hub/write-data.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1009,7 +1009,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../data-hub/add-data.html" class="md-nav__link">
+      <a href="../how-to/data-hub/add-data.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1086,7 +1086,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../ref/data-hub/high-level-api.html" class="md-nav__link">
+      <a href="../ref/data-hub/high-level-api.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1107,7 +1107,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../ref/data-hub/low-level-api.html" class="md-nav__link">
+      <a href="../ref/data-hub/low-level-api.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1128,7 +1128,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../ref/data-hub/types.html" class="md-nav__link">
+      <a href="../ref/data-hub/types.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1161,8 +1161,6 @@
       
   
   
-    
-  
   
   
     
@@ -1177,24 +1175,21 @@
     
     
       
-        
-        
-      
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
         
           
           
           <div class="md-nav__link md-nav__container">
-            <a href="../../compute-hub/index.html" class="md-nav__link ">
+            <a href="../compute-hub/index.html" class="md-nav__link ">
               
   
   <span class="md-ellipsis">
@@ -1205,13 +1200,13 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_4" id="__nav_4_label" tabindex="">
+              <label class="md-nav__link " for="__nav_4" id="__nav_4_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             Compute hub
@@ -1224,10 +1219,8 @@
                 
   
   
-    
   
   
-  
     
     
       
@@ -1239,21 +1232,18 @@
     
       
       
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_2" >
         
           
-          
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_2" checked>
-        
-          
-          <label class="md-nav__link" for="__nav_4_2" id="__nav_4_2_label" tabindex="">
+          <label class="md-nav__link" for="__nav_4_2" id="__nav_4_2_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -1264,7 +1254,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_4_2">
             <span class="md-nav__icon md-icon"></span>
             How to
@@ -1275,19 +1265,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-      <a href="variables.html" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../how-to/compute-hub/variables.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1296,7 +1277,6 @@
   
 
       </a>
-      
     </li>
   
 
@@ -1309,7 +1289,7 @@
   
   
     <li class="md-nav__item">
-      <a href="workstation-info.html" class="md-nav__link">
+      <a href="../how-to/compute-hub/workstation-info.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1342,6 +1322,8 @@
       
   
   
+    
+  
   
   
     
@@ -1360,21 +1342,24 @@
     
     
       
+        
+        
+      
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
         
           
           
           <div class="md-nav__link md-nav__container">
-            <a href="../../tools/index.html" class="md-nav__link ">
+            <a href="index.html" class="md-nav__link ">
               
   
   <span class="md-ellipsis">
@@ -1385,13 +1370,13 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_5" id="__nav_5_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_5" id="__nav_5_label" tabindex="">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             Tools
@@ -1422,17 +1407,20 @@
       
       
         
+          
+          
+        
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_2" >
         
           
-          <label class="md-nav__link" for="__nav_5_2" id="__nav_5_2_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_5_2" id="__nav_5_2_label" tabindex="">
             
   
   <span class="md-ellipsis">
@@ -1457,7 +1445,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../tools/list-tools.html" class="md-nav__link">
+      <a href="../how-to/tools/list-tools.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1478,7 +1466,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../tools/run-tools.html" class="md-nav__link">
+      <a href="../how-to/tools/run-tools.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1499,7 +1487,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../tools/check-status.html" class="md-nav__link">
+      <a href="../how-to/tools/check-status.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1520,7 +1508,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../tools/wait-for-run.html" class="md-nav__link">
+      <a href="../how-to/tools/wait-for-run.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1546,8 +1534,10 @@
                 
   
   
+    
   
   
+  
     
     
       
@@ -1565,18 +1555,21 @@
     
       
       
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_3" >
         
           
-          <label class="md-nav__link" for="__nav_5_3" id="__nav_5_3_label" tabindex="0">
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_5_3" id="__nav_5_3_label" tabindex="">
             
   
   <span class="md-ellipsis">
@@ -1587,7 +1580,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_3_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_3_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_5_3">
             <span class="md-nav__icon md-icon"></span>
             Available tools
@@ -1601,7 +1594,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tools/vina.html" class="md-nav__link">
+      <a href="vina.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1622,7 +1615,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tools/pdbfixer.html" class="md-nav__link">
+      <a href="pdbfixer.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1643,7 +1636,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tools/ligand-prep-meeko.html" class="md-nav__link">
+      <a href="ligand-prep-meeko.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1664,7 +1657,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tools/pdb-to-pdbqt.html" class="md-nav__link">
+      <a href="pdb-to-pdbqt.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1682,10 +1675,30 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../tools/draco.html" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Draco
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="draco.html" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -1694,6 +1707,118 @@
   
 
       </a>
+      
+        
+
+  
+
+<nav class="md-nav md-nav--secondary" aria-label="Page contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Page contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#file-inputs" class="md-nav__link">
+    <span class="md-ellipsis">
+      File Inputs
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="File Inputs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-pdf-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. PDF File
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#outputs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Outputs
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Outputs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#output-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      Output Files
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#running-draco-on-deep-origin" class="md-nav__link">
+    <span class="md-ellipsis">
+      Running Draco on Deep Origin
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Running Draco on Deep Origin">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-create-a-database-to-store-input-and-output-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Create a database to store input and output files
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-start-a-tool-run-on-deep-origin" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Start a tool run on Deep Origin
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#example" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1725,17 +1850,20 @@
       
       
         
+          
+          
+        
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_4" >
         
           
-          <label class="md-nav__link" for="__nav_5_4" id="__nav_5_4_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_5_4" id="__nav_5_4_label" tabindex="">
             
   
   <span class="md-ellipsis">
@@ -1760,7 +1888,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tools/run.html" class="md-nav__link">
+      <a href="run.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1781,7 +1909,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tools/utils.html" class="md-nav__link">
+      <a href="utils.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1817,7 +1945,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../changelog.html" class="md-nav__link">
+      <a href="../changelog.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1872,6 +2000,104 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Page contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#file-inputs" class="md-nav__link">
+    <span class="md-ellipsis">
+      File Inputs
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="File Inputs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-pdf-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. PDF File
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#outputs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Outputs
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Outputs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#output-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      Output Files
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#running-draco-on-deep-origin" class="md-nav__link">
+    <span class="md-ellipsis">
+      Running Draco on Deep Origin
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Running Draco on Deep Origin">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-create-a-database-to-store-input-and-output-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Create a database to store input and output files
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-start-a-tool-run-on-deep-origin" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Start a tool run on Deep Origin
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#example" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -1888,23 +2114,53 @@
   
 
 
-<h1 id="install-variables-and-secrets">Install variables and secrets<a class="headerlink" href="#install-variables-and-secrets" title="Permanent link">&para;</a></h1>
-<p><a href="https://docs.deeporigin.io/docs/os/variables-secrets">Variables and secrets</a> captured in the Deep Orgin OS, either
-at the organization level or the account level, can be installed into
-workstations by running the following command:</p>
-<div class="language-bash highlight"><pre><span></span><code>deeporigin<span class="w"> </span>variables<span class="w"> </span>install
+<h1 id="draco-a-chemical-data-extractor">Draco: a Chemical Data Extractor<a class="headerlink" href="#draco-a-chemical-data-extractor" title="Permanent link">&para;</a></h1>
+<p>[Draco] is a tool for extracting chemical data (Molecules, Reactions, procedures, etc.) from documents. In its first version, Draco focused on extracting molecules (fragments and complete structures) from PDF documents.</p>
+<h2 id="file-inputs">File Inputs<a class="headerlink" href="#file-inputs" title="Permanent link">&para;</a></h2>
+<h3 id="1-pdf-file">1. PDF File<a class="headerlink" href="#1-pdf-file" title="Permanent link">&para;</a></h3>
+<p>Upload a PDF file containing chemical structures to extract to the Data Hub.</p>
+<h2 id="outputs">Outputs<a class="headerlink" href="#outputs" title="Permanent link">&para;</a></h2>
+<h3 id="output-files">Output Files<a class="headerlink" href="#output-files" title="Permanent link">&para;</a></h3>
+<p>Draco produces a .xlsx (Excel) file that contains all the extracted chemical structures for a given document. Each row includes the extracted image, the predicted image, the predicted SMILES, the confidence score, and the confidence score associated with each token in the SMILES.</p>
+<h2 id="running-draco-on-deep-origin">Running Draco on Deep Origin<a class="headerlink" href="#running-draco-on-deep-origin" title="Permanent link">&para;</a></h2>
+<p>To run Draco on Deep Origin, follow these steps:</p>
+<h3 id="1-create-a-database-to-store-input-and-output-files">1. Create a database to store input and output files<a class="headerlink" href="#1-create-a-database-to-store-input-and-output-files" title="Permanent link">&para;</a></h3>
+<p>Create a Column containing the PDF files and an output column, which will store the output files. The type of these columns is File.</p>
+<p><img alt="draco_database_example" src="https://github.com/user-attachments/assets/926a4f06-3c27-4b4b-9b47-79fc98e96723" /></p>
+<h3 id="2-start-a-tool-run-on-deep-origin">2. Start a tool run on Deep Origin<a class="headerlink" href="#2-start-a-tool-run-on-deep-origin" title="Permanent link">&para;</a></h3>
+<p>To start a tool run, use:</p>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">deeporigin.tools</span> <span class="kn">import</span> <span class="n">run</span>
+
+<span class="n">job_id</span> <span class="o">=</span> <span class="n">run</span><span class="o">.</span><span class="n">draco</span><span class="p">(</span>
+    <span class="n">database_id</span><span class="o">=</span><span class="s2">&quot;&lt;your-db-name&gt;&quot;</span><span class="p">,</span>
+    <span class="n">row_id</span><span class="o">=</span><span class="s2">&quot;&lt;row-name&gt;&quot;</span><span class="p">,</span>
+    <span class="n">input_file_column_name</span><span class="o">=</span><span class="s2">&quot;&lt;input-file-column-name&gt;&quot;</span>
+    <span class="n">output_column_name</span><span class="o">=</span><span class="s2">&quot;&lt;output-column-name&gt;&quot;</span>
+<span class="p">)</span>
 </code></pre></div>
-<p>This command will install your variables and secrets into your workstation and print a message similar to that below:</p>
-<div class="language-bash highlight"><pre><span></span><code>No<span class="w"> </span>variables<span class="w"> </span>were<span class="w"> </span>modified
-No<span class="w"> </span>variables<span class="w"> </span>were<span class="w"> </span>added
-No<span class="w"> </span>variables<span class="w"> </span>were<span class="w"> </span>deleted
-<span class="m">1</span><span class="w"> </span>variables<span class="w"> </span>were<span class="w"> </span>unmodified:
-<span class="w">  </span>EnvironmentVariable:<span class="w"> </span>foo
+<p><code>run.draco</code> returns the ID of the tool run, which can be used to monitor the status of the run and terminate it if needed. </p>
+<p><code>run.draco</code> prints a message that looks like:</p>
+<div class="language-bash highlight"><pre><span></span><code>🧬<span class="w"> </span>Job<span class="w"> </span>started<span class="w"> </span>with<span class="w"> </span>ID:<span class="w"> </span>9f7a3741-e392-45fb-a349-804b7fca07d7
 </code></pre></div>
-<div class="admonition info">
-<p class="admonition-title">Only on Deep Origin workstations</p>
-<p>This function of the CLI only works on Deep Origin workstations. This function will not work on your local computer.</p>
-</div>
+<p>To monitor the status of the tool run, use:</p>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">deeporigin.tools.utils</span> <span class="kn">import</span> <span class="n">query_run_status</span>
+<span class="n">query_run_status</span><span class="p">(</span><span class="s2">&quot;9f7a3741-e392-45fb-a349-804b7fca07d7&quot;</span><span class="p">)</span>
+</code></pre></div>
+<p>To wait for the tool run to finish, use:</p>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">deeporigin.tools.utils</span> <span class="kn">import</span> <span class="n">wait_for_job</span>
+<span class="n">wait_for_job</span><span class="p">(</span><span class="s2">&quot;9f7a3741-e392-45fb-a349-804b7fca07d7&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="example">Example<a class="headerlink" href="#example" title="Permanent link">&para;</a></h2>
+<p>Using the database shown above in section "1. Create a database to store input and output files", the code to extract molecules from the uploaded document (patent_test.pdf) is:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">deeporigin.tools</span> <span class="kn">import</span> <span class="n">run</span>
+
+<span class="n">job_id</span> <span class="o">=</span> <span class="n">run</span><span class="o">.</span><span class="n">draco</span><span class="p">(</span>
+    <span class="n">database_id</span><span class="o">=</span><span class="s2">&quot;draco_use_case&quot;</span><span class="p">,</span>
+    <span class="n">row_id</span><span class="o">=</span><span class="s2">&quot;draco-use-case-1&quot;</span><span class="p">,</span>
+    <span class="n">input_file_column_name</span><span class="o">=</span><span class="s2">&quot;Document&quot;</span>
+    <span class="n">output_column_name</span><span class="o">=</span><span class="s2">&quot;Result&quot;</span>
+<span class="p">)</span>
+</code></pre></div></p>
 
 
 
@@ -1942,7 +2198,7 @@ No<span class="w"> </span>variables<span class="w"> </span>were<span class="w"> 
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../../compute-hub/index.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Compute hub">
+          <a href="pdb-to-pdbqt.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: PDB to PDBQT">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -1952,20 +2208,20 @@ No<span class="w"> </span>variables<span class="w"> </span>were<span class="w"> 
                 Previous
               </span>
               <div class="md-ellipsis">
-                Compute hub
+                PDB to PDBQT
               </div>
             </div>
           </a>
         
         
           
-          <a href="workstation-info.html" class="md-footer__link md-footer__link--next" aria-label="Next: Get info about your workstation">
+          <a href="run.html" class="md-footer__link md-footer__link--next" aria-label="Next: Running tools">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Get info about your workstation
+                Running tools
               </div>
             </div>
             <div class="md-footer__button md-icon">
@@ -2001,10 +2257,10 @@ No<span class="w"> </span>variables<span class="w"> </span>were<span class="w"> 
       <div class="md-progress" data-md-component="progress" role="progressbar"></div>
     
     
-    <script id="__config" type="application/json">{"base": "../..", "features": ["announce.dismiss", "content.code.annotate", "content.code.copy", "content.tabs.link", "content.tooltips", "navigation.footer", "navigation.indexes", "navigation.instant", "navigation.instant.prefetch", "navigation.instant.preview", "navigation.instant.progress", "navigation.sections", "navigation.path", "navigation.tabs", "navigation.top", "navigation.tracking", "search.suggest", "toc.follow"], "search": "../../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": ["announce.dismiss", "content.code.annotate", "content.code.copy", "content.tabs.link", "content.tooltips", "navigation.footer", "navigation.indexes", "navigation.instant", "navigation.instant.prefetch", "navigation.instant.preview", "navigation.instant.progress", "navigation.sections", "navigation.path", "navigation.tabs", "navigation.top", "navigation.tracking", "search.suggest", "toc.follow"], "search": "../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.83f73b43.min.js"></script>
+      <script src="../assets/javascripts/bundle.83f73b43.min.js"></script>
       
     
   </body>
