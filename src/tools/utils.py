@@ -1,6 +1,8 @@
 """This module contains utility functions used by tool execution. In general, you will not need to use many of these functions directly."""
 
 import functools
+import json
+import os
 import time
 from typing import Optional
 
@@ -8,6 +10,7 @@ from beartype import beartype
 from deeporigin.config import get_value
 from deeporigin.platform import clusters, tools
 from deeporigin.platform.tools import execute_tool
+from deeporigin.utils.core import _ensure_do_folder
 
 
 @beartype
@@ -25,6 +28,18 @@ def query_run_status(job_id: str) -> str:
     data = tools.get_tool_execution(
         org_friendly_id=get_value()["organization_id"], resource_id=job_id
     )
+
+    # Define the cache directory and file path
+    cache_dir = _ensure_do_folder() / "jobs"
+    if not cache_dir.exists():
+        cache_dir.mkdir(parents=True)
+    cache_file = os.path.join(cache_dir, f"{job_id}.json")
+
+    # Ensure the cache directory exists
+    os.makedirs(cache_dir, exist_ok=True)
+
+    with open(cache_file, "w") as file:
+        json.dump(data, file, indent=4)
 
     return data.attributes.status
 
