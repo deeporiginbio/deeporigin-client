@@ -77,5 +77,5 @@ job_id = run.draco(
 ## Notes
 - Only one input file per row is allowed
 - Restarting a job for a given row that has already generated an output file will replace the output file with the latest generated one
-- Depending on the number of molecules per page, a page can be processed between 3 (0-3 molecules) and 30 seconds (30-40) molecules)
+- Depending on the number of molecules per page, a page can be processed between 3 (0-3 molecules) and 30 seconds (30-40 molecules)
 
