@@ -4,13 +4,20 @@ import functools
 import json
 import os
 import time
+from concurrent.futures import ThreadPoolExecutor
 from typing import Optional
 
 from beartype import beartype
+from box import Box
 from deeporigin.config import get_value
 from deeporigin.platform import clusters, tools
 from deeporigin.platform.tools import execute_tool
 from deeporigin.utils.core import _ensure_do_folder
+
+JOBS_CACHE_DIR = _ensure_do_folder() / "jobs"
+
+TERMINAL_STATES = {"Succeeded", "Failed"}
+NON_TERMINAL_STATES = {"Created", "Queued", "Running"}
 
 
 @beartype
@@ -30,13 +37,13 @@ def query_run_status(job_id: str) -> str:
     )
 
     # Define the cache directory and file path
-    cache_dir = _ensure_do_folder() / "jobs"
-    if not cache_dir.exists():
-        cache_dir.mkdir(parents=True)
-    cache_file = os.path.join(cache_dir, f"{job_id}.json")
+
+    if not JOBS_CACHE_DIR.exists():
+        JOBS_CACHE_DIR.mkdir(parents=True)
+    cache_file = os.path.join(JOBS_CACHE_DIR, f"{job_id}.json")
 
     # Ensure the cache directory exists
-    os.makedirs(cache_dir, exist_ok=True)
+    os.makedirs(JOBS_CACHE_DIR, exist_ok=True)
 
     with open(cache_file, "w") as file:
         json.dump(data, file, indent=4)
@@ -70,6 +77,33 @@ def wait_for_job(
         print(status, end="", flush=True)
         time.sleep(poll_interval)
         bs = "".join(["\b" for _ in range(txt_length)])
+
+
+def wait_for_jobs(
+    refresh_time: int = 3,
+    hide_succeeded: bool = True,
+):
+    df = get_job_dataframe(update=True)
+
+    if hide_succeeded:
+        df = df[df["Status"] != "Succeeded"]
+
+    from IPython.display import clear_output, display
+
+    while len(set(df["Status"]).difference(TERMINAL_STATES)) != 0:
+        df = get_job_dataframe(update=True)
+
+        if hide_succeeded:
+            df = df[df["Status"] != "Succeeded"]
+
+        display(df)
+        time.sleep(refresh_time)
+
+        clear_output(wait=True)
+
+    print("✔️ All jobs completed")
+    df = get_job_dataframe()
+    return df
 
 
 @beartype
@@ -199,3 +233,71 @@ def _column_name_to_column_id(data: dict, cols: list) -> dict:
                 for item in value
             ]
     return data
+
+
+def get_job_dataframe(update: bool = False):
+    """returns a dataframe of all jobs and statuses, reading from local cache
+
+    Args:
+        update (bool, optional): Whether to check for updates on non-terminal jobs. Defaults to False.
+
+    Note that this function is deliberately not annotated with an output type because pandas is imported internally to this funciton.
+
+    Returns:
+        pd.DataFrame: A dataframe containing job information"""
+    jobs = read_jobs()
+
+    if update:
+        update_all_jobs(jobs)
+    jobs = read_jobs()
+
+    import pandas as pd
+
+    df = pd.DataFrame(
+        {
+            "Job Id": [job.id for job in jobs],
+            "Execution ID": [job.attributes.executionId for job in jobs],
+            "Status": [job.attributes.status for job in jobs],
+            "Tool": [job.attributes.toolId for job in jobs],
+        }
+    )
+    return df
+
+
+def update_all_jobs(jobs: list) -> None:
+    def should_update(job):
+        return job.attributes.status in NON_TERMINAL_STATES
+
+    with ThreadPoolExecutor() as executor:
+        futures = [
+            executor.submit(query_run_status, job.id)
+            for job in jobs
+            if should_update(job)
+        ]
+
+        for future in futures:
+            try:
+                future.result()
+            except Exception as e:
+                print(f"An error occurred: {e}")
+
+
+@beartype
+def read_jobs() -> list:
+    # Initialize an empty list to store job data
+    jobs = []
+
+    if os.path.exists(JOBS_CACHE_DIR):
+        for file_name in os.listdir(JOBS_CACHE_DIR):
+            if file_name.endswith(".json"):
+                file_path = os.path.join(JOBS_CACHE_DIR, file_name)
+                try:
+                    with open(file_path, "r") as f:
+                        job_data = json.load(f)
+                        jobs.append(Box(job_data))
+                except Exception as e:
+                    print(f"Failed to load {file_path}: {e}")
+    else:
+        print(f"Directory {JOBS_CACHE_DIR} does not exist.")
+
+    return jobs
