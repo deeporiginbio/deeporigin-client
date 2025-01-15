@@ -66,6 +66,10 @@ To run this tool on Deep Origin, follow these steps:
 
 Navigate to DataHub on Deep Origin, and create a database for this tool. Add columns for input and output files. Create a new row and upload your input files to the input column. 
 
+This image shows an example database:
+
+![](../images/tools/receptor-prep.png)
+
 ### 2. Start a tool run on Deep Origin
 
 For this tool run, we will use the following parameters:
