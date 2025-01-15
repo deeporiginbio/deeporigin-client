@@ -75,7 +75,6 @@ version = {file = ["src/VERSION"]}
 
 [project.scripts]
 deeporigin = "deeporigin.cli:main"
-do-tool-dashboard = "deeporigin.cli.dashboard:run"
 
 [build-system]
 requires = [
