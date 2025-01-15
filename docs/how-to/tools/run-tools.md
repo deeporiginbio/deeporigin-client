@@ -1,5 +1,6 @@
 This document describes how to run tools on the Deep Origin platform. 
 
+
 ## Running packaged tools
 
 In general, tools are best run by calling functions in the `tools.run` module. For example, to run [Autodock Vina](../../tools/vina.md), use:
@@ -10,6 +11,10 @@ run.autodock_vina(...)
 ```
 
 ## Running any tool
+
+
+!!! warning "Tools are best run using wrapper run functions"
+    While it is possible to run any tool using generic functions, they are best run using the wrapper functions in the `deeporigin.tools.run` module.
 
 Any tool in the Deep Origin tool registry can be run using a generic tool run function. 
 
