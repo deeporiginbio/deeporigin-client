@@ -79,10 +79,23 @@ def wait_for_job(
         bs = "".join(["\b" for _ in range(txt_length)])
 
 
+@beartype
 def wait_for_jobs(
     refresh_time: int = 3,
     hide_succeeded: bool = True,
 ):
+    """Wait for all jobs started via this client to complete
+
+    Args:
+        refresh_time (int, optional): number of seconds to wait between polling. Defaults to 3.
+        hide_succeeded (bool, optional): whether to hide jobs that have already completed. Defaults to True.
+
+    Note that this function signature is explicitly not annotated with a return type to avoid importing pandas outside this function
+
+    Returns:
+        pd.DataFrame: dataframe of all jobs.
+
+    """
     df = get_job_dataframe(update=True)
 
     if hide_succeeded:
@@ -248,7 +261,7 @@ def get_job_dataframe(update: bool = False):
     jobs = read_jobs()
 
     if update:
-        update_all_jobs(jobs)
+        _update_all_jobs(jobs)
     jobs = read_jobs()
 
     import pandas as pd
@@ -264,7 +277,13 @@ def get_job_dataframe(update: bool = False):
     return df
 
 
-def update_all_jobs(jobs: list) -> None:
+@beartype
+def _update_all_jobs(jobs: list) -> None:
+    """Update all job response files with the latest status, in parallel.
+
+    This is an internal function. Do not use.
+    """
+
     def should_update(job):
         return job.attributes.status in NON_TERMINAL_STATES
 
@@ -284,7 +303,8 @@ def update_all_jobs(jobs: list) -> None:
 
 @beartype
 def read_jobs() -> list:
-    # Initialize an empty list to store job data
+    """read jobs from files in the jobs cache directory"""
+
     jobs = []
 
     if os.path.exists(JOBS_CACHE_DIR):
