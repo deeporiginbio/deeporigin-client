@@ -70,6 +70,12 @@ To run AutoDock Vina on Deep Origin, follow these steps:
 
 ### 1. Create a database to store input and output files
 
+Navigate to DataHub on Deep Origin, and create a database for this tool. Add columns for input and output files. Create a new row and upload your input files to the input column. 
+
+This image shows an example database:
+
+![](../images/tools/vina.png)
+
 ### 2. Start a tool run on Deep Origin
 
 For this tool run, we will use the following parameters:
@@ -115,19 +121,6 @@ job_id = run.autodock_vina(
 🧬 Job started with ID: 9f7a3741-e392-45fb-a349-804b7fca07d7
 ```
 
-To monitor the status of the tool run, use:
-
-```python
-from deeporigin.tools.utils import query_run_status
-query_run_status("9f7a3741-e392-45fb-a349-804b7fca07d7")
-```
-
-To wait for the tool run to finish, use:
-
-```python
-from deeporigin.tools.utils import wait_for_job
-wait_for_job("9f7a3741-e392-45fb-a349-804b7fca07d7")
-```
 
 
 ## Outputs
