@@ -3,7 +3,7 @@ organization_id: null
 bench_id: null
 api_endpoint: https://os.deeporigin.io
 nucleus_api_route: data-hub/api/
-auth_domain: https://login.deeporigin.io
+auth_domain: https://formicbio.us.auth0.com 
 auth_device_code_endpoint: oauth/device/code/
 auth_token_endpoint: oauth/token/
 auth_audience: https://os.deeporigin.io/api
