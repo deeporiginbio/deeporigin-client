@@ -237,7 +237,7 @@ def autodock_vina(
             "columnId": output_column_name,
             "databaseId": database_id,
         },
-        scores={
+        scores_file={
             "rowId": row_id,
             "columnId": scores_column_name,
             "databaseId": database_id,
