@@ -50,7 +50,7 @@ install:
 	@python3 -m venv venv
 	@source $(CURDIR)/venv/bin/activate && \
 		pip install --upgrade pip && \
-	    pip install --no-cache-dir -e .[lint,test,dev,docs,plots] && \
+	    pip install --no-cache-dir -e .[lint,test,dev,docs,plots,tools] && \
 	    deactivate
 	@-mkdir -p ~/.deeporigin
 	@test -f ~/.deeporigin/deeporigin || ln -s $(CURDIR)/venv/bin/deeporigin ~/.deeporigin/deeporigin
