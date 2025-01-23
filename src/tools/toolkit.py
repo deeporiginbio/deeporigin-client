@@ -177,7 +177,10 @@ def run_ligand_prep_on_db(
     col_mapper = {col["name"]: col["id"] for col in database.cols}
 
     for row in rows:
-        columns_with_files = [field["columnId"] for field in row.fields]
+        if "fields" in row.keys():
+            columns_with_files = [field["columnId"] for field in row.fields]
+        else:
+            columns_with_files = []
 
         if (
             col_mapper["input-ligand"] in columns_with_files
