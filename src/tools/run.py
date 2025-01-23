@@ -180,6 +180,7 @@ def autodock_vina(
     output_column_name: str,
     receptor_column_name: str,
     ligand_column_name: str,
+    scores_column_name: str,
 ) -> str:
     """starts an run of AutoDock Vina on the Deep Origin platform.
 
@@ -191,6 +192,7 @@ def autodock_vina(
         output_column_name (str): name of the column to write output file to
         receptor_column_name (str): name of the column to source the receptor file from
         ligand_column_name (str): name of the column to source the ligand file from
+        scores_column_name (str): name of the column to write scores to
 
     Returns:
         str: ID of the job. This ID can be used to query status.
@@ -233,6 +235,11 @@ def autodock_vina(
         output_file={
             "rowId": row_id,
             "columnId": output_column_name,
+            "databaseId": database_id,
+        },
+        scores_file={
+            "rowId": row_id,
+            "columnId": scores_column_name,
             "databaseId": database_id,
         },
     )

@@ -54,7 +54,6 @@ test = [
 dev = [
     "ipykernel",
     "jupyter-black",
-    "icecream",
 ]
 docs = [
     "mkdocs", 
@@ -65,6 +64,7 @@ docs = [
     "black"
 ]
 plots = ["bokeh"]
+tools = ["rdkit"]
 
 [tool.setuptools]
 package-dir = {"deeporigin" = "src"}

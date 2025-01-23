@@ -24,7 +24,7 @@ else
 endif 
 	@source $(CURDIR)/venv/bin/activate && \
 	interrogate -c pyproject.toml -v . -f 100 && \
-	python3 -m coverage run --source="src" -m pytest -x -n $(n_workers) --failed-first -k $(chosen_tests) --client $(client) --responses $(responses) && \
+	python3 -m coverage run --source="src" -m pytest -x -n $(n_workers) --failed-first -k $(chosen_tests) --client $(client) --responses $(responses) --dist loadfile && \
 	python3 -m coverage html && \
 	deactivate
 
@@ -50,7 +50,7 @@ install:
 	@python3 -m venv venv
 	@source $(CURDIR)/venv/bin/activate && \
 		pip install --upgrade pip && \
-	    pip install --no-cache-dir -e .[lint,test,dev,docs,plots] && \
+	    pip install --no-cache-dir -e .[lint,test,dev,docs,plots,tools] && \
 	    deactivate
 	@-mkdir -p ~/.deeporigin
 	@test -f ~/.deeporigin/deeporigin || ln -s $(CURDIR)/venv/bin/deeporigin ~/.deeporigin/deeporigin
