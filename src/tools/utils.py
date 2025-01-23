@@ -103,16 +103,20 @@ def wait_for_jobs(
 
     from IPython.display import clear_output, display
 
-    while len(set(df["Status"]).difference(TERMINAL_STATES)) != 0:
-        df = get_job_dataframe(update=True)
+    try:
+        while len(set(df["Status"]).difference(TERMINAL_STATES)) != 0:
+            df = get_job_dataframe(update=True)
 
-        if hide_succeeded:
-            df = df[df["Status"] != "Succeeded"]
+            if hide_succeeded:
+                df = df[df["Status"] != "Succeeded"]
 
-        display(df)
-        time.sleep(refresh_time)
+            display(df)
+            time.sleep(refresh_time)
 
-        clear_output(wait=True)
+            clear_output(wait=True)
+
+    except KeyboardInterrupt:
+        return
 
     print("✔️ All jobs completed")
     df = get_job_dataframe()
