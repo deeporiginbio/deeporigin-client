@@ -1,9 +1,7 @@
 from deeporigin.config import get_value
 
-from tests.utils import (  # noqa: F401
-    _run_cli_command,
-    config,
-)
+from tests.utils import _run_cli_command
+from tests.utils import minimal_config as config  # noqa: F401
 
 
 def test_set_config(config):  # noqa: F811
