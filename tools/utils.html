@@ -1825,6 +1825,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#src.tools.utils.get_job_dataframe" class="md-nav__link">
+    <span class="md-ellipsis">
+      get_job_dataframe
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#src.tools.utils.make_payload" class="md-nav__link">
     <span class="md-ellipsis">
       make_payload
@@ -1843,6 +1852,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#src.tools.utils.read_jobs" class="md-nav__link">
+    <span class="md-ellipsis">
+      read_jobs
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#src.tools.utils.run_tool" class="md-nav__link">
     <span class="md-ellipsis">
       run_tool
@@ -1855,6 +1873,15 @@
   <a href="#src.tools.utils.wait_for_job" class="md-nav__link">
     <span class="md-ellipsis">
       wait_for_job
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#src.tools.utils.wait_for_jobs" class="md-nav__link">
+    <span class="md-ellipsis">
+      wait_for_jobs
     </span>
   </a>
   
@@ -1953,6 +1980,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#src.tools.utils.get_job_dataframe" class="md-nav__link">
+    <span class="md-ellipsis">
+      get_job_dataframe
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#src.tools.utils.make_payload" class="md-nav__link">
     <span class="md-ellipsis">
       make_payload
@@ -1971,6 +2007,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#src.tools.utils.read_jobs" class="md-nav__link">
+    <span class="md-ellipsis">
+      read_jobs
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#src.tools.utils.run_tool" class="md-nav__link">
     <span class="md-ellipsis">
       run_tool
@@ -1983,6 +2028,15 @@
   <a href="#src.tools.utils.wait_for_job" class="md-nav__link">
     <span class="md-ellipsis">
       wait_for_job
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#src.tools.utils.wait_for_jobs" class="md-nav__link">
+    <span class="md-ellipsis">
+      wait_for_jobs
     </span>
   </a>
   
@@ -2038,6 +2092,79 @@
 
 
 
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="src.tools.utils.get_job_dataframe" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>            <span class="doc doc-object-name doc-function-name">get_job_dataframe</span>
+
+
+<a href="#src.tools.utils.get_job_dataframe" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">get_job_dataframe</span><span class="p">(</span><span class="n">update</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>returns a dataframe of all jobs and statuses, reading from local cache</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>update</code>
+            </td>
+            <td>
+                  <code>bool</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Whether to check for updates on non-terminal jobs. Defaults to False.</p>
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+        <p>Note that this function is deliberately not annotated with an output type because pandas is imported internally to this funciton.</p>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>pd.DataFrame: A dataframe containing job information</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+    </div>
+
+</div>
 
 <div class="doc doc-object doc-function">
 
@@ -2259,6 +2386,25 @@
 <div class="doc doc-object doc-function">
 
 
+<h2 id="src.tools.utils.read_jobs" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>            <span class="doc doc-object-name doc-function-name">read_jobs</span>
+
+
+<a href="#src.tools.utils.read_jobs" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">read_jobs</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">list</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>read jobs from files in the jobs cache directory</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
 <h2 id="src.tools.utils.run_tool" class="doc doc-heading">
 <code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>            <span class="doc doc-object-name doc-function-name">run_tool</span>
 
@@ -2366,6 +2512,97 @@
             </td>
             <td>
                   <code>4</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="src.tools.utils.wait_for_jobs" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>            <span class="doc doc-object-name doc-function-name">wait_for_jobs</span>
+
+
+<a href="#src.tools.utils.wait_for_jobs" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">wait_for_jobs</span><span class="p">(</span>
+    <span class="n">refresh_time</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="n">hide_succeeded</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Wait for all jobs started via this client to complete</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>refresh_time</code>
+            </td>
+            <td>
+                  <code>int</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>number of seconds to wait between polling. Defaults to 3.</p>
+              </div>
+            </td>
+            <td>
+                  <code>3</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>hide_succeeded</code>
+            </td>
+            <td>
+                  <code>bool</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>whether to hide jobs that have already completed. Defaults to True.</p>
+              </div>
+            </td>
+            <td>
+                  <code>True</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+        <p>Note that this function signature is explicitly not annotated with a return type to avoid importing pandas outside this function</p>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>pd.DataFrame: dataframe of all jobs.</p>
+              </div>
             </td>
           </tr>
       </tbody>

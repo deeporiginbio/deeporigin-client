@@ -2073,7 +2073,8 @@
     <span class="n">docking</span><span class="p">:</span> <span class="n">dict</span><span class="p">,</span>
     <span class="n">output_column_name</span><span class="p">:</span> <span class="n">str</span><span class="p">,</span>
     <span class="n">receptor_column_name</span><span class="p">:</span> <span class="n">str</span><span class="p">,</span>
-    <span class="n">ligand_column_name</span><span class="p">:</span> <span class="n">str</span>
+    <span class="n">ligand_column_name</span><span class="p">:</span> <span class="n">str</span><span class="p">,</span>
+    <span class="n">scores_column_name</span><span class="p">:</span> <span class="n">str</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">str</span>
 </code></pre></div>
 
@@ -2199,6 +2200,22 @@
             <td>
               <div class="doc-md-description">
                 <p>name of the column to source the ligand file from</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>scores_column_name</code>
+            </td>
+            <td>
+                  <code>str</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>name of the column to write scores to</p>
               </div>
             </td>
             <td>
