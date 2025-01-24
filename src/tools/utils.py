@@ -5,7 +5,7 @@ import json
 import os
 import time
 from concurrent.futures import ThreadPoolExecutor
-from typing import Optional
+from typing import Any, Optional
 
 from beartype import beartype
 from box import Box
@@ -83,7 +83,7 @@ def wait_for_job(
 def wait_for_jobs(
     refresh_time: int = 3,
     hide_succeeded: bool = True,
-):
+) -> Any:
     """Wait for all jobs started via this client to complete
 
     Args:
@@ -252,7 +252,7 @@ def _column_name_to_column_id(data: dict, cols: list) -> dict:
     return data
 
 
-def get_job_dataframe(update: bool = False):
+def get_job_dataframe(update: bool = False) -> Any:
     """returns a dataframe of all jobs and statuses, reading from local cache
 
     Args:
