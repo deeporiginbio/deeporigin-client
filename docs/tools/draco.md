@@ -1,14 +1,33 @@
 # Draco: a Chemical Data Extractor
 
-[Draco] is a tool for extracting chemical data (Molecules, Reactions, procedures, etc.) from documents. In its first version, Draco focused on extracting molecules (fragments and complete structures) from PDF documents.
+Draco is a tool for extracting chemical data (Molecules, Reactions, Procedures, etc.) from documents. This version of Draco (1.0 Closed Alpha) includes the following capabilities:
+- Process a single PDF
+- Have no page or size limit for the PDF document
+- Extract images of molecular fragments as SMILES
+- Extract images of full molecules as SMILES
+- Receive confidence score for each predicted SMILES
+- Receive structural tokens for each predicted SMILES
 
-## File Inputs
 
-### 1. PDF File
+## Draco Input Requirements
+Draco will only accept files in PDF format. There is no file size restriction or page limit. The files have to be uploaded to the Data Hub (see below) for the script to be executed. 
 
-Upload a PDF file containing chemical structures to extract to the Data Hub.
+Draco will recognize and analyze only images containing chemical structures - both fragments and full molecules.
 
-## Outputs
+
+## Draco Output Capabilities
+
+![draco_ouput_example](https://s3.us-west-2.amazonaws.com/deeporigin.public/client_doc/draco_image2.png)
+Draco produces a file in .xlsx (Excel) format. The file will contain predicted SMILES for each image of chemical structure that PDF document contains.
+
+The report will contain one molecule per row. The following information will be provided with each molecule:
+1. **Extracted Image** - an original image as it was reported in the PDF document
+2. **Predicted Structure** - 2D rendering of the extracted SMILES string
+3. **Confidence** - global confidence score for the entire molecule
+4. **Confidence details** - local confidence score for each recognized structural element
+5. **SMILES** - extracted SMILES string
+6. **Source** - title of the uploaded PDF document
+7. **Page** - page number where the extracted chemical structure was found
 
 ### Output Files
 
@@ -17,14 +36,15 @@ Draco produces a .xlsx (Excel) file that contains all the extracted chemical str
 ## Running Draco on Deep Origin
 
 To run Draco on Deep Origin, follow these steps:
+### 1. Create an account with Deep Origin
+See details about how to a Deep Origin account [here](https://docs.deeporigin.io/docs/users)
+### 2. Create a database to store input and output files
 
-### 1. Create a database to store input and output files
-
-Create a Column containing the PDF files and an output column, which will store the output files. The type of these columns is File.
+Create a Column containing the PDF Document and an output column Result, which will store the output files. The type of these columns is “File.”
 
 ![draco_database_example](https://github.com/user-attachments/assets/926a4f06-3c27-4b4b-9b47-79fc98e96723)
 
-### 2. Start a tool run on Deep Origin
+### 3. Start a tool run on Deep Origin
 
 To start a tool run, use:
 
@@ -62,7 +82,7 @@ wait_for_job("9f7a3741-e392-45fb-a349-804b7fca07d7")
 ```
 
 ## Example
-Using the database shown above in section "1. Create a database to store input and output files", the code to extract molecules from the uploaded document (patent_test.pdf) is:
+Using the database shown above in section "2. Create a database to store input and output files", the code to extract molecules from the uploaded document (patent_test.pdf) is:
 ```python
 from deeporigin.tools import run
 
