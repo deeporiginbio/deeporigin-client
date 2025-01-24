@@ -1726,37 +1726,22 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#file-inputs" class="md-nav__link">
+  <a href="#draco-input-requirements" class="md-nav__link">
     <span class="md-ellipsis">
-      File Inputs
+      Draco Input Requirements
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="File Inputs">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#1-pdf-file" class="md-nav__link">
-    <span class="md-ellipsis">
-      1. PDF File
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#outputs" class="md-nav__link">
+  <a href="#draco-output-capabilities" class="md-nav__link">
     <span class="md-ellipsis">
-      Outputs
+      Draco Output Capabilities
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Outputs">
+    <nav class="md-nav" aria-label="Draco Output Capabilities">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -1784,18 +1769,27 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#1-create-a-database-to-store-input-and-output-files" class="md-nav__link">
+  <a href="#1-create-an-account-with-deep-origin" class="md-nav__link">
     <span class="md-ellipsis">
-      1. Create a database to store input and output files
+      1. Create an account with Deep Origin
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#2-start-a-tool-run-on-deep-origin" class="md-nav__link">
+  <a href="#2-create-a-database-to-store-input-and-output-files" class="md-nav__link">
     <span class="md-ellipsis">
-      2. Start a tool run on Deep Origin
+      2. Create a database to store input and output files
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-start-a-tool-run-on-deep-origin" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Start a tool run on Deep Origin
     </span>
   </a>
   
@@ -2007,37 +2001,22 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#file-inputs" class="md-nav__link">
+  <a href="#draco-input-requirements" class="md-nav__link">
     <span class="md-ellipsis">
-      File Inputs
+      Draco Input Requirements
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="File Inputs">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#1-pdf-file" class="md-nav__link">
-    <span class="md-ellipsis">
-      1. PDF File
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#outputs" class="md-nav__link">
+  <a href="#draco-output-capabilities" class="md-nav__link">
     <span class="md-ellipsis">
-      Outputs
+      Draco Output Capabilities
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Outputs">
+    <nav class="md-nav" aria-label="Draco Output Capabilities">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -2065,18 +2044,27 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#1-create-a-database-to-store-input-and-output-files" class="md-nav__link">
+  <a href="#1-create-an-account-with-deep-origin" class="md-nav__link">
     <span class="md-ellipsis">
-      1. Create a database to store input and output files
+      1. Create an account with Deep Origin
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#2-start-a-tool-run-on-deep-origin" class="md-nav__link">
+  <a href="#2-create-a-database-to-store-input-and-output-files" class="md-nav__link">
     <span class="md-ellipsis">
-      2. Start a tool run on Deep Origin
+      2. Create a database to store input and output files
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-start-a-tool-run-on-deep-origin" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Start a tool run on Deep Origin
     </span>
   </a>
   
@@ -2115,19 +2103,37 @@
 
 
 <h1 id="draco-a-chemical-data-extractor">Draco: a Chemical Data Extractor<a class="headerlink" href="#draco-a-chemical-data-extractor" title="Permanent link">&para;</a></h1>
-<p>[Draco] is a tool for extracting chemical data (Molecules, Reactions, procedures, etc.) from documents. In its first version, Draco focused on extracting molecules (fragments and complete structures) from PDF documents.</p>
-<h2 id="file-inputs">File Inputs<a class="headerlink" href="#file-inputs" title="Permanent link">&para;</a></h2>
-<h3 id="1-pdf-file">1. PDF File<a class="headerlink" href="#1-pdf-file" title="Permanent link">&para;</a></h3>
-<p>Upload a PDF file containing chemical structures to extract to the Data Hub.</p>
-<h2 id="outputs">Outputs<a class="headerlink" href="#outputs" title="Permanent link">&para;</a></h2>
+<p>Draco is a tool for extracting chemical data (Molecules, Reactions, Procedures, etc.) from documents. This version of Draco (1.0 Closed Alpha) includes the following capabilities:
+- Process a single PDF
+- Have no page or size limit for the PDF document
+- Extract images of molecular fragments as SMILES
+- Extract images of full molecules as SMILES
+- Receive confidence score for each predicted SMILES
+- Receive structural tokens for each predicted SMILES</p>
+<h2 id="draco-input-requirements">Draco Input Requirements<a class="headerlink" href="#draco-input-requirements" title="Permanent link">&para;</a></h2>
+<p>Draco will only accept files in PDF format. There is no file size restriction or page limit. The files have to be uploaded to the Data Hub (see below) for the script to be executed. </p>
+<p>Draco will recognize and analyze only images containing chemical structures - both fragments and full molecules.</p>
+<h2 id="draco-output-capabilities">Draco Output Capabilities<a class="headerlink" href="#draco-output-capabilities" title="Permanent link">&para;</a></h2>
+<p><img alt="draco_ouput_example" src="https://s3.us-west-2.amazonaws.com/deeporigin.public/client_doc/draco_image2.png" />
+Draco produces a file in .xlsx (Excel) format. The file will contain predicted SMILES for each image of chemical structure that PDF document contains.</p>
+<p>The report will contain one molecule per row. The following information will be provided with each molecule:
+1. <strong>Extracted Image</strong> - an original image as it was reported in the PDF document
+2. <strong>Predicted Structure</strong> - 2D rendering of the extracted SMILES string
+3. <strong>Confidence</strong> - global confidence score for the entire molecule
+4. <strong>Confidence details</strong> - local confidence score for each recognized structural element
+5. <strong>SMILES</strong> - extracted SMILES string
+6. <strong>Source</strong> - title of the uploaded PDF document
+7. <strong>Page</strong> - page number where the extracted chemical structure was found</p>
 <h3 id="output-files">Output Files<a class="headerlink" href="#output-files" title="Permanent link">&para;</a></h3>
 <p>Draco produces a .xlsx (Excel) file that contains all the extracted chemical structures for a given document. Each row includes the extracted image, the predicted image, the predicted SMILES, the confidence score, and the confidence score associated with each token in the SMILES.</p>
 <h2 id="running-draco-on-deep-origin">Running Draco on Deep Origin<a class="headerlink" href="#running-draco-on-deep-origin" title="Permanent link">&para;</a></h2>
 <p>To run Draco on Deep Origin, follow these steps:</p>
-<h3 id="1-create-a-database-to-store-input-and-output-files">1. Create a database to store input and output files<a class="headerlink" href="#1-create-a-database-to-store-input-and-output-files" title="Permanent link">&para;</a></h3>
-<p>Create a Column containing the PDF files and an output column, which will store the output files. The type of these columns is File.</p>
+<h3 id="1-create-an-account-with-deep-origin">1. Create an account with Deep Origin<a class="headerlink" href="#1-create-an-account-with-deep-origin" title="Permanent link">&para;</a></h3>
+<p>See details about how to a Deep Origin account <a href="https://docs.deeporigin.io/docs/users">here</a></p>
+<h3 id="2-create-a-database-to-store-input-and-output-files">2. Create a database to store input and output files<a class="headerlink" href="#2-create-a-database-to-store-input-and-output-files" title="Permanent link">&para;</a></h3>
+<p>Create a Column containing the PDF Document and an output column Result, which will store the output files. The type of these columns is “File.”</p>
 <p><img alt="draco_database_example" src="https://github.com/user-attachments/assets/926a4f06-3c27-4b4b-9b47-79fc98e96723" /></p>
-<h3 id="2-start-a-tool-run-on-deep-origin">2. Start a tool run on Deep Origin<a class="headerlink" href="#2-start-a-tool-run-on-deep-origin" title="Permanent link">&para;</a></h3>
+<h3 id="3-start-a-tool-run-on-deep-origin">3. Start a tool run on Deep Origin<a class="headerlink" href="#3-start-a-tool-run-on-deep-origin" title="Permanent link">&para;</a></h3>
 <p>To start a tool run, use:</p>
 <div class="language-python highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">deeporigin.tools</span> <span class="kn">import</span> <span class="n">run</span>
 
@@ -2151,7 +2157,7 @@
 <span class="n">wait_for_job</span><span class="p">(</span><span class="s2">&quot;9f7a3741-e392-45fb-a349-804b7fca07d7&quot;</span><span class="p">)</span>
 </code></pre></div>
 <h2 id="example">Example<a class="headerlink" href="#example" title="Permanent link">&para;</a></h2>
-<p>Using the database shown above in section "1. Create a database to store input and output files", the code to extract molecules from the uploaded document (patent_test.pdf) is:
+<p>Using the database shown above in section "2. Create a database to store input and output files", the code to extract molecules from the uploaded document (patent_test.pdf) is:
 <div class="language-python highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">deeporigin.tools</span> <span class="kn">import</span> <span class="n">run</span>
 
 <span class="n">job_id</span> <span class="o">=</span> <span class="n">run</span><span class="o">.</span><span class="n">draco</span><span class="p">(</span>
