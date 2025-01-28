@@ -229,7 +229,7 @@ def _column_name_to_column_id(data: dict, cols: list) -> dict:
     Recursively update all values for the key 'columnId' in a nested dictionary.
 
     Args:
-        d (dict): The dictionary to process.
+        data (dict): The dictionary to process.
         func (callable): A function that takes the original value and returns the new value.
 
     Returns:

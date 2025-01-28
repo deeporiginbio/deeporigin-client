@@ -6,6 +6,149 @@ from deeporigin.tools import run
 
 VINA_DB = "autodock-vina"
 LIGAND_PREP_DB = "ligand-prep-meeko"
+ABFE_DB = "ABFE"
+
+
+@beartype
+def _ensure_database(name: str) -> dict:
+    """ensure that a database exists with the given name. If it doesn't exist, create it"""
+
+    databases = api.list_rows(row_type="database")
+
+    database = [db for db in databases if db["hid"] == name]
+
+    if len(database) == 0:
+        # make a new DB
+        print("🧬 Creating a database called {name}...")
+        database = api.create_database(
+            hid=name,
+            hid_prefix=name,
+            name=name,
+        )
+
+    database = api.describe_database(database_id=name)
+    return database
+
+
+@beartype
+def _ensure_columns(
+    *,
+    database: dict,
+    required_columns: list[dict],
+):
+    """ensure that columns exist with the given names (and types). If they don't exist, create them"""
+
+    existing_column_names = []
+    if "cols" in list(database.keys()):
+        existing_column_names = [col["name"] for col in database.cols]
+
+    # check if we need to make columns
+    for item in required_columns:
+        column_name = item["name"]
+        column_type = item["type"]
+
+        if column_name in existing_column_names:
+            continue
+        print(f"🧬 Making column named: {column_name} in {database.hid}")
+
+        api.add_database_column(
+            cardinality="one",
+            database_id=database.hid,
+            name=column_name,
+            required=False,
+            type=column_type,
+        )
+
+
+@beartype
+def _ensure_db_for_abfe() -> dict:
+    """ensure that there is a database for FEP on Data Hub"""
+
+    required_columns = [
+        dict(name="ligand", type="file"),
+        dict(name="protein", type="file"),
+        dict(name="prep_output", type="file"),
+        dict(name="emeq_output", type="file"),
+    ]
+
+    database = _ensure_database(ABFE_DB)
+
+    _ensure_columns(
+        database=database,
+        required_columns=required_columns,
+    )
+
+    return database
+
+
+def _abfe_system_prep(*, ligand_file: str, protein_file: str):
+    """high level function to prepare ligand and protein files for FEP on Data Hub"""
+
+    database = _ensure_db_for_abfe()
+
+    print(f"🧬 Print uploading files to database called: {database.hid}...")
+
+    response = api.upload_file_to_new_database_row(
+        database_id=ABFE_DB,
+        column_id="ligand",
+        file_path=ligand_file,
+    )
+
+    row_id = response.rows[0].hid
+
+    file = api.upload_file(file_path=protein_file)
+
+    api.assign_files_to_cell(
+        file_ids=[file.id],
+        database_id=ABFE_DB,
+        column_id="protein",
+        row_id=row_id,
+    )
+
+    tool_id = "deeporigin/md-suite-prep"
+    inputs = {
+        "ligand": {
+            "columnId": "ligand",
+            "rowId": row_id,
+            "databaseId": database.hid,
+        },
+        "protein": {
+            "columnId": "protein",
+            "rowId": row_id,
+            "databaseId": database.hid,
+        },
+        "force": 1,
+        "test_run": 0,
+        "system": "complex",
+        "include_ligands": 1,
+        "include_protein": 1,
+        "sysprep_params": {
+            "is_protein_protonated": True,
+            "do_loop_modelling": False,
+            "force_field": "ff14SB",
+            "padding": 1,
+            "keep_waters": True,
+            "save_gmx_files": False,
+            "is_lig_protonated": True,
+            "charge_method": "bcc",
+            "lig_force_field": "gaff2",
+        },
+    }
+
+    outputs = {
+        "output_file": {
+            "columnId": "prep_output",
+            "rowId": row_id,
+            "databaseId": database.hid,
+        }
+    }
+
+    run._process_job(
+        inputs=inputs,
+        outputs=outputs,
+        tool_id=tool_id,
+        cols=database.cols,
+    )
 
 
 @beartype

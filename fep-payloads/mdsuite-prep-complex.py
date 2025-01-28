@@ -1,9 +1,3 @@
-import json
-
-import requests
-
-url = "{{baseUrl}}/tools/{{orgFriendlyId}}"
-
 payload = {
     "toolId": "deeporigin/md-suite-prep",
     "inputs": {
@@ -41,13 +35,10 @@ payload = {
             "databaseId": "fep-mason-all",
         }
     },
-    "clusterId": {{cluster_id}},
+    "clusterId": "{{cluster_id}}",
 }
+
 headers = {
     "Content-Type": "application/json",
     "Authorization": "Bearer {{auth_token_edge}}",
 }
-
-response = requests.request("POST", url, headers=headers, data=payload)
-
-print(response.text)
