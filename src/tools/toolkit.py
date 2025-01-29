@@ -15,6 +15,7 @@ ABFE_DB = "ABFE"
 
 charge_methods = Literal["gas", "bcc"]
 lig_force_fields = Literal["gaff2", "openff"]
+force_fields = Literal["ff14SB", "ff99SB-ildn"]
 
 
 @beartype
@@ -89,7 +90,7 @@ def _ensure_db_for_abfe() -> dict:
     return database
 
 
-def _abfe_system_prep(
+def system_prep(
     *,
     ligand_file: str,
     protein_file: str,
@@ -102,8 +103,25 @@ def _abfe_system_prep(
     lig_force_field: lig_force_fields = "gaff2",
     padding: float = 1.0,
     system_name: str = "complex",
-):
-    """high level function to prepare ligand and protein files for FEP on Data Hub"""
+    force_field: force_fields = "ff14SB",
+) -> None:
+    """High level function to prepare Ligand and protein files using Deep Origin MDSuite. Use this function to run system prep on a ligand and protein pair, that exist as files on your local computer.
+
+    Args:
+        ligand_file (str): path to ligand file
+        protein_file (str): path to protein file
+        keep_waters (bool, optional): whether to keep waters. Defaults to True.
+        save_gmx_files (bool, optional): whether to save gmx files. Defaults to False.
+        is_lig_protonated (bool, optional): whether the ligand is protonated. Defaults to True.
+        is_protein_protonated (bool, optional): whether the protein is protonated. Defaults to True.
+        do_loop_modelling (bool, optional): whether to do loop modelling. Defaults to False.
+        charge_method (charge_methods, optional): charge method. Defaults to "bcc".
+        lig_force_field (lig_force_fields, optional): ligand force field. Defaults to "gaff2".
+        padding (float, optional): padding. Defaults to 1.0.
+        system_name (str, optional): system name. Defaults to "complex".
+        force_field (force_fields, optional): force field. Defaults to "ff14SB".
+
+    """
 
     # input validation
     if padding < 0.5 or padding > 2:
@@ -148,7 +166,7 @@ def _abfe_system_prep(
             "rowId": row_id,
             "databaseId": database.hid,
         },
-        "force": 1,
+        "force": 2,
         "test_run": 0,
         "system": system_name,
         "include_ligands": 1,
