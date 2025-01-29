@@ -272,7 +272,7 @@ def get_job_dataframe(update: bool = False) -> Any:
 
     df = pd.DataFrame(
         {
-            "Job Id": [job.id for job in jobs],
+            "Job ID": [job.id for job in jobs],
             "Execution ID": [job.attributes.executionId for job in jobs],
             "Status": [job.attributes.status for job in jobs],
             "Tool": [job.attributes.toolId for job in jobs],
