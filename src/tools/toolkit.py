@@ -1,13 +1,20 @@
 """this module contains high level utility functions that makes it easier to use tools by providing wrappers over tools"""
 
+from typing import Literal
+
 from beartype import beartype
 from deeporigin.data_hub import api
+from deeporigin.exceptions import DeepOriginException
 from deeporigin.tools import run
 from deeporigin.utils.config import construct_resource_url
 
 VINA_DB = "autodock-vina"
 LIGAND_PREP_DB = "ligand-prep-meeko"
 ABFE_DB = "ABFE"
+
+
+charge_methods = Literal["gas", "bcc"]
+lig_force_fields = Literal["gaff2", "openff"]
 
 
 @beartype
@@ -91,8 +98,16 @@ def _abfe_system_prep(
     is_lig_protonated: bool = True,
     is_protein_protonated: bool = True,
     do_loop_modelling: bool = False,
+    charge_method: charge_methods = "bcc",
+    lig_force_field: lig_force_fields = "gaff2",
+    padding: float = 1.0,
+    system_name: str = "complex",
 ):
     """high level function to prepare ligand and protein files for FEP on Data Hub"""
+
+    # input validation
+    if padding < 0.5 or padding > 2:
+        raise DeepOriginException("Padding must be greater than 0.5, and less than 2")
 
     database = _ensure_db_for_abfe()
 
@@ -136,19 +151,19 @@ def _abfe_system_prep(
         },
         "force": 1,
         "test_run": 0,
-        "system": "complex",
+        "system": system_name,
         "include_ligands": 1,
         "include_protein": 1,
         "sysprep_params": {
             "is_protein_protonated": is_protein_protonated,
             "do_loop_modelling": do_loop_modelling,
             "force_field": "ff14SB",
-            "padding": 1,
+            "padding": padding,
             "keep_waters": keep_waters,
             "save_gmx_files": save_gmx_files,
             "is_lig_protonated": is_lig_protonated,
-            "charge_method": "bcc",
-            "lig_force_field": "gaff2",
+            "charge_method": charge_method,
+            "lig_force_field": lig_force_field,
         },
     }
 
