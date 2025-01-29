@@ -117,8 +117,7 @@ def _abfe_system_prep(
     )
 
     print(f"Using database at: {url}")
-
-    print(f"🧬 Print uploading files to database called: {database.hid}...")
+    print("🧬 Uploading files to database...")
 
     response = api.upload_file_to_new_database_row(
         database_id=ABFE_DB,
