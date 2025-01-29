@@ -3,6 +3,7 @@
 from beartype import beartype
 from deeporigin.data_hub import api
 from deeporigin.tools import run
+from deeporigin.utils.config import construct_resource_url
 
 VINA_DB = "autodock-vina"
 LIGAND_PREP_DB = "ligand-prep-meeko"
@@ -81,10 +82,26 @@ def _ensure_db_for_abfe() -> dict:
     return database
 
 
-def _abfe_system_prep(*, ligand_file: str, protein_file: str):
+def _abfe_system_prep(
+    *,
+    ligand_file: str,
+    protein_file: str,
+    keep_waters: bool = True,
+    save_gmx_files: bool = False,
+    is_lig_protonated: bool = True,
+    is_protein_protonated: bool = True,
+    do_loop_modelling: bool = False,
+):
     """high level function to prepare ligand and protein files for FEP on Data Hub"""
 
     database = _ensure_db_for_abfe()
+
+    url = construct_resource_url(
+        name=ABFE_DB,
+        row_type="database",
+    )
+
+    print(f"Using database at: {url}")
 
     print(f"🧬 Print uploading files to database called: {database.hid}...")
 
@@ -123,13 +140,13 @@ def _abfe_system_prep(*, ligand_file: str, protein_file: str):
         "include_ligands": 1,
         "include_protein": 1,
         "sysprep_params": {
-            "is_protein_protonated": True,
-            "do_loop_modelling": False,
+            "is_protein_protonated": is_protein_protonated,
+            "do_loop_modelling": do_loop_modelling,
             "force_field": "ff14SB",
             "padding": 1,
-            "keep_waters": True,
-            "save_gmx_files": False,
-            "is_lig_protonated": True,
+            "keep_waters": keep_waters,
+            "save_gmx_files": save_gmx_files,
+            "is_lig_protonated": is_lig_protonated,
             "charge_method": "bcc",
             "lig_force_field": "gaff2",
         },
