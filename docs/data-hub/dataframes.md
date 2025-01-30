@@ -153,4 +153,4 @@ df
 
 ## Reference
 
-Read more about the `to_deeporigin` method [here](../ref/data-hub/types.md#src.data_hub.dataframe.DataFrame.to_deeporigin). 
+Read more about the `to_deeporigin` method [here](ref/types.md#src.data_hub.dataframe.DataFrame.to_deeporigin). 

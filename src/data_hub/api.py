@@ -1600,7 +1600,7 @@ def add_database_column(
 
     Args:
         database_id: ID (or human ID) of a database on Deep Origin.
-        type: type of the column. Should be one of [DataType](../data-hub/types.md#src.utils.constants.DataType)
+        type: type of the column. Should be one of [DataType](types.md#src.utils.constants.DataType)
         name: name of the column
         cardinality: cardinality of the column. Specifies whether cells in this column can contain or many items. Should be one of "one" or "many"
         required: whether the column is required. If True, cells in this column cannot be empty
