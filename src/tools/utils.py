@@ -139,7 +139,9 @@ def _resolve_column_name(column_name: str, cols: list) -> str:
     column_names = [col.name for col in cols]
 
     if column_name not in column_names and column_name not in column_ids:
-        raise ValueError(f"column_name must be one of {column_names} or {column_ids}")
+        raise ValueError(
+            f"column_name must be one of {column_names} or {column_ids}. Instead it was: {column_name}"
+        )
     elif column_name in column_names:
         column_id = [col.id for col in cols if col.name == column_name][0]
     else:

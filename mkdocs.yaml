@@ -61,9 +61,9 @@ nav:
     - Write data: data-hub/how-to/write-data.md
     - Add data to database: data-hub/how-to/add-data.md
   - API reference:
-    - High-level API: ref/data-hub/high-level-api.md
-    - Low-level API: ref/data-hub/low-level-api.md
-    - Classes & constants: ref/data-hub/types.md
+    - High-level API: data-hub/ref/high-level-api.md
+    - Low-level API: data-hub/ref/low-level-api.md
+    - Classes & constants: data-hub/ref/types.md
 - Compute hub: 
   - compute-hub/index.md
   - How to:
@@ -76,6 +76,8 @@ nav:
     - Run tools: tools/how-to/run-tools.md
     - Check tool run status: tools/how-to/check-status.md
     - Wait for a tool run: tools/how-to/wait-for-run.md
+  - Toolboxes:
+    - ABFE: tools/how-to/abfe.md
   - Available tools:
     - Autodock Vina: tools/vina.md
     - Receptor Prep (PDBFixer): tools/pdbfixer.md
@@ -86,6 +88,7 @@ nav:
     - Running tools: tools/ref/run.md
     - Utils: tools/ref/utils.md
     - Toolkit: tools/ref/toolkit.md
+    - ABFE: tools/ref/abfe.md
 - Changelog: changelog.md
 - Support: https://www.support.deeporigin.com/servicedesk/customer/portals
 
@@ -112,7 +115,6 @@ markdown_extensions:
       permalink: true
       title: Page contents
   - pymdownx.details
-  - pymdownx.superfences
   - pymdownx.arithmatex:
       generic: true
   - pymdownx.snippets
@@ -122,7 +124,7 @@ markdown_extensions:
   - pymdownx.tabbed:
       alternate_style: true
 
-
+  
 plugins:
   - search
   - mkdocstrings:

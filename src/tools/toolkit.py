@@ -58,6 +58,9 @@ def _ensure_columns(
             type=column_type,
         )
 
+    database = api.describe_database(database_id=database.id)
+    return database
+
 
 @beartype
 def _ensure_db_for_vina_outputs() -> None:

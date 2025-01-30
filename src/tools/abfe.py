@@ -9,10 +9,47 @@ from deeporigin.tools import run
 from deeporigin.tools.toolkit import _ensure_columns, _ensure_database
 from deeporigin.utils.config import construct_resource_url
 
+# constants and types
 ABFE_DB = "ABFE"
+
 charge_methods = Literal["gas", "bcc"]
-lig_force_fields = Literal["gaff2", "openff"]
+"""Available charge methods"""
+
+lig_force_fields = Literal["gaff", "gaff2", "openff"]
+"""Available ligand force fields. gaff is General Amber Force Field, gaff2 is an updated version of gaff. """
+
 force_fields = Literal["ff14SB", "ff99SB-ildn"]
+"""Available force fields"""
+
+integrators = Literal[
+    "BAOABIntegrator",
+    "LangevinIntegrator",
+    "SteepestDescentMinimizer",
+    "LeapFrogIntegrator",
+    "SoluteSolventSplittingIntegrator",
+]
+"""Integrator available for simulation"""
+
+
+prod_md_defaults = {
+    "integrator": "BAOABIntegrator",
+    "Δt": 0.004,
+    "T": 298.15,
+    "cutoff": 0.9,
+    "fourier_spacing": 0.12,
+    "hydrogen_mass": 2,
+    "barostat": "MonteCarloBarostat",
+    "barostat_exchange_interval": 500,
+}
+
+
+emeq_md_defaults = {
+    "Δt": 0.004,
+    "T": 298.15,
+    "cutoff": 0.9,
+    "fourier_spacing": 0.12,
+    "hydrogen_mass": 2,
+}
 
 
 @beartype
@@ -65,11 +102,14 @@ def _ensure_db_for_abfe() -> dict:
         dict(name="complex_prep_output", type="file"),
         dict(name="solvation_prep_output", type="file"),
         dict(name="emeq_output", type="file"),
+        dict(name="solvation_output", type="file"),
+        dict(name="md_output", type="file"),
+        dict(name="abfe_output", type="file"),
     ]
 
     database = _ensure_database(ABFE_DB)
 
-    _ensure_columns(
+    database = _ensure_columns(
         database=database,
         required_columns=required_columns,
     )
@@ -82,6 +122,13 @@ def emeq(
     *,
     row_id: str,
     system_name: str = "complex",
+    fourier_spacing: float = 0.12,
+    hydrogen_mass: int = 2,
+    cutoff: float = 0.9,
+    temperature: float = 298.15,
+    Δt: float = 0.004,
+    npt_reduce_restraints_ns: float = 0.2,
+    nvt_heating_ns: float = 0.1,
 ) -> None:
     """Run emeq on a ligand and protein pair, that exist as files on a row in the ABFE database. For this to work, the complex prep step must have been run first.
 
@@ -108,16 +155,10 @@ def emeq(
         "threads": 0,
         "em_solvent": True,
         "em_all": True,
-        "nvt_heating_ns": 0.1,
-        "npt_reduce_restraints_ns": 0.2,
+        "nvt_heating_ns": nvt_heating_ns,
+        "npt_reduce_restraints_ns": npt_reduce_restraints_ns,
         "from_run": "__USE_SYSTEM",
-        "emeq_md_options": {
-            "Δt": 0.004,
-            "T": 298.15,
-            "cutoff": 0.9,
-            "fourier_spacing": 0.12,
-            "hydrogen_mass": 2,
-        },
+        "emeq_md_options": emeq_md_options,
     }
 
     outputs = {
@@ -263,6 +304,251 @@ def _prep(
     outputs = {
         "output_file": {
             "columnId": output_column_name,
+            "rowId": row_id,
+            "databaseId": database.hid,
+        }
+    }
+
+    run._process_job(
+        inputs=inputs,
+        outputs=outputs,
+        tool_id=tool_id,
+        cols=database.cols,
+    )
+
+
+def solvation_fep(
+    *,
+    row_id: str,
+    integrator: integrators = "BAOABIntegrator",
+    softcore_alpha: float = 0.5,
+    steps: int = 300000,
+    repeats: int = 1,
+    threads: int = 0,
+    annihilate: bool = True,
+    hydrogen_mass: int = 2,
+    T: float = 298.15,
+) -> None:
+    """Run a solvation simulation
+
+
+    Args:
+        row_id (str): row id of the ligand and protein files.
+        integrator (integrators, optional): integrator. Defaults to "BAOABIntegrator".
+        softcore_alpha (float, optional): softcore alpha. Defaults to 0.5.
+        steps (int, optional): The number of steps to run the simulation for the prod step.
+        repeats (int, optional): The number of repeats for prod step.
+        threads (int, optional): The number of threads per worker. By default the number of threads will be determined by the number of windows and available cores on the CPU. Defaults to 0.
+        annihilate (bool, optional): Whether to annihilate the ligand or decouple it. Defaults to True.
+    """
+
+    kwargs = locals()
+
+    if softcore_alpha < 0.0 or softcore_alpha > 1.0:
+        raise DeepOriginException("softcore_alpha must be between 0.0 and 1.0")
+
+    database = _ensure_db_for_abfe()
+
+    url = construct_resource_url(
+        name=ABFE_DB,
+        row_type="database",
+    )
+
+    print(f"Using row {row_id} in database at: {url}")
+
+    tool_id = "deeporigin/md-suite-solvation"
+
+    prod_md_options = {
+        k: kwargs[k] if k in kwargs else v for k, v in prod_md_defaults.items()
+    }
+    emeq_md_options = {
+        k: kwargs[k] if k in kwargs else v for k, v in emeq_md_defaults.items()
+    }
+
+    inputs = {
+        "input": {
+            "columnId": "solvation_prep_output",
+            "rowId": row_id,
+            "databaseId": database.hid,
+        },
+        "force": 1,
+        "test_run": 0,
+        "run_name": "annihilation",
+        "system": "ligand_only",
+        "softcore_alpha": softcore_alpha,
+        "annihilate": annihilate,
+        "em_solvent": True,
+        "em_all": True,
+        "nvt_heating_ns": 0.1,
+        "npt_reduce_restraints_ns": 0.2,
+        "repeats": repeats,
+        "steps": steps,
+        "threads": threads,
+        "fep_windows": [
+            {"coul_A": [1, 0.8, 0.6, 0.4, 0.2, 0]},
+            {"vdw_A": [1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1, 0]},
+        ],
+        "emeq_md_options": emeq_md_options,
+        "prod_md_options": prod_md_options,
+    }
+
+    outputs = {
+        "output_file": {
+            "columnId": "solvation_output",
+            "rowId": row_id,
+            "databaseId": database.hid,
+        }
+    }
+
+    run._process_job(
+        inputs=inputs,
+        outputs=outputs,
+        tool_id=tool_id,
+        cols=database.cols,
+    )
+
+
+def simple_md(
+    *,
+    row_id: str,
+    integrator: integrators = "BAOABIntegrator",
+    run_name: str = "complex_1ns_md",
+    steps: int = 250000,
+    threads: int = 0,
+    Δt: float = 0.004,
+    temperature: float = 298.15,
+    cutoff: float = 0.9,
+    fourier_spacing: float = 0.12,
+):
+    """Run a simple MD simulation
+
+    Args:
+        row_id (str): row id of the ligand and protein files.
+        integrator (integrators, optional): integrator. Defaults to "BAOABIntegrator".
+        run_name (str, optional): run name. Defaults to "complex_1ns_md".
+        steps (int, optional): The number of steps to run the simulation for the prod step.
+        threads (int, optional): The number of threads per worker. By default the number of threads will be determined by the number of windows and available cores on the CPU. Defaults to 0.
+        Δt (float, optional): The time step in femtoseconds. Defaults to 0.004.
+        temperature (float, optional): The temperature in kelvin. Defaults to 298.15.
+        cutoff (float, optional): The cutoff distance in angstroms. Defaults to 0.9.
+        fourier_spacing (float, optional): The Fourier spacing in femtoseconds. Defaults to 0.12.
+    """
+    kwargs = locals()
+    database = _ensure_db_for_abfe()
+
+    url = construct_resource_url(
+        name=ABFE_DB,
+        row_type="database",
+    )
+
+    md_options = {
+        k: kwargs[k] if k in kwargs else v for k, v in prod_md_defaults.items()
+    }
+
+    print(f"Using row {row_id} in database at: {url}")
+
+    tool_id = "deeporigin/md-suite-md"
+    inputs = {
+        "input": {
+            "columnId": "emeq_output",
+            "rowId": row_id,
+            "databaseId": ABFE_DB,
+        },
+        "force": 1,
+        "test_run": 0,
+        "run_name": run_name,
+        "from_run": "test-run",
+        "steps": steps,
+        "threads": threads,
+        "system": "__USE_FROM_RUN",
+        "md_options": md_options,
+    }
+
+    outputs = {
+        "output_file": {
+            "columnId": "md_output",
+            "rowId": row_id,
+            "databaseId": database.hid,
+        }
+    }
+
+    run._process_job(
+        inputs=inputs,
+        outputs=outputs,
+        tool_id=tool_id,
+        cols=database.cols,
+    )
+
+
+def binding_fep(
+    row_id,
+    *,
+    run_name: str = "annihilation_fep",
+    softcore_alpha: float = 0.5,
+    annihilate: bool = True,
+    em_solvent: bool = True,
+    em_all: bool = True,
+    nvt_heating_ns: int = 1,
+    npt_reduce_restraints_ns: int = 2,
+    steps: int = 1250000,
+    repeats: int = 1,
+    threads: int = 0,
+    integrator: integrators = "BAOABIntegrator",
+    Δt: float = 0.004,
+    temperature: float = 298.15,
+):
+    """Run an ABFE simulation"""
+
+    kwargs = locals()
+    database = _ensure_db_for_abfe()
+
+    url = construct_resource_url(
+        name=ABFE_DB,
+        row_type="database",
+    )
+
+    print(f"Using row {row_id} in database at: {url}")
+
+    emeq_md_options = {
+        k: kwargs[k] if k in kwargs else v for k, v in emeq_md_defaults.items()
+    }
+    prod_md_options = {
+        k: kwargs[k] if k in kwargs else v for k, v in prod_md_defaults.items()
+    }
+
+    tool_id = "deeporigin/md-suite-abfe"
+    inputs = {
+        "input": {
+            "columnId": "md_output",
+            "rowId": row_id,
+            "databaseId": ABFE_DB,
+        },
+        "force": 1,
+        "test_run": 0,
+        "run_name": run_name,
+        "boresch_run_name": "complex_1ns_md",
+        "system": "complex",
+        "softcore_alpha": softcore_alpha,
+        "annihilate": annihilate,
+        "em_solvent": em_solvent,
+        "em_all": em_all,
+        "nvt_heating_ns": nvt_heating_ns,
+        "npt_reduce_restraints_ns": npt_reduce_restraints_ns,
+        "repeats": repeats,
+        "steps": steps,
+        "threads": threads,
+        "fep_windows": [
+            {"restraints_A": [0, 0.01, 0.025, 0.05, 0.1, 0.35, 0.5, 0.75, 1]},
+            {"coul_A": [1, 0.8, 0.6, 0.4, 0.2, 0]},
+            {"vdw_A": [1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1, 0]},
+        ],
+        "emeq_md_options": emeq_md_options,
+        "prod_md_options": prod_md_options,
+    }
+
+    outputs = {
+        "output_file": {
+            "columnId": "abfe_output",
             "rowId": row_id,
             "databaseId": database.hid,
         }
