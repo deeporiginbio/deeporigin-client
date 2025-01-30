@@ -9,6 +9,7 @@ This reference page provides information on function signature for every functio
         - charge_methods
         - init
         - complex_prep
+        - emeq
         - solvation_prep
         - solvation_fep
         - simple_md
