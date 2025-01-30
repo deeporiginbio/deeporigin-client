@@ -19,7 +19,7 @@ def _ensure_database(name: str) -> dict:
     if len(database) == 0:
         # make a new DB
         print(f"🧬 Creating a database called {name}...")
-        database = api.create_database(
+        api.create_database(
             hid=name,
             hid_prefix=name,
             name=name,
@@ -75,7 +75,7 @@ def _ensure_db_for_vina_outputs() -> None:
 
     if len(database) == 0:
         # make a new DB
-        database = api.create_database(
+        api.create_database(
             hid=VINA_DB,
             hid_prefix="adv",
             name=VINA_DB,
@@ -114,7 +114,7 @@ def _ensure_db_for_ligand_prep_meeko() -> None:
 
     if len(database) == 0:
         # make a new DB
-        database = api.create_database(
+        api.create_database(
             hid=LIGAND_PREP_DB,
             hid_prefix="lpm",
             name=LIGAND_PREP_DB,
