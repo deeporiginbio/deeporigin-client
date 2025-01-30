@@ -1,3 +1,5 @@
+"""this module contains various functions to run steps of an ABFE workflow"""
+
 from typing import Literal
 
 from beartype import beartype
@@ -81,6 +83,14 @@ def emeq(
     row_id: str,
     system_name: str = "complex",
 ) -> None:
+    """Run emeq on a ligand and protein pair, that exist as files on a row in the ABFE database. For this to work, the complex prep step must have been run first.
+
+    Args:
+        row_id (str): row id that contains the ligand and protein files.
+        system_name (str, optional): name of the system. Defaults to "complex". This name can be anything.
+
+    """
+
     tool_id = "deeporigin/md-suite-emeq"
 
     database = _ensure_database(ABFE_DB)
@@ -142,6 +152,7 @@ def complex_prep(
     force_field: force_fields = "ff14SB",
 ) -> None:
     """Function to prepare uploaded Ligand and protein files using Deep Origin MDSuite. Use this function to run system prep on a ligand and protein pair, that exist as files on a row in the ABFE database."""
+
     kwargs = locals()
 
     kwargs["include_protein"] = 1
