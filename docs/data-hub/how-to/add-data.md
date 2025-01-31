@@ -44,4 +44,4 @@ api.add_database_rows(database_id="xy", data=data)
 
 ## Reference
 
-The reference documentation for [add_database_rows](../../ref/data-hub/high-level-api.md#src.data_hub.api.add_database_rows)
+The reference documentation for [add_database_rows](../ref/high-level-api.md#src.data_hub.api.add_database_rows)

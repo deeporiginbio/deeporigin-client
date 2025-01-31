@@ -10,7 +10,11 @@ from beartype import beartype
 from deeporigin import __version__
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.utils.config import _get_domain_name
-from deeporigin.utils.core import _ensure_do_folder, in_aws_lambda
+from deeporigin.utils.core import (
+    _ensure_do_folder,
+    _get_api_tokens_filepath,
+    in_aws_lambda,
+)
 from packaging.version import Version
 
 
@@ -96,7 +100,7 @@ def _download_nucleus_api_spec() -> None:
 
     spec_file = deeporigin_path / "nucleus_spec.json"
 
-    with open(deeporigin_path / "api_tokens", "r") as file:
+    with open(_get_api_tokens_filepath(), "r") as file:
         data = json.loads(file.read())
     token = data["access"]
 

@@ -9,6 +9,60 @@ LIGAND_PREP_DB = "ligand-prep-meeko"
 
 
 @beartype
+def _ensure_database(name: str) -> dict:
+    """ensure that a database exists with the given name. If it doesn't exist, create it"""
+
+    databases = api.list_rows(row_type="database")
+
+    database = [db for db in databases if db["hid"] == name]
+
+    if len(database) == 0:
+        # make a new DB
+        print(f"🧬 Creating a database called {name}...")
+        api.create_database(
+            hid=name,
+            hid_prefix=name,
+            name=name,
+        )
+
+    database = api.describe_database(database_id=name)
+    return database
+
+
+@beartype
+def _ensure_columns(
+    *,
+    database: dict,
+    required_columns: list[dict],
+):
+    """ensure that columns exist with the given names (and types). If they don't exist, create them"""
+
+    existing_column_names = []
+    if "cols" in list(database.keys()):
+        existing_column_names = [col["name"] for col in database.cols]
+
+    # check if we need to make columns
+    for item in required_columns:
+        column_name = item["name"]
+        column_type = item["type"]
+
+        if column_name in existing_column_names:
+            continue
+        print(f"🧬 Making column named: {column_name} in {database.hid}")
+
+        api.add_database_column(
+            cardinality="one",
+            database_id=database.hid,
+            name=column_name,
+            required=False,
+            type=column_type,
+        )
+
+    database = api.describe_database(database_id=database.id)
+    return database
+
+
+@beartype
 def _ensure_db_for_vina_outputs() -> None:
     """makes a DB for outputs of vina"""
 
@@ -21,7 +75,7 @@ def _ensure_db_for_vina_outputs() -> None:
 
     if len(database) == 0:
         # make a new DB
-        database = api.create_database(
+        api.create_database(
             hid=VINA_DB,
             hid_prefix="adv",
             name=VINA_DB,
@@ -60,7 +114,7 @@ def _ensure_db_for_ligand_prep_meeko() -> None:
 
     if len(database) == 0:
         # make a new DB
-        database = api.create_database(
+        api.create_database(
             hid=LIGAND_PREP_DB,
             hid_prefix="lpm",
             name=LIGAND_PREP_DB,

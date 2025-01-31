@@ -52,30 +52,32 @@ nav:
   - Deep Origin DataFrames:
     - Tutorial: data-hub/dataframes.md
   - How to:
-    - Create objects: how-to/data-hub/create.md
-    - Delete objects: how-to/data-hub/delete.md
-    - List data: how-to/data-hub/list-data.md
-    - View data: how-to/data-hub/view-data.md
-    - Upload files: how-to/data-hub/upload-files.md
-    - Download files: how-to/data-hub/download-files.md
-    - Write data: how-to/data-hub/write-data.md
-    - Add data to database: how-to/data-hub/add-data.md
+    - Create objects: data-hub/how-to/create.md
+    - Delete objects: data-hub/how-to/delete.md
+    - List data: data-hub/how-to/list-data.md
+    - View data: data-hub/how-to/view-data.md
+    - Upload files: data-hub/how-to/upload-files.md
+    - Download files: data-hub/how-to/download-files.md
+    - Write data: data-hub/how-to/write-data.md
+    - Add data to database: data-hub/how-to/add-data.md
   - API reference:
-    - High-level API: ref/data-hub/high-level-api.md
-    - Low-level API: ref/data-hub/low-level-api.md
-    - Classes & constants: ref/data-hub/types.md
+    - High-level API: data-hub/ref/high-level-api.md
+    - Low-level API: data-hub/ref/low-level-api.md
+    - Classes & constants: data-hub/ref/types.md
 - Compute hub: 
   - compute-hub/index.md
   - How to:
-    - Install variables and secrets: how-to/compute-hub/variables.md
-    - Get info about your workstation: how-to/compute-hub/workstation-info.md
+    - Install variables and secrets: compute-hub/how-to/variables.md
+    - Get info about your workstation: compute-hub/how-to/workstation-info.md
 - Tools: 
   - tools/index.md
   - How to:
-    - List tools: how-to/tools/list-tools.md
-    - Run tools: how-to/tools/run-tools.md
-    - Check tool run status: how-to/tools/check-status.md
-    - Wait for a tool run: how-to/tools/wait-for-run.md
+    - List tools: tools/how-to/list-tools.md
+    - Run tools: tools/how-to/run-tools.md
+    - Check tool run status: tools/how-to/check-status.md
+    - Wait for a tool run: tools/how-to/wait-for-run.md
+  - Toolboxes:
+    - ABFE: tools/how-to/abfe.md
   - Available tools:
     - Autodock Vina: tools/vina.md
     - Receptor Prep (PDBFixer): tools/pdbfixer.md
@@ -83,8 +85,10 @@ nav:
     - PDB to PDBQT: tools/pdb-to-pdbqt.md
     - Draco: tools/draco.md
   - Reference: 
-    - Running tools: tools/run.md
-    - Utils: tools/utils.md
+    - Running tools: tools/ref/run.md
+    - Utils: tools/ref/utils.md
+    - Toolkit: tools/ref/toolkit.md
+    - ABFE: tools/ref/abfe.md
 - Changelog: changelog.md
 - Support: https://www.support.deeporigin.com/servicedesk/customer/portals
 
@@ -111,7 +115,6 @@ markdown_extensions:
       permalink: true
       title: Page contents
   - pymdownx.details
-  - pymdownx.superfences
   - pymdownx.arithmatex:
       generic: true
   - pymdownx.snippets
@@ -121,7 +124,7 @@ markdown_extensions:
   - pymdownx.tabbed:
       alternate_style: true
 
-
+  
 plugins:
   - search
   - mkdocstrings:

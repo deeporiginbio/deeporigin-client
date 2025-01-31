@@ -139,7 +139,9 @@ def _resolve_column_name(column_name: str, cols: list) -> str:
     column_names = [col.name for col in cols]
 
     if column_name not in column_names and column_name not in column_ids:
-        raise ValueError(f"column_name must be one of {column_names} or {column_ids}")
+        raise ValueError(
+            f"column_name must be one of {column_names} or {column_ids}. Instead it was: {column_name}"
+        )
     elif column_name in column_names:
         column_id = [col.id for col in cols if col.name == column_name][0]
     else:
@@ -229,7 +231,7 @@ def _column_name_to_column_id(data: dict, cols: list) -> dict:
     Recursively update all values for the key 'columnId' in a nested dictionary.
 
     Args:
-        d (dict): The dictionary to process.
+        data (dict): The dictionary to process.
         func (callable): A function that takes the original value and returns the new value.
 
     Returns:
@@ -272,7 +274,7 @@ def get_job_dataframe(update: bool = False) -> Any:
 
     df = pd.DataFrame(
         {
-            "Job Id": [job.id for job in jobs],
+            "Job ID": [job.id for job in jobs],
             "Execution ID": [job.attributes.executionId for job in jobs],
             "Status": [job.attributes.status for job in jobs],
             "Tool": [job.attributes.toolId for job in jobs],
