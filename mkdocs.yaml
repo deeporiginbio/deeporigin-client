@@ -45,8 +45,10 @@ nav:
 - Platform: 
   - platform/index.md
   - How to:
-    - Get user information: how-to/platform/user-info.md
-    - Get workstation information: how-to/platform/workstation-info.md
+    - Get user information: platform/how-to/user-info.md
+    - Get workstation information: platform/how-to/workstation-info.md
+  - Refrence:
+      - Platform API: platform/ref/platform.md
 - Data hub: 
   - data-hub/index.md
   - Deep Origin DataFrames:

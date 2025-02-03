@@ -1,4 +1,3 @@
-
 # Get information about workstations
 
 To list all workstations on Deep Origin, use:
