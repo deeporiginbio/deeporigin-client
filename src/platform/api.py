@@ -129,13 +129,6 @@ def resolve_user(user_id: str):
 
 
 @beartype
-def whoami() -> dict:
-    """get details about currently signed in user"""
-
-    return _make_request("/users/me", verb="PATCH")
-
-
-@beartype
 def get_workstations() -> list[dict]:
     """get information about all workstations in the organization"""
     return _make_request(f"/computebenches/{_get_org_id()}")
