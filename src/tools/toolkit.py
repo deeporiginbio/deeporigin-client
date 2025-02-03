@@ -333,5 +333,5 @@ def dock_ligands_to_protein(
             cols=protein_db.cols + ligand_db.cols + vina_db.cols,
             inputs=inputs,
             outputs=outputs,
-            tool_id="deeporigin/autodock-vina",
+            tool_key="deeporigin.autodock-vina",
         )
