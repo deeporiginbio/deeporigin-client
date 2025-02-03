@@ -15,7 +15,7 @@ from deeporigin.utils.core import _get_method
 def add_functions_to_module(
     module,
     api_name: str,
-) -> set:
+) -> list:
     """utility function to dynamically add functions to a module
 
     This function works by calling setattr on the module.
@@ -33,9 +33,17 @@ def add_functions_to_module(
         )
     )
 
+    sanitized_methods = []
+
     for method in methods:
         # clean up the name so that it's more readable
-        sanitized_method_name = method.split("controller")[0].rstrip("_")
+        sanitized_method_name = method.split("controller")[-1]
+
+        sanitized_method_name = sanitized_method_name.replace(
+            "_without_preload_content", ""
+        ).lstrip("_")
+
+        sanitized_methods.append(sanitized_method_name)
 
         # add this function as an attribute to this module
         # so that we can call it
@@ -48,7 +56,7 @@ def add_functions_to_module(
             ),
         )
 
-    return methods
+    return sanitized_methods
 
 
 @beartype
