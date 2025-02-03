@@ -53,7 +53,7 @@ def pdb_pdbqt_converter(
         cols=db.cols,
         inputs=inputs,
         outputs=outputs,
-        tool_id="deeporigin/pdb-pdbqt-convert-obabel",
+        tool_key="deeporigin.pdb-pdbqt-convert-obabel",
     )
 
 
@@ -100,7 +100,7 @@ def ligand_prep(
         cols=db.cols,
         inputs=inputs,
         outputs=outputs,
-        tool_id="deeporigin/ligand-prep",
+        tool_key="deeporigin.ligand-prep",
     )
 
 
@@ -166,7 +166,7 @@ def receptor_prep(
         cols=db.cols,
         inputs=inputs,
         outputs=outputs,
-        tool_id="deeporigin/receptor-prep",
+        tool_key="deeporigin.receptor-prep",
     )
 
 
@@ -250,7 +250,7 @@ def autodock_vina(
         cols=db.cols,
         inputs=inputs,
         outputs=outputs,
-        tool_id="deeporigin/autodock-vina",
+        tool_key="deeporigin.autodock-vina",
     )
 
 
@@ -276,8 +276,6 @@ def draco(
 
     """
 
-    TOOL_ID = "deeporigin/draco"
-
     inputs = dict(
         input_file={
             "rowId": row_id,
@@ -299,7 +297,7 @@ def draco(
         cols=db.cols,
         inputs=inputs,
         outputs=outputs,
-        tool_id=TOOL_ID,
+        tool_key="deeporigin.draco",
     )
 
 
@@ -308,7 +306,7 @@ def _process_job(
     *,
     inputs: dict,
     outputs: dict,
-    tool_id: str,
+    tool_key: str,
     cols,
 ) -> str:
     """helper function that uses inputs and outputs to construct a payload and run a tool"""
@@ -316,11 +314,13 @@ def _process_job(
     payload = make_payload(
         outputs=outputs,
         inputs=inputs,
-        tool_id=tool_id,
         cols=cols,
     )
 
-    response = run_tool(payload)
+    response = run_tool(
+        data=payload,
+        tool_key=tool_key,
+    )
 
     execution_id = response.attributes.executionId
     job_id = response.id

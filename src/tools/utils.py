@@ -21,11 +21,11 @@ NON_TERMINAL_STATES = {"Created", "Queued", "Running"}
 
 
 @beartype
-def query_run_status(job_id: str) -> str:
-    """Determine the status of a run, identified by job ID
+def query_run_status(execution_id: str) -> str:
+    """Determine the status of a run, identified by execution_id ID
 
     Args:
-        job_id (str): job ID
+        execution_id (str): execution_id ID
 
     Returns:
         One of "Created", "Queued", "Running", "Succeeded", or "Failed"
@@ -33,14 +33,14 @@ def query_run_status(job_id: str) -> str:
     """
 
     data = tools.get_tool_execution(
-        org_friendly_id=get_value()["organization_id"], resource_id=job_id
+        org_friendly_id=get_value()["organization_id"], execution_id=execution_id
     )
 
     # Define the cache directory and file path
 
     if not JOBS_CACHE_DIR.exists():
         JOBS_CACHE_DIR.mkdir(parents=True)
-    cache_file = os.path.join(JOBS_CACHE_DIR, f"{job_id}.json")
+    cache_file = os.path.join(JOBS_CACHE_DIR, f"{execution_id}.json")
 
     # Ensure the cache directory exists
     os.makedirs(JOBS_CACHE_DIR, exist_ok=True)
@@ -53,7 +53,7 @@ def query_run_status(job_id: str) -> str:
 
 @beartype
 def wait_for_job(
-    job_id: str,
+    execution_id: str,
     *,
     poll_interval: int = 4,
 ) -> None:
@@ -62,7 +62,7 @@ def wait_for_job(
     This function is useful for blocking execution of your code till a specific task is complete.
 
     Args:
-        job_id (str): job ID. This is typically printed to screen and returned when a job is initialized.
+        execution_id (str): execution_id ID. This is typically printed to screen and returned when a job is initialized.
         poll_interval (int, optional): number of seconds to wait between polling. Defaults to 4.
 
     """
@@ -72,7 +72,7 @@ def wait_for_job(
     bs = "".join(["\b" for _ in range(txt_length)])
     while not (status == "Succeeded" or status == "Failed"):
         print(bs, end="", flush=True)
-        status = query_run_status(job_id)
+        status = query_run_status(execution_id)
         txt_length = len(status)
         print(status, end="", flush=True)
         time.sleep(poll_interval)
@@ -172,7 +172,11 @@ def _get_cluster_id() -> str:
 
 
 @beartype
-def run_tool(data: dict):
+def run_tool(
+    *,
+    data: dict,
+    tool_key: str,
+):
     """run any tool using provided data transfer object (DTO)
 
     Args:
@@ -182,6 +186,7 @@ def run_tool(data: dict):
         data["clusterId"] = _get_cluster_id()
 
     return execute_tool(
+        tool_key=tool_key,
         org_friendly_id=get_value()["organization_id"],
         execute_tool_dto=data,
     )
@@ -192,7 +197,6 @@ def make_payload(
     *,
     inputs: dict,
     outputs: dict,
-    tool_id: str,
     cluster_id: Optional[str] = None,
     cols: Optional[list] = None,
 ) -> dict:
@@ -201,7 +205,6 @@ def make_payload(
     Args:
         inputs (dict): inputs
         outputs (dict): outputs
-        tool_id (str): tool ID of the tool to run.
         cluster_id (Optional[str], optional): cluster ID. Defaults to None. If not provided, the default cluster (us-west-2) is used.
         cols: (Optional[list], optional): list of columns. Defaults to None. If provided, column names (in inputs or outputs) are converted to column IDs.
 
@@ -216,7 +219,6 @@ def make_payload(
         inputs=inputs,
         outputs=outputs,
         clusterId=cluster_id,
-        toolId=tool_id,
     )
 
     if cols:
@@ -226,7 +228,10 @@ def make_payload(
 
 
 @beartype
-def _column_name_to_column_id(data: dict, cols: list) -> dict:
+def _column_name_to_column_id(
+    data: dict,
+    cols: list,
+) -> dict:
     """
     Recursively update all values for the key 'columnId' in a nested dictionary.
 
@@ -254,6 +259,7 @@ def _column_name_to_column_id(data: dict, cols: list) -> dict:
     return data
 
 
+@beartype
 def get_job_dataframe(update: bool = False) -> Any:
     """returns a dataframe of all jobs and statuses, reading from local cache
 
@@ -277,7 +283,7 @@ def get_job_dataframe(update: bool = False) -> Any:
             "Job ID": [job.id for job in jobs],
             "Execution ID": [job.attributes.executionId for job in jobs],
             "Status": [job.attributes.status for job in jobs],
-            "Tool": [job.attributes.toolId for job in jobs],
+            "Tool": [job.attributes.tool.id for job in jobs],
         }
     )
     return df

@@ -26,7 +26,6 @@ dependencies = [
     "pandas",
     "beartype",
     "tabulate",
-    "filetype",
     "httpx",
     "deeporigin-data-sdk==0.1.0a35",
     "humanize",
@@ -36,7 +35,8 @@ dependencies = [
     "pyjwt",
     "cryptography",
     "python-box",
-    "do-sdk-platform==1.1.0",
+    "do-sdk-platform==2.0.0",
+    "urllib3>=2.0.0"
 ]
 dynamic = ["version"]
 

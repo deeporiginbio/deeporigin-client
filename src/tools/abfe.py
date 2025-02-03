@@ -148,7 +148,7 @@ def emeq(
 
     kwargs = locals()
 
-    tool_id = "deeporigin/md-suite-emeq"
+    tool_key = "deeporigin.md-suite-emeq"
 
     database = _ensure_database(ABFE_DB)
 
@@ -186,7 +186,7 @@ def emeq(
     run._process_job(
         inputs=inputs,
         outputs=outputs,
-        tool_id=tool_id,
+        tool_key=tool_key,
         cols=database.cols,
     )
 
@@ -312,7 +312,8 @@ def _prep(
 
     print(f"Using row {row_id} in database at: {url}")
 
-    tool_id = "deeporigin/md-suite-prep"
+    tool_key = "deeporigin.md-suite-prep"
+
     inputs = {
         "ligand": {
             "columnId": "ligand",
@@ -353,7 +354,7 @@ def _prep(
     run._process_job(
         inputs=inputs,
         outputs=outputs,
-        tool_id=tool_id,
+        tool_key=tool_key,
         cols=database.cols,
     )
 
@@ -397,7 +398,7 @@ def solvation_fep(
 
     print(f"Using row {row_id} in database at: {url}")
 
-    tool_id = "deeporigin/md-suite-solvation"
+    tool_key = "deeporigin.md-suite-solvation"
 
     prod_md_options = {
         k: kwargs[k] if k in kwargs else v for k, v in prod_md_defaults.items()
@@ -444,7 +445,7 @@ def solvation_fep(
     run._process_job(
         inputs=inputs,
         outputs=outputs,
-        tool_id=tool_id,
+        tool_key=tool_key,
         cols=database.cols,
     )
 
@@ -488,7 +489,7 @@ def simple_md(
 
     print(f"Using row {row_id} in database at: {url}")
 
-    tool_id = "deeporigin/md-suite-md"
+    tool_key = "deeporigin.md-suite-md"
     inputs = {
         "input": {
             "columnId": "emeq_output",
@@ -516,7 +517,7 @@ def simple_md(
     run._process_job(
         inputs=inputs,
         outputs=outputs,
-        tool_id=tool_id,
+        tool_key=tool_key,
         cols=database.cols,
     )
 
@@ -574,7 +575,7 @@ def binding_fep(
         k: kwargs[k] if k in kwargs else v for k, v in prod_md_defaults.items()
     }
 
-    tool_id = "deeporigin/md-suite-abfe"
+    tool_key = "deeporigin.md-suite-abfe"
     inputs = {
         "input": {
             "columnId": "md_output",
@@ -615,6 +616,6 @@ def binding_fep(
     run._process_job(
         inputs=inputs,
         outputs=outputs,
-        tool_id=tool_id,
+        tool_key=tool_key,
         cols=database.cols,
     )

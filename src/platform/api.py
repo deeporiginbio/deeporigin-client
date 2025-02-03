@@ -129,13 +129,6 @@ def resolve_user(user_id: str):
 
 
 @beartype
-def whoami() -> dict:
-    """get details about currently signed in user"""
-
-    return _make_request("/users/me", verb="PATCH")
-
-
-@beartype
 def get_workstations() -> list[dict]:
     """get information about all workstations in the organization"""
     return _make_request(f"/computebenches/{_get_org_id()}")
@@ -212,7 +205,7 @@ def decode_access_token(token: Optional[str] = None) -> dict:
         if key["kid"] == kid:
             public_key = RSAAlgorithm.from_jwk(key)
             break
-        raise Exception(f"Key ID {kid} not found in JWKS.")
+        raise DeepOriginException(f"Key ID {kid} not found in JWKS.")
 
     # Decode the JWT using the public key
     return jwt.decode(
