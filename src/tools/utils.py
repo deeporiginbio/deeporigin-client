@@ -22,10 +22,10 @@ NON_TERMINAL_STATES = {"Created", "Queued", "Running"}
 
 @beartype
 def query_run_status(execution_id: str) -> str:
-    """Determine the status of a run, identified by job ID
+    """Determine the status of a run, identified by execution_id ID
 
     Args:
-        job_id (str): job ID
+        execution_id (str): execution_id ID
 
     Returns:
         One of "Created", "Queued", "Running", "Succeeded", or "Failed"
@@ -53,7 +53,7 @@ def query_run_status(execution_id: str) -> str:
 
 @beartype
 def wait_for_job(
-    job_id: str,
+    execution_id: str,
     *,
     poll_interval: int = 4,
 ) -> None:
@@ -62,7 +62,7 @@ def wait_for_job(
     This function is useful for blocking execution of your code till a specific task is complete.
 
     Args:
-        job_id (str): job ID. This is typically printed to screen and returned when a job is initialized.
+        execution_id (str): execution_id ID. This is typically printed to screen and returned when a job is initialized.
         poll_interval (int, optional): number of seconds to wait between polling. Defaults to 4.
 
     """
@@ -72,7 +72,7 @@ def wait_for_job(
     bs = "".join(["\b" for _ in range(txt_length)])
     while not (status == "Succeeded" or status == "Failed"):
         print(bs, end="", flush=True)
-        status = query_run_status(job_id)
+        status = query_run_status(execution_id)
         txt_length = len(status)
         print(status, end="", flush=True)
         time.sleep(poll_interval)
@@ -228,7 +228,10 @@ def make_payload(
 
 
 @beartype
-def _column_name_to_column_id(data: dict, cols: list) -> dict:
+def _column_name_to_column_id(
+    data: dict,
+    cols: list,
+) -> dict:
     """
     Recursively update all values for the key 'columnId' in a nested dictionary.
 
@@ -256,6 +259,7 @@ def _column_name_to_column_id(data: dict, cols: list) -> dict:
     return data
 
 
+@beartype
 def get_job_dataframe(update: bool = False) -> Any:
     """returns a dataframe of all jobs and statuses, reading from local cache
 
