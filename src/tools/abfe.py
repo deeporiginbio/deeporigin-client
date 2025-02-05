@@ -1,6 +1,6 @@
 """this module contains various functions to run steps of an ABFE workflow"""
 
-from dataclasses import asdict, dataclass, fields
+from dataclasses import asdict, dataclass, field, fields
 from pathlib import Path
 from typing import Literal, Optional, Union
 
@@ -10,7 +10,9 @@ from deeporigin.data_hub import api
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.tools import run
 from deeporigin.tools.toolkit import _ensure_columns, _ensure_database
+from deeporigin.tools.utils import query_run_status
 from deeporigin.utils.config import construct_resource_url
+from IPython.display import HTML, Javascript, display
 
 # constants and types
 ABFE_DB = "ABFE"
@@ -145,6 +147,9 @@ class ABFE:
 
     row_id: Optional[str] = None
 
+    _job_ids: dict = field(default_factory=dict)
+    _status: dict = field(default_factory=dict)
+
     def init(self):
         """Initialize an ABFE run. Upload ligand and protein files to Data Hub."""
 
@@ -188,13 +193,15 @@ class ABFE:
 
         self.row_id = row_id
 
+        self._status["init"] = "Succeeded"
+
     def complex_prep(
         self,
         params: SystemPrepParams = SystemPrepParams(),
     ):
         """Run complex prep on a ligand and protein pair, that exist as files on a row in the ABFE database. For this to work, the complex prep step must have been run first."""
 
-        _prep(
+        self._job_ids["complex_prep"] = _prep(
             name="complex",
             row_id=self.row_id,
             output_column_name="complex_prep_output",
@@ -202,13 +209,14 @@ class ABFE:
             include_protein=1,
             include_ligands=1,
         )
+        self._status["complex_prep"] = "NotStarted"
 
     @beartype
     def ligand_prep(
         self,
         params: SystemPrepParams = SystemPrepParams(),
     ):
-        _prep(
+        self._job_ids["ligand_prep"] = _prep(
             name="complex",
             row_id=self.row_id,
             output_column_name="ligand_prep_output",
@@ -216,6 +224,31 @@ class ABFE:
             include_protein=0,
             include_ligands=1,
         )
+        self._status["ligand_prep"] = "NotStarted"
+
+    def status(self):
+        node_statuses = {
+            "init": "NotStarted",
+            "complex_prep": "NotStarted",
+            "ligand_prep": "NotStarted",
+            "solvation_FEP": "NotStarted",
+            "simple_MD": "NotStarted",
+            "binding_FEP": "NotStarted",
+            "DeltaG": "NotStarted",
+        }
+
+        keys = self._job_ids.keys()
+
+        for key in keys:
+            if self._status[key] == "Succeeded" or self._status[key] == "Failed":
+                continue
+
+            # IN NON-terminal state. update
+            self._status[key] = query_run_status(self._job_ids[key])
+
+        node_statuses.update(self._status)
+
+        render_mermaid_with_statuses(node_statuses)
 
 
 @beartype
@@ -301,7 +334,7 @@ def _prep(
     sysprep_params: SystemPrepParams,
     include_protein: int = 1,
     include_ligands: int = 1,
-) -> None:
+) -> str:
     """Function to prepare uploaded Ligand and protein files using Deep Origin MDSuite. Use this function to run system prep on a ligand and protein pair, that exist as files on a row in the ABFE database."""
 
     database = _ensure_db_for_abfe()
@@ -342,12 +375,14 @@ def _prep(
         }
     }
 
-    run._process_job(
+    job_id = run._process_job(
         inputs=inputs,
         outputs=outputs,
         tool_key=tool_key,
         cols=database.cols,
     )
+
+    return job_id
 
 
 def solvation_fep(
@@ -609,4 +644,100 @@ def binding_fep(
         outputs=outputs,
         tool_key=tool_key,
         cols=database.cols,
+    )
+
+
+@beartype
+def render_mermaid_with_statuses(node_status: dict[str, str] = None) -> None:
+    """
+    Render a Mermaid diagram where each node is drawn as a rounded rectangle
+    with a color indicating its status.
+
+    Any node not specified in the node_status dict will default to "notStarted".
+
+    The diagram uses fixed edges:
+      init --> complex_prep
+      init --> ligand_prep
+      ligand_prep --> solvation_FEP
+      solvation_FEP --> DeltaG
+      complex_prep --> simple_MD --> binding_FEP --> DeltaG
+    """
+    # Define the fixed nodes in the diagram.
+    nodes = [
+        "init",
+        "complex_prep",
+        "ligand_prep",
+        "solvation_FEP",
+        "simple_MD",
+        "binding_FEP",
+        "DeltaG",
+    ]
+
+    # Use an empty dictionary if none is provided.
+    if node_status is None:
+        node_status = {}
+
+    # Build node definitions. For each node, use the provided status or default to "notStarted".
+    node_defs = ""
+    for node in nodes:
+        status = node_status.get(node, "NotStarted")
+        node_defs += f"    {node}({node}):::{status};\n"
+
+    # Define the fixed edges of the diagram.
+    edges = """
+    init --> complex_prep;
+    init --> ligand_prep;
+    ligand_prep --> solvation_FEP;
+    solvation_FEP --> DeltaG;
+    complex_prep --> simple_MD --> binding_FEP --> DeltaG;
+    """
+
+    # Build the complete Mermaid diagram definition.
+    mermaid_code = f"""
+graph LR;
+    %% Define styles for statuses:
+    classDef NotStarted fill:#cccccc,stroke:#333,stroke-width:2px;
+    classDef Queued fill:#cccccc,stroke:#222,stroke-width:2px;
+    classDef Succeeded    fill:#90ee90,stroke:#333,stroke-width:2px;
+    classDef Running       fill:#87CEFA,stroke:#333,stroke-width:2px;
+    classDef failed     fill:#ff7f7f,stroke:#333,stroke-width:2px;
+
+{node_defs}
+{edges}
+    """
+
+    # Render the diagram using your helper function.
+    render_mermaid(mermaid_code)
+
+    # Define HTML for the legend. Each status is displayed as a colored span.
+    legend_html = """
+    <div style="margin-top: 20px; font-family: sans-serif;">
+      <span style="background-color:#cccccc; color: black; padding:2px 4px; margin: 0 8px;">NotStarted</span>
+      <span style="background-color:#90ee90; color: black; padding:2px 4px; margin: 0 8px;">Suceedeed</span>
+      <span style="background-color:#87CEFA; color: black; padding:2px 4px; margin: 0 8px;">Running</span>
+      <span style="background-color:#ff7f7f; color: black; padding:2px 4px; margin: 0 8px;">Failed</span>
+    </div>
+    """
+    # Display the legend below the Mermaid diagram.
+    display(HTML(legend_html))
+
+
+def render_mermaid(diagram_code: str):
+    """
+    Renders a Mermaid diagram in a Jupyter Notebook cell.
+
+    Parameters:
+      diagram_code (str): The Mermaid diagram definition, e.g.,
+        'graph TD; A-->B;'
+    """
+    # Create the HTML for the diagram.
+    diagram_html = f'<div class="mermaid">{diagram_code}</div>'
+    display(HTML(diagram_html))
+
+    # Call mermaid.init() to process the new Mermaid diagram.
+    # This forces Mermaid to scan for elements with the "mermaid" class.
+    display(
+        Javascript(
+            'mermaid.init(undefined, document.getElementsByClassName("mermaid"));'
+        )
     )
