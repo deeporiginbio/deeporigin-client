@@ -8,30 +8,18 @@ from typing import Any, Optional, Union
 from urllib.parse import urlparse, urlunparse
 
 from beartype import beartype
-
 # this import is to allow us to use functions
 # not marked in __all__ in _api
 from deeporigin.data_hub import _api
-
-# this import is to make sure that all simply-wrapped
-# functions in _api are available in api (this module)
 from deeporigin.data_hub._api import *  # noqa: F403
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.platform.api import get_user_name
-from deeporigin.utils.constants import (
-    PREFIXES,
-    Cardinality,
-    DataType,
-    DatabaseReturnType,
-    IDFormat,
-    ObjectType,
-)
+from deeporigin.utils.constants import (PREFIXES, Cardinality,
+                                        DatabaseReturnType, DataType, IDFormat,
+                                        ObjectType)
 from deeporigin.utils.core import find_last_updated_row, sha256_checksum
-from deeporigin.utils.network import (
-    _parse_params_from_url,
-    check_for_updates,
-    download_sync,
-)
+from deeporigin.utils.network import (_parse_params_from_url,
+                                      check_for_updates, download_sync)
 from tqdm import tqdm
 
 check_for_updates()
@@ -1622,3 +1610,33 @@ def add_database_column(
     )
 
     return response
+
+
+@beartype
+def add_smiles_column(
+    *,
+    database_id: str,
+    name: str,
+    client=None,
+    _stash: bool = False,
+):
+    """Add a SMILES column, with a inline 2D viewer configured
+
+    Args:
+        database_id: ID (or human ID) of a database on Deep Origin.
+        name: name of the column
+
+
+    """
+    column = {
+        "cardinality": "one",
+        "cellJsonSchema": {"format": "smiles"},
+        "inlineViewer": "molecule2d",
+        "name": name,
+        "type": "text",
+    }
+
+    return _api.add_database_column(
+        column=column,
+        database_id=database_id,
+    )

@@ -1,13 +1,18 @@
 """this module contains various functions to run steps of an ABFE workflow"""
 
-from typing import Literal
+from dataclasses import asdict, dataclass, field, fields
+from pathlib import Path
+from typing import Literal, Optional, Union
 
 from beartype import beartype
+from deeporigin import chemistry
 from deeporigin.data_hub import api
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.tools import run
 from deeporigin.tools.toolkit import _ensure_columns, _ensure_database
+from deeporigin.tools.utils import query_run_status
 from deeporigin.utils.config import construct_resource_url
+from IPython.display import HTML, Javascript, display
 
 # constants and types
 ABFE_DB = "ABFE"
@@ -53,61 +58,29 @@ emeq_md_defaults = {
 
 
 @beartype
-def init(
-    *,
-    ligand_file: str,
-    protein_file: str,
-) -> str:
-    """Initialize an ABFE run. Upload ligand and protein files to Data Hub."""
-
-    _ensure_db_for_abfe()
-
-    url = construct_resource_url(
-        name=ABFE_DB,
-        row_type="database",
-    )
-
-    print(f"Using database at: {url}")
-    print("🧬 Uploading files to database...")
-
-    response = api.upload_file_to_new_database_row(
-        database_id=ABFE_DB,
-        column_id="ligand",
-        file_path=ligand_file,
-    )
-
-    row_id = response.rows[0].hid
-
-    file = api.upload_file(file_path=protein_file)
-
-    api.assign_files_to_cell(
-        file_ids=[file.id],
-        database_id=ABFE_DB,
-        column_id="protein",
-        row_id=row_id,
-    )
-
-    print(f"🧬 Files uploaded to row {row_id}.")
-
-    return row_id
-
-
-@beartype
 def _ensure_db_for_abfe() -> dict:
     """ensure that there is a database for FEP on Data Hub"""
+
+    database = _ensure_database(ABFE_DB)
+
+    try:
+        api.add_smiles_column(
+            name="Ligand (2D)",
+            database_id=ABFE_DB,
+        )
+    except Exception:
+        pass
 
     required_columns = [
         dict(name="ligand", type="file"),
         dict(name="protein", type="file"),
         dict(name="complex_prep_output", type="file"),
-        dict(name="solvation_prep_output", type="file"),
+        dict(name="ligand_prep_output", type="file"),
         dict(name="emeq_output", type="file"),
         dict(name="solvation_output", type="file"),
         dict(name="md_output", type="file"),
         dict(name="abfe_output", type="file"),
     ]
-
-    database = _ensure_database(ABFE_DB)
 
     database = _ensure_columns(
         database=database,
@@ -115,6 +88,167 @@ def _ensure_db_for_abfe() -> dict:
     )
 
     return database
+
+
+@dataclass
+class SystemPrepParams:
+    charge_method: charge_methods = "bcc"
+    do_loop_modelling: bool = False
+    force_field: force_fields = "ff14SB"
+    is_lig_protonated: bool = True
+    is_protein_protonated: bool = True
+    keep_waters: bool = False
+    lig_force_field: ligand_force_fields = "gaff2"
+    padding: float = 1.0  # nm
+    save_gmx_files: bool = False
+
+
+@dataclass
+class Ligand:
+    file: Union[str, Path]
+    smiles_string: Optional[str] = None
+    is_protonated: Optional[bool] = False
+
+    def __post_init__(self):
+        if self.smiles_string is None:
+            self.smiles_string = chemistry.sdf_to_smiles(self.file)
+
+        if self.is_protonated is None:
+            self.is_protonated = chemistry.is_ligand_protonated(self.file)
+
+    def _repr_pretty_(self, p, cycle):
+        if cycle:
+            p.text("Ligand(...)")
+        else:
+            p.text("Ligand(")
+
+            with p.group(2, "\n  ", "\n"):
+                all_fields = fields(self)
+                for idx, field in enumerate(all_fields):
+                    value = getattr(self, field.name)
+                    p.text(f"{field.name}: {value!r}")
+                    # Only add a breakable if this isn't the last field.
+                    if idx < len(all_fields) - 1:
+                        p.breakable()
+            p.text(")")
+
+
+@dataclass
+class Protein:
+    file: str | Path
+
+
+@dataclass
+class ABFE:
+    """ABFE class"""
+
+    ligand: Ligand
+    protein: Protein
+
+    row_id: Optional[str] = None
+
+    _job_ids: dict = field(default_factory=dict)
+    _status: dict = field(default_factory=dict)
+
+    def init(self):
+        """Initialize an ABFE run. Upload ligand and protein files to Data Hub."""
+
+        database = _ensure_db_for_abfe()
+
+        smiles_column_id = [col.id for col in database.cols if col.name == "SMILES"][0]
+
+        url = construct_resource_url(
+            name=ABFE_DB,
+            row_type="database",
+        )
+
+        print(f"Using database at: {url}")
+        print("🧬 Uploading files to database...")
+
+        response = api.upload_file_to_new_database_row(
+            database_id=ABFE_DB,
+            column_id="ligand",
+            file_path=self.ligand.file,
+        )
+
+        row_id = response.rows[0].hid
+
+        file = api.upload_file(file_path=self.protein.file)
+
+        api.assign_files_to_cell(
+            file_ids=[file.id],
+            database_id=ABFE_DB,
+            column_id="protein",
+            row_id=row_id,
+        )
+
+        print(f"🧬 Files uploaded to row {row_id}.")
+
+        api.set_cell_data(
+            self.ligand.smiles_string,
+            database_id=ABFE_DB,
+            row_id=row_id,
+            column_id=smiles_column_id,
+        )
+
+        self.row_id = row_id
+
+        self._status["init"] = "Succeeded"
+
+    def complex_prep(
+        self,
+        params: SystemPrepParams = SystemPrepParams(),
+    ):
+        """Run complex prep on a ligand and protein pair, that exist as files on a row in the ABFE database. For this to work, the complex prep step must have been run first."""
+
+        self._job_ids["complex_prep"] = _prep(
+            name="complex",
+            row_id=self.row_id,
+            output_column_name="complex_prep_output",
+            sysprep_params=params,
+            include_protein=1,
+            include_ligands=1,
+        )
+        self._status["complex_prep"] = "NotStarted"
+
+    @beartype
+    def ligand_prep(
+        self,
+        params: SystemPrepParams = SystemPrepParams(),
+    ):
+        self._job_ids["ligand_prep"] = _prep(
+            name="complex",
+            row_id=self.row_id,
+            output_column_name="ligand_prep_output",
+            sysprep_params=params,
+            include_protein=0,
+            include_ligands=1,
+        )
+        self._status["ligand_prep"] = "NotStarted"
+
+    def status(self):
+        node_statuses = {
+            "init": "NotStarted",
+            "complex_prep": "NotStarted",
+            "ligand_prep": "NotStarted",
+            "solvation_FEP": "NotStarted",
+            "simple_MD": "NotStarted",
+            "binding_FEP": "NotStarted",
+            "DeltaG": "NotStarted",
+        }
+
+        keys = self._job_ids.keys()
+
+        for key in keys:
+            if self._status[key] == "Succeeded" or self._status[key] == "Failed":
+                continue
+
+            # IN NON-terminal state. update
+            self._status[key] = query_run_status(self._job_ids[key])
+
+        node_statuses.update(self._status)
+
+        render_mermaid_with_statuses(node_statuses)
 
 
 @beartype
@@ -192,116 +326,16 @@ def emeq(
 
 
 @beartype
-def complex_prep(
-    row_id: str,
-    *,
-    keep_waters: bool = True,
-    save_gmx_files: bool = False,
-    is_lig_protonated: bool = True,
-    is_protein_protonated: bool = True,
-    do_loop_modelling: bool = False,
-    charge_method: charge_methods = "bcc",
-    lig_force_field: ligand_force_fields = "gaff2",
-    padding: float = 1.0,
-    system_name: str = "complex",
-    force_field: force_fields = "ff14SB",
-) -> None:
-    """Function to prepare uploaded Ligand and protein files using Deep Origin MDSuite. Use this function to run system prep on a ligand and protein pair, that exist as files on a row in the ABFE database.
-
-    Args:
-        row_id (str): row id that contains the ligand and protein files.
-        keep_waters (bool, optional): whether to keep water molecules in the system. Defaults to True.
-        save_gmx_files (bool, optional): whether to save gmx files. Defaults to False.
-        is_lig_protonated (bool, optional): whether the ligand is protonated. Defaults to True.
-        is_protein_protonated (bool, optional): whether the protein is protonated. Defaults to True.
-        do_loop_modelling (bool, optional): whether to do loop modelling. Defaults to False.
-        charge_method (str, optional): method to use for charge assignment. Defaults to "bcc".
-        lig_force_field (str, optional): ligand force field. Defaults to "gaff2".
-        padding (float, optional): padding to use. Defaults to 1.0.
-        force_field (str, optional): force field. Defaults to "ff14SB".
-        system_name (str, optional): name of the system. Defaults to "complex". This name can be anything.
-
-
-    """
-
-    kwargs = locals()
-
-    kwargs["include_protein"] = 1
-    kwargs["include_ligands"] = 1
-    kwargs["output_column_name"] = "complex_prep_output"
-
-    _prep(**kwargs)
-
-
-@beartype
-def solvation_prep(
-    row_id: str,
-    *,
-    is_lig_protonated: bool = True,
-    charge_method: charge_methods = "bcc",
-    lig_force_field: ligand_force_fields = "gaff2",
-    system_name: str = "ligand_prep",
-    force_field: force_fields = "ff14SB",
-) -> None:
-    """Function to prepare uploaded Ligand and protein files using Deep Origin MDSuite. Use this function to run system prep on a ligand and protein pair, that exist as files on a row in the ABFE database.
-
-    Args:
-        row_id (str): row id that contains the ligand and protein files.
-        is_lig_protonated (bool, optional): whether the ligand is protonated. Defaults to True.
-        charge_method (str, optional): method to use for charge assignment. Defaults to "bcc".
-        lig_force_field (str, optional): ligand force field. Defaults to "gaff2".
-        system_name (str, optional): name of the system. Defaults to "ligand_prep". This name can be anything.
-        force_field (str, optional): force field. Defaults to "ff14SB".
-
-
-    """
-    kwargs = locals()
-
-    kwargs["include_protein"] = 0
-    kwargs["include_ligands"] = 1
-    kwargs["output_column_name"] = "solvation_prep_output"
-
-    _prep(**kwargs)
-
-
-@beartype
 def _prep(
-    row_id: str,
     *,
-    include_protein: int,
-    include_ligands: int,
-    system_name: str,
+    name: str,
+    row_id: str,
     output_column_name: str,
-    keep_waters: bool = True,
-    save_gmx_files: bool = False,
-    is_lig_protonated: bool = True,
-    is_protein_protonated: bool = True,
-    do_loop_modelling: bool = False,
-    charge_method: charge_methods = "bcc",
-    lig_force_field: ligand_force_fields = "gaff2",
-    padding: float = 1.0,
-    force_field: force_fields = "ff14SB",
-) -> None:
-    """Function to prepare uploaded Ligand and protein files using Deep Origin MDSuite. Use this function to run system prep on a ligand and protein pair, that exist as files on a row in the ABFE database.
-
-    Args:
-        row_id (str): row id of the ligand and protein files.
-        keep_waters (bool, optional): whether to keep waters. Defaults to True.
-        save_gmx_files (bool, optional): whether to save gmx files. Defaults to False.
-        is_lig_protonated (bool, optional): whether the ligand is protonated. Defaults to True.
-        is_protein_protonated (bool, optional): whether the protein is protonated. Defaults to True.
-        do_loop_modelling (bool, optional): whether to do loop modelling. Defaults to False.
-        charge_method (charge_methods, optional): charge method. Defaults to "bcc".
-        lig_force_field (ligand_force_fields, optional): ligand force field. Defaults to "gaff2".
-        padding (float, optional): padding. Defaults to 1.0.
-        system_name (str, optional): system name. Defaults to "complex".
-        force_field (force_fields, optional): force field. Defaults to "ff14SB".
-
-    """
-
-    # input validation
-    if padding < 0.5 or padding > 2:
-        raise DeepOriginException("Padding must be greater than 0.5, and less than 2")
+    sysprep_params: SystemPrepParams,
+    include_protein: int = 1,
+    include_ligands: int = 1,
+) -> str:
+    """Function to prepare uploaded Ligand and protein files using Deep Origin MDSuite. Use this function to run system prep on a ligand and protein pair, that exist as files on a row in the ABFE database."""
 
     database = _ensure_db_for_abfe()
 
@@ -327,20 +361,10 @@ def _prep(
         },
         "force": 2,
         "test_run": 0,
-        "system": system_name,
+        "system": name,
         "include_ligands": include_ligands,
         "include_protein": include_protein,
-        "sysprep_params": {
-            "is_protein_protonated": is_protein_protonated,
-            "do_loop_modelling": do_loop_modelling,
-            "force_field": "ff14SB",
-            "padding": padding,
-            "keep_waters": keep_waters,
-            "save_gmx_files": save_gmx_files,
-            "is_lig_protonated": is_lig_protonated,
-            "charge_method": charge_method,
-            "lig_force_field": lig_force_field,
-        },
+        "sysprep_params": asdict(sysprep_params),
     }
 
     outputs = {
@@ -351,12 +375,14 @@ def _prep(
         }
     }
 
-    run._process_job(
+    job_id = run._process_job(
         inputs=inputs,
         outputs=outputs,
         tool_key=tool_key,
         cols=database.cols,
     )
+
+    return job_id
 
 
 def solvation_fep(
@@ -618,4 +644,100 @@ def binding_fep(
         outputs=outputs,
         tool_key=tool_key,
         cols=database.cols,
+    )
+
+
+@beartype
+def render_mermaid_with_statuses(node_status: dict[str, str] = None) -> None:
+    """
+    Render a Mermaid diagram where each node is drawn as a rounded rectangle
+    with a color indicating its status.
+
+    Any node not specified in the node_status dict will default to "notStarted".
+
+    The diagram uses fixed edges:
+      init --> complex_prep
+      init --> ligand_prep
+      ligand_prep --> solvation_FEP
+      solvation_FEP --> DeltaG
+      complex_prep --> simple_MD --> binding_FEP --> DeltaG
+    """
+    # Define the fixed nodes in the diagram.
+    nodes = [
+        "init",
+        "complex_prep",
+        "ligand_prep",
+        "solvation_FEP",
+        "simple_MD",
+        "binding_FEP",
+        "DeltaG",
+    ]
+
+    # Use an empty dictionary if none is provided.
+    if node_status is None:
+        node_status = {}
+
+    # Build node definitions. For each node, use the provided status or default to "notStarted".
+    node_defs = ""
+    for node in nodes:
+        status = node_status.get(node, "NotStarted")
+        node_defs += f"    {node}({node}):::{status};\n"
+
+    # Define the fixed edges of the diagram.
+    edges = """
+    init --> complex_prep;
+    init --> ligand_prep;
+    ligand_prep --> solvation_FEP;
+    solvation_FEP --> DeltaG;
+    complex_prep --> simple_MD --> binding_FEP --> DeltaG;
+    """
+
+    # Build the complete Mermaid diagram definition.
+    mermaid_code = f"""
+graph LR;
+    %% Define styles for statuses:
+    classDef NotStarted fill:#cccccc,stroke:#333,stroke-width:2px;
+    classDef Queued fill:#cccccc,stroke:#222,stroke-width:2px;
+    classDef Succeeded    fill:#90ee90,stroke:#333,stroke-width:2px;
+    classDef Running       fill:#87CEFA,stroke:#333,stroke-width:2px;
+    classDef failed     fill:#ff7f7f,stroke:#333,stroke-width:2px;
+
+{node_defs}
+{edges}
+    """
+
+    # Render the diagram using your helper function.
+    render_mermaid(mermaid_code)
+
+    # Define HTML for the legend. Each status is displayed as a colored span.
+    legend_html = """
+    <div style="margin-top: 20px; font-family: sans-serif;">
+      <span style="background-color:#cccccc; color: black; padding:2px 4px; margin: 0 8px;">NotStarted</span>
+      <span style="background-color:#90ee90; color: black; padding:2px 4px; margin: 0 8px;">Suceedeed</span>
+      <span style="background-color:#87CEFA; color: black; padding:2px 4px; margin: 0 8px;">Running</span>
+      <span style="background-color:#ff7f7f; color: black; padding:2px 4px; margin: 0 8px;">Failed</span>
+    </div>
+    """
+    # Display the legend below the Mermaid diagram.
+    display(HTML(legend_html))
+
+
+def render_mermaid(diagram_code: str):
+    """
+    Renders a Mermaid diagram in a Jupyter Notebook cell.
+
+    Parameters:
+      diagram_code (str): The Mermaid diagram definition, e.g.,
+        'graph TD; A-->B;'
+    """
+    # Create the HTML for the diagram.
+    diagram_html = f'<div class="mermaid">{diagram_code}</div>'
+    display(HTML(diagram_html))
+
+    # Call mermaid.init() to process the new Mermaid diagram.
+    # This forces Mermaid to scan for elements with the "mermaid" class.
+    display(
+        Javascript(
+            'mermaid.init(undefined, document.getElementsByClassName("mermaid"));'
+        )
     )

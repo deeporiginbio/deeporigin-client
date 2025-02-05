@@ -143,31 +143,6 @@ def _ensure_db_for_ligand_prep_meeko() -> None:
 
 
 @beartype
-def smiles_to_sdf(smiles: str, sdf_path: str) -> None:
-    """convert a SMILES string to a SDF file"""
-
-    from rdkit import Chem
-    from rdkit.Chem import AllChem, SDWriter
-
-    mol = Chem.MolFromSmiles(smiles)
-    if mol is None:
-        print(f"Invalid SMILES: {smiles}")
-
-    try:
-        Chem.Kekulize(mol)
-    except ValueError:
-        print(f"Failed to kekulize: {smiles}")
-
-    mol = Chem.AddHs(mol)
-
-    AllChem.EmbedMolecule(mol, AllChem.ETKDG())
-    AllChem.UFFOptimizeMolecule(mol)
-
-    with SDWriter(sdf_path) as writer:
-        writer.write(mol)
-
-
-@beartype
 def csv_to_sdfs(
     csv_file: str,
     smiles_column_name: str,
