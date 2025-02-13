@@ -1,9 +1,39 @@
 """module that contains some utility functions for chemistry"""
 
+import base64
+import io
 from typing import Optional
 
 from beartype import beartype
 from rdkit import Chem
+from rdkit.Chem import Draw
+
+
+@beartype
+def smiles_to_base64_png(
+    smiles: Optional[str],
+    size=(300, 10),
+) -> str:
+    """Convert a SMILES string to an inline base64 <img> tag."""
+
+    if not smiles:
+        return "N/A"
+
+    mol = Chem.MolFromSmiles(smiles)
+    if mol is None:
+        return "N/A"
+
+    img = Draw.MolToImage(mol, size=size, fitImage=False)
+
+    buffer = io.BytesIO()
+    img.save(buffer, format="PNG")
+    buffer.seek(0)
+    encoded = base64.b64encode(buffer.read()).decode("ascii")
+
+    return (
+        f"<img src='data:image/png;base64,{encoded}' "
+        f"style='max-width:{size[0]}px; max-height:{size[1]}px;'/>"
+    )
 
 
 @beartype

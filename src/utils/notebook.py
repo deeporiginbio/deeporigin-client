@@ -1,7 +1,7 @@
 """utility functions for working in Jupyter notebooks"""
 
 from beartype import beartype
-from IPython.display import HTML, Javascript, display
+from IPython.display import HTML, display
 
 
 @beartype
