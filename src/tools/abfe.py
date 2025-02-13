@@ -1,8 +1,9 @@
 """this module contains various functions to run steps of an ABFE workflow"""
 
+import os
 from dataclasses import asdict, dataclass, field, fields
 from pathlib import Path
-from typing import Literal, Optional, Union
+from typing import List, Literal, Optional, Union
 
 from beartype import beartype
 from deeporigin import chemistry
@@ -12,7 +13,8 @@ from deeporigin.tools import run
 from deeporigin.tools.toolkit import _ensure_columns, _ensure_database
 from deeporigin.tools.utils import query_run_status
 from deeporigin.utils.config import construct_resource_url
-from IPython.display import HTML, Javascript, display
+from deeporigin.utils.notebook import render_mermaid
+from IPython.display import HTML, display
 
 # constants and types
 ABFE_DB = "ABFE"
@@ -36,27 +38,6 @@ integrators = Literal[
 """Integrator available for simulation"""
 
 
-prod_md_defaults = {
-    "integrator": "BAOABIntegrator",
-    "Δt": 0.004,
-    "T": 298.15,
-    "cutoff": 0.9,
-    "fourier_spacing": 0.12,
-    "hydrogen_mass": 2,
-    "barostat": "MonteCarloBarostat",
-    "barostat_exchange_interval": 500,
-}
-
-
-emeq_md_defaults = {
-    "Δt": 0.004,
-    "T": 298.15,
-    "cutoff": 0.9,
-    "fourier_spacing": 0.12,
-    "hydrogen_mass": 2,
-}
-
-
 @beartype
 def _ensure_db_for_abfe() -> dict:
     """ensure that there is a database for FEP on Data Hub"""
@@ -65,21 +46,23 @@ def _ensure_db_for_abfe() -> dict:
 
     try:
         api.add_smiles_column(
-            name="Ligand (2D)",
+            name="Ligand",
             database_id=ABFE_DB,
         )
     except Exception:
         pass
 
     required_columns = [
-        dict(name="ligand", type="file"),
-        dict(name="protein", type="file"),
+        dict(name="FEP ΔG (kcal/mol)", type="float"),
+        dict(name="ligand_file", type="file"),
+        dict(name="protein_file", type="file"),
         dict(name="complex_prep_output", type="file"),
         dict(name="ligand_prep_output", type="file"),
         dict(name="emeq_output", type="file"),
         dict(name="solvation_output", type="file"),
         dict(name="md_output", type="file"),
         dict(name="abfe_output", type="file"),
+        dict(name="end_to_end_output", type="file"),
     ]
 
     database = _ensure_columns(
@@ -88,6 +71,18 @@ def _ensure_db_for_abfe() -> dict:
     )
 
     return database
+
+
+@dataclass
+class MDParams:
+    integrator: integrators = "BAOABIntegrator"
+    Δt: float = 0.004
+    T: float = 298.15
+    cutoff: float = 0.9
+    fourier_spacing: float = 0.12
+    hydrogen_mass: int = 2
+    barostat: str = "MonteCarloBarostat"
+    barostat_exchange_interval: int = 500
 
 
 @dataclass
@@ -140,22 +135,50 @@ class Protein:
 
 @dataclass
 class ABFE:
-    """ABFE class"""
+    """ABFE class that can work with one protein and many ligands"""
 
-    ligand: Ligand
+    ligands: List[Ligand]
     protein: Protein
 
-    row_id: Optional[str] = None
+    row_ids: Optional[list[str]] = None
 
     _job_ids: dict = field(default_factory=dict)
     _status: dict = field(default_factory=dict)
 
+    @classmethod
+    def from_dir(cls, directory: str) -> "ABFE":
+        """initialize an ABFE class given some files in a directory"""
+
+        sdf_files = sorted(
+            [
+                os.path.join(directory, f)
+                for f in os.listdir(directory)
+                if f.lower().endswith(".sdf")
+            ]
+        )
+        ligands = [Ligand(sdf_file) for sdf_file in sdf_files]
+
+        pdb_files = [
+            os.path.join(directory, f)
+            for f in os.listdir(directory)
+            if f.lower().endswith(".pdb")
+        ]
+
+        if len(pdb_files) != 1:
+            raise ValueError(
+                f"Expected exactly one PDB file in the directory, but found {len(pdb_files)}."
+            )
+        protein_file = pdb_files[0]
+        protein = Protein(protein_file)
+
+        return cls(ligands=ligands, protein=protein)
+
     def init(self):
-        """Initialize an ABFE run. Upload ligand and protein files to Data Hub."""
+        """Initialize an ABFE run. Upload ligand(s) and protein files to Data Hub."""
 
         database = _ensure_db_for_abfe()
 
-        smiles_column_id = [col.id for col in database.cols if col.name == "SMILES"][0]
+        smiles_column_id = [col.id for col in database.cols if col.name == "Ligand"][0]
 
         url = construct_resource_url(
             name=ABFE_DB,
@@ -165,35 +188,40 @@ class ABFE:
         print(f"Using database at: {url}")
         print("🧬 Uploading files to database...")
 
-        response = api.upload_file_to_new_database_row(
-            database_id=ABFE_DB,
-            column_id="ligand",
-            file_path=self.ligand.file,
-        )
+        self.row_ids = []
 
-        row_id = response.rows[0].hid
+        # now upload the protein
+        protein_file = api.upload_file(file_path=self.protein.file)
 
-        file = api.upload_file(file_path=self.protein.file)
+        for ligand in self.ligands:
+            # for each ligand, upload the ligand to a new row
+            response = api.upload_file_to_new_database_row(
+                database_id=ABFE_DB,
+                column_id="ligand_file",
+                file_path=ligand.file,
+            )
 
-        api.assign_files_to_cell(
-            file_ids=[file.id],
-            database_id=ABFE_DB,
-            column_id="protein",
-            row_id=row_id,
-        )
+            row_id = response.rows[0].hid
+
+            self.row_ids.append(row_id)
+
+            api.set_cell_data(
+                ligand.smiles_string,
+                database_id=ABFE_DB,
+                row_id=row_id,
+                column_id=smiles_column_id,
+            )
+
+            api.assign_files_to_cell(
+                file_ids=[protein_file.id],
+                database_id=ABFE_DB,
+                column_id="protein_file",
+                row_id=row_id,
+            )
 
         print(f"🧬 Files uploaded to row {row_id}.")
 
-        api.set_cell_data(
-            self.ligand.smiles_string,
-            database_id=ABFE_DB,
-            row_id=row_id,
-            column_id=smiles_column_id,
-        )
-
-        self.row_id = row_id
-
-        self._status["init"] = "Succeeded"
+        # self._status["init"] = "Succeeded"
 
     def complex_prep(
         self,
@@ -226,6 +254,73 @@ class ABFE:
         )
         self._status["ligand_prep"] = "NotStarted"
 
+    @beartype
+    def emeq(
+        self,
+        *,
+        system_name: str = "complex",
+        nvt_heating_ns: float = 0.1,
+        npt_reduce_restraints_ns: float = 0.2,
+        params: MDParams = MDParams(),
+    ) -> None:
+        """Run emeq on a ligand and protein pair, that exist as files on a row in the ABFE database. For this to work, the complex prep step must have been run first.
+
+        Args:
+            row_id (str): row id that contains the ligand and protein files.
+            system_name (str, optional): name of the system. Defaults to "complex". This name can be anything.
+            fourier_spacing (float, optional): spacing of the fourier grid. Defaults to 0.12.
+            hydrogen_mass (int, optional): hydrogen mass. Defaults to 2.
+            cutoff (float, optional): cutoff. Defaults to 0.9.
+            T (float, optional): temperature. Defaults to 298.15.
+            Δt (float, optional): time step. Defaults to 0.004.
+            npt_reduce_restraints_ns (float, optional): time step. Defaults to 0.2.
+            nvt_heating_ns (float, optional): time step. Defaults to 0.1.
+
+
+        """
+
+        params = asdict(params)
+
+        tool_key = "deeporigin.md-suite-emeq"
+
+        database = _ensure_database(ABFE_DB)
+
+        inputs = {
+            "input": {
+                "columnId": "complex_prep_output",
+                "rowId": self.row_id,
+                "databaseId": database.hid,
+            },
+            "force": 1,
+            "test_run": 0,
+            "system": system_name,
+            "run_name": "test-run",
+            "threads": 0,
+            "em_solvent": True,
+            "em_all": True,
+            "nvt_heating_ns": nvt_heating_ns,
+            "npt_reduce_restraints_ns": npt_reduce_restraints_ns,
+            "from_run": "__USE_SYSTEM",
+            "emeq_md_options": params,
+        }
+
+        outputs = {
+            "output_file": {
+                "columnId": "emeq_output",
+                "rowId": self.row_id,
+                "databaseId": database.hid,
+            }
+        }
+
+        self._job_ids["emeq"] = run._process_job(
+            inputs=inputs,
+            outputs=outputs,
+            tool_key=tool_key,
+            cols=database.cols,
+        )
+
+        self._status["emeq"] = "NotStarted"
+
     def status(self):
         node_statuses = {
             "init": "NotStarted",
@@ -249,80 +344,6 @@ class ABFE:
         node_statuses.update(self._status)
 
         render_mermaid_with_statuses(node_statuses)
-
-
-@beartype
-def emeq(
-    row_id: str,
-    *,
-    system_name: str = "complex",
-    fourier_spacing: float = 0.12,
-    hydrogen_mass: int = 2,
-    cutoff: float = 0.9,
-    T: float = 298.15,
-    Δt: float = 0.004,
-    npt_reduce_restraints_ns: float = 0.2,
-    nvt_heating_ns: float = 0.1,
-) -> None:
-    """Run emeq on a ligand and protein pair, that exist as files on a row in the ABFE database. For this to work, the complex prep step must have been run first.
-
-    Args:
-        row_id (str): row id that contains the ligand and protein files.
-        system_name (str, optional): name of the system. Defaults to "complex". This name can be anything.
-        fourier_spacing (float, optional): spacing of the fourier grid. Defaults to 0.12.
-        hydrogen_mass (int, optional): hydrogen mass. Defaults to 2.
-        cutoff (float, optional): cutoff. Defaults to 0.9.
-        T (float, optional): temperature. Defaults to 298.15.
-        Δt (float, optional): time step. Defaults to 0.004.
-        npt_reduce_restraints_ns (float, optional): time step. Defaults to 0.2.
-        nvt_heating_ns (float, optional): time step. Defaults to 0.1.
-
-
-    """
-
-    kwargs = locals()
-
-    tool_key = "deeporigin.md-suite-emeq"
-
-    database = _ensure_database(ABFE_DB)
-
-    emeq_md_options = {
-        k: kwargs[k] if k in kwargs else v for k, v in emeq_md_defaults.items()
-    }
-
-    inputs = {
-        "input": {
-            "columnId": "complex_prep_output",
-            "rowId": row_id,
-            "databaseId": database.hid,
-        },
-        "force": 1,
-        "test_run": 0,
-        "system": system_name,
-        "run_name": "test-run",
-        "threads": 0,
-        "em_solvent": True,
-        "em_all": True,
-        "nvt_heating_ns": nvt_heating_ns,
-        "npt_reduce_restraints_ns": npt_reduce_restraints_ns,
-        "from_run": "__USE_SYSTEM",
-        "emeq_md_options": emeq_md_options,
-    }
-
-    outputs = {
-        "output_file": {
-            "columnId": "emeq_output",
-            "rowId": row_id,
-            "databaseId": database.hid,
-        }
-    }
-
-    run._process_job(
-        inputs=inputs,
-        outputs=outputs,
-        tool_key=tool_key,
-        cols=database.cols,
-    )
 
 
 @beartype
@@ -648,23 +669,20 @@ def binding_fep(
 
 
 @beartype
-def render_mermaid_with_statuses(node_status: dict[str, str] = None) -> None:
+def render_mermaid_with_statuses(
+    node_status: dict[str, str] = None,
+) -> None:
     """
     Render a Mermaid diagram where each node is drawn as a rounded rectangle
     with a color indicating its status.
 
     Any node not specified in the node_status dict will default to "notStarted".
 
-    The diagram uses fixed edges:
-      init --> complex_prep
-      init --> ligand_prep
-      ligand_prep --> solvation_FEP
-      solvation_FEP --> DeltaG
-      complex_prep --> simple_MD --> binding_FEP --> DeltaG
     """
     # Define the fixed nodes in the diagram.
     nodes = [
         "init",
+        "emeq",
         "complex_prep",
         "ligand_prep",
         "solvation_FEP",
@@ -687,9 +705,9 @@ def render_mermaid_with_statuses(node_status: dict[str, str] = None) -> None:
     edges = """
     init --> complex_prep;
     init --> ligand_prep;
-    ligand_prep --> solvation_FEP;
+    ligand_prep ----> solvation_FEP;
     solvation_FEP --> DeltaG;
-    complex_prep --> simple_MD --> binding_FEP --> DeltaG;
+    complex_prep --> emeq --> simple_MD --> binding_FEP --> DeltaG;
     """
 
     # Build the complete Mermaid diagram definition.
@@ -720,24 +738,3 @@ graph LR;
     """
     # Display the legend below the Mermaid diagram.
     display(HTML(legend_html))
-
-
-def render_mermaid(diagram_code: str):
-    """
-    Renders a Mermaid diagram in a Jupyter Notebook cell.
-
-    Parameters:
-      diagram_code (str): The Mermaid diagram definition, e.g.,
-        'graph TD; A-->B;'
-    """
-    # Create the HTML for the diagram.
-    diagram_html = f'<div class="mermaid">{diagram_code}</div>'
-    display(HTML(diagram_html))
-
-    # Call mermaid.init() to process the new Mermaid diagram.
-    # This forces Mermaid to scan for elements with the "mermaid" class.
-    display(
-        Javascript(
-            'mermaid.init(undefined, document.getElementsByClassName("mermaid"));'
-        )
-    )
