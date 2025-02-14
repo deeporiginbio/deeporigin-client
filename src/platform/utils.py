@@ -135,6 +135,7 @@ def _create_function(*, method_path: str, api_name: str):
 
         if 400 <= response.status < 600:
             content = response.read().decode("utf-8", errors="replace")
+
             raise ValueError(
                 f"HTTP request failed with status: {response.status} - {response.reason} - {content}"
             )
