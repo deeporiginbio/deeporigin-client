@@ -3,9 +3,9 @@
 import importlib.resources
 import json
 import os
-from dataclasses import asdict, dataclass, field, fields
+from dataclasses import dataclass, field, fields
 from pathlib import Path
-from typing import List, Literal, Optional, Union
+from typing import List, Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -13,54 +13,14 @@ from beartype import beartype
 from box import Box
 from deeporigin import chemistry
 from deeporigin.data_hub import api
-from deeporigin.exceptions import DeepOriginException
 from deeporigin.tools import run
 from deeporigin.tools.toolkit import _ensure_columns, _ensure_database
 from deeporigin.tools.utils import query_run_status
 from deeporigin.utils.config import construct_resource_url
-from deeporigin.utils.notebook import render_mermaid
 from IPython.display import HTML, display
 
 # constants and types
 ABFE_DB = "ABFE"
-
-charge_methods = Literal["gas", "bcc"]
-"""Available charge methods"""
-
-ligand_force_fields = Literal["gaff", "gaff2", "openff"]
-"""Available ligand force fields. `gaff` is General Amber Force Field, gaff2 is an updated version of gaff. """
-
-force_fields = Literal["ff14SB", "ff99SB-ildn"]
-"""Available force fields"""
-
-integrators = Literal[
-    "BAOABIntegrator",
-    "LangevinIntegrator",
-    "SteepestDescentMinimizer",
-    "LeapFrogIntegrator",
-    "SoluteSolventSplittingIntegrator",
-]
-"""Integrator available for simulation"""
-
-
-prod_md_defaults = {
-    "integrator": "BAOABIntegrator",
-    "Δt": 0.004,
-    "T": 298.15,
-    "cutoff": 0.9,
-    "fourier_spacing": 0.12,
-    "hydrogen_mass": 2,
-    "barostat": "MonteCarloBarostat",
-    "barostat_exchange_interval": 500,
-}
-
-emeq_md_defaults = {
-    "Δt": 0.004,
-    "T": 298.15,
-    "cutoff": 0.9,
-    "fourier_spacing": 0.12,
-    "hydrogen_mass": 2,
-}
 
 
 class PrettyDict(Box):
@@ -120,31 +80,6 @@ def _ensure_db_for_abfe() -> dict:
 
 
 @dataclass
-class MDParams:
-    integrator: integrators = "BAOABIntegrator"
-    Δt: float = 0.004
-    T: float = 298.15
-    cutoff: float = 0.9
-    fourier_spacing: float = 0.12
-    hydrogen_mass: int = 2
-    barostat: str = "MonteCarloBarostat"
-    barostat_exchange_interval: int = 500
-
-
-@dataclass
-class SystemPrepParams:
-    charge_method: charge_methods = "bcc"
-    do_loop_modelling: bool = False
-    force_field: force_fields = "ff14SB"
-    is_lig_protonated: bool = True
-    is_protein_protonated: bool = True
-    keep_waters: bool = False
-    lig_force_field: ligand_force_fields = "gaff2"
-    padding: float = 1.0  # nm
-    save_gmx_files: bool = False
-
-
-@dataclass
 class Ligand:
     file: Union[str, Path]
     smiles_string: Optional[str] = None
@@ -189,7 +124,7 @@ class ABFE:
     delta_gs: List[float] = field(default_factory=list)
     row_ids: List[str] = field(default_factory=list)
 
-    params: PrettyDict = field(default_factory=_load_params(step="abfe"))
+    params: Optional[dict] = None
 
     df: pd.DataFrame = field(
         default_factory=lambda: pd.DataFrame(
@@ -256,6 +191,15 @@ class ABFE:
         """Initialize an ABFE run. Upload ligand(s) and protein files to Data Hub."""
 
         database = _ensure_db_for_abfe()
+
+        # get params in
+        self.params = dict()
+        self.params.binding_fep = _load_params("binding_fep")
+        self.params.complex_prep = _load_params("complex_prep")
+        self.params.emeq = _load_params("emeq")
+        self.params.ligand_prep = _load_params("ligand_prep")
+        self.params.simple_md = _load_params("simple_md")
+        self.params.solvation_fep = _load_params("solvation_fep")
 
         smiles_column_id = [col.id for col in database.cols if col.name == "Ligand"][0]
 
@@ -394,6 +338,60 @@ class ABFE:
 
         node_statuses.update(self._status)
 
+    def emeq(self):
+        """run EMEQ step on each ligand"""
+
+        for row_id in self.row_ids:
+            emeq(
+                row_id=row_id,
+                params=self.params.emeq,
+            )
+
+    def complex_prep(self):
+        """run complex prep step on each ligand"""
+
+        for row_id in self.row_ids:
+            complex_prep(
+                row_id=row_id,
+                params=self.params.complex_prep,
+            )
+
+    def ligand_prep(self):
+        """run ligand prep step on each ligand"""
+
+        for row_id in self.row_ids:
+            ligand_prep(
+                row_id=row_id,
+                params=self.params.ligand_prep,
+            )
+
+    def simple_md(self):
+        """run simple MD step on each ligand"""
+
+        for row_id in self.row_ids:
+            simple_md(
+                row_id=row_id,
+                params=self.params.simple_md,
+            )
+
+    def solvation_fep(self):
+        """run solvation FEP step on each ligand"""
+
+        for row_id in self.row_ids:
+            solvation_fep(
+                row_id=row_id,
+                params=self.params.solvation_fep,
+            )
+
+    def binding_fep(self):
+        """run binding FEP step on each ligand"""
+
+        for row_id in self.row_ids:
+            binding_fep(
+                row_id=row_id,
+                params=self.params.binding_fep,
+            )
+
 
 def _run_e2e(
     *,
@@ -447,7 +445,11 @@ def _run_e2e(
 
 
 @beartype
-def emeq(row_id: str) -> None:
+def emeq(
+    *,
+    row_id: str,
+    params: Optional[dict] = None,
+) -> None:
     """Run emeq on a ligand and protein pair, that exist as files on a row in the ABFE database. For this to work, the complex prep step must have been run first.
 
     Args:
@@ -461,8 +463,10 @@ def emeq(row_id: str) -> None:
 
     database = _ensure_database(ABFE_DB)
 
-    inputs = _load_params("emeq")
-    inputs["input"] = {
+    if params is None:
+        params = _load_params("emeq")
+
+    params["input"] = {
         "columnId": "complex_prep_output",
         "rowId": row_id,
         "databaseId": database.hid,
@@ -477,7 +481,7 @@ def emeq(row_id: str) -> None:
     }
 
     run._process_job(
-        inputs=inputs,
+        inputs=params,
         outputs=outputs,
         tool_key=tool_key,
         cols=database.cols,
@@ -485,7 +489,11 @@ def emeq(row_id: str) -> None:
 
 
 @beartype
-def ligand_prep(row_id: str) -> None:
+def ligand_prep(
+    *,
+    row_id: str,
+    params: Optional[dict] = None,
+) -> None:
     """Function to prepare uploaded Ligand and protein files using Deep Origin MDSuite. Use this function to run system prep on a ligand and protein pair, that exist as files on a row in the ABFE database.
 
     Args:
@@ -497,13 +505,15 @@ def ligand_prep(row_id: str) -> None:
 
     tool_key = "deeporigin.md-suite-prep"
 
-    inputs = _load_params("ligand_prep")
-    inputs["ligand"] = {
+    if params is None:
+        params = _load_params("ligand_prep")
+
+    params["ligand"] = {
         "columnId": "ligand_file",
         "rowId": row_id,
         "databaseId": database.hid,
     }
-    inputs["protein"] = {
+    params["protein"] = {
         "columnId": "protein_file",
         "rowId": row_id,
         "databaseId": database.hid,
@@ -518,7 +528,7 @@ def ligand_prep(row_id: str) -> None:
     }
 
     run._process_job(
-        inputs=inputs,
+        inputs=params,
         outputs=outputs,
         tool_key=tool_key,
         cols=database.cols,
@@ -526,7 +536,11 @@ def ligand_prep(row_id: str) -> None:
 
 
 @beartype
-def complex_prep(row_id: str) -> None:
+def complex_prep(
+    *,
+    row_id: str,
+    params: Optional[dict] = None,
+) -> None:
     """Function to prepare uploaded Ligand and protein files using Deep Origin MDSuite. Use this function to run system prep on a ligand and protein pair, that exist as files on a row in the ABFE database.
 
     Args:
@@ -538,13 +552,15 @@ def complex_prep(row_id: str) -> None:
 
     tool_key = "deeporigin.md-suite-prep"
 
-    inputs = _load_params("complex_prep")
-    inputs["ligand"] = {
+    if params is None:
+        params = _load_params("ligand_prep")
+
+    params["ligand"] = {
         "columnId": "ligand_file",
         "rowId": row_id,
         "databaseId": database.hid,
     }
-    inputs["protein"] = {
+    params["protein"] = {
         "columnId": "protein_file",
         "rowId": row_id,
         "databaseId": database.hid,
@@ -559,14 +575,18 @@ def complex_prep(row_id: str) -> None:
     }
 
     run._process_job(
-        inputs=inputs,
+        inputs=params,
         outputs=outputs,
         tool_key=tool_key,
         cols=database.cols,
     )
 
 
-def solvation_fep(row_id: str) -> None:
+def solvation_fep(
+    *,
+    row_id: str,
+    params: Optional[dict] = None,
+) -> None:
     """Run a solvation simulation
 
 
@@ -576,17 +596,12 @@ def solvation_fep(row_id: str) -> None:
 
     database = _ensure_db_for_abfe()
 
-    url = construct_resource_url(
-        name=ABFE_DB,
-        row_type="database",
-    )
-
-    print(f"Using row {row_id} in database at: {url}")
-
     tool_key = "deeporigin.md-suite-solvation"
 
-    inputs = _load_params("solvation_fep")
-    inputs["input"] = {
+    if params is None:
+        params = _load_params("solvation_fep")
+
+    params["input"] = {
         "columnId": "ligand_prep_output",
         "rowId": row_id,
         "databaseId": ABFE_DB,
@@ -601,14 +616,18 @@ def solvation_fep(row_id: str) -> None:
     }
 
     run._process_job(
-        inputs=inputs,
+        inputs=params,
         outputs=outputs,
         tool_key=tool_key,
         cols=database.cols,
     )
 
 
-def simple_md(row_id: str):
+def simple_md(
+    *,
+    row_id: str,
+    params: Optional[dict] = None,
+):
     """Run a simple MD simulation
 
     Args:
@@ -619,8 +638,10 @@ def simple_md(row_id: str):
 
     tool_key = "deeporigin.md-suite-md"
 
-    inputs = _load_params("simple_md")
-    inputs["input"] = {
+    if params is None:
+        params = _load_params("simple_md")
+
+    params["input"] = {
         "columnId": "emeq_output",
         "rowId": row_id,
         "databaseId": ABFE_DB,
@@ -635,14 +656,18 @@ def simple_md(row_id: str):
     }
 
     run._process_job(
-        inputs=inputs,
+        inputs=params,
         outputs=outputs,
         tool_key=tool_key,
         cols=database.cols,
     )
 
 
-def binding_fep(row_id):
+def binding_fep(
+    *,
+    row_id: str,
+    params: Optional[dict] = None,
+):
     """Run an ABFE simulation
 
     Args:
@@ -654,8 +679,10 @@ def binding_fep(row_id):
 
     tool_key = "deeporigin.md-suite-abfe"
 
-    inputs = _load_params("binding_fep")
-    inputs["input"] = {
+    if params is None:
+        params = _load_params("binding_fep")
+
+    params["input"] = {
         "columnId": "md_output",
         "rowId": row_id,
         "databaseId": ABFE_DB,
@@ -670,7 +697,7 @@ def binding_fep(row_id):
     }
 
     run._process_job(
-        inputs=inputs,
+        inputs=params,
         outputs=outputs,
         tool_key=tool_key,
         cols=database.cols,
