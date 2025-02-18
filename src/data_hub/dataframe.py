@@ -284,7 +284,7 @@ class DataFrame(pd.DataFrame):
 
         df_representation = super().__repr__()
         try:
-            header = f'{self.attrs["metadata"]["hid"]}\n'
+            header = f"{self.attrs['metadata']['hid']}\n"
         except Exception:
             header = ""
 

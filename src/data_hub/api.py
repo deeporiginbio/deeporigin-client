@@ -8,18 +8,27 @@ from typing import Any, Optional, Union
 from urllib.parse import urlparse, urlunparse
 
 from beartype import beartype
+
 # this import is to allow us to use functions
 # not marked in __all__ in _api
 from deeporigin.data_hub import _api
 from deeporigin.data_hub._api import *  # noqa: F403
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.platform.api import get_user_name
-from deeporigin.utils.constants import (PREFIXES, Cardinality,
-                                        DatabaseReturnType, DataType, IDFormat,
-                                        ObjectType)
+from deeporigin.utils.constants import (
+    PREFIXES,
+    Cardinality,
+    DatabaseReturnType,
+    DataType,
+    IDFormat,
+    ObjectType,
+)
 from deeporigin.utils.core import find_last_updated_row, sha256_checksum
-from deeporigin.utils.network import (_parse_params_from_url,
-                                      check_for_updates, download_sync)
+from deeporigin.utils.network import (
+    _parse_params_from_url,
+    check_for_updates,
+    download_sync,
+)
 from tqdm import tqdm
 
 check_for_updates()

@@ -110,9 +110,9 @@ def test_list_rows_root_parent(config):  # noqa: F811
 
     root = root[0]
 
-    assert (
-        "parentId" not in root.keys() or root.parentId is None
-    ), "Expected root to have no parent"
+    assert "parentId" not in root.keys() or root.parentId is None, (
+        "Expected root to have no parent"
+    )
 
 
 def test_list_rows_by_type(config):  # noqa: F811
@@ -125,9 +125,9 @@ def test_list_rows_by_type(config):  # noqa: F811
     assert len(rows) > 0, "Expected at least one folder"
 
     for row in rows:
-        assert (
-            row.type == "workspace"
-        ), f"Expected to get a list of folders, but {row} is not a folder"
+        assert row.type == "workspace", (
+            f"Expected to get a list of folders, but {row} is not a folder"
+        )
 
 
 def test_list_files(config):  # noqa: F811
@@ -148,9 +148,9 @@ def test_list_files_unassigned(config):  # noqa: F811
     assert len(files) > 0, "Expected to find at least 1 unassigned files"
 
     for file in files:
-        assert (
-            "assignments" not in file.keys() or file.assignments is None
-        ), f"Expected not to see an assignments key for this file, but instead found {file}"
+        assert "assignments" not in file.keys() or file.assignments is None, (
+            f"Expected not to see an assignments key for this file, but instead found {file}"
+        )
 
 
 def test_list_files_assigned(config):  # noqa: F811
@@ -164,14 +164,14 @@ def test_list_files_assigned(config):  # noqa: F811
 
     for file in files:
         assignments = file.assignments
-        assert (
-            len(assignments) > 0
-        ), "Expected assignments to be a list with at least 1 element"
+        assert len(assignments) > 0, (
+            "Expected assignments to be a list with at least 1 element"
+        )
 
         for assignment in assignments:
-            assert (
-                assignment.rowId is not None
-            ), f"Expected to find a rowId in assignments, but instead found {assignment}"
+            assert assignment.rowId is not None, (
+                f"Expected to find a rowId in assignments, but instead found {assignment}"
+            )
 
 
 def test_describe_database_stats(config):  # noqa: F811
@@ -257,9 +257,9 @@ def test_get_dataframe(config):  # noqa: F811
 
     assert isinstance(df, pd.DataFrame), "Expected return type to be a pandas Dataframe"
 
-    assert (
-        "Validation Status" in df.columns
-    ), f"Expected to find a column called `Validation Status` in the dataframe. Instead, the columns in this dataframe are: {df.columns}"
+    assert "Validation Status" in df.columns, (
+        f"Expected to find a column called `Validation Status` in the dataframe. Instead, the columns in this dataframe are: {df.columns}"
+    )
 
     data = api.get_dataframe(
         config["databases"][0],
@@ -279,9 +279,9 @@ def test_list_mentions(config):  # noqa: F811
         _stash=config["stash"],
     )
 
-    assert hasattr(
-        data, "mentions"
-    ), "Expected to find a object with the attribute `mentions`"
+    assert hasattr(data, "mentions"), (
+        "Expected to find a object with the attribute `mentions`"
+    )
 
     assert isinstance(data.mentions, list), "Expected `mentions` to be a list"
 
@@ -294,17 +294,17 @@ def test_get_tree(config):  # noqa: F811
 
     tree = tree[0]
 
-    assert (
-        "parentId" not in tree.keys() or tree.parentId is None
-    ), "Expected the root of the tree to have no parent"
+    assert "parentId" not in tree.keys() or tree.parentId is None, (
+        "Expected the root of the tree to have no parent"
+    )
 
     tree.pop("children")
 
     tree = api.get_tree(client=config["client"], include_rows=False)
     tree = tree[0]
-    assert (
-        "parentId" not in tree.keys() or tree.parentId is None
-    ), "Expected the root of the tree to have no parent"
+    assert "parentId" not in tree.keys() or tree.parentId is None, (
+        "Expected the root of the tree to have no parent"
+    )
 
     tree.pop("children")
 
@@ -317,9 +317,9 @@ def test_create_file_download_url(config):  # noqa: F811
         _stash=config["stash"],
     )
 
-    assert (
-        "downloadUrl" in data.keys()
-    ), "Expected to find `downloadUrl` in data response"
+    assert "downloadUrl" in data.keys(), (
+        "Expected to find `downloadUrl` in data response"
+    )
 
 
 def test_download_files(config):  # noqa: F811
