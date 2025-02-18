@@ -43,6 +43,26 @@ integrators = Literal[
 """Integrator available for simulation"""
 
 
+prod_md_defaults = {
+    "integrator": "BAOABIntegrator",
+    "Δt": 0.004,
+    "T": 298.15,
+    "cutoff": 0.9,
+    "fourier_spacing": 0.12,
+    "hydrogen_mass": 2,
+    "barostat": "MonteCarloBarostat",
+    "barostat_exchange_interval": 500,
+}
+
+emeq_md_defaults = {
+    "Δt": 0.004,
+    "T": 298.15,
+    "cutoff": 0.9,
+    "fourier_spacing": 0.12,
+    "hydrogen_mass": 2,
+}
+
+
 class PrettyDict(Box):
     """A dict subclass with a custom pretty-print representation."""
 
@@ -58,9 +78,9 @@ class PrettyDict(Box):
 
 
 @beartype
-def _load_abfe_params() -> Box:
+def _load_params(step: str) -> Box:
     """load default values for abfe end to end run"""
-    with importlib.resources.open_text("deeporigin.json", "abfe.json") as f:
+    with importlib.resources.open_text("deeporigin.json", f"{step}.json") as f:
         return PrettyDict(json.load(f))
 
 
@@ -85,9 +105,9 @@ def _ensure_db_for_abfe() -> dict:
         dict(name="complex_prep_output", type="file"),
         dict(name="ligand_prep_output", type="file"),
         dict(name="emeq_output", type="file"),
-        dict(name="solvation_output", type="file"),
+        dict(name="solvation_fep_output", type="file"),
         dict(name="md_output", type="file"),
-        dict(name="abfe_output", type="file"),
+        dict(name="binding_fep_output", type="file"),
         dict(name="end_to_end_output", type="file"),
     ]
 
@@ -169,7 +189,7 @@ class ABFE:
     delta_gs: List[float] = field(default_factory=list)
     row_ids: List[str] = field(default_factory=list)
 
-    params: PrettyDict = field(default_factory=_load_abfe_params)
+    params: PrettyDict = field(default_factory=_load_params(step="abfe"))
 
     df: pd.DataFrame = field(
         default_factory=lambda: pd.DataFrame(
@@ -424,3 +444,234 @@ def _run_e2e(
     )
 
     return job_id
+
+
+@beartype
+def emeq(row_id: str) -> None:
+    """Run emeq on a ligand and protein pair, that exist as files on a row in the ABFE database. For this to work, the complex prep step must have been run first.
+
+    Args:
+        row_id (str): row id that contains the ligand and protein files.
+
+
+
+    """
+
+    tool_key = "deeporigin.md-suite-emeq"
+
+    database = _ensure_database(ABFE_DB)
+
+    inputs = _load_params("emeq")
+    inputs["input"] = {
+        "columnId": "complex_prep_output",
+        "rowId": row_id,
+        "databaseId": database.hid,
+    }
+
+    outputs = {
+        "output_file": {
+            "columnId": "emeq_output",
+            "rowId": row_id,
+            "databaseId": database.hid,
+        }
+    }
+
+    run._process_job(
+        inputs=inputs,
+        outputs=outputs,
+        tool_key=tool_key,
+        cols=database.cols,
+    )
+
+
+@beartype
+def ligand_prep(row_id: str) -> None:
+    """Function to prepare uploaded Ligand and protein files using Deep Origin MDSuite. Use this function to run system prep on a ligand and protein pair, that exist as files on a row in the ABFE database.
+
+    Args:
+        row_id (str): row id that contains the ligand and protein files.
+
+
+    """
+    database = _ensure_db_for_abfe()
+
+    tool_key = "deeporigin.md-suite-prep"
+
+    inputs = _load_params("ligand_prep")
+    inputs["ligand"] = {
+        "columnId": "ligand_file",
+        "rowId": row_id,
+        "databaseId": database.hid,
+    }
+    inputs["protein"] = {
+        "columnId": "protein_file",
+        "rowId": row_id,
+        "databaseId": database.hid,
+    }
+
+    outputs = {
+        "output_file": {
+            "columnId": "ligand_prep_output",
+            "rowId": row_id,
+            "databaseId": database.hid,
+        }
+    }
+
+    run._process_job(
+        inputs=inputs,
+        outputs=outputs,
+        tool_key=tool_key,
+        cols=database.cols,
+    )
+
+
+@beartype
+def complex_prep(row_id: str) -> None:
+    """Function to prepare uploaded Ligand and protein files using Deep Origin MDSuite. Use this function to run system prep on a ligand and protein pair, that exist as files on a row in the ABFE database.
+
+    Args:
+        row_id (str): row id that contains the ligand and protein files.
+
+
+    """
+    database = _ensure_db_for_abfe()
+
+    tool_key = "deeporigin.md-suite-prep"
+
+    inputs = _load_params("complex_prep")
+    inputs["ligand"] = {
+        "columnId": "ligand_file",
+        "rowId": row_id,
+        "databaseId": database.hid,
+    }
+    inputs["protein"] = {
+        "columnId": "protein_file",
+        "rowId": row_id,
+        "databaseId": database.hid,
+    }
+
+    outputs = {
+        "output_file": {
+            "columnId": "ligand_prep_output",
+            "rowId": row_id,
+            "databaseId": database.hid,
+        }
+    }
+
+    run._process_job(
+        inputs=inputs,
+        outputs=outputs,
+        tool_key=tool_key,
+        cols=database.cols,
+    )
+
+
+def solvation_fep(row_id: str) -> None:
+    """Run a solvation simulation
+
+
+    Args:
+        row_id (str): row id of the ligand and protein files.
+    """
+
+    database = _ensure_db_for_abfe()
+
+    url = construct_resource_url(
+        name=ABFE_DB,
+        row_type="database",
+    )
+
+    print(f"Using row {row_id} in database at: {url}")
+
+    tool_key = "deeporigin.md-suite-solvation"
+
+    inputs = _load_params("solvation_fep")
+    inputs["input"] = {
+        "columnId": "ligand_prep_output",
+        "rowId": row_id,
+        "databaseId": ABFE_DB,
+    }
+
+    outputs = {
+        "output_file": {
+            "columnId": "solvation_fep_output",
+            "rowId": row_id,
+            "databaseId": database.hid,
+        }
+    }
+
+    run._process_job(
+        inputs=inputs,
+        outputs=outputs,
+        tool_key=tool_key,
+        cols=database.cols,
+    )
+
+
+def simple_md(row_id: str):
+    """Run a simple MD simulation
+
+    Args:
+        row_id (str): row id of the ligand and protein files.
+    """
+    kwargs = locals()
+    database = _ensure_db_for_abfe()
+
+    tool_key = "deeporigin.md-suite-md"
+
+    inputs = _load_params("simple_md")
+    inputs["input"] = {
+        "columnId": "emeq_output",
+        "rowId": row_id,
+        "databaseId": ABFE_DB,
+    }
+
+    outputs = {
+        "output_file": {
+            "columnId": "md_output",
+            "rowId": row_id,
+            "databaseId": database.hid,
+        }
+    }
+
+    run._process_job(
+        inputs=inputs,
+        outputs=outputs,
+        tool_key=tool_key,
+        cols=database.cols,
+    )
+
+
+def binding_fep(row_id):
+    """Run an ABFE simulation
+
+    Args:
+        row_id (str): row id of the ligand and protein files.
+
+    """
+
+    database = _ensure_db_for_abfe()
+
+    tool_key = "deeporigin.md-suite-abfe"
+
+    inputs = _load_params("binding_fep")
+    inputs["input"] = {
+        "columnId": "md_output",
+        "rowId": row_id,
+        "databaseId": ABFE_DB,
+    }
+
+    outputs = {
+        "output_file": {
+            "columnId": "binding_fep_output",
+            "rowId": row_id,
+            "databaseId": database.hid,
+        }
+    }
+
+    run._process_job(
+        inputs=inputs,
+        outputs=outputs,
+        tool_key=tool_key,
+        cols=database.cols,
+    )

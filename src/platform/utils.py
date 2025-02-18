@@ -71,7 +71,9 @@ def _get_api_client(*, api_name: str, configure: bool = True):
     """
 
     if configure:
-        configuration = do_sdk_platform.configuration.Configuration(
+        from do_sdk_platform.configuration import Configuration
+
+        configuration = Configuration(
             host=urljoin(get_value()["api_endpoint"], "/api"),
             access_token=get_tokens()["access"],
         )
