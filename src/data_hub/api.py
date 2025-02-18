@@ -8,30 +8,17 @@ from typing import Any, Optional, Union
 from urllib.parse import urlparse, urlunparse
 
 from beartype import beartype
-
 # this import is to allow us to use functions
 # not marked in __all__ in _api
 from deeporigin.data_hub import _api
 from deeporigin.data_hub._api import *  # noqa: F403
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.platform.api import get_user_name
-from deeporigin.utils.constants import (
-    PREFIXES,
-    Cardinality,
-    DatabaseReturnType,
-    DataType,
-    IDFormat,
-    ObjectType,
-)
+from deeporigin.utils import constants, network
 from deeporigin.utils.core import find_last_updated_row, sha256_checksum
-from deeporigin.utils.network import (
-    _parse_params_from_url,
-    check_for_updates,
-    download_sync,
-)
 from tqdm import tqdm
 
-check_for_updates()
+network.check_for_updates()
 
 
 @beartype
@@ -183,7 +170,7 @@ def list_files(
 def list_rows(
     *,
     parent_id: Optional[str] = None,
-    row_type: ObjectType = None,
+    row_type: constants.ObjectType = None,
     parent_is_root: Optional[bool] = None,
     client=None,
     _stash: bool = False,
@@ -265,7 +252,7 @@ def upload_file(
     url = urlunparse((url.scheme, url.netloc, url.path, "", "", ""))
 
     # extract params
-    params = _parse_params_from_url(response.uploadUrl)
+    params = network._parse_params_from_url(response.uploadUrl)
 
     headers = {
         "Accept": "application/json, text/plain, */*",
@@ -859,10 +846,10 @@ def download(
             message=f"Destination `{destination}` should be a path for a folder."
         )
 
-    source = source.replace(PREFIXES.DO, "")
+    source = source.replace(constants.PREFIXES.DO, "")
 
     # first, need to determine what this is.
-    if PREFIXES.FILE in source:
+    if constants.PREFIXES.FILE in source:
         # this is a file
 
         download_files(
@@ -960,8 +947,8 @@ def get_dataframe(
     database_id: str,
     *,
     use_file_names: bool = True,
-    reference_format: IDFormat = "human-id",
-    return_type: DatabaseReturnType = "dataframe",
+    reference_format: constants.IDFormat = "human-id",
+    return_type: constants.DatabaseReturnType = "dataframe",
     filter: Optional[dict] = None,
     client=None,
     _stash: bool = False,
@@ -1235,7 +1222,7 @@ def download_files(
         for file_id, save_path in zip(file_ids, save_paths):
             futures.append(
                 executor.submit(
-                    lambda file_id, save_path: download_sync(
+                    lambda file_id, save_path: network.download_sync(
                         _api.create_file_download_url(
                             file_id=file_id, client=client
                         ).downloadUrl,
@@ -1586,9 +1573,9 @@ def get_row_data(
 def add_database_column(
     *,
     database_id: str,
-    type: DataType,
+    type: constants.DataType,
     name: str,
-    cardinality: Cardinality = "one",
+    cardinality: constants.Cardinality = "one",
     required: bool = False,
     client=None,
     _stash: bool = False,

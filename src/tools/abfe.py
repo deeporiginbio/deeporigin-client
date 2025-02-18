@@ -27,6 +27,7 @@ class PrettyDict(Box):
     """A dict subclass with a custom pretty-print representation."""
 
     def __repr__(self):
+        """pretty print a dict"""
         return json.dumps(
             dict(self),
             indent=2,
@@ -34,12 +35,14 @@ class PrettyDict(Box):
         )
 
     def _repr_html_(self):
+        """pretty print a dict"""
         self.__repr__()
 
 
 @beartype
 def _load_params(step: str) -> Box:
     """load default values for abfe end to end run"""
+
     with importlib.resources.open_text("deeporigin.json", f"{step}.json") as f:
         return PrettyDict(json.load(f))
 
@@ -81,11 +84,15 @@ def _ensure_db_for_abfe() -> dict:
 
 @dataclass
 class Ligand:
+    """class to represent a ligand on disk"""
+
     file: Union[str, Path]
     smiles_string: Optional[str] = None
     is_protonated: Optional[bool] = False
 
     def __post_init__(self):
+        """generates a SMILES if it doesn't exist"""
+
         if self.smiles_string is None:
             self.smiles_string = chemistry.sdf_to_smiles(self.file)
 
@@ -93,6 +100,8 @@ class Ligand:
             self.is_protonated = chemistry.is_ligand_protonated(self.file)
 
     def _repr_pretty_(self, p, cycle):
+        """pretty print a ligand"""
+
         if cycle:
             p.text("Ligand(...)")
         else:
@@ -111,6 +120,8 @@ class Ligand:
 
 @dataclass
 class Protein:
+    """class to represent a protein on disk"""
+
     file: str | Path
 
 
@@ -317,6 +328,8 @@ class ABFE:
         )
 
     def status(self):
+        """print the status of an ABFE run"""
+
         node_statuses = {
             "init": "NotStarted",
             "complex_prep": "NotStarted",

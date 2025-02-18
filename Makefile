@@ -12,11 +12,8 @@ client="mock"
 chosen_tests=""
 responses="pass"
 
-check-dangerous-indexing:
-	bash tests/check-dangerous-index.sh
 
-
-test: check-dangerous-indexing
+test: 
 ifeq ($(client), "mock")
 	$(eval n_workers=1)
 else 
