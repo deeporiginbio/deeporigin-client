@@ -43,7 +43,7 @@ jobs:
       - name: Check code formatting using ruff
         uses: chartboost/ruff-action@v1
         with:
-          version: 0.3.1
+          version: 0.9.4
           args: format --check
 
       - name: Check import order
