@@ -4,9 +4,8 @@ import pathlib
 from typing import Optional
 
 import confuse
+from deeporigin.exceptions import DeepOriginException
 from deeporigin.utils.core import _ensure_do_folder, in_aws_lambda
-
-from ..exceptions import DeepOriginException
 
 CONFIG_DIR = pathlib.Path(__file__).parent
 DEFAULT_CONFIG_FILENAME = os.path.join(CONFIG_DIR, "default.yml")
