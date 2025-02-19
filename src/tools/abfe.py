@@ -21,6 +21,16 @@ from IPython.display import HTML, display
 
 # constants and types
 ABFE_DB = "ABFE"
+COL_DELTA_G = "FEP ΔG (kcal/mol)"
+COL_LIGAND_FILE = "ligand_file"
+COL_PROTEIN_FILE = "protein_file"
+COL_COMPLEX_PREP_OUTPUT = "complex_prep_output"
+COL_LIGAND_PREP_OUTPUT = "ligand_prep_output"
+COL_EMEQ_OUTPUT = "emeq_output"
+COL_SOLVATION_FEP_OUTPUT = "solvation_fep_output"
+COL_MD_OUTPUT = "md_output"
+COL_BINDING_FEP_OUTPUT = "binding_fep_output"
+COL_END_TO_END_OUTPUT = "end_to_end_output"
 
 
 class PrettyDict(Box):
@@ -62,16 +72,16 @@ def _ensure_db_for_abfe() -> dict:
         pass
 
     required_columns = [
-        dict(name="FEP ΔG (kcal/mol)", type="float"),
-        dict(name="ligand_file", type="file"),
-        dict(name="protein_file", type="file"),
-        dict(name="complex_prep_output", type="file"),
-        dict(name="ligand_prep_output", type="file"),
-        dict(name="emeq_output", type="file"),
-        dict(name="solvation_fep_output", type="file"),
-        dict(name="md_output", type="file"),
-        dict(name="binding_fep_output", type="file"),
-        dict(name="end_to_end_output", type="file"),
+        dict(name=COL_DELTA_G, type="float"),
+        dict(name=COL_LIGAND_FILE, type="file"),
+        dict(name=COL_PROTEIN_FILE, type="file"),
+        dict(name=COL_COMPLEX_PREP_OUTPUT, type="file"),
+        dict(name=COL_LIGAND_PREP_OUTPUT, type="file"),
+        dict(name=COL_EMEQ_OUTPUT, type="file"),
+        dict(name=COL_SOLVATION_FEP_OUTPUT, type="file"),
+        dict(name=COL_MD_OUTPUT, type="file"),
+        dict(name=COL_BINDING_FEP_OUTPUT, type="file"),
+        dict(name=COL_END_TO_END_OUTPUT, type="file"),
     ]
 
     database = _ensure_columns(
@@ -231,7 +241,7 @@ class ABFE:
             # for each ligand, upload the ligand to a new row
             response = api.upload_file_to_new_database_row(
                 database_id=ABFE_DB,
-                column_id="ligand_file",
+                column_id=COL_LIGAND_FILE,
                 file_path=ligand.file,
             )
 
@@ -249,7 +259,7 @@ class ABFE:
             api.assign_files_to_cell(
                 file_ids=[protein_file.id],
                 database_id=ABFE_DB,
-                column_id="protein_file",
+                column_id=COL_PROTEIN_FILE,
                 row_id=row_id,
             )
 
@@ -297,7 +307,7 @@ class ABFE:
                     ligand.smiles_string,
                     size=image_size,
                 ),
-                "FEP ΔG (kcal/mol)": self.delta_gs[idx],
+                COL_DELTA_G: self.delta_gs[idx],
                 "Status": status,
             }
             rows.append(row)
@@ -306,7 +316,7 @@ class ABFE:
             rows,
             columns=[
                 "Molecule",
-                "FEP ΔG (kcal/mol)",
+                COL_DELTA_G,
                 "Status",
             ],
         )
@@ -323,7 +333,7 @@ class ABFE:
             _run_e2e(
                 row_id=row_id,
                 steps=self.params.steps,
-                output_column_name="end_to_end_output",
+                output_column_name=COL_END_TO_END_OUTPUT,
             )
         )
 
@@ -468,8 +478,6 @@ def emeq(
     Args:
         row_id (str): row id that contains the ligand and protein files.
 
-
-
     """
 
     tool_key = "deeporigin.md-suite-emeq"
@@ -480,14 +488,14 @@ def emeq(
         params = _load_params("emeq")
 
     params["input"] = {
-        "columnId": "complex_prep_output",
+        "columnId": COL_COMPLEX_PREP_OUTPUT,
         "rowId": row_id,
         "databaseId": database.hid,
     }
 
     outputs = {
         "output_file": {
-            "columnId": "emeq_output",
+            "columnId": COL_EMEQ_OUTPUT,
             "rowId": row_id,
             "databaseId": database.hid,
         }
@@ -522,7 +530,7 @@ def ligand_prep(
         params = _load_params("ligand_prep")
 
     params["ligand"] = {
-        "columnId": "ligand_file",
+        "columnId": COL_LIGAND_FILE,
         "rowId": row_id,
         "databaseId": database.hid,
     }
@@ -534,7 +542,7 @@ def ligand_prep(
 
     outputs = {
         "output_file": {
-            "columnId": "ligand_prep_output",
+            "columnId": COL_LIGAND_PREP_OUTPUT,
             "rowId": row_id,
             "databaseId": database.hid,
         }
@@ -569,19 +577,19 @@ def complex_prep(
         params = _load_params("ligand_prep")
 
     params["ligand"] = {
-        "columnId": "ligand_file",
+        "columnId": COL_LIGAND_FILE,
         "rowId": row_id,
         "databaseId": database.hid,
     }
     params["protein"] = {
-        "columnId": "protein_file",
+        "columnId": COL_PROTEIN_FILE,
         "rowId": row_id,
         "databaseId": database.hid,
     }
 
     outputs = {
         "output_file": {
-            "columnId": "ligand_prep_output",
+            "columnId": COL_COMPLEX_PREP_OUTPUT,
             "rowId": row_id,
             "databaseId": database.hid,
         }
@@ -615,14 +623,14 @@ def solvation_fep(
         params = _load_params("solvation_fep")
 
     params["input"] = {
-        "columnId": "ligand_prep_output",
+        "columnId": COL_LIGAND_PREP_OUTPUT,
         "rowId": row_id,
         "databaseId": ABFE_DB,
     }
 
     outputs = {
         "output_file": {
-            "columnId": "solvation_fep_output",
+            "columnId": COL_SOLVATION_FEP_OUTPUT,
             "rowId": row_id,
             "databaseId": database.hid,
         }
@@ -655,14 +663,14 @@ def simple_md(
         params = _load_params("simple_md")
 
     params["input"] = {
-        "columnId": "emeq_output",
+        "columnId": COL_EMEQ_OUTPUT,
         "rowId": row_id,
         "databaseId": ABFE_DB,
     }
 
     outputs = {
         "output_file": {
-            "columnId": "md_output",
+            "columnId": COL_MD_OUTPUT,
             "rowId": row_id,
             "databaseId": database.hid,
         }
@@ -696,14 +704,14 @@ def binding_fep(
         params = _load_params("binding_fep")
 
     params["input"] = {
-        "columnId": "md_output",
+        "columnId": COL_MD_OUTPUT,
         "rowId": row_id,
         "databaseId": ABFE_DB,
     }
 
     outputs = {
         "output_file": {
-            "columnId": "binding_fep_output",
+            "columnId": COL_BINDING_FEP_OUTPUT,
             "rowId": row_id,
             "databaseId": database.hid,
         }
