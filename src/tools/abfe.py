@@ -14,6 +14,7 @@ from beartype import beartype
 from box import Box
 from deeporigin import chemistry
 from deeporigin.data_hub import api
+from deeporigin.exceptions import DeepOriginException
 from deeporigin.tools import run
 from deeporigin.tools.toolkit import _ensure_columns, _ensure_database
 from deeporigin.tools.utils import query_run_status
@@ -34,6 +35,11 @@ COL_MD_OUTPUT = "md_output"
 COL_BINDING_FEP_OUTPUT = "binding_fep_output"
 COL_END_TO_END_OUTPUT = "end_to_end_output"
 COL_JOB_IDS = "job_ids"
+COL_PROTEIN_NAME = "protein_name"
+
+
+ABFE_DIR = os.path.join(os.path.expanduser("~"), ".deeporigin", "abfe")
+os.makedirs(ABFE_DIR, exist_ok=True)
 
 
 class PrettyDict(Box):
@@ -77,6 +83,7 @@ def _ensure_db_for_abfe() -> dict:
     required_columns = [
         dict(name=COL_DELTA_G, type="float"),
         dict(name=COL_LIGAND_FILE, type="file"),
+        dict(name=COL_PROTEIN_NAME, type="text"),
         dict(name=COL_PROTEIN_FILE, type="file"),
         dict(name=COL_COMPLEX_PREP_OUTPUT, type="file"),
         dict(name=COL_LIGAND_PREP_OUTPUT, type="file"),
@@ -102,16 +109,12 @@ class Ligand:
 
     file: Union[str, Path]
     smiles_string: Optional[str] = None
-    is_protonated: Optional[bool] = False
 
     def __post_init__(self):
         """generates a SMILES if it doesn't exist"""
 
         if self.smiles_string is None:
             self.smiles_string = chemistry.sdf_to_smiles(self.file)
-
-        if self.is_protonated is None:
-            self.is_protonated = chemistry.is_ligand_protonated(self.file)
 
     def _repr_pretty_(self, p, cycle):
         """pretty print a ligand"""
@@ -134,9 +137,13 @@ class Ligand:
 
 @dataclass
 class Protein:
-    """class to represent a protein on disk"""
+    file: Union[str, Path]
+    name: Optional[str] = None
 
-    file: str | Path
+    def __post_init__(self):
+        self.file = Path(self.file)
+        if self.name is None:
+            self.name = self.file.name
 
 
 @dataclass
@@ -163,15 +170,95 @@ class ABFE:
     )
 
     @classmethod
-    def from_sessions(cls, sessions: List[str]) -> "ABFE":
+    def from_sessions(cls, sessions: List[int]) -> "ABFE":
         """initialize an ABFE class given a list of sessions"""
 
-        # check that those rows correspond to only one protein
+        df = api.get_dataframe(ABFE_DB, use_file_names=False)
+        idx = [ABFE_DB + "-" + str(session) for session in sessions]
 
-        # download ligand from those rows
+        all_valid = set(idx).issubset(df.index)
+        if not all_valid:
+            raise DeepOriginException("Some sessions are not valid.")
+
+        df = df.loc[idx]
+
+        # check that rows correspond to only one protein
+        if len(df["protein_name"].unique()) > 1:
+            raise DeepOriginException(
+                "List of sessions corresponds to more than 1 protein. Cannot continue"
+            )
+
+        protein_name = df["protein_name"].unique()[0]
+
+        # make ligands
+        file_ids = list(df["protein_file"]) + list(df["ligand_file"])
+        files = api.list_files(file_ids=file_ids)
+
+        ligands = []
+        for row_id, row in df.iterrows():
+            file_id = row["ligand_file"]
+            file_name = [file.file.name for file in files if file.file.id == file_id][0]
+            smiles_string = row["Ligand"]
+            ligand = Ligand(file=file_name, smiles_string=smiles_string)
+            ligands.append(ligand)
+
+        files = api.list_files(file_ids=file_ids)
+
+        # make protein
+        protein_file_name = [file for file in files if file.file.name.endswith("pdb")][
+            0
+        ].file.name
+        protein = Protein(
+            file=protein_file_name,
+            name=protein_name,
+        )
 
         #
-        raise NotImplementedError
+        # Create the ABFE instance
+        abfe = cls(
+            ligands=ligands,
+            protein=protein,
+            delta_gs=[np.nan for _ in ligands],
+        )
+
+        abfe.row_ids = df.index
+
+        # now make the status df
+        rows = []
+
+        # every ligand is initialized
+        for lig in ligands:
+            rows.append(
+                {
+                    "ligand_file": str(lig.file),
+                    "jobID": None,
+                    "step": "init",
+                    "Status": "Succeeded",
+                }
+            )
+
+        # now put the job IDs
+        for ligand, (_, row) in zip(ligands, df.iterrows()):
+            if pd.isna(row["job_ids"]):
+                continue
+
+            data = ast.literal_eval(row["job_ids"])
+            for key in data.keys():
+                if data[key] is None:
+                    continue
+
+                rows.append(
+                    {
+                        "ligand_file": str(ligand.file),
+                        "jobID": data[key],
+                        "step": key,
+                        "Status": "Running",
+                    }
+                )
+
+        abfe.df = pd.DataFrame(rows, columns=abfe.df.columns)
+
+        return abfe
 
     @classmethod
     def from_dir(cls, directory: str) -> "ABFE":
@@ -250,6 +337,9 @@ class ABFE:
         self.params.solvation_fep = _load_params("solvation_fep")
 
         smiles_column_id = [col.id for col in database.cols if col.name == "Ligand"][0]
+        protein_name_column_id = [
+            col.id for col in database.cols if col.name == COL_PROTEIN_NAME
+        ][0]
 
         url = construct_resource_url(
             name=ABFE_DB,
@@ -262,7 +352,7 @@ class ABFE:
         self.row_ids = []
 
         # now upload the protein
-        protein_file = api.upload_file(file_path=self.protein.file)
+        protein_file = api.upload_file(file_path=str(self.protein.file))
 
         self.delta_gs = [np.nan for _ in self.ligands]
 
@@ -286,6 +376,13 @@ class ABFE:
                 database_id=ABFE_DB,
                 row_id=row_id,
                 column_id=smiles_column_id,
+            )
+
+            api.set_cell_data(
+                self.protein.name,
+                database_id=ABFE_DB,
+                row_id=row_id,
+                column_id=protein_name_column_id,
             )
 
             api.assign_files_to_cell(
@@ -836,7 +933,7 @@ graph LR;
     classDef Queued fill:#cccccc,stroke:#222,stroke-width:2px;
     classDef Succeeded    fill:#90ee90,stroke:#333,stroke-width:2px;
     classDef Running       fill:#87CEFA,stroke:#333,stroke-width:2px;
-    classDef failed     fill:#ff7f7f,stroke:#333,stroke-width:2px;
+    classDef Failed     fill:#ff7f7f,stroke:#333,stroke-width:2px;
 
 {node_defs}
 {edges}
