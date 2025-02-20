@@ -693,7 +693,7 @@ def ligand_prep(
     """
     database = _ensure_db_for_abfe()
 
-    tool_key = "deeporigin.md-suite-prep"
+    tool_key = "deeporigin.abfe-prep"
 
     if params is None:
         params = _load_params("ligand_prep")
@@ -740,10 +740,10 @@ def complex_prep(
     """
     database = _ensure_db_for_abfe()
 
-    tool_key = "deeporigin.md-suite-prep"
+    tool_key = "deeporigin.abfe-prep"
 
     if params is None:
-        params = _load_params("ligand_prep")
+        params = _load_params("complex_prep")
 
     params["ligand"] = {
         "columnId": COL_LIGAND_FILE,
