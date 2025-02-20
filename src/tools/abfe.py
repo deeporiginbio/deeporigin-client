@@ -67,6 +67,20 @@ def _load_params(step: str) -> Box:
 
 
 @beartype
+def _load_all_params() -> Box:
+    """utility function to load all parameters"""
+
+    params = Box()
+    params.binding_fep = _load_params("binding_fep")
+    params.complex_prep = _load_params("complex_prep")
+    params.emeq = _load_params("emeq")
+    params.ligand_prep = _load_params("ligand_prep")
+    params.simple_md = _load_params("simple_md")
+    params.solvation_fep = _load_params("solvation_fep")
+    return params
+
+
+@beartype
 def _ensure_db_for_abfe() -> dict:
     """ensure that there is a database for FEP on Data Hub"""
 
@@ -158,7 +172,7 @@ class ABFE:
     delta_gs: List[float] = field(default_factory=list)
     row_ids: List[str] = field(default_factory=list)
 
-    params: Optional[dict] = None
+    params: dict = field(default_factory=lambda: _load_all_params())
 
     df: pd.DataFrame = field(
         default_factory=lambda: pd.DataFrame(
@@ -336,13 +350,7 @@ class ABFE:
         database = _ensure_db_for_abfe()
 
         # get params in
-        self.params = Box()
-        self.params.binding_fep = _load_params("binding_fep")
-        self.params.complex_prep = _load_params("complex_prep")
-        self.params.emeq = _load_params("emeq")
-        self.params.ligand_prep = _load_params("ligand_prep")
-        self.params.simple_md = _load_params("simple_md")
-        self.params.solvation_fep = _load_params("solvation_fep")
+        self.params = _load_all_params()
 
         smiles_column_id = [col.id for col in database.cols if col.name == "Ligand"][0]
         protein_name_column_id = [
