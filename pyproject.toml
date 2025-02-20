@@ -35,7 +35,7 @@ dependencies = [
     "pyjwt",
     "cryptography",
     "python-box",
-    "do-sdk-platform==2.0.0",
+    "do-sdk-platform==2.1.0",
     "urllib3>=2.0.0"
 ]
 dynamic = ["version"]
@@ -97,7 +97,7 @@ ignore = ["E203", "E266", "E501"]
 
 
 [tool.ruff.lint.isort]
-case-sensitive = true
+case-sensitive = false
 
 [tool.distutils.bdist_wheel]
 universal = true

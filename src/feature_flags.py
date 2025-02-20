@@ -3,8 +3,8 @@
 import dataclasses
 import functools
 
-from .config import get_value as get_config
-from .warnings import DeepOriginWarning
+from deeporigin.config import get_value as get_config
+from deeporigin.warnings import DeepOriginWarning
 
 __all__ = [
     "get_value",

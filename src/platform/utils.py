@@ -71,7 +71,9 @@ def _get_api_client(*, api_name: str, configure: bool = True):
     """
 
     if configure:
-        configuration = do_sdk_platform.configuration.Configuration(
+        from do_sdk_platform.configuration import Configuration
+
+        configuration = Configuration(
             host=urljoin(get_value()["api_endpoint"], "/api"),
             access_token=get_tokens()["access"],
         )
@@ -135,6 +137,7 @@ def _create_function(*, method_path: str, api_name: str):
 
         if 400 <= response.status < 600:
             content = response.read().decode("utf-8", errors="replace")
+
             raise ValueError(
                 f"HTTP request failed with status: {response.status} - {response.reason} - {content}"
             )

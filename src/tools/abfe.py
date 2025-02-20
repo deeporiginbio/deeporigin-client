@@ -1,113 +1,113 @@
 """this module contains various functions to run steps of an ABFE workflow"""
 
-from typing import Literal
+import ast
+import importlib.resources
+import json
+import os
+from dataclasses import dataclass, field, fields
+from pathlib import Path
+from typing import Any, Callable, List, Optional, Union
 
+import numpy as np
+import pandas as pd
 from beartype import beartype
+from box import Box
+from deeporigin import chemistry
 from deeporigin.data_hub import api
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.tools import run
 from deeporigin.tools.toolkit import _ensure_columns, _ensure_database
+from deeporigin.tools.utils import query_run_status
 from deeporigin.utils.config import construct_resource_url
+from deeporigin.utils.notebook import render_mermaid
+from IPython.display import HTML, display
 
 # constants and types
 ABFE_DB = "ABFE"
-
-charge_methods = Literal["gas", "bcc"]
-"""Available charge methods"""
-
-ligand_force_fields = Literal["gaff", "gaff2", "openff"]
-"""Available ligand force fields. `gaff` is General Amber Force Field, gaff2 is an updated version of gaff. """
-
-force_fields = Literal["ff14SB", "ff99SB-ildn"]
-"""Available force fields"""
-
-integrators = Literal[
-    "BAOABIntegrator",
-    "LangevinIntegrator",
-    "SteepestDescentMinimizer",
-    "LeapFrogIntegrator",
-    "SoluteSolventSplittingIntegrator",
-]
-"""Integrator available for simulation"""
+COL_DELTA_G = "FEP ΔG (kcal/mol)"
+COL_LIGAND_FILE = "ligand_file"
+COL_PROTEIN_FILE = "protein_file"
+COL_COMPLEX_PREP_OUTPUT = "complex_prep_output"
+COL_LIGAND_PREP_OUTPUT = "ligand_prep_output"
+COL_EMEQ_OUTPUT = "emeq_output"
+COL_SOLVATION_FEP_OUTPUT = "solvation_fep_output"
+COL_MD_OUTPUT = "md_output"
+COL_BINDING_FEP_OUTPUT = "binding_fep_output"
+COL_END_TO_END_OUTPUT = "end_to_end_output"
+COL_JOB_IDS = "job_ids"
+COL_PROTEIN_NAME = "protein_name"
 
 
-prod_md_defaults = {
-    "integrator": "BAOABIntegrator",
-    "Δt": 0.004,
-    "T": 298.15,
-    "cutoff": 0.9,
-    "fourier_spacing": 0.12,
-    "hydrogen_mass": 2,
-    "barostat": "MonteCarloBarostat",
-    "barostat_exchange_interval": 500,
-}
+ABFE_DIR = os.path.join(os.path.expanduser("~"), ".deeporigin", "abfe")
+os.makedirs(ABFE_DIR, exist_ok=True)
 
 
-emeq_md_defaults = {
-    "Δt": 0.004,
-    "T": 298.15,
-    "cutoff": 0.9,
-    "fourier_spacing": 0.12,
-    "hydrogen_mass": 2,
-}
+class PrettyDict(Box):
+    """A dict subclass with a custom pretty-print representation."""
+
+    def __repr__(self):
+        """pretty print a dict"""
+        return json.dumps(
+            dict(self),
+            indent=2,
+            ensure_ascii=False,
+        )
+
+    def _repr_html_(self):
+        """pretty print a dict"""
+        self.__repr__()
 
 
 @beartype
-def init(
-    *,
-    ligand_file: str,
-    protein_file: str,
-) -> str:
-    """Initialize an ABFE run. Upload ligand and protein files to Data Hub."""
+def _load_params(step: str) -> Box:
+    """load default values for abfe end to end run"""
 
-    _ensure_db_for_abfe()
+    with importlib.resources.open_text("deeporigin.json", f"{step}.json") as f:
+        return PrettyDict(json.load(f))
 
-    url = construct_resource_url(
-        name=ABFE_DB,
-        row_type="database",
-    )
 
-    print(f"Using database at: {url}")
-    print("🧬 Uploading files to database...")
+@beartype
+def _load_all_params() -> Box:
+    """utility function to load all parameters"""
 
-    response = api.upload_file_to_new_database_row(
-        database_id=ABFE_DB,
-        column_id="ligand",
-        file_path=ligand_file,
-    )
-
-    row_id = response.rows[0].hid
-
-    file = api.upload_file(file_path=protein_file)
-
-    api.assign_files_to_cell(
-        file_ids=[file.id],
-        database_id=ABFE_DB,
-        column_id="protein",
-        row_id=row_id,
-    )
-
-    print(f"🧬 Files uploaded to row {row_id}.")
-
-    return row_id
+    params = Box()
+    params.binding_fep = _load_params("binding_fep")
+    params.complex_prep = _load_params("complex_prep")
+    params.emeq = _load_params("emeq")
+    params.ligand_prep = _load_params("ligand_prep")
+    params.simple_md = _load_params("simple_md")
+    params.solvation_fep = _load_params("solvation_fep")
+    return params
 
 
 @beartype
 def _ensure_db_for_abfe() -> dict:
     """ensure that there is a database for FEP on Data Hub"""
 
-    required_columns = [
-        dict(name="ligand", type="file"),
-        dict(name="protein", type="file"),
-        dict(name="complex_prep_output", type="file"),
-        dict(name="solvation_prep_output", type="file"),
-        dict(name="emeq_output", type="file"),
-        dict(name="solvation_output", type="file"),
-        dict(name="md_output", type="file"),
-        dict(name="abfe_output", type="file"),
-    ]
-
     database = _ensure_database(ABFE_DB)
+
+    try:
+        api.add_smiles_column(
+            name="Ligand",
+            database_id=ABFE_DB,
+        )
+    except Exception:
+        pass
+
+    required_columns = [
+        dict(name=COL_DELTA_G, type="float"),
+        dict(name=COL_LIGAND_FILE, type="file"),
+        dict(name=COL_PROTEIN_NAME, type="text"),
+        dict(name=COL_PROTEIN_FILE, type="file"),
+        dict(name=COL_COMPLEX_PREP_OUTPUT, type="file"),
+        dict(name=COL_LIGAND_PREP_OUTPUT, type="file"),
+        dict(name=COL_EMEQ_OUTPUT, type="file"),
+        dict(name=COL_SOLVATION_FEP_OUTPUT, type="file"),
+        dict(name=COL_MD_OUTPUT, type="file"),
+        dict(name=COL_BINDING_FEP_OUTPUT, type="file"),
+        dict(name=COL_END_TO_END_OUTPUT, type="file"),
+        dict(name=COL_JOB_IDS, type="text"),
+    ]
 
     database = _ensure_columns(
         database=database,
@@ -117,191 +117,481 @@ def _ensure_db_for_abfe() -> dict:
     return database
 
 
-@beartype
-def emeq(
-    row_id: str,
-    *,
-    system_name: str = "complex",
-    fourier_spacing: float = 0.12,
-    hydrogen_mass: int = 2,
-    cutoff: float = 0.9,
-    T: float = 298.15,
-    Δt: float = 0.004,
-    npt_reduce_restraints_ns: float = 0.2,
-    nvt_heating_ns: float = 0.1,
-) -> None:
-    """Run emeq on a ligand and protein pair, that exist as files on a row in the ABFE database. For this to work, the complex prep step must have been run first.
+@dataclass
+class Ligand:
+    """class to represent a ligand (typically backed by a SDF file)"""
 
-    Args:
-        row_id (str): row id that contains the ligand and protein files.
-        system_name (str, optional): name of the system. Defaults to "complex". This name can be anything.
-        fourier_spacing (float, optional): spacing of the fourier grid. Defaults to 0.12.
-        hydrogen_mass (int, optional): hydrogen mass. Defaults to 2.
-        cutoff (float, optional): cutoff. Defaults to 0.9.
-        T (float, optional): temperature. Defaults to 298.15.
-        Δt (float, optional): time step. Defaults to 0.004.
-        npt_reduce_restraints_ns (float, optional): time step. Defaults to 0.2.
-        nvt_heating_ns (float, optional): time step. Defaults to 0.1.
+    file: Union[str, Path]
+    smiles_string: Optional[str] = None
+
+    def __post_init__(self):
+        """generates a SMILES if it doesn't exist"""
+
+        if self.smiles_string is None:
+            self.smiles_string = chemistry.sdf_to_smiles(self.file)
+
+    def _repr_pretty_(self, p, cycle):
+        """pretty print a ligand"""
+
+        if cycle:
+            p.text("Ligand(...)")
+        else:
+            p.text("Ligand(")
+
+            with p.group(2, "\n  ", "\n"):
+                all_fields = fields(self)
+                for idx, field in enumerate(all_fields):
+                    value = getattr(self, field.name)
+                    p.text(f"{field.name}: {value!r}")
+                    # Only add a breakable if this isn't the last field.
+                    if idx < len(all_fields) - 1:
+                        p.breakable()
+            p.text(")")
 
 
-    """
+@dataclass
+class Protein:
+    """class to represent a protein (typically backed by a PDB file)"""
 
-    kwargs = locals()
+    file: Union[str, Path]
+    name: Optional[str] = None
 
-    tool_key = "deeporigin.md-suite-emeq"
+    def __post_init__(self):
+        self.file = Path(self.file)
+        if self.name is None:
+            self.name = self.file.name
 
-    database = _ensure_database(ABFE_DB)
 
-    emeq_md_options = {
-        k: kwargs[k] if k in kwargs else v for k, v in emeq_md_defaults.items()
-    }
+@dataclass
+class ABFE:
+    """ABFE class that can work with one protein and many ligands"""
 
-    inputs = {
-        "input": {
-            "columnId": "complex_prep_output",
-            "rowId": row_id,
-            "databaseId": database.hid,
-        },
-        "force": 1,
-        "test_run": 0,
-        "system": system_name,
-        "run_name": "test-run",
-        "threads": 0,
-        "em_solvent": True,
-        "em_all": True,
-        "nvt_heating_ns": nvt_heating_ns,
-        "npt_reduce_restraints_ns": npt_reduce_restraints_ns,
-        "from_run": "__USE_SYSTEM",
-        "emeq_md_options": emeq_md_options,
-    }
+    protein: Protein
+    ligands: List[Ligand]
 
-    outputs = {
-        "output_file": {
-            "columnId": "emeq_output",
-            "rowId": row_id,
-            "databaseId": database.hid,
-        }
-    }
+    delta_gs: List[float] = field(default_factory=list)
+    row_ids: List[str] = field(default_factory=list)
 
-    run._process_job(
-        inputs=inputs,
-        outputs=outputs,
-        tool_key=tool_key,
-        cols=database.cols,
+    params: dict = field(default_factory=lambda: _load_all_params())
+
+    df: pd.DataFrame = field(
+        default_factory=lambda: pd.DataFrame(
+            columns=[
+                "ligand_file",
+                "jobID",
+                "step",
+                "Status",
+            ]
+        )
     )
 
+    @classmethod
+    def from_sessions(cls, sessions: List[int]) -> "ABFE":
+        """initialize an ABFE class given a list of sessions
 
-@beartype
-def complex_prep(
-    row_id: str,
+        Args:
+            sessions (List[int]): list of sessions"""
+
+        df = api.get_dataframe(ABFE_DB, use_file_names=False)
+        idx = [ABFE_DB + "-" + str(session) for session in sessions]
+
+        all_valid = set(idx).issubset(df.index)
+        if not all_valid:
+            raise DeepOriginException("Some sessions are not valid.")
+
+        df = df.loc[idx]
+
+        # check that rows correspond to only one protein
+        if len(df["protein_name"].unique()) > 1:
+            raise DeepOriginException(
+                "List of sessions corresponds to more than 1 protein. Cannot continue"
+            )
+
+        protein_name = df["protein_name"].unique()[0]
+
+        # make ligands
+        file_ids = list(df["protein_file"]) + list(df["ligand_file"])
+        files = api.list_files(file_ids=file_ids)
+
+        ligands = []
+        for row_id, row in df.iterrows():
+            file_id = row["ligand_file"]
+            file_name = [file.file.name for file in files if file.file.id == file_id][0]
+            smiles_string = row["Ligand"]
+            ligand = Ligand(file=file_name, smiles_string=smiles_string)
+            ligands.append(ligand)
+
+        files = api.list_files(file_ids=file_ids)
+
+        # make protein
+        protein_file_name = [file for file in files if file.file.name.endswith("pdb")][
+            0
+        ].file.name
+        protein = Protein(
+            file=protein_file_name,
+            name=protein_name,
+        )
+
+        #
+        # Create the ABFE instance
+        abfe = cls(
+            ligands=ligands,
+            protein=protein,
+            delta_gs=[np.nan for _ in ligands],
+        )
+
+        abfe.row_ids = df.index
+
+        # now make the status df
+        rows = []
+
+        # every ligand is initialized
+        for lig in ligands:
+            rows.append(
+                {
+                    "ligand_file": str(lig.file),
+                    "jobID": None,
+                    "step": "init",
+                    "Status": "Succeeded",
+                }
+            )
+
+        # now put the job IDs
+        for ligand, (_, row) in zip(ligands, df.iterrows()):
+            if pd.isna(row["job_ids"]):
+                continue
+
+            data = ast.literal_eval(row["job_ids"])
+            for key in data.keys():
+                if data[key] is None:
+                    continue
+
+                rows.append(
+                    {
+                        "ligand_file": str(ligand.file),
+                        "jobID": data[key],
+                        "step": key,
+                        "Status": "Running",
+                    }
+                )
+
+        abfe.df = pd.DataFrame(rows, columns=abfe.df.columns)
+
+        return abfe
+
+    @classmethod
+    def from_dir(cls, directory: str) -> "ABFE":
+        """initialize an ABFE class given some files in a directory
+
+        Args:
+            directory (str): directory containing ligand and protein files"""
+
+        sdf_files = sorted(
+            [
+                os.path.join(directory, f)
+                for f in os.listdir(directory)
+                if f.lower().endswith(".sdf")
+            ]
+        )
+        ligands = [Ligand(sdf_file) for sdf_file in sdf_files]
+
+        pdb_files = [
+            os.path.join(directory, f)
+            for f in os.listdir(directory)
+            if f.lower().endswith(".pdb")
+        ]
+
+        if len(pdb_files) != 1:
+            raise ValueError(
+                f"Expected exactly one PDB file in the directory, but found {len(pdb_files)}."
+            )
+        protein_file = pdb_files[0]
+        protein = Protein(protein_file)
+
+        # Create the ABFE instance
+        abfe = cls(
+            ligands=ligands,
+            protein=protein,
+            delta_gs=[np.nan for _ in ligands],
+        )
+
+        # Populate a row in abfe.df for each ligand
+        rows = []
+        for lig in ligands:
+            rows.append(
+                {
+                    "ligand_file": str(lig.file),
+                    "jobID": None,
+                    "step": None,
+                    "Status": "Ready to Upload",
+                }
+            )
+
+        # Overwrite (or extend) the internal DataFrame
+        abfe.df = pd.DataFrame(rows, columns=abfe.df.columns)
+
+        return abfe
+
+    def update(self):
+        """update statuses of jobs in ABFE run"""
+
+        for _, row in self.df.iterrows():
+            if row["Status"] in ["Succeeded", "Failed"]:
+                continue
+
+            if row["jobID"] is None or len(row["jobID"]) == 0:
+                continue
+
+            row["Status"] = query_run_status(row["jobID"])
+
+    def init(self):
+        """Initialize an ABFE run. Upload ligand(s) and protein files to Deep Origin."""
+
+        database = _ensure_db_for_abfe()
+
+        # get params in
+        self.params = _load_all_params()
+
+        smiles_column_id = [col.id for col in database.cols if col.name == "Ligand"][0]
+        protein_name_column_id = [
+            col.id for col in database.cols if col.name == COL_PROTEIN_NAME
+        ][0]
+
+        url = construct_resource_url(
+            name=ABFE_DB,
+            row_type="database",
+        )
+
+        print(f"Using database at: {url}")
+        print("🧬 Uploading files to database...")
+
+        self.row_ids = []
+
+        # now upload the protein
+        protein_file = api.upload_file(file_path=str(self.protein.file))
+
+        self.delta_gs = [np.nan for _ in self.ligands]
+
+        for ligand in self.ligands:
+            # for each ligand, upload the ligand to a new row
+
+            ligand_file = ligand.file
+
+            response = api.upload_file_to_new_database_row(
+                database_id=ABFE_DB,
+                column_id=COL_LIGAND_FILE,
+                file_path=ligand.file,
+            )
+
+            row_id = response.rows[0].hid
+
+            self.row_ids.append(row_id)
+
+            api.set_cell_data(
+                ligand.smiles_string,
+                database_id=ABFE_DB,
+                row_id=row_id,
+                column_id=smiles_column_id,
+            )
+
+            api.set_cell_data(
+                self.protein.name,
+                database_id=ABFE_DB,
+                row_id=row_id,
+                column_id=protein_name_column_id,
+            )
+
+            api.assign_files_to_cell(
+                file_ids=[protein_file.id],
+                database_id=ABFE_DB,
+                column_id=COL_PROTEIN_FILE,
+                row_id=row_id,
+            )
+
+            # update the dataframe
+            self.df.loc[len(self.df)] = [
+                ligand_file,
+                "",
+                "init",
+                "Succeeded",
+            ]
+
+        print(f"🧬 Files uploaded to row {row_id}.")
+
+    def results(self, image_size=(200, 200)):
+        """
+        Create and display a DataFrame in a Jupyter notebook with columns:
+          - Molecule (an inline RDKit image from the SMILES)
+          - SMILES (the raw SMILES string)
+          - FEP ΔG (kcal/mol)
+          - status
+        """
+
+        df = self.df.copy()
+
+        # 1. Mark rows where jobID is non-empty
+        df["has_jobID"] = df["jobID"].notna() & (df["jobID"] != "")
+
+        # 2. Sort by 'has_jobID' in descending order,
+        #    ensuring rows with a valid jobID appear first
+        df = df.sort_values("has_jobID", ascending=False)
+
+        # 3. Drop duplicates on 'ligand_file', keeping the first row for each group
+        df = df.drop_duplicates(subset=["ligand_file"], keep="first")
+
+        # 4. Drop the helper column
+        df = df.drop(columns=["has_jobID"])
+
+        rows = []
+        for _, row in df.iterrows():
+            ligand_file = row["ligand_file"]
+
+            idx = [lig.file for lig in self.ligands].index(ligand_file)
+
+            ligand = self.ligands[idx]
+
+            status = row["Status"]
+
+            row = {
+                "Molecule": chemistry.smiles_to_base64_png(
+                    ligand.smiles_string,
+                    size=image_size,
+                ),
+                COL_DELTA_G: self.delta_gs[idx],
+                "Status": status,
+            }
+            rows.append(row)
+
+        df = pd.DataFrame(
+            rows,
+            columns=[
+                "Molecule",
+                COL_DELTA_G,
+                "Status",
+            ],
+        )
+
+        # Use escape=False to allow the <img> tags to render as images
+        display(HTML(df.to_html(escape=False)))
+
+    def end_to_end(self):
+        """run an end-to-end job"""
+
+        job_ids = []
+        row_id = self.row_ids[0]
+        job_ids.append(
+            _run_e2e(
+                row_id=row_id,
+                steps=self.params.steps,
+                output_column_name=COL_END_TO_END_OUTPUT,
+            )
+        )
+
+    def status(self):
+        """print the status of an ABFE run"""
+
+        if len(self.df["ligand_file"].unique()) != 1:
+            raise NotImplementedError(
+                "Expected exactly one ligand file in the dataframe. I haven't coded this yet"
+            )
+
+        self.update()
+
+        node_statuses = {
+            "init": "NotStarted",
+            "complex_prep": "NotStarted",
+            "ligand_prep": "NotStarted",
+            "solvation_FEP": "NotStarted",
+            "simple_MD": "NotStarted",
+            "binding_FEP": "NotStarted",
+            "DeltaG": "NotStarted",
+        }
+
+        for _, row in self.df.iterrows():
+            node_statuses[row["step"]] = row["Status"]
+
+        render_mermaid_with_statuses(node_statuses)
+
+    def emeq(self):
+        """run complex prep step on each ligand"""
+
+        for ligand, row_id in zip(self.ligands, self.row_ids):
+            self.df = _run_job(
+                ligand_file=ligand.file,
+                row_id=row_id,
+                df=self.df,
+                params=self.params.emeq,
+                func=emeq,
+            )
+
+    def complex_prep(self):
+        """run complex prep step on each ligand"""
+
+        for ligand, row_id in zip(self.ligands, self.row_ids):
+            self.df = _run_job(
+                ligand_file=ligand.file,
+                row_id=row_id,
+                df=self.df,
+                params=self.params.complex_prep,
+                func=complex_prep,
+            )
+
+    def ligand_prep(self):
+        """run complex prep step on each ligand"""
+
+        for ligand, row_id in zip(self.ligands, self.row_ids):
+            self.df = _run_job(
+                ligand_file=ligand.file,
+                row_id=row_id,
+                df=self.df,
+                params=self.params.ligand_prep,
+                func=ligand_prep,
+            )
+
+    def simple_md(self):
+        """run complex prep step on each ligand"""
+
+        for ligand, row_id in zip(self.ligands, self.row_ids):
+            self.df = _run_job(
+                ligand_file=ligand.file,
+                row_id=row_id,
+                df=self.df,
+                params=self.params.simple_md,
+                func=simple_md,
+            )
+
+    def solvation_fep(self):
+        """run complex prep step on each ligand"""
+
+        for ligand, row_id in zip(self.ligands, self.row_ids):
+            self.df = _run_job(
+                ligand_file=ligand.file,
+                row_id=row_id,
+                df=self.df,
+                params=self.params.solvation_fep,
+                func=solvation_fep,
+            )
+
+    def binding_fep(self):
+        """run complex prep step on each ligand"""
+
+        for ligand, row_id in zip(self.ligands, self.row_ids):
+            self.df = _run_job(
+                ligand_file=ligand.file,
+                row_id=row_id,
+                df=self.df,
+                params=self.params.binding_fep,
+                func=binding_fep,
+            )
+
+
+def _run_e2e(
     *,
-    keep_waters: bool = True,
-    save_gmx_files: bool = False,
-    is_lig_protonated: bool = True,
-    is_protein_protonated: bool = True,
-    do_loop_modelling: bool = False,
-    charge_method: charge_methods = "bcc",
-    lig_force_field: ligand_force_fields = "gaff2",
-    padding: float = 1.0,
-    system_name: str = "complex",
-    force_field: force_fields = "ff14SB",
-) -> None:
-    """Function to prepare uploaded Ligand and protein files using Deep Origin MDSuite. Use this function to run system prep on a ligand and protein pair, that exist as files on a row in the ABFE database.
-
-    Args:
-        row_id (str): row id that contains the ligand and protein files.
-        keep_waters (bool, optional): whether to keep water molecules in the system. Defaults to True.
-        save_gmx_files (bool, optional): whether to save gmx files. Defaults to False.
-        is_lig_protonated (bool, optional): whether the ligand is protonated. Defaults to True.
-        is_protein_protonated (bool, optional): whether the protein is protonated. Defaults to True.
-        do_loop_modelling (bool, optional): whether to do loop modelling. Defaults to False.
-        charge_method (str, optional): method to use for charge assignment. Defaults to "bcc".
-        lig_force_field (str, optional): ligand force field. Defaults to "gaff2".
-        padding (float, optional): padding to use. Defaults to 1.0.
-        force_field (str, optional): force field. Defaults to "ff14SB".
-        system_name (str, optional): name of the system. Defaults to "complex". This name can be anything.
-
-
-    """
-
-    kwargs = locals()
-
-    kwargs["include_protein"] = 1
-    kwargs["include_ligands"] = 1
-    kwargs["output_column_name"] = "complex_prep_output"
-
-    _prep(**kwargs)
-
-
-@beartype
-def solvation_prep(
     row_id: str,
-    *,
-    is_lig_protonated: bool = True,
-    charge_method: charge_methods = "bcc",
-    lig_force_field: ligand_force_fields = "gaff2",
-    system_name: str = "ligand_prep",
-    force_field: force_fields = "ff14SB",
-) -> None:
-    """Function to prepare uploaded Ligand and protein files using Deep Origin MDSuite. Use this function to run system prep on a ligand and protein pair, that exist as files on a row in the ABFE database.
-
-    Args:
-        row_id (str): row id that contains the ligand and protein files.
-        is_lig_protonated (bool, optional): whether the ligand is protonated. Defaults to True.
-        charge_method (str, optional): method to use for charge assignment. Defaults to "bcc".
-        lig_force_field (str, optional): ligand force field. Defaults to "gaff2".
-        system_name (str, optional): name of the system. Defaults to "ligand_prep". This name can be anything.
-        force_field (str, optional): force field. Defaults to "ff14SB".
-
-
-    """
-    kwargs = locals()
-
-    kwargs["include_protein"] = 0
-    kwargs["include_ligands"] = 1
-    kwargs["output_column_name"] = "solvation_prep_output"
-
-    _prep(**kwargs)
-
-
-@beartype
-def _prep(
-    row_id: str,
-    *,
-    include_protein: int,
-    include_ligands: int,
-    system_name: str,
+    steps: dict,
     output_column_name: str,
-    keep_waters: bool = True,
-    save_gmx_files: bool = False,
-    is_lig_protonated: bool = True,
-    is_protein_protonated: bool = True,
-    do_loop_modelling: bool = False,
-    charge_method: charge_methods = "bcc",
-    lig_force_field: ligand_force_fields = "gaff2",
-    padding: float = 1.0,
-    force_field: force_fields = "ff14SB",
-) -> None:
-    """Function to prepare uploaded Ligand and protein files using Deep Origin MDSuite. Use this function to run system prep on a ligand and protein pair, that exist as files on a row in the ABFE database.
-
-    Args:
-        row_id (str): row id of the ligand and protein files.
-        keep_waters (bool, optional): whether to keep waters. Defaults to True.
-        save_gmx_files (bool, optional): whether to save gmx files. Defaults to False.
-        is_lig_protonated (bool, optional): whether the ligand is protonated. Defaults to True.
-        is_protein_protonated (bool, optional): whether the protein is protonated. Defaults to True.
-        do_loop_modelling (bool, optional): whether to do loop modelling. Defaults to False.
-        charge_method (charge_methods, optional): charge method. Defaults to "bcc".
-        lig_force_field (ligand_force_fields, optional): ligand force field. Defaults to "gaff2".
-        padding (float, optional): padding. Defaults to 1.0.
-        system_name (str, optional): system name. Defaults to "complex".
-        force_field (force_fields, optional): force field. Defaults to "ff14SB".
-
-    """
-
-    # input validation
-    if padding < 0.5 or padding > 2:
-        raise DeepOriginException("Padding must be greater than 0.5, and less than 2")
+) -> str:
+    """Function to run an end-to-end job"""
 
     database = _ensure_db_for_abfe()
 
@@ -312,35 +602,20 @@ def _prep(
 
     print(f"Using row {row_id} in database at: {url}")
 
-    tool_key = "deeporigin.md-suite-prep"
+    tool_key = "deeporigin.md-suite-abfe-e2e"
 
     inputs = {
         "ligand": {
-            "columnId": "ligand",
+            "columnId": "ligand_file",
             "rowId": row_id,
             "databaseId": database.hid,
         },
         "protein": {
-            "columnId": "protein",
+            "columnId": "protein_file",
             "rowId": row_id,
             "databaseId": database.hid,
         },
-        "force": 2,
-        "test_run": 0,
-        "system": system_name,
-        "include_ligands": include_ligands,
-        "include_protein": include_protein,
-        "sysprep_params": {
-            "is_protein_protonated": is_protein_protonated,
-            "do_loop_modelling": do_loop_modelling,
-            "force_field": "ff14SB",
-            "padding": padding,
-            "keep_waters": keep_waters,
-            "save_gmx_files": save_gmx_files,
-            "is_lig_protonated": is_lig_protonated,
-            "charge_method": charge_method,
-            "lig_force_field": lig_force_field,
-        },
+        "steps": steps,
     }
 
     outputs = {
@@ -351,271 +626,393 @@ def _prep(
         }
     }
 
-    run._process_job(
+    job_id = run._process_job(
         inputs=inputs,
         outputs=outputs,
         tool_key=tool_key,
         cols=database.cols,
     )
 
+    return job_id
 
-def solvation_fep(
-    row_id: str,
+
+@beartype
+def emeq(
     *,
-    integrator: integrators = "BAOABIntegrator",
-    softcore_alpha: float = 0.5,
-    steps: int = 300000,
-    repeats: int = 1,
-    threads: int = 0,
-    annihilate: bool = True,
-    hydrogen_mass: int = 2,
-    T: float = 298.15,
-) -> None:
+    row_id: str,
+    params: Optional[dict] = None,
+) -> str:
+    """Run emeq on a ligand and protein pair, that exist as files on a row in the ABFE database. For this to work, the complex prep step must have been run first.
+
+    Args:
+        row_id (str): row id that contains the ligand and protein files.
+
+    """
+
+    tool_key = "deeporigin.md-suite-emeq"
+
+    database = _ensure_database(ABFE_DB)
+
+    if params is None:
+        params = _load_params("emeq")
+
+    params["input"] = {
+        "columnId": COL_COMPLEX_PREP_OUTPUT,
+        "rowId": row_id,
+        "databaseId": database.hid,
+    }
+
+    outputs = {
+        "output_file": {
+            "columnId": COL_EMEQ_OUTPUT,
+            "rowId": row_id,
+            "databaseId": database.hid,
+        }
+    }
+
+    return run._process_job(
+        inputs=params,
+        outputs=outputs,
+        tool_key=tool_key,
+        cols=database.cols,
+    )
+
+
+@beartype
+def ligand_prep(
+    *,
+    row_id: str,
+    params: Optional[dict] = None,
+) -> str:
+    """Function to prepare uploaded Ligand and protein files using Deep Origin MDSuite. Use this function to run system prep on a ligand and protein pair, that exist as files on a row in the ABFE database.
+
+    Args:
+        row_id (str): row id that contains the ligand and protein files.
+
+
+    """
+    database = _ensure_db_for_abfe()
+
+    tool_key = "deeporigin.md-suite-prep"
+
+    if params is None:
+        params = _load_params("ligand_prep")
+
+    params["ligand"] = {
+        "columnId": COL_LIGAND_FILE,
+        "rowId": row_id,
+        "databaseId": database.hid,
+    }
+    params["protein"] = {
+        "columnId": "protein_file",
+        "rowId": row_id,
+        "databaseId": database.hid,
+    }
+
+    outputs = {
+        "output_file": {
+            "columnId": COL_LIGAND_PREP_OUTPUT,
+            "rowId": row_id,
+            "databaseId": database.hid,
+        }
+    }
+
+    return run._process_job(
+        inputs=params,
+        outputs=outputs,
+        tool_key=tool_key,
+        cols=database.cols,
+    )
+
+
+@beartype
+def complex_prep(
+    *,
+    row_id: str,
+    params: Optional[dict] = None,
+) -> str:
+    """Function to prepare uploaded Ligand and protein files using Deep Origin MDSuite. Use this function to run system prep on a ligand and protein pair, that exist as files on a row in the ABFE database.
+
+    Args:
+        row_id (str): row id that contains the ligand and protein files.
+
+
+    """
+    database = _ensure_db_for_abfe()
+
+    tool_key = "deeporigin.md-suite-prep"
+
+    if params is None:
+        params = _load_params("ligand_prep")
+
+    params["ligand"] = {
+        "columnId": COL_LIGAND_FILE,
+        "rowId": row_id,
+        "databaseId": database.hid,
+    }
+    params["protein"] = {
+        "columnId": COL_PROTEIN_FILE,
+        "rowId": row_id,
+        "databaseId": database.hid,
+    }
+
+    outputs = {
+        "output_file": {
+            "columnId": COL_COMPLEX_PREP_OUTPUT,
+            "rowId": row_id,
+            "databaseId": database.hid,
+        }
+    }
+
+    job_id = run._process_job(
+        inputs=params,
+        outputs=outputs,
+        tool_key=tool_key,
+        cols=database.cols,
+    )
+
+    return job_id
+
+
+@beartype
+def solvation_fep(
+    *,
+    row_id: str,
+    params: Optional[dict] = None,
+) -> str:
     """Run a solvation simulation
 
 
     Args:
         row_id (str): row id of the ligand and protein files.
-        integrator (integrators, optional): integrator. Defaults to "BAOABIntegrator".
-        softcore_alpha (float, optional): softcore alpha. Defaults to 0.5.
-        steps (int, optional): The number of steps to run the simulation for the prod step.
-        repeats (int, optional): The number of repeats for prod step.
-        threads (int, optional): The number of threads per worker. By default the number of threads will be determined by the number of windows and available cores on the CPU. Defaults to 0.
-        annihilate (bool, optional): Whether to annihilate the ligand or decouple it. Defaults to True.
     """
-
-    kwargs = locals()
-
-    if softcore_alpha < 0.0 or softcore_alpha > 1.0:
-        raise DeepOriginException("softcore_alpha must be between 0.0 and 1.0")
 
     database = _ensure_db_for_abfe()
 
-    url = construct_resource_url(
-        name=ABFE_DB,
-        row_type="database",
-    )
-
-    print(f"Using row {row_id} in database at: {url}")
-
     tool_key = "deeporigin.md-suite-solvation"
 
-    prod_md_options = {
-        k: kwargs[k] if k in kwargs else v for k, v in prod_md_defaults.items()
-    }
-    emeq_md_options = {
-        k: kwargs[k] if k in kwargs else v for k, v in emeq_md_defaults.items()
-    }
+    if params is None:
+        params = _load_params("solvation_fep")
 
-    inputs = {
-        "input": {
-            "columnId": "solvation_prep_output",
-            "rowId": row_id,
-            "databaseId": database.hid,
-        },
-        "force": 1,
-        "test_run": 0,
-        "run_name": "annihilation",
-        "system": "ligand_only",
-        "softcore_alpha": softcore_alpha,
-        "annihilate": annihilate,
-        "em_solvent": True,
-        "em_all": True,
-        "nvt_heating_ns": 0.1,
-        "npt_reduce_restraints_ns": 0.2,
-        "repeats": repeats,
-        "steps": steps,
-        "threads": threads,
-        "fep_windows": [
-            {"coul_A": [1, 0.8, 0.6, 0.4, 0.2, 0]},
-            {"vdw_A": [1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1, 0]},
-        ],
-        "emeq_md_options": emeq_md_options,
-        "prod_md_options": prod_md_options,
+    params["input"] = {
+        "columnId": COL_LIGAND_PREP_OUTPUT,
+        "rowId": row_id,
+        "databaseId": ABFE_DB,
     }
 
     outputs = {
         "output_file": {
-            "columnId": "solvation_output",
+            "columnId": COL_SOLVATION_FEP_OUTPUT,
             "rowId": row_id,
             "databaseId": database.hid,
         }
     }
 
-    run._process_job(
-        inputs=inputs,
+    return run._process_job(
+        inputs=params,
         outputs=outputs,
         tool_key=tool_key,
         cols=database.cols,
     )
 
 
+@beartype
 def simple_md(
-    row_id: str,
     *,
-    integrator: integrators = "BAOABIntegrator",
-    run_name: str = "complex_1ns_md",
-    steps: int = 250000,
-    threads: int = 0,
-    Δt: float = 0.004,
-    temperature: float = 298.15,
-    cutoff: float = 0.9,
-    fourier_spacing: float = 0.12,
-):
+    row_id: str,
+    params: Optional[dict] = None,
+) -> str:
     """Run a simple MD simulation
 
     Args:
         row_id (str): row id of the ligand and protein files.
-        integrator (integrators, optional): integrator. Defaults to "BAOABIntegrator".
-        run_name (str, optional): run name. Defaults to "complex_1ns_md".
-        steps (int, optional): The number of steps to run the simulation for the prod step.
-        threads (int, optional): The number of threads per worker. By default the number of threads will be determined by the number of windows and available cores on the CPU. Defaults to 0.
-        Δt (float, optional): The time step in femtoseconds. Defaults to 0.004.
-        temperature (float, optional): The temperature in kelvin. Defaults to 298.15.
-        cutoff (float, optional): The cutoff distance in angstroms. Defaults to 0.9.
-        fourier_spacing (float, optional): The Fourier spacing in femtoseconds. Defaults to 0.12.
     """
     kwargs = locals()
     database = _ensure_db_for_abfe()
 
-    url = construct_resource_url(
-        name=ABFE_DB,
-        row_type="database",
-    )
-
-    md_options = {
-        k: kwargs[k] if k in kwargs else v for k, v in prod_md_defaults.items()
-    }
-
-    print(f"Using row {row_id} in database at: {url}")
-
     tool_key = "deeporigin.md-suite-md"
-    inputs = {
-        "input": {
-            "columnId": "emeq_output",
-            "rowId": row_id,
-            "databaseId": ABFE_DB,
-        },
-        "force": 1,
-        "test_run": 0,
-        "run_name": run_name,
-        "from_run": "test-run",
-        "steps": steps,
-        "threads": threads,
-        "system": "__USE_FROM_RUN",
-        "md_options": md_options,
+
+    if params is None:
+        params = _load_params("simple_md")
+
+    params["input"] = {
+        "columnId": COL_EMEQ_OUTPUT,
+        "rowId": row_id,
+        "databaseId": ABFE_DB,
     }
 
     outputs = {
         "output_file": {
-            "columnId": "md_output",
+            "columnId": COL_MD_OUTPUT,
             "rowId": row_id,
             "databaseId": database.hid,
         }
     }
 
-    run._process_job(
-        inputs=inputs,
+    return run._process_job(
+        inputs=params,
         outputs=outputs,
         tool_key=tool_key,
         cols=database.cols,
     )
 
 
+@beartype
 def binding_fep(
-    row_id,
     *,
-    run_name: str = "annihilation_fep",
-    softcore_alpha: float = 0.5,
-    annihilate: bool = True,
-    em_solvent: bool = True,
-    em_all: bool = True,
-    nvt_heating_ns: int = 1,
-    npt_reduce_restraints_ns: int = 2,
-    steps: int = 1250000,
-    repeats: int = 1,
-    threads: int = 0,
-    integrator: integrators = "BAOABIntegrator",
-    Δt: float = 0.004,
-    T: float = 298.15,
-):
+    row_id: str,
+    params: Optional[dict] = None,
+) -> str:
     """Run an ABFE simulation
 
     Args:
         row_id (str): row id of the ligand and protein files.
-        run_name (str, optional): run name. Defaults to "annihilation_fep".
-        softcore_alpha (float, optional): softcore alpha. Defaults to 0.5.
-        annihilate (bool, optional): Whether to annihilate the ligand or decouple it. Defaults to True.
-        em_solvent (bool, optional): Whether to use em solvent. Defaults to True.
-        em_all (bool, optional): Whether to use em all. Defaults to True.
-        nvt_heating_ns (int, optional): The number of nvt heating steps. Defaults to 1.
-        npt_reduce_restraints_ns (int, optional): The number of npt reduce restraints steps. Defaults to 2.
-        steps (int, optional): The number of steps to run the simulation for the prod step.
-        threads (int, optional): The number of threads per worker. By default the number of threads will be determined by the number of windows and available cores on the CPU. Defaults to 0.
-        integrator (integrators, optional): integrator. Defaults to "BAOABIntegrator".
-        Δt (float, optional): The time step in femtoseconds. Defaults to 0.004.
-        T (float, optional): The temperature in kelvin. Defaults to 298.15.
 
     """
 
-    kwargs = locals()
     database = _ensure_db_for_abfe()
 
-    url = construct_resource_url(
-        name=ABFE_DB,
-        row_type="database",
-    )
-
-    print(f"Using row {row_id} in database at: {url}")
-
-    emeq_md_options = {
-        k: kwargs[k] if k in kwargs else v for k, v in emeq_md_defaults.items()
-    }
-    prod_md_options = {
-        k: kwargs[k] if k in kwargs else v for k, v in prod_md_defaults.items()
-    }
-
     tool_key = "deeporigin.md-suite-abfe"
-    inputs = {
-        "input": {
-            "columnId": "md_output",
-            "rowId": row_id,
-            "databaseId": ABFE_DB,
-        },
-        "force": 1,
-        "test_run": 0,
-        "run_name": run_name,
-        "boresch_run_name": "complex_1ns_md",
-        "system": "complex",
-        "softcore_alpha": softcore_alpha,
-        "annihilate": annihilate,
-        "em_solvent": em_solvent,
-        "em_all": em_all,
-        "nvt_heating_ns": nvt_heating_ns,
-        "npt_reduce_restraints_ns": npt_reduce_restraints_ns,
-        "repeats": repeats,
-        "steps": steps,
-        "threads": threads,
-        "fep_windows": [
-            {"restraints_A": [0, 0.01, 0.025, 0.05, 0.1, 0.35, 0.5, 0.75, 1]},
-            {"coul_A": [1, 0.8, 0.6, 0.4, 0.2, 0]},
-            {"vdw_A": [1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1, 0]},
-        ],
-        "emeq_md_options": emeq_md_options,
-        "prod_md_options": prod_md_options,
+
+    if params is None:
+        params = _load_params("binding_fep")
+
+    params["input"] = {
+        "columnId": COL_MD_OUTPUT,
+        "rowId": row_id,
+        "databaseId": ABFE_DB,
     }
 
     outputs = {
         "output_file": {
-            "columnId": "abfe_output",
+            "columnId": COL_BINDING_FEP_OUTPUT,
             "rowId": row_id,
             "databaseId": database.hid,
         }
     }
 
-    run._process_job(
-        inputs=inputs,
+    return run._process_job(
+        inputs=params,
         outputs=outputs,
         tool_key=tool_key,
         cols=database.cols,
     )
+
+
+@beartype
+def render_mermaid_with_statuses(
+    node_status: dict[str, str] = None,
+) -> None:
+    """
+    Render a Mermaid diagram where each node is drawn as a rounded rectangle
+    with a color indicating its status.
+
+    Any node not specified in the node_status dict will default to "notStarted".
+
+    """
+    # Define the fixed nodes in the diagram.
+    nodes = [
+        "init",
+        "emeq",
+        "complex_prep",
+        "ligand_prep",
+        "solvation_fep",
+        "simple_md",
+        "binding_fep",
+        "DeltaG",
+    ]
+
+    # Use an empty dictionary if none is provided.
+    if node_status is None:
+        node_status = {}
+
+    # Build node definitions. For each node, use the provided status or default to "notStarted".
+    node_defs = ""
+    for node in nodes:
+        status = node_status.get(node, "NotStarted")
+        node_defs += f"    {node}({node}):::{status};\n"
+
+    # Define the fixed edges of the diagram.
+    edges = """
+    init --> complex_prep;
+    init --> ligand_prep;
+    ligand_prep ----> solvation_fep;
+    solvation_fep --> DeltaG;
+    complex_prep --> emeq --> simple_md --> binding_fep --> DeltaG;
+    """
+
+    # Build the complete Mermaid diagram definition.
+    mermaid_code = f"""
+graph LR;
+    %% Define styles for statuses:
+    classDef NotStarted fill:#cccccc,stroke:#333,stroke-width:2px;
+    classDef Queued fill:#cccccc,stroke:#222,stroke-width:2px;
+    classDef Succeeded    fill:#90ee90,stroke:#333,stroke-width:2px;
+    classDef Running       fill:#87CEFA,stroke:#333,stroke-width:2px;
+    classDef Failed     fill:#ff7f7f,stroke:#333,stroke-width:2px;
+
+{node_defs}
+{edges}
+    """
+
+    # Render the diagram using your helper function.
+    render_mermaid(mermaid_code)
+
+    # Define HTML for the legend. Each status is displayed as a colored span.
+    legend_html = """
+    <div style="margin-top: 20px; font-family: sans-serif;">
+      <span style="background-color:#cccccc; color: black; padding:2px 4px; margin: 0 8px;">NotStarted</span>
+      <span style="background-color:#90ee90; color: black; padding:2px 4px; margin: 0 8px;">Suceedeed</span>
+      <span style="background-color:#87CEFA; color: black; padding:2px 4px; margin: 0 8px;">Running</span>
+      <span style="background-color:#ff7f7f; color: black; padding:2px 4px; margin: 0 8px;">Failed</span>
+    </div>
+    """
+    # Display the legend below the Mermaid diagram.
+    display(HTML(legend_html))
+
+
+@beartype
+def _run_job(
+    ligand_file: str,
+    row_id: str,
+    df: pd.DataFrame,
+    params: dict,
+    func: Callable[..., Any],
+) -> pd.DataFrame:
+    """utility function that runs a job if needed"""
+
+    step = func.__name__
+
+    existing = df[(df["ligand_file"] == ligand_file) & (df["step"] == step)]
+    if not existing.empty:
+        print(f"Aborting for {ligand_file}: '{step}' step already exists.")
+        return df
+
+    data = api.get_cell_data(
+        row_id=row_id,
+        column_name=COL_JOB_IDS,
+    )
+
+    if data is None:
+        data = {}
+
+    else:
+        data = ast.literal_eval(data)
+
+    job_id = func(
+        row_id=row_id,
+        params=params,
+    )
+
+    data[step] = job_id
+
+    api.set_cell_data(
+        data,
+        row_id=row_id,
+        column_id=COL_JOB_IDS,
+        database_id=ABFE_DB,
+    )
+
+    df.loc[len(df)] = [ligand_file, job_id, step, "Queued"]
+
+    return df

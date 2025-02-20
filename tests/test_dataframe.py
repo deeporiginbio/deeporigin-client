@@ -173,9 +173,9 @@ def test_df_loc_indexer_1(config):  # noqa: F811
     last_row = df.index[-1]
     df.loc[first_row] = list(df.loc[last_row])
 
-    assert (
-        df._modified_columns != {}
-    ), "Failed to successfully modify a row using the loc indexer"
+    assert df._modified_columns != {}, (
+        "Failed to successfully modify a row using the loc indexer"
+    )
 
     if not config["mock"]:
         df.to_deeporigin()
@@ -194,9 +194,9 @@ def test_df_loc_indexer_2(config):  # noqa: F811
     last_row = df.index[-1]
     df.loc[[first_row, last_row]] = list(df.loc[last_row])
 
-    assert (
-        df._modified_columns != {}
-    ), "Failed to successfully modify a row using the loc indexer"
+    assert df._modified_columns != {}, (
+        "Failed to successfully modify a row using the loc indexer"
+    )
 
     if not config["mock"]:
         df.to_deeporigin()
@@ -263,6 +263,6 @@ def test_modify_cell(config, row):
     df.to_deeporigin()
 
     df = DataFrame.from_deeporigin(config["db-name"])
-    assert (
-        df.at[row_id, "float"] == salt
-    ), "Failed to successfully modify a cell using the at syntax and write to DB"
+    assert df.at[row_id, "float"] == salt, (
+        "Failed to successfully modify a cell using the at syntax and write to DB"
+    )

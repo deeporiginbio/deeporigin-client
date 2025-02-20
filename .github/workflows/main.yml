@@ -28,7 +28,7 @@ jobs:
       with:
         fetch-depth: 0
     - name: SonarCloud Scan
-      uses: sonarsource/sonarcloud-github-action@master
+      uses: sonarsource/sonarqube-scan-action@master
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -43,13 +43,13 @@ jobs:
       - name: Check code formatting using ruff
         uses: chartboost/ruff-action@v1
         with:
-          version: 0.3.1
+          version: 0.9.6
           args: format --check
 
       - name: Check import order
         uses: chartboost/ruff-action@v1
         with:
-          version: 0.3.1
+          version: 0.9.6
           args: check --select I
 
       - name: Check docstrings using interrogate

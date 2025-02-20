@@ -3,14 +3,9 @@
 import warnings
 
 import cement
-
-from ..feature_flags import (
-    FeatureNotAvailableWarning,
-)
-from ..feature_flags import (
-    get_value as get_feature_flags,
-)
-from ..variables import (
+from deeporigin.feature_flags import FeatureNotAvailableWarning
+from deeporigin.feature_flags import get_value as get_feature_flags
+from deeporigin.variables import (
     VariableStatus,
     VariableType,
     disable_variable_auto_updating,
@@ -19,7 +14,7 @@ from ..variables import (
     install_variables,
     uninstall_variables,
 )
-from ..variables.types import EnvironmentVariable
+from deeporigin.variables.types import EnvironmentVariable
 
 __all__ = [
     "CONTROLLERS",

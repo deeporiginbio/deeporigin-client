@@ -64,9 +64,9 @@ def test_describe_row(config, option):  # noqa: F811
     if option == ["--json"]:
         data = _check_json(stdout)
 
-        assert (
-            data["hid"] == row_id
-        ), f"Expected row ID to match. However, got {data['id']} vs. {row_id}"
+        assert data["hid"] == row_id, (
+            f"Expected row ID to match. However, got {data['id']} vs. {row_id}"
+        )
 
 
 @pytest.mark.parametrize("json_option", JSON_OPTIONS)
