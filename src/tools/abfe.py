@@ -1,11 +1,12 @@
 """this module contains various functions to run steps of an ABFE workflow"""
 
+import ast
 import importlib.resources
 import json
 import os
 from dataclasses import dataclass, field, fields
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import Any, Callable, List, Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -17,6 +18,7 @@ from deeporigin.tools import run
 from deeporigin.tools.toolkit import _ensure_columns, _ensure_database
 from deeporigin.tools.utils import query_run_status
 from deeporigin.utils.config import construct_resource_url
+from deeporigin.utils.notebook import render_mermaid
 from IPython.display import HTML, display
 
 # constants and types
@@ -31,6 +33,7 @@ COL_SOLVATION_FEP_OUTPUT = "solvation_fep_output"
 COL_MD_OUTPUT = "md_output"
 COL_BINDING_FEP_OUTPUT = "binding_fep_output"
 COL_END_TO_END_OUTPUT = "end_to_end_output"
+COL_JOB_IDS = "job_ids"
 
 
 class PrettyDict(Box):
@@ -82,6 +85,7 @@ def _ensure_db_for_abfe() -> dict:
         dict(name=COL_MD_OUTPUT, type="file"),
         dict(name=COL_BINDING_FEP_OUTPUT, type="file"),
         dict(name=COL_END_TO_END_OUTPUT, type="file"),
+        dict(name=COL_JOB_IDS, type="text"),
     ]
 
     database = _ensure_columns(
@@ -208,13 +212,25 @@ class ABFE:
 
         return abfe
 
+    def update(self):
+        """update statuses of jobs"""
+
+        for _, row in self.df.iterrows():
+            if row["Status"] in ["Succeeded", "Failed"]:
+                continue
+
+            if row["jobID"] is None or len(row["jobID"]) == 0:
+                continue
+
+            row["Status"] = query_run_status(row["jobID"])
+
     def init(self):
         """Initialize an ABFE run. Upload ligand(s) and protein files to Data Hub."""
 
         database = _ensure_db_for_abfe()
 
         # get params in
-        self.params = dict()
+        self.params = Box()
         self.params.binding_fep = _load_params("binding_fep")
         self.params.complex_prep = _load_params("complex_prep")
         self.params.emeq = _load_params("emeq")
@@ -237,8 +253,13 @@ class ABFE:
         # now upload the protein
         protein_file = api.upload_file(file_path=self.protein.file)
 
+        self.delta_gs = [np.nan for _ in self.ligands]
+
         for ligand in self.ligands:
             # for each ligand, upload the ligand to a new row
+
+            ligand_file = ligand.file
+
             response = api.upload_file_to_new_database_row(
                 database_id=ABFE_DB,
                 column_id=COL_LIGAND_FILE,
@@ -264,7 +285,12 @@ class ABFE:
             )
 
             # update the dataframe
-            self.df.loc[self.df["ligand_file"] == ligand.file, "Status"] = "Uploaded"
+            self.df.loc[len(self.df)] = [
+                ligand_file,
+                "",
+                "init",
+                "Succeeded",
+            ]
 
         print(f"🧬 Files uploaded to row {row_id}.")
 
@@ -340,6 +366,13 @@ class ABFE:
     def status(self):
         """print the status of an ABFE run"""
 
+        if len(self.df["ligand_file"].unique()) != 1:
+            raise NotImplementedError(
+                "Expected exactly one ligand file in the dataframe. I haven't coded this yet"
+            )
+
+        self.update()
+
         node_statuses = {
             "init": "NotStarted",
             "complex_prep": "NotStarted",
@@ -350,69 +383,81 @@ class ABFE:
             "DeltaG": "NotStarted",
         }
 
-        keys = self._job_ids.keys()
+        for _, row in self.df.iterrows():
+            node_statuses[row["step"]] = row["Status"]
 
-        for key in keys:
-            if self._status[key] == "Succeeded" or self._status[key] == "Failed":
-                continue
-
-            # IN NON-terminal state. update
-            self._status[key] = query_run_status(self._job_ids[key])
-
-        node_statuses.update(self._status)
+        render_mermaid_with_statuses(node_statuses)
 
     def emeq(self):
-        """run EMEQ step on each ligand"""
+        """run complex prep step on each ligand"""
 
-        for row_id in self.row_ids:
-            emeq(
+        for ligand, row_id in zip(self.ligands, self.row_ids):
+            self.df = _run_job(
+                ligand_file=ligand.file,
                 row_id=row_id,
+                df=self.df,
                 params=self.params.emeq,
+                func=emeq,
             )
 
     def complex_prep(self):
         """run complex prep step on each ligand"""
 
-        for row_id in self.row_ids:
-            complex_prep(
+        for ligand, row_id in zip(self.ligands, self.row_ids):
+            self.df = _run_job(
+                ligand_file=ligand.file,
                 row_id=row_id,
+                df=self.df,
                 params=self.params.complex_prep,
+                func=complex_prep,
             )
 
     def ligand_prep(self):
-        """run ligand prep step on each ligand"""
+        """run complex prep step on each ligand"""
 
-        for row_id in self.row_ids:
-            ligand_prep(
+        for ligand, row_id in zip(self.ligands, self.row_ids):
+            self.df = _run_job(
+                ligand_file=ligand.file,
                 row_id=row_id,
+                df=self.df,
                 params=self.params.ligand_prep,
+                func=ligand_prep,
             )
 
     def simple_md(self):
-        """run simple MD step on each ligand"""
+        """run complex prep step on each ligand"""
 
-        for row_id in self.row_ids:
-            simple_md(
+        for ligand, row_id in zip(self.ligands, self.row_ids):
+            self.df = _run_job(
+                ligand_file=ligand.file,
                 row_id=row_id,
+                df=self.df,
                 params=self.params.simple_md,
+                func=simple_md,
             )
 
     def solvation_fep(self):
-        """run solvation FEP step on each ligand"""
+        """run complex prep step on each ligand"""
 
-        for row_id in self.row_ids:
-            solvation_fep(
+        for ligand, row_id in zip(self.ligands, self.row_ids):
+            self.df = _run_job(
+                ligand_file=ligand.file,
                 row_id=row_id,
+                df=self.df,
                 params=self.params.solvation_fep,
+                func=solvation_fep,
             )
 
     def binding_fep(self):
-        """run binding FEP step on each ligand"""
+        """run complex prep step on each ligand"""
 
-        for row_id in self.row_ids:
-            binding_fep(
+        for ligand, row_id in zip(self.ligands, self.row_ids):
+            self.df = _run_job(
+                ligand_file=ligand.file,
                 row_id=row_id,
+                df=self.df,
                 params=self.params.binding_fep,
+                func=binding_fep,
             )
 
 
@@ -514,7 +559,7 @@ def ligand_prep(
     *,
     row_id: str,
     params: Optional[dict] = None,
-) -> None:
+) -> str:
     """Function to prepare uploaded Ligand and protein files using Deep Origin MDSuite. Use this function to run system prep on a ligand and protein pair, that exist as files on a row in the ABFE database.
 
     Args:
@@ -548,7 +593,7 @@ def ligand_prep(
         }
     }
 
-    run._process_job(
+    return run._process_job(
         inputs=params,
         outputs=outputs,
         tool_key=tool_key,
@@ -561,7 +606,7 @@ def complex_prep(
     *,
     row_id: str,
     params: Optional[dict] = None,
-) -> None:
+) -> str:
     """Function to prepare uploaded Ligand and protein files using Deep Origin MDSuite. Use this function to run system prep on a ligand and protein pair, that exist as files on a row in the ABFE database.
 
     Args:
@@ -595,12 +640,14 @@ def complex_prep(
         }
     }
 
-    run._process_job(
+    job_id = run._process_job(
         inputs=params,
         outputs=outputs,
         tool_key=tool_key,
         cols=database.cols,
     )
+
+    return job_id
 
 
 def solvation_fep(
@@ -723,3 +770,121 @@ def binding_fep(
         tool_key=tool_key,
         cols=database.cols,
     )
+
+
+@beartype
+def render_mermaid_with_statuses(
+    node_status: dict[str, str] = None,
+) -> None:
+    """
+    Render a Mermaid diagram where each node is drawn as a rounded rectangle
+    with a color indicating its status.
+
+    Any node not specified in the node_status dict will default to "notStarted".
+
+    """
+    # Define the fixed nodes in the diagram.
+    nodes = [
+        "init",
+        "emeq",
+        "complex_prep",
+        "ligand_prep",
+        "solvation_FEP",
+        "simple_MD",
+        "binding_FEP",
+        "DeltaG",
+    ]
+
+    # Use an empty dictionary if none is provided.
+    if node_status is None:
+        node_status = {}
+
+    # Build node definitions. For each node, use the provided status or default to "notStarted".
+    node_defs = ""
+    for node in nodes:
+        status = node_status.get(node, "NotStarted")
+        node_defs += f"    {node}({node}):::{status};\n"
+
+    # Define the fixed edges of the diagram.
+    edges = """
+    init --> complex_prep;
+    init --> ligand_prep;
+    ligand_prep ----> solvation_FEP;
+    solvation_FEP --> DeltaG;
+    complex_prep --> emeq --> simple_MD --> binding_FEP --> DeltaG;
+    """
+
+    # Build the complete Mermaid diagram definition.
+    mermaid_code = f"""
+graph LR;
+    %% Define styles for statuses:
+    classDef NotStarted fill:#cccccc,stroke:#333,stroke-width:2px;
+    classDef Queued fill:#cccccc,stroke:#222,stroke-width:2px;
+    classDef Succeeded    fill:#90ee90,stroke:#333,stroke-width:2px;
+    classDef Running       fill:#87CEFA,stroke:#333,stroke-width:2px;
+    classDef failed     fill:#ff7f7f,stroke:#333,stroke-width:2px;
+
+{node_defs}
+{edges}
+    """
+
+    # Render the diagram using your helper function.
+    render_mermaid(mermaid_code)
+
+    # Define HTML for the legend. Each status is displayed as a colored span.
+    legend_html = """
+    <div style="margin-top: 20px; font-family: sans-serif;">
+      <span style="background-color:#cccccc; color: black; padding:2px 4px; margin: 0 8px;">NotStarted</span>
+      <span style="background-color:#90ee90; color: black; padding:2px 4px; margin: 0 8px;">Suceedeed</span>
+      <span style="background-color:#87CEFA; color: black; padding:2px 4px; margin: 0 8px;">Running</span>
+      <span style="background-color:#ff7f7f; color: black; padding:2px 4px; margin: 0 8px;">Failed</span>
+    </div>
+    """
+    # Display the legend below the Mermaid diagram.
+    display(HTML(legend_html))
+
+
+def _run_job(
+    ligand_file: str,
+    row_id: str,
+    df: pd.DataFrame,
+    params: dict,
+    func: Callable[..., Any],
+) -> pd.DataFrame:
+    """utility function that runs a job if needed"""
+
+    step = func.__name__
+
+    existing = df[(df["ligand_file"] == ligand_file) & (df["step"] == step)]
+    if not existing.empty:
+        print(f"Aborting for {ligand_file}: '{step}' step already exists.")
+        return df
+
+    data = api.get_cell_data(
+        row_id=row_id,
+        column_name=COL_JOB_IDS,
+    )
+
+    if data is None:
+        data = {}
+
+    else:
+        data = ast.literal_eval(data)
+
+    job_id = func(
+        row_id=row_id,
+        params=params,
+    )
+
+    data[step] = job_id
+
+    api.set_cell_data(
+        data,
+        row_id=row_id,
+        column_id=COL_JOB_IDS,
+        database_id=ABFE_DB,
+    )
+
+    df.loc[len(df)] = [ligand_file, job_id, step, "Queued"]
+
+    return df
