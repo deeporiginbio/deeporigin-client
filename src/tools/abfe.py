@@ -165,6 +165,12 @@ class ABFE:
     @classmethod
     def from_sessions(cls, sessions: List[str]) -> "ABFE":
         """initialize an ABFE class given a list of sessions"""
+
+        # check that those rows correspond to only one protein
+
+        # download ligand from those rows
+
+        #
         raise NotImplementedError
 
     @classmethod
@@ -797,9 +803,9 @@ def render_mermaid_with_statuses(
         "emeq",
         "complex_prep",
         "ligand_prep",
-        "solvation_FEP",
-        "simple_MD",
-        "binding_FEP",
+        "solvation_fep",
+        "simple_md",
+        "binding_fep",
         "DeltaG",
     ]
 
@@ -817,9 +823,9 @@ def render_mermaid_with_statuses(
     edges = """
     init --> complex_prep;
     init --> ligand_prep;
-    ligand_prep ----> solvation_FEP;
-    solvation_FEP --> DeltaG;
-    complex_prep --> emeq --> simple_MD --> binding_FEP --> DeltaG;
+    ligand_prep ----> solvation_fep;
+    solvation_fep --> DeltaG;
+    complex_prep --> emeq --> simple_md --> binding_fep --> DeltaG;
     """
 
     # Build the complete Mermaid diagram definition.

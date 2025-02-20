@@ -1,10 +1,7 @@
 """controllers for context information in the CLI"""
 
 import cement
-
-from ..context import (
-    get_value as get_context,
-)
+from deeporigin.context import get_value as get_context
 
 __all__ = [
     "CONTROLLERS",
