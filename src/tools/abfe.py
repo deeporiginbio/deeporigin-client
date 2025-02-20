@@ -105,7 +105,7 @@ def _ensure_db_for_abfe() -> dict:
 
 @dataclass
 class Ligand:
-    """class to represent a ligand on disk"""
+    """class to represent a ligand (typically backed by a SDF file)"""
 
     file: Union[str, Path]
     smiles_string: Optional[str] = None
@@ -137,6 +137,8 @@ class Ligand:
 
 @dataclass
 class Protein:
+    """class to represent a protein (typically backed by a PDB file)"""
+
     file: Union[str, Path]
     name: Optional[str] = None
 
@@ -171,7 +173,10 @@ class ABFE:
 
     @classmethod
     def from_sessions(cls, sessions: List[int]) -> "ABFE":
-        """initialize an ABFE class given a list of sessions"""
+        """initialize an ABFE class given a list of sessions
+
+        Args:
+            sessions (List[int]): list of sessions"""
 
         df = api.get_dataframe(ABFE_DB, use_file_names=False)
         idx = [ABFE_DB + "-" + str(session) for session in sessions]
@@ -262,7 +267,10 @@ class ABFE:
 
     @classmethod
     def from_dir(cls, directory: str) -> "ABFE":
-        """initialize an ABFE class given some files in a directory"""
+        """initialize an ABFE class given some files in a directory
+
+        Args:
+            directory (str): directory containing ligand and protein files"""
 
         sdf_files = sorted(
             [
@@ -311,7 +319,7 @@ class ABFE:
         return abfe
 
     def update(self):
-        """update statuses of jobs"""
+        """update statuses of jobs in ABFE run"""
 
         for _, row in self.df.iterrows():
             if row["Status"] in ["Succeeded", "Failed"]:
@@ -323,7 +331,7 @@ class ABFE:
             row["Status"] = query_run_status(row["jobID"])
 
     def init(self):
-        """Initialize an ABFE run. Upload ligand(s) and protein files to Data Hub."""
+        """Initialize an ABFE run. Upload ligand(s) and protein files to Deep Origin."""
 
         database = _ensure_db_for_abfe()
 
