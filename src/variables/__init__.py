@@ -1,5 +1,5 @@
-from .base_type import Variable
-from .core import (
+from deeporigin.variables.base_type import Variable
+from deeporigin.variables.core import (
     VariableStatus,
     disable_variable_auto_updating,
     enable_variable_auto_updating,
@@ -7,9 +7,7 @@ from .core import (
     install_variables,
     uninstall_variables,
 )
-from .types import (
-    VariableType,
-)
+from deeporigin.variables.types import VariableType
 
 __all__ = [
     "Variable",

@@ -4,15 +4,13 @@ import warnings
 
 import cement
 import termcolor
-from deeporigin import auth
-
-from .. import __version__
-from ..exceptions import DeepOriginException
-from ..warnings import DeepOriginWarning
-from .config import CONTROLLERS as CONFIG_CONTROLLERS
-from .context import CONTROLLERS as CONTEXT_CONTROLLERS
-from .data import CONTROLLERS as DATA_CONTROLLERS
-from .variables import CONTROLLERS as VARIABLE_CONTROLLERS
+from deeporigin import __version__, auth
+from deeporigin.config import CONTROLLERS as CONFIG_CONTROLLERS
+from deeporigin.context import CONTROLLERS as CONTEXT_CONTROLLERS
+from deeporigin.data import CONTROLLERS as DATA_CONTROLLERS
+from deeporigin.exceptions import DeepOriginException
+from deeporigin.variables import CONTROLLERS as VARIABLE_CONTROLLERS
+from deeporigin.warnings import DeepOriginWarning
 
 __all__ = ["main", "App"]
 
