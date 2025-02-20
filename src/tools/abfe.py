@@ -163,6 +163,11 @@ class ABFE:
     )
 
     @classmethod
+    def from_sessions(cls, sessions: List[str]) -> "ABFE":
+        """initialize an ABFE class given a list of sessions"""
+        raise NotImplementedError
+
+    @classmethod
     def from_dir(cls, directory: str) -> "ABFE":
         """initialize an ABFE class given some files in a directory"""
 
@@ -517,7 +522,7 @@ def emeq(
     *,
     row_id: str,
     params: Optional[dict] = None,
-) -> None:
+) -> str:
     """Run emeq on a ligand and protein pair, that exist as files on a row in the ABFE database. For this to work, the complex prep step must have been run first.
 
     Args:
@@ -546,7 +551,7 @@ def emeq(
         }
     }
 
-    run._process_job(
+    return run._process_job(
         inputs=params,
         outputs=outputs,
         tool_key=tool_key,
@@ -650,11 +655,12 @@ def complex_prep(
     return job_id
 
 
+@beartype
 def solvation_fep(
     *,
     row_id: str,
     params: Optional[dict] = None,
-) -> None:
+) -> str:
     """Run a solvation simulation
 
 
@@ -683,7 +689,7 @@ def solvation_fep(
         }
     }
 
-    run._process_job(
+    return run._process_job(
         inputs=params,
         outputs=outputs,
         tool_key=tool_key,
@@ -691,11 +697,12 @@ def solvation_fep(
     )
 
 
+@beartype
 def simple_md(
     *,
     row_id: str,
     params: Optional[dict] = None,
-):
+) -> str:
     """Run a simple MD simulation
 
     Args:
@@ -723,7 +730,7 @@ def simple_md(
         }
     }
 
-    run._process_job(
+    return run._process_job(
         inputs=params,
         outputs=outputs,
         tool_key=tool_key,
@@ -731,11 +738,12 @@ def simple_md(
     )
 
 
+@beartype
 def binding_fep(
     *,
     row_id: str,
     params: Optional[dict] = None,
-):
+) -> str:
     """Run an ABFE simulation
 
     Args:
@@ -764,7 +772,7 @@ def binding_fep(
         }
     }
 
-    run._process_job(
+    return run._process_job(
         inputs=params,
         outputs=outputs,
         tool_key=tool_key,
@@ -844,6 +852,7 @@ graph LR;
     display(HTML(legend_html))
 
 
+@beartype
 def _run_job(
     ligand_file: str,
     row_id: str,
