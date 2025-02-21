@@ -983,7 +983,11 @@ def _run_job(
 
     step = func.__name__
 
-    existing = df[(df["ligand_file"] == ligand_file) & (df["step"] == step)]
+    existing = df[
+        (df["ligand_file"] == ligand_file)
+        & (df["step"] == step)
+        & (df["Status"] != "Failed")
+    ]
     if not existing.empty:
         print(f"Aborting for {ligand_file}: '{step}' step already exists.")
         return df
