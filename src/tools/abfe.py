@@ -602,7 +602,7 @@ def _run_e2e(
 
     print(f"Using row {row_id} in database at: {url}")
 
-    tool_key = "deeporigin.md-suite-abfe-e2e"
+    tool_key = "deeporigin.abfe-e2e"
 
     inputs = {
         "ligand": {
@@ -649,7 +649,7 @@ def emeq(
 
     """
 
-    tool_key = "deeporigin.md-suite-emeq"
+    tool_key = "deeporigin.abfe-emeq"
 
     database = _ensure_database(ABFE_DB)
 
@@ -784,7 +784,7 @@ def solvation_fep(
 
     database = _ensure_db_for_abfe()
 
-    tool_key = "deeporigin.md-suite-solvation"
+    tool_key = "deeporigin.abfe-solvation-fep"
 
     if params is None:
         params = _load_params("solvation_fep")
@@ -825,7 +825,7 @@ def simple_md(
     kwargs = locals()
     database = _ensure_db_for_abfe()
 
-    tool_key = "deeporigin.md-suite-md"
+    tool_key = "deeporigin.abfe-simple-md"
 
     if params is None:
         params = _load_params("simple_md")
@@ -867,7 +867,7 @@ def binding_fep(
 
     database = _ensure_db_for_abfe()
 
-    tool_key = "deeporigin.md-suite-abfe"
+    tool_key = "deeporigin.abfe-binding-fep"
 
     if params is None:
         params = _load_params("binding_fep")
