@@ -703,11 +703,6 @@ def ligand_prep(
         "rowId": row_id,
         "databaseId": database.hid,
     }
-    params["protein"] = {
-        "columnId": "protein_file",
-        "rowId": row_id,
-        "databaseId": database.hid,
-    }
 
     outputs = {
         "output_file": {
