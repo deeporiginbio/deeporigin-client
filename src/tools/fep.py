@@ -1,3 +1,5 @@
+"""module to work FEP calculations"""
+
 from dataclasses import dataclass, fields
 from pathlib import Path
 from typing import Optional, Union
