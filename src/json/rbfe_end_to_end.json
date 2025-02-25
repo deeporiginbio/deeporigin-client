@@ -1,0 +1,61 @@
+{
+    "complex_prep": {
+        "include_ligands": 1,
+        "include_protein": 1,
+        "test_run": 0
+    },
+    "ligand1_prep": {
+        "include_ligands": 1,
+        "include_protein": 0,
+        "test_run": 0
+    },
+    "ligand2_prep": {
+        "include_ligands": 1,
+        "include_protein": 0,
+        "test_run": 0
+    },
+    "rbfe": {
+        "add_fep_repeats": 0,
+        "annihilate": true,
+        "atom_mapping_threshold": 0.01,
+        "em_all": true,
+        "em_solvent": true,
+        "mbar": 1,
+        "npt_reduce_restraints_ns": 2.0,
+        "nvt_heating_ns": 1.0,
+        "repeats": 1,
+        "run_name": "binding",
+        "softcore_alpha": 0.5,
+        "steps": 1250000,
+        "system": "complex",
+        "test_run": 0
+    },
+    "solvation1": {
+        "add_fep_repeats": 0,
+        "annihilate": true,
+        "atom_mapping_threshold": 0.01,
+        "em_all": true,
+        "em_solvent": true,
+        "mbar": 1,
+        "npt_reduce_restraints_ns": 0.2,
+        "nvt_heating_ns": 0.1,
+        "repeats": 1,
+        "softcore_alpha": 0.5,
+        "steps": 300000,
+        "test_run": 0
+    },
+    "solvation2": {
+        "add_fep_repeats": 0,
+        "annihilate": true,
+        "atom_mapping_threshold": 0.01,
+        "em_all": true,
+        "em_solvent": true,
+        "mbar": 1,
+        "npt_reduce_restraints_ns": 0.2,
+        "nvt_heating_ns": 0.1,
+        "repeats": 1,
+        "softcore_alpha": 0.5,
+        "steps": 300000,
+        "test_run": 0
+    }
+}
