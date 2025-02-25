@@ -4,9 +4,8 @@ import ast
 import importlib.resources
 import json
 import os
-from dataclasses import dataclass, field, fields
-from pathlib import Path
-from typing import Any, Callable, List, Optional, Union
+from dataclasses import dataclass, field
+from typing import Any, Callable, List, Optional
 
 import numpy as np
 import pandas as pd
@@ -16,6 +15,7 @@ from deeporigin import chemistry
 from deeporigin.data_hub import api
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.tools import run
+from deeporigin.tools.fep import Ligand, Protein
 from deeporigin.tools.toolkit import _ensure_columns, _ensure_database
 from deeporigin.tools.utils import query_run_status
 from deeporigin.utils.config import construct_resource_url
@@ -77,7 +77,7 @@ def _load_all_params() -> Box:
     params.ligand_prep = _load_params("ligand_prep")
     params.simple_md = _load_params("simple_md")
     params.solvation_fep = _load_params("solvation_fep")
-    params.end_to_end = _load_params("end_to_end")
+    params.end_to_end = _load_params("abfe_end_to_end")
     return params
 
 
@@ -116,51 +116,6 @@ def _ensure_db_for_abfe() -> dict:
     )
 
     return database
-
-
-@dataclass
-class Ligand:
-    """class to represent a ligand (typically backed by a SDF file)"""
-
-    file: Union[str, Path]
-    smiles_string: Optional[str] = None
-
-    def __post_init__(self):
-        """generates a SMILES if it doesn't exist"""
-
-        if self.smiles_string is None:
-            self.smiles_string = chemistry.sdf_to_smiles(self.file)
-
-    def _repr_pretty_(self, p, cycle):
-        """pretty print a ligand"""
-
-        if cycle:
-            p.text("Ligand(...)")
-        else:
-            p.text("Ligand(")
-
-            with p.group(2, "\n  ", "\n"):
-                all_fields = fields(self)
-                for idx, field in enumerate(all_fields):
-                    value = getattr(self, field.name)
-                    p.text(f"{field.name}: {value!r}")
-                    # Only add a breakable if this isn't the last field.
-                    if idx < len(all_fields) - 1:
-                        p.breakable()
-            p.text(")")
-
-
-@dataclass
-class Protein:
-    """class to represent a protein (typically backed by a PDB file)"""
-
-    file: Union[str, Path]
-    name: Optional[str] = None
-
-    def __post_init__(self):
-        self.file = Path(self.file)
-        if self.name is None:
-            self.name = self.file.name
 
 
 @dataclass
@@ -431,6 +386,8 @@ class ABFE:
           - FEP ΔG (kcal/mol)
           - status
         """
+
+        self.update()
 
         df = self.df.copy()
 
