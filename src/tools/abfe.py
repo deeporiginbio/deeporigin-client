@@ -175,6 +175,8 @@ class ABFE:
 
     params: dict = field(default_factory=lambda: _load_all_params())
 
+    database: Optional[Box] = None
+
     df: pd.DataFrame = field(
         default_factory=lambda: pd.DataFrame(
             columns=[
@@ -348,14 +350,16 @@ class ABFE:
     def init(self):
         """Initialize an ABFE run. Upload ligand(s) and protein files to Deep Origin."""
 
-        database = _ensure_db_for_abfe()
+        self.database = _ensure_db_for_abfe()
 
         # get params in
         self.params = _load_all_params()
 
-        smiles_column_id = [col.id for col in database.cols if col.name == "Ligand"][0]
+        smiles_column_id = [
+            col.id for col in self.database.cols if col.name == "Ligand"
+        ][0]
         protein_name_column_id = [
-            col.id for col in database.cols if col.name == COL_PROTEIN_NAME
+            col.id for col in self.database.cols if col.name == COL_PROTEIN_NAME
         ][0]
 
         url = construct_resource_url(
@@ -478,15 +482,15 @@ class ABFE:
     def end_to_end(self):
         """run an end-to-end job"""
 
-        job_ids = []
-        row_id = self.row_ids[0]
-        job_ids.append(
-            _run_e2e(
+        for ligand, row_id in zip(self.ligands, self.row_ids):
+            self.df = _run_job(
+                ligand_file=ligand.file,
                 row_id=row_id,
+                df=self.df,
                 params=self.params.end_to_end,
-                output_column_name=COL_END_TO_END_OUTPUT,
+                func=end_to_end,
+                database=self.database,
             )
-        )
 
     def status(self):
         """print the status of an ABFE run"""
@@ -523,6 +527,7 @@ class ABFE:
                 df=self.df,
                 params=self.params.emeq,
                 func=emeq,
+                database=self.database,
             )
 
     def complex_prep(self):
@@ -535,6 +540,7 @@ class ABFE:
                 df=self.df,
                 params=self.params.complex_prep,
                 func=complex_prep,
+                database=self.database,
             )
 
     def ligand_prep(self):
@@ -547,6 +553,7 @@ class ABFE:
                 df=self.df,
                 params=self.params.ligand_prep,
                 func=ligand_prep,
+                database=self.database,
             )
 
     def simple_md(self):
@@ -559,6 +566,7 @@ class ABFE:
                 df=self.df,
                 params=self.params.simple_md,
                 func=simple_md,
+                database=self.database,
             )
 
     def solvation_fep(self):
@@ -571,6 +579,7 @@ class ABFE:
                 df=self.df,
                 params=self.params.solvation_fep,
                 func=solvation_fep,
+                database=self.database,
             )
 
     def binding_fep(self):
@@ -583,63 +592,52 @@ class ABFE:
                 df=self.df,
                 params=self.params.binding_fep,
                 func=binding_fep,
+                database=self.database,
             )
 
 
-def _run_e2e(
+def end_to_end(
     *,
     row_id: str,
-    params: dict,
-    output_column_name: str,
+    params: Optional[dict] = None,
+    database: Optional[dict] = None,
 ) -> str:
     """Function to run an end-to-end job"""
 
-    database = _ensure_db_for_abfe()
-
-    url = construct_resource_url(
-        name=ABFE_DB,
-        row_type="database",
-    )
-
-    print(f"Using row {row_id} in database at: {url}")
-
     tool_key = "deeporigin.abfe-end-to-end"
 
-    inputs = {
-        "ligand": {
-            "columnId": "ligand_file",
-            "rowId": row_id,
-            "databaseId": database.hid,
-        },
-        "protein": {
-            "columnId": "protein_file",
-            "rowId": row_id,
-            "databaseId": database.hid,
-        },
-        "abfe": params["abfe"],
-        "complex_prep": params["complex_prep"],
-        "ligand_prep": params["ligand_prep"],
-        "emeq": params["emeq"],
-        "md": params["md"],
-        "solvation": params["solvation"],
+    if database is None:
+        database = _ensure_database(ABFE_DB)
+
+    if params is None:
+        params = _load_params("abfe_end_to_end")
+
+    params["protein"] = {
+        "columnId": COL_PROTEIN_FILE,
+        "rowId": row_id,
+        "databaseId": database.hid,
+    }
+
+    params["ligand"] = {
+        "columnId": COL_LIGAND_FILE,
+        "rowId": row_id,
+        "databaseId": database.hid,
     }
 
     outputs = {
         "output_file": {
-            "columnId": output_column_name,
+            "columnId": COL_END_TO_END_OUTPUT,
             "rowId": row_id,
             "databaseId": database.hid,
         }
     }
 
-    job_id = run._process_job(
-        inputs=inputs,
+    return run._process_job(
+        inputs=params,
         outputs=outputs,
         tool_key=tool_key,
         cols=database.cols,
     )
-
-    return job_id
 
 
 @beartype
@@ -647,6 +645,7 @@ def emeq(
     *,
     row_id: str,
     params: Optional[dict] = None,
+    database: Optional[dict] = None,
 ) -> str:
     """Run emeq on a ligand and protein pair, that exist as files on a row in the ABFE database. For this to work, the complex prep step must have been run first.
 
@@ -657,7 +656,8 @@ def emeq(
 
     tool_key = "deeporigin.abfe-emeq"
 
-    database = _ensure_database(ABFE_DB)
+    if database is None:
+        database = _ensure_database(ABFE_DB)
 
     if params is None:
         params = _load_params("emeq")
@@ -689,6 +689,7 @@ def ligand_prep(
     *,
     row_id: str,
     params: Optional[dict] = None,
+    database: Optional[dict] = None,
 ) -> str:
     """Function to prepare uploaded Ligand and protein files using Deep Origin MDSuite. Use this function to run system prep on a ligand and protein pair, that exist as files on a row in the ABFE database.
 
@@ -697,9 +698,11 @@ def ligand_prep(
 
 
     """
-    database = _ensure_db_for_abfe()
 
     tool_key = "deeporigin.abfe-prep"
+
+    if database is None:
+        database = _ensure_database(ABFE_DB)
 
     if params is None:
         params = _load_params("ligand_prep")
@@ -731,6 +734,7 @@ def complex_prep(
     *,
     row_id: str,
     params: Optional[dict] = None,
+    database: Optional[dict] = None,
 ) -> str:
     """Function to prepare uploaded Ligand and protein files using Deep Origin MDSuite. Use this function to run system prep on a ligand and protein pair, that exist as files on a row in the ABFE database.
 
@@ -739,9 +743,11 @@ def complex_prep(
 
 
     """
-    database = _ensure_db_for_abfe()
 
     tool_key = "deeporigin.abfe-prep"
+
+    if database is None:
+        database = _ensure_database(ABFE_DB)
 
     if params is None:
         params = _load_params("complex_prep")
@@ -780,6 +786,7 @@ def solvation_fep(
     *,
     row_id: str,
     params: Optional[dict] = None,
+    database: Optional[dict] = None,
 ) -> str:
     """Run a solvation simulation
 
@@ -788,9 +795,10 @@ def solvation_fep(
         row_id (str): row id of the ligand and protein files.
     """
 
-    database = _ensure_db_for_abfe()
-
     tool_key = "deeporigin.abfe-solvation-fep"
+
+    if database is None:
+        database = _ensure_database(ABFE_DB)
 
     if params is None:
         params = _load_params("solvation_fep")
@@ -822,16 +830,18 @@ def simple_md(
     *,
     row_id: str,
     params: Optional[dict] = None,
+    database: Optional[dict] = None,
 ) -> str:
     """Run a simple MD simulation
 
     Args:
         row_id (str): row id of the ligand and protein files.
     """
-    kwargs = locals()
-    database = _ensure_db_for_abfe()
 
     tool_key = "deeporigin.abfe-simple-md"
+
+    if database is None:
+        database = _ensure_database(ABFE_DB)
 
     if params is None:
         params = _load_params("simple_md")
@@ -863,6 +873,7 @@ def binding_fep(
     *,
     row_id: str,
     params: Optional[dict] = None,
+    database: Optional[dict] = None,
 ) -> str:
     """Run an ABFE simulation
 
@@ -871,9 +882,10 @@ def binding_fep(
 
     """
 
-    database = _ensure_db_for_abfe()
-
     tool_key = "deeporigin.abfe-binding-fep"
+
+    if database is None:
+        database = _ensure_database(ABFE_DB)
 
     if params is None:
         params = _load_params("binding_fep")
@@ -974,11 +986,13 @@ graph LR;
 
 @beartype
 def _run_job(
+    *,
     ligand_file: str,
     row_id: str,
     df: pd.DataFrame,
     params: dict,
     func: Callable[..., Any],
+    database: dict,
 ) -> pd.DataFrame:
     """utility function that runs a job if needed"""
 
@@ -1007,6 +1021,7 @@ def _run_job(
     job_id = func(
         row_id=row_id,
         params=params,
+        database=database,
     )
 
     data[step] = job_id
