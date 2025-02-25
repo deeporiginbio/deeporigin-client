@@ -77,6 +77,7 @@ def _load_all_params() -> Box:
     params.ligand_prep = _load_params("ligand_prep")
     params.simple_md = _load_params("simple_md")
     params.solvation_fep = _load_params("solvation_fep")
+    params.end_to_end = _load_params("end_to_end")
     return params
 
 
@@ -482,7 +483,7 @@ class ABFE:
         job_ids.append(
             _run_e2e(
                 row_id=row_id,
-                steps=self.params.steps,
+                params=self.params.end_to_end,
                 output_column_name=COL_END_TO_END_OUTPUT,
             )
         )
@@ -588,7 +589,7 @@ class ABFE:
 def _run_e2e(
     *,
     row_id: str,
-    steps: dict,
+    params: dict,
     output_column_name: str,
 ) -> str:
     """Function to run an end-to-end job"""
@@ -602,7 +603,7 @@ def _run_e2e(
 
     print(f"Using row {row_id} in database at: {url}")
 
-    tool_key = "deeporigin.abfe-e2e"
+    tool_key = "deeporigin.abfe-end-to-end"
 
     inputs = {
         "ligand": {
@@ -615,7 +616,12 @@ def _run_e2e(
             "rowId": row_id,
             "databaseId": database.hid,
         },
-        "steps": steps,
+        "abfe": params["abfe"],
+        "complex_prep": params["complex_prep"],
+        "ligand_prep": params["ligand_prep"],
+        "emeq": params["emeq"],
+        "md": params["md"],
+        "solvation": params["solvation"],
     }
 
     outputs = {
