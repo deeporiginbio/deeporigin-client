@@ -33,6 +33,41 @@ def requires_rdkit(func):
 
 @beartype
 @requires_rdkit
+def count_molecules_in_sdf_file(sdf_file):
+    """
+    Count the number of valid (sanitizable) molecules in an SDF file using RDKit,
+    while suppressing RDKit's error logging for sanitization issues.
+
+    Args:
+        sdf_file (str or Path): Path to the SDF file.
+
+    Returns:
+        int: The number of molecules successfully sanitized.
+    """
+    # Disable RDKit error logging to suppress messages about kekulization/sanitization.
+
+    from rdkit import Chem, RDLogger
+
+    RDLogger.DisableLog("rdApp.error")
+
+    # Use sanitize=False to defer sanitization until we can handle exceptions ourselves.
+    supplier = Chem.SDMolSupplier(str(sdf_file), sanitize=False)
+    valid_count = 0
+    for mol in supplier:
+        if mol is None:
+            continue
+        try:
+            # Manually sanitize the molecule.
+            Chem.SanitizeMol(mol)
+            valid_count += 1
+        except Exception:
+            # If sanitization fails, skip this molecule.
+            continue
+    return valid_count
+
+
+@beartype
+@requires_rdkit
 def split_sdf_file(
     input_sdf_path: Union[str, Path],
     output_prefix: str = "ligand",
@@ -151,17 +186,20 @@ def smiles_to_sdf(smiles: str, sdf_path: str) -> None:
 
 @beartype
 @requires_rdkit
-def sdf_to_smiles(sdf_file: str) -> list[str]:
+def sdf_to_smiles(sdf_file: Union[str, Path]) -> list[str]:
     """
     Extracts the SMILES strings of all valid molecules from an SDF file using RDKit.
 
     Args:
-        sdf_file (str): Path to the SDF file.
+        sdf_file (Union[str, Path]): Path to the SDF file.
 
     Returns:
-        List[str]: A list of SMILES strings for all valid molecules in the file.
+        list[str]: A list of SMILES strings for all valid molecules in the file.
     """
     from rdkit import Chem
+
+    if isinstance(sdf_file, Path):
+        sdf_file = str(sdf_file)
 
     suppl = Chem.SDMolSupplier(sdf_file)
     if not suppl:

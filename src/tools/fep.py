@@ -17,6 +17,12 @@ class Ligand:
     def __post_init__(self):
         """generates a SMILES if it doesn't exist"""
 
+        # check that there's only one molecule here
+        if chemistry.count_molecules_in_sdf_file(self.file) > 1:
+            raise ValueError(
+                "Too many molecules. Expected a single molecule in the SDF file, but got multiple"
+            )
+
         if self.smiles_string is None:
             smiles_string = chemistry.sdf_to_smiles(self.file)
             if len(smiles_string) > 1:

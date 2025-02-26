@@ -5,8 +5,8 @@ import os
 import pytest
 from deeporigin import chemistry
 
-ligand_files = ["6xue-paper-ligands-docked.sdf", "ligands-brd-all.sdf"]
-n_ligands = [44, 8]
+ligand_files = ["6xue-paper-ligands-docked.sdf", "ligands-brd-all.sdf", "brd-7.sdf"]
+n_ligands = [44, 8, 1]
 
 
 ligands = [
@@ -16,6 +16,14 @@ ligands = [
     }
     for file, num in zip(ligand_files, n_ligands)
 ]
+
+
+@pytest.mark.parametrize("ligand", ligands)
+def test_count_molecules_in_sdf_file(
+    tmp_path,
+    ligand,
+):
+    assert chemistry.count_molecules_in_sdf_file(ligand["file"]) == ligand["n_ligands"]
 
 
 @pytest.mark.parametrize("ligand", ligands)
