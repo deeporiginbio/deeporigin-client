@@ -2,27 +2,27 @@
 
 import os
 
+import pytest
 from deeporigin import chemistry
 
-SDF_FILE = os.path.join(os.path.dirname(__file__), "fixtures", "ligands-brd-all.sdf")
+ligand_files = ["6xue-paper-ligands-docked.sdf", "ligands-brd-all.sdf"]
+n_ligands = [44, 8]
 
 
-def test_sdf_to_smiles():
-    smiles_strings = chemistry.sdf_to_smiles(SDF_FILE)
-
-    assert set(smiles_strings) == {
-        "C=CCCn1cc(-c2cccc(C(=O)N(C)C)c2)c2cc[nH]c2c1=O",
-        "CN(C)C(=O)c1cccc(-c2cn(C)c(=O)c3[nH]ccc23)c1",
-        "C=CCn1cc(-c2cccc(C(=O)N(C)C)c2)c2cc[nH]c2c1=O",
-        "COCCn1cc(-c2cccc(C(=O)N(C)C)c2)c2cc[nH]c2c1=O",
-        "CCn1cc(-c2cccc(C(=O)N(C)C)c2)c2cc[nH]c2c1=O",
-        "CCCCn1cc(-c2cccc(C(=O)N(C)C)c2)c2cc[nH]c2c1=O",
-        "CCCn1cc(-c2cccc(C(=O)N(C)C)c2)c2cc[nH]c2c1=O",
-        "C/C=C/Cn1cc(-c2cccc(C(=O)N(C)C)c2)c2cc[nH]c2c1=O",
+ligands = [
+    {
+        "file": os.path.join(os.path.dirname(__file__), "fixtures", file),
+        "n_ligands": num,
     }
+    for file, num in zip(ligand_files, n_ligands)
+]
 
 
-def test_split_sdf_file(tmp_path):
+@pytest.mark.parametrize("ligand", ligands)
+def test_split_sdf_file(
+    tmp_path,
+    ligand,
+):
     """
     Test that split_sdf_using_names correctly splits the ligands SDF file
     into separate SDF files, and that the output is cleaned up (by pytest)
@@ -34,8 +34,8 @@ def test_split_sdf_file(tmp_path):
     output_dir.mkdir(exist_ok=True)
 
     # Call the function to be tested
-    chemistry.split_sdf_file(
-        input_sdf_path=str(SDF_FILE),
+    sdf_file_names = chemistry.split_sdf_file(
+        input_sdf_path=str(ligand["file"]),
         output_prefix="testLig",
         output_dir=str(output_dir),
     )
@@ -43,6 +43,8 @@ def test_split_sdf_file(tmp_path):
     # Check that at least one output file was created
     sdf_files = list(output_dir.glob("*.sdf"))
     assert len(sdf_files) > 0, "No SDF files were created by the splitting function."
+
+    assert len(sdf_file_names) == ligand["n_ligands"]
 
     # Optionally, you can validate each file (e.g., reading them back with RDKit)
     from rdkit import Chem

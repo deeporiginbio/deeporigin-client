@@ -6,7 +6,7 @@ import io
 import re
 from functools import wraps
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import Optional, Union
 
 from beartype import beartype
 
@@ -37,7 +37,7 @@ def split_sdf_file(
     input_sdf_path: Union[str, Path],
     output_prefix: str = "ligand",
     output_dir: Optional[Union[str, Path]] = None,
-) -> List[Path]:
+) -> list[Path]:
     """
     Splits a multi-ligand SDF file into individual SDF files, optionally placing
     the output in a user-specified directory. Each output SDF is named using
@@ -151,7 +151,7 @@ def smiles_to_sdf(smiles: str, sdf_path: str) -> None:
 
 @beartype
 @requires_rdkit
-def sdf_to_smiles(sdf_file: str) -> List[str]:
+def sdf_to_smiles(sdf_file: str) -> list[str]:
     """
     Extracts the SMILES strings of all valid molecules from an SDF file using RDKit.
 
