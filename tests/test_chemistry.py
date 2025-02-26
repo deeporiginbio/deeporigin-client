@@ -7,6 +7,21 @@ from deeporigin import chemistry
 SDF_FILE = os.path.join(os.path.dirname(__file__), "fixtures", "ligands-brd-all.sdf")
 
 
+def test_sdf_to_smiles():
+    smiles_strings = chemistry.sdf_to_smiles(SDF_FILE)
+
+    assert set(smiles_strings) == {
+        "C=CCCn1cc(-c2cccc(C(=O)N(C)C)c2)c2cc[nH]c2c1=O",
+        "CN(C)C(=O)c1cccc(-c2cn(C)c(=O)c3[nH]ccc23)c1",
+        "C=CCn1cc(-c2cccc(C(=O)N(C)C)c2)c2cc[nH]c2c1=O",
+        "COCCn1cc(-c2cccc(C(=O)N(C)C)c2)c2cc[nH]c2c1=O",
+        "CCn1cc(-c2cccc(C(=O)N(C)C)c2)c2cc[nH]c2c1=O",
+        "CCCCn1cc(-c2cccc(C(=O)N(C)C)c2)c2cc[nH]c2c1=O",
+        "CCCn1cc(-c2cccc(C(=O)N(C)C)c2)c2cc[nH]c2c1=O",
+        "C/C=C/Cn1cc(-c2cccc(C(=O)N(C)C)c2)c2cc[nH]c2c1=O",
+    }
+
+
 def test_split_sdf_file(tmp_path):
     """
     Test that split_sdf_using_names correctly splits the ligands SDF file

@@ -6,7 +6,7 @@ import io
 import re
 from functools import wraps
 from pathlib import Path
-from typing import Optional, Union
+from typing import List, Optional, Union
 
 from beartype import beartype
 
@@ -153,23 +153,28 @@ def smiles_to_sdf(smiles: str, sdf_path: str) -> None:
 
 @beartype
 @requires_rdkit
-def sdf_to_smiles(sdf_file: str) -> Optional[str]:
-    """Extracts the first molecule's SMILES string from an SDF file using RDKit.
+def sdf_to_smiles(sdf_file: str) -> List[str]:
+    """
+    Extracts the SMILES strings of all valid molecules from an SDF file using RDKit.
 
     Args:
         sdf_file (str): Path to the SDF file.
 
     Returns:
-        Optional[str]: SMILES string if extraction is successful, else None.
+        List[str]: A list of SMILES strings for all valid molecules in the file.
     """
-
     from rdkit import Chem
 
     suppl = Chem.SDMolSupplier(sdf_file)
-    if not suppl or suppl[0] is None:
-        return None
+    if not suppl:
+        return []
 
-    return Chem.MolToSmiles(suppl[0])
+    smiles_list = []
+    for mol in suppl:
+        if mol is not None:
+            smiles_list.append(Chem.MolToSmiles(mol))
+
+    return smiles_list
 
 
 @beartype
