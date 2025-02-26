@@ -37,7 +37,7 @@ def split_sdf_file(
     input_sdf_path: Union[str, Path],
     output_prefix: str = "ligand",
     output_dir: Optional[Union[str, Path]] = None,
-) -> None:
+) -> List[Path]:
     """
     Splits a multi-ligand SDF file into individual SDF files, optionally placing
     the output in a user-specified directory. Each output SDF is named using
@@ -46,52 +46,50 @@ def split_sdf_file(
     Args:
         input_sdf_path: Path to the input SDF file containing multiple ligands.
         output_prefix: Prefix for unnamed ligands. Defaults to "ligand".
-        output_dir: Directory to write the output SDF files to. If None, output files are written to the same directory as input_sdf_path.
+        output_dir: Directory to write the output SDF files to. If None,
+            output files are written to the same directory as input_sdf_path.
 
-
+    Returns:
+        List[Path]: A list of paths to the generated SDF files.
     """
 
     from rdkit import Chem
 
-    # Convert inputs to Path objects if they are not already
     if not isinstance(input_sdf_path, Path):
         input_sdf_path = Path(input_sdf_path)
 
     if output_dir is None:
-        # Default to the directory containing the input file
         output_dir = input_sdf_path.parent
     else:
         if not isinstance(output_dir, Path):
             output_dir = Path(output_dir)
         output_dir.mkdir(parents=True, exist_ok=True)
 
-    # Read the molecules using a string path
     suppl = Chem.SDMolSupplier(str(input_sdf_path), removeHs=False)
 
+    generated_paths: List[Path] = []
+
     for i, mol in enumerate(suppl, start=1):
-        # Skip invalid molecules (i.e., parse failures)
         if mol is None:
             continue
 
-        # Check if the molecule has a name stored in "_Name"
         if mol.HasProp("_Name"):
             mol_name = mol.GetProp("_Name").strip()
         else:
-            # Fallback if no name is found
             mol_name = f"{output_prefix}_{i}"
 
         # Replace unsafe filename characters
         safe_name = re.sub(r"[^a-zA-Z0-9_\-]+", "_", mol_name)
 
-        # Construct the path for the output file
         output_file = output_dir / f"{safe_name}.sdf"
 
-        # RDKit’s writer expects a string path
         writer = Chem.SDWriter(str(output_file))
         writer.write(mol)
         writer.close()
 
-    print(f"Splitting complete! Files written to: {output_dir}")
+        generated_paths.append(output_file)
+
+    return generated_paths
 
 
 @beartype
