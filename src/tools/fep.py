@@ -18,7 +18,10 @@ class Ligand:
         """generates a SMILES if it doesn't exist"""
 
         if self.smiles_string is None:
-            self.smiles_string = chemistry.sdf_to_smiles(self.file)
+            smiles_string = chemistry.sdf_to_smiles(self.file)
+            if len(smiles_string) > 1:
+                raise ValueError("Expected a single SMILES strings, but got multiple")
+            self.smiles_string = smiles_string[0]
 
     def _repr_pretty_(self, p, cycle):
         """pretty print a ligand"""
