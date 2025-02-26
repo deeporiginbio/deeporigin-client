@@ -13,29 +13,34 @@
         "softcore_alpha": 0.5,
         "steps": 1250000,
         "system": "complex",
-        "test_run": 1
+        "test_run": 1,
+        "thread_pinning": 0
     },
     "complex_prep": {
         "include_ligands": 1,
         "include_protein": 1,
-        "test_run": 1
+        "test_run": 1,
+        "thread_pinning": 0
     },
     "emeq": {
         "em_all": true,
         "em_solvent": true,
         "npt_reduce_restraints_ns": 2.0,
         "nvt_heating_ns": 1.0,
-        "test_run": 1
+        "test_run": 1,
+        "thread_pinning": 0
     },
     "ligand_prep": {
         "include_ligands": 1,
         "include_protein": 0,
-        "test_run": 1
+        "test_run": 1,
+        "thread_pinning": 0
     },
     "md": {
         "run_name": "md",
         "steps": 1000,
-        "test_run": 1
+        "test_run": 1,
+        "thread_pinning": 0
     },
     "solvation": {
         "add_fep_repeats": 0,
@@ -49,6 +54,7 @@
         "repeats": 1,
         "softcore_alpha": 0.5,
         "steps": 300000,
-        "test_run": 1
+        "test_run": 1,
+        "thread_pinning": 0
     }
 }
