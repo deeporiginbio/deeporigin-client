@@ -1,17 +1,38 @@
 """module that contains some utility functions for chemistry"""
 
 import base64
+import importlib.util
 import io
 import re
+from functools import wraps
 from pathlib import Path
 from typing import Optional, Union
 
 from beartype import beartype
-from rdkit import Chem
-from rdkit.Chem import Draw
+
+
+def requires_rdkit(func):
+    """
+    A decorator that checks for the presence of RDKit via importlib.util.find_spec.
+    If RDKit is unavailable, raises a user-friendly ImportError.
+    """
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if importlib.util.find_spec("rdkit") is None:
+            raise ImportError(
+                "RDKit is required for this functionality.\n"
+                "Please install it manually \n"
+                "or install this package with the extra [tools], for example:\n\n"
+                "   pip install deeporigin[tools]\n"
+            )
+        return func(*args, **kwargs)
+
+    return wrapper
 
 
 @beartype
+@requires_rdkit
 def split_sdf_file(
     input_sdf_path: Union[str, Path],
     output_prefix: str = "ligand",
@@ -29,6 +50,8 @@ def split_sdf_file(
 
 
     """
+
+    from rdkit import Chem
 
     # Convert inputs to Path objects if they are not already
     if not isinstance(input_sdf_path, Path):
@@ -72,11 +95,15 @@ def split_sdf_file(
 
 
 @beartype
+@requires_rdkit
 def smiles_to_base64_png(
     smiles: Optional[str],
     size=(300, 10),
 ) -> str:
     """Convert a SMILES string to an inline base64 <img> tag."""
+
+    from rdkit import Chem
+    from rdkit.Chem import Draw
 
     if not smiles:
         return "N/A"
@@ -99,9 +126,11 @@ def smiles_to_base64_png(
 
 
 @beartype
+@requires_rdkit
 def smiles_to_sdf(smiles: str, sdf_path: str) -> None:
     """convert a SMILES string to a SDF file"""
 
+    from rdkit import Chem
     from rdkit.Chem import AllChem, SDWriter
 
     mol = Chem.MolFromSmiles(smiles)
@@ -123,6 +152,7 @@ def smiles_to_sdf(smiles: str, sdf_path: str) -> None:
 
 
 @beartype
+@requires_rdkit
 def sdf_to_smiles(sdf_file: str) -> Optional[str]:
     """Extracts the first molecule's SMILES string from an SDF file using RDKit.
 
@@ -133,6 +163,8 @@ def sdf_to_smiles(sdf_file: str) -> Optional[str]:
         Optional[str]: SMILES string if extraction is successful, else None.
     """
 
+    from rdkit import Chem
+
     suppl = Chem.SDMolSupplier(sdf_file)
     if not suppl or suppl[0] is None:
         return None
@@ -141,6 +173,7 @@ def sdf_to_smiles(sdf_file: str) -> Optional[str]:
 
 
 @beartype
+@requires_rdkit
 def is_ligand_protonated(sdf_file: str) -> bool:
     """
     Determine if the ligand (loaded from an SDF file) is protonated.
@@ -157,6 +190,8 @@ def is_ligand_protonated(sdf_file: str) -> bool:
     Returns:
         bool: True if protonated evidence is found; False otherwise.
     """
+    from rdkit import Chem
+
     # Load the molecule from the SDF file.
     # Use removeHs=False so that explicit hydrogens are preserved.
     mol = Chem.MolFromMolFile(sdf_file, removeHs=False)
