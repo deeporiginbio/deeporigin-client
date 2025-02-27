@@ -38,7 +38,7 @@
     },
     "md": {
         "run_name": "md",
-        "steps": 1000,
+        "steps": 300000,
         "test_run": 0,
         "thread_pinning": 0
     },
