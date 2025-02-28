@@ -1,8 +1,6 @@
 """this module contains various functions to run steps of an ABFE workflow"""
 
 import ast
-import importlib.resources
-import json
 import os
 from dataclasses import dataclass, field
 from typing import Any, Callable, List, Optional
@@ -15,7 +13,7 @@ from deeporigin import chemistry
 from deeporigin.data_hub import api
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.tools import run
-from deeporigin.tools.fep import Ligand, Protein
+from deeporigin.tools.fep import Ligand, Protein, _load_params
 from deeporigin.tools.toolkit import _ensure_columns, _ensure_database
 from deeporigin.tools.utils import query_run_status
 from deeporigin.utils.config import construct_resource_url
@@ -40,30 +38,6 @@ COL_PROTEIN_NAME = "protein_name"
 
 ABFE_DIR = os.path.join(os.path.expanduser("~"), ".deeporigin", "abfe")
 os.makedirs(ABFE_DIR, exist_ok=True)
-
-
-class PrettyDict(Box):
-    """A dict subclass with a custom pretty-print representation."""
-
-    def __repr__(self):
-        """pretty print a dict"""
-        return json.dumps(
-            dict(self),
-            indent=2,
-            ensure_ascii=False,
-        )
-
-    def _repr_html_(self):
-        """pretty print a dict"""
-        self.__repr__()
-
-
-@beartype
-def _load_params(step: str) -> Box:
-    """load default values for abfe end to end run"""
-
-    with importlib.resources.open_text("deeporigin.json", f"{step}.json") as f:
-        return PrettyDict(json.load(f))
 
 
 @beartype
@@ -176,7 +150,7 @@ class ABFE:
             file_id = row["ligand_file"]
             file_name = [file.file.name for file in files if file.file.id == file_id][0]
             smiles_string = row["Ligand"]
-            ligand = Ligand(file=file_name, smiles_string=smiles_string)
+            ligand = Ligand(file=file_name, smiles_string=smiles_string, n_molecules=1)
             ligands.append(ligand)
 
         files = api.list_files(file_ids=file_ids)
@@ -190,7 +164,6 @@ class ABFE:
             name=protein_name,
         )
 
-        #
         # Create the ABFE instance
         abfe = cls(
             ligands=ligands,
@@ -404,21 +377,20 @@ class ABFE:
         # 4. Drop the helper column
         df = df.drop(columns=["has_jobID"])
 
+        # convert SMILES to aligned images
+        smiles_list = [ligand.smiles_string for ligand in self.ligands]
+        images = chemistry.smiles_list_to_base64_png_list(smiles_list)
+
         rows = []
         for _, row in df.iterrows():
             ligand_file = row["ligand_file"]
 
             idx = [lig.file for lig in self.ligands].index(ligand_file)
 
-            ligand = self.ligands[idx]
-
             status = row["Status"]
 
             row = {
-                "Molecule": chemistry.smiles_to_base64_png(
-                    ligand.smiles_string,
-                    size=image_size,
-                ),
+                "Molecule": images[idx],
                 COL_DELTA_G: self.delta_gs[idx],
                 "Status": status,
             }

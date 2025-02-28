@@ -2,11 +2,10 @@
 
 import base64
 import importlib.util
-import io
 import re
 from functools import wraps
 from pathlib import Path
-from typing import Optional, Union
+from typing import List, Optional, Tuple, Union
 
 from beartype import beartype
 
@@ -129,13 +128,101 @@ def split_sdf_file(
 
 @beartype
 @requires_rdkit
+def smiles_list_to_base64_png_list(
+    smiles_list: List[str],
+    *,
+    size: Tuple[int, int] = (300, 100),
+    scale_factor: int = 2,
+    reference_smiles: Optional[str] = None,
+) -> List[str]:
+    """
+    Convert a list of SMILES strings to a list of base64-encoded PNG <img> tags.
+
+    This aligns images so that they have consistent core orientation.
+
+    Args:
+        smiles_list: List of SMILES strings.
+        size: (width, height) of the final rendered image in pixels (CSS downscaled).
+        scale_factor: Factor to generate higher-resolution images internally.
+        reference_smiles: If provided, all molecules will be oriented to match the 2D layout of this reference molecule.
+
+    """
+
+    from rdkit import Chem
+    from rdkit.Chem import AllChem, rdDepictor
+    from rdkit.Chem.Draw import rdMolDraw2D
+
+    if reference_smiles is None:
+        reference_smiles = smiles_list[0]
+
+    # Prepare the reference molecule
+    ref_mol = None
+    if reference_smiles:
+        ref_mol = Chem.MolFromSmiles(reference_smiles)
+        if ref_mol is not None:
+            AllChem.Compute2DCoords(ref_mol)
+
+    imgs = []
+
+    for smi in smiles_list:
+        if not smi:
+            imgs.append("N/A")
+            continue
+
+        mol = Chem.MolFromSmiles(smi)
+        if mol is None:
+            imgs.append("N/A")
+            continue
+
+        # Generate initial 2D coordinates
+        AllChem.Compute2DCoords(mol)
+
+        # If we have a reference molecule, match orientation
+        if ref_mol is not None:
+            try:
+                rdDepictor.GenerateDepictionMatching2DStructure(mol, ref_mol)
+            except Exception:
+                # In case it fails (incompatible substructures, etc.)
+                pass
+
+        # Prepare for drawing
+        rdMolDraw2D.PrepareMolForDrawing(mol)
+
+        # Create high-resolution image
+        width, height = size[0] * scale_factor, size[1] * scale_factor
+        drawer = rdMolDraw2D.MolDraw2DCairo(width, height)
+        drawer.DrawMolecule(mol)
+        drawer.FinishDrawing()
+
+        png_bytes = drawer.GetDrawingText()
+        encoded = base64.b64encode(png_bytes).decode("ascii")
+
+        # Create an <img> tag with CSS-downscaled dimensions
+        img_tag = (
+            f"<img src='data:image/png;base64,{encoded}' "
+            f"style='width:{size[0]}px; height:{size[1]}px;'/>"
+        )
+        imgs.append(img_tag)
+
+    return imgs
+
+
+@beartype
+@requires_rdkit
 def smiles_to_base64_png(
     smiles: str,
     *,
     size=(300, 100),
     scale_factor: int = 2,
 ) -> str:
-    """Convert a SMILES string to an inline base64 <img> tag."""
+    """Convert a SMILES string to an inline base64 <img> tag. Use this if you want to convert a single molecule into an image. If you want to convert a set of SMILES strings (corresponding to a set of related molecules) to images, use `smiles_list_to_base64_png_list`.
+
+    Args:
+        smiles (str): SMILES string.
+        size (Tuple[int, int], optional): (width, height) of the final rendered image in pixels (CSS downscaled).
+        scale_factor (int, optional): Factor to generate higher-resolution images internally.
+
+    """
 
     from rdkit import Chem
     from rdkit.Chem.Draw import rdMolDraw2D
