@@ -77,7 +77,7 @@ def _ensure_db_for_abfe() -> dict:
 
 @dataclass
 class RBFE:
-    """ABFE class that can work with one protein and many ligands"""
+    """RBFE class that can work with one protein and many ligands"""
 
     protein: Protein
     ligands: List[Ligand]
@@ -101,101 +101,7 @@ class RBFE:
     )
 
     @classmethod
-    def from_sessions(cls, sessions: List[int]) -> "ABFE":
-        """initialize an ABFE class given a list of sessions
-
-        Args:
-            sessions (List[int]): list of sessions"""
-
-        df = api.get_dataframe(RBFE_DB, use_file_names=False)
-        idx = [RBFE_DB + "-" + str(session) for session in sessions]
-
-        all_valid = set(idx).issubset(df.index)
-        if not all_valid:
-            raise DeepOriginException("Some sessions are not valid.")
-
-        df = df.loc[idx]
-
-        # check that rows correspond to only one protein
-        if len(df["protein_name"].unique()) > 1:
-            raise DeepOriginException(
-                "List of sessions corresponds to more than 1 protein. Cannot continue"
-            )
-
-        protein_name = df["protein_name"].unique()[0]
-
-        # make ligands
-        file_ids = list(df["protein_file"]) + list(df["ligand_file"])
-        files = api.list_files(file_ids=file_ids)
-
-        ligands = []
-        for row_id, row in df.iterrows():
-            file_id = row["ligand_file"]
-            file_name = [file.file.name for file in files if file.file.id == file_id][0]
-            smiles_string = row["Ligand"]
-            ligand = Ligand(file=file_name, smiles_string=smiles_string)
-            ligands.append(ligand)
-
-        files = api.list_files(file_ids=file_ids)
-
-        # make protein
-        protein_file_name = [file for file in files if file.file.name.endswith("pdb")][
-            0
-        ].file.name
-        protein = Protein(
-            file=protein_file_name,
-            name=protein_name,
-        )
-
-        #
-        # Create the ABFE instance
-        abfe = cls(
-            ligands=ligands,
-            protein=protein,
-            delta_gs=[np.nan for _ in ligands],
-        )
-
-        abfe.row_ids = df.index
-
-        # now make the status df
-        rows = []
-
-        # every ligand is initialized
-        for lig in ligands:
-            rows.append(
-                {
-                    "ligand_file": str(lig.file),
-                    "jobID": None,
-                    "step": "init",
-                    "Status": "Succeeded",
-                }
-            )
-
-        # now put the job IDs
-        for ligand, (_, row) in zip(ligands, df.iterrows()):
-            if pd.isna(row["job_ids"]):
-                continue
-
-            data = ast.literal_eval(row["job_ids"])
-            for key in data.keys():
-                if data[key] is None:
-                    continue
-
-                rows.append(
-                    {
-                        "ligand_file": str(ligand.file),
-                        "jobID": data[key],
-                        "step": key,
-                        "Status": "Running",
-                    }
-                )
-
-        abfe.df = pd.DataFrame(rows, columns=abfe.df.columns)
-
-        return abfe
-
-    @classmethod
-    def from_dir(cls, directory: str) -> "ABFE":
+    def from_dir(cls, directory: str) -> "RBFE":
         """initialize an ABFE class given some files in a directory
 
         Args:
@@ -223,8 +129,8 @@ class RBFE:
         protein_file = pdb_files[0]
         protein = Protein(protein_file)
 
-        # Create the ABFE instance
-        abfe = cls(
+        # Create the RBFE instance
+        rbfe = cls(
             ligands=ligands,
             protein=protein,
             delta_gs=[np.nan for _ in ligands],
@@ -243,9 +149,9 @@ class RBFE:
             )
 
         # Overwrite (or extend) the internal DataFrame
-        abfe.df = pd.DataFrame(rows, columns=abfe.df.columns)
+        rbfe.df = pd.DataFrame(rows, columns=rbfe.df.columns)
 
-        return abfe
+        return rbfe
 
     def update(self):
         """update statuses of jobs in ABFE run"""

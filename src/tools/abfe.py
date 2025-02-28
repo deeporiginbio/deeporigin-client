@@ -169,6 +169,7 @@ class ABFE:
             ligands=ligands,
             protein=protein,
             delta_gs=[np.nan for _ in ligands],
+            database=_ensure_db_for_abfe(),
         )
 
         abfe.row_ids = df.index
@@ -372,10 +373,35 @@ class ABFE:
         df = df.sort_values("has_jobID", ascending=False)
 
         # 3. Drop duplicates on 'ligand_file', keeping the first row for each group
-        df = df.drop_duplicates(subset=["ligand_file"], keep="first")
 
-        # 4. Drop the helper column
-        df = df.drop(columns=["has_jobID"])
+        step_order = pd.CategoricalDtype(
+            categories=["init", "end_to_end"], ordered=True
+        )
+
+        status_order = pd.CategoricalDtype(
+            categories=["Queued", "Failed", "Running", "Succeeded"], ordered=True
+        )
+        df["step"] = df["step"].astype(step_order)
+        df["Status"] = df["Status"].astype(status_order)
+
+        df = df.groupby(["ligand_file", "step"], as_index=False, observed=True).agg(
+            {"Status": "max"}
+        )
+
+        def pick_dominant_row(group):
+            # If there's any end_to_end row for this ligand_file, keep only those
+            if (group["step"] == "end_to_end").any():
+                group = group[group["step"] == "end_to_end"]
+            # Among the remaining rows, pick the single row with the highest Status
+            # Since Status is an ordered categorical, 'idxmax()' gives the index of the best status
+            best_idx = group["Status"].idxmax()
+            return group.loc[best_idx]
+
+        df = (
+            df.groupby("ligand_file", group_keys=False)
+            .apply(pick_dominant_row)
+            .reset_index(drop=True)
+        )
 
         # convert SMILES to aligned images
         smiles_list = [ligand.smiles_string for ligand in self.ligands]
