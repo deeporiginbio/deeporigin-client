@@ -102,7 +102,7 @@ def split_sdf_file(
 
     suppl = Chem.SDMolSupplier(str(input_sdf_path), removeHs=False)
 
-    generated_paths: List[Path] = []
+    generated_paths = []
 
     for i, mol in enumerate(suppl, start=1):
         if mol is None:
@@ -130,13 +130,15 @@ def split_sdf_file(
 @beartype
 @requires_rdkit
 def smiles_to_base64_png(
-    smiles: Optional[str],
-    size=(300, 10),
+    smiles: str,
+    *,
+    size=(300, 100),
+    scale_factor: int = 2,
 ) -> str:
     """Convert a SMILES string to an inline base64 <img> tag."""
 
     from rdkit import Chem
-    from rdkit.Chem import Draw
+    from rdkit.Chem.Draw import rdMolDraw2D
 
     if not smiles:
         return "N/A"
@@ -145,16 +147,21 @@ def smiles_to_base64_png(
     if mol is None:
         return "N/A"
 
-    img = Draw.MolToImage(mol, size=size, fitImage=False)
+    # Compute high-resolution size
+    width, height = size[0] * scale_factor, size[1] * scale_factor
 
-    buffer = io.BytesIO()
-    img.save(buffer, format="PNG")
-    buffer.seek(0)
-    encoded = base64.b64encode(buffer.read()).decode("ascii")
+    # Create a high-resolution drawer
+    drawer = rdMolDraw2D.MolDraw2DCairo(width, height)
+    drawer.DrawMolecule(mol)
+    drawer.FinishDrawing()
 
+    png = drawer.GetDrawingText()
+    encoded = base64.b64encode(png).decode("ascii")
+
+    # Downscale in CSS
     return (
         f"<img src='data:image/png;base64,{encoded}' "
-        f"style='max-width:{size[0]}px; max-height:{size[1]}px;'/>"
+        f"style='width:{size[0]}px; height:{size[1]}px;'/>"
     )
 
 

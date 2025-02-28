@@ -378,7 +378,7 @@ class ABFE:
 
         print(f"🧬 Files uploaded to row {row_id}.")
 
-    def results(self, image_size=(200, 200)):
+    def results(self, image_size=(200, 100)):
         """
         Create and display a DataFrame in a Jupyter notebook with columns:
           - Molecule (an inline RDKit image from the SMILES)
