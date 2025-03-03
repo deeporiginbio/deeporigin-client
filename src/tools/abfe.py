@@ -375,6 +375,7 @@ class ABFE:
         """
 
         self.update()
+        self.get_delta_gs()
 
         df = self.df.copy()
 
@@ -419,6 +420,9 @@ class ABFE:
         # add the SMILES strings
         df["SMILES"] = [ligand.smiles_string for ligand in self.ligands]
 
+        # only show basenames of files
+        df["ligand_file"] = [os.path.basename(file) for file in df["ligand_file"]]
+
         # now add the delta Gs
         df[COL_DELTA_G] = self.delta_gs
 
@@ -428,6 +432,10 @@ class ABFE:
     def get_delta_gs(self):
         """return the delta Gs of the ABFE run and stored them in self.delta_gs"""
 
+        # some early exits
+        if len(self.row_ids) == 0:
+            return
+
         # get rows of the dataframe for these runs
         df = api.get_dataframe("ABFE", use_file_names=False)
         df = df.loc[self.row_ids]
@@ -435,6 +443,10 @@ class ABFE:
         file_ids = list(df["fep_results"])
 
         file_ids = [x for x in file_ids if pd.notna(x)]
+
+        if len(file_ids) == 0:
+            return
+
         api.download_files(
             file_ids=file_ids,
             save_to_dir=ABFE_DIR,
@@ -459,6 +471,8 @@ class ABFE:
 
     def show_results(self):
         """print the results of an ABFE run"""
+
+        self.get_results()
 
         df = self.results_df.copy()
 
