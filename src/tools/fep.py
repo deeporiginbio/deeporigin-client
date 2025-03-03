@@ -15,6 +15,7 @@ from deeporigin.data_hub import api
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.tools import run
 from deeporigin.tools.toolkit import _ensure_columns, _ensure_database
+from deeporigin.tools.utils import query_run_status
 from IPython.display import HTML, display
 
 # constants
@@ -278,6 +279,55 @@ class FEP:
         else:
             self.protein._do_id = matching_indices[0]
 
+    def get_abfe_results(self):
+        """get ABFE results"""
+
+        df = pd.DataFrame(api.get_dataframe(DB_ABFE, return_type="dict"))
+
+        # we only care about proteins and ligands corresponding to this session
+        df = df[df[COL_PROTEIN] == self.protein._do_id]
+        valid_ligands = [ligand._do_id for ligand in self.ligands]
+        df = df[df[COL_LIGAND].isin(valid_ligands)]
+
+        df["Status"] = df[COL_JOBID].apply(lambda jobid: query_run_status(jobid))
+
+        # drop some columns
+        df.drop("Validation Status", axis=1, inplace=True)
+        df.drop("JobID", axis=1, inplace=True)
+        df.drop("OutputFile", axis=1, inplace=True)
+        df.drop("ResultFile", axis=1, inplace=True)
+        df.drop("ID", axis=1, inplace=True)
+        df.drop("Protein", axis=1, inplace=True)
+
+        # map ligand IDs to ligand file names
+        # Create a mapping dictionary: _do_id -> file
+        mapping = {
+            ligand._do_id: os.path.basename(ligand.file) for ligand in self.ligands
+        }
+        smiles_mapping = {
+            ligand._do_id: ligand.smiles_string for ligand in self.ligands
+        }
+
+        # Replace the values in the 'Ligand' column with the corresponding file
+        df["SMILES"] = df["Ligand"].map(smiles_mapping)
+        df["Ligand"] = df["Ligand"].map(mapping)
+
+        return df
+
+    def show_abfe_results(self):
+        """show ABFE results in a dataframe"""
+
+        df = self.get_abfe_results()
+
+        # convert SMILES to aligned images
+        smiles_list = list(df["SMILES"])
+        df.drop("SMILES", axis=1, inplace=True)
+
+        df["Structure"] = chemistry.smiles_list_to_base64_png_list(smiles_list)
+
+        # Use escape=False to allow the <img> tags to render as images
+        display(HTML(df.to_html(escape=False)))
+
     def abfe_end_to_end(
         self,
         *,
@@ -314,6 +364,7 @@ class FEP:
             )
 
 
+@beartype
 def start_abfe_run_and_log(
     *,
     protein_id: str,
@@ -321,7 +372,15 @@ def start_abfe_run_and_log(
     params: dict,
     database_columns: list,
 ):
-    """starts a single run of ABFE end to end and logs it in the ABFE database"""
+    """starts a single run of ABFE end to end and logs it in the ABFE database
+
+    Args:
+        protein_id (str): protein ID
+        ligand_id (str): ligand ID
+        params (dict): parameters for the ABFE end-to-end job
+        database_columns (list): list of database columns dicts
+
+    """
 
     tool_key = "deeporigin.abfe-end-to-end"
 
