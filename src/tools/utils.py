@@ -270,11 +270,16 @@ def get_job_dataframe(update: bool = False) -> Any:
 
     Returns:
         pd.DataFrame: A dataframe containing job information"""
-    jobs = read_jobs()
+    jobs = tools.get_tool_executions(
+        page=1,
+        page_size=100,
+        org_friendly_id="likely-aardvark-ewo",
+        filter={},
+        order="executionId",
+    )
 
     if update:
         _update_all_jobs(jobs)
-    jobs = read_jobs()
 
     import pandas as pd
 
@@ -283,7 +288,7 @@ def get_job_dataframe(update: bool = False) -> Any:
             "Job ID": [job.id for job in jobs],
             "Execution ID": [job.attributes.executionId for job in jobs],
             "Status": [job.attributes.status for job in jobs],
-            "Tool": [job.attributes.tool.id for job in jobs],
+            "Tool": [job.attributes.tool for job in jobs],
         }
     )
     return df

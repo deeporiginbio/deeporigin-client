@@ -3,9 +3,7 @@
         "add_fep_repeats": 0,
         "amend": "__NO_AMEND",
         "annihilate": true,
-        "atom_mapping_paths": null,
         "atom_mapping_threshold": 0.01,
-        "boresch_run_names": null,
         "em_all": true,
         "em_solvent": true,
         "emeq_md_options": {
@@ -72,11 +70,10 @@
         "run_name": "binding",
         "skip_emeq": "__NO",
         "softcore_alpha": 0.5,
-        "status_file": null,
         "steps": 1250000,
         "system": "complex",
-        "test_run": 1,
-        "thread_pinning": 1,
+        "test_run": 0,
+        "thread_pinning": 0,
         "thread_pinning_offset": 0,
         "threads": 0,
         "workers": 0
@@ -84,21 +81,22 @@
     "complex_prep": {
         "include_ligands": 1,
         "include_protein": 1,
-        "status_file": null,
         "sysprep_params": {
             "charge_method": "bcc",
             "do_loop_modelling": false,
             "force_field": "ff14SB",
-            "is_lig_protonated": false,
-            "is_protein_protonated": false,
-            "keep_waters": false,
+            "is_lig_protonated": true,
+            "is_protein_protonated": true,
+            "keep_waters": true,
             "lig_force_field": "gaff2",
+            "ligand_res_names": [
+                "LIG"
+            ],
             "padding": 1.0,
-            "pdb_id": null,
             "save_gmx_files": false
         },
         "test_run": 0,
-        "thread_pinning": 1,
+        "thread_pinning": 0,
         "thread_pinning_offset": 0
     },
     "emeq": {
@@ -113,18 +111,16 @@
             "Δt": 0.004
         },
         "from_run": "__USE_SYSTEM",
-        "npt_reduce_restraints_ns": 2.0,
-        "nvt_heating_ns": 1.0,
-        "status_file": null,
-        "test_run": 1,
-        "thread_pinning": 1,
+        "npt_reduce_restraints_ns": 0.2,
+        "nvt_heating_ns": 0.1,
+        "test_run": 0,
+        "thread_pinning": 0,
         "thread_pinning_offset": 0,
         "threads": 0
     },
     "ligand_prep": {
         "include_ligands": 1,
         "include_protein": 0,
-        "status_file": null,
         "sysprep_params": {
             "charge_method": "bcc",
             "do_loop_modelling": false,
@@ -134,11 +130,10 @@
             "keep_waters": false,
             "lig_force_field": "gaff2",
             "padding": 1.0,
-            "pdb_id": null,
             "save_gmx_files": false
         },
         "test_run": 0,
-        "thread_pinning": 1,
+        "thread_pinning": 0,
         "thread_pinning_offset": 0
     },
     "md": {
@@ -156,10 +151,9 @@
             "Δt": 0.004
         },
         "run_name": "md",
-        "status_file": null,
-        "steps": 1000,
-        "test_run": 1,
-        "thread_pinning": 1,
+        "steps": 250000,
+        "test_run": 0,
+        "thread_pinning": 0,
         "thread_pinning_offset": 0,
         "threads": 0
     },
@@ -167,7 +161,6 @@
         "add_fep_repeats": 0,
         "amend": "__NO_AMEND",
         "annihilate": true,
-        "atom_mapping_paths": null,
         "atom_mapping_threshold": 0.01,
         "em_all": true,
         "em_solvent": true,
@@ -221,10 +214,9 @@
         "repeats": 1,
         "skip_emeq": "__NO",
         "softcore_alpha": 0.5,
-        "status_file": null,
         "steps": 300000,
         "test_run": 1,
-        "thread_pinning": 1,
+        "thread_pinning": 0,
         "thread_pinning_offset": 0,
         "threads": 0,
         "workers": 0
