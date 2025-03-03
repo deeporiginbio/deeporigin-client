@@ -34,6 +34,7 @@ COL_BINDING_FEP_OUTPUT = "binding_fep_output"
 COL_END_TO_END_OUTPUT = "end_to_end_output"
 COL_JOB_IDS = "job_ids"
 COL_PROTEIN_NAME = "protein_name"
+COL_FEP_RESULTS = "fep_results"
 
 
 ABFE_DIR = os.path.join(os.path.expanduser("~"), ".deeporigin", "abfe")
@@ -81,6 +82,7 @@ def _ensure_db_for_abfe() -> dict:
         dict(name=COL_MD_OUTPUT, type="file"),
         dict(name=COL_BINDING_FEP_OUTPUT, type="file"),
         dict(name=COL_END_TO_END_OUTPUT, type="file"),
+        dict(name=COL_FEP_RESULTS, type="file"),
         dict(name=COL_JOB_IDS, type="text"),
     ]
 
@@ -112,6 +114,17 @@ class ABFE:
                 "ligand_file",
                 "jobID",
                 "step",
+                "Status",
+            ]
+        )
+    )
+
+    results_df: pd.DataFrame = field(
+        default_factory=lambda: pd.DataFrame(
+            columns=[
+                "Ligand",
+                "SMILES",
+                "FEP ΔG (kcal/mol)",
                 "Status",
             ]
         )
@@ -352,7 +365,7 @@ class ABFE:
 
         print(f"🧬 Files uploaded to row {row_id}.")
 
-    def results(self, image_size=(200, 100)):
+    def get_results(self, image_size=(200, 100)):
         """
         Create and display a DataFrame in a Jupyter notebook with columns:
           - Molecule (an inline RDKit image from the SMILES)
@@ -403,33 +416,57 @@ class ABFE:
             .reset_index(drop=True)
         )
 
-        # convert SMILES to aligned images
-        smiles_list = [ligand.smiles_string for ligand in self.ligands]
-        images = chemistry.smiles_list_to_base64_png_list(smiles_list)
+        # add the SMILES strings
+        df["SMILES"] = [ligand.smiles_string for ligand in self.ligands]
 
-        rows = []
-        for _, row in df.iterrows():
-            ligand_file = row["ligand_file"]
+        # now add the delta Gs
+        df[COL_DELTA_G] = self.delta_gs
 
-            idx = [lig.file for lig in self.ligands].index(ligand_file)
+        self.results_df = df
+        return df
 
-            status = row["Status"]
+    def get_delta_gs(self):
+        """return the delta Gs of the ABFE run and stored them in self.delta_gs"""
 
-            row = {
-                "Molecule": images[idx],
-                COL_DELTA_G: self.delta_gs[idx],
-                "Status": status,
-            }
-            rows.append(row)
+        # get rows of the dataframe for these runs
+        df = api.get_dataframe("ABFE", use_file_names=False)
+        df = df.loc[self.row_ids]
 
-        df = pd.DataFrame(
-            rows,
-            columns=[
-                "Molecule",
-                COL_DELTA_G,
-                "Status",
-            ],
+        file_ids = list(df["fep_results"])
+
+        file_ids = [x for x in file_ids if pd.notna(x)]
+        api.download_files(
+            file_ids=file_ids,
+            save_to_dir=ABFE_DIR,
         )
+
+        delta_gs = []
+
+        for i, row in df.loc[self.row_ids].iterrows():
+            file_id = row["fep_results"]
+            if pd.isna(file_id):
+                delta_gs.append(np.nan)
+                continue
+
+            file_id = file_id.replace("_file:", "")
+
+            delta_g = float(
+                pd.read_csv(os.path.join(ABFE_DIR, file_id))["Total"].iloc[0]
+            )
+            delta_gs.append(delta_g)
+
+        self.delta_gs = delta_gs
+
+    def show_results(self):
+        """print the results of an ABFE run"""
+
+        df = self.results_df.copy()
+
+        # convert SMILES to aligned images
+        smiles_list = list(df["SMILES"])
+        df.drop("SMILES", axis=1, inplace=True)
+
+        df["Ligands"] = chemistry.smiles_list_to_base64_png_list(smiles_list)
 
         # Use escape=False to allow the <img> tags to render as images
         display(HTML(df.to_html(escape=False)))
@@ -584,7 +621,12 @@ def end_to_end(
             "columnId": COL_END_TO_END_OUTPUT,
             "rowId": row_id,
             "databaseId": database.hid,
-        }
+        },
+        "abfe_results_summary": {
+            "columnId": COL_FEP_RESULTS,
+            "rowId": row_id,
+            "databaseId": database.hid,
+        },
     }
 
     return run._process_job(
