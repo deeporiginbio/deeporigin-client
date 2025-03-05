@@ -30,6 +30,7 @@ def add_functions_to_module(
     methods = _get_client_methods(
         _get_api_client(
             api_name=api_name,
+            configure=False,
         )
     )
 
