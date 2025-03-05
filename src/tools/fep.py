@@ -29,6 +29,9 @@ COL_JOBID = "JobID"
 COL_OUTPUT = "OutputFile"
 COL_RESULT = "ResultFile"
 
+FEP_DIR = os.path.join(os.path.expanduser("~"), ".deeporigin", "fep")
+os.makedirs(FEP_DIR, exist_ok=True)
+
 
 class PrettyDict(Box):
     """A dict subclass with a custom pretty-print representation."""
@@ -282,14 +285,46 @@ class FEP:
     def get_abfe_results(self):
         """get ABFE results"""
 
-        df = pd.DataFrame(api.get_dataframe(DB_ABFE, return_type="dict"))
+        df = pd.DataFrame(
+            api.get_dataframe(
+                DB_ABFE,
+                return_type="dict",
+                use_file_names=False,
+            )
+        )
 
         # we only care about proteins and ligands corresponding to this session
         df = df[df[COL_PROTEIN] == self.protein._do_id]
         valid_ligands = [ligand._do_id for ligand in self.ligands]
         df = df[df[COL_LIGAND].isin(valid_ligands)]
 
-        df["Status"] = df[COL_JOBID].apply(lambda jobid: query_run_status(jobid))
+        df["Status"] = ""
+        df.loc[~df["OutputFile"].isna(), "Status"] = "Succeeded"
+
+        df.loc[df["OutputFile"].isna(), "Status"] = df.loc[
+            df["OutputFile"].isna(), COL_JOBID
+        ].apply(query_run_status)
+
+        # for each row, fill in delta_gs if needed
+
+        # download all files for delta_gs
+        file_ids = list(df["ResultFile"].dropna())
+        api.download_files(
+            file_ids=file_ids,
+            use_file_names=False,
+            save_to_dir=FEP_DIR,
+        )
+
+        # open each file, read the delta_g, write it to
+        # the local dataframe
+        for idx, row in df.iterrows():
+            if not pd.isna(row["ResultFile"]) and pd.isna(row["delta_g"]):
+                file_id = row["ResultFile"].replace("_file:", "")
+                delta_g = float(
+                    pd.read_csv(os.path.join(FEP_DIR, file_id))["Total"].iloc[0]
+                )
+                df.loc[idx, "delta_g"] = delta_g
+                print(delta_g)
 
         # drop some columns
         df.drop("Validation Status", axis=1, inplace=True)
