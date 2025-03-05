@@ -53,6 +53,24 @@ Run the command below for your favorite package manager to install the Deep Orig
     flit install deeporigin
     ```
 
+## Using `uv` to set up `deeporigin` on your computer
+
+We recommend using the following:
+
+```bash
+# make a folder for your project
+# this can be any name (except deeporigin)
+mkdir do-client
+cd do-client
+
+uv init
+uv python install
+uv add deeporigin
+
+# run jupyter using this environment
+uv run --with jupyter jupyter lab
+```
+
 ## For developers
 
 !!! warning "Developers only"
