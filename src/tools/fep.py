@@ -197,7 +197,7 @@ class FEP:
         # proteins
         database = _ensure_database(DB_PROTEINS)
         required_columns = [
-            dict(name="Protein", type="file"),
+            dict(name=COL_PROTEIN, type="file"),
         ]
         _ensure_columns(
             database=database,
@@ -308,7 +308,7 @@ class FEP:
         # for each row, fill in delta_gs if needed
 
         # download all files for delta_gs
-        file_ids = list(df["ResultFile"].dropna())
+        file_ids = list(df[COL_RESULT].dropna())
         existing_files = os.listdir(FEP_DIR)
         existing_files = ["_file:" + file for file in existing_files]
         missing_files = list(set(file_ids) - set(existing_files))
@@ -322,8 +322,8 @@ class FEP:
         # open each file, read the delta_g, write it to
         # the local dataframe
         for idx, row in df.iterrows():
-            if not pd.isna(row["ResultFile"]) and pd.isna(row["delta_g"]):
-                file_id = row["ResultFile"].replace("_file:", "")
+            if not pd.isna(row[COL_RESULT]) and pd.isna(row["delta_g"]):
+                file_id = row[COL_RESULT].replace("_file:", "")
                 delta_g = float(
                     pd.read_csv(os.path.join(FEP_DIR, file_id))["Total"].iloc[0]
                 )
@@ -333,10 +333,10 @@ class FEP:
         # drop some columns
         df.drop("Validation Status", axis=1, inplace=True)
         df.drop("JobID", axis=1, inplace=True)
-        df.drop("OutputFile", axis=1, inplace=True)
-        df.drop("ResultFile", axis=1, inplace=True)
+        df.drop(COL_OUTPUT, axis=1, inplace=True)
+        df.drop(COL_RESULT, axis=1, inplace=True)
         df.drop("ID", axis=1, inplace=True)
-        df.drop("Protein", axis=1, inplace=True)
+        df.drop(COL_PROTEIN, axis=1, inplace=True)
 
         # map ligand IDs to ligand file names
         # Create a mapping dictionary: _do_id -> file
@@ -348,8 +348,8 @@ class FEP:
         }
 
         # Replace the values in the 'Ligand' column with the corresponding file
-        df["SMILES"] = df["Ligand"].map(smiles_mapping)
-        df["Ligand"] = df["Ligand"].map(mapping)
+        df["SMILES"] = df[COL_LIGAND].map(smiles_mapping)
+        df[COL_LIGAND] = df[COL_LIGAND].map(mapping)
 
         return df
 
@@ -453,9 +453,9 @@ def start_abfe_run_and_log(
 
     # start job
     params["protein"] = {
-        "columnId": "Protein",
+        "columnId": COL_PROTEIN,
         "rowId": protein_id,
-        "databaseId": "Proteins",
+        "databaseId": DB_PROTEINS,
     }
 
     params["ligand"] = {
