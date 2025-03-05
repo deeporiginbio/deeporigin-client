@@ -353,3 +353,7 @@ abfe.show_abfe_results()
 This shows a table similar to:
 
 ![ABFE ligands](../../images/tools/abfe-results.png)
+
+If some jobs are running, they are listed in the table, as shown below:
+
+![ABFE ligands](../../images/tools/abfe-results-running.png)
