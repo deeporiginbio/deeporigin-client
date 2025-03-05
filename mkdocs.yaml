@@ -90,7 +90,7 @@ nav:
     - Running tools: tools/ref/run.md
     - Utils: tools/ref/utils.md
     - Toolkit: tools/ref/toolkit.md
-    - ABFE: tools/ref/abfe.md
+    - FEP: tools/ref/fep.md
 - Changelog: changelog.md
 - Support: https://www.support.deeporigin.com/servicedesk/customer/portals
 

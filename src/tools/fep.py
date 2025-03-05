@@ -121,7 +121,7 @@ class Protein:
 
 @dataclass
 class FEP:
-    """class for FEP simulations"""
+    """Class for FEP simulations. This class can be used to run FEP calculations on Deep Origin. This class can contain N ligands and a single protein."""
 
     ligands: list[Ligand]
     protein: Protein
@@ -137,7 +137,12 @@ class FEP:
         """initialize an FEP class given some files in a directory
 
         Args:
-            directory (str): directory containing ligand and protein files"""
+            directory (str): directory containing ligand and protein files.
+
+        Protein file should be in PDB format. Ligand files should be in SDF format. Each SDF file should contain a single molecule. If your SDF files contain more than one molecule, use `deeporigin.chemistry.split_sdf_file` to split them into separate files.
+
+
+        """
 
         sdf_files = sorted(
             [
@@ -222,7 +227,7 @@ class FEP:
         self._abfe_db = database
 
     def show_ligands(self):
-        """show ligands in a dataframe"""
+        """show ligands in the FEP object in a dataframe. This method visualizes the ligands using core-aligned 2D visualizations. To simply obtain a listing of the ligands in this class, use `.ligands`."""
 
         # convert SMILES to aligned images
         smiles_list = [ligand.smiles_string for ligand in self.ligands]
@@ -243,7 +248,11 @@ class FEP:
         display(HTML(df.to_html(escape=False)))
 
     def connect(self):
-        """connects the local instantiation of the simulation to Deep Origin"""
+        """Connects the local instantiation of the simulation to Deep Origin.
+
+        If contained ligand or protein files do not exist on Deep Origin, they will be uploaded. The connect method also connects to existing runs, if any.
+
+        """
 
         self._ensure_dbs_for_fep()
 
@@ -282,7 +291,14 @@ class FEP:
             self.protein._do_id = matching_indices[0]
 
     def get_abfe_results(self):
-        """get ABFE results"""
+        """Get ABFE results.
+
+        Returns a dataframe containing results of ABFE runs. The retuned dataframe has the following columns:
+
+        - Ligand: contains the file name of the original SDF file
+        - Step: Step in the ABFE flow. `End-to-end` indicates the end-to-end flow, starting from ligand and protein, and going all the way to the outputs.
+        - Status: `Succeeded` or `Running`, etc. Status of job on Deep Origin.
+        """
 
         df = pd.DataFrame(
             api.get_dataframe(
@@ -329,7 +345,6 @@ class FEP:
                     pd.read_csv(os.path.join(FEP_DIR, file_id))["Total"].iloc[0]
                 )
                 df.loc[idx, "delta_g"] = delta_g
-                print(delta_g)
 
         # drop some columns
         df.drop("Validation Status", axis=1, inplace=True)
@@ -355,7 +370,9 @@ class FEP:
         return df
 
     def show_abfe_results(self):
-        """show ABFE results in a dataframe"""
+        """Show ABFE results in a dataframe.
+
+        This method returns a dataframe showing the results of ABFE runs associated with this simulation session. The ligand file name, 2-D structure, and ΔG are shown."""
 
         df = self.get_abfe_results()
 
@@ -373,7 +390,10 @@ class FEP:
         *,
         ligand_ids: Optional[str] = None,
     ) -> str:
-        """Function to run an end-to-end job"""
+        """Method to run an end-to-end ABFE run.
+
+        Args:
+            ligand_ids (Optional[str], optional): List of ligand IDs to run. Defaults to None. When None, all ligands in the object will be run. To view a list of valid ligand IDs, use the `.show_ligands()` method"""
 
         if ligand_ids is None:
             raise NotImplementedError("Not implemented yet")
@@ -396,7 +416,7 @@ class FEP:
         )
 
         for ligand_id in ligand_ids:
-            start_abfe_run_and_log(
+            _start_abfe_run_and_log(
                 protein_id=self.protein._do_id,
                 ligand_id=ligand_id,
                 database_columns=database_columns,
@@ -405,14 +425,14 @@ class FEP:
 
 
 @beartype
-def start_abfe_run_and_log(
+def _start_abfe_run_and_log(
     *,
     protein_id: str,
     ligand_id: str,
     params: dict,
     database_columns: list,
 ):
-    """starts a single run of ABFE end to end and logs it in the ABFE database
+    """starts a single run of ABFE end to end and logs it in the ABFE database. Internal function. Do not use.
 
     Args:
         protein_id (str): protein ID
