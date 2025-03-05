@@ -32,7 +32,7 @@ def requires_rdkit(func):
 
 @beartype
 @requires_rdkit
-def count_molecules_in_sdf_file(sdf_file):
+def count_molecules_in_sdf_file(sdf_file: str):
     """
     Count the number of valid (sanitizable) molecules in an SDF file using RDKit,
     while suppressing RDKit's error logging for sanitization issues.

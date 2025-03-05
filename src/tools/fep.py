@@ -13,9 +13,7 @@ from box import Box
 from deeporigin import chemistry
 from deeporigin.data_hub import api
 from deeporigin.exceptions import DeepOriginException
-from deeporigin.tools import run
 from deeporigin.tools.toolkit import _ensure_columns, _ensure_database
-from IPython.display import HTML, display
 
 # constants
 DB_ABFE = "ABFE2"
@@ -246,6 +244,8 @@ class FEP:
         df = pd.DataFrame(data)
 
         # Use escape=False to allow the <img> tags to render as images
+        from IPython.display import HTML, display
+
         display(HTML(df.to_html(escape=False)))
 
     def connect(self):
@@ -384,6 +384,8 @@ class FEP:
         df["Structure"] = chemistry.smiles_list_to_base64_png_list(smiles_list)
 
         # Use escape=False to allow the <img> tags to render as images
+        from IPython.display import HTML, display
+
         display(HTML(df.to_html(escape=False)))
 
     def abfe_end_to_end(
@@ -442,6 +444,8 @@ def _start_abfe_run_and_log(
         database_columns (list): list of database columns dicts
 
     """
+
+    from deeporigin.tools import run
 
     tool_key = "deeporigin.abfe-end-to-end"
 
