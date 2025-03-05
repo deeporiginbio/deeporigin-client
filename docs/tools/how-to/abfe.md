@@ -1,10 +1,13 @@
 # ABFE
 
-This document describes how to run a ABFE simulation using Deep Origin tools. 
+This document describes how to run a [ABFE](https://en.wikipedia.org/wiki/Free-energy_perturbation) simulation using Deep Origin tools. 
 
 ## Prerequisites 
 
-Make sure you have [installed](../../install.md), [configured](../../configure.md), and [authenticated](../../how-to/auth.md) with the Deep Origin python client. 
+Make sure you have [installed](../../install.md), [configured](../../configure.md), and [authenticated](../../how-to/auth.md) with the Deep Origin python client.
+
+!!! tip "Use uv to install `deeporigin`" 
+    We strongly recommend using [uv](https://docs.astral.sh/uv/) to install Deep Origin in a separate project, following instructions [here](../../install.md#using-uv-to-set-up-deeporigin-on-your-computer). This gives you all the dependencies you need, together with a stand-alone install of Jupyter Lab that you can use with `deeporigin`
 
 ## Background
 
@@ -17,27 +20,25 @@ The following flowchart describes the workflow of ABFE that we will go through. 
 
 You will need to have the following input files on your local computer:
 
-1. A ligand file, in SDF format
+1. A set of ligand files, in SDF format. Each SDF file should contain a single molecule. 
 2. A protein PDF file 
 
 
 ## Running ABFE workflow
 
 !!! tip "Jupyter notebooks"
-    It is assumed that you are working in a Jupyter notebook (or similar IPython environment). This makes it easier to run the workflow, and some functions, such as `wait_for_jobs` assume that you are in a Jupyter notebook.
+    It is assumed that you are working in a Jupyter notebook (or similar IPython environment). This makes it easier to run the workflow, and some functions assume that you are in a Jupyter notebook.
 
 First, we import necessary functions and modules from the `deeporigin` package:
 
 ```python
-from deeporigin.tools.utils import wait_for_jobs
-from deeporigin.tools import abfe
+from deeporigin.tools import fep
 ```
 
 We then specify where our input files are:
 
 ```python
-protein_file = "/path/to/protein.pdb"
-ligand_file = "/path/to/ligand.sdf"
+input_dir = "/path/to/input/dir"
 ```
 
 ### Initialization
@@ -45,39 +46,47 @@ ligand_file = "/path/to/ligand.sdf"
 Here, we data structures to store input and intermediate files, and upload input files to Deep Origin:
 
 ```python
-row_id = abfe.init(
-    ligand_file=ligand_file,
-    protein_file=protein_file,
-)
+sim = fep.FEP.from_dir(input_dir)
 ```
 
-You will see a message similar to:
-
-```bash
-Using database at: https://os.deeporigin.io/org/org/data/database/ABFE
-🧬 Uploading files to database...
-🧬 Files uploaded to row ABFE-1.
-```
-
-This function creates a database for you on the DataHub, generates necessary columns, and uploads your input ligand and protein files to the appropriate columns in that database. 
-
-The created database will look something like this:
-
-![ABFE database](../../images/tools/datahub-abfe.png)
-
-!!! info "Row IDs"
-    The `row_id` identifies a row in this database, and is used by all subsequent functions. You will always need to specify the row_id to each function. 
-
-
-### Complex Prep
-
-To run complex prep on the ligand and protein file, we use:
+Now, we can view the ligands that are part of this simulation:
 
 ```python
-abfe.complex_prep(
-    row_id=row_id,
-    is_lig_protonated=True,
-)
+sim.show_ligands()
+```
+
+This will show a table similar to this:
+
+![ABFE ligands](../../images/tools/abfe-ligands.png)
+
+### Connecting to Deep Origin
+
+We can connect the instance we created to Deep Origin using
+
+```python
+sim.connect()
+```
+
+
+This function creates necessary databases on Deep Origin, uploads ligand and protein files if needed, and updates the status of runs on Deep Origin.
+
+
+After connecting, running `show_ligands` again shows us that our ligands have been assigned IDs that we can use to refer to them in future operations:
+
+```python
+sim.show_ligands()
+```
+
+![ABFE ligands](../../images/tools/abfe-ligands-id.png)
+
+
+### Running end to end ABFE on a single ligand
+
+To run an end-to-end ABFE workflow on a single ligand, we use:
+
+
+```python
+sim.abfe_end_to_end(ligand_ids=["Ligands-1"]) # for example
 ```
 
 This queues up a task on Deep Origin. When it completes, outputs will be written to the appropriate column in this database. 
@@ -86,139 +95,261 @@ You will see a message printed to screen similar to:
 
 
 ```bash
-Using row ABFE-1 in database
 🧬 Job started with ID: 20f05e96, execution ID: x9rl5eghrpqwyiciehc3e
 ```
 
-??? Parameters for Complex Prep
-    This function exposes a number of parameters. To see which parameters are available, and to modify them, look at the [reference documentation](../ref/abfe.md#src.tools.abfe.complex_prep)
+??? Parameters for ABFE
+    The end to end ABFE tool has a number of user-controllable parameters. To view all parameters, use:
+
+    ```python
+    sim.params_abfe_end_to_end
+    ```
+
+    This will print a dictionary of the parameters used for ABFE, similar to:
+
+    ```json
+    {
+      "abfe": {
+        "add_fep_repeats": 0,
+        "amend": "__NO_AMEND",
+        "annihilate": true,
+        "atom_mapping_threshold": 0.01,
+        "em_all": true,
+        "em_solvent": true,
+        "emeq_md_options": {
+          "T": 298.15,
+          "cutoff": 0.9,
+          "fourier_spacing": 0.12,
+          "hydrogen_mass": 2.0,
+          "Δt": 0.004
+        },
+        "fep_windows": [
+          {
+            "restraints_A": [
+              0.0,
+              0.01,
+              0.025,
+              0.05,
+              0.1,
+              0.35,
+              0.5,
+              0.75,
+              1.0
+            ]
+          },
+          {
+            "coul_A": [
+              1.0,
+              0.8,
+              0.6,
+              0.4,
+              0.2,
+              0.0
+            ]
+          },
+          {
+            "vdw_A": [
+              1.0,
+              0.9,
+              0.8,
+              0.7,
+              0.6,
+              0.5,
+              0.4,
+              0.3,
+              0.2,
+              0.1,
+              0.0
+            ]
+          }
+        ],
+        "mbar": 1,
+        "npt_reduce_restraints_ns": 2.0,
+        "nvt_heating_ns": 1.0,
+        "prod_md_options": {
+          "T": 298.15,
+          "barostat": "MonteCarloBarostat",
+          "barostat_exchange_interval": 500,
+          "cutoff": 0.9,
+          "fourier_spacing": 0.12,
+          "hydrogen_mass": 2.0,
+          "integrator": "BAOABIntegrator",
+          "Δt": 0.004
+        },
+        "repeats": 1,
+        "run_name": "binding",
+        "skip_emeq": "__NO",
+        "softcore_alpha": 0.5,
+        "steps": 1250000,
+        "system": "complex",
+        "test_run": 0,
+        "thread_pinning": 0,
+        "thread_pinning_offset": 0,
+        "threads": 0,
+        "workers": 0
+      },
+      "complex_prep": {
+        "include_ligands": 1,
+        "include_protein": 1,
+        "sysprep_params": {
+          "charge_method": "bcc",
+          "do_loop_modelling": false,
+          "force_field": "ff14SB",
+          "is_lig_protonated": true,
+          "is_protein_protonated": true,
+          "keep_waters": true,
+          "lig_force_field": "gaff2",
+          "ligand_res_names": [
+            "LIG"
+          ],
+          "padding": 1.0,
+          "save_gmx_files": false
+        },
+        "test_run": 0,
+        "thread_pinning": 0,
+        "thread_pinning_offset": 0
+      },
+      "emeq": {
+        "amend": "__NO_AMEND",
+        "em_all": true,
+        "em_solvent": true,
+        "emeq_md_options": {
+          "T": 298.15,
+          "cutoff": 0.9,
+          "fourier_spacing": 0.12,
+          "hydrogen_mass": 2.0,
+          "Δt": 0.004
+        },
+        "from_run": "__USE_SYSTEM",
+        "npt_reduce_restraints_ns": 0.2,
+        "nvt_heating_ns": 0.1,
+        "test_run": 0,
+        "thread_pinning": 0,
+        "thread_pinning_offset": 0,
+        "threads": 0
+      },
+      "ligand_prep": {
+        "include_ligands": 1,
+        "include_protein": 0,
+        "sysprep_params": {
+          "charge_method": "bcc",
+          "do_loop_modelling": false,
+          "force_field": "ff14SB",
+          "is_lig_protonated": false,
+          "is_protein_protonated": false,
+          "keep_waters": false,
+          "lig_force_field": "gaff2",
+          "padding": 1.0,
+          "save_gmx_files": false
+        },
+        "test_run": 0,
+        "thread_pinning": 0,
+        "thread_pinning_offset": 0
+      },
+      "md": {
+        "amend": "__NO_AMEND",
+        "continue": 0,
+        "from_run": "__USE_SYSTEM",
+        "md_options": {
+          "T": 298.15,
+          "barostat": "MonteCarloBarostat",
+          "barostat_exchange_interval": 500,
+          "cutoff": 0.9,
+          "fourier_spacing": 0.12,
+          "hydrogen_mass": 2.0,
+          "integrator": "BAOABIntegrator",
+          "Δt": 0.004
+        },
+        "run_name": "md",
+        "steps": 250000,
+        "test_run": 0,
+        "thread_pinning": 0,
+        "thread_pinning_offset": 0,
+        "threads": 0
+      },
+      "solvation": {
+        "add_fep_repeats": 0,
+        "amend": "__NO_AMEND",
+        "annihilate": true,
+        "atom_mapping_threshold": 0.01,
+        "em_all": true,
+        "em_solvent": true,
+        "emeq_md_options": {
+          "T": 298.15,
+          "cutoff": 0.9,
+          "fourier_spacing": 0.12,
+          "hydrogen_mass": 2.0,
+          "Δt": 0.004
+        },
+        "fep_windows": [
+          {
+            "coul_A": [
+              1.0,
+              0.8,
+              0.6,
+              0.4,
+              0.2,
+              0.0
+            ]
+          },
+          {
+            "vdw_A": [
+              1.0,
+              0.9,
+              0.8,
+              0.7,
+              0.6,
+              0.5,
+              0.4,
+              0.3,
+              0.2,
+              0.1,
+              0.0
+            ]
+          }
+        ],
+        "mbar": 1,
+        "npt_reduce_restraints_ns": 0.2,
+        "nvt_heating_ns": 0.1,
+        "prod_md_options": {
+          "T": 298.15,
+          "barostat": "MonteCarloBarostat",
+          "barostat_exchange_interval": 500,
+          "cutoff": 0.9,
+          "fourier_spacing": 0.12,
+          "hydrogen_mass": 2.0,
+          "integrator": "BAOABIntegrator",
+          "Δt": 0.004
+        },
+        "repeats": 1,
+        "skip_emeq": "__NO",
+        "softcore_alpha": 0.5,
+        "steps": 300000,
+        "test_run": 1,
+        "thread_pinning": 0,
+        "thread_pinning_offset": 0,
+        "threads": 0,
+        "workers": 0
+      }
+    }
+
+    ```
+    Any of these parameters are modifiable using dot notation. For example, to change the number of steps in the MD step, we can use:
+
+    ```python
+    sim.params_abfe_end_to_end.md.steps = 500000
+    ```
 
 
-### Solvation Prep
 
-We do not have to wait for the complex prep step to complete in order to start this step. So we can start this step using: 
+### Results
+
+After initiating a run, we can view results using:
 
 ```python
-abfe.solvation_prep(row_id=row_id)
-```
+abfe.show_abfe_results()
+```  
 
-This queues up a task on Deep Origin. When it completes, outputs will be written to the appropriate column in this database. 
+This shows a table similar to:
 
-You will see a message printed to screen similar to:
-
-
-```bash
-Using row ABFE-1 in database
-🧬 Job started with ID: 20f05e96, execution ID: x9rl5eghrpqwyiciehc3e
-```
-
-??? Parameters for Solvation Prep
-    This function exposes a number of parameters. To see which parameters are available, and to modify them, look at the [reference documentation](../ref/abfe.md#src.tools.abfe.solvation_prep)
-
-!!! Tip "Waiting for Jobs"
-    At this stage, we need to wait for these steps to complete to before proceeding to the next step. For example, we need to wait for the Complex Prep step to complete in order to proceed to the EMEQ step.
-
-    To do this, use the `wait_for_jobs` function. The `wait_for_jobs` repeatedly polls Deep Origin to determine the status of jobs, and terminates when all jobs have completed. 
-
-    While it is running (and blocking execution), you will see a table similar to this:
-
-    ![ABFE waiting for jobs](../../images/tools/abfe-waiting-for-jobs.png)
-
-### EMEQ
-
-To run EMEQ, we use:
-
-```python
-abfe.emeq(row_id=row_id)
-```
-
-This queues up a task on Deep Origin. When it completes, outputs will be written to the appropriate column in this database. 
-
-You will see a message printed to screen similar to:
-
-
-```bash
-Using row ABFE-1 in database
-🧬 Job started with ID: 20f05e96, execution ID: x9rl5eghrpqwyiciehc3e
-```
-
-??? Parameters for EMEQ
-    This function exposes a number of parameters. To see which parameters are available, and to modify them, look at the [reference documentation](../ref/abfe.md#src.tools.abfe.emeq)
-
-### Simple MD
-
-To run simple MD, we use:
-
-```python
-abfe.simple_md(
-    row_id=row_id,
-    steps=1000,
-)
-```
-
-This queues up a task on Deep Origin. When it completes, outputs will be written to the appropriate column in this database. 
-
-You will see a message printed to screen similar to:
-
-
-```bash
-Using row ABFE-1 in database
-🧬 Job started with ID: 20f05e96, execution ID: x9rl5eghrpqwyiciehc3e
-```
-
-??? Parameters for Simple MD
-    This function exposes a number of parameters. To see which parameters are available, and to modify them, look at the [reference documentation](../ref/abfe.md#src.tools.abfe.simple_md)
-
-### Binding FEP 
-
-To run Binding FEP, we use:
-
-```python
-abfe.binding_fep(
-    row_id,
-    steps=1000,
-)
-```
-
-This queues up a task on Deep Origin. When it completes, outputs will be written to the appropriate column in this database. 
-
-You will see a message printed to screen similar to:
-
-
-```bash
-Using row ABFE-1 in database
-🧬 Job started with ID: 20f05e96, execution ID: x9rl5eghrpqwyiciehc3e
-```
-
-??? Parameters for Binding FEP
-    This function exposes a number of parameters. To see which parameters are available, and to modify them, look at the [reference documentation](../ref/abfe.md#src.tools.abfe.binding_fep)
-
-### Solvation FEP
-
-
-To run Solvation FEP, we use:
-
-```python
-abfe.solvation_fep(
-    row_id=row_id,
-    annihilate=True,
-)
-```
-
-This queues up a task on Deep Origin. When it completes, outputs will be written to the appropriate column in this database. 
-
-You will see a message printed to screen similar to:
-
-
-```bash
-Using row ABFE-1 in database
-🧬 Job started with ID: 20f05e96, execution ID: x9rl5eghrpqwyiciehc3e
-```
-
-??? Parameters for Solvation FEP
-    This function exposes a number of parameters. To see which parameters are available, and to modify them, look at the [reference documentation](../ref/abfe.md#src.tools.abfe.solvation_fep)
-
-
-## Inspecting outputs
-
-The output of any step can be inspected by downloading the linked zip file in the appropriate column in the database.
+![ABFE ligands](../../images/tools/abfe-results.png)

@@ -67,6 +67,9 @@ uv init
 uv python install
 uv add deeporigin
 
+# if you're using Deep Origin tools (like FEP), use:
+uv add deeporigin --extra tools
+
 # run jupyter using this environment
 uv run --with jupyter jupyter lab
 ```

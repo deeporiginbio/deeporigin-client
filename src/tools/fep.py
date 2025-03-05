@@ -1,4 +1,4 @@
-"""module to work FEP calculations"""
+"""Module to help work on FEP calculations. This module provides the FEP class, that allows you to run FEP calculations on Deep Origin."""
 
 import importlib.resources
 import json
@@ -27,6 +27,7 @@ COL_STEP = "Step"
 COL_JOBID = "JobID"
 COL_OUTPUT = "OutputFile"
 COL_RESULT = "ResultFile"
+COL_DELTA_G = "FEP ΔG (kcal/mol)"
 
 FEP_DIR = os.path.join(os.path.expanduser("~"), ".deeporigin", "fep")
 os.makedirs(FEP_DIR, exist_ok=True)
@@ -218,7 +219,7 @@ class FEP:
             dict(name=COL_JOBID, type="text"),
             dict(name=COL_OUTPUT, type="file"),
             dict(name=COL_RESULT, type="file"),
-            dict(name="delta_g", type="file"),
+            dict(name=COL_DELTA_G, type="file"),
         ]
         database = _ensure_columns(
             database=database,
@@ -339,12 +340,12 @@ class FEP:
         # open each file, read the delta_g, write it to
         # the local dataframe
         for idx, row in df.iterrows():
-            if not pd.isna(row[COL_RESULT]) and pd.isna(row["delta_g"]):
+            if not pd.isna(row[COL_RESULT]) and pd.isna(row[COL_DELTA_G]):
                 file_id = row[COL_RESULT].replace("_file:", "")
                 delta_g = float(
                     pd.read_csv(os.path.join(FEP_DIR, file_id))["Total"].iloc[0]
                 )
-                df.loc[idx, "delta_g"] = delta_g
+                df.loc[idx, COL_DELTA_G] = delta_g
 
         # drop some columns
         df.drop("Validation Status", axis=1, inplace=True)
