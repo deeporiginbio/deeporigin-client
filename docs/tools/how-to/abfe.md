@@ -49,6 +49,17 @@ Here, we data structures to store input and intermediate files, and upload input
 sim = fep.FEP.from_dir(input_dir)
 ```
 
+!!! tip "Creating a FEP instance from specific files"
+    You can instantiate the class directly from specific files if you don't want to use the `from_dir` function.
+
+    ```python
+    ligand = fep.Ligand(file="/path/to/ligand.sdf")
+    protein = fep.Protein(file="/path/to/protein.pdb")
+
+    sim = fep.FEP(ligands=[ligand], protein=protein)
+
+    ```
+
 Now, we can view the ligands that are part of this simulation:
 
 ```python
