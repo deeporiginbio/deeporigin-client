@@ -15,7 +15,6 @@ from deeporigin.data_hub import api
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.tools import run
 from deeporigin.tools.toolkit import _ensure_columns, _ensure_database
-from deeporigin.tools.utils import query_run_status
 from IPython.display import HTML, display
 
 # constants
@@ -292,6 +291,8 @@ class FEP:
                 use_file_names=False,
             )
         )
+
+        from deeporigin.tools.utils import query_run_status
 
         # we only care about proteins and ligands corresponding to this session
         df = df[df[COL_PROTEIN] == self.protein._do_id]
