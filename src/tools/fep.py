@@ -309,11 +309,15 @@ class FEP:
 
         # download all files for delta_gs
         file_ids = list(df["ResultFile"].dropna())
-        api.download_files(
-            file_ids=file_ids,
-            use_file_names=False,
-            save_to_dir=FEP_DIR,
-        )
+        existing_files = os.listdir(FEP_DIR)
+        existing_files = ["_file:" + file for file in existing_files]
+        missing_files = list(set(file_ids) - set(existing_files))
+        if len(missing_files) > 0:
+            api.download_files(
+                file_ids=missing_files,
+                use_file_names=False,
+                save_to_dir=FEP_DIR,
+            )
 
         # open each file, read the delta_g, write it to
         # the local dataframe
