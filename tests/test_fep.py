@@ -3,16 +3,24 @@ import os
 import pytest
 from deeporigin.tools import fep
 
-ligand_files = ["6xue-paper-ligands-docked.sdf", "ligands-brd-all.sdf", "brd-7.sdf"]
-n_ligands = [44, 8, 1]
-
+base_path = os.path.join(os.path.dirname(__file__), "fixtures")
 
 ligands = [
     {
-        "file": os.path.join(os.path.dirname(__file__), "fixtures", file),
-        "n_ligands": num,
-    }
-    for file, num in zip(ligand_files, n_ligands)
+        "file": os.path.join(base_path, "42-ligands.sdf"),
+        "n_ligands": 42,
+        "name_by_property": "Compound",
+    },
+    {
+        "file": os.path.join(base_path, "ligands-brd-all.sdf"),
+        "n_ligands": 8,
+        "name_by_property": "_Name",
+    },
+    {
+        "file": os.path.join(base_path, "brd-7.sdf"),
+        "n_ligands": 1,
+        "name_by_property": "_Name",
+    },
 ]
 
 

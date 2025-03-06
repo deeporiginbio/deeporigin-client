@@ -66,8 +66,14 @@ class Ligand:
     # this ID keeps track of whether it is uploaded to deep origin or not
     _do_id: Optional[str] = None
 
+    # this stores user-defined properties
+    properties: Optional[dict] = None
+
     def __post_init__(self):
         """generates a SMILES if it doesn't exist"""
+
+        # read user-defined properties
+        self.properties = chemistry.read_sdf_properties(self.file)
 
         # check that there's only one molecule here
         if self.n_molecules is None:
