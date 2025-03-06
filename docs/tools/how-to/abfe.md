@@ -358,7 +358,7 @@ You will see a message printed to screen similar to:
 After initiating a run, we can view results using:
 
 ```python
-abfe.show_abfe_results()
+sim.show_abfe_results()
 ```  
 
 This shows a table similar to:
