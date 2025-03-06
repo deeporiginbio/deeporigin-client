@@ -2321,6 +2321,15 @@
 <p>Here, we data structures to store input and intermediate files, and upload input files to Deep Origin:</p>
 <div class="language-python highlight"><pre><span></span><code><span class="n">sim</span> <span class="o">=</span> <span class="n">fep</span><span class="o">.</span><span class="n">FEP</span><span class="o">.</span><span class="n">from_dir</span><span class="p">(</span><span class="n">input_dir</span><span class="p">)</span>
 </code></pre></div>
+<div class="admonition tip">
+<p class="admonition-title">Creating a FEP instance from specific files</p>
+<p>You can instantiate the class directly from specific files if you don't want to use the <code>from_dir</code> function.</p>
+<div class="language-python highlight"><pre><span></span><code><span class="n">ligand</span> <span class="o">=</span> <span class="n">fep</span><span class="o">.</span><span class="n">Ligand</span><span class="p">(</span><span class="n">file</span><span class="o">=</span><span class="s2">&quot;/path/to/ligand.sdf&quot;</span><span class="p">)</span>
+<span class="n">protein</span> <span class="o">=</span> <span class="n">fep</span><span class="o">.</span><span class="n">Protein</span><span class="p">(</span><span class="n">file</span><span class="o">=</span><span class="s2">&quot;/path/to/protein.pdb&quot;</span><span class="p">)</span>
+
+<span class="n">sim</span> <span class="o">=</span> <span class="n">fep</span><span class="o">.</span><span class="n">FEP</span><span class="p">(</span><span class="n">ligands</span><span class="o">=</span><span class="p">[</span><span class="n">ligand</span><span class="p">],</span> <span class="n">protein</span><span class="o">=</span><span class="n">protein</span><span class="p">)</span>
+</code></pre></div>
+</div>
 <p>Now, we can view the ligands that are part of this simulation:</p>
 <div class="language-python highlight"><pre><span></span><code><span class="n">sim</span><span class="o">.</span><span class="n">show_ligands</span><span class="p">()</span>
 </code></pre></div>
@@ -2580,7 +2589,7 @@ Any of these parameters are modifiable using dot notation. For example, to chang
 </details>
 <h3 id="results">Results<a class="headerlink" href="#results" title="Permanent link">&para;</a></h3>
 <p>After initiating a run, we can view results using:</p>
-<div class="language-python highlight"><pre><span></span><code><span class="n">abfe</span><span class="o">.</span><span class="n">show_abfe_results</span><span class="p">()</span>
+<div class="language-python highlight"><pre><span></span><code><span class="n">sim</span><span class="o">.</span><span class="n">show_abfe_results</span><span class="p">()</span>
 </code></pre></div>
 <p>This shows a table similar to:</p>
 <p><img alt="ABFE ligands" src="../../images/tools/abfe-results.png" /></p>
