@@ -191,7 +191,7 @@ class FEP:
         required_columns = [
             dict(name=COL_LIGAND, type="file"),
         ]
-        _ensure_columns(
+        database = _ensure_columns(
             database=database,
             required_columns=required_columns,
         )
@@ -202,7 +202,7 @@ class FEP:
         required_columns = [
             dict(name=COL_PROTEIN, type="file"),
         ]
-        _ensure_columns(
+        database = _ensure_columns(
             database=database,
             required_columns=required_columns,
         )
