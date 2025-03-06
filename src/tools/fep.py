@@ -191,7 +191,7 @@ class FEP:
         required_columns = [
             dict(name=COL_LIGAND, type="file"),
         ]
-        _ensure_columns(
+        database = _ensure_columns(
             database=database,
             required_columns=required_columns,
         )
@@ -202,7 +202,7 @@ class FEP:
         required_columns = [
             dict(name=COL_PROTEIN, type="file"),
         ]
-        _ensure_columns(
+        database = _ensure_columns(
             database=database,
             required_columns=required_columns,
         )
@@ -377,6 +377,10 @@ class FEP:
 
         df = self.get_abfe_results()
 
+        if len(df) == 0:
+            print("No ABFE results to display. Start a run first.")
+            return
+
         # convert SMILES to aligned images
         smiles_list = list(df["SMILES"])
         df.drop("SMILES", axis=1, inplace=True)
@@ -399,7 +403,13 @@ class FEP:
             ligand_ids (Optional[str], optional): List of ligand IDs to run. Defaults to None. When None, all ligands in the object will be run. To view a list of valid ligand IDs, use the `.show_ligands()` method"""
 
         if ligand_ids is None:
-            raise NotImplementedError("Not implemented yet")
+            ligand_ids = [ligand._do_id for ligand in self.ligands]
+
+        # check that protein ID is valid
+        if self.protein._do_id is None:
+            raise DeepOriginException(
+                "Protein has not been uploaded yet. Use .connect() first."
+            )
 
         # check that ligand IDs are valid
         valid_ligand_ids = [ligand._do_id for ligand in self.ligands]
@@ -417,6 +427,16 @@ class FEP:
         database_columns = (
             self._ligands_db.cols + self._proteins_db.cols + self._abfe_db.cols
         )
+
+        # only run on ligands that have not been run yet
+        # first check that there are no existing runs
+        df = api.get_dataframe(DB_ABFE)
+        df[df["Protein"] == self.protein._do_id]
+
+        df = df[(df[COL_LIGAND].isin(ligand_ids)) & (~pd.isna(df[COL_RESULT]))]
+
+        already_run_ligands = set(df[COL_LIGAND])
+        ligand_ids = set(ligand_ids) - already_run_ligands
 
         for ligand_id in ligand_ids:
             _start_abfe_run_and_log(
