@@ -32,7 +32,44 @@ def requires_rdkit(func):
 
 @beartype
 @requires_rdkit
-def count_molecules_in_sdf_file(sdf_file: str):
+def read_sdf_properties(sdf_file: str | Path) -> dict:
+    """Reads all user-defined properties from an SDF file (single molecule) and returns them as a dictionary."""
+
+    from rdkit import Chem
+
+    supplier = Chem.SDMolSupplier(str(sdf_file), sanitize=False)
+    mol = supplier[0]  # Assuming a single molecule
+
+    if mol is None:
+        raise ValueError("Invalid SDF file or molecule could not be read.")
+
+    return {prop: mol.GetProp(prop) for prop in mol.GetPropNames()}
+
+
+@beartype
+@requires_rdkit
+def get_properties_in_sdf_file(sdf_file: str) -> list:
+    """returns a list of all user-defined properties in an SDF file"""
+    from rdkit import Chem
+
+    # Load molecules from the SDF file
+    supplier = Chem.SDMolSupplier(sdf_file, sanitize=False)
+
+    properties = []
+
+    for i, mol in enumerate(supplier):
+        if mol is None:
+            continue  # Skip invalid molecules
+
+        for prop_name in mol.GetPropNames():
+            properties.append(prop_name)
+
+    return list(set(properties))
+
+
+@beartype
+@requires_rdkit
+def count_molecules_in_sdf_file(sdf_file: str | Path) -> int:
     """
     Count the number of valid (sanitizable) molecules in an SDF file using RDKit,
     while suppressing RDKit's error logging for sanitization issues.
@@ -67,10 +104,35 @@ def count_molecules_in_sdf_file(sdf_file: str):
 
 @beartype
 @requires_rdkit
+def read_property_values(sdf_file: str, key: str):
+    """given a SDF file with more than 1 molecule, return the values of the properties for each molecule"""
+    from rdkit import Chem
+
+    suppl = Chem.SDMolSupplier(
+        sdf_file,
+        removeHs=False,
+        sanitize=False,
+    )
+    values = []
+    for i, mol in enumerate(suppl, start=1):
+        if mol is None:
+            value = None
+        else:
+            if mol.HasProp(key):
+                value = mol.GetProp(key).strip()
+            else:
+                value = None
+        values.append(value)
+    return values
+
+
+@beartype
+@requires_rdkit
 def split_sdf_file(
     input_sdf_path: Union[str, Path],
     output_prefix: str = "ligand",
     output_dir: Optional[Union[str, Path]] = None,
+    name_by_property: str = "_Name",
 ) -> list[Path]:
     """
     Splits a multi-ligand SDF file into individual SDF files, optionally placing
@@ -89,6 +151,14 @@ def split_sdf_file(
 
     from rdkit import Chem
 
+    values = read_property_values(input_sdf_path, name_by_property)
+    n_mols = count_molecules_in_sdf_file(input_sdf_path)
+
+    if len(set(values)) != n_mols:
+        raise ValueError(
+            f"The number of molecules in the SDF file ({n_mols}) is not consistent with the number of values ({len(set(values))}) extracted from the property {name_by_property}. Use a different property to fix this."
+        )
+
     if not isinstance(input_sdf_path, Path):
         input_sdf_path = Path(input_sdf_path)
 
@@ -99,7 +169,11 @@ def split_sdf_file(
             output_dir = Path(output_dir)
         output_dir.mkdir(parents=True, exist_ok=True)
 
-    suppl = Chem.SDMolSupplier(str(input_sdf_path), removeHs=False)
+    suppl = Chem.SDMolSupplier(
+        str(input_sdf_path),
+        removeHs=False,
+        sanitize=False,
+    )
 
     generated_paths = []
 
@@ -107,8 +181,8 @@ def split_sdf_file(
         if mol is None:
             continue
 
-        if mol.HasProp("_Name"):
-            mol_name = mol.GetProp("_Name").strip()
+        if mol.HasProp(name_by_property):
+            mol_name = mol.GetProp(name_by_property).strip()
         else:
             mol_name = f"{output_prefix}_{i}"
 
@@ -295,7 +369,7 @@ def sdf_to_smiles(sdf_file: Union[str, Path]) -> list[str]:
     if isinstance(sdf_file, Path):
         sdf_file = str(sdf_file)
 
-    suppl = Chem.SDMolSupplier(sdf_file)
+    suppl = Chem.SDMolSupplier(sdf_file, sanitize=False)
     if not suppl:
         return []
 

@@ -66,8 +66,14 @@ class Ligand:
     # this ID keeps track of whether it is uploaded to deep origin or not
     _do_id: Optional[str] = None
 
+    # this stores user-defined properties
+    properties: Optional[dict] = None
+
     def __post_init__(self):
         """generates a SMILES if it doesn't exist"""
+
+        # read user-defined properties
+        self.properties = chemistry.read_sdf_properties(self.file)
 
         # check that there's only one molecule here
         if self.n_molecules is None:
@@ -240,6 +246,13 @@ class FEP:
             "File": file_list,
             "Ligand": images,
         }
+
+        # find all the common properties in all ligands
+        common_keys = set.intersection(
+            *(set(ligand.properties.keys()) for ligand in self.ligands)
+        )
+        for key in common_keys:
+            data[key] = [ligand.properties[key] for ligand in self.ligands]
 
         df = pd.DataFrame(data)
 

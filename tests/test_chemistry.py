@@ -5,16 +5,24 @@ import os
 import pytest
 from deeporigin import chemistry
 
-ligand_files = ["6xue-paper-ligands-docked.sdf", "ligands-brd-all.sdf", "brd-7.sdf"]
-n_ligands = [44, 8, 1]
-
+base_path = os.path.join(os.path.dirname(__file__), "fixtures")
 
 ligands = [
     {
-        "file": os.path.join(os.path.dirname(__file__), "fixtures", file),
-        "n_ligands": num,
-    }
-    for file, num in zip(ligand_files, n_ligands)
+        "file": os.path.join(base_path, "42-ligands.sdf"),
+        "n_ligands": 42,
+        "name_by_property": "Compound",
+    },
+    {
+        "file": os.path.join(base_path, "ligands-brd-all.sdf"),
+        "n_ligands": 8,
+        "name_by_property": "_Name",
+    },
+    {
+        "file": os.path.join(base_path, "brd-7.sdf"),
+        "n_ligands": 1,
+        "name_by_property": "_Name",
+    },
 ]
 
 
@@ -46,19 +54,17 @@ def test_split_sdf_file(
         input_sdf_path=str(ligand["file"]),
         output_prefix="testLig",
         output_dir=str(output_dir),
+        name_by_property=ligand["name_by_property"],
     )
 
     # Check that at least one output file was created
     sdf_files = list(output_dir.glob("*.sdf"))
     assert len(sdf_files) > 0, "No SDF files were created by the splitting function."
 
-    assert len(sdf_file_names) == ligand["n_ligands"]
-
-    # Optionally, you can validate each file (e.g., reading them back with RDKit)
-    from rdkit import Chem
+    assert len(sdf_file_names) == ligand["n_ligands"], (
+        "The number of SDF files is incorrect."
+    )
 
     for sdf_file in sdf_files:
-        mols = list(Chem.SDMolSupplier(str(sdf_file), removeHs=False))
-        assert len(mols) == 1, (
-            f"Output file {sdf_file} does not contain exactly 1 molecule."
-        )
+        n_mol = chemistry.count_molecules_in_sdf_file(sdf_file)
+        assert n_mol == 1, "The SDF file contains more than one molecule."
