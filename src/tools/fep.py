@@ -247,6 +247,13 @@ class FEP:
             "Ligand": images,
         }
 
+        # find all the common properties in all ligands
+        common_keys = set.intersection(
+            *(set(ligand.properties.keys()) for ligand in self.ligands)
+        )
+        for key in common_keys:
+            data[key] = [ligand.properties[key] for ligand in self.ligands]
+
         df = pd.DataFrame(data)
 
         # Use escape=False to allow the <img> tags to render as images
