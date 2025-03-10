@@ -2,7 +2,6 @@
     "complex_prep": {
         "include_ligands": 1,
         "include_protein": 1,
-        "status_file": null,
         "sysprep_params": {
             "charge_method": "bcc",
             "do_loop_modelling": false,
@@ -63,9 +62,7 @@
         "add_fep_repeats": 0,
         "amend": "__NO_AMEND",
         "annihilate": true,
-        "atom_mapping_paths": null,
         "atom_mapping_threshold": 0.01,
-        "boresch_run_names": null,
         "em_all": true,
         "em_solvent": true,
         "emeq_md_options": {

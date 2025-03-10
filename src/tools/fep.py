@@ -17,15 +17,20 @@ from deeporigin.tools.toolkit import _ensure_columns, _ensure_database
 
 # constants
 DB_ABFE = "ABFE2"
+DB_RBFE = "RBFE"
 DB_PROTEINS = "Proteins"
 DB_LIGANDS = "Ligands"
+
 COL_PROTEIN = "Protein"
-COL_LIGAND = "Ligand"
+COL_LIGAND = "Ligand"  # for ABFE
+COL_LIGAND1 = "Ligand1"  # for RBFE
+COL_LIGAND2 = "Ligand2"  # for RBFE
 COL_STEP = "Step"
 COL_JOBID = "JobID"
 COL_OUTPUT = "OutputFile"
 COL_RESULT = "ResultFile"
 COL_DELTA_G = "FEP ΔG (kcal/mol)"
+COL_DELTA_DELTA_G = "FEP ΔΔG (kcal/mol)"
 
 FEP_DIR = os.path.join(os.path.expanduser("~"), ".deeporigin", "fep")
 os.makedirs(FEP_DIR, exist_ok=True)
@@ -134,8 +139,10 @@ class FEP:
     _ligands_db: Optional[dict] = None
     _proteins_db: Optional[dict] = None
     _abfe_db: Optional[dict] = None
+    _rbfe_db: Optional[dict] = None
 
     params_abfe_end_to_end = _load_params("abfe_end_to_end")
+    params_rbfe_end_to_end = _load_params("rbfe_end_to_end")
 
     @classmethod
     def from_dir(cls, directory: str) -> "FEP":
@@ -223,13 +230,31 @@ class FEP:
             dict(name=COL_JOBID, type="text"),
             dict(name=COL_OUTPUT, type="file"),
             dict(name=COL_RESULT, type="file"),
-            dict(name=COL_DELTA_G, type="file"),
+            dict(name=COL_DELTA_G, type="float"),
         ]
         database = _ensure_columns(
             database=database,
             required_columns=required_columns,
         )
         self._abfe_db = database
+
+        # RBFE
+        database = _ensure_database(DB_RBFE)
+        required_columns = [
+            dict(name=COL_PROTEIN, type="text"),
+            dict(name=COL_LIGAND1, type="text"),
+            dict(name=COL_LIGAND2, type="text"),
+            dict(name=COL_STEP, type="text"),
+            dict(name=COL_JOBID, type="text"),
+            dict(name=COL_OUTPUT, type="file"),
+            dict(name=COL_RESULT, type="file"),
+            dict(name=COL_DELTA_DELTA_G, type="float"),
+        ]
+        database = _ensure_columns(
+            database=database,
+            required_columns=required_columns,
+        )
+        self._rbfe_db = database
 
     def show_ligands(self):
         """show ligands in the FEP object in a dataframe. This method visualizes the ligands using core-aligned 2D visualizations. To simply obtain a listing of the ligands in this class, use `.ligands`."""
@@ -459,6 +484,63 @@ class FEP:
                 params=self.params_abfe_end_to_end,
             )
 
+    def rbfe_end_to_end(
+        self,
+        *,
+        ligand_pair_ids: Optional[tuple[str, str]] = None,
+    ) -> str:
+        """Method to run an end-to-end RBFE run.
+
+        Args:
+            ligand_ids (Optional[str], optional): List of ligand IDs to run. Defaults to None. When None, all ligands in the object will be run. To view a list of valid ligand IDs, use the `.show_ligands()` method"""
+
+        if ligand_pair_ids is None:
+            raise NotImplementedError("Not yet implemented. Must specify ligand pair")
+
+        # check that protein ID is valid
+        if self.protein._do_id is None:
+            raise DeepOriginException(
+                "Protein has not been uploaded yet. Use .connect() first."
+            )
+
+        # check that ligand IDs are valid
+        valid_ligand_ids = [ligand._do_id for ligand in self.ligands]
+
+        if None in valid_ligand_ids:
+            raise DeepOriginException(
+                "Some ligands have not been uploaded yet. Use .connect() first."
+            )
+
+        flattened_ligand_pairs = [s for tup in ligand_pair_ids for s in tup]
+
+        if not set(flattened_ligand_pairs).issubset(valid_ligand_ids):
+            raise DeepOriginException(
+                f"Some ligand IDs re not valid. Valid ligand IDs are: {valid_ligand_ids}"
+            )
+
+        database_columns = (
+            self._ligands_db.cols + self._proteins_db.cols + self._abfe_db.cols
+        )
+
+        # only run on ligands that have not been run yet
+        # first check that there are no existing runs
+        df = api.get_dataframe(DB_ABFE)
+        df[df["Protein"] == self.protein._do_id]
+
+        df = df[(df[COL_LIGAND].isin(ligand_ids)) & (~pd.isna(df[COL_RESULT]))]
+
+        already_run_ligands = set(df[COL_LIGAND])
+        ligand_ids = set(ligand_ids) - already_run_ligands
+
+        for ligand_id in ligand_ids:
+            _start_rbfe_run_and_log(
+                protein_id=self.protein._do_id,
+                ligand1_id=ligand1_id,
+                ligand2_id=ligand2_id,
+                database_columns=database_columns,
+                params=self.params_abfe_end_to_end,
+            )
+
 
 @beartype
 def _start_abfe_run_and_log(
@@ -549,4 +631,111 @@ def _start_abfe_run_and_log(
         column_id=COL_JOBID,
         row_id=row_id,
         database_id=DB_ABFE,
+    )
+
+
+@beartype
+def _start_rbfe_run_and_log(
+    *,
+    protein_id: str,
+    ligand1_id: str,
+    ligand2_id: str,
+    params: dict,
+    database_columns: list,
+):
+    """starts a single run of ABFE end to end and logs it in the ABFE database. Internal function. Do not use.
+
+    Args:
+        protein_id (str): protein ID
+        ligand_id (str): ligand ID
+        params (dict): parameters for the ABFE end-to-end job
+        database_columns (list): list of database columns dicts
+
+    """
+
+    from deeporigin.tools import run
+
+    tool_key = "deeporigin.rbfe-end-to-end"
+
+    # make a new row
+    response = api.make_database_rows(DB_RBFE, n_rows=1)
+    row_id = response.rows[0].hid
+
+    # write ligand1 ID
+    api.set_cell_data(
+        ligand1_id,
+        column_id=COL_LIGAND1,
+        row_id=row_id,
+        database_id=DB_RBFE,
+    )
+
+    # write ligand2 ID
+    api.set_cell_data(
+        ligand2_id,
+        column_id=COL_LIGAND2,
+        row_id=row_id,
+        database_id=DB_RBFE,
+    )
+
+    # write protein ID
+    api.set_cell_data(
+        protein_id,
+        column_id=COL_PROTEIN,
+        row_id=row_id,
+        database_id=DB_RBFE,
+    )
+
+    # write step
+    api.set_cell_data(
+        "End-to-end",
+        column_id=COL_STEP,
+        row_id=row_id,
+        database_id=DB_RBFE,
+    )
+
+    # start job
+    params["protein"] = {
+        "columnId": COL_PROTEIN,
+        "rowId": protein_id,
+        "databaseId": DB_PROTEINS,
+    }
+
+    params["ligand1"] = {
+        "columnId": COL_LIGAND1,
+        "rowId": ligand1_id,
+        "databaseId": DB_LIGANDS,
+    }
+
+    params["ligand2"] = {
+        "columnId": COL_LIGAND2,
+        "rowId": ligand1_id,
+        "databaseId": DB_LIGANDS,
+    }
+
+    outputs = {
+        "output_file": {
+            "columnId": COL_OUTPUT,
+            "rowId": row_id,
+            "databaseId": DB_RBFE,
+        },
+        "rbfe_results_summary": {
+            "columnId": COL_RESULT,
+            "rowId": row_id,
+            "databaseId": DB_RBFE,
+        },
+    }
+
+    job_id = run._process_job(
+        inputs=params,
+        outputs=outputs,
+        tool_key=tool_key,
+        cols=database_columns,
+    )
+
+    # write job ID
+    api.set_cell_data(
+        job_id,
+        column_id=COL_JOBID,
+        row_id=row_id,
+        database_id=DB_RBFE,
     )
