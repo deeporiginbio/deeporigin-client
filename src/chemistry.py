@@ -37,7 +37,7 @@ def read_sdf_properties(sdf_file: str | Path) -> dict:
 
     from rdkit import Chem
 
-    supplier = Chem.SDMolSupplier(str(sdf_file))
+    supplier = Chem.SDMolSupplier(str(sdf_file), sanitize=False)
     mol = supplier[0]  # Assuming a single molecule
 
     if mol is None:
@@ -53,7 +53,7 @@ def get_properties_in_sdf_file(sdf_file: str) -> list:
     from rdkit import Chem
 
     # Load molecules from the SDF file
-    supplier = Chem.SDMolSupplier(sdf_file)
+    supplier = Chem.SDMolSupplier(sdf_file, sanitize=False)
 
     properties = []
 
@@ -108,7 +108,11 @@ def read_property_values(sdf_file: str, key: str):
     """given a SDF file with more than 1 molecule, return the values of the properties for each molecule"""
     from rdkit import Chem
 
-    suppl = Chem.SDMolSupplier(sdf_file, removeHs=False)
+    suppl = Chem.SDMolSupplier(
+        sdf_file,
+        removeHs=False,
+        sanitize=False,
+    )
     values = []
     for i, mol in enumerate(suppl, start=1):
         if mol is None:
@@ -165,7 +169,11 @@ def split_sdf_file(
             output_dir = Path(output_dir)
         output_dir.mkdir(parents=True, exist_ok=True)
 
-    suppl = Chem.SDMolSupplier(str(input_sdf_path), removeHs=False)
+    suppl = Chem.SDMolSupplier(
+        str(input_sdf_path),
+        removeHs=False,
+        sanitize=False,
+    )
 
     generated_paths = []
 
@@ -361,7 +369,7 @@ def sdf_to_smiles(sdf_file: Union[str, Path]) -> list[str]:
     if isinstance(sdf_file, Path):
         sdf_file = str(sdf_file)
 
-    suppl = Chem.SDMolSupplier(sdf_file)
+    suppl = Chem.SDMolSupplier(sdf_file, sanitize=False)
     if not suppl:
         return []
 
