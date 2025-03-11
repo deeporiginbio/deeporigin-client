@@ -2,7 +2,6 @@
     "complex_prep": {
         "include_ligands": 1,
         "include_protein": 1,
-        "status_file": null,
         "sysprep_params": {
             "charge_method": "bcc",
             "do_loop_modelling": false,
@@ -12,7 +11,6 @@
             "keep_waters": false,
             "lig_force_field": "gaff2",
             "padding": 1.0,
-            "pdb_id": null,
             "save_gmx_files": false
         },
         "test_run": 0,
@@ -22,7 +20,6 @@
     "ligand1_prep": {
         "include_ligands": 1,
         "include_protein": 0,
-        "status_file": null,
         "sysprep_params": {
             "charge_method": "bcc",
             "do_loop_modelling": false,
@@ -32,7 +29,6 @@
             "keep_waters": false,
             "lig_force_field": "gaff2",
             "padding": 1.0,
-            "pdb_id": null,
             "save_gmx_files": false
         },
         "test_run": 0,
@@ -42,7 +38,6 @@
     "ligand2_prep": {
         "include_ligands": 1,
         "include_protein": 0,
-        "status_file": null,
         "sysprep_params": {
             "charge_method": "bcc",
             "do_loop_modelling": false,
@@ -52,7 +47,6 @@
             "keep_waters": false,
             "lig_force_field": "gaff2",
             "padding": 1.0,
-            "pdb_id": null,
             "save_gmx_files": false
         },
         "test_run": 0,
@@ -63,9 +57,7 @@
         "add_fep_repeats": 0,
         "amend": "__NO_AMEND",
         "annihilate": true,
-        "atom_mapping_paths": null,
         "atom_mapping_threshold": 0.01,
-        "boresch_run_names": null,
         "em_all": true,
         "em_solvent": true,
         "emeq_md_options": {
@@ -132,7 +124,6 @@
         "run_name": "binding",
         "skip_emeq": "__NO",
         "softcore_alpha": 0.5,
-        "status_file": null,
         "steps": 1250000,
         "system": "complex",
         "test_run": 1,
@@ -145,7 +136,6 @@
         "add_fep_repeats": 0,
         "amend": "__NO_AMEND",
         "annihilate": true,
-        "atom_mapping_paths": null,
         "atom_mapping_threshold": 0.01,
         "em_all": true,
         "em_solvent": true,
@@ -199,7 +189,6 @@
         "repeats": 1,
         "skip_emeq": "__NO",
         "softcore_alpha": 0.5,
-        "status_file": null,
         "steps": 300000,
         "test_run": 1,
         "thread_pinning": 1,
@@ -211,7 +200,6 @@
         "add_fep_repeats": 0,
         "amend": "__NO_AMEND",
         "annihilate": true,
-        "atom_mapping_paths": null,
         "atom_mapping_threshold": 0.01,
         "em_all": true,
         "em_solvent": true,
@@ -265,7 +253,6 @@
         "repeats": 1,
         "skip_emeq": "__NO",
         "softcore_alpha": 0.5,
-        "status_file": null,
         "steps": 300000,
         "test_run": 1,
         "thread_pinning": 1,

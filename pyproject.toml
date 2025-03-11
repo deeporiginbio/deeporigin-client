@@ -36,7 +36,8 @@ dependencies = [
     "cryptography",
     "python-box",
     "do-sdk-platform==2.1.0",
-    "urllib3>=2.0.0"
+    "urllib3>=2.0.0",
+    "more-itertools",
 ]
 dynamic = ["version"]
 

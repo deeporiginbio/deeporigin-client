@@ -3,9 +3,8 @@
 import importlib.resources
 import json
 import os
-from dataclasses import dataclass, fields
-from pathlib import Path
-from typing import Optional, Union
+from dataclasses import dataclass
+from typing import Optional
 
 import pandas as pd
 from beartype import beartype
@@ -17,15 +16,20 @@ from deeporigin.tools.toolkit import _ensure_columns, _ensure_database
 
 # constants
 DB_ABFE = "ABFE2"
+DB_RBFE = "RBFE"
 DB_PROTEINS = "Proteins"
 DB_LIGANDS = "Ligands"
+
 COL_PROTEIN = "Protein"
-COL_LIGAND = "Ligand"
+COL_LIGAND = "Ligand"  # for ABFE
+COL_LIGAND1 = "Ligand1"  # for RBFE
+COL_LIGAND2 = "Ligand2"  # for RBFE
 COL_STEP = "Step"
 COL_JOBID = "JobID"
 COL_OUTPUT = "OutputFile"
 COL_RESULT = "ResultFile"
 COL_DELTA_G = "FEP ΔG (kcal/mol)"
+COL_DELTA_DELTA_G = "FEP ΔΔG (kcal/mol)"
 
 FEP_DIR = os.path.join(os.path.expanduser("~"), ".deeporigin", "fep")
 os.makedirs(FEP_DIR, exist_ok=True)
@@ -56,86 +60,19 @@ def _load_params(step: str) -> Box:
 
 
 @dataclass
-class Ligand:
-    """class to represent a ligand (typically backed by a SDF file)"""
-
-    file: Union[str, Path]
-    smiles_string: Optional[str] = None
-    n_molecules: Optional[int] = None
-
-    # this ID keeps track of whether it is uploaded to deep origin or not
-    _do_id: Optional[str] = None
-
-    # this stores user-defined properties
-    properties: Optional[dict] = None
-
-    def __post_init__(self):
-        """generates a SMILES if it doesn't exist"""
-
-        # read user-defined properties
-        self.properties = chemistry.read_sdf_properties(self.file)
-
-        # check that there's only one molecule here
-        if self.n_molecules is None:
-            if chemistry.count_molecules_in_sdf_file(self.file) > 1:
-                raise ValueError(
-                    "Too many molecules. Expected a single molecule in the SDF file, but got multiple"
-                )
-            self.n_molecules = 1
-
-        if self.smiles_string is None:
-            smiles_string = chemistry.sdf_to_smiles(self.file)
-            if len(smiles_string) > 1:
-                raise ValueError("Expected a single SMILES strings, but got multiple")
-            self.smiles_string = smiles_string[0]
-
-    def _repr_pretty_(self, p, cycle):
-        """pretty print a ligand"""
-
-        if cycle:
-            p.text("Ligand(...)")
-        else:
-            p.text("Ligand(")
-
-            with p.group(2, "\n  ", "\n"):
-                all_fields = fields(self)
-                for idx, field in enumerate(all_fields):
-                    value = getattr(self, field.name)
-                    p.text(f"{field.name}: {value!r}")
-                    # Only add a breakable if this isn't the last field.
-                    if idx < len(all_fields) - 1:
-                        p.breakable()
-            p.text(")")
-
-
-@dataclass
-class Protein:
-    """class to represent a protein (typically backed by a PDB file)"""
-
-    file: Union[str, Path]
-    name: Optional[str] = None
-
-    # this ID keeps track of whether it is uploaded to deep origin or not
-    _do_id: Optional[str] = None
-
-    def __post_init__(self):
-        self.file = Path(self.file)
-        if self.name is None:
-            self.name = self.file.name
-
-
-@dataclass
 class FEP:
     """Class for FEP simulations. This class can be used to run FEP calculations on Deep Origin. This class can contain N ligands and a single protein."""
 
-    ligands: list[Ligand]
-    protein: Protein
+    ligands: list[chemistry.Ligand]
+    protein: chemistry.Protein
 
     _ligands_db: Optional[dict] = None
     _proteins_db: Optional[dict] = None
     _abfe_db: Optional[dict] = None
+    _rbfe_db: Optional[dict] = None
 
     params_abfe_end_to_end = _load_params("abfe_end_to_end")
+    params_rbfe_end_to_end = _load_params("rbfe_end_to_end")
 
     @classmethod
     def from_dir(cls, directory: str) -> "FEP":
@@ -156,7 +93,7 @@ class FEP:
                 if f.lower().endswith(".sdf")
             ]
         )
-        ligands = [Ligand(sdf_file) for sdf_file in sdf_files]
+        ligands = [chemistry.Ligand(sdf_file) for sdf_file in sdf_files]
 
         pdb_files = [
             os.path.join(directory, f)
@@ -169,7 +106,7 @@ class FEP:
                 f"Expected exactly one PDB file in the directory, but found {len(pdb_files)}."
             )
         protein_file = pdb_files[0]
-        protein = Protein(protein_file)
+        protein = chemistry.Protein(protein_file)
 
         # Create the ABFE instance
         fep = cls(
@@ -223,13 +160,31 @@ class FEP:
             dict(name=COL_JOBID, type="text"),
             dict(name=COL_OUTPUT, type="file"),
             dict(name=COL_RESULT, type="file"),
-            dict(name=COL_DELTA_G, type="file"),
+            dict(name=COL_DELTA_G, type="float"),
         ]
         database = _ensure_columns(
             database=database,
             required_columns=required_columns,
         )
         self._abfe_db = database
+
+        # RBFE
+        database = _ensure_database(DB_RBFE)
+        required_columns = [
+            dict(name=COL_PROTEIN, type="text"),
+            dict(name=COL_LIGAND1, type="text"),
+            dict(name=COL_LIGAND2, type="text"),
+            dict(name=COL_STEP, type="text"),
+            dict(name=COL_JOBID, type="text"),
+            dict(name=COL_OUTPUT, type="file"),
+            dict(name=COL_RESULT, type="file"),
+            dict(name=COL_DELTA_DELTA_G, type="float"),
+        ]
+        database = _ensure_columns(
+            database=database,
+            required_columns=required_columns,
+        )
+        self._rbfe_db = database
 
     def show_ligands(self):
         """show ligands in the FEP object in a dataframe. This method visualizes the ligands using core-aligned 2D visualizations. To simply obtain a listing of the ligands in this class, use `.ligands`."""
@@ -549,4 +504,111 @@ def _start_abfe_run_and_log(
         column_id=COL_JOBID,
         row_id=row_id,
         database_id=DB_ABFE,
+    )
+
+
+@beartype
+def _start_rbfe_run_and_log(
+    *,
+    protein_id: str,
+    ligand1_id: str,
+    ligand2_id: str,
+    params: dict,
+    database_columns: list,
+):
+    """starts a single run of ABFE end to end and logs it in the ABFE database. Internal function. Do not use.
+
+    Args:
+        protein_id (str): protein ID
+        ligand_id (str): ligand ID
+        params (dict): parameters for the ABFE end-to-end job
+        database_columns (list): list of database columns dicts
+
+    """
+
+    from deeporigin.tools import run
+
+    tool_key = "deeporigin.rbfe-end-to-end"
+
+    # make a new row
+    response = api.make_database_rows(DB_RBFE, n_rows=1)
+    row_id = response.rows[0].hid
+
+    # write ligand1 ID
+    api.set_cell_data(
+        ligand1_id,
+        column_id=COL_LIGAND1,
+        row_id=row_id,
+        database_id=DB_RBFE,
+    )
+
+    # write ligand2 ID
+    api.set_cell_data(
+        ligand2_id,
+        column_id=COL_LIGAND2,
+        row_id=row_id,
+        database_id=DB_RBFE,
+    )
+
+    # write protein ID
+    api.set_cell_data(
+        protein_id,
+        column_id=COL_PROTEIN,
+        row_id=row_id,
+        database_id=DB_RBFE,
+    )
+
+    # write step
+    api.set_cell_data(
+        "End-to-end",
+        column_id=COL_STEP,
+        row_id=row_id,
+        database_id=DB_RBFE,
+    )
+
+    # start job
+    params["protein"] = {
+        "columnId": COL_PROTEIN,
+        "rowId": protein_id,
+        "databaseId": DB_PROTEINS,
+    }
+
+    params["ligand1"] = {
+        "columnId": COL_LIGAND1,
+        "rowId": ligand1_id,
+        "databaseId": DB_LIGANDS,
+    }
+
+    params["ligand2"] = {
+        "columnId": COL_LIGAND2,
+        "rowId": ligand1_id,
+        "databaseId": DB_LIGANDS,
+    }
+
+    outputs = {
+        "output_file": {
+            "columnId": COL_OUTPUT,
+            "rowId": row_id,
+            "databaseId": DB_RBFE,
+        },
+        "rbfe_results_summary": {
+            "columnId": COL_RESULT,
+            "rowId": row_id,
+            "databaseId": DB_RBFE,
+        },
+    }
+
+    job_id = run._process_job(
+        inputs=params,
+        outputs=outputs,
+        tool_key=tool_key,
+        cols=database_columns,
+    )
+
+    # write job ID
+    api.set_cell_data(
+        job_id,
+        column_id=COL_JOBID,
+        row_id=row_id,
+        database_id=DB_RBFE,
     )
