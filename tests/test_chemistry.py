@@ -68,3 +68,16 @@ def test_split_sdf_file(
     for sdf_file in sdf_files:
         n_mol = chemistry.count_molecules_in_sdf_file(sdf_file)
         assert n_mol == 1, "The SDF file contains more than one molecule."
+
+
+@pytest.mark.parametrize("ligand", ligands)
+def test_ligand(
+    ligand,
+):
+    n_ligands = ligand["n_ligands"]
+
+    if n_ligands > 1:
+        with pytest.raises(ValueError, match="Too many molecules."):
+            ligand = chemistry.Ligand(ligand["file"])
+    else:
+        ligand = chemistry.Ligand(ligand["file"])

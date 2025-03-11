@@ -21,7 +21,7 @@ The following flowchart describes the workflow of ABFE that we will go through. 
 You will need to have the following input files on your local computer:
 
 1. A set of ligand files, in SDF format. Each SDF file should contain a single molecule. 
-2. A protein PDF file 
+2. A protein PDB file 
 
 
 ## Running ABFE workflow

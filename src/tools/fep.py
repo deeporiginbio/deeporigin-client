@@ -419,10 +419,7 @@ class FEP:
         *,
         ligand_pair_ids: Optional[tuple[str, str]] = None,
     ) -> str:
-        """Method to run an end-to-end RBFE run.
-
-        Args:
-            ligand_ids (Optional[str], optional): List of ligand IDs to run. Defaults to None. When None, all ligands in the object will be run. To view a list of valid ligand IDs, use the `.show_ligands()` method"""
+        """Method to run an end-to-end RBFE run."""
 
         if ligand_pair_ids is None:
             raise NotImplementedError("Not yet implemented. Must specify ligand pair")
