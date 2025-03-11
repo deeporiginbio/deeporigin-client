@@ -3,9 +3,8 @@
 import importlib.resources
 import json
 import os
-from dataclasses import dataclass, fields
-from pathlib import Path
-from typing import Optional, Union
+from dataclasses import dataclass
+from typing import Optional
 
 import pandas as pd
 from beartype import beartype
@@ -61,80 +60,11 @@ def _load_params(step: str) -> Box:
 
 
 @dataclass
-class Ligand:
-    """class to represent a ligand (typically backed by a SDF file)"""
-
-    file: Union[str, Path]
-    smiles_string: Optional[str] = None
-    n_molecules: Optional[int] = None
-
-    # this ID keeps track of whether it is uploaded to deep origin or not
-    _do_id: Optional[str] = None
-
-    # this stores user-defined properties
-    properties: Optional[dict] = None
-
-    def __post_init__(self):
-        """generates a SMILES if it doesn't exist"""
-
-        # read user-defined properties
-        self.properties = chemistry.read_sdf_properties(self.file)
-
-        # check that there's only one molecule here
-        if self.n_molecules is None:
-            if chemistry.count_molecules_in_sdf_file(self.file) > 1:
-                raise ValueError(
-                    "Too many molecules. Expected a single molecule in the SDF file, but got multiple"
-                )
-            self.n_molecules = 1
-
-        if self.smiles_string is None:
-            smiles_string = chemistry.sdf_to_smiles(self.file)
-            if len(smiles_string) > 1:
-                raise ValueError("Expected a single SMILES strings, but got multiple")
-            self.smiles_string = smiles_string[0]
-
-    def _repr_pretty_(self, p, cycle):
-        """pretty print a ligand"""
-
-        if cycle:
-            p.text("Ligand(...)")
-        else:
-            p.text("Ligand(")
-
-            with p.group(2, "\n  ", "\n"):
-                all_fields = fields(self)
-                for idx, field in enumerate(all_fields):
-                    value = getattr(self, field.name)
-                    p.text(f"{field.name}: {value!r}")
-                    # Only add a breakable if this isn't the last field.
-                    if idx < len(all_fields) - 1:
-                        p.breakable()
-            p.text(")")
-
-
-@dataclass
-class Protein:
-    """class to represent a protein (typically backed by a PDB file)"""
-
-    file: Union[str, Path]
-    name: Optional[str] = None
-
-    # this ID keeps track of whether it is uploaded to deep origin or not
-    _do_id: Optional[str] = None
-
-    def __post_init__(self):
-        self.file = Path(self.file)
-        if self.name is None:
-            self.name = self.file.name
-
-
-@dataclass
 class FEP:
     """Class for FEP simulations. This class can be used to run FEP calculations on Deep Origin. This class can contain N ligands and a single protein."""
 
-    ligands: list[Ligand]
-    protein: Protein
+    ligands: list[chemistry.Ligand]
+    protein: chemistry.Protein
 
     _ligands_db: Optional[dict] = None
     _proteins_db: Optional[dict] = None
@@ -163,7 +93,7 @@ class FEP:
                 if f.lower().endswith(".sdf")
             ]
         )
-        ligands = [Ligand(sdf_file) for sdf_file in sdf_files]
+        ligands = [chemistry.Ligand(sdf_file) for sdf_file in sdf_files]
 
         pdb_files = [
             os.path.join(directory, f)
@@ -176,7 +106,7 @@ class FEP:
                 f"Expected exactly one PDB file in the directory, but found {len(pdb_files)}."
             )
         protein_file = pdb_files[0]
-        protein = Protein(protein_file)
+        protein = chemistry.Protein(protein_file)
 
         # Create the ABFE instance
         fep = cls(

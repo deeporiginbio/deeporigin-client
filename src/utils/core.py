@@ -1,15 +1,38 @@
 """this module contains some core utility functions that in turn do not depend on anything else in this library"""
 
 import base64
+import hashlib
 import json
 import os
 import shutil
 from datetime import datetime
 from pathlib import Path
+from typing import List, Union
 
 from beartype import beartype
-from beartype.typing import List, Union
 from tabulate import tabulate
+
+
+@beartype
+def hash_strings(strings: List[str]) -> str:
+    """
+    Computes a SHA-256 hash for a list of strings in an order-insensitive manner.
+
+    The function sorts the input list, joins the sorted strings using a null-character delimiter,
+    and returns the hexadecimal digest of the SHA-256 hash.
+
+    Parameters:
+        strings (List[str]): A list of strings.
+
+    Returns:
+        str: The hexadecimal SHA-256 hash of the sorted list.
+    """
+    sorted_strings = sorted(strings)
+
+    # Use a delimiter
+    combined_string = "--".join(sorted_strings)
+    hash_obj = hashlib.sha256(combined_string.encode("utf-8"))
+    return hash_obj.hexdigest()
 
 
 @beartype
