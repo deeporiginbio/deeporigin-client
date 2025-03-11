@@ -414,60 +414,6 @@ class FEP:
                 params=self.params_abfe_end_to_end,
             )
 
-    def rbfe_end_to_end(
-        self,
-        *,
-        ligand_pair_ids: Optional[tuple[str, str]] = None,
-    ) -> str:
-        """Method to run an end-to-end RBFE run."""
-
-        if ligand_pair_ids is None:
-            raise NotImplementedError("Not yet implemented. Must specify ligand pair")
-
-        # check that protein ID is valid
-        if self.protein._do_id is None:
-            raise DeepOriginException(
-                "Protein has not been uploaded yet. Use .connect() first."
-            )
-
-        # check that ligand IDs are valid
-        valid_ligand_ids = [ligand._do_id for ligand in self.ligands]
-
-        if None in valid_ligand_ids:
-            raise DeepOriginException(
-                "Some ligands have not been uploaded yet. Use .connect() first."
-            )
-
-        flattened_ligand_pairs = [s for tup in ligand_pair_ids for s in tup]
-
-        if not set(flattened_ligand_pairs).issubset(valid_ligand_ids):
-            raise DeepOriginException(
-                f"Some ligand IDs re not valid. Valid ligand IDs are: {valid_ligand_ids}"
-            )
-
-        database_columns = (
-            self._ligands_db.cols + self._proteins_db.cols + self._abfe_db.cols
-        )
-
-        # only run on ligands that have not been run yet
-        # first check that there are no existing runs
-        df = api.get_dataframe(DB_ABFE)
-        df[df["Protein"] == self.protein._do_id]
-
-        df = df[(df[COL_LIGAND].isin(ligand_ids)) & (~pd.isna(df[COL_RESULT]))]
-
-        already_run_ligands = set(df[COL_LIGAND])
-        ligand_ids = set(ligand_ids) - already_run_ligands
-
-        for ligand_id in ligand_ids:
-            _start_rbfe_run_and_log(
-                protein_id=self.protein._do_id,
-                ligand1_id=ligand1_id,
-                ligand2_id=ligand2_id,
-                database_columns=database_columns,
-                params=self.params_abfe_end_to_end,
-            )
-
 
 @beartype
 def _start_abfe_run_and_log(
