@@ -275,7 +275,7 @@ def _start_bulk_docking_run_and_log(
 
     from deeporigin.tools import run
 
-    tool_key = "sgs-test.bulk-docking"
+    tool_key = "deeporigin.bulk-docking"
 
     # make a new row
     response = api.make_database_rows(DB_DOCKING, n_rows=1)
