@@ -574,13 +574,13 @@ def _start_rbfe_run_and_log(
     }
 
     params["ligand1"] = {
-        "columnId": COL_LIGAND1,
+        "columnId": COL_LIGAND,
         "rowId": ligand1_id,
         "databaseId": DB_LIGANDS,
     }
 
     params["ligand2"] = {
-        "columnId": COL_LIGAND2,
+        "columnId": COL_LIGAND,
         "rowId": ligand1_id,
         "databaseId": DB_LIGANDS,
     }
