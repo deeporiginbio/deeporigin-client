@@ -1,14 +1,11 @@
 """Module to help work on FEP calculations. This module provides the FEP class, that allows you to run FEP calculations on Deep Origin."""
 
-import importlib.resources
-import json
 import os
 from dataclasses import dataclass
 from typing import Optional
 
 import pandas as pd
 from beartype import beartype
-from box import Box
 from deeporigin import chemistry
 from deeporigin.data_hub import api
 from deeporigin.exceptions import DeepOriginException
@@ -33,30 +30,6 @@ COL_DELTA_DELTA_G = "FEP ΔΔG (kcal/mol)"
 
 FEP_DIR = os.path.join(os.path.expanduser("~"), ".deeporigin", "fep")
 os.makedirs(FEP_DIR, exist_ok=True)
-
-
-class PrettyDict(Box):
-    """A dict subclass with a custom pretty-print representation."""
-
-    def __repr__(self):
-        """pretty print a dict"""
-        return json.dumps(
-            dict(self),
-            indent=2,
-            ensure_ascii=False,
-        )
-
-    def _repr_html_(self):
-        """pretty print a dict"""
-        self.__repr__()
-
-
-@beartype
-def _load_params(step: str) -> Box:
-    """load default values for abfe end to end run"""
-
-    with importlib.resources.open_text("deeporigin.json", f"{step}.json") as f:
-        return PrettyDict(json.load(f))
 
 
 @dataclass

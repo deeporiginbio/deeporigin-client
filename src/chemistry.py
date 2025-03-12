@@ -145,7 +145,7 @@ def read_molecules_in_sdf_file(sdf_file: str | Path) -> list[dict]:
 
 
 def show_ligands(ligands: list[Ligand]):
-    """show ligands in the FEP object in a dataframe. This method visualizes the ligands using core-aligned 2D visualizations. To simply obtain a listing of the ligands in this class, use `.ligands`."""
+    """show ligands in the FEP object in a dataframe. This function visualizes the ligands using core-aligned 2D visualizations."""
 
     import pandas as pd
 
@@ -380,11 +380,9 @@ def smiles_list_to_base64_png_list(
         reference_smiles = smiles_list[0]
 
     # Prepare the reference molecule
-    ref_mol = None
-    if reference_smiles:
-        ref_mol = Chem.MolFromSmiles(reference_smiles)
-        if ref_mol is not None:
-            AllChem.Compute2DCoords(ref_mol)
+    ref_mol = Chem.MolFromSmiles(reference_smiles)
+    if ref_mol is not None:
+        AllChem.Compute2DCoords(ref_mol)
 
     imgs = []
 

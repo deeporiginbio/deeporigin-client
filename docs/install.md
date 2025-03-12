@@ -44,7 +44,7 @@ Run the command below for your favorite package manager to install the Deep Orig
 === "uv"
 
     ```bash
-    uv pip install deeporigin
+    uv add deeporigin
     ```
 
 === "flit"
@@ -66,12 +66,18 @@ cd do-client
 # install uv
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
+# If uv tells you to add something to PATH,
+# you may need to do that first
+
 uv init
 uv python install
 uv add deeporigin
 
 # if you're using Deep Origin tools (like FEP), use:
 uv add deeporigin --extra tools
+
+# also install as a uv tool to run from the command line
+uv tool install deeporigin
 
 # run jupyter using this environment
 uv run --with jupyter jupyter lab

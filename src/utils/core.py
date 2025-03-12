@@ -10,7 +10,46 @@ from pathlib import Path
 from typing import List, Union
 
 from beartype import beartype
+from box import Box
 from tabulate import tabulate
+
+
+class PrettyDict(Box):
+    """A dict subclass with a custom pretty-print representation."""
+
+    def __repr__(self):
+        """pretty print a dict"""
+        return json.dumps(
+            dict(self),
+            indent=2,
+            ensure_ascii=False,
+        )
+
+    def _repr_html_(self):
+        """pretty print a dict"""
+        self.__repr__()
+
+
+@beartype
+def hash_file(file_path: str | Path) -> str:
+    """
+    Hashes the contents of a file using sha256
+
+    Args:
+        file_path (Union[str, Path]): Path to the file to be hashed.
+
+    Returns:
+        str: The hexadecimal hash digest of the file's contents.
+    """
+    file_path = Path(file_path)
+    hasher = hashlib.new("sha256")
+
+    # Read and update hash in chunks to handle large files efficiently
+    with file_path.open("rb") as f:
+        for chunk in iter(lambda: f.read(8192), b""):
+            hasher.update(chunk)
+
+    return hasher.hexdigest()
 
 
 @beartype
