@@ -9,7 +9,9 @@ repo=$(shell basename $(CURDIR))
 # using mocked responses. if "default", tests run against
 # a live instance 
 client="mock"
-chosen_tests=""
+
+# chosen tests (matching -k syntax of pytest)
+k=""
 responses="pass"
 
 
@@ -21,7 +23,7 @@ else
 endif 
 	@source $(CURDIR)/venv/bin/activate && \
 	interrogate -c pyproject.toml -v . -f 100 && \
-	python3 -m coverage run --source="src" -m pytest -x -n $(n_workers) --failed-first -k $(chosen_tests) --client $(client) --responses $(responses) --dist loadfile && \
+	python3 -m coverage run --source="src" -m pytest -x -n $(n_workers) --failed-first -k $(k) --client $(client) --responses $(responses) --dist loadfile && \
 	python3 -m coverage html && \
 	deactivate
 

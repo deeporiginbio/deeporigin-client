@@ -2,6 +2,7 @@
 
 import base64
 import importlib.util
+import os
 import re
 from dataclasses import dataclass, fields
 from functools import wraps
@@ -9,13 +10,14 @@ from pathlib import Path
 from typing import List, Optional, Tuple, Union
 
 from beartype import beartype
+from deeporigin.exceptions import DeepOriginException
 
 
 @dataclass
 class Ligand:
     """class to represent a ligand (typically backed by a SDF file)"""
 
-    file: Union[str, Path]
+    file: Optional[Union[str, Path]] = None
     smiles_string: Optional[str] = None
     n_molecules: Optional[int] = None
 
@@ -26,10 +28,19 @@ class Ligand:
     properties: Optional[dict] = None
 
     def __post_init__(self):
-        """generates a SMILES if it doesn't exist"""
+        """post init tasks"""
+
+        if self.file is not None:
+            if not os.path.exists(self.file):
+                raise DeepOriginException(f"File {self.file} does not exist")
+
+        # we require either a SMILES string or a file
+        if self.file is None and self.smiles_string is None:
+            raise DeepOriginException("Must specify either a file or a SMILES string")
 
         # read user-defined properties
-        self.properties = read_sdf_properties(self.file)
+        if self.file is not None:
+            self.properties = read_sdf_properties(self.file)
 
         # check that there's only one molecule here
         if self.n_molecules is None:
