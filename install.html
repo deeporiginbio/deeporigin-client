@@ -2441,7 +2441,7 @@
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="language-bash highlight"><pre><span></span><code>uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>deeporigin
+<div class="language-bash highlight"><pre><span></span><code>uv<span class="w"> </span>add<span class="w"> </span>deeporigin
 </code></pre></div>
 </div>
 <div class="tabbed-block">
@@ -2460,12 +2460,18 @@ mkdir<span class="w"> </span><span class="k">do</span>-client
 <span class="c1"># install uv</span>
 curl<span class="w"> </span>-LsSf<span class="w"> </span>https://astral.sh/uv/install.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sh
 
+<span class="c1"># If uv tells you to add something to PATH,</span>
+<span class="c1"># you may need to do that first</span>
+
 uv<span class="w"> </span>init
 uv<span class="w"> </span>python<span class="w"> </span>install
 uv<span class="w"> </span>add<span class="w"> </span>deeporigin
 
 <span class="c1"># if you&#39;re using Deep Origin tools (like FEP), use:</span>
 uv<span class="w"> </span>add<span class="w"> </span>deeporigin<span class="w"> </span>--extra<span class="w"> </span>tools
+
+<span class="c1"># also install as a uv tool to run from the command line</span>
+uv<span class="w"> </span>tool<span class="w"> </span>install<span class="w"> </span>deeporigin
 
 <span class="c1"># run jupyter using this environment</span>
 uv<span class="w"> </span>run<span class="w"> </span>--with<span class="w"> </span>jupyter<span class="w"> </span>jupyter<span class="w"> </span>lab

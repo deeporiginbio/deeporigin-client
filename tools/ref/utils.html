@@ -2105,6 +2105,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#src.tools.utils.query_run_statuses" class="md-nav__link">
+    <span class="md-ellipsis">
+      query_run_statuses
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#src.tools.utils.read_jobs" class="md-nav__link">
     <span class="md-ellipsis">
       read_jobs
@@ -2300,6 +2309,15 @@
   <a href="#src.tools.utils.query_run_status" class="md-nav__link">
     <span class="md-ellipsis">
       query_run_status
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#src.tools.utils.query_run_statuses" class="md-nav__link">
+    <span class="md-ellipsis">
+      query_run_statuses
     </span>
   </a>
   
@@ -2658,6 +2676,56 @@
               <div class="doc-md-description">
                 <p>One of "Created", "Queued", "Running", "Succeeded", or "Failed"</p>
               </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="src.tools.utils.query_run_statuses" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>            <span class="doc doc-object-name doc-function-name">query_run_statuses</span>
+
+
+<a href="#src.tools.utils.query_run_statuses" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">query_run_statuses</span><span class="p">(</span><span class="n">job_ids</span><span class="p">:</span> <span class="n">list</span><span class="p">[</span><span class="n">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">dict</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>get statuses for multiple jobs in parallel</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>job_ids</code>
+            </td>
+            <td>
+                  <code>list[str]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>list of job IDs</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
             </td>
           </tr>
       </tbody>
