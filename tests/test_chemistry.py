@@ -103,3 +103,14 @@ def test_ligand_errors(ligand):
             file=ligand["file"],
             smiles_string=ligand["smiles_string"],
         )
+
+
+def test_ligands_from_sdf_file():
+    """test that we can make many ligands from a single SDF file with many molecules"""
+
+    mols = chemistry.read_molecules_in_sdf_file(
+        os.path.join(base_path, "ligands-brd-all.sdf")
+    )
+
+    for mol in mols:
+        chemistry.Ligand(**mol)
