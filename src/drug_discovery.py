@@ -558,7 +558,7 @@ class Complex:
             )
 
         database_columns = (
-            self._db.ligands.cols + self._db.proteins.cols + self._db.abfe.cols
+            self._db.ligands.cols + self._db.proteins.cols + self._db.rbfe.cols
         )
 
         # only run on ligands that have not been run yet
@@ -712,6 +712,8 @@ def _start_tool_run(
                 "databaseId": DB_DOCKING,
             },
         }
+
+    print(outputs)
 
     job_id = run._process_job(
         inputs=params,
