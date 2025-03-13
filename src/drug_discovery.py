@@ -440,9 +440,8 @@ class Complex:
         # only run on ligands that have not been run yet
         # first check that there are no existing runs
         df = api.get_dataframe(DB_ABFE)
-        df[df[COL_PROTEIN] == self.protein._do_id]
-
-        df = df[(df[COL_LIGAND].isin(ligand_ids)) & (~pd.isna(df[COL_RESULT]))]
+        df = df[df[COL_PROTEIN] == self.protein._do_id]
+        df = df[(df[COL_LIGAND].isin(ligand_ids))]
 
         already_run_ligands = set(df[COL_LIGAND])
         ligand_ids = set(ligand_ids) - already_run_ligands
@@ -456,6 +455,87 @@ class Complex:
             )
 
             self._job_ids["ABFE"].append(job_id)
+
+    def get_abfe_results(self):
+        """Get ABFE results.
+
+        Returns a dataframe containing results of ABFE runs. The retuned dataframe has the following columns:
+
+        - Ligand: contains the file name of the original SDF file
+        - Step: Step in the ABFE flow. `End-to-end` indicates the end-to-end flow, starting from ligand and protein, and going all the way to the outputs.
+        - Status: `Succeeded` or `Running`, etc. Status of job on Deep Origin.
+        """
+
+        df = pd.DataFrame(
+            api.get_dataframe(
+                DB_ABFE,
+                return_type="dict",
+                use_file_names=False,
+            )
+        )
+
+        from deeporigin.tools.utils import query_run_status
+
+        # we only care about proteins and ligands corresponding to this session
+        df = df[df[COL_PROTEIN] == self.protein._do_id]
+        valid_ligands = [ligand._do_id for ligand in self.ligands]
+        df = df[df[COL_LIGAND].isin(valid_ligands)]
+
+        df["Status"] = ""
+        df.loc[~df["OutputFile"].isna(), "Status"] = "Succeeded"
+
+        df.loc[df["OutputFile"].isna(), "Status"] = df.loc[
+            df["OutputFile"].isna(), COL_JOBID
+        ].apply(query_run_status)
+
+        # for each row, fill in delta_gs if needed
+
+        # download all files for delta_gs
+        file_ids = list(df[COL_CSV_OUTPUT].dropna())
+        existing_files = os.listdir(DATA_DIRS[DB_ABFE])
+        existing_files = ["_file:" + file for file in existing_files]
+        missing_files = list(set(file_ids) - set(existing_files))
+        if len(missing_files) > 0:
+            api.download_files(
+                file_ids=missing_files,
+                use_file_names=False,
+                save_to_dir=DATA_DIRS[DB_ABFE],
+            )
+
+        # open each file, read the delta_g, write it to
+        # the local dataframe
+        for idx, row in df.iterrows():
+            if not pd.isna(row[COL_CSV_OUTPUT]) and pd.isna(row[COL_DELTA_G]):
+                file_id = row[COL_CSV_OUTPUT].replace("_file:", "")
+                delta_g = float(
+                    pd.read_csv(os.path.join(DATA_DIRS[DB_ABFE], file_id))[
+                        "Total"
+                    ].iloc[0]
+                )
+                df.loc[idx, COL_DELTA_G] = delta_g
+
+        # drop some columns
+        df.drop("Validation Status", axis=1, inplace=True)
+        df.drop("JobID", axis=1, inplace=True)
+        df.drop(COL_CSV_OUTPUT, axis=1, inplace=True)
+        df.drop(COL_RESULT, axis=1, inplace=True)
+        df.drop("ID", axis=1, inplace=True)
+        df.drop(COL_PROTEIN, axis=1, inplace=True)
+
+        # map ligand IDs to ligand file names
+        # Create a mapping dictionary: _do_id -> file
+        mapping = {
+            ligand._do_id: os.path.basename(ligand.file) for ligand in self.ligands
+        }
+        smiles_mapping = {
+            ligand._do_id: ligand.smiles_string for ligand in self.ligands
+        }
+
+        # Replace the values in the 'Ligand' column with the corresponding file
+        df["SMILES"] = df[COL_LIGAND].map(smiles_mapping)
+        df[COL_LIGAND] = df[COL_LIGAND].map(mapping)
+
+        return df
 
 
 # TO DO: the internal network requests here need to be parallelized
@@ -603,12 +683,12 @@ def _start_abfe_run_and_log(
 
     outputs = {
         "output_file": {
-            "columnId": COL_CSV_OUTPUT,
+            "columnId": COL_RESULT,
             "rowId": row_id,
             "databaseId": DB_ABFE,
         },
         "abfe_results_summary": {
-            "columnId": COL_RESULT,
+            "columnId": COL_CSV_OUTPUT,
             "rowId": row_id,
             "databaseId": DB_ABFE,
         },
