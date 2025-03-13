@@ -192,7 +192,12 @@ class Complex:
         )
         mols = []
         for sdf_file in sdf_files:
-            mols.extend(chem.read_molecules_in_sdf_file(sdf_file))
+            mols_from_this_sdf_file = chem.read_molecules_in_sdf_file(sdf_file)
+            if len(mols_from_this_sdf_file) == 1:
+                # there's only one molecule in thie SDF file, so we should track the file it came from.
+                mols_from_this_sdf_file[0]["file"] = sdf_file
+
+            mols.extend(mols_from_this_sdf_file)
 
         ligands = []
 
@@ -225,6 +230,29 @@ class Complex:
 
         if self._db is None:
             self._db = _ensure_dbs()
+
+        # ensure that ligands are uploaded
+        df = api.get_dataframe(DB_LIGANDS)
+
+        for ligand in self.ligands:
+            if ligand.file is None:
+                # no ligand file, we only have a SMILES string. this means that there is no need to upload or otherwise manage this ligand
+
+                continue
+
+            ligand_file = os.path.basename(ligand.file)
+            matching_indices = df.index[df[COL_LIGAND] == ligand_file].tolist()
+            if len(matching_indices) == 0:
+                print(f"Uploading {ligand.file}...")
+                response = api.upload_file_to_new_database_row(
+                    database_id=DB_LIGANDS,
+                    column_id=COL_LIGAND,
+                    file_path=str(ligand.file),
+                )
+
+                ligand._do_id = response.rows[0].hid
+            else:
+                ligand._do_id = matching_indices[0]
 
         # ensure that protein is uploaded
         df = api.get_dataframe(DB_PROTEINS)
