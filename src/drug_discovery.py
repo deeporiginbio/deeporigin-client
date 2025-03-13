@@ -17,6 +17,8 @@ from deeporigin.tools.toolkit import _ensure_columns, _ensure_database
 from deeporigin.tools.utils import query_run_statuses
 from deeporigin.utils.core import PrettyDict, hash_file, hash_strings
 
+Number = float | int
+
 # constants
 DB_ABFE = "ABFE"
 DB_RBFE = "RBFE"
@@ -29,11 +31,11 @@ VALID_TOOLS = Literal[DB_ABFE, DB_RBFE, DB_DOCKING]
 COL_DELTA_DELTA_G = "FEP ΔΔG (kcal/mol)"
 COL_DELTA_G = "FEP ΔG (kcal/mol)"
 COL_JOBID = "JobID"
-COL_LIGAND = "Ligand"  # for ABFE
-COL_LIGAND1 = "Ligand1"  # for RBFE
+COL_LIGAND1 = "Ligand1"  # for ABFE/RBFE
 COL_LIGAND2 = "Ligand2"  # for RBFE
 COL_CSV_OUTPUT = "OutputFile"  # this will be a CSV
 COL_PROTEIN = "Protein"
+COL_LIGAND = "Ligand"
 COL_RESULT = "ResultFile"
 COL_SMILES_HASH = "SMILESHash"
 COL_COMPLEX_HASH = "ComplexHash"
@@ -96,7 +98,7 @@ def _ensure_dbs() -> dict:
             DB_ABFE,
             [
                 dict(name=COL_PROTEIN, type="text"),
-                dict(name=COL_LIGAND, type="text"),
+                dict(name=COL_LIGAND1, type="text"),
                 dict(name=COL_COMPLEX_HASH, type="text"),
                 dict(name=COL_STEP, type="text"),
                 dict(name=COL_JOBID, type="text"),
@@ -344,24 +346,20 @@ class Complex:
                 save_to_dir=DATA_DIRS[tool],
             )
 
-        if COL_LIGAND in df.columns:
-            ligand_ids = df[COL_LIGAND].tolist()
+        if COL_LIGAND1 in df.columns:
+            ligand1_ids = df[COL_LIGAND1].tolist()
         else:
-            ligand_ids = [None for _ in file_ids]
+            ligand1_ids = [None for _ in file_ids]
+
+        if COL_LIGAND2 in df.columns:
+            ligand2_ids = df[COL_LIGAND1].tolist()
+        else:
+            ligand2_ids = [None for _ in file_ids]
 
         all_dfs = []
-        for file_id, ligand_id in zip(file_ids, ligand_ids):
+        for file_id, ligand1_id, ligand2_id in zip(file_ids, ligand1_ids, ligand2_ids):
             file_loc = os.path.join(DATA_DIRS[tool], file_id.replace("_file:", ""))
             df = pd.read_csv(file_loc)
-
-            if ligand_id is not None:
-                df["Ligand"] = ligand_id
-
-                smiles_mapping = {
-                    ligand._do_id: ligand.smiles_string for ligand in self.ligands
-                }
-
-                df["SMILES"] = df[COL_LIGAND].map(smiles_mapping)
 
             # drop some columns
             drop_columns = ["Ligand1", "Ligand2", "Protein"]
@@ -373,9 +371,25 @@ class Complex:
                     errors="ignore",
                 )
 
+            smiles_mapping = {
+                ligand._do_id: ligand.smiles_string for ligand in self.ligands
+            }
+
+            if tool == "RBFE":
+                df["Ligand1"] = ligand1_id
+                df["Ligand2"] = ligand2_id
+
+                df["SMILES1"] = df[COL_LIGAND1].map(smiles_mapping)
+                df["SMILES2"] = df[COL_LIGAND2].map(smiles_mapping)
+            elif tool == "ABFE":
+                df["Ligand"] = ligand1_id
+
+                df["SMILES"] = df["Ligand"].map(smiles_mapping)
+
             all_dfs.append(df)
 
         df = pd.concat(all_dfs)
+
         return df
 
     def get_docking_results(self) -> pd.DataFrame:
@@ -401,11 +415,12 @@ class Complex:
         df.drop("SMILES", axis=1, inplace=True)
         display(HTML(df.to_html(escape=False)))
 
+    @beartype
     def dock(
         self,
         *,
-        box_size: tuple[float, float, float],
-        pocket_center: tuple[float, float, float],
+        box_size: tuple[Number, Number, Number],
+        pocket_center: tuple[Number, Number, Number],
         batch_size: int = 32,
     ):
         """Run bulk docking on Deep Origin. Ligands will be split into batches based on the batch_size argument, and will run in parallel on Deep Origin clusters.
@@ -435,11 +450,12 @@ class Complex:
 
         for chunk in chunks:
             params["smiles_list"] = chunk
-            job_id = _start_bulk_docking_run_and_log(
+            job_id = _start_tool_run(
                 params=params,
                 protein_id=self.protein._do_id,
                 database_columns=database_columns,
                 complex_hash=self._hash,
+                tool="Docking",
             )
 
             self._job_ids["Docking"].append(job_id)
@@ -485,27 +501,29 @@ class Complex:
         # first check that there are no existing runs
         df = api.get_dataframe(DB_ABFE)
         df = df[df[COL_PROTEIN] == self.protein._do_id]
-        df = df[(df[COL_LIGAND].isin(ligand_ids))]
+        df = df[(df[COL_LIGAND1].isin(ligand_ids))]
 
-        already_run_ligands = set(df[COL_LIGAND])
+        already_run_ligands = set(df[COL_LIGAND1])
         ligand_ids = set(ligand_ids) - already_run_ligands
 
         for ligand_id in ligand_ids:
-            job_id = _start_abfe_run_and_log(
+            job_id = _start_tool_run(
                 protein_id=self.protein._do_id,
-                ligand_id=ligand_id,
+                ligand1_id=ligand_id,
                 database_columns=database_columns,
                 params=self._params.abfe_end_to_end,
+                tool=DB_ABFE,
+                complex_hash=self._hash,
             )
 
-            self._job_ids["ABFE"].append(job_id)
+            self._job_ids[DB_ABFE].append(job_id)
 
     def show_abfe_results(self):
         """Show ABFE results in a dataframe.
 
         This method returns a dataframe showing the results of ABFE runs associated with this simulation session. The ligand file name, 2-D structure, and ΔG are shown."""
 
-        df = self.get_csv_results_for("ABFE")
+        df = self.get_csv_results_for(DB_ABFE)
 
         if len(df) == 0:
             print("No ABFE results to display. Start a run first.")
@@ -523,70 +541,120 @@ class Complex:
         display(HTML(df.to_html(escape=False)))
 
 
-# TO DO: the internal network requests here need to be parallelized
 @beartype
-def _start_bulk_docking_run_and_log(
+def _start_tool_run(
     *,
-    protein_id: str,
-    database_columns: list,
     params: dict,
+    database_columns: list,
+    tool: VALID_TOOLS,
+    protein_id: str,
     complex_hash: str,
+    ligand1_id: Optional[str] = None,
+    ligand2_id: Optional[str] = None,
 ) -> str:
-    """starts a single run of docking end to end and logs it in the Docking database. Internal function. Do not use.
+    """starts a single run of ABFE end to end and logs it in the ABFE database. Internal function. Do not use.
 
     Args:
         protein_id (str): protein ID
+        ligand_id (str): ligand ID
         params (dict): parameters for the ABFE end-to-end job
         database_columns (list): list of database columns dicts
-        complex_hash (str): hash of complex of ligands and protein
 
     """
 
-    # first check if we actually need to run this
-    df = pd.DataFrame(api.get_dataframe(DB_DOCKING, return_type="dict"))
+    # input validation
+    if tool == "ABFE":
+        if ligand1_id is None:
+            raise ValueError("ligand1_id is required for ABFE")
 
-    existing_hashes = list(df[COL_SMILES_HASH])
+    if tool == "RBFE":
+        if ligand1_id is None or ligand2_id is None:
+            raise ValueError("ligand1_id and ligand2_id is required for RBFE")
 
-    smiles_hash = hash_strings(params["smiles_list"])
-
-    if smiles_hash in existing_hashes:
-        print("This tranche of ligands has already been docked. Skipping...")
-
-        # TODO transmit job ID correctly, and do so only when  the job has succeeded or is running (Failed jobs should be ignored)
-        return
+    # tool key mapper
+    tool_key_mapper = dict(
+        ABFE="deeporigin.abfe-end-to-end",
+        RBFE="deeporigin.rbfe-end-to-end",
+        Docking="deeporigin.bulk-docking",
+    )
 
     from deeporigin.tools import run
 
-    tool_key = "deeporigin.bulk-docking"
-
     # make a new row
-    response = api.make_database_rows(DB_DOCKING, n_rows=1)
+    response = api.make_database_rows(tool, n_rows=1)
     row_id = response.rows[0].hid
 
-    # start job
-    params["pdb_file"] = {
+    # a protein is needed for ABFE, RBFE, and docking
+    params["protein"] = {
         "columnId": COL_PROTEIN,
         "rowId": protein_id,
         "databaseId": DB_PROTEINS,
     }
 
-    outputs = {
-        "data_file": {
-            "columnId": COL_CSV_OUTPUT,
-            "rowId": row_id,
-            "databaseId": DB_DOCKING,
-        },
-        "results_sdf": {
-            "columnId": COL_RESULT,
-            "rowId": row_id,
-            "databaseId": DB_DOCKING,
-        },
-    }
+    # input ligand files
+    if tool == "RBFE":
+        params["ligand1"] = {
+            "columnId": COL_LIGAND,
+            "rowId": ligand1_id,
+            "databaseId": DB_LIGANDS,
+        }
+
+        params["ligand2"] = {
+            "columnId": COL_LIGAND,
+            "rowId": ligand2_id,
+            "databaseId": DB_LIGANDS,
+        }
+    elif tool == "ABFE":
+        params["ligand"] = {
+            "columnId": COL_LIGAND,
+            "rowId": ligand1_id,
+            "databaseId": DB_LIGANDS,
+        }
+
+    if tool == "RBFE":
+        outputs = {
+            "output_file": {
+                "columnId": COL_RESULT,
+                "rowId": row_id,
+                "databaseId": tool,
+            },
+            "rbfe_results_summary": {
+                "columnId": COL_CSV_OUTPUT,
+                "rowId": row_id,
+                "databaseId": tool,
+            },
+        }
+    elif tool == "ABFE":
+        outputs = {
+            "output_file": {
+                "columnId": COL_RESULT,
+                "rowId": row_id,
+                "databaseId": DB_ABFE,
+            },
+            "abfe_results_summary": {
+                "columnId": COL_CSV_OUTPUT,
+                "rowId": row_id,
+                "databaseId": DB_ABFE,
+            },
+        }
+    elif tool == "Docking":
+        outputs = {
+            "data_file": {
+                "columnId": COL_CSV_OUTPUT,
+                "rowId": row_id,
+                "databaseId": DB_DOCKING,
+            },
+            "results_sdf": {
+                "columnId": COL_RESULT,
+                "rowId": row_id,
+                "databaseId": DB_DOCKING,
+            },
+        }
 
     job_id = run._process_job(
         inputs=params,
         outputs=outputs,
-        tool_key=tool_key,
+        tool_key=tool_key_mapper[tool],
         cols=database_columns,
     )
 
@@ -595,236 +663,50 @@ def _start_bulk_docking_run_and_log(
         job_id,
         column_id=COL_JOBID,
         row_id=row_id,
-        database_id=DB_DOCKING,
+        database_id=tool,
     )
 
-    # write hash of all ligands
+    # write ligand1 IDs
+    if ligand1_id is not None:
+        api.set_cell_data(
+            ligand1_id,
+            column_id=COL_LIGAND1,
+            row_id=row_id,
+            database_id=tool,
+        )
+
+    # write ligand2 ID
+    if ligand2_id is not None:
+        api.set_cell_data(
+            ligand2_id,
+            column_id=COL_LIGAND2,
+            row_id=row_id,
+            database_id=tool,
+        )
+
+    # write protein ID
+    api.set_cell_data(
+        protein_id,
+        column_id=COL_PROTEIN,
+        row_id=row_id,
+        database_id=tool,
+    )
+
+    # write complex hash
     api.set_cell_data(
         complex_hash,
         column_id=COL_COMPLEX_HASH,
         row_id=row_id,
-        database_id=DB_DOCKING,
-    )
-
-    # write hash of ligands we're docking
-    api.set_cell_data(
-        smiles_hash,
-        column_id=COL_SMILES_HASH,
-        row_id=row_id,
-        database_id=DB_DOCKING,
-    )
-
-    # write protein ID
-    api.set_cell_data(
-        protein_id,
-        column_id=COL_PROTEIN,
-        row_id=row_id,
-        database_id=DB_DOCKING,
-    )
-
-    return job_id
-
-
-@beartype
-def _start_abfe_run_and_log(
-    *,
-    protein_id: str,
-    ligand_id: str,
-    params: dict,
-    database_columns: list,
-) -> str:
-    """starts a single run of ABFE end to end and logs it in the ABFE database. Internal function. Do not use.
-
-    Args:
-        protein_id (str): protein ID
-        ligand_id (str): ligand ID
-        params (dict): parameters for the ABFE end-to-end job
-        database_columns (list): list of database columns dicts
-
-    """
-
-    from deeporigin.tools import run
-
-    tool_key = "deeporigin.abfe-end-to-end"
-
-    # TODO -- take this out of this loop and use n_rows>1
-    # so that we can make all rows with a single call
-    # make a new row
-    response = api.make_database_rows(DB_ABFE, n_rows=1)
-    row_id = response.rows[0].hid
-
-    # start job
-    params["protein"] = {
-        "columnId": COL_PROTEIN,
-        "rowId": protein_id,
-        "databaseId": DB_PROTEINS,
-    }
-
-    params["ligand"] = {
-        "columnId": COL_LIGAND,
-        "rowId": ligand_id,
-        "databaseId": DB_LIGANDS,
-    }
-
-    outputs = {
-        "output_file": {
-            "columnId": COL_RESULT,
-            "rowId": row_id,
-            "databaseId": DB_ABFE,
-        },
-        "abfe_results_summary": {
-            "columnId": COL_CSV_OUTPUT,
-            "rowId": row_id,
-            "databaseId": DB_ABFE,
-        },
-    }
-
-    job_id = run._process_job(
-        inputs=params,
-        outputs=outputs,
-        tool_key=tool_key,
-        cols=database_columns,
-    )
-
-    # write job ID
-    api.set_cell_data(
-        job_id,
-        column_id=COL_JOBID,
-        row_id=row_id,
-        database_id=DB_ABFE,
-    )
-
-    # write ligand ID
-    api.set_cell_data(
-        ligand_id,
-        column_id=COL_LIGAND,
-        row_id=row_id,
-        database_id=DB_ABFE,
-    )
-
-    # write protein ID
-    api.set_cell_data(
-        protein_id,
-        column_id=COL_PROTEIN,
-        row_id=row_id,
-        database_id=DB_ABFE,
+        database_id=tool,
     )
 
     # write step
-    api.set_cell_data(
-        "End-to-end",
-        column_id=COL_STEP,
-        row_id=row_id,
-        database_id=DB_ABFE,
-    )
-
-    return job_id
-
-
-@beartype
-def _start_rbfe_run_and_log(
-    *,
-    protein_id: str,
-    ligand1_id: str,
-    ligand2_id: str,
-    params: dict,
-    database_columns: list,
-):
-    """starts a single run of ABFE end to end and logs it in the ABFE database. Internal function. Do not use.
-
-    Args:
-        protein_id (str): protein ID
-        ligand_id (str): ligand ID
-        params (dict): parameters for the ABFE end-to-end job
-        database_columns (list): list of database columns dicts
-
-    """
-
-    from deeporigin.tools import run
-
-    tool_key = "deeporigin.rbfe-end-to-end"
-
-    # make a new row
-    response = api.make_database_rows(DB_RBFE, n_rows=1)
-    row_id = response.rows[0].hid
-
-    # start job
-    params["protein"] = {
-        "columnId": COL_PROTEIN,
-        "rowId": protein_id,
-        "databaseId": DB_PROTEINS,
-    }
-
-    params["ligand1"] = {
-        "columnId": COL_LIGAND,
-        "rowId": ligand1_id,
-        "databaseId": DB_LIGANDS,
-    }
-
-    params["ligand2"] = {
-        "columnId": COL_LIGAND,
-        "rowId": ligand1_id,
-        "databaseId": DB_LIGANDS,
-    }
-
-    outputs = {
-        "output_file": {
-            "columnId": COL_RESULT,
-            "rowId": row_id,
-            "databaseId": DB_RBFE,
-        },
-        "rbfe_results_summary": {
-            "columnId": COL_CSV_OUTPUT,
-            "rowId": row_id,
-            "databaseId": DB_RBFE,
-        },
-    }
-
-    job_id = run._process_job(
-        inputs=params,
-        outputs=outputs,
-        tool_key=tool_key,
-        cols=database_columns,
-    )
-
-    # write job ID
-    api.set_cell_data(
-        job_id,
-        column_id=COL_JOBID,
-        row_id=row_id,
-        database_id=DB_RBFE,
-    )
-
-    # write ligand1 ID
-    api.set_cell_data(
-        ligand1_id,
-        column_id=COL_LIGAND1,
-        row_id=row_id,
-        database_id=DB_RBFE,
-    )
-
-    # write ligand2 ID
-    api.set_cell_data(
-        ligand2_id,
-        column_id=COL_LIGAND2,
-        row_id=row_id,
-        database_id=DB_RBFE,
-    )
-
-    # write protein ID
-    api.set_cell_data(
-        protein_id,
-        column_id=COL_PROTEIN,
-        row_id=row_id,
-        database_id=DB_RBFE,
-    )
-
-    # write step
-    api.set_cell_data(
-        "End-to-end",
-        column_id=COL_STEP,
-        row_id=row_id,
-        database_id=DB_RBFE,
-    )
+    if tool in ["ABFE", "RBFE"]:
+        api.set_cell_data(
+            "End-to-end",
+            column_id=COL_STEP,
+            row_id=row_id,
+            database_id=tool,
+        )
 
     return job_id
