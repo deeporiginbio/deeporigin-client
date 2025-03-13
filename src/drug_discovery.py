@@ -1,5 +1,6 @@
 """Module to support Drug Discovery workflows using Deep Origin"""
 
+import concurrent.futures
 import importlib.resources
 import json
 import os
@@ -61,91 +62,84 @@ def _load_params(step: str) -> PrettyDict:
 
 @beartype
 def _ensure_dbs() -> dict:
-    """ensure that there are databases for FEP on the data hub
+    """Ensure that there are databases for FEP on the data hub.
 
     Ensures the following DBs:
-
-    - ligand (list of ligand files)
-    - protein (list of protein files)
-    - ABFE (ligand, protein, step, job_id, output, results, delta_g)
-    - RBFE (ligand1, ligand2, protein, step, job_id, output, results, delta_g)
-
+      - ligand (list of ligand files)
+      - protein (list of protein files)
+      - ABFE (ligand, protein, step, job_id, output, results, delta_g)
+      - RBFE (ligand1, ligand2, protein, step, job_id, output, results, delta_g)
+      - docking (protein, job_id, smiles_hash, complex_hash, output, results)
     """
-
     databases = PrettyDict()
 
-    # ligands
-    database = _ensure_database(DB_LIGANDS)
-    required_columns = [
-        dict(name=COL_LIGAND, type="file"),
-    ]
-    database = _ensure_columns(
-        database=database,
-        required_columns=required_columns,
-    )
-    databases.ligands = database
+    # Define a helper function to process a single database
+    def process_db(db_key: str, db_name, required_columns: list) -> tuple[str, object]:
+        """ensure that a db exists, and ensure that columns exist"""
 
-    # proteins
-    database = _ensure_database(DB_PROTEINS)
-    required_columns = [
-        dict(name=COL_PROTEIN, type="file"),
-    ]
-    database = _ensure_columns(
-        database=database,
-        required_columns=required_columns,
-    )
-    databases.proteins = database
+        db = _ensure_database(db_name)
+        db = _ensure_columns(database=db, required_columns=required_columns)
 
-    # ABFE
-    database = _ensure_database(DB_ABFE)
-    required_columns = [
-        dict(name=COL_PROTEIN, type="text"),
-        dict(name=COL_LIGAND, type="text"),
-        dict(name=COL_STEP, type="text"),
-        dict(name=COL_JOBID, type="text"),
-        dict(name=COL_CSV_OUTPUT, type="file"),
-        dict(name=COL_RESULT, type="file"),
-        dict(name=COL_DELTA_G, type="float"),
-    ]
-    database = _ensure_columns(
-        database=database,
-        required_columns=required_columns,
-    )
-    databases.abfe = database
+        return db_key, db
 
-    # RBFE
-    database = _ensure_database(DB_RBFE)
-    required_columns = [
-        dict(name=COL_PROTEIN, type="text"),
-        dict(name=COL_LIGAND1, type="text"),
-        dict(name=COL_LIGAND2, type="text"),
-        dict(name=COL_STEP, type="text"),
-        dict(name=COL_JOBID, type="text"),
-        dict(name=COL_CSV_OUTPUT, type="file"),
-        dict(name=COL_RESULT, type="file"),
-        dict(name=COL_DELTA_DELTA_G, type="float"),
-    ]
-    database = _ensure_columns(
-        database=database,
-        required_columns=required_columns,
-    )
-    databases.rbfe = database
+    # Mapping each database key to its parameters (name and required columns)
+    tasks = {
+        "ligands": (
+            DB_LIGANDS,
+            [dict(name=COL_LIGAND, type="file")],
+        ),
+        "proteins": (
+            DB_PROTEINS,
+            [dict(name=COL_PROTEIN, type="file")],
+        ),
+        "abfe": (
+            DB_ABFE,
+            [
+                dict(name=COL_PROTEIN, type="text"),
+                dict(name=COL_LIGAND, type="text"),
+                dict(name=COL_STEP, type="text"),
+                dict(name=COL_JOBID, type="text"),
+                dict(name=COL_CSV_OUTPUT, type="file"),
+                dict(name=COL_RESULT, type="file"),
+                dict(name=COL_DELTA_G, type="float"),
+            ],
+        ),
+        "rbfe": (
+            DB_RBFE,
+            [
+                dict(name=COL_PROTEIN, type="text"),
+                dict(name=COL_LIGAND1, type="text"),
+                dict(name=COL_LIGAND2, type="text"),
+                dict(name=COL_STEP, type="text"),
+                dict(name=COL_JOBID, type="text"),
+                dict(name=COL_CSV_OUTPUT, type="file"),
+                dict(name=COL_RESULT, type="file"),
+                dict(name=COL_DELTA_DELTA_G, type="float"),
+            ],
+        ),
+        "docking": (
+            DB_DOCKING,
+            [
+                dict(name=COL_PROTEIN, type="text"),
+                dict(name=COL_JOBID, type="text"),
+                dict(name=COL_SMILES_HASH, type="text"),
+                dict(name=COL_COMPLEX_HASH, type="text"),
+                dict(name=COL_CSV_OUTPUT, type="file"),
+                dict(name=COL_RESULT, type="file"),
+            ],
+        ),
+    }
 
-    # docking
-    database = _ensure_database(DB_DOCKING)
-    required_columns = [
-        dict(name=COL_PROTEIN, type="text"),
-        dict(name=COL_JOBID, type="text"),
-        dict(name=COL_SMILES_HASH, type="text"),
-        dict(name=COL_COMPLEX_HASH, type="text"),
-        dict(name=COL_CSV_OUTPUT, type="file"),
-        dict(name=COL_RESULT, type="file"),
-    ]
-    database = _ensure_columns(
-        database=database,
-        required_columns=required_columns,
-    )
-    databases.docking = database
+    # Use a ThreadPoolExecutor for I/O-bound network calls
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        future_to_key = {
+            executor.submit(process_db, key, db_name, req_cols): key
+            for key, (db_name, req_cols) in tasks.items()
+        }
+
+        for future in concurrent.futures.as_completed(future_to_key):
+            key, db = future.result()
+            databases[key] = db
 
     return databases
 
@@ -413,30 +407,6 @@ def _start_bulk_docking_run_and_log(
     response = api.make_database_rows(DB_DOCKING, n_rows=1)
     row_id = response.rows[0].hid
 
-    # write hash of all ligands
-    api.set_cell_data(
-        complex_hash,
-        column_id=COL_COMPLEX_HASH,
-        row_id=row_id,
-        database_id=DB_DOCKING,
-    )
-
-    # write hash of ligands we're docking
-    api.set_cell_data(
-        smiles_hash,
-        column_id=COL_SMILES_HASH,
-        row_id=row_id,
-        database_id=DB_DOCKING,
-    )
-
-    # write protein ID
-    api.set_cell_data(
-        protein_id,
-        column_id=COL_PROTEIN,
-        row_id=row_id,
-        database_id=DB_DOCKING,
-    )
-
     # start job
     params["pdb_file"] = {
         "columnId": COL_PROTEIN,
@@ -468,6 +438,30 @@ def _start_bulk_docking_run_and_log(
     api.set_cell_data(
         job_id,
         column_id=COL_JOBID,
+        row_id=row_id,
+        database_id=DB_DOCKING,
+    )
+
+    # write hash of all ligands
+    api.set_cell_data(
+        complex_hash,
+        column_id=COL_COMPLEX_HASH,
+        row_id=row_id,
+        database_id=DB_DOCKING,
+    )
+
+    # write hash of ligands we're docking
+    api.set_cell_data(
+        smiles_hash,
+        column_id=COL_SMILES_HASH,
+        row_id=row_id,
+        database_id=DB_DOCKING,
+    )
+
+    # write protein ID
+    api.set_cell_data(
+        protein_id,
+        column_id=COL_PROTEIN,
         row_id=row_id,
         database_id=DB_DOCKING,
     )
