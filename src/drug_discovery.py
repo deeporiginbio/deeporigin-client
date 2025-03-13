@@ -97,6 +97,7 @@ def _ensure_dbs() -> dict:
             [
                 dict(name=COL_PROTEIN, type="text"),
                 dict(name=COL_LIGAND, type="text"),
+                dict(name=COL_COMPLEX_HASH, type="text"),
                 dict(name=COL_STEP, type="text"),
                 dict(name=COL_JOBID, type="text"),
                 dict(name=COL_CSV_OUTPUT, type="file"),
@@ -110,6 +111,7 @@ def _ensure_dbs() -> dict:
                 dict(name=COL_PROTEIN, type="text"),
                 dict(name=COL_LIGAND1, type="text"),
                 dict(name=COL_LIGAND2, type="text"),
+                dict(name=COL_COMPLEX_HASH, type="text"),
                 dict(name=COL_STEP, type="text"),
                 dict(name=COL_JOBID, type="text"),
                 dict(name=COL_CSV_OUTPUT, type="file"),
@@ -302,7 +304,11 @@ class Complex:
         chem.show_ligands(self.ligands)
 
     def get_csv_results_for(self, tool: VALID_TOOLS):
-        """get CSV results for a particular tool and combine them as need be"""
+        """get CSV results for a particular tool and combine them as need be
+
+        Args:
+            tool: A valid tool
+        """
 
         df = pd.DataFrame(
             api.get_dataframe(
@@ -314,7 +320,13 @@ class Complex:
 
         df = df[self._hash == df[COL_COMPLEX_HASH]]
 
-        file_ids = list(df[COL_CSV_OUTPUT].dropna())
+        # this makes sure that we only retain rows
+        # where there is a valid output being generated
+        # rows where there is no output (for failed or
+        # running jobs) are simply dropped
+        df = df.dropna(subset=[COL_CSV_OUTPUT])
+        file_ids = list(df[COL_CSV_OUTPUT])
+
         existing_files = os.listdir(DATA_DIRS[tool])
         existing_files = ["_file:" + file for file in existing_files]
         missing_files = list(set(file_ids) - set(existing_files))
@@ -325,10 +337,35 @@ class Complex:
                 save_to_dir=DATA_DIRS[tool],
             )
 
+        if COL_LIGAND in df.columns:
+            ligand_ids = df[COL_LIGAND].tolist()
+        else:
+            ligand_ids = [None for _ in file_ids]
+
         all_dfs = []
-        for file_id in file_ids:
+        for file_id, ligand_id in zip(file_ids, ligand_ids):
             file_loc = os.path.join(DATA_DIRS[tool], file_id.replace("_file:", ""))
             df = pd.read_csv(file_loc)
+
+            if ligand_id is not None:
+                df["Ligand"] = ligand_id
+
+                smiles_mapping = {
+                    ligand._do_id: ligand.smiles_string for ligand in self.ligands
+                }
+
+                df["SMILES"] = df[COL_LIGAND].map(smiles_mapping)
+
+            # drop some columns
+            drop_columns = ["Ligand1", "Ligand2", "Protein"]
+            for col in drop_columns:
+                df.drop(
+                    col,
+                    axis=1,
+                    inplace=True,
+                    errors="ignore",
+                )
+
             all_dfs.append(df)
 
         df = pd.concat(all_dfs)
@@ -456,86 +493,27 @@ class Complex:
 
             self._job_ids["ABFE"].append(job_id)
 
-    def get_abfe_results(self):
-        """Get ABFE results.
+    def show_abfe_results(self):
+        """Show ABFE results in a dataframe.
 
-        Returns a dataframe containing results of ABFE runs. The retuned dataframe has the following columns:
+        This method returns a dataframe showing the results of ABFE runs associated with this simulation session. The ligand file name, 2-D structure, and ΔG are shown."""
 
-        - Ligand: contains the file name of the original SDF file
-        - Step: Step in the ABFE flow. `End-to-end` indicates the end-to-end flow, starting from ligand and protein, and going all the way to the outputs.
-        - Status: `Succeeded` or `Running`, etc. Status of job on Deep Origin.
-        """
+        df = self.get_csv_results_for("ABFE")
 
-        df = pd.DataFrame(
-            api.get_dataframe(
-                DB_ABFE,
-                return_type="dict",
-                use_file_names=False,
-            )
-        )
+        if len(df) == 0:
+            print("No ABFE results to display. Start a run first.")
+            return
 
-        from deeporigin.tools.utils import query_run_status
+        # convert SMILES to aligned images
+        smiles_list = list(df["SMILES"])
+        df.drop("SMILES", axis=1, inplace=True)
 
-        # we only care about proteins and ligands corresponding to this session
-        df = df[df[COL_PROTEIN] == self.protein._do_id]
-        valid_ligands = [ligand._do_id for ligand in self.ligands]
-        df = df[df[COL_LIGAND].isin(valid_ligands)]
+        df["Structure"] = chem.smiles_list_to_base64_png_list(smiles_list)
 
-        df["Status"] = ""
-        df.loc[~df["OutputFile"].isna(), "Status"] = "Succeeded"
+        # Use escape=False to allow the <img> tags to render as images
+        from IPython.display import HTML, display
 
-        df.loc[df["OutputFile"].isna(), "Status"] = df.loc[
-            df["OutputFile"].isna(), COL_JOBID
-        ].apply(query_run_status)
-
-        # for each row, fill in delta_gs if needed
-
-        # download all files for delta_gs
-        file_ids = list(df[COL_CSV_OUTPUT].dropna())
-        existing_files = os.listdir(DATA_DIRS[DB_ABFE])
-        existing_files = ["_file:" + file for file in existing_files]
-        missing_files = list(set(file_ids) - set(existing_files))
-        if len(missing_files) > 0:
-            api.download_files(
-                file_ids=missing_files,
-                use_file_names=False,
-                save_to_dir=DATA_DIRS[DB_ABFE],
-            )
-
-        # open each file, read the delta_g, write it to
-        # the local dataframe
-        for idx, row in df.iterrows():
-            if not pd.isna(row[COL_CSV_OUTPUT]) and pd.isna(row[COL_DELTA_G]):
-                file_id = row[COL_CSV_OUTPUT].replace("_file:", "")
-                delta_g = float(
-                    pd.read_csv(os.path.join(DATA_DIRS[DB_ABFE], file_id))[
-                        "Total"
-                    ].iloc[0]
-                )
-                df.loc[idx, COL_DELTA_G] = delta_g
-
-        # drop some columns
-        df.drop("Validation Status", axis=1, inplace=True)
-        df.drop("JobID", axis=1, inplace=True)
-        df.drop(COL_CSV_OUTPUT, axis=1, inplace=True)
-        df.drop(COL_RESULT, axis=1, inplace=True)
-        df.drop("ID", axis=1, inplace=True)
-        df.drop(COL_PROTEIN, axis=1, inplace=True)
-
-        # map ligand IDs to ligand file names
-        # Create a mapping dictionary: _do_id -> file
-        mapping = {
-            ligand._do_id: os.path.basename(ligand.file) for ligand in self.ligands
-        }
-        smiles_mapping = {
-            ligand._do_id: ligand.smiles_string for ligand in self.ligands
-        }
-
-        # Replace the values in the 'Ligand' column with the corresponding file
-        df["SMILES"] = df[COL_LIGAND].map(smiles_mapping)
-        df[COL_LIGAND] = df[COL_LIGAND].map(mapping)
-
-        return df
+        display(HTML(df.to_html(escape=False)))
 
 
 # TO DO: the internal network requests here need to be parallelized
@@ -731,6 +709,115 @@ def _start_abfe_run_and_log(
         column_id=COL_STEP,
         row_id=row_id,
         database_id=DB_ABFE,
+    )
+
+    return job_id
+
+
+@beartype
+def _start_rbfe_run_and_log(
+    *,
+    protein_id: str,
+    ligand1_id: str,
+    ligand2_id: str,
+    params: dict,
+    database_columns: list,
+):
+    """starts a single run of ABFE end to end and logs it in the ABFE database. Internal function. Do not use.
+
+    Args:
+        protein_id (str): protein ID
+        ligand_id (str): ligand ID
+        params (dict): parameters for the ABFE end-to-end job
+        database_columns (list): list of database columns dicts
+
+    """
+
+    from deeporigin.tools import run
+
+    tool_key = "deeporigin.rbfe-end-to-end"
+
+    # make a new row
+    response = api.make_database_rows(DB_RBFE, n_rows=1)
+    row_id = response.rows[0].hid
+
+    # start job
+    params["protein"] = {
+        "columnId": COL_PROTEIN,
+        "rowId": protein_id,
+        "databaseId": DB_PROTEINS,
+    }
+
+    params["ligand1"] = {
+        "columnId": COL_LIGAND,
+        "rowId": ligand1_id,
+        "databaseId": DB_LIGANDS,
+    }
+
+    params["ligand2"] = {
+        "columnId": COL_LIGAND,
+        "rowId": ligand1_id,
+        "databaseId": DB_LIGANDS,
+    }
+
+    outputs = {
+        "output_file": {
+            "columnId": COL_RESULT,
+            "rowId": row_id,
+            "databaseId": DB_RBFE,
+        },
+        "rbfe_results_summary": {
+            "columnId": COL_CSV_OUTPUT,
+            "rowId": row_id,
+            "databaseId": DB_RBFE,
+        },
+    }
+
+    job_id = run._process_job(
+        inputs=params,
+        outputs=outputs,
+        tool_key=tool_key,
+        cols=database_columns,
+    )
+
+    # write job ID
+    api.set_cell_data(
+        job_id,
+        column_id=COL_JOBID,
+        row_id=row_id,
+        database_id=DB_RBFE,
+    )
+
+    # write ligand1 ID
+    api.set_cell_data(
+        ligand1_id,
+        column_id=COL_LIGAND1,
+        row_id=row_id,
+        database_id=DB_RBFE,
+    )
+
+    # write ligand2 ID
+    api.set_cell_data(
+        ligand2_id,
+        column_id=COL_LIGAND2,
+        row_id=row_id,
+        database_id=DB_RBFE,
+    )
+
+    # write protein ID
+    api.set_cell_data(
+        protein_id,
+        column_id=COL_PROTEIN,
+        row_id=row_id,
+        database_id=DB_RBFE,
+    )
+
+    # write step
+    api.set_cell_data(
+        "End-to-end",
+        column_id=COL_STEP,
+        row_id=row_id,
+        database_id=DB_RBFE,
     )
 
     return job_id
