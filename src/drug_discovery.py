@@ -518,6 +518,67 @@ class Complex:
 
             self._job_ids[DB_ABFE].append(job_id)
 
+    @beartype
+    def rbfe_end_to_end(
+        self,
+        *,
+        ligand1_id: str,
+        ligand2_id: str,
+    ):
+        """Method to run an end-to-end ABFE run.
+
+        Args:
+            ligand_ids (Optional[str], optional): List of ligand IDs to run. Defaults to None. When None, all ligands in the object will be run. To view a list of valid ligand IDs, use the `.show_ligands()` method"""
+
+        if ligand1_id is None or ligand2_id is None:
+            raise DeepOriginException(
+                "Both ligand1_id and ligand2_id must be specified."
+            )
+
+        if ligand1_id == ligand2_id:
+            raise DeepOriginException("ligand1_id and ligand2_id cannot be the same.")
+
+        # check that protein ID is valid
+        if self.protein._do_id is None:
+            raise DeepOriginException(
+                "Protein has not been uploaded yet. Use .connect() first."
+            )
+
+        # check that ligand IDs are valid
+        valid_ligand_ids = [ligand._do_id for ligand in self.ligands]
+
+        if None in valid_ligand_ids:
+            raise DeepOriginException(
+                "Some ligands have not been uploaded yet. Use .connect() first."
+            )
+
+        if ligand1_id not in valid_ligand_ids or ligand2_id not in valid_ligand_ids:
+            raise DeepOriginException(
+                f"Some ligand IDs re not valid. Valid ligand IDs are: {valid_ligand_ids}"
+            )
+
+        database_columns = (
+            self._db.ligands.cols + self._db.proteins.cols + self._db.abfe.cols
+        )
+
+        # only run on ligands that have not been run yet
+        # first check that there are no existing runs
+        df = api.get_dataframe(DB_RBFE)
+        df = df[df[COL_PROTEIN] == self.protein._do_id]
+        df = df[(df[COL_LIGAND1] == ligand1_id) & (df[COL_LIGAND2] == ligand2_id)]
+
+        job_id = _start_tool_run(
+            protein_id=self.protein._do_id,
+            ligand1_id=ligand1_id,
+            ligand2_id=ligand2_id,
+            database_columns=database_columns,
+            params=self._params.rbfe_end_to_end,
+            tool=DB_RBFE,
+            complex_hash=self._hash,
+        )
+
+        self._job_ids[DB_RBFE].append(job_id)
+
     def show_abfe_results(self):
         """Show ABFE results in a dataframe.
 
@@ -611,17 +672,18 @@ def _start_tool_run(
             "databaseId": DB_LIGANDS,
         }
 
+    # output files
     if tool == "RBFE":
         outputs = {
             "output_file": {
                 "columnId": COL_RESULT,
                 "rowId": row_id,
-                "databaseId": tool,
+                "databaseId": DB_RBFE,
             },
             "rbfe_results_summary": {
                 "columnId": COL_CSV_OUTPUT,
                 "rowId": row_id,
-                "databaseId": tool,
+                "databaseId": DB_RBFE,
             },
         }
     elif tool == "ABFE":
@@ -666,7 +728,7 @@ def _start_tool_run(
         database_id=tool,
     )
 
-    # write ligand1 IDs
+    # write ligand1 ID
     if ligand1_id is not None:
         api.set_cell_data(
             ligand1_id,
