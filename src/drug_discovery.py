@@ -5,7 +5,7 @@ import importlib.resources
 import json
 import os
 from dataclasses import dataclass, field
-from typing import Literal, Optional
+from typing import Literal, Optional, get_args
 
 import more_itertools
 import pandas as pd
@@ -278,12 +278,19 @@ class Complex:
             self.protein._do_id = matching_indices[0]
 
         # fetch all relevant jobIDs
-        df = pd.DataFrame(api.get_dataframe(DB_DOCKING, return_type="dict"))
-        df = df[df["ComplexHash"] == self._hash]
-        self._job_ids["Docking"] = df["JobID"].tolist()
+        # TODO -- parallelize this
+        for tool in list(get_args(VALID_TOOLS)):
+            df = pd.DataFrame(
+                api.get_dataframe(
+                    tool,
+                    return_type="dict",
+                )
+            )
+            df = df[df["ComplexHash"] == self._hash]
+            self._job_ids[tool] = df[COL_JOBID].tolist()
 
     @beartype
-    def get_status(self, tool: VALID_TOOLS) -> dict:
+    def get_status_for(self, tool: VALID_TOOLS) -> dict:
         return query_run_statuses(self._job_ids[tool])
 
     def _repr_pretty_(self, p, cycle):
@@ -304,7 +311,7 @@ class Complex:
         chem.show_ligands(self.ligands)
 
     def get_csv_results_for(self, tool: VALID_TOOLS):
-        """get CSV results for a particular tool and combine them as need be
+        """generic method to get CSV results for a particular tool and combine them as need be
 
         Args:
             tool: A valid tool
