@@ -42,9 +42,9 @@ COL_STEP = "Step"
 
 DATA_DIRS = dict()
 
-DATA_DIRS[DB_ABFE] = os.path.join(os.path.expanduser("~"), ".deeporigin", "abfe")
-DATA_DIRS[DB_RBFE] = os.path.join(os.path.expanduser("~"), ".deeporigin", "rbfe")
-DATA_DIRS[DB_DOCKING] = os.path.join(os.path.expanduser("~"), ".deeporigin", "docking")
+DATA_DIRS[DB_ABFE] = os.path.join(os.path.expanduser("~"), ".deeporigin", DB_ABFE)
+DATA_DIRS[DB_RBFE] = os.path.join(os.path.expanduser("~"), ".deeporigin", DB_RBFE)
+DATA_DIRS[DB_DOCKING] = os.path.join(os.path.expanduser("~"), ".deeporigin", DB_DOCKING)
 
 
 os.makedirs(DATA_DIRS[DB_ABFE], exist_ok=True)
@@ -53,10 +53,10 @@ os.makedirs(DATA_DIRS[DB_DOCKING], exist_ok=True)
 
 
 @beartype
-def _load_params(step: str) -> PrettyDict:
-    """load default values for abfe end to end run"""
+def _load_params(tool: str) -> PrettyDict:
+    """load params for various tools, reading from JSON files"""
 
-    with importlib.resources.open_text("deeporigin.json", f"{step}.json") as f:
+    with importlib.resources.open_text("deeporigin.json", f"{tool}.json") as f:
         return PrettyDict(json.load(f))
 
 
@@ -153,22 +153,27 @@ class Complex:
 
     # these params are not user facing
     _db: Optional[dict] = None
-    _params: Optional[dict] = None
+    _params: PrettyDict = PrettyDict()
 
     """stores a hash of all ligands and the protein. This will be computed post initialization"""
     _hash: Optional[str] = None
 
     """stores job ids for all jobs, organized by tool. """
     _job_ids: dict = field(
-        default_factory=lambda: {"docking": [], "abfe": [], "rbfe": []}
+        default_factory=lambda: {DB_DOCKING: [], DB_ABFE: [], DB_RBFE: []}
     )
 
     def __post_init__(self):
-        """compute hash of this object post initialization"""
+        """various post init tasks"""
 
+        # hash protein and ligands
         protein_hash = hash_file(self.protein.file)
         ligands_hash = hash_strings([ligand.smiles_string for ligand in self.ligands])
         self._hash = hash_strings([protein_hash, ligands_hash])
+
+        # load params for all tools
+        self._params.abfe_end_to_end = _load_params("abfe_end_to_end")
+        self._params.rbfe_end_to_end = _load_params("rbfe_end_to_end")
 
     @classmethod
     def from_dir(cls, directory: str) -> "Complex":
@@ -395,7 +400,65 @@ class Complex:
 
             self._job_ids["Docking"].append(job_id)
 
+    @beartype
+    def abfe_end_to_end(
+        self,
+        *,
+        ligand_ids: Optional[list[str]] = None,
+    ):
+        """Method to run an end-to-end ABFE run.
 
+        Args:
+            ligand_ids (Optional[str], optional): List of ligand IDs to run. Defaults to None. When None, all ligands in the object will be run. To view a list of valid ligand IDs, use the `.show_ligands()` method"""
+
+        if ligand_ids is None:
+            ligand_ids = [ligand._do_id for ligand in self.ligands]
+
+        # check that protein ID is valid
+        if self.protein._do_id is None:
+            raise DeepOriginException(
+                "Protein has not been uploaded yet. Use .connect() first."
+            )
+
+        # check that ligand IDs are valid
+        valid_ligand_ids = [ligand._do_id for ligand in self.ligands]
+
+        if None in valid_ligand_ids:
+            raise DeepOriginException(
+                "Some ligands have not been uploaded yet. Use .connect() first."
+            )
+
+        if not set(ligand_ids).issubset(valid_ligand_ids):
+            raise DeepOriginException(
+                f"Some ligand IDs re not valid. Valid ligand IDs are: {valid_ligand_ids}"
+            )
+
+        database_columns = (
+            self._db.ligands.cols + self._db.proteins.cols + self._db.abfe.cols
+        )
+
+        # only run on ligands that have not been run yet
+        # first check that there are no existing runs
+        df = api.get_dataframe(DB_ABFE)
+        df[df[COL_PROTEIN] == self.protein._do_id]
+
+        df = df[(df[COL_LIGAND].isin(ligand_ids)) & (~pd.isna(df[COL_RESULT]))]
+
+        already_run_ligands = set(df[COL_LIGAND])
+        ligand_ids = set(ligand_ids) - already_run_ligands
+
+        for ligand_id in ligand_ids:
+            job_id = _start_abfe_run_and_log(
+                protein_id=self.protein._do_id,
+                ligand_id=ligand_id,
+                database_columns=database_columns,
+                params=self._params.abfe_end_to_end,
+            )
+
+            self._job_ids["ABFE"].append(job_id)
+
+
+# TO DO: the internal network requests here need to be parallelized
 @beartype
 def _start_bulk_docking_run_and_log(
     *,
@@ -403,7 +466,7 @@ def _start_bulk_docking_run_and_log(
     database_columns: list,
     params: dict,
     complex_hash: str,
-):
+) -> str:
     """starts a single run of docking end to end and logs it in the Docking database. Internal function. Do not use.
 
     Args:
@@ -492,6 +555,102 @@ def _start_bulk_docking_run_and_log(
         column_id=COL_PROTEIN,
         row_id=row_id,
         database_id=DB_DOCKING,
+    )
+
+    return job_id
+
+
+@beartype
+def _start_abfe_run_and_log(
+    *,
+    protein_id: str,
+    ligand_id: str,
+    params: dict,
+    database_columns: list,
+) -> str:
+    """starts a single run of ABFE end to end and logs it in the ABFE database. Internal function. Do not use.
+
+    Args:
+        protein_id (str): protein ID
+        ligand_id (str): ligand ID
+        params (dict): parameters for the ABFE end-to-end job
+        database_columns (list): list of database columns dicts
+
+    """
+
+    from deeporigin.tools import run
+
+    tool_key = "deeporigin.abfe-end-to-end"
+
+    # TODO -- take this out of this loop and use n_rows>1
+    # so that we can make all rows with a single call
+    # make a new row
+    response = api.make_database_rows(DB_ABFE, n_rows=1)
+    row_id = response.rows[0].hid
+
+    # start job
+    params["protein"] = {
+        "columnId": COL_PROTEIN,
+        "rowId": protein_id,
+        "databaseId": DB_PROTEINS,
+    }
+
+    params["ligand"] = {
+        "columnId": COL_LIGAND,
+        "rowId": ligand_id,
+        "databaseId": DB_LIGANDS,
+    }
+
+    outputs = {
+        "output_file": {
+            "columnId": COL_CSV_OUTPUT,
+            "rowId": row_id,
+            "databaseId": DB_ABFE,
+        },
+        "abfe_results_summary": {
+            "columnId": COL_RESULT,
+            "rowId": row_id,
+            "databaseId": DB_ABFE,
+        },
+    }
+
+    job_id = run._process_job(
+        inputs=params,
+        outputs=outputs,
+        tool_key=tool_key,
+        cols=database_columns,
+    )
+
+    # write job ID
+    api.set_cell_data(
+        job_id,
+        column_id=COL_JOBID,
+        row_id=row_id,
+        database_id=DB_ABFE,
+    )
+
+    # write ligand ID
+    api.set_cell_data(
+        ligand_id,
+        column_id=COL_LIGAND,
+        row_id=row_id,
+        database_id=DB_ABFE,
+    )
+
+    # write protein ID
+    api.set_cell_data(
+        protein_id,
+        column_id=COL_PROTEIN,
+        row_id=row_id,
+        database_id=DB_ABFE,
+    )
+
+    # write step
+    api.set_cell_data(
+        "End-to-end",
+        column_id=COL_STEP,
+        row_id=row_id,
+        database_id=DB_ABFE,
     )
 
     return job_id
