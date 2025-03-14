@@ -1,9 +1,7 @@
-::: src.tools.fep
+
+
+::: src.chemistry
     options:
-      members:
-        - Ligand
-        - Protein
-        - FEP
       docstring_style: google
       show_root_heading: false
       show_category_heading: true

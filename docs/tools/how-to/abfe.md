@@ -1,103 +1,32 @@
 # ABFE
 
-This document describes how to run a [ABFE](https://en.wikipedia.org/wiki/Free-energy_perturbation) simulation using Deep Origin tools. 
+This document describes how to run a [ABFE :octicons-link-external-16:](https://en.wikipedia.org/wiki/Free-energy_perturbation) simulation using Deep Origin tools. 
 
-## Prerequisites 
+## Prerequisites
 
-Make sure you have [installed](../../install.md), [configured](../../configure.md), and [authenticated](../../how-to/auth.md) with the Deep Origin python client.
-
-!!! tip "Use uv to install `deeporigin`" 
-    We strongly recommend using [uv](https://docs.astral.sh/uv/) to install Deep Origin in a separate project, following instructions [here](../../install.md#using-uv-to-set-up-deeporigin-on-your-computer). This gives you all the dependencies you need, together with a stand-alone install of Jupyter Lab that you can use with `deeporigin`
-
-## Background
-
-The following flowchart describes the workflow of ABFE that we will go through. Square boxes represent tools in the workflow, and rounded rectangles represent artifacts and files. 
-
-![ABFE workflow](../../images/tools/abfe-workflow.png)
-
-
-## Required input files 
-
-You will need to have the following input files on your local computer:
-
-1. A set of ligand files, in SDF format. Each SDF file should contain a single molecule. 
-2. A protein PDB file 
-
-
-## Running ABFE workflow
-
-!!! tip "Jupyter notebooks"
-    It is assumed that you are working in a Jupyter notebook (or similar IPython environment). This makes it easier to run the workflow, and some functions assume that you are in a Jupyter notebook.
-
-First, we import necessary functions and modules from the `deeporigin` package:
+We assume that we have an initialized and configured `Complex` object:
 
 ```python
-from deeporigin.tools import fep
-```
-
-We then specify where our input files are:
-
-```python
-input_dir = "/path/to/input/dir"
-```
-
-### Initialization
-
-Here, we data structures to store input and intermediate files, and upload input files to Deep Origin:
-
-```python
-sim = fep.FEP.from_dir(input_dir)
-```
-
-!!! tip "Creating a FEP instance from specific files"
-    You can instantiate the class directly from specific files if you don't want to use the `from_dir` function.
-
-    ```python
-    ligand = fep.Ligand(file="/path/to/ligand.sdf")
-    protein = fep.Protein(file="/path/to/protein.pdb")
-
-    sim = fep.FEP(ligands=[ligand], protein=protein)
-
-    ```
-
-Now, we can view the ligands that are part of this simulation:
-
-```python
-sim.show_ligands()
-```
-
-This will show a table similar to this:
-
-![ABFE ligands](../../images/tools/abfe-ligands.png)
-
-### Connecting to Deep Origin
-
-We can connect the instance we created to Deep Origin using
-
-```python
+from deeporigin import drug_discovery as dd
+sim = dd.Complex.from_dir("/path/to/folder/")
 sim.connect()
 ```
+For more details on how to get started, see [:material-page-previous: Getting Started ](./drug-discovery.md).
 
 
-This function creates necessary databases on Deep Origin, uploads ligand and protein files if needed, and updates the status of runs on Deep Origin.
 
 
-After connecting, running `show_ligands` again shows us that our ligands have been assigned IDs that we can use to refer to them in future operations:
-
-```python
-sim.show_ligands()
-```
-
-![ABFE ligands](../../images/tools/abfe-ligands-id.png)
+## Starting an ABFE run
 
 
-### Running end to end ABFE on a single ligand
+
+### Single ligand
 
 To run an end-to-end ABFE workflow on a single ligand, we use:
 
 
 ```python
-sim.abfe_end_to_end(ligand_ids=["Ligands-1"]) # for example
+sim.run_abfe_end_to_end(ligand_ids=["Ligands-1"]) # for example
 ```
 
 This queues up a task on Deep Origin. When it completes, outputs will be written to the appropriate column in this database. 
@@ -105,17 +34,41 @@ This queues up a task on Deep Origin. When it completes, outputs will be written
 You will see a message printed to screen similar to:
 
 
-```bash
-🧬 Job started with ID: 20f05e96, execution ID: x9rl5eghrpqwyiciehc3e
-```
 
-??? Parameters for ABFE
-    The end to end ABFE tool has a number of user-controllable parameters. To view all parameters, use:
-
-    ```python
-    sim.params_abfe_end_to_end
+!!! success "Expected output" 
+    ```bash
+    🧬 Job started with ID: 20f05e96, execution ID: x9rl5eghrpqwyiciehc3e
     ```
 
+
+### Multiple ligands
+
+To run an end-to-end ABFE workflow on multiple ligands, we use:
+
+```python
+sim.run_abfe_end_to_end(ligand_ids=["Ligands-1", "Ligands-2"]) 
+```
+
+Omitting the ligand IDs will run ABFE on all ligands in the `Complex` object.
+
+
+```python
+sim.run_abfe_end_to_end() 
+```
+
+Each ligand will be run in parallel on a separate instance. 
+
+
+## Parameters
+
+### Viewing parameters
+
+The end to end ABFE tool has a number of user-accessible parameters. To view all parameters, use:
+
+```python
+sim._params.abfe_end_to_end
+```
+??? success "Expected output" 
     This will print a dictionary of the parameters used for ABFE, similar to:
 
     ```json
@@ -345,15 +298,32 @@ You will see a message printed to screen similar to:
     }
 
     ```
-    Any of these parameters are modifiable using dot notation. For example, to change the number of steps in the MD step, we can use:
 
-    ```python
-    sim.params_abfe_end_to_end.md.steps = 500000
-    ```
+### Modifying parameters
+
+Any of these parameters are modifiable using dot notation. For example, to change the number of steps in the MD step, we can use:
+
+```python
+sim._params.abfe_end_to_end.md.steps = 500000
+```
+
+### Using `test_run`
+
+The test run parameter can be used to run ABFE for a short number of steps, to verify that all steps execute quickly. This should not be used to run production simulations.
+
+To set the test run parameter to 1, we can use:
+
+
+```python
+from deeporigin.utils.core import set_key_to_value
+set_key_to_value(sim._params.abfe_end_to_end, "test_run", 1)
+```
 
 
 
-### Results
+## Results
+
+### Viewing results
 
 After initiating a run, we can view results using:
 
@@ -363,8 +333,24 @@ sim.show_abfe_results()
 
 This shows a table similar to:
 
-![ABFE ligands](../../images/tools/abfe-results.png)
+!!! success "Expected output" 
+    ![ABFE ligands](../../images/tools/abfe-results.png)
 
-If some jobs are running, they are listed in the table, as shown below:
 
-![ABFE ligands](../../images/tools/abfe-results-running.png)
+
+### Exporting results for analysis
+
+
+These results can be exported for analysis using:
+
+```python
+df = sim.get_abfe_results()
+df
+```
+
+!!! success "Expected output" 
+    | Binding       | Solvation            | AnalyticalCorr | Std | Total         | ID         | File       | r_exp_dg | SMILES                                                                                                                                                                               |
+    |---------------|----------------------|----------------|-----|---------------|------------|------------|----------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+    | 16.23   | -27.53 | -7.2 | 0.0 | -36.50 | Ligands-1  | brd-2.sdf  | -9.59    | [H]C1=C([H])C(C(=O)N(C([H])([H])[H])C([H])([H])[H])=C([H])C(C2=C([H])N(C([H])([H])[H])C(=O)C3=C2C([H])=C([H])N3[H])=C1[H]                                      |
+    | -454.99 | -722.01       | -7.58   | 0.0 | -259.44 | Ligands-2  | brd-3.sdf  | -7.09    | [H]C([H])=C([H])C([H])([H])N1C(=O)C2=C(C([H])=C([H])N2[H])C(C2=C([H])C([H])=C([H])C(C(=O)N(C([H])([H])[H])C([H])([H])[H])=C2[H])=C1[H]                    |
+    | -600.31 | -1354.79      | -7.47   | 0.0 | -747.00 | Ligands-3  | brd-4.sdf  | -8.64    | [H]C1=C([H])C(C(=O)N(C([H])([H])[H])C([H])([H])[H])=C([H])C(C2=C([H])N(C([H])([H])/C([H])=C(\[H])C([H])([H])[H])C(=O)C3=C2C([H])=C([H])N3[H])=C1[H]            |

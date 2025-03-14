@@ -57,7 +57,7 @@ jobs:
           pip install interrogate 
           if [ $(interrogate -c pyproject.toml -v . -f 100 | grep "FAILED" | wc -l) = 1 ]; then
              echo "necessary docstrings missing:"
-             interrogate -vv . -f 100 
+             interrogate -vv -c pyproject.toml --omit-covered-files . -f 100 
              exit 1
           fi
 
