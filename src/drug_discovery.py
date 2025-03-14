@@ -642,7 +642,7 @@ class Complex:
         df1 = self.get_csv_results_for(DB_ABFE)
 
         if len(df1) == 0:
-            print("No ABFE results to display. Start a run first.")
+            print("No ABFE results to display.")
             return
 
         df1["ID"] = df1["Ligand"]
@@ -682,7 +682,7 @@ class Complex:
         df = self.get_csv_results_for(DB_RBFE)
 
         if len(df) == 0:
-            print("No RBFE results to display. Start a run first.")
+            print("No RBFE results to display.")
             return pd.DataFrame()
 
         return df
@@ -693,6 +693,9 @@ class Complex:
         This method returns a dataframe showing the results of RBFE runs associated with this simulation session. The ligand file name, 2-D structure, and ΔΔG are shown."""
 
         df = self.get_rbfe_results()
+
+        if len(df) == 0:
+            return
 
         # convert SMILES to aligned images
         smiles1_list = list(df["SMILES1"])
