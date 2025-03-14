@@ -394,6 +394,10 @@ class Complex:
 
             all_dfs.append(df)
 
+        if len(all_dfs) == 0:
+            # no data, so nothing to do
+            return pd.DataFrame()
+
         df = pd.concat(all_dfs)
 
         return df
@@ -606,11 +610,20 @@ class Complex:
 
         This method returns a dataframe showing the results of ABFE runs associated with this simulation session. The ligand file name, 2-D structure, and ΔG are shown."""
 
-        df = self.get_csv_results_for(DB_ABFE)
+        df1 = self.get_csv_results_for(DB_ABFE)
 
-        if len(df) == 0:
+        if len(df1) == 0:
             print("No ABFE results to display. Start a run first.")
             return
+
+        df1["ID"] = df1["Ligand"]
+        df1.drop(columns=["Ligand", "SMILES"], inplace=True)
+
+        df2 = chem.ligands_to_dataframe(self.ligands)
+        df2["SMILES"] = df2["Ligand"]
+        df2.drop(columns=["Ligand"], inplace=True)
+
+        df = pd.merge(df1, df2, left_on="ID", right_on="ID", how="inner")
 
         # convert SMILES to aligned images
         smiles_list = list(df["SMILES"])

@@ -144,12 +144,11 @@ def read_molecules_in_sdf_file(sdf_file: str | Path) -> list[dict]:
     return output
 
 
-def show_ligands(ligands: list[Ligand]):
-    """show ligands in the FEP object in a dataframe. This function visualizes the ligands using core-aligned 2D visualizations."""
+def ligands_to_dataframe(ligands: list[Ligand]):
+    """convert a list of ligands to a pandas dataframe"""
 
     import pandas as pd
 
-    # convert SMILES to aligned images
     smiles_list = [ligand.smiles_string for ligand in ligands]
     id_list = [ligand._do_id for ligand in ligands]
     file_list = [
@@ -157,10 +156,8 @@ def show_ligands(ligands: list[Ligand]):
         for ligand in ligands
     ]
 
-    images = smiles_list_to_base64_png_list(smiles_list)
-
     data = {
-        "Ligand": images,
+        "Ligand": smiles_list,
         "ID": id_list,
         "File": file_list,
     }
@@ -173,6 +170,18 @@ def show_ligands(ligands: list[Ligand]):
         data[key] = [ligand.properties[key] for ligand in ligands]
 
     df = pd.DataFrame(data)
+
+    return df
+
+
+def show_ligands(ligands: list[Ligand]):
+    """show ligands in the FEP object in a dataframe. This function visualizes the ligands using core-aligned 2D visualizations."""
+
+    df = ligands_to_dataframe(ligands)
+
+    # convert SMILES to aligned images
+    images = smiles_list_to_base64_png_list(df["Ligand"].tolist())
+    df["Ligand"] = images
 
     # Use escape=False to allow the <img> tags to render as images
     from IPython.display import HTML, display
