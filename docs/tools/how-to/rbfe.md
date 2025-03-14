@@ -344,7 +344,7 @@ sim.show_rbfe_results()
 This shows a table similar to:
 
 !!! success "Expected output" 
-    ![RBFE ligands](../../images/tools/rbfe-results.png)
+    ![RBFE ligands](../../images/tools/abfe-results.png)
 
 
 
