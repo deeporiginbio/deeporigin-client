@@ -1,6 +1,6 @@
 # Getting started with the Drug Discovery toolbox
 
-This document describes how to use the Drug Discovery toolbox to perform docking, run ABFE and RBFE runs on Deep Origin. Functionality for this is built around the `drug_discovery` module, that can be imported using:
+This document describes how to use the Drug Discovery toolbox to perform docking and run ABFE and RBFE runs on Deep Origin. Functionality for this is built around the [:material-book:drug_discovery](../ref/drug-discovery.md) module, that can be imported using:
 
 ```python
 from deeporigin import drug_discovery as dd
@@ -10,10 +10,12 @@ For the rest of this tutorial, we will assume that this module is imported as `d
 
 ## Prerequisites 
 
-Make sure you have [installed](../../install.md), [configured](../../configure.md), and [authenticated](../../how-to/auth.md) with the Deep Origin python client.
+Make sure you have [:material-page-previous: installed](../../install.md), [:material-page-previous: configured](../../configure.md), and [:material-page-previous: authenticated](../../how-to/auth.md) with the Deep Origin python client.
 
 !!! tip "Recommended installation method" 
     We recommend using [:material-page-previous: these instructions](../../install.md#recommended-installation) to install the Deep Origin python client.
+
+    Following these instructions will install the deeporigin client in an isolated environment using `uv`, and will start a Jupyter instance that you will need for the rest of this tutorial.
 
 
 ## Input data
@@ -100,6 +102,6 @@ Using `sim.show_ligands()`, we see that the ID column is now assigned:
     ![](../../images/tools/ligands-id.png)
 
 
-That's it! We are now ready to perform [docking](./docking.md), [ABFE](./abfe.md), and [RBFE](./rbfe.md).
+That's it! We are now ready to perform [:material-page-next: docking](./docking.md), [:material-page-next: ABFE](./abfe.md), and [:material-page-next: RBFE](./rbfe.md).
 
 

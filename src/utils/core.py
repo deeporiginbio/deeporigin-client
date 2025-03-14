@@ -30,6 +30,30 @@ class PrettyDict(Box):
         self.__repr__()
 
 
+def set_key_to_value(
+    obj: dict,
+    target_key: str,
+    new_value,
+):
+    """utility function to set a key in a dict to a value
+
+    Args:
+        obj (dict): the dictionary
+        target_key (str): the key to be set
+        new_value: the value to be set
+
+    """
+    if isinstance(obj, dict):
+        for key, value in obj.items():
+            if key == target_key:
+                obj[key] = new_value
+            else:
+                set_key_to_value(value, target_key, new_value)
+    elif isinstance(obj, list):
+        for item in obj:
+            set_key_to_value(item, target_key, new_value)
+
+
 @beartype
 def hash_file(file_path: str | Path) -> str:
     """

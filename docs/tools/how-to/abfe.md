@@ -1,6 +1,6 @@
 # ABFE
 
-This document describes how to run a [ABFE](https://en.wikipedia.org/wiki/Free-energy_perturbation) simulation using Deep Origin tools. 
+This document describes how to run a [ABFE :octicons-link-external-16:](https://en.wikipedia.org/wiki/Free-energy_perturbation) simulation using Deep Origin tools. 
 
 ## Prerequisites
 
@@ -43,8 +43,25 @@ You will see a message printed to screen similar to:
 
 ### Multiple ligands
 
-### Parameters
+To run an end-to-end ABFE workflow on multiple ligands, we use:
 
+```python
+sim.run_abfe_end_to_end(ligand_ids=["Ligands-1", "Ligands-2"]) 
+```
+
+Omitting the ligand IDs will run ABFE on all ligands in the `Complex` object.
+
+
+```python
+sim.run_abfe_end_to_end() 
+```
+
+Each ligand will be run in parallel on a separate instance. 
+
+
+## Parameters
+
+### Viewing parameters
 
 The end to end ABFE tool has a number of user-accessible parameters. To view all parameters, use:
 
@@ -281,10 +298,25 @@ sim._params.abfe_end_to_end
     }
 
     ```
+
+### Modifying parameters
+
 Any of these parameters are modifiable using dot notation. For example, to change the number of steps in the MD step, we can use:
 
 ```python
 sim._params.abfe_end_to_end.md.steps = 500000
+```
+
+### Using `test_run`
+
+The test run parameter can be used to run ABFE for a short number of steps, to verify that all steps execute quickly. This should not be used to run production simulations.
+
+To set the test run parameter to 1, we can use:
+
+
+```python
+from deeporigin.utils.core import set_key_to_value
+set_key_to_value(sim._params.abfe_end_to_end, "test_run", 1)
 ```
 
 

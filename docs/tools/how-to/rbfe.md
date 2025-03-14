@@ -1,6 +1,6 @@
 # RBFE
 
-This document describes how to run a [RBFE](https://en.wikipedia.org/wiki/Free-energy_perturbation) simulation using Deep Origin tools. 
+This document describes how to run a [RBFE :octicons-link-external-16:](https://en.wikipedia.org/wiki/Free-energy_perturbation) simulation using Deep Origin tools. 
 
 ## Prerequisites
 

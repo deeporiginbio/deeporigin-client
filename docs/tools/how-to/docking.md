@@ -1,6 +1,6 @@
 # Docking
 
-This document describes how to [dock](https://en.wikipedia.org/wiki/Docking_(molecular)) a set of ligands to a protein  using Deep Origin tools. 
+This document describes how to [dock :octicons-link-external-16:](https://en.wikipedia.org/wiki/Docking_(molecular)) a set of ligands to a protein  using Deep Origin tools. 
 
 ## Prerequisites
 
