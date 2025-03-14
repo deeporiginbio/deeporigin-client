@@ -295,6 +295,12 @@ class Complex:
     def get_status_for(self, tool: VALID_TOOLS) -> dict:
         return query_run_statuses(self._job_ids[tool])
 
+    def get_status(self):
+        data = dict()
+        for tool in list(get_args(VALID_TOOLS)):
+            data[tool] = self.get_status_for(tool)
+        print(json.dumps(data, indent=2))
+
     def _repr_pretty_(self, p, cycle):
         """pretty print a Docking object"""
 
@@ -352,7 +358,7 @@ class Complex:
             ligand1_ids = [None for _ in file_ids]
 
         if COL_LIGAND2 in df.columns:
-            ligand2_ids = df[COL_LIGAND1].tolist()
+            ligand2_ids = df[COL_LIGAND2].tolist()
         else:
             ligand2_ids = [None for _ in file_ids]
 
@@ -396,7 +402,7 @@ class Complex:
         """get docking results from Deep Origin"""
 
         # to do -- some way to make sure that we handle failed runs, complete runs, etc.
-        status = self.get_status("Docking")
+        # status = self.get_status("Docking")
 
         # download the CSV files for this run
 
@@ -437,6 +443,16 @@ class Complex:
                 "Protein must be uploaded to Deep Origin before docking."
             )
 
+        df = pd.DataFrame(
+            api.get_dataframe(
+                DB_DOCKING,
+                return_type="dict",
+                use_file_names=False,
+            )
+        )
+
+        df = df[self._hash == df[COL_COMPLEX_HASH]]
+
         smiles_strings = [ligand.smiles_string for ligand in self.ligands]
 
         chunks = list(more_itertools.chunked(smiles_strings, batch_size))
@@ -450,6 +466,12 @@ class Complex:
 
         for chunk in chunks:
             params["smiles_list"] = chunk
+            smiles_hash = hash_strings(params["smiles_list"])
+
+            if smiles_hash in df[COL_SMILES_HASH].tolist():
+                print("Skipping this tranche because this has already been run...")
+                continue
+
             job_id = _start_tool_run(
                 params=params,
                 protein_id=self.protein._do_id,
@@ -601,6 +623,31 @@ class Complex:
 
         display(HTML(df.to_html(escape=False)))
 
+    def show_rbfe_results(self):
+        """Show RBFE results in a dataframe.
+
+        This method returns a dataframe showing the results of RBFE runs associated with this simulation session. The ligand file name, 2-D structure, and ΔG are shown."""
+
+        df = self.get_csv_results_for(DB_RBFE)
+
+        if len(df) == 0:
+            print("No RBFE results to display. Start a run first.")
+            return
+
+        # convert SMILES to aligned images
+        smiles1_list = list(df["SMILES1"])
+        smiles2_list = list(df["SMILES2"])
+        df.drop("SMILES1", axis=1, inplace=True)
+        df.drop("SMILES2", axis=1, inplace=True)
+
+        df["Structure1"] = chem.smiles_list_to_base64_png_list(smiles1_list)
+        df["Structure2"] = chem.smiles_list_to_base64_png_list(smiles2_list)
+
+        # Use escape=False to allow the <img> tags to render as images
+        from IPython.display import HTML, display
+
+        display(HTML(df.to_html(escape=False)))
+
 
 @beartype
 def _start_tool_run(
@@ -713,8 +760,6 @@ def _start_tool_run(
             },
         }
 
-    print(outputs)
-
     job_id = run._process_job(
         inputs=params,
         outputs=outputs,
@@ -763,6 +808,16 @@ def _start_tool_run(
         row_id=row_id,
         database_id=tool,
     )
+
+    # write SMILEShash
+    if tool == "Docking":
+        smiles_hash = smiles_hash = hash_strings(params["smiles_list"])
+        api.set_cell_data(
+            smiles_hash,
+            column_id=COL_SMILES_HASH,
+            row_id=row_id,
+            database_id=tool,
+        )
 
     # write step
     if tool in ["ABFE", "RBFE"]:
