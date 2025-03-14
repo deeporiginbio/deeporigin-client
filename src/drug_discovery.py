@@ -423,12 +423,14 @@ class Complex:
         # to do -- some way to make sure that we handle failed runs, complete runs, etc.
         # status = self.get_status("Docking")
 
-        # TODO -- need to fuse this dataframe with ligands
-        # so that used-supplied props are shown in this table
+        df1 = self.get_csv_results_for("Docking")
 
-        # download the CSV files for this run
+        df2 = chem.ligands_to_dataframe(self.ligands)
+        df2["SMILES"] = df2["Ligand"]
+        df2.drop(columns=["Ligand"], inplace=True)
 
-        return self.get_csv_results_for("Docking")
+        df = pd.merge(df1, df2, on="SMILES", how="inner")
+        return df
 
     def show_docking_results(self):
         """show results of bulk Docking run in a table, rendering 2D structures of molecules"""
