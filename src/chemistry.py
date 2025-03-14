@@ -176,7 +176,12 @@ def ligands_to_dataframe(ligands: list[Ligand]):
 
 
 def show_ligands(ligands: list[Ligand]):
-    """show ligands in the FEP object in a dataframe. This function visualizes the ligands using core-aligned 2D visualizations."""
+    """show ligands in the FEP object in a dataframe. This function visualizes the ligands using core-aligned 2D visualizations.
+
+    Args:
+        ligands (list[Ligand]): list of ligands
+
+    """
 
     df = ligands_to_dataframe(ligands)
 
@@ -193,11 +198,19 @@ def show_ligands(ligands: list[Ligand]):
 @beartype
 @_requires_rdkit
 def read_sdf_properties(sdf_file: str | Path) -> dict:
-    """Reads all user-defined properties from an SDF file (single molecule) and returns them as a dictionary."""
+    """Reads all user-defined properties from an SDF file (single molecule) and returns them as a dictionary.
+
+    Args:
+        sdf_file: Path to the SDF file.
+
+    """
 
     from rdkit import Chem
 
-    supplier = Chem.SDMolSupplier(str(sdf_file), sanitize=False)
+    supplier = Chem.SDMolSupplier(
+        str(sdf_file),
+        sanitize=False,
+    )
     mol = supplier[0]  # Assuming a single molecule
 
     if mol is None:
@@ -208,11 +221,11 @@ def read_sdf_properties(sdf_file: str | Path) -> dict:
 
 @beartype
 @_requires_rdkit
-def get_properties_in_sdf_file(sdf_file: str) -> list:
+def get_properties_in_sdf_file(sdf_file: str | Path) -> list:
     """Returns a list of all user-defined properties in an SDF file
 
     Args:
-        sdf_file (str): Path to the SDF file.
+        sdf_file: Path to the SDF file.
 
     Returns:
         list: A list of the names of all user-defined properties in the SDF file.
@@ -222,7 +235,7 @@ def get_properties_in_sdf_file(sdf_file: str) -> list:
     from rdkit import Chem
 
     # Load molecules from the SDF file
-    supplier = Chem.SDMolSupplier(sdf_file, sanitize=False)
+    supplier = Chem.SDMolSupplier(str(sdf_file), sanitize=False)
 
     properties = []
 
@@ -244,7 +257,7 @@ def count_molecules_in_sdf_file(sdf_file: str | Path) -> int:
     while suppressing RDKit's error logging for sanitization issues.
 
     Args:
-        sdf_file (str or Path): Path to the SDF file.
+        sdf_file: Path to the SDF file.
 
     Returns:
         int: The number of molecules successfully read in the SDF file.
@@ -273,12 +286,19 @@ def count_molecules_in_sdf_file(sdf_file: str | Path) -> int:
 
 @beartype
 @_requires_rdkit
-def read_property_values(sdf_file: str, key: str):
-    """Given a SDF file with more than 1 molecule, return the values of the properties for each molecule"""
+def read_property_values(sdf_file: str | Path, key: str):
+    """Given a SDF file with more than 1 molecule, return the values of the properties for each molecule
+
+    Args:
+        sdf_file: Path to the SDF file.
+        key: The key of the property to read.
+
+
+    """
     from rdkit import Chem
 
     suppl = Chem.SDMolSupplier(
-        sdf_file,
+        str(sdf_file),
         removeHs=False,
         sanitize=False,
     )
@@ -496,7 +516,13 @@ def smiles_to_base64_png(
 @beartype
 @_requires_rdkit
 def smiles_to_sdf(smiles: str, sdf_path: str) -> None:
-    """convert a SMILES string to a SDF file"""
+    """convert a SMILES string to a SDF file
+
+    Args:
+        smiles (str): SMILES string
+        sdf_path (str): Path to the SDF file
+
+    """
 
     from rdkit import Chem
     from rdkit.Chem import AllChem, SDWriter
@@ -548,59 +574,3 @@ def sdf_to_smiles(sdf_file: str | Path) -> list[str]:
     smiles_list = sorted(set(smiles_list))
 
     return smiles_list
-
-
-@beartype
-@_requires_rdkit
-def is_ligand_protonated(sdf_file: str) -> bool:
-    """
-    Determine if the ligand (loaded from an SDF file) is protonated.
-
-    This heuristic function checks for:
-      - A positive overall formal charge.
-      - The presence of a protonated carboxyl group (-COOH).
-      - The presence of a protonated amine (e.g., -NH3+).
-      - (Optionally) Other protonated functional groups.
-
-    Parameters:
-        sdf_file (str): Path to the SDF file containing the ligand.
-
-    Returns:
-        bool: True if protonated evidence is found; False otherwise.
-    """
-    from rdkit import Chem
-
-    # Load the molecule from the SDF file.
-    # Use removeHs=False so that explicit hydrogens are preserved.
-    mol = Chem.MolFromMolFile(sdf_file, removeHs=False)
-    if mol is None:
-        raise ValueError(f"Could not load molecule from {sdf_file}")
-
-    # 1. Check overall formal charge.
-    #    (A positive net charge is a strong indicator of protonation.)
-    if Chem.GetFormalCharge(mol) > 0:
-        return True
-
-    # 2. Check for a protonated carboxylic acid.
-    #    The SMARTS '[CX3](=O)[OX1H]' matches a typical protonated -COOH group.
-    prot_carboxy_smarts = "[CX3](=O)[OX1H]"
-    prot_carboxy = Chem.MolFromSmarts(prot_carboxy_smarts)
-    if mol.HasSubstructMatch(prot_carboxy):
-        return True
-
-    # 3. Check for a protonated amine.
-    #    The SMARTS '[NX3+;H3]' matches, for example, an ammonium group (R-NH3+).
-    prot_amine_smarts = "[NX3+;H3]"
-    prot_amine = Chem.MolFromSmarts(prot_amine_smarts)
-    if mol.HasSubstructMatch(prot_amine):
-        return True
-
-    # 4. (Optional) Add more SMARTS queries for other protonated groups
-    #    For example, if you want to catch protonated imidazole (imidazolium):
-    prot_imidazolium_smarts = "c1[n+][cH]cn1"
-    prot_imidazolium = Chem.MolFromSmarts(prot_imidazolium_smarts)
-    if mol.HasSubstructMatch(prot_imidazolium):
-        return True
-
-    # If no indicators of protonation were found, assume the ligand is not protonated.
-    return False
