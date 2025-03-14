@@ -574,10 +574,14 @@ class Complex:
         ligand1_id: str,
         ligand2_id: str,
     ):
-        """Method to run an end-to-end ABFE run.
+        """Run end-to-end ABFE run on a pair of ligands.
 
         Args:
-            ligand_ids (Optional[str], optional): List of ligand IDs to run. Defaults to None. When None, all ligands in the object will be run. To view a list of valid ligand IDs, use the `.show_ligands()` method"""
+            ligand1_id (str): ID of ligand 1
+            ligand2_id (str): ID of ligand 2
+
+
+        """
 
         if ligand1_id is None or ligand2_id is None:
             raise DeepOriginException(

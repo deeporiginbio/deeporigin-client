@@ -12,8 +12,8 @@ For the rest of this tutorial, we will assume that this module is imported as `d
 
 Make sure you have [installed](../../install.md), [configured](../../configure.md), and [authenticated](../../how-to/auth.md) with the Deep Origin python client.
 
-!!! tip "Use uv to install `deeporigin`" 
-    We strongly recommend using [uv](https://docs.astral.sh/uv/) to install Deep Origin in a separate project, following instructions [here](../../install.md#using-uv-to-set-up-deeporigin-on-your-computer). This gives you all the dependencies you need, together with a stand-alone install of Jupyter Lab that you can use with `deeporigin`
+!!! tip "Recommended installation method" 
+    We recommend using [:material-page-previous: these instructions](../../install.md#recommended-installation) to install the Deep Origin python client.
 
 
 ## Input data
