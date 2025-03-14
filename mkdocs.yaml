@@ -79,9 +79,11 @@ nav:
     - Check tool run status: tools/how-to/check-status.md
     - Wait for a tool run: tools/how-to/wait-for-run.md
   - Toolboxes:
-    - Docking: tools/how-to/docking.md
-    - ABFE: tools/how-to/abfe.md
-    - RBFE: tools/how-to/rbfe.md
+    - Drug Discovery: 
+      - Getting started: tools/how-to/drug-discovery.md
+      - Docking: tools/how-to/docking.md
+      - ABFE: tools/how-to/abfe.md
+      - RBFE: tools/how-to/rbfe.md
   - Available tools:
     - Autodock Vina: tools/vina.md
     - Receptor Prep (PDBFixer): tools/pdbfixer.md

@@ -5,6 +5,7 @@ import importlib.resources
 import json
 import os
 from dataclasses import dataclass, field
+from importlib.resources import path
 from typing import Literal, Optional, get_args
 
 import more_itertools
@@ -52,6 +53,11 @@ DATA_DIRS[DB_DOCKING] = os.path.join(os.path.expanduser("~"), ".deeporigin", DB_
 os.makedirs(DATA_DIRS[DB_ABFE], exist_ok=True)
 os.makedirs(DATA_DIRS[DB_RBFE], exist_ok=True)
 os.makedirs(DATA_DIRS[DB_DOCKING], exist_ok=True)
+
+
+# example data
+with path("deeporigin.data.brd", "brd.pdb") as file_path:
+    EXAMPLE_DATA_DIR = file_path.parent
 
 
 @beartype
@@ -456,6 +462,11 @@ class Complex:
         )
 
         df = df[self._hash == df[COL_COMPLEX_HASH]]
+
+        # remove failed runs
+        statuses = query_run_statuses(df["JobID"].tolist())
+        df["Status"] = df["JobID"].replace(statuses)
+        df = df["Failed" != df["Status"]]
 
         smiles_strings = [ligand.smiles_string for ligand in self.ligands]
 
