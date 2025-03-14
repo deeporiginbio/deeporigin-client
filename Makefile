@@ -20,7 +20,7 @@ else
 	$(eval n_workers="auto")
 endif 
 	@source $(CURDIR)/venv/bin/activate && \
-	interrogate -c pyproject.toml -v . -f 100 && \
+	interrogate -c pyproject.toml -vv . -f 100 --omit-covered-files && \
 	python3 -m coverage run --source="src" -m pytest -x -n $(n_workers) --failed-first -k $(chosen_tests) --client $(client) --responses $(responses) --dist loadfile && \
 	python3 -m coverage html && \
 	deactivate

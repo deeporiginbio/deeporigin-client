@@ -241,7 +241,9 @@ class Complex:
         return complex
 
     def connect(self) -> None:
-        """connect to the databases on Deep Origin"""
+        """Connect instance of Complex to the databases on Deep Origin. This method uploads ligand and protein files if needed, and retrieves job IDs of tasks for all tools, if they exist.
+
+        Before running any tool, it is required to call this method."""
 
         if self._db is None:
             self._db = _ensure_dbs()
@@ -498,7 +500,7 @@ class Complex:
             self._job_ids["Docking"].append(job_id)
 
     @beartype
-    def abfe_end_to_end(
+    def run_abfe_end_to_end(
         self,
         *,
         ligand_ids: Optional[list[str]] = None,
@@ -556,7 +558,7 @@ class Complex:
             self._job_ids[DB_ABFE].append(job_id)
 
     @beartype
-    def rbfe_end_to_end(
+    def run_rbfe_end_to_end(
         self,
         *,
         ligand1_id: str,
@@ -662,16 +664,25 @@ class Complex:
 
         display(HTML(df.to_html(escape=False)))
 
-    def show_rbfe_results(self):
-        """Show RBFE results in a dataframe.
+    def get_rbfe_results(self):
+        """Fetch RBFE results and return in a dataframe.
 
-        This method returns a dataframe showing the results of RBFE runs associated with this simulation session. The ligand file name, 2-D structure, and ΔG are shown."""
+        This method returns a dataframe showing the results of RBFE runs associated with this simulation session. The ligand file name, SMILES string and ΔΔG are shown."""
 
         df = self.get_csv_results_for(DB_RBFE)
 
         if len(df) == 0:
             print("No RBFE results to display. Start a run first.")
-            return
+            return pd.DataFrame()
+
+        return df
+
+    def show_rbfe_results(self):
+        """Show RBFE results in a dataframe.
+
+        This method returns a dataframe showing the results of RBFE runs associated with this simulation session. The ligand file name, 2-D structure, and ΔΔG are shown."""
+
+        df = self.get_rbfe_results()
 
         # convert SMILES to aligned images
         smiles1_list = list(df["SMILES1"])

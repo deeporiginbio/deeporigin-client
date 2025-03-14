@@ -14,7 +14,7 @@
             "save_gmx_files": false
         },
         "test_run": 0,
-        "thread_pinning": 1,
+        "thread_pinning": 0,
         "thread_pinning_offset": 0
     },
     "ligand1_prep": {
@@ -32,7 +32,7 @@
             "save_gmx_files": false
         },
         "test_run": 0,
-        "thread_pinning": 1,
+        "thread_pinning": 0,
         "thread_pinning_offset": 0
     },
     "ligand2_prep": {
@@ -127,7 +127,7 @@
         "steps": 1250000,
         "system": "complex",
         "test_run": 0,
-        "thread_pinning": 1,
+        "thread_pinning": 0,
         "thread_pinning_offset": 0,
         "threads": 0,
         "workers": 0
@@ -191,7 +191,7 @@
         "softcore_alpha": 0.5,
         "steps": 300000,
         "test_run": 0,
-        "thread_pinning": 1,
+        "thread_pinning": 0,
         "thread_pinning_offset": 0,
         "threads": 0,
         "workers": 0
@@ -255,7 +255,7 @@
         "softcore_alpha": 0.5,
         "steps": 300000,
         "test_run": 0,
-        "thread_pinning": 1,
+        "thread_pinning": 0,
         "thread_pinning_offset": 0,
         "threads": 0,
         "workers": 0

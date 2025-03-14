@@ -25,7 +25,7 @@ To run an end-to-end RBFE workflow on a single pair of ligands, we use:
 
 
 ```python
-sim.rbfe_end_to_end(ligand1_id"Ligands-1", ligand2_id="Ligands-2") # for example
+sim.run_rbfe_end_to_end(ligand1_id"Ligands-1", ligand2_id="Ligands-2") # for example
 ```
 
 This queues up a task on Deep Origin. When it completes, outputs will be written to the appropriate column in this database. 

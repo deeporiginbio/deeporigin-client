@@ -26,7 +26,7 @@ To run an end-to-end ABFE workflow on a single ligand, we use:
 
 
 ```python
-sim.abfe_end_to_end(ligand_ids=["Ligands-1"]) # for example
+sim.run_abfe_end_to_end(ligand_ids=["Ligands-1"]) # for example
 ```
 
 This queues up a task on Deep Origin. When it completes, outputs will be written to the appropriate column in this database. 

@@ -94,7 +94,7 @@ nav:
     - Running tools: tools/ref/run.md
     - Utils: tools/ref/utils.md
     - Toolkit: tools/ref/toolkit.md
-    - FEP: tools/ref/fep.md
+    - Drug Discovery: tools/ref/drug-discovery.md
 - Changelog: changelog.md
 - Support: https://www.support.deeporigin.com/servicedesk/customer/portals
 
