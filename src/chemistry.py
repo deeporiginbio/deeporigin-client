@@ -29,9 +29,8 @@ class Ligand:
     def __post_init__(self):
         """post init tasks"""
 
-        if self.file is not None:
-            if not os.path.exists(self.file):
-                raise DeepOriginException(f"File {self.file} does not exist")
+        if self.file is not None and not os.path.exists(self.file):
+            raise DeepOriginException(f"File {self.file} does not exist")
 
         # we require either a SMILES string or a file
         if self.file is None and self.smiles_string is None:

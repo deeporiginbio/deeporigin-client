@@ -233,12 +233,12 @@ class Complex:
         protein = chem.Protein(protein_file)
 
         # Create the Complex instance
-        complex = cls(
+        instance = cls(
             ligands=ligands,
             protein=protein,
         )
 
-        return complex
+        return instance
 
     def connect(self) -> None:
         """Connect instance of Complex to the databases on Deep Origin. This method uploads ligand and protein files if needed, and retrieves job IDs of tasks for all tools, if they exist.
@@ -646,13 +646,7 @@ class Complex:
         df2["SMILES"] = df2["Ligand"]
         df2.drop(columns=["Ligand"], inplace=True)
 
-        df = pd.merge(
-            df1,
-            df2,
-            left_on="ID",
-            right_on="ID",
-            how="inner",
-        )
+        df = pd.merge(df1, df2, on="ID", how="inner")
 
         return df
 
@@ -731,13 +725,11 @@ def _start_tool_run(
     """
 
     # input validation
-    if tool == "ABFE":
-        if ligand1_id is None:
-            raise ValueError("ligand1_id is required for ABFE")
+    if tool == "ABFE" and ligand1_id is None:
+        raise ValueError("ligand1_id is required for ABFE")
 
-    if tool == "RBFE":
-        if ligand1_id is None or ligand2_id is None:
-            raise ValueError("ligand1_id and ligand2_id is required for RBFE")
+    if tool == "RBFE" and (ligand1_id is None or ligand2_id is None):
+        raise ValueError("ligand1_id and ligand2_id is required for RBFE")
 
     # tool key mapper
     tool_key_mapper = dict(
