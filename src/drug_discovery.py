@@ -301,9 +301,16 @@ class Complex:
 
     @beartype
     def get_status_for(self, tool: VALID_TOOLS) -> dict:
+        """Return status for jobs corresponding to a particular tool
+
+        Args:
+            tool: one of "Docking", "ABFE", "RBFE"
+        """
         return query_run_statuses(self._job_ids[tool])
 
     def get_status(self):
+        """Returns status for all runs for all tools"""
+
         data = dict()
         for tool in list(get_args(VALID_TOOLS)):
             data[tool] = self.get_status_for(tool)
@@ -322,15 +329,15 @@ class Complex:
             p.text(")")
 
     def show_ligands(self):
-        """show all ligands in complex object"""
+        """Show all ligands in complex object in a table, rendering ligands as 2D structures"""
 
         chem.show_ligands(self.ligands)
 
     def get_csv_results_for(self, tool: VALID_TOOLS):
-        """generic method to get CSV results for a particular tool and combine them as need be
+        """Generic method to get CSV results for a particular tool and combine them as need be
 
         Args:
-            tool: A valid tool
+            tool: One of "Docking", "ABFE", "RBFE"
         """
 
         df = pd.DataFrame(
@@ -411,10 +418,13 @@ class Complex:
         return df
 
     def get_docking_results(self) -> pd.DataFrame:
-        """get docking results from Deep Origin"""
+        """Get docking results from Deep Origin"""
 
         # to do -- some way to make sure that we handle failed runs, complete runs, etc.
         # status = self.get_status("Docking")
+
+        # TODO -- need to fuse this dataframe with ligands
+        # so that used-supplied props are shown in this table
 
         # download the CSV files for this run
 
