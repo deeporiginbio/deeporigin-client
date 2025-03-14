@@ -1,4 +1,4 @@
-"""module that contains some utility functions for chemistry"""
+"""Module that contains some utility functions for working with molecules and proteins"""
 
 import base64
 import importlib.util
@@ -15,7 +15,7 @@ from deeporigin.exceptions import DeepOriginException
 
 @dataclass
 class Ligand:
-    """class to represent a ligand (typically backed by a SDF file)"""
+    """Class to represent a ligand (typically backed by a SDF file)"""
 
     file: Optional[str | Path] = None
     smiles_string: Optional[str] = None
@@ -73,7 +73,7 @@ class Ligand:
 
 @dataclass
 class Protein:
-    """class to represent a protein (typically backed by a PDB file)"""
+    """Class to represent a protein (typically backed by a PDB file)"""
 
     file: str | Path
     name: Optional[str] = None
@@ -87,10 +87,12 @@ class Protein:
             self.name = self.file.name
 
 
-def requires_rdkit(func):
+def _requires_rdkit(func):
     """
     A decorator that checks for the presence of RDKit via importlib.util.find_spec.
     If RDKit is unavailable, raises a user-friendly ImportError.
+
+    Internal use only.
     """
 
     @wraps(func)
@@ -108,7 +110,7 @@ def requires_rdkit(func):
 
 
 @beartype
-@requires_rdkit
+@_requires_rdkit
 def read_molecules_in_sdf_file(sdf_file: str | Path) -> list[dict]:
     """
     Reads an SDF file containing one or more molecules, and for each molecule:
@@ -189,7 +191,7 @@ def show_ligands(ligands: list[Ligand]):
 
 
 @beartype
-@requires_rdkit
+@_requires_rdkit
 def read_sdf_properties(sdf_file: str | Path) -> dict:
     """Reads all user-defined properties from an SDF file (single molecule) and returns them as a dictionary."""
 
@@ -205,9 +207,18 @@ def read_sdf_properties(sdf_file: str | Path) -> dict:
 
 
 @beartype
-@requires_rdkit
+@_requires_rdkit
 def get_properties_in_sdf_file(sdf_file: str) -> list:
-    """returns a list of all user-defined properties in an SDF file"""
+    """Returns a list of all user-defined properties in an SDF file
+
+    Args:
+        sdf_file (str): Path to the SDF file.
+
+    Returns:
+        list: A list of the names of all user-defined properties in the SDF file.
+
+
+    """
     from rdkit import Chem
 
     # Load molecules from the SDF file
@@ -226,7 +237,7 @@ def get_properties_in_sdf_file(sdf_file: str) -> list:
 
 
 @beartype
-@requires_rdkit
+@_requires_rdkit
 def count_molecules_in_sdf_file(sdf_file: str | Path) -> int:
     """
     Count the number of valid (sanitizable) molecules in an SDF file using RDKit,
@@ -236,12 +247,12 @@ def count_molecules_in_sdf_file(sdf_file: str | Path) -> int:
         sdf_file (str or Path): Path to the SDF file.
 
     Returns:
-        int: The number of molecules successfully sanitized.
+        int: The number of molecules successfully read in the SDF file.
     """
-    # Disable RDKit error logging to suppress messages about kekulization/sanitization.
 
     from rdkit import Chem, RDLogger
 
+    # Disable RDKit error logging to suppress messages about kekulization/sanitization.
     RDLogger.DisableLog("rdApp.error")
 
     # Use sanitize=False to defer sanitization until we can handle exceptions ourselves.
@@ -261,9 +272,9 @@ def count_molecules_in_sdf_file(sdf_file: str | Path) -> int:
 
 
 @beartype
-@requires_rdkit
+@_requires_rdkit
 def read_property_values(sdf_file: str, key: str):
-    """given a SDF file with more than 1 molecule, return the values of the properties for each molecule"""
+    """Given a SDF file with more than 1 molecule, return the values of the properties for each molecule"""
     from rdkit import Chem
 
     suppl = Chem.SDMolSupplier(
@@ -285,7 +296,7 @@ def read_property_values(sdf_file: str, key: str):
 
 
 @beartype
-@requires_rdkit
+@_requires_rdkit
 def split_sdf_file(
     input_sdf_path: str | Path,
     output_prefix: str = "ligand",
@@ -359,7 +370,7 @@ def split_sdf_file(
 
 
 @beartype
-@requires_rdkit
+@_requires_rdkit
 def smiles_list_to_base64_png_list(
     smiles_list: list[str],
     *,
@@ -438,7 +449,7 @@ def smiles_list_to_base64_png_list(
 
 
 @beartype
-@requires_rdkit
+@_requires_rdkit
 def smiles_to_base64_png(
     smiles: str,
     *,
@@ -483,7 +494,7 @@ def smiles_to_base64_png(
 
 
 @beartype
-@requires_rdkit
+@_requires_rdkit
 def smiles_to_sdf(smiles: str, sdf_path: str) -> None:
     """convert a SMILES string to a SDF file"""
 
@@ -509,7 +520,7 @@ def smiles_to_sdf(smiles: str, sdf_path: str) -> None:
 
 
 @beartype
-@requires_rdkit
+@_requires_rdkit
 def sdf_to_smiles(sdf_file: str | Path) -> list[str]:
     """
     Extracts the SMILES strings of all valid molecules from an SDF file using RDKit.
@@ -540,7 +551,7 @@ def sdf_to_smiles(sdf_file: str | Path) -> list[str]:
 
 
 @beartype
-@requires_rdkit
+@_requires_rdkit
 def is_ligand_protonated(sdf_file: str) -> bool:
     """
     Determine if the ligand (loaded from an SDF file) is protonated.
