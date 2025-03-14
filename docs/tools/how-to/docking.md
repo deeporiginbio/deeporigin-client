@@ -2,16 +2,16 @@
 
 This document describes how to [dock](https://en.wikipedia.org/wiki/Docking_(molecular)) a set of ligands to a protein  using Deep Origin tools. 
 
+## Prerequisites
 
-
-For the rest of this tutorial we assume that we have an initiialized and configured `Complex` object:
+We assume that we have an initialized and configured `Complex` object:
 
 ```python
 from deeporigin import drug_discovery as dd
 sim = dd.Complex.from_dir("/path/to/folder/")
 sim.connect()
 ```
-
+For more details on how to get started, see [:material-page-previous: Getting Started ](./drug-discovery.md).
 
 ## Starting a docking run
 
@@ -52,6 +52,8 @@ sim.get_status_for("Docking")
 ## Results
 
 ### Viewing results
+
+
 
 After completion of bulk docking, we can view results using:
 

@@ -616,10 +616,10 @@ class Complex:
 
         self._job_ids[DB_RBFE].append(job_id)
 
-    def show_abfe_results(self):
-        """Show ABFE results in a dataframe.
+    def get_abfe_results(self):
+        """get ABFE results and return in a dataframe.
 
-        This method returns a dataframe showing the results of ABFE runs associated with this simulation session. The ligand file name, 2-D structure, and ΔG are shown."""
+        This method returns a dataframe showing the results of ABFE runs associated with this simulation session. The ligand file name and ΔG are shown, together with user-supplied properties"""
 
         df1 = self.get_csv_results_for(DB_ABFE)
 
@@ -634,7 +634,22 @@ class Complex:
         df2["SMILES"] = df2["Ligand"]
         df2.drop(columns=["Ligand"], inplace=True)
 
-        df = pd.merge(df1, df2, left_on="ID", right_on="ID", how="inner")
+        df = pd.merge(
+            df1,
+            df2,
+            left_on="ID",
+            right_on="ID",
+            how="inner",
+        )
+
+        return df
+
+    def show_abfe_results(self):
+        """Show ABFE results in a dataframe.
+
+        This method returns a dataframe showing the results of ABFE runs associated with this simulation session. The ligand file name, 2-D structure, and ΔG are shown."""
+
+        df = self.get_abfe_results()
 
         # convert SMILES to aligned images
         smiles_list = list(df["SMILES"])
