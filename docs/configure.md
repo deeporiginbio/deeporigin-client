@@ -13,7 +13,7 @@ To run this package outside of a Deep Origin workstation (for example, on your o
 
     ```python
     from deeporigin import config
-    config.set("organization_id", "org-id")
+    config.set_value("organization_id", "org-id")
     ```
 
 
