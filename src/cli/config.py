@@ -5,11 +5,7 @@ import shutil
 
 import cement
 import yaml
-from deeporigin.config import (
-    CONFIG_YML_LOCATION,
-    TEMPLATE,
-    get_value,
-)
+from deeporigin.config import CONFIG_YML_LOCATION, get_value, set_value
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.utils.core import (
     _ensure_do_folder,
@@ -64,30 +60,7 @@ class ConfigController(cement.Controller):
         key = self.app.pargs.key
         value = self.app.pargs.value
 
-        # check that key exists in the confuse template
-        if key not in TEMPLATE.keys():
-            raise DeepOriginException(
-                message=f"{key} is not a valid configuration key.",
-                fix=f"The following configuration keys are supported: {', '.join(list(TEMPLATE.keys()))}",
-            )
-
-        # check if config file exists
-        if os.path.isfile(CONFIG_YML_LOCATION):
-            with open(CONFIG_YML_LOCATION, "r") as file:
-                data = yaml.safe_load(file)
-        else:
-            # no file.
-            data = {}
-        data[key] = value
-
-        # check that this is valid
-        get_value(override_values=tuple(data.items()))
-
-        # save configuration
-        with open(CONFIG_YML_LOCATION, "w") as file:
-            yaml.dump(data, file, default_flow_style=False)
-
-        print(f"✔︎ {key} → {value}")
+        set_value(key, value)
 
     @cement.ex(
         help="Save configuration to a file",

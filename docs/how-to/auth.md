@@ -5,17 +5,19 @@
 
 To use most of the functionality of the CLI or Python client, you must first run one of the following commands to sign into Deep Origin.
 
-=== "CLI"
 
-    ```bash
-    deeporigin authenticate
-    ```
 
 === "Python"
 
     ```python
     from deeporigin import auth
     auth.authenticate()
+    ```
+
+=== "CLI"
+
+    ```bash
+    deeporigin authenticate
     ```
 
 In either case, you will be presented with a prompt similar to below:
