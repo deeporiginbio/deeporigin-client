@@ -542,15 +542,6 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#set-a-configuration-variable" class="md-nav__link">
-    <span class="md-ellipsis">
-      Set a configuration variable
-    </span>
-  </a>
-  
-</li>
-      
     </ul>
   
 </nav>
@@ -2341,15 +2332,6 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#set-a-configuration-variable" class="md-nav__link">
-    <span class="md-ellipsis">
-      Set a configuration variable
-    </span>
-  </a>
-  
-</li>
-      
     </ul>
   
 </nav>
@@ -2374,10 +2356,29 @@
 <p>On a Deep Origin workstation, no configuration is needed! Within a workstation, the Deep Origin CLI and Python client are automatically configured.</p>
 <h2 id="on-your-local-computer">On your local computer<a class="headerlink" href="#on-your-local-computer" title="Permanent link">&para;</a></h2>
 <p>To run this package outside of a Deep Origin workstation (for example, on your own computer), first you need to configure this package. After installing this package, run the following to configure your organization, replacing <code>org-id</code> with the ID of the Deep Origin organization that you would like to work with.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">python</label><label for="__tabbed_1_2">CLI</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">deeporigin</span> <span class="kn">import</span><span class="w"> </span><span class="nn">config</span>
+<span class="n">config</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;organization_id&quot;</span><span class="p">,</span> <span class="s2">&quot;org-id&quot;</span><span class="p">)</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
 <div class="language-bash highlight"><pre><span></span><code>deeporigin<span class="w"> </span>config<span class="w"> </span><span class="nb">set</span><span class="w"> </span>organization_id<span class="w"> </span><span class="o">[</span>org-id<span class="o">]</span>
 </code></pre></div>
+</div>
+</div>
+</div>
 <h2 id="view-configuration">View configuration<a class="headerlink" href="#view-configuration" title="Permanent link">&para;</a></h2>
 <p>To view the configuration for this package, run:</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">python</label><label for="__tabbed_2_2">CLI</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin</span><span class="w"> </span><span class="kn">import</span> <span class="n">config</span>
+<span class="n">config</span><span class="o">.</span><span class="n">get_value</span><span class="p">()</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
 <div class="language-bash highlight"><pre><span></span><code>deeporigin<span class="w"> </span>config<span class="w"> </span>show
 </code></pre></div>
 <p>This will display a table such as below:</p>
@@ -2400,13 +2401,9 @@
 │ feature_flags               │                                     │
 ╰─────────────────────────────┴─────────────────────────────────────╯
 </code></pre></div>
-<h2 id="set-a-configuration-variable">Set a configuration variable<a class="headerlink" href="#set-a-configuration-variable" title="Permanent link">&para;</a></h2>
-<p>To set a variable, run:</p>
-<div class="language-bash highlight"><pre><span></span><code>deeporigin<span class="w"> </span>config<span class="w"> </span><span class="nb">set</span><span class="w"> </span><span class="o">[</span>variable-name<span class="o">]</span><span class="w"> </span><span class="o">[</span>variable-value<span class="o">]</span>
-</code></pre></div>
-<p>For example, to configure your organization, run:</p>
-<div class="language-bash highlight"><pre><span></span><code>deeporigin<span class="w"> </span>config<span class="w"> </span><span class="nb">set</span><span class="w"> </span>organization_id<span class="w"> </span>likely-aardvark-ewo
-</code></pre></div>
+</div>
+</div>
+</div>
 
 
 
