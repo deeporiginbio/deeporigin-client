@@ -572,9 +572,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#supported-python-versions" class="md-nav__link">
+  <a href="#os-and-python-support" class="md-nav__link">
     <span class="md-ellipsis">
-      Supported Python versions
+      OS and python support
     </span>
   </a>
   
@@ -2444,9 +2444,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#supported-python-versions" class="md-nav__link">
+  <a href="#os-and-python-support" class="md-nav__link">
     <span class="md-ellipsis">
-      Supported Python versions
+      OS and python support
     </span>
   </a>
   
@@ -2474,41 +2474,25 @@
 <h1 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h1>
 <h2 id="on-a-deep-origin-workstation">On a Deep Origin workstation<a class="headerlink" href="#on-a-deep-origin-workstation" title="Permanent link">&para;</a></h2>
 <p>No installation needed!</p>
-<p>The Deep Origin CLI and Python client are installed on every workstation.</p>
+<p>The Deep Origin CLI and Python client are installed on every <a href="https://docs.deeporigin.io/docs/os/compute-hub/workstations">Deep Origin Workstation <span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M3.75 2h3.5a.75.75 0 0 1 0 1.5h-3.5a.25.25 0 0 0-.25.25v8.5c0 .138.112.25.25.25h8.5a.25.25 0 0 0 .25-.25v-3.5a.75.75 0 0 1 1.5 0v3.5A1.75 1.75 0 0 1 12.25 14h-8.5A1.75 1.75 0 0 1 2 12.25v-8.5C2 2.784 2.784 2 3.75 2m6.854-1h4.146a.25.25 0 0 1 .25.25v4.146a.25.25 0 0 1-.427.177L13.03 4.03 9.28 7.78a.75.75 0 0 1-1.042-.018.75.75 0 0 1-.018-1.042l3.75-3.75-1.543-1.543A.25.25 0 0 1 10.604 1"/></svg></span></a>.</p>
 <h2 id="recommended-installation">Recommended installation<a class="headerlink" href="#recommended-installation" title="Permanent link">&para;</a></h2>
 <p>This sections describes how to install the Deep Origin CLI and Python client on your computer using our recommendations. We recommend:</p>
 <ul>
-<li>using the <code>uv</code> package and environment manager </li>
-<li>Using Jupyter to run the Deep Origin Python client</li>
+<li>Using the <a href="https://docs.astral.sh/uv/">uv <span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M3.75 2h3.5a.75.75 0 0 1 0 1.5h-3.5a.25.25 0 0 0-.25.25v8.5c0 .138.112.25.25.25h8.5a.25.25 0 0 0 .25-.25v-3.5a.75.75 0 0 1 1.5 0v3.5A1.75 1.75 0 0 1 12.25 14h-8.5A1.75 1.75 0 0 1 2 12.25v-8.5C2 2.784 2.784 2 3.75 2m6.854-1h4.146a.25.25 0 0 1 .25.25v4.146a.25.25 0 0 1-.427.177L13.03 4.03 9.28 7.78a.75.75 0 0 1-1.042-.018.75.75 0 0 1-.018-1.042l3.75-3.75-1.543-1.543A.25.25 0 0 1 10.604 1"/></svg></span></a> package and environment manager </li>
+<li>Using <a href="https://jupyter.org/">Jupyter Lab <span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M3.75 2h3.5a.75.75 0 0 1 0 1.5h-3.5a.25.25 0 0 0-.25.25v8.5c0 .138.112.25.25.25h8.5a.25.25 0 0 0 .25-.25v-3.5a.75.75 0 0 1 1.5 0v3.5A1.75 1.75 0 0 1 12.25 14h-8.5A1.75 1.75 0 0 1 2 12.25v-8.5C2 2.784 2.784 2 3.75 2m6.854-1h4.146a.25.25 0 0 1 .25.25v4.146a.25.25 0 0 1-.427.177L13.03 4.03 9.28 7.78a.75.75 0 0 1-1.042-.018.75.75 0 0 1-.018-1.042l3.75-3.75-1.543-1.543A.25.25 0 0 1 10.604 1"/></svg></span></a> to run the Deep Origin Python client</li>
 </ul>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">maxOS/Linux</label><label for="__tabbed_1_2">Windows</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="language-bash highlight"><pre><span></span><code><span class="c1"># make a folder for your project</span>
-<span class="c1"># this can be any name (except deeporigin)</span>
-mkdir<span class="w"> </span><span class="k">do</span>-client
+<p>First, create a folder to contain your project. This can be any name (except deeporigin).</p>
+<div class="language-bash highlight"><pre><span></span><code>mkdir<span class="w"> </span><span class="k">do</span>-client
 <span class="nb">cd</span><span class="w"> </span><span class="k">do</span>-client
-
-<span class="c1"># install uv if needed</span>
-curl<span class="w"> </span>-LsSf<span class="w"> </span>https://astral.sh/uv/install.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sh
-
-<span class="c1"># If uv tells you to add something to PATH,</span>
-<span class="c1"># you may need to do that first</span>
-uv<span class="w"> </span>init
-
-<span class="c1"># we use the latest stable version of python</span>
-uv<span class="w"> </span>python<span class="w"> </span>install<span class="w"> </span><span class="m">3</span>.13
-
-<span class="c1"># install deeporigin in the current environment</span>
-uv<span class="w"> </span>add<span class="w"> </span>deeporigin
-
-<span class="c1"># if you&#39;re using Deep Origin tools (like FEP), use:</span>
-uv<span class="w"> </span>add<span class="w"> </span>deeporigin<span class="w"> </span>--extra<span class="w"> </span>tools
-
-<span class="c1"># also install as a uv tool to run from the command line</span>
-uv<span class="w"> </span>tool<span class="w"> </span>install<span class="w"> </span>deeporigin
-
-<span class="c1"># run jupyter using this environment</span>
+</code></pre></div>
+<p>Now use this one liner to install deeporigin using the <a href="https://docs.astral.sh/uv/">uv <span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M3.75 2h3.5a.75.75 0 0 1 0 1.5h-3.5a.25.25 0 0 0-.25.25v8.5c0 .138.112.25.25.25h8.5a.25.25 0 0 0 .25-.25v-3.5a.75.75 0 0 1 1.5 0v3.5A1.75 1.75 0 0 1 12.25 14h-8.5A1.75 1.75 0 0 1 2 12.25v-8.5C2 2.784 2.784 2 3.75 2m6.854-1h4.146a.25.25 0 0 1 .25.25v4.146a.25.25 0 0 1-.427.177L13.03 4.03 9.28 7.78a.75.75 0 0 1-1.042-.018.75.75 0 0 1-.018-1.042l3.75-3.75-1.543-1.543A.25.25 0 0 1 10.604 1"/></svg></span></a> package manager. </p>
+<div class="language-bash highlight"><pre><span></span><code>curl<span class="w"> </span>-LsSf<span class="w"> </span>https://client-docs.deeporigin.io/install.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sh
+</code></pre></div>
+<p>Now start a Jupyter Lab instance that uses this environment, allowing you to use the <code>deeporigin</code> python client in it:</p>
+<div class="language-bash highlight"><pre><span></span><code><span class="c1"># run jupyter using this environment</span>
 uv<span class="w"> </span>run<span class="w"> </span>--with<span class="w"> </span>jupyter<span class="w"> </span>jupyter<span class="w"> </span>lab
 </code></pre></div>
 </div>
@@ -2546,7 +2530,7 @@ uv<span class="w"> </span>run<span class="w"> </span>--with<span class="w"> </sp
 <h2 id="for-developers">For developers<a class="headerlink" href="#for-developers" title="Permanent link">&para;</a></h2>
 <div class="admonition warning">
 <p class="admonition-title">Developers only</p>
-<p>If you intend to contribute this package, we recommend installing this package via the instructions below. If you simply intend to use this package, we recommend following the instructions above.</p>
+<p>If you intend to contribute this package, we recommend installing this package via the instructions below. If you simply intend to use this package, use the instructions above.</p>
 </div>
 <h3 id="get-the-code">Get the code<a class="headerlink" href="#get-the-code" title="Permanent link">&para;</a></h3>
 <p>First, run the following command to clone the source code repository:</p>
@@ -2554,7 +2538,7 @@ uv<span class="w"> </span>run<span class="w"> </span>--with<span class="w"> </sp
 </code></pre></div>
 <h3 id="install-the-development-dependencies-for-this-package">Install the development dependencies for this package<a class="headerlink" href="#install-the-development-dependencies-for-this-package" title="Permanent link">&para;</a></h3>
 <p>Second, install Python 3.10+ and
-<a href="https://www.gnu.org/software/make/">make</a>.</p>
+<a href="https://www.gnu.org/software/make/">GNU make <span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M3.75 2h3.5a.75.75 0 0 1 0 1.5h-3.5a.25.25 0 0 0-.25.25v8.5c0 .138.112.25.25.25h8.5a.25.25 0 0 0 .25-.25v-3.5a.75.75 0 0 1 1.5 0v3.5A1.75 1.75 0 0 1 12.25 14h-8.5A1.75 1.75 0 0 1 2 12.25v-8.5C2 2.784 2.784 2 3.75 2m6.854-1h4.146a.25.25 0 0 1 .25.25v4.146a.25.25 0 0 1-.427.177L13.03 4.03 9.28 7.78a.75.75 0 0 1-1.042-.018.75.75 0 0 1-.018-1.042l3.75-3.75-1.543-1.543A.25.25 0 0 1 10.604 1"/></svg></span></a>.</p>
 <p>To verify that both are installed, run the following commands:</p>
 <div class="language-bash highlight"><pre><span></span><code>python3<span class="w"> </span>--version
 <span class="c1"># Python 3.12.3</span>
@@ -2569,22 +2553,51 @@ make<span class="w"> </span>--version
 <p>This will install this package in an "editable" mode. In this mode, changes to the source code will take effect
 immediately.</p>
 <h3 id="run-the-linting-and-tests-for-this-package">Run the linting and tests for this package<a class="headerlink" href="#run-the-linting-and-tests-for-this-package" title="Permanent link">&para;</a></h3>
-<p>Once installed, you can lint and test this package by running the following commands:</p>
-<div class="language-bash highlight"><pre><span></span><code>make<span class="w"> </span>lint
-make<span class="w"> </span><span class="nb">test</span>
+<p>Once installed, you can test this package by running the following commands:</p>
+<div class="language-bash highlight"><pre><span></span><code>make<span class="w"> </span><span class="nb">test</span>
 </code></pre></div>
 <h3 id="compiling-and-serving-the-documentation-for-this-package">Compiling and serving the documentation for this package<a class="headerlink" href="#compiling-and-serving-the-documentation-for-this-package" title="Permanent link">&para;</a></h3>
 <p>You can compile and serve the documentation for this package by running:</p>
 <div class="language-bash highlight"><pre><span></span><code>make<span class="w"> </span>docs-serve
 </code></pre></div>
-<h2 id="supported-python-versions">Supported Python versions<a class="headerlink" href="#supported-python-versions" title="Permanent link">&para;</a></h2>
-<p><code>deeporigin</code> is <a href="https://github.com/deeporiginbio/deeporigin-client/actions/workflows/main.yml">tested</a> against the following versions of Python in Ubuntu Linux and Windows:</p>
-<ul>
-<li>3.10</li>
-<li>3.11</li>
-<li>3.12</li>
-<li>3.13</li>
-</ul>
+<h2 id="os-and-python-support">OS and python support<a class="headerlink" href="#os-and-python-support" title="Permanent link">&para;</a></h2>
+<p><code>deeporigin</code> is <a href="https://github.com/deeporiginbio/deeporigin-client/actions/workflows/main.yml">tested</a> against the following versions of Python on Ubuntu Linux and Windows:</p>
+<table>
+<thead>
+<tr>
+<th>Python</th>
+<th>macOS</th>
+<th>Windows</th>
+<th>Ubuntu</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>3.10</td>
+<td></td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>3.11</td>
+<td></td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>3.12</td>
+<td></td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>3.13</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
 
 
 
