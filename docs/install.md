@@ -5,44 +5,37 @@
 
 No installation needed!
 
-The Deep Origin CLI and Python client are installed on every workstation.
+The Deep Origin CLI and Python client are installed on every [Deep Origin Workstation :octicons-link-external-16:](https://docs.deeporigin.io/docs/os/compute-hub/workstations).
 
 ## Recommended installation
 
 This sections describes how to install the Deep Origin CLI and Python client on your computer using our recommendations. We recommend:
 
-- using the `uv` package and environment manager 
-- Using Jupyter to run the Deep Origin Python client
+- Using the [uv :octicons-link-external-16:](https://docs.astral.sh/uv/) package and environment manager 
+- Using [Jupyter Lab :octicons-link-external-16:](https://jupyter.org/) to run the Deep Origin Python client
 
 === "maxOS/Linux"
 
+    First, create a folder to contain your project. This can be any name (except deeporigin).
+
     ```bash
-    # make a folder for your project
-    # this can be any name (except deeporigin)
     mkdir do-client
     cd do-client
+    ```
 
-    # install uv if needed
-    curl -LsSf https://astral.sh/uv/install.sh | sh
+    Now use this one liner to install deeporigin using the [uv :octicons-link-external-16:](https://docs.astral.sh/uv/) package manager. 
 
-    # If uv tells you to add something to PATH,
-    # you may need to do that first
-    uv init
+    ```bash
+    curl -LsSf https://client-docs.deeporigin.io/install.sh | sh
+    ```
 
-    # we use the latest stable version of python
-    uv python install 3.13
+    Now start a Jupyter Lab instance that uses this environment, allowing you to use the `deeporigin` python client in it:
 
-    # install deeporigin in the current environment
-    uv add deeporigin
 
-    # if you're using Deep Origin tools (like FEP), use:
-    uv add deeporigin --extra tools
-
-    # also install as a uv tool to run from the command line
-    uv tool install deeporigin
-
+    ```bash
     # run jupyter using this environment
     uv run --with jupyter jupyter lab
+
     ```
 
 
@@ -81,7 +74,7 @@ This sections describes how to install the Deep Origin CLI and Python client on 
 ## For developers
 
 !!! warning "Developers only"
-    If you intend to contribute this package, we recommend installing this package via the instructions below. If you simply intend to use this package, we recommend following the instructions above.
+    If you intend to contribute this package, we recommend installing this package via the instructions below. If you simply intend to use this package, use the instructions above.
 
 ### Get the code
 
@@ -94,7 +87,7 @@ git clone git@github.com:deeporiginbio/deeporigin-client.git
 ### Install the development dependencies for this package
 
 Second, install Python 3.10+ and
-[make](https://www.gnu.org/software/make/).
+[GNU make :octicons-link-external-16:](https://www.gnu.org/software/make/).
 
 To verify that both are installed, run the following commands:
 
@@ -119,10 +112,9 @@ immediately.
 
 ### Run the linting and tests for this package
 
-Once installed, you can lint and test this package by running the following commands:
+Once installed, you can test this package by running the following commands:
 
 ```bash
-make lint
 make test
 ```
 
@@ -134,11 +126,15 @@ You can compile and serve the documentation for this package by running:
 make docs-serve
 ```
 
-## Supported Python versions
+## OS and python support
 
-`deeporigin` is [tested](https://github.com/deeporiginbio/deeporigin-client/actions/workflows/main.yml) against the following versions of Python in Ubuntu Linux and Windows:
+`deeporigin` is [tested](https://github.com/deeporiginbio/deeporigin-client/actions/workflows/main.yml) against the following versions of Python on Ubuntu Linux and Windows:
 
-- 3.10
-- 3.11
-- 3.12
-- 3.13
+| Python | macOS | Windows | Ubuntu |
+| -- | -- | -- | -- | 
+| 3.10| | ✅ | ✅ |
+| 3.11| | ✅ | ✅ |
+| 3.12| | ✅ | ✅ |
+| 3.13 | ✅ | ✅ | ✅ |
+
+
