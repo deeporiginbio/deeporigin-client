@@ -4,6 +4,7 @@ import os
 
 import pytest
 from deeporigin import chemistry
+from deeporigin.exceptions import DeepOriginException
 
 base_path = os.path.join(os.path.dirname(__file__), "fixtures")
 
@@ -22,6 +23,18 @@ ligands = [
         "file": os.path.join(base_path, "brd-7.sdf"),
         "n_ligands": 1,
         "name_by_property": "_Name",
+    },
+]
+
+
+bad_ligands = [
+    {
+        "file": "missing.sdf",
+        "smiles_string": None,
+    },
+    {
+        "file": None,
+        "smiles_string": None,
     },
 ]
 
@@ -81,3 +94,23 @@ def test_ligand(
             ligand = chemistry.Ligand(ligand["file"])
     else:
         ligand = chemistry.Ligand(ligand["file"])
+
+
+@pytest.mark.parametrize("ligand", bad_ligands)
+def test_ligand_errors(ligand):
+    with pytest.raises(DeepOriginException):
+        chemistry.Ligand(
+            file=ligand["file"],
+            smiles_string=ligand["smiles_string"],
+        )
+
+
+def test_ligands_from_sdf_file():
+    """test that we can make many ligands from a single SDF file with many molecules"""
+
+    mols = chemistry.read_molecules_in_sdf_file(
+        os.path.join(base_path, "ligands-brd-all.sdf")
+    )
+
+    for mol in mols:
+        chemistry.Ligand(**mol)

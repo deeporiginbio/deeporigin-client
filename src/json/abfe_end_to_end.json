@@ -215,7 +215,7 @@
         "skip_emeq": "__NO",
         "softcore_alpha": 0.5,
         "steps": 300000,
-        "test_run": 1,
+        "test_run": 0,
         "thread_pinning": 0,
         "thread_pinning_offset": 0,
         "threads": 0,

@@ -1,5 +1,6 @@
 """This module contains utility functions used by tool execution. In general, you will not need to use many of these functions directly."""
 
+import concurrent.futures
 import functools
 import json
 import os
@@ -18,6 +19,33 @@ JOBS_CACHE_DIR = _ensure_do_folder() / "jobs"
 
 TERMINAL_STATES = {"Succeeded", "Failed"}
 NON_TERMINAL_STATES = {"Created", "Queued", "Running"}
+
+
+@beartype
+def query_run_statuses(job_ids: list[str]) -> dict:
+    """get statuses for multiple jobs in parallel
+
+    Args:
+        job_ids (list[str]): list of job IDs
+
+    """
+    status = {}
+
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        # Submit all jobs and create a mapping from future to job_id
+        future_to_job_id = {
+            executor.submit(query_run_status, job_id): job_id for job_id in job_ids
+        }
+
+        # As each future completes, store the result in the status dictionary
+        for future in concurrent.futures.as_completed(future_to_job_id):
+            job_id = future_to_job_id[future]
+            try:
+                status[job_id] = future.result()
+            except Exception:
+                status[job_id] = None
+
+    return status
 
 
 @beartype

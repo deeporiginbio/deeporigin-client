@@ -7,75 +7,76 @@ No installation needed!
 
 The Deep Origin CLI and Python client are installed on every workstation.
 
-## On your local computer
+## Recommended installation
 
-Run the command below for your favorite package manager to install the Deep Origin CLI and Python client.
+This sections describes how to install the Deep Origin CLI and Python client on your computer using our recommendations. We recommend:
 
-=== "pip"
+- using the `uv` package and environment manager 
+- Using Jupyter to run the Deep Origin Python client
 
-    ```bash
-    pip install deeporigin
-    ```
-
-=== "pixi"
+=== "maxOS/Linux"
 
     ```bash
-    pixi add --pypi deeporigin
+    # make a folder for your project
+    # this can be any name (except deeporigin)
+    mkdir do-client
+    cd do-client
+
+    # install uv if needed
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+
+    # If uv tells you to add something to PATH,
+    # you may need to do that first
+    uv init
+
+    # we use the latest stable version of python
+    uv python install 3.13
+
+    # install deeporigin in the current environment
+    uv add deeporigin
+
+    # if you're using Deep Origin tools (like FEP), use:
+    uv add deeporigin --extra tools
+
+    # also install as a uv tool to run from the command line
+    uv tool install deeporigin
+
+    # run jupyter using this environment
+    uv run --with jupyter jupyter lab
     ```
 
-=== "pipx"
+
+=== "Windows"
 
     ```bash
-    pipx install deeporigin
+    # make a folder for your project
+    # this can be any name (except deeporigin)
+    mkdir do-client
+    cd do-client
+
+    # install uv if needed
+    powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+
+    # If uv tells you to add something to PATH,
+    # you may need to do that first
+    uv init
+
+    # we use the latest stable version of python
+    uv python install 3.13
+
+    # install deeporigin in the current environment
+    uv add deeporigin
+
+    # if you're using Deep Origin tools (like FEP), use:
+    uv add deeporigin --extra tools
+
+    # also install as a uv tool to run from the command line
+    uv tool install deeporigin
+
+    # run jupyter using this environment
+    uv run --with jupyter jupyter lab
     ```
 
-=== "pipenv"
-
-    ```bash
-    pipenv install deeporigin
-    ```
-
-=== "poetry"
-
-    ```bash
-    poetry add deeporigin
-    ```
-
-=== "uv"
-
-    ```bash
-    uv pip install deeporigin
-    ```
-
-=== "flit"
-
-    ```bash
-    flit install deeporigin
-    ```
-
-## Using `uv` to set up `deeporigin` on your computer
-
-We recommend using the following:
-
-```bash
-# make a folder for your project
-# this can be any name (except deeporigin)
-mkdir do-client
-cd do-client
-
-# install uv
-curl -LsSf https://astral.sh/uv/install.sh | sh
-
-uv init
-uv python install
-uv add deeporigin
-
-# if you're using Deep Origin tools (like FEP), use:
-uv add deeporigin --extra tools
-
-# run jupyter using this environment
-uv run --with jupyter jupyter lab
-```
 
 ## For developers
 
@@ -92,7 +93,7 @@ git clone git@github.com:deeporiginbio/deeporigin-client.git
 
 ### Install the development dependencies for this package
 
-Second, install Python 3.9+ and
+Second, install Python 3.10+ and
 [make](https://www.gnu.org/software/make/).
 
 To verify that both are installed, run the following commands:

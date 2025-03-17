@@ -1,70 +1,21 @@
 # Docking
 
-This document describes how to [dock](https://en.wikipedia.org/wiki/Docking_(molecular)) a set of ligands to a protein  using Deep Origin tools. 
+This document describes how to [dock :octicons-link-external-16:](https://en.wikipedia.org/wiki/Docking_(molecular)) a set of ligands to a protein  using Deep Origin tools. 
 
-## Prerequisites 
+## Prerequisites
 
-Make sure you have [installed](../../install.md), [configured](../../configure.md), and [authenticated](../../how-to/auth.md) with the Deep Origin python client.
-
-!!! tip "Use uv to install `deeporigin`" 
-    We strongly recommend using [uv](https://docs.astral.sh/uv/) to install Deep Origin in a separate project, following instructions [here](../../install.md#using-uv-to-set-up-deeporigin-on-your-computer). This gives you all the dependencies you need, together with a stand-alone install of Jupyter Lab that you can use with `deeporigin`
-
-
-
-
-## Required input files 
-
-You will need to have the following input files on your local computer:
-
-1. A set of ligand files, in SDF format.
-2. A protein PDB file 
-
-
-## Running Bulk Docking
-
-!!! tip "Jupyter notebooks"
-    It is assumed that you are working in a Jupyter notebook (or similar IPython environment). This makes it easier to run the workflow, and some functions assume that you are in a Jupyter notebook.
-
-First, we import necessary functions and modules from the `deeporigin` package:
+We assume that we have an initialized and configured `Complex` object:
 
 ```python
-from deeporigin.tools import docking
-```
-
-We then specify where our input files are:
-
-```python
-input_dir = "/path/to/input/dir"
-```
-
-### Initialization
-
-Here, we data structures to store input and intermediate files, and upload input files to Deep Origin:
-
-```python
-sim = docking.Docking.from_dir(input_dir)
-```
-
-
-### Connecting to Deep Origin
-
-We can connect the instance we created to Deep Origin using
-
-```python
+from deeporigin import drug_discovery as dd
+sim = dd.Complex.from_dir("/path/to/folder/")
 sim.connect()
 ```
+For more details on how to get started, see [:material-page-previous: Getting Started ](./drug-discovery.md).
 
+## Starting a docking run
 
-This function creates necessary databases on Deep Origin, uploads ligand and protein files if needed, and updates the status of runs on Deep Origin.
-
-
-
-
-
-### Running bulk docking in parallel
-
-To dock all ligands to the protein in bulk, parallelizing and batching across all ligands, we do the following:
-
+To dock all ligands to the protein, parallelizing and batching across all ligands, we do the following:
 
 
 ```python
@@ -77,22 +28,47 @@ sim.dock(
 
 This queues up tasks on Deep Origin. When it completes, the results of docking can be viewed.
 
+## Viewing status of docking
+
+The status of docking runs can be viewed using:
+
+```python
+sim.get_status_for("Docking")
+```
+
+!!! success "Expected output"
+
+    A typical output can look like:
 
 
-### Results
+    ```python
+    {'ccdb9ba9-b3d2-4083-bb4c-7c7249f7dbc2': 'Succeeded',
+     '17a0b478-c11d-48a9-9bce-2e0272b804fb': 'Running',
+     '08342c26-b773-4423-91c3-3fcbe4955778': 'Running'}
+    ```
+
+    The keys are IDs of the jobs running on Deep Origin. You may see different numbers of jobs based on your `batch_size` parameter and the number of ligands in your dataset.
+
+## Results
+
+### Viewing results
+
+
 
 After completion of bulk docking, we can view results using:
 
 ```python
-sim.show_results()
+sim.show_docking_results()
 ```  
 
 This shows a table similar to:
 
 ![Docking results](../../images/tools/docking-results.png)
 
+### Exporting for further analysis
+
 To obtain the raw dataframe for further analysis, use:
 
 ```python
-df = sim.get_results()
+df = sim.get_docking_results()
 ```
