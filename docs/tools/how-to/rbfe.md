@@ -25,7 +25,11 @@ To run an end-to-end RBFE workflow on a single pair of ligands, we use:
 
 
 ```python
-sim.run_rbfe_end_to_end(ligand1_id"Ligands-1", ligand2_id="Ligands-2") # for example
+sim.run_rbfe_end_to_end(
+    ligand1_id="Ligands-1",  # for example
+    ligand2_id="Ligands-2",
+)
+
 ```
 
 This queues up a task on Deep Origin. When it completes, outputs will be written to the appropriate column in this database. 
@@ -344,7 +348,7 @@ sim.show_rbfe_results()
 This shows a table similar to:
 
 !!! success "Expected output" 
-    ![RBFE ligands](../../images/tools/abfe-results.png)
+    ![RBFE ligands](../../images/tools/rbfe-results.png)
 
 
 
@@ -359,8 +363,9 @@ df
 ```
 
 !!! success "Expected output" 
-    | Binding       | Solvation            | AnalyticalCorr | Std | Total         | ID         | File       | r_exp_dg | SMILES                                                                                                                                                                               |
-    |---------------|----------------------|----------------|-----|---------------|------------|------------|----------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-    | 16.23   | -27.53 | -7.2 | 0.0 | -36.50 | Ligands-1  | brd-2.sdf  | -9.59    | [H]C1=C([H])C(C(=O)N(C([H])([H])[H])C([H])([H])[H])=C([H])C(C2=C([H])N(C([H])([H])[H])C(=O)C3=C2C([H])=C([H])N3[H])=C1[H]                                      |
-    | -454.99 | -722.01       | -7.58   | 0.0 | -259.44 | Ligands-2  | brd-3.sdf  | -7.09    | [H]C([H])=C([H])C([H])([H])N1C(=O)C2=C(C([H])=C([H])N2[H])C(C2=C([H])C([H])=C([H])C(C(=O)N(C([H])([H])[H])C([H])([H])[H])=C2[H])=C1[H]                    |
-    | -600.31 | -1354.79      | -7.47   | 0.0 | -747.00 | Ligands-3  | brd-4.sdf  | -8.64    | [H]C1=C([H])C(C(=O)N(C([H])([H])[H])C([H])([H])[H])=C([H])C(C2=C([H])N(C([H])([H])/C([H])=C(\[H])C([H])([H])[H])C(=O)C3=C2C([H])=C([H])N3[H])=C1[H]            |
+    | Index | Binding    | Solvation          | AnalyticalCorr | Std | Total      | Ligand1   | Ligand2   | SMILES1                                                                                                                         | SMILES2                                                                                                                         |
+    |-------|------------|--------------------|----------------|-----|------------|-----------|-----------|---------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------|
+    | 0     | 69.397782  | 5.298763           | 0.0            | 0.0 | 64.099019  | Ligands-6 | Ligands-2 | [H]C1=C([H])C(C(=O)N(C([H])([H])[H])C([H])([H]...                                                                             | [H]C([H])=C([H])C([H])([H])N1C(=O)C2=C(C([H])=...                                                                              |
+    | 0     | 233.01173  | 172.591013         | 0.0            | 0.0 | 60.420717  | Ligands-1 | Ligands-2 | [H]C1=C([H])C(C(=O)N(C([H])([H])[H])C([H])([H]...                                                                             | [H]C([H])=C([H])C([H])([H])N1C(=O)C2=C(C([H])=...                                                                              |
+    | 0     | 242.937649 | 178.723907         | 0.0            | 0.0 | 64.213742  | Ligands-1 | Ligands-3 | [H]C1=C([H])C(C(=O)N(C([H])([H])[H])C([H])([H]...                                                                             | [H]C1=C([H])C(C(=O)N(C([H])([H])[H])C([H])([H]...                                                                              |
+    | 0     | 63.544525  | 7.050677           | 0.0            | 0.0 | 56.493848  | Ligands-5 | Ligands-3 | [H]C1=C([H])C(C(=O)N(C([H])([H])[H])C([H])([H]...                                                                             | [H]C1=C([H])C(C(=O)N(C([H])([H])[H])C([H])([H]...                                                                              |
