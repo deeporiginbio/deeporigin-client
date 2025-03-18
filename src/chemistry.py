@@ -95,8 +95,6 @@ def show_protein(pdb_file_path: str | Path):
     Args:
         pdb_file_path (str): Path to the PDB file.
 
-    Returns:
-        NGLView widget: An interactive viewer for the protein structure.
     """
     import nglview as nv
 

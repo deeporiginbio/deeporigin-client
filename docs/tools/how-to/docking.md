@@ -20,11 +20,37 @@ To dock all ligands to the protein, parallelizing and batching across all ligand
 
 ```python
 sim.dock(
-    batch_size=32,
     box_size=[15, 15, 15],      # match to your protein
     pocket_center=[13, -6, 22], # match to your protein
 )
 ```
+
+??? info "Controlling batch size"
+
+    By default, all ligands are docked in batches of 32 ligands. 
+
+    This can be controlled in two ways. First, you can control the batch size using the `batch_size` parameter.
+
+    ```python
+    sim.dock(
+        batch_size=32,
+        box_size=[15, 15, 15],      
+        pocket_center=[13, -6, 22], 
+    )
+    ```
+
+    You can also specify the number of workers using:
+
+    ```python
+    sim.dock(
+        n_workers=2,
+        box_size=[15, 15, 15],      
+        pocket_center=[13, -6, 22], 
+    )
+    ```
+
+    You can specify either the number of workers or the batch size, but not both. 
+
 
 This queues up tasks on Deep Origin. When it completes, the results of docking can be viewed.
 
