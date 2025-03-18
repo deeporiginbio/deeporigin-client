@@ -2445,8 +2445,8 @@ For more details on how to get started, see <a href="drug-discovery.html"><span 
 <h2 id="starting-a-docking-run">Starting a docking run<a class="headerlink" href="#starting-a-docking-run" title="Permanent link">&para;</a></h2>
 <p>To dock all ligands to the protein, parallelizing and batching across all ligands, we do the following:</p>
 <div class="language-python highlight"><pre><span></span><code><span class="n">sim</span><span class="o">.</span><span class="n">dock</span><span class="p">(</span>
-    <span class="n">box_size</span><span class="o">=</span><span class="p">[</span><span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">],</span>      <span class="c1"># match to your protein</span>
-    <span class="n">pocket_center</span><span class="o">=</span><span class="p">[</span><span class="mi">13</span><span class="p">,</span> <span class="o">-</span><span class="mi">6</span><span class="p">,</span> <span class="mi">22</span><span class="p">],</span> <span class="c1"># match to your protein</span>
+    <span class="n">box_size</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">),</span>      <span class="c1"># match to your protein</span>
+    <span class="n">pocket_center</span><span class="o">=</span><span class="p">(</span><span class="mi">13</span><span class="p">,</span> <span class="o">-</span><span class="mi">6</span><span class="p">,</span> <span class="mi">22</span><span class="p">),</span> <span class="c1"># match to your protein</span>
 <span class="p">)</span>
 </code></pre></div>
 <details class="info">
@@ -2455,15 +2455,15 @@ For more details on how to get started, see <a href="drug-discovery.html"><span 
 <p>This can be controlled in two ways. First, you can control the batch size using the <code>batch_size</code> parameter.</p>
 <div class="language-python highlight"><pre><span></span><code><span class="n">sim</span><span class="o">.</span><span class="n">dock</span><span class="p">(</span>
     <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
-    <span class="n">box_size</span><span class="o">=</span><span class="p">[</span><span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">],</span>      
-    <span class="n">pocket_center</span><span class="o">=</span><span class="p">[</span><span class="mi">13</span><span class="p">,</span> <span class="o">-</span><span class="mi">6</span><span class="p">,</span> <span class="mi">22</span><span class="p">],</span> 
+    <span class="n">box_size</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">),</span>      <span class="c1"># note: tuple  </span>
+    <span class="n">pocket_center</span><span class="o">=</span><span class="p">(</span><span class="mi">13</span><span class="p">,</span> <span class="o">-</span><span class="mi">6</span><span class="p">,</span> <span class="mi">22</span><span class="p">),</span> <span class="c1"># note: tuple  </span>
 <span class="p">)</span>
 </code></pre></div>
 <p>You can also specify the number of workers using:</p>
 <div class="language-python highlight"><pre><span></span><code><span class="n">sim</span><span class="o">.</span><span class="n">dock</span><span class="p">(</span>
     <span class="n">n_workers</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-    <span class="n">box_size</span><span class="o">=</span><span class="p">[</span><span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">],</span>      
-    <span class="n">pocket_center</span><span class="o">=</span><span class="p">[</span><span class="mi">13</span><span class="p">,</span> <span class="o">-</span><span class="mi">6</span><span class="p">,</span> <span class="mi">22</span><span class="p">],</span> 
+    <span class="n">box_size</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">),</span>      <span class="c1"># note: tuple  </span>
+    <span class="n">pocket_center</span><span class="o">=</span><span class="p">(</span><span class="mi">13</span><span class="p">,</span> <span class="o">-</span><span class="mi">6</span><span class="p">,</span> <span class="mi">22</span><span class="p">),</span> <span class="c1"># note: tuple  </span>
 <span class="p">)</span>
 </code></pre></div>
 <p>You can specify either the number of workers or the batch size, but not both. </p>
