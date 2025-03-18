@@ -2375,6 +2375,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#src.chemistry.show_protein" class="md-nav__link">
+    <span class="md-ellipsis">
+      show_protein
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#src.chemistry.smiles_list_to_base64_png_list" class="md-nav__link">
     <span class="md-ellipsis">
       smiles_list_to_base64_png_list
@@ -2726,6 +2735,15 @@
   <a href="#src.chemistry.show_ligands" class="md-nav__link">
     <span class="md-ellipsis">
       show_ligands
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.chemistry.show_protein" class="md-nav__link">
+    <span class="md-ellipsis">
+      show_protein
     </span>
   </a>
   
@@ -3460,6 +3478,56 @@ while suppressing RDKit's error logging for sanitization issues.</p>
             <td>
               <div class="doc-md-description">
                 <p>list of ligands</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.chemistry.show_protein" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>            <span class="doc doc-object-name doc-function-name">show_protein</span>
+
+
+<a href="#src.chemistry.show_protein" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">show_protein</span><span class="p">(</span><span class="n">pdb_file_path</span><span class="p">:</span> <span class="n">str</span> <span class="o">|</span> <span class="n"><span title="pathlib.Path">Path</span></span><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Visualizes the 3D structure of a protein from a PDB file using NGLView.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>pdb_file_path</code>
+            </td>
+            <td>
+                  <code>str</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Path to the PDB file.</p>
               </div>
             </td>
             <td>
