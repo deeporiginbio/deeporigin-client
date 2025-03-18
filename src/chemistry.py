@@ -87,6 +87,23 @@ class Protein:
             self.name = self.file.name
 
 
+@beartype
+def show_protein(pdb_file_path: str | Path):
+    """
+    Visualizes the 3D structure of a protein from a PDB file using NGLView.
+
+    Args:
+        pdb_file_path (str): Path to the PDB file.
+
+    Returns:
+        NGLView widget: An interactive viewer for the protein structure.
+    """
+    import nglview as nv
+
+    view = nv.show_file(str(pdb_file_path))
+    return view
+
+
 def _requires_rdkit(func):
     """
     A decorator that checks for the presence of RDKit via importlib.util.find_spec.

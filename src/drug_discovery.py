@@ -334,6 +334,11 @@ class Complex:
 
         chem.show_ligands(self.ligands)
 
+    def show_protein(self):
+        """Show protein in complex object in 3D view"""
+
+        return chem.show_protein(self.protein.file)
+
     def get_csv_results_for(self, tool: VALID_TOOLS):
         """Generic method to get CSV results for a particular tool and combine them as need be
 
