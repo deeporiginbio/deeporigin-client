@@ -443,6 +443,10 @@ class Complex:
 
         df = self.get_docking_results()
 
+        if len(df) == 0:
+            print("No results found")
+            return
+
         from IPython.display import HTML, display
 
         smiles_list = list(df["SMILES"])
