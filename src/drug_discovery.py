@@ -3,6 +3,7 @@
 import concurrent.futures
 import importlib.resources
 import json
+import math
 import os
 from dataclasses import dataclass, field
 from importlib.resources import path
@@ -333,6 +334,11 @@ class Complex:
 
         chem.show_ligands(self.ligands)
 
+    def show_protein(self):
+        """Show protein in complex object in 3D view"""
+
+        return chem.show_protein(self.protein.file)
+
     def get_csv_results_for(self, tool: VALID_TOOLS):
         """Generic method to get CSV results for a particular tool and combine them as need be
 
@@ -451,7 +457,8 @@ class Complex:
         *,
         box_size: tuple[Number, Number, Number],
         pocket_center: tuple[Number, Number, Number],
-        batch_size: int = 32,
+        batch_size: Optional[int] = 32,
+        n_workers: Optional[int] = None,
     ):
         """Run bulk docking on Deep Origin. Ligands will be split into batches based on the batch_size argument, and will run in parallel on Deep Origin clusters.
 
@@ -459,6 +466,7 @@ class Complex:
             box_size (tuple[float, float, float]): box size
             pocket_center (tuple[float, float, float]): pocket center
             batch_size (int, optional): batch size. Defaults to 30.
+            n_workers (int, optional): number of workers. Defaults to None.
 
         """
 
@@ -466,6 +474,18 @@ class Complex:
             raise DeepOriginException(
                 "Protein must be uploaded to Deep Origin before docking."
             )
+
+        if batch_size is None and n_workers is None:
+            raise DeepOriginException(
+                "Either batch_size or n_workers must be specified."
+            )
+        elif batch_size is not None and n_workers is not None:
+            raise DeepOriginException(
+                "Either batch_size or n_workers must be specified, but not both."
+            )
+
+        if n_workers is not None:
+            batch_size = math.ceil(len(self.ligands) / n_workers)
 
         df = pd.DataFrame(
             api.get_dataframe(
