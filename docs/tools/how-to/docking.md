@@ -20,8 +20,8 @@ To dock all ligands to the protein, parallelizing and batching across all ligand
 
 ```python
 sim.dock(
-    box_size=[15, 15, 15],      # match to your protein
-    pocket_center=[13, -6, 22], # match to your protein
+    box_size=(15, 15, 15),      # match to your protein
+    pocket_center=(13, -6, 22), # match to your protein
 )
 ```
 
@@ -34,8 +34,8 @@ sim.dock(
     ```python
     sim.dock(
         batch_size=32,
-        box_size=[15, 15, 15],      
-        pocket_center=[13, -6, 22], 
+        box_size=(15, 15, 15),      # note: tuple  
+        pocket_center=(13, -6, 22), # note: tuple  
     )
     ```
 
@@ -44,8 +44,8 @@ sim.dock(
     ```python
     sim.dock(
         n_workers=2,
-        box_size=[15, 15, 15],      
-        pocket_center=[13, -6, 22], 
+        box_size=(15, 15, 15),      # note: tuple  
+        pocket_center=(13, -6, 22), # note: tuple  
     )
     ```
 

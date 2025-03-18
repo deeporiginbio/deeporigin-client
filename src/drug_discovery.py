@@ -683,6 +683,9 @@ class Complex:
 
         df = self.get_abfe_results()
 
+        if len(df) == 0:
+            return
+
         # convert SMILES to aligned images
         smiles_list = list(df["SMILES"])
         df.drop("SMILES", axis=1, inplace=True)
