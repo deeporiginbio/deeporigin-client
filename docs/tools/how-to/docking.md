@@ -20,7 +20,7 @@ To dock all ligands to the protein, parallelizing and batching across all ligand
 
 ```python
 sim.dock(
-    batch_size=30,
+    batch_size=32,
     box_size=[15, 15, 15],      # match to your protein
     pocket_center=[13, -6, 22], # match to your protein
 )
