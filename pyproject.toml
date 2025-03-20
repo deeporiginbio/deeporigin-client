@@ -65,7 +65,7 @@ docs = [
     "black"
 ]
 plots = ["bokeh"]
-tools = ["rdkit","nglview","MDAnalysis"]
+tools = ["rdkit"]
 
 [tool.setuptools]
 package-dir = {"deeporigin" = "src"}
