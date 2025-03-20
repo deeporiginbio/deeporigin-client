@@ -14,7 +14,7 @@ This sections describes how to install the Deep Origin CLI and Python client on 
 - Using the [uv :octicons-link-external-16:](https://docs.astral.sh/uv/) package and environment manager 
 - Using [Jupyter Lab :octicons-link-external-16:](https://jupyter.org/) to run the Deep Origin Python client
 
-=== "maxOS/Linux"
+=== "macOS/Linux"
 
     First, create a folder to contain your project. This can be any name (except deeporigin).
 
