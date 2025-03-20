@@ -65,7 +65,7 @@ docs = [
     "black"
 ]
 plots = ["bokeh"]
-tools = ["rdkit"]
+tools = ["rdkit", "deeporigin-molstar"]
 
 [tool.setuptools]
 package-dir = {"deeporigin" = "src"}

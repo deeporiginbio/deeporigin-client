@@ -1,5 +1,5 @@
 
-# Deep Origin CLI and Python client
+# Deep Origin Python client
 
 <div class="grid cards" markdown>
 

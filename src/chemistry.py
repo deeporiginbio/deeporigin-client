@@ -70,36 +70,68 @@ class Ligand:
                         p.breakable()
             p.text(")")
 
+    def show(self):
+        """show a ligand in a Jupyter notebook using molstar"""
+
+        if self.file is not None:
+            # backed by SDF file. use a 3D viewer
+
+            show_molecules_in_sdf_file(self.file)
+        else:
+            # only SMILES. use a 2D viewer
+            img = smiles_to_base64_png(self.smiles_string)
+
+            from IPython.display import HTML, display
+
+            display(HTML(img))
+
+
+@beartype
+def show_molecules_in_sdf_file(sdf_file: str | Path):
+    """show molecules in an SDF file in a Jupyter notebook using molstar"""
+
+    from deeporigin_molstar import JupyterViewer, MoleculeViewer
+
+    molecule_viewer = MoleculeViewer(
+        data=str(sdf_file),
+        format="sdf",
+    )
+    html_content = molecule_viewer.render_ligand()
+    JupyterViewer.visualize(html_content)
+
 
 @dataclass
 class Protein:
     """Class to represent a protein (typically backed by a PDB file)"""
 
-    file: str | Path
+    file: Optional[str | Path] = None
     name: Optional[str] = None
+    pdb_id: Optional[str] = None
 
     # this ID keeps track of whether it is uploaded to deep origin or not
     _do_id: Optional[str] = None
 
     def __post_init__(self):
+        if self.pdb_id is not None:
+            self.file = download_protein(self.pdb_id)
+
         self.file = Path(self.file)
         if self.name is None:
             self.name = self.file.name
 
+    def show(self):
+        """visualize the protein in a Jupyter notebook using molstar"""
 
-@beartype
-def show_protein(pdb_file_path: str | Path):
-    """
-    Visualizes the 3D structure of a protein from a PDB file using NGLView.
+        from deeporigin_molstar import JupyterViewer
+        from deeporigin_molstar.src.viewers.protein_viewer import ProteinViewer
 
-    Args:
-        pdb_file_path (str): Path to the PDB file.
+        protein_viewer = ProteinViewer(
+            data=str(self.file),
+            format="pdb",
+        )
+        html_content = protein_viewer.render_protein()
 
-    """
-    import nglview as nv
-
-    view = nv.show_file(str(pdb_file_path))
-    return view
+        JupyterViewer.visualize(html_content)
 
 
 def _requires_rdkit(func):
@@ -589,3 +621,39 @@ def sdf_to_smiles(sdf_file: str | Path) -> list[str]:
     smiles_list = sorted(set(smiles_list))
 
     return smiles_list
+
+
+@beartype
+def download_protein(
+    pdb_id: str,
+    save_dir: str = ".",
+) -> str:
+    """
+    Downloads a PDB structure by its PDB ID from RCSB and saves it to the specified directory.
+
+    Args:
+        pdb_id (str): PDB ID of the protein.
+        save_dir (str): Directory to save the downloaded PDB file.
+
+    Returns:
+        str: Path to the downloaded PDB file.
+
+    Raises:
+        Exception: If the download fails.
+    """
+
+    from biotite.database.rcsb import fetch
+
+    pdb_id = pdb_id.lower()
+    save_dir_path = Path(save_dir)
+    save_dir_path.mkdir(parents=True, exist_ok=True)
+
+    file_path = save_dir_path / f"{pdb_id}.pdb"
+    if not file_path.exists():
+        try:
+            fetch(pdb_id, "pdb", save_dir_path)
+        except Exception as e:
+            raise DeepOriginException(f"Failed to download PDB {pdb_id}: {str(e)}")
+            raise
+
+    return str(file_path)

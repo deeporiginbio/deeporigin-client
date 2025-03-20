@@ -1,4 +1,4 @@
-site_name: CLI and Python client | Deep Origin
+site_name: Deep Origin Python client | Deep Origin
 site_author: Deep Origin
 repo_url: https://github.com/deeporiginbio/deeporigin-client
 repo_name: deeporiginbio/deeporigin-client
@@ -42,6 +42,19 @@ nav:
   - Install: install.md
   - Configure: configure.md
   - Authenticate: how-to/auth.md
+- Drug Discovery:
+  - Tutorial: 
+    - Getting started: dd/tutorial/getting-started.md
+    - Docking: dd/tutorial/docking.md
+    - ABFE: dd/tutorial/abfe.md
+    - RBFE: dd/tutorial/rbfe.md
+  - How To:
+    - Work with proteins: dd/how-to/proteins.md
+    - Work with ligands: dd/how-to/ligands.md
+    - Visualize proteins and ligands: dd/how-to/visualize.md
+  - Reference: 
+    - Chemistry: dd/ref/chemistry.md
+    - Drug Discovery: dd/ref/drug-discovery.md
 - Platform: 
   - platform/index.md
   - How to:
@@ -78,23 +91,15 @@ nav:
     - Run tools: tools/how-to/run-tools.md
     - Check tool run status: tools/how-to/check-status.md
     - Wait for a tool run: tools/how-to/wait-for-run.md
-  - Toolboxes:
-    - Drug Discovery: 
-      - Getting started: tools/how-to/drug-discovery.md
-      - Docking: tools/how-to/docking.md
-      - ABFE: tools/how-to/abfe.md
-      - RBFE: tools/how-to/rbfe.md
   - Available tools:
     - Autodock Vina: tools/vina.md
     - Receptor Prep (PDBFixer): tools/pdbfixer.md
     - Ligand Prep (Meeko): tools/ligand-prep-meeko.md
     - PDB to PDBQT: tools/pdb-to-pdbqt.md
     - Draco: tools/draco.md
-  - Reference: 
+  - Reference:
     - Running tools: tools/ref/run.md
     - Utils: tools/ref/utils.md
-    - Chemistry: tools/ref/chemistry.md
-    - Drug Discovery: tools/ref/drug-discovery.md
 - Changelog: changelog.md
 - Support: https://www.support.deeporigin.com/servicedesk/customer/portals
 
