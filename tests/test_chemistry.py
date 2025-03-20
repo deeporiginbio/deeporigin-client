@@ -114,3 +114,13 @@ def test_ligands_from_sdf_file():
 
     for mol in mols:
         chemistry.Ligand(**mol)
+
+
+def test_download_protein():
+    pdb_id = "1EBY"
+
+    pdb_file = chemistry.download_protein(pdb_id)
+
+    assert os.path.exists(pdb_file), "The downloaded PDB file does not exist."
+
+    os.remove(pdb_file)

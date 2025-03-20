@@ -11,7 +11,7 @@ from deeporigin import drug_discovery as dd
 sim = dd.Complex.from_dir("/path/to/folder/")
 sim.connect()
 ```
-For more details on how to get started, see [:material-page-previous: Getting Started ](./drug-discovery.md).
+For more details on how to get started, see [:material-page-previous: Getting Started ](./getting-started.md).
 
 ## Starting a docking run
 

@@ -334,11 +334,6 @@ class Complex:
 
         chem.show_ligands(self.ligands)
 
-    def show_protein(self):
-        """Show protein in complex object in 3D view"""
-
-        return chem.show_protein(self.protein.file)
-
     def get_result_files_for(self, tool: VALID_TOOLS):
         """Generic method to get output results for a particular tool and combine them as need be
 
@@ -473,7 +468,13 @@ class Complex:
         df2["SMILES"] = df2["Ligand"]
         df2.drop(columns=["Ligand"], inplace=True)
 
-        df = pd.merge(df1, df2, on="SMILES", how="inner")
+        df = pd.merge(
+            df1,
+            df2,
+            on="SMILES",
+            how="inner",
+            validate="one_to_one",
+        )
         return df
 
     def show_docking_results(self):
@@ -714,7 +715,13 @@ class Complex:
         df2["SMILES"] = df2["Ligand"]
         df2.drop(columns=["Ligand"], inplace=True)
 
-        df = pd.merge(df1, df2, on="ID", how="inner")
+        df = pd.merge(
+            df1,
+            df2,
+            on="ID",
+            how="inner",
+            validate="one_to_one",
+        )
 
         return df
 
