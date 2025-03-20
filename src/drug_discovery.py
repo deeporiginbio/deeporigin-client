@@ -339,6 +339,44 @@ class Complex:
 
         return chem.show_protein(self.protein.file)
 
+    def get_result_files_for(self, tool: VALID_TOOLS):
+        """Generic method to get output results for a particular tool and combine them as need be
+
+        Args:
+            tool: One of "Docking", "ABFE", "RBFE"
+        """
+
+        df = pd.DataFrame(
+            api.get_dataframe(
+                tool,
+                return_type="dict",
+                use_file_names=False,
+            )
+        )
+
+        df = df[self._hash == df[COL_COMPLEX_HASH]]
+
+        # this makes sure that we only retain rows
+        # where there is a valid output being generated
+        # rows where there is no output (for failed or
+        # running jobs) are simply dropped
+        df = df.dropna(subset=[COL_RESULT])
+
+        file_ids = list(df[COL_RESULT])
+
+        existing_files = os.listdir(DATA_DIRS[tool])
+        existing_files = ["_file:" + file for file in existing_files]
+        missing_files = list(set(file_ids) - set(existing_files))
+
+        if len(missing_files) > 0:
+            print("Downloading result files. This can take a while...")
+            api.download_files(
+                file_ids=missing_files,
+                use_file_names=False,
+                save_to_dir=DATA_DIRS[tool],
+            )
+            print("Done.")
+
     def get_csv_results_for(self, tool: VALID_TOOLS):
         """Generic method to get CSV results for a particular tool and combine them as need be
 
@@ -511,8 +549,8 @@ class Complex:
         chunks = list(more_itertools.chunked(smiles_strings, batch_size))
 
         params = dict(
-            box_size=box_size,
-            pocket_center=pocket_center,
+            box_size=list(box_size),
+            pocket_center=list(pocket_center),
         )
 
         database_columns = self._db.proteins.cols + self._db.docking.cols

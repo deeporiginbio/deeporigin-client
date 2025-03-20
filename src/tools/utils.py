@@ -252,7 +252,39 @@ def make_payload(
     if cols:
         payload = _column_name_to_column_id(payload, cols)
 
+    payload = add_provider_if_databaseid_found(payload)
+
+    print(258)
+    print(payload)
+
     return payload
+
+
+def add_provider_if_databaseid_found(data):
+    """
+    Recursively traverse a data structure of nested dictionaries/lists.
+    If a dict contains the key 'databaseId', add a peer key '$provider' = 'datahub-cell'.
+    Return the modified data structure.
+    """
+    if isinstance(data, dict):
+        # If this dict has 'databaseId', add '$provider'
+        if "databaseId" in data:
+            data["$provider"] = "datahub-cell"
+
+        # Recursively check all values that are dicts or lists
+        for key, value in data.items():
+            if isinstance(value, dict):
+                add_provider_if_databaseid_found(value)
+            elif isinstance(value, list):
+                for item in value:
+                    add_provider_if_databaseid_found(item)
+
+    elif isinstance(data, list):
+        # If data is a list, recurse into each element if it is dict/list
+        for item in data:
+            add_provider_if_databaseid_found(item)
+
+    return data
 
 
 @beartype
