@@ -4,6 +4,8 @@ This document describes how to work with proteins and use them in Deep Origin to
 
 The [`Protein` class](../ref/chemistry.md#src.chemistry.Protein) is the primary way to work with proteins in Deep Origin.
 
+## Constructing a protein
+
 ### From a file
 
 A protein can be constructed from a file:
@@ -24,7 +26,7 @@ protein = Protein(pdb_id="1EBY")
 ```
 
 
-## Visualizing the protein
+## Visualizing a protein
 
 ??? warning "Browser support"
     These visualizations work best on Google Chrome. We are aware of issues on other browsers, especially Safari on macOS.

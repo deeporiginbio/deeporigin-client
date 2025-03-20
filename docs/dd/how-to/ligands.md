@@ -4,6 +4,8 @@ This document describes how to work with ligands (molecules) and use them in Dee
 
 The [`Ligand` class](../ref/chemistry.md#src.chemistry.Ligand) is the primary way to work with ligands in Deep Origin.
 
+## Constructing a ligand
+
 ### From a file
 
 A ligand can be constructed from a file:
@@ -26,7 +28,7 @@ ligand = Ligand(smiles_string="[H]C1=C([H])C(C(=O)N(C([H])([H])[H])C([H])([H])[H
 ```
 
 
-## Visualizing the ligand
+## Visualizing a ligand
 
 ??? warning "Browser support"
     These visualizations work best on Google Chrome. We are aware of issues on other browsers, especially Safari on macOS.
