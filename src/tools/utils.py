@@ -254,9 +254,6 @@ def make_payload(
 
     payload = add_provider_if_databaseid_found(payload)
 
-    print(258)
-    print(payload)
-
     return payload
 
 
