@@ -468,7 +468,13 @@ class Complex:
         df2["SMILES"] = df2["Ligand"]
         df2.drop(columns=["Ligand"], inplace=True)
 
-        df = pd.merge(df1, df2, on="SMILES", how="inner")
+        df = pd.merge(
+            df1,
+            df2,
+            on="SMILES",
+            how="inner",
+            validate="one_to_one",
+        )
         return df
 
     def show_docking_results(self):
@@ -709,7 +715,13 @@ class Complex:
         df2["SMILES"] = df2["Ligand"]
         df2.drop(columns=["Ligand"], inplace=True)
 
-        df = pd.merge(df1, df2, on="ID", how="inner")
+        df = pd.merge(
+            df1,
+            df2,
+            on="ID",
+            how="inner",
+            validate="one_to_one",
+        )
 
         return df
 

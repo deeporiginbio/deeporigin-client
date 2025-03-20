@@ -654,6 +654,5 @@ def download_protein(
             fetch(pdb_id, "pdb", save_dir_path)
         except Exception as e:
             raise DeepOriginException(f"Failed to download PDB {pdb_id}: {str(e)}")
-            raise
 
     return str(file_path)
