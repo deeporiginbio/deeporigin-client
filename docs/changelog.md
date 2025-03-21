@@ -1,5 +1,7 @@
 # Changelog
 
+## `deeporigin v3.14.0`
+
 ## `deeporigin v3.1.0`
 
 !!! warning "Deleted functions"
