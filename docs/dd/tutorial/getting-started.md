@@ -1,9 +1,9 @@
 # Getting started with the Drug Discovery toolbox
 
-This document describes how to use the Drug Discovery toolbox to perform docking and run ABFE and RBFE runs on Deep Origin. Functionality for this is built around the [:material-book:drug_discovery](../ref/drug-discovery.md) module, that can be imported using:
+This document describes how to use the Drug Discovery toolbox to perform docking and run ABFE and RBFE runs on Deep Origin. Functionality for this is built around the [:material-book:Complex](../ref/complex.md) class, that can be imported using:
 
 ```python
-from deeporigin import drug_discovery as dd
+from deeporigin.drug_discovery import Complex
 ```
 
 For the rest of this tutorial, we will assume that this module is imported as `dd`. 
@@ -28,7 +28,7 @@ Ligands can be imported from SDF files or SMILES strings. To run ABFE and RBFE, 
     If you want to explore these tools using some example data, we provide the BRD protein and a few ligands. This is built into the `deeporigin` package and can be accessed using:
 
     ```python
-    dd.EXAMPLE_DATA_DIR
+    from deeporigin.drug_discovery import EXAMPLE_DATA_DIR
     ```
 
 ## Creating a `Complex` object
@@ -39,7 +39,7 @@ The `Complex` object can be created using:
 
 ```python
 # here, we're using the example data directory
-sim = dd.Complex.from_dir(dd.EXAMPLE_DATA_DIR)
+sim = Complex.from_dir(EXAMPLE_DATA_DIR)
 ```
 
 Inspecting the object shows that it contains a protein and 8 ligands:
@@ -76,9 +76,9 @@ sim.ligands
     It is assumed that you are working in a Jupyter notebook (or similar IPython environment). This makes it easier to run the workflow, and some functions assume that you are in a Jupyter notebook.
 
 
-### Viewing Ligands
+### Viewing Ligands (2D in table)
 
-We can also view a table of 2D structures of the ligands using the `show_ligands` method:
+We can also view a table of 2D structures of the ligands, together with user-defined properties using the `show_ligands` method:
 
 ```python
 sim.show_ligands()
@@ -86,7 +86,27 @@ sim.show_ligands()
 
 !!! success "Expected output"
     ![](../../images/tools/ligands.png)
-    
+
+
+### Viewing Ligands (3D structures)
+
+We can also view a table of 3D structures as follows:
+
+```python
+sim.show_ligands("3D")
+```
+
+
+<iframe 
+    src="../how-to/brd-ligands.html" 
+    width="100%" 
+    height="650" 
+    style="border:none;"
+    title="Protein visualization"
+></iframe>
+
+
+
 
 ## Initialization
 

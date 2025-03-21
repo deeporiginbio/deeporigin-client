@@ -22,7 +22,7 @@ class Docking:
 
     Objects instantiated here are meant to be used within the Complex class."""
 
-    def __init__(self, parent=None):
+    def __init__(self, parent):
         self.parent = parent
 
     def get_results(self) -> pd.DataFrame:

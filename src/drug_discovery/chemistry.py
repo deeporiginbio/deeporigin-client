@@ -101,6 +101,29 @@ def show_molecules_in_sdf_file(sdf_file: str | Path):
     JupyterViewer.visualize(html_content)
 
 
+@beartype
+def show_molecules_in_sdf_files(sdf_files: list[str]):
+    """show molecules in an SDF file in a Jupyter notebook using molstar"""
+
+    import tempfile
+
+    temp_dir = tempfile.TemporaryDirectory()
+
+    sdf_file = os.path.join(temp_dir.name, "temp.sdf")
+
+    # combine the SDF files
+    merge_sdf_files(sdf_files, sdf_file)
+
+    from deeporigin_molstar import JupyterViewer, MoleculeViewer
+
+    molecule_viewer = MoleculeViewer(
+        data=str(sdf_file),
+        format="sdf",
+    )
+    html_content = molecule_viewer.render_ligand()
+    JupyterViewer.visualize(html_content)
+
+
 @dataclass
 class Protein:
     """Class to represent a protein (typically backed by a PDB file)"""
@@ -661,7 +684,10 @@ def download_protein(
 
 @beartype
 @_requires_rdkit
-def merge_sdf_files(sdf_file_list: list[str]) -> str:
+def merge_sdf_files(
+    sdf_file_list: list[str],
+    output_path: Optional[str] = None,
+) -> str:
     """
     Merge a list of SDF files into a single SDF file.
 
@@ -688,7 +714,9 @@ def merge_sdf_files(sdf_file_list: list[str]) -> str:
     # Hash the combined string using SHA256 and take the first 10 characters.
     hash_digest = hashlib.sha256(combined_string.encode("utf-8")).hexdigest()[:10]
     output_filename = f"{hash_digest}.sdf"
-    output_path = os.path.join(base_dir, output_filename)
+
+    if output_path is None:
+        output_path = os.path.join(base_dir, output_filename)
 
     # Check if the output file already exists; if so, do nothing and return it.
     if os.path.exists(output_path):

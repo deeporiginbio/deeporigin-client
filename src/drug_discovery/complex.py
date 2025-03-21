@@ -154,18 +154,14 @@ class Complex:
         }
     )
 
-    docking: Docking = field(default_factory=Docking)
-    abfe: ABFE = field(default_factory=ABFE)
-    rbfe: RBFE = field(default_factory=RBFE)
-
     def __post_init__(self):
         """various post init tasks"""
 
         # assign references to the complex in the
         # various child classes
-        self.docking.parent = self
-        self.abfe.parent = self
-        self.rbfe.parent = self
+        self.docking = Docking(parent=self)
+        self.abfe = ABFE(parent=self)
+        self.rbfe = RBFE(parent=self)
 
         # hash protein and ligands
         protein_hash = hash_file(self.protein.file)
@@ -319,10 +315,14 @@ class Complex:
             p.text(f" with {len(self.ligands)} ligands")
             p.text(")")
 
-    def show_ligands(self):
+    def show_ligands(self, view="2d"):
         """Show all ligands in complex object in a table, rendering ligands as 2D structures"""
 
-        chem.show_ligands(self.ligands)
+        if view == "3d":
+            files = [ligand.file for ligand in self.ligands]
+            chem.show_molecules_in_sdf_files(files)
+        else:
+            chem.show_ligands(self.ligands)
 
     def get_result_files_for(self, tool: utils.VALID_TOOLS):
         """Generic method to get output results for a particular tool and combine them as need be
