@@ -1,7 +1,6 @@
 """Module to support Drug Discovery workflows using Deep Origin"""
 
 import concurrent.futures
-import importlib.resources
 import json
 import os
 from dataclasses import dataclass, field
@@ -35,14 +34,6 @@ DATA_DIRS[utils.DB_DOCKING] = os.path.join(
 os.makedirs(DATA_DIRS[utils.DB_ABFE], exist_ok=True)
 os.makedirs(DATA_DIRS[utils.DB_RBFE], exist_ok=True)
 os.makedirs(DATA_DIRS[utils.DB_DOCKING], exist_ok=True)
-
-
-@beartype
-def _load_params(tool: str) -> PrettyDict:
-    """load params for various tools, reading from JSON files"""
-
-    with importlib.resources.open_text("deeporigin.json", f"{tool}.json") as f:
-        return PrettyDict(json.load(f))
 
 
 @beartype
@@ -140,7 +131,6 @@ class Complex:
 
     # these params are not user facing
     _db: Optional[dict] = None
-    _params: PrettyDict = field(default_factory=PrettyDict)
 
     """stores a hash of all ligands and the protein. This will be computed post initialization"""
     _hash: Optional[str] = None

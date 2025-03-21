@@ -11,7 +11,7 @@ from deeporigin.drug_discovery import chemistry as chem
 from deeporigin.drug_discovery import utils
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.tools.utils import query_run_statuses
-from deeporigin.utils.core import hash_strings
+from deeporigin.utils.core import PrettyDict, hash_strings
 from deeporigin_molstar import DockingViewer, JupyterViewer
 
 Number = float | int
@@ -24,6 +24,7 @@ class Docking:
 
     def __init__(self, parent):
         self.parent = parent
+        self._params = PrettyDict()
 
     def get_results(self) -> pd.DataFrame:
         """Get docking results from Deep Origin"""

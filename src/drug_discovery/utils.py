@@ -1,8 +1,12 @@
 """This module contains utility functions for the Drug Discovery module"""
 
+import importlib.resources
+import json
 from typing import Literal, Optional
 
 from beartype import beartype
+from deeporigin.data_hub import api
+from deeporigin.utils.core import PrettyDict, hash_strings
 
 # constants
 DB_ABFE = "ABFE"
@@ -25,6 +29,14 @@ COL_RESULT = "ResultFile"
 COL_SMILES_HASH = "SMILESHash"
 COL_COMPLEX_HASH = "ComplexHash"
 COL_STEP = "Step"
+
+
+@beartype
+def _load_params(tool: str) -> PrettyDict:
+    """load params for various tools, reading from JSON files"""
+
+    with importlib.resources.open_text("deeporigin.json", f"{tool}.json") as f:
+        return PrettyDict(json.load(f))
 
 
 @beartype

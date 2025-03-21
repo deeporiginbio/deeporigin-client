@@ -10,6 +10,7 @@ from deeporigin.data_hub import api
 from deeporigin.drug_discovery import chemistry as chem
 from deeporigin.drug_discovery import utils
 from deeporigin.exceptions import DeepOriginException
+from deeporigin.utils.core import PrettyDict
 
 
 class ABFE:
@@ -19,6 +20,9 @@ class ABFE:
 
     def __init__(self, parent):
         self.parent = parent
+        self._params = PrettyDict()
+
+        self._params.end_to_end = utils._load_params("rbfe_end_to_end")
 
     def get_results(self) -> pd.DataFrame:
         """get ABFE results and return in a dataframe.
@@ -122,7 +126,7 @@ class ABFE:
                 protein_id=self.parent.protein._do_id,
                 ligand1_id=ligand_id,
                 database_columns=database_columns,
-                params=self.parent._params.abfe_end_to_end,
+                params=self._params.end_to_end,
                 tool=utils.DB_ABFE,
                 complex_hash=self.parent._hash,
             )
