@@ -1,6 +1,7 @@
 """Module that contains some utility functions for working with molecules and proteins"""
 
 import base64
+import hashlib
 import importlib.util
 import os
 import re
@@ -656,3 +657,50 @@ def download_protein(
             raise DeepOriginException(f"Failed to download PDB {pdb_id}: {str(e)}")
 
     return str(file_path)
+
+
+@beartype
+@_requires_rdkit
+def merge_sdf_files(sdf_file_list: list[str]) -> str:
+    """
+    Merge a list of SDF files into a single SDF file.
+
+    Args:
+        sdf_file_list (list of str): List of paths to SDF files.
+
+    Returns:
+        str: Path to the merged SDF file.
+    """
+    from rdkit import Chem
+
+    # Get the absolute directory of the first file.
+    base_dir = os.path.dirname(os.path.abspath(sdf_file_list[0]))
+
+    # Check that all files are in the same directory.
+    for sdf_file in sdf_file_list:
+        if os.path.dirname(os.path.abspath(sdf_file)) != base_dir:
+            raise ValueError("All input files must be in the same directory.")
+
+    # Create a combined string from the sorted basenames of the input files.
+    basenames = sorted([os.path.basename(file) for file in sdf_file_list])
+    combined_string = "".join(basenames)
+
+    # Hash the combined string using SHA256 and take the first 10 characters.
+    hash_digest = hashlib.sha256(combined_string.encode("utf-8")).hexdigest()[:10]
+    output_filename = f"{hash_digest}.sdf"
+    output_path = os.path.join(base_dir, output_filename)
+
+    # Check if the output file already exists; if so, do nothing and return it.
+    if os.path.exists(output_path):
+        return output_path
+
+    # Merge the molecules from all SDF files into the new file.
+    writer = Chem.SDWriter(output_path)
+    for sdf_file in sdf_file_list:
+        supplier = Chem.SDMolSupplier(sdf_file)
+        for mol in supplier:
+            if mol is not None:  # Skip molecules that failed to parse.
+                writer.write(mol)
+    writer.close()
+
+    return output_path

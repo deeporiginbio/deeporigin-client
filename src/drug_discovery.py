@@ -18,6 +18,7 @@ from deeporigin.exceptions import DeepOriginException
 from deeporigin.tools.toolkit import _ensure_columns, _ensure_database
 from deeporigin.tools.utils import query_run_statuses
 from deeporigin.utils.core import PrettyDict, hash_file, hash_strings
+from deeporigin_molstar import DockingViewer, JupyterViewer
 
 Number = float | int
 
@@ -372,6 +373,11 @@ class Complex:
             )
             print("Done.")
 
+        return [
+            os.path.join(DATA_DIRS[tool], file_id.replace("_file:", ""))
+            for file_id in file_ids
+        ]
+
     def get_csv_results_for(self, tool: VALID_TOOLS):
         """Generic method to get CSV results for a particular tool and combine them as need be
 
@@ -493,6 +499,24 @@ class Complex:
         df["Structure"] = images
         df.drop("SMILES", axis=1, inplace=True)
         display(HTML(df.to_html(escape=False)))
+
+    def show_docked_ligands(self):
+        """show docked ligands with protein in 3D"""
+
+        files = self.get_result_files_for("Docking")
+
+        sdf_file = chem.merge_sdf_files(files)
+
+        # Example usage of the DockingViewer
+        docking_viewer = DockingViewer()
+        html_content = docking_viewer.render_merged_structures(
+            protein_data=str(self.protein.file),
+            protein_format="pdb",
+            ligands_data=[sdf_file],
+            ligand_format="sdf",
+        )
+
+        JupyterViewer.visualize(html_content)
 
     @beartype
     def dock(
