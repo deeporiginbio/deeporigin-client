@@ -158,10 +158,6 @@ class Complex:
         ligands_hash = hash_strings([ligand.smiles_string for ligand in self.ligands])
         self._hash = hash_strings([protein_hash, ligands_hash])
 
-        # load params for all tools
-        self._params.abfe_end_to_end = _load_params("abfe_end_to_end")
-        self._params.rbfe_end_to_end = _load_params("rbfe_end_to_end")
-
     @classmethod
     def from_dir(cls, directory: str) -> "Complex":
         """initialize an FEP class given some files in a directory

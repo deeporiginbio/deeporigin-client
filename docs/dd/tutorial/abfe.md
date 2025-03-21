@@ -66,7 +66,7 @@ Each ligand will be run in parallel on a separate instance.
 The end to end ABFE tool has a number of user-accessible parameters. To view all parameters, use:
 
 ```python
-sim._params.abfe_end_to_end
+sim.abfe._params.end_to_end
 ```
 ??? success "Expected output" 
     This will print a dictionary of the parameters used for ABFE, similar to:
@@ -304,7 +304,7 @@ sim._params.abfe_end_to_end
 Any of these parameters are modifiable using dot notation. For example, to change the number of steps in the MD step, we can use:
 
 ```python
-sim._params.abfe_end_to_end.md.steps = 500000
+sim.abfe._params.end_to_end.md.steps = 500000
 ```
 
 ### Using `test_run`
@@ -316,7 +316,7 @@ To set the test run parameter to 1, we can use:
 
 ```python
 from deeporigin.utils.core import set_key_to_value
-set_key_to_value(sim._params.abfe_end_to_end, "test_run", 1)
+set_key_to_value(sim.abfe._params.end_to_end, "test_run", 1)
 ```
 
 

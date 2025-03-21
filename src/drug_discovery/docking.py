@@ -63,7 +63,7 @@ class Docking:
         df.drop("SMILES", axis=1, inplace=True)
         display(HTML(df.to_html(escape=False)))
 
-    def show_docked_ligands(self):
+    def show_poses(self):
         """show docked ligands with protein in 3D"""
 
         files = self.parent.get_result_files_for("Docking")
