@@ -1041,6 +1041,12 @@
       
         
       
+        
+      
+        
+      
+        
+      
     
     
       
@@ -1089,7 +1095,7 @@
         
   
   <span class="md-ellipsis">
-    Chemistry
+    chemistry
     
   </span>
   
@@ -1107,11 +1113,77 @@
   
   
     <li class="md-nav__item">
-      <a href="../ref/drug-discovery.html" class="md-nav__link">
+      <a href="../ref/complex.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Drug Discovery
+    complex
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ref/docking.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    docking
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ref/abfe.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    abfe
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ref/rbfe.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    rbfe
     
   </span>
   
@@ -2752,15 +2824,15 @@
 <p>This document describes how to run a <a href="https://en.wikipedia.org/wiki/Free-energy_perturbation">ABFE <span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M3.75 2h3.5a.75.75 0 0 1 0 1.5h-3.5a.25.25 0 0 0-.25.25v8.5c0 .138.112.25.25.25h8.5a.25.25 0 0 0 .25-.25v-3.5a.75.75 0 0 1 1.5 0v3.5A1.75 1.75 0 0 1 12.25 14h-8.5A1.75 1.75 0 0 1 2 12.25v-8.5C2 2.784 2.784 2 3.75 2m6.854-1h4.146a.25.25 0 0 1 .25.25v4.146a.25.25 0 0 1-.427.177L13.03 4.03 9.28 7.78a.75.75 0 0 1-1.042-.018.75.75 0 0 1-.018-1.042l3.75-3.75-1.543-1.543A.25.25 0 0 1 10.604 1"/></svg></span></a> simulation using Deep Origin tools. </p>
 <h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h2>
 <p>We assume that we have an initialized and configured <code>Complex</code> object:</p>
-<p><div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin</span><span class="w"> </span><span class="kn">import</span> <span class="n">drug_discovery</span> <span class="k">as</span> <span class="n">dd</span>
-<span class="n">sim</span> <span class="o">=</span> <span class="n">dd</span><span class="o">.</span><span class="n">Complex</span><span class="o">.</span><span class="n">from_dir</span><span class="p">(</span><span class="s2">&quot;/path/to/folder/&quot;</span><span class="p">)</span>
+<p><div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin.drug_discovery</span><span class="w"> </span><span class="kn">import</span> <span class="n">Complex</span>
+<span class="n">sim</span> <span class="o">=</span> <span class="n">Complex</span><span class="o">.</span><span class="n">from_dir</span><span class="p">(</span><span class="s2">&quot;/path/to/folder/&quot;</span><span class="p">)</span>
 <span class="n">sim</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
 </code></pre></div>
 For more details on how to get started, see <a href="getting-started.html"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 21h15a2 2 0 0 0 2-2v-6h-4v2l-4-3 4-3v2h4V5a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2m0-6h4v2H4zm0-4h7v2H4zm0-4h7v2H4zm17 4h3v2h-3z"/></svg></span> Getting Started </a>.</p>
 <h2 id="starting-an-abfe-run">Starting an ABFE run<a class="headerlink" href="#starting-an-abfe-run" title="Permanent link">&para;</a></h2>
 <h3 id="single-ligand">Single ligand<a class="headerlink" href="#single-ligand" title="Permanent link">&para;</a></h3>
 <p>To run an end-to-end ABFE workflow on a single ligand, we use:</p>
-<div class="language-python highlight"><pre><span></span><code><span class="n">sim</span><span class="o">.</span><span class="n">run_abfe_end_to_end</span><span class="p">(</span><span class="n">ligand_ids</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Ligands-1&quot;</span><span class="p">])</span> <span class="c1"># for example</span>
+<div class="language-python highlight"><pre><span></span><code><span class="n">sim</span><span class="o">.</span><span class="n">abfe</span><span class="o">.</span><span class="n">run_end_to_end</span><span class="p">(</span><span class="n">ligand_ids</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Ligands-1&quot;</span><span class="p">])</span> <span class="c1"># for example</span>
 </code></pre></div>
 <p>This queues up a task on Deep Origin. When it completes, outputs will be written to the appropriate column in this database. </p>
 <p>You will see a message printed to screen similar to:</p>
@@ -2771,16 +2843,16 @@ For more details on how to get started, see <a href="getting-started.html"><span
 </div>
 <h3 id="multiple-ligands">Multiple ligands<a class="headerlink" href="#multiple-ligands" title="Permanent link">&para;</a></h3>
 <p>To run an end-to-end ABFE workflow on multiple ligands, we use:</p>
-<div class="language-python highlight"><pre><span></span><code><span class="n">sim</span><span class="o">.</span><span class="n">run_abfe_end_to_end</span><span class="p">(</span><span class="n">ligand_ids</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Ligands-1&quot;</span><span class="p">,</span> <span class="s2">&quot;Ligands-2&quot;</span><span class="p">])</span> 
+<div class="language-python highlight"><pre><span></span><code><span class="n">sim</span><span class="o">.</span><span class="n">abfe</span><span class="o">.</span><span class="n">run_end_to_end</span><span class="p">(</span><span class="n">ligand_ids</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Ligands-1&quot;</span><span class="p">,</span> <span class="s2">&quot;Ligands-2&quot;</span><span class="p">])</span> 
 </code></pre></div>
 <p>Omitting the ligand IDs will run ABFE on all ligands in the <code>Complex</code> object.</p>
-<div class="language-python highlight"><pre><span></span><code><span class="n">sim</span><span class="o">.</span><span class="n">run_abfe_end_to_end</span><span class="p">()</span> 
+<div class="language-python highlight"><pre><span></span><code><span class="n">sim</span><span class="o">.</span><span class="n">abfe</span><span class="o">.</span><span class="n">run_end_to_end</span><span class="p">()</span> 
 </code></pre></div>
 <p>Each ligand will be run in parallel on a separate instance. </p>
 <h2 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h2>
 <h3 id="viewing-parameters">Viewing parameters<a class="headerlink" href="#viewing-parameters" title="Permanent link">&para;</a></h3>
 <p>The end to end ABFE tool has a number of user-accessible parameters. To view all parameters, use:</p>
-<div class="language-python highlight"><pre><span></span><code><span class="n">sim</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">abfe_end_to_end</span>
+<div class="language-python highlight"><pre><span></span><code><span class="n">sim</span><span class="o">.</span><span class="n">abfe</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">end_to_end</span>
 </code></pre></div>
 <details class="success">
 <summary>Expected output</summary>
@@ -3013,18 +3085,18 @@ For more details on how to get started, see <a href="getting-started.html"><span
 </details>
 <h3 id="modifying-parameters">Modifying parameters<a class="headerlink" href="#modifying-parameters" title="Permanent link">&para;</a></h3>
 <p>Any of these parameters are modifiable using dot notation. For example, to change the number of steps in the MD step, we can use:</p>
-<div class="language-python highlight"><pre><span></span><code><span class="n">sim</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">abfe_end_to_end</span><span class="o">.</span><span class="n">md</span><span class="o">.</span><span class="n">steps</span> <span class="o">=</span> <span class="mi">500000</span>
+<div class="language-python highlight"><pre><span></span><code><span class="n">sim</span><span class="o">.</span><span class="n">abfe</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">end_to_end</span><span class="o">.</span><span class="n">md</span><span class="o">.</span><span class="n">steps</span> <span class="o">=</span> <span class="mi">500000</span>
 </code></pre></div>
 <h3 id="using-test_run">Using <code>test_run</code><a class="headerlink" href="#using-test_run" title="Permanent link">&para;</a></h3>
 <p>The test run parameter can be used to run ABFE for a short number of steps, to verify that all steps execute quickly. This should not be used to run production simulations.</p>
 <p>To set the test run parameter to 1, we can use:</p>
 <div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin.utils.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">set_key_to_value</span>
-<span class="n">set_key_to_value</span><span class="p">(</span><span class="n">sim</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">abfe_end_to_end</span><span class="p">,</span> <span class="s2">&quot;test_run&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">set_key_to_value</span><span class="p">(</span><span class="n">sim</span><span class="o">.</span><span class="n">abfe</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">end_to_end</span><span class="p">,</span> <span class="s2">&quot;test_run&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 </code></pre></div>
 <h2 id="results">Results<a class="headerlink" href="#results" title="Permanent link">&para;</a></h2>
 <h3 id="viewing-results">Viewing results<a class="headerlink" href="#viewing-results" title="Permanent link">&para;</a></h3>
 <p>After initiating a run, we can view results using:</p>
-<div class="language-python highlight"><pre><span></span><code><span class="n">sim</span><span class="o">.</span><span class="n">show_abfe_results</span><span class="p">()</span>
+<div class="language-python highlight"><pre><span></span><code><span class="n">sim</span><span class="o">.</span><span class="n">abfe</span><span class="o">.</span><span class="n">show_results</span><span class="p">()</span>
 </code></pre></div>
 <p>This shows a table similar to:</p>
 <div class="admonition success">
@@ -3033,7 +3105,7 @@ For more details on how to get started, see <a href="getting-started.html"><span
 </div>
 <h3 id="exporting-results-for-analysis">Exporting results for analysis<a class="headerlink" href="#exporting-results-for-analysis" title="Permanent link">&para;</a></h3>
 <p>These results can be exported for analysis using:</p>
-<div class="language-python highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">get_abfe_results</span><span class="p">()</span>
+<div class="language-python highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">abfe</span><span class="o">.</span><span class="n">get_results</span><span class="p">()</span>
 <span class="n">df</span>
 </code></pre></div>
 <div class="admonition success">

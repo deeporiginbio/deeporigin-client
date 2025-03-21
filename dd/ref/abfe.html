@@ -10,13 +10,13 @@
         <meta name="author" content="Deep Origin">
       
       
-        <link rel="canonical" href="https://client-docs.deeporigin.io/dd/ref/drug-discovery.html">
+        <link rel="canonical" href="https://client-docs.deeporigin.io/dd/ref/abfe.html">
       
       
-        <link rel="prev" href="chemistry.html">
+        <link rel="prev" href="docking.html">
       
       
-        <link rel="next" href="../../platform/index.html">
+        <link rel="next" href="rbfe.html">
       
       
       <link rel="icon" href="../../images/favicon.png">
@@ -24,7 +24,7 @@
     
     
       
-        <title>Drug Discovery - Deep Origin Python client | Deep Origin</title>
+        <title>abfe - Deep Origin Python client | Deep Origin</title>
       
     
     
@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#deeporigindrug_discoverycomplex" class="md-skip">
+        <a href="#deeporigindrug_discoveryabfe" class="md-skip">
           Skip to content
         </a>
       
@@ -111,7 +111,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Drug Discovery
+              abfe
             
           </span>
         </div>
@@ -881,6 +881,12 @@
       
         
       
+        
+      
+        
+      
+        
+      
     
     
       
@@ -929,7 +935,51 @@
         
   
   <span class="md-ellipsis">
-    Chemistry
+    chemistry
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="complex.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    complex
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="docking.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    docking
     
   </span>
   
@@ -953,12 +1003,14 @@
       <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
       
       
+        
+      
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
           
   
   <span class="md-ellipsis">
-    Drug Discovery
+    abfe
     
   </span>
   
@@ -966,11 +1018,11 @@
           <span class="md-nav__icon md-icon"></span>
         </label>
       
-      <a href="drug-discovery.html" class="md-nav__link md-nav__link--active">
+      <a href="abfe.html" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
-    Drug Discovery
+    abfe
     
   </span>
   
@@ -985,6 +1037,8 @@
   
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -993,16 +1047,27 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#deeporigindrug_discoverycomplex" class="md-nav__link">
+  <a href="#src.drug_discovery.abfe-classes" class="md-nav__link">
     <span class="md-ellipsis">
-      deeporigin.drug_discovery.Complex
+      Classes
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#src.drug_discovery.Complex-attributes" class="md-nav__link">
+    <nav class="md-nav" aria-label="Classes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.drug_discovery.abfe.ABFE" class="md-nav__link">
+    <span class="md-ellipsis">
+      ABFE
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ABFE">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.drug_discovery.abfe.ABFE-attributes" class="md-nav__link">
     <span class="md-ellipsis">
       Attributes
     </span>
@@ -1012,18 +1077,9 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#src.drug_discovery.Complex.ligands" class="md-nav__link">
+  <a href="#src.drug_discovery.abfe.ABFE.parent" class="md-nav__link">
     <span class="md-ellipsis">
-      ligands
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#src.drug_discovery.Complex.protein" class="md-nav__link">
-    <span class="md-ellipsis">
-      protein
+      parent
     </span>
   </a>
   
@@ -1033,9 +1089,9 @@
     </nav>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#src.drug_discovery.Complex-functions" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#src.drug_discovery.abfe.ABFE-functions" class="md-nav__link">
     <span class="md-ellipsis">
       Functions
     </span>
@@ -1045,146 +1101,39 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#src.drug_discovery.Complex.connect" class="md-nav__link">
+  <a href="#src.drug_discovery.abfe.ABFE.get_results" class="md-nav__link">
     <span class="md-ellipsis">
-      connect
+      get_results
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#src.drug_discovery.Complex.dock" class="md-nav__link">
+  <a href="#src.drug_discovery.abfe.ABFE.run_end_to_end" class="md-nav__link">
     <span class="md-ellipsis">
-      dock
+      run_end_to_end
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#src.drug_discovery.Complex.from_dir" class="md-nav__link">
+  <a href="#src.drug_discovery.abfe.ABFE.show_results" class="md-nav__link">
     <span class="md-ellipsis">
-      from_dir
+      show_results
     </span>
   </a>
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#src.drug_discovery.Complex.get_abfe_results" class="md-nav__link">
-    <span class="md-ellipsis">
-      get_abfe_results
-    </span>
-  </a>
+      </ul>
+    </nav>
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#src.drug_discovery.Complex.get_csv_results_for" class="md-nav__link">
-    <span class="md-ellipsis">
-      get_csv_results_for
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#src.drug_discovery.Complex.get_docking_results" class="md-nav__link">
-    <span class="md-ellipsis">
-      get_docking_results
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#src.drug_discovery.Complex.get_rbfe_results" class="md-nav__link">
-    <span class="md-ellipsis">
-      get_rbfe_results
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#src.drug_discovery.Complex.get_result_files_for" class="md-nav__link">
-    <span class="md-ellipsis">
-      get_result_files_for
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#src.drug_discovery.Complex.get_status" class="md-nav__link">
-    <span class="md-ellipsis">
-      get_status
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#src.drug_discovery.Complex.get_status_for" class="md-nav__link">
-    <span class="md-ellipsis">
-      get_status_for
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#src.drug_discovery.Complex.run_abfe_end_to_end" class="md-nav__link">
-    <span class="md-ellipsis">
-      run_abfe_end_to_end
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#src.drug_discovery.Complex.run_rbfe_end_to_end" class="md-nav__link">
-    <span class="md-ellipsis">
-      run_rbfe_end_to_end
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#src.drug_discovery.Complex.show_abfe_results" class="md-nav__link">
-    <span class="md-ellipsis">
-      show_abfe_results
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#src.drug_discovery.Complex.show_docking_results" class="md-nav__link">
-    <span class="md-ellipsis">
-      show_docking_results
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#src.drug_discovery.Complex.show_ligands" class="md-nav__link">
-    <span class="md-ellipsis">
-      show_ligands
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#src.drug_discovery.Complex.show_rbfe_results" class="md-nav__link">
-    <span class="md-ellipsis">
-      show_rbfe_results
-    </span>
-  </a>
+      </ul>
+    </nav>
   
 </li>
         
@@ -1197,6 +1146,28 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="rbfe.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    rbfe
+    
+  </span>
+  
+
+      </a>
     </li>
   
 
@@ -2683,6 +2654,8 @@
   
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -2691,16 +2664,27 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#deeporigindrug_discoverycomplex" class="md-nav__link">
+  <a href="#src.drug_discovery.abfe-classes" class="md-nav__link">
     <span class="md-ellipsis">
-      deeporigin.drug_discovery.Complex
+      Classes
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#src.drug_discovery.Complex-attributes" class="md-nav__link">
+    <nav class="md-nav" aria-label="Classes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.drug_discovery.abfe.ABFE" class="md-nav__link">
+    <span class="md-ellipsis">
+      ABFE
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ABFE">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.drug_discovery.abfe.ABFE-attributes" class="md-nav__link">
     <span class="md-ellipsis">
       Attributes
     </span>
@@ -2710,18 +2694,9 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#src.drug_discovery.Complex.ligands" class="md-nav__link">
+  <a href="#src.drug_discovery.abfe.ABFE.parent" class="md-nav__link">
     <span class="md-ellipsis">
-      ligands
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#src.drug_discovery.Complex.protein" class="md-nav__link">
-    <span class="md-ellipsis">
-      protein
+      parent
     </span>
   </a>
   
@@ -2731,9 +2706,9 @@
     </nav>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#src.drug_discovery.Complex-functions" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#src.drug_discovery.abfe.ABFE-functions" class="md-nav__link">
     <span class="md-ellipsis">
       Functions
     </span>
@@ -2743,146 +2718,39 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#src.drug_discovery.Complex.connect" class="md-nav__link">
+  <a href="#src.drug_discovery.abfe.ABFE.get_results" class="md-nav__link">
     <span class="md-ellipsis">
-      connect
+      get_results
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#src.drug_discovery.Complex.dock" class="md-nav__link">
+  <a href="#src.drug_discovery.abfe.ABFE.run_end_to_end" class="md-nav__link">
     <span class="md-ellipsis">
-      dock
+      run_end_to_end
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#src.drug_discovery.Complex.from_dir" class="md-nav__link">
+  <a href="#src.drug_discovery.abfe.ABFE.show_results" class="md-nav__link">
     <span class="md-ellipsis">
-      from_dir
+      show_results
     </span>
   </a>
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#src.drug_discovery.Complex.get_abfe_results" class="md-nav__link">
-    <span class="md-ellipsis">
-      get_abfe_results
-    </span>
-  </a>
+      </ul>
+    </nav>
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#src.drug_discovery.Complex.get_csv_results_for" class="md-nav__link">
-    <span class="md-ellipsis">
-      get_csv_results_for
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#src.drug_discovery.Complex.get_docking_results" class="md-nav__link">
-    <span class="md-ellipsis">
-      get_docking_results
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#src.drug_discovery.Complex.get_rbfe_results" class="md-nav__link">
-    <span class="md-ellipsis">
-      get_rbfe_results
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#src.drug_discovery.Complex.get_result_files_for" class="md-nav__link">
-    <span class="md-ellipsis">
-      get_result_files_for
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#src.drug_discovery.Complex.get_status" class="md-nav__link">
-    <span class="md-ellipsis">
-      get_status
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#src.drug_discovery.Complex.get_status_for" class="md-nav__link">
-    <span class="md-ellipsis">
-      get_status_for
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#src.drug_discovery.Complex.run_abfe_end_to_end" class="md-nav__link">
-    <span class="md-ellipsis">
-      run_abfe_end_to_end
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#src.drug_discovery.Complex.run_rbfe_end_to_end" class="md-nav__link">
-    <span class="md-ellipsis">
-      run_rbfe_end_to_end
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#src.drug_discovery.Complex.show_abfe_results" class="md-nav__link">
-    <span class="md-ellipsis">
-      show_abfe_results
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#src.drug_discovery.Complex.show_docking_results" class="md-nav__link">
-    <span class="md-ellipsis">
-      show_docking_results
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#src.drug_discovery.Complex.show_ligands" class="md-nav__link">
-    <span class="md-ellipsis">
-      show_ligands
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#src.drug_discovery.Complex.show_rbfe_results" class="md-nav__link">
-    <span class="md-ellipsis">
-      show_rbfe_results
-    </span>
-  </a>
+      </ul>
+    </nav>
   
 </li>
         
@@ -2910,20 +2778,51 @@
   
 
 
-  <h1>Drug Discovery</h1>
-
-<h2 id="deeporigindrug_discoverycomplex"><code>deeporigin.drug_discovery.Complex</code><a class="headerlink" href="#deeporigindrug_discoverycomplex" title="Permanent link">&para;</a></h2>
+<h1 id="deeporigindrug_discoveryabfe"><code>deeporigin.drug_discovery.abfe</code><a class="headerlink" href="#deeporigindrug_discoveryabfe" title="Permanent link">&para;</a></h1>
 
 
-<div class="doc doc-object doc-class">
+<div class="doc doc-object doc-module">
 
 
 
 
     <div class="doc doc-contents first">
 
+        <p>This module encapsulates methods to run ABFE and show ABFE results on Deep Origin.</p>
+<p>The ABFE object instantiated here is contained in the Complex class is meant to be used within that class.</p>
 
-        <p>class to represent a set of a protein and 1 or many ligands</p>
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+<h2 id="src.drug_discovery.abfe-classes">Classes<a href="#src.drug_discovery.abfe-classes" class="headerlink" title="Permanent link">&para;</a></h2>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="src.drug_discovery.abfe.ABFE" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-class"></code>            <span class="doc doc-object-name doc-class-name">ABFE</span>
+
+
+<a href="#src.drug_discovery.abfe.ABFE" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+
+        <p>class to handle ABFE-related tasks within the Complex class.</p>
+<p>Objects instantiated here are meant to be used within the Complex class.</p>
 
 
 
@@ -2939,22 +2838,22 @@
 
 
 
-<h2 id="src.drug_discovery.Complex-attributes">Attributes<a href="#src.drug_discovery.Complex-attributes" class="headerlink" title="Permanent link">&para;</a></h2>
+<h4 id="src.drug_discovery.abfe.ABFE-attributes">Attributes<a href="#src.drug_discovery.abfe.ABFE-attributes" class="headerlink" title="Permanent link">&para;</a></h4>
 
 <div class="doc doc-object doc-attribute">
 
 
 
-<h3 id="src.drug_discovery.Complex.ligands" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-attribute"></code>            <span class="doc doc-object-name doc-attribute-name">ligands</span>
+<h5 id="src.drug_discovery.abfe.ABFE.parent" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-attribute"></code>            <span class="doc doc-object-name doc-attribute-name">parent</span>
 
 
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
   </span>
 
-<a href="#src.drug_discovery.Complex.ligands" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="n">ligands</span><span class="p">:</span> <span class="n">list</span><span class="p">[</span><span class="n"><span title="deeporigin.chemistry.Ligand">Ligand</span></span><span class="p">]</span>
+<a href="#src.drug_discovery.abfe.ABFE.parent" class="headerlink" title="Permanent link">&para;</a></h5>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="n">parent</span> <span class="o">=</span> <span class="n"><a class="autorefs autorefs-internal" title="src.drug_discovery.abfe.ABFE.parent" href="#src.drug_discovery.abfe.ABFE.parent">parent</a></span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -2962,217 +2861,17 @@
 
 </div>
 
-<div class="doc doc-object doc-attribute">
-
-
-
-<h3 id="src.drug_discovery.Complex.protein" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-attribute"></code>            <span class="doc doc-object-name doc-attribute-name">protein</span>
-
-
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
-  </span>
-
-<a href="#src.drug_discovery.Complex.protein" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="n">protein</span><span class="p">:</span> <span class="n"><span title="deeporigin.chemistry.Protein">Protein</span></span>
-</code></pre></div>
-
-    <div class="doc doc-contents ">
-    </div>
-
-</div>
-
-<h2 id="src.drug_discovery.Complex-functions">Functions<a href="#src.drug_discovery.Complex-functions" class="headerlink" title="Permanent link">&para;</a></h2>
+<h4 id="src.drug_discovery.abfe.ABFE-functions">Functions<a href="#src.drug_discovery.abfe.ABFE-functions" class="headerlink" title="Permanent link">&para;</a></h4>
 
 <div class="doc doc-object doc-function">
 
 
-<h3 id="src.drug_discovery.Complex.connect" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">connect</span>
+<h5 id="src.drug_discovery.abfe.ABFE.get_results" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">get_results</span>
 
 
-<a href="#src.drug_discovery.Complex.connect" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">connect</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span>
-</code></pre></div>
-
-    <div class="doc doc-contents ">
-
-        <p>Connect instance of Complex to the databases on Deep Origin. This method uploads ligand and protein files if needed, and retrieves job IDs of tasks for all tools, if they exist.</p>
-<p>Before running any tool, it is required to call this method.</p>
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h3 id="src.drug_discovery.Complex.dock" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">dock</span>
-
-
-<a href="#src.drug_discovery.Complex.dock" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">dock</span><span class="p">(</span>
-    <span class="o">*</span><span class="p">,</span>
-    <span class="n">box_size</span><span class="p">:</span> <span class="n">tuple</span><span class="p">[</span><span class="n"><span title="src.drug_discovery.Number">Number</span></span><span class="p">,</span> <span class="n"><span title="src.drug_discovery.Number">Number</span></span><span class="p">,</span> <span class="n"><span title="src.drug_discovery.Number">Number</span></span><span class="p">],</span>
-    <span class="n">pocket_center</span><span class="p">:</span> <span class="n">tuple</span><span class="p">[</span><span class="n"><span title="src.drug_discovery.Number">Number</span></span><span class="p">,</span> <span class="n"><span title="src.drug_discovery.Number">Number</span></span><span class="p">,</span> <span class="n"><span title="src.drug_discovery.Number">Number</span></span><span class="p">],</span>
-    <span class="n">batch_size</span><span class="p">:</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">32</span><span class="p">,</span>
-    <span class="n">n_workers</span><span class="p">:</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-<span class="p">)</span>
-</code></pre></div>
-
-    <div class="doc doc-contents ">
-
-        <p>Run bulk docking on Deep Origin. Ligands will be split into batches based on the batch_size argument, and will run in parallel on Deep Origin clusters.</p>
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>box_size</code>
-            </td>
-            <td>
-                  <code>tuple[float, float, float]</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>box size</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>pocket_center</code>
-            </td>
-            <td>
-                  <code>tuple[float, float, float]</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>pocket center</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>batch_size</code>
-            </td>
-            <td>
-                  <code>int</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>batch size. Defaults to 30.</p>
-              </div>
-            </td>
-            <td>
-                  <code>32</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>n_workers</code>
-            </td>
-            <td>
-                  <code>int</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>number of workers. Defaults to None.</p>
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h3 id="src.drug_discovery.Complex.from_dir" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">from_dir</span>
-
-
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
-  </span>
-
-<a href="#src.drug_discovery.Complex.from_dir" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">from_dir</span><span class="p">(</span><span class="n">directory</span><span class="p">:</span> <span class="n">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><span title="src.drug_discovery.Complex">Complex</span></span>
-</code></pre></div>
-
-    <div class="doc doc-contents ">
-
-        <p>initialize an FEP class given some files in a directory</p>
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>directory</code>
-            </td>
-            <td>
-                  <code>str</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>directory containing ligand and protein files.</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-        <p>Protein file should be in PDB format. Ligand files should be in SDF format. Each SDF file should contain a single molecule. If your SDF files contain more than one molecule, use <code>deeporigin.chemistry.split_sdf_file</code> to split them into separate files.</p>
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h3 id="src.drug_discovery.Complex.get_abfe_results" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">get_abfe_results</span>
-
-
-<a href="#src.drug_discovery.Complex.get_abfe_results" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">get_abfe_results</span><span class="p">()</span>
+<a href="#src.drug_discovery.abfe.ABFE.get_results" class="headerlink" title="Permanent link">&para;</a></h5>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">get_results</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n"><span title="pandas.DataFrame">DataFrame</span></span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -3187,222 +2886,12 @@
 <div class="doc doc-object doc-function">
 
 
-<h3 id="src.drug_discovery.Complex.get_csv_results_for" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">get_csv_results_for</span>
+<h5 id="src.drug_discovery.abfe.ABFE.run_end_to_end" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">run_end_to_end</span>
 
 
-<a href="#src.drug_discovery.Complex.get_csv_results_for" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">get_csv_results_for</span><span class="p">(</span><span class="n">tool</span><span class="p">:</span> <span class="n"><span title="src.drug_discovery.VALID_TOOLS">VALID_TOOLS</span></span><span class="p">)</span>
-</code></pre></div>
-
-    <div class="doc doc-contents ">
-
-        <p>Generic method to get CSV results for a particular tool and combine them as need be</p>
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>tool</code>
-            </td>
-            <td>
-                  <code><span title="src.drug_discovery.VALID_TOOLS">VALID_TOOLS</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>One of "Docking", "ABFE", "RBFE"</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h3 id="src.drug_discovery.Complex.get_docking_results" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">get_docking_results</span>
-
-
-<a href="#src.drug_discovery.Complex.get_docking_results" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">get_docking_results</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n"><span title="pandas.DataFrame">DataFrame</span></span>
-</code></pre></div>
-
-    <div class="doc doc-contents ">
-
-        <p>Get docking results from Deep Origin</p>
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h3 id="src.drug_discovery.Complex.get_rbfe_results" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">get_rbfe_results</span>
-
-
-<a href="#src.drug_discovery.Complex.get_rbfe_results" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">get_rbfe_results</span><span class="p">()</span>
-</code></pre></div>
-
-    <div class="doc doc-contents ">
-
-        <p>Fetch RBFE results and return in a dataframe.</p>
-<p>This method returns a dataframe showing the results of RBFE runs associated with this simulation session. The ligand file name, SMILES string and ΔΔG are shown.</p>
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h3 id="src.drug_discovery.Complex.get_result_files_for" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">get_result_files_for</span>
-
-
-<a href="#src.drug_discovery.Complex.get_result_files_for" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">get_result_files_for</span><span class="p">(</span><span class="n">tool</span><span class="p">:</span> <span class="n"><span title="src.drug_discovery.VALID_TOOLS">VALID_TOOLS</span></span><span class="p">)</span>
-</code></pre></div>
-
-    <div class="doc doc-contents ">
-
-        <p>Generic method to get output results for a particular tool and combine them as need be</p>
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>tool</code>
-            </td>
-            <td>
-                  <code><span title="src.drug_discovery.VALID_TOOLS">VALID_TOOLS</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>One of "Docking", "ABFE", "RBFE"</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h3 id="src.drug_discovery.Complex.get_status" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">get_status</span>
-
-
-<a href="#src.drug_discovery.Complex.get_status" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">get_status</span><span class="p">()</span>
-</code></pre></div>
-
-    <div class="doc doc-contents ">
-
-        <p>Returns status for all runs for all tools</p>
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h3 id="src.drug_discovery.Complex.get_status_for" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">get_status_for</span>
-
-
-<a href="#src.drug_discovery.Complex.get_status_for" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">get_status_for</span><span class="p">(</span><span class="n">tool</span><span class="p">:</span> <span class="n"><span title="src.drug_discovery.VALID_TOOLS">VALID_TOOLS</span></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">dict</span>
-</code></pre></div>
-
-    <div class="doc doc-contents ">
-
-        <p>Return status for jobs corresponding to a particular tool</p>
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>tool</code>
-            </td>
-            <td>
-                  <code><span title="src.drug_discovery.VALID_TOOLS">VALID_TOOLS</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>one of "Docking", "ABFE", "RBFE"</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h3 id="src.drug_discovery.Complex.run_abfe_end_to_end" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">run_abfe_end_to_end</span>
-
-
-<a href="#src.drug_discovery.Complex.run_abfe_end_to_end" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">run_abfe_end_to_end</span><span class="p">(</span>
-    <span class="o">*</span><span class="p">,</span> <span class="n">ligand_ids</span><span class="p">:</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n">list</span><span class="p">[</span><span class="n">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
-<span class="p">)</span>
+<a href="#src.drug_discovery.abfe.ABFE.run_end_to_end" class="headerlink" title="Permanent link">&para;</a></h5>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">run_end_to_end</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">ligand_ids</span><span class="p">:</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n">list</span><span class="p">[</span><span class="n">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -3447,78 +2936,12 @@
 <div class="doc doc-object doc-function">
 
 
-<h3 id="src.drug_discovery.Complex.run_rbfe_end_to_end" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">run_rbfe_end_to_end</span>
+<h5 id="src.drug_discovery.abfe.ABFE.show_results" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">show_results</span>
 
 
-<a href="#src.drug_discovery.Complex.run_rbfe_end_to_end" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">run_rbfe_end_to_end</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">ligand1_id</span><span class="p">:</span> <span class="n">str</span><span class="p">,</span> <span class="n">ligand2_id</span><span class="p">:</span> <span class="n">str</span><span class="p">)</span>
-</code></pre></div>
-
-    <div class="doc doc-contents ">
-
-        <p>Run end-to-end ABFE run on a pair of ligands.</p>
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>ligand1_id</code>
-            </td>
-            <td>
-                  <code>str</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>ID of ligand 1</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>ligand2_id</code>
-            </td>
-            <td>
-                  <code>str</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>ID of ligand 2</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h3 id="src.drug_discovery.Complex.show_abfe_results" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">show_abfe_results</span>
-
-
-<a href="#src.drug_discovery.Complex.show_abfe_results" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">show_abfe_results</span><span class="p">()</span>
+<a href="#src.drug_discovery.abfe.ABFE.show_results" class="headerlink" title="Permanent link">&para;</a></h5>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">show_results</span><span class="p">()</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -3530,63 +2953,14 @@
 
 </div>
 
-<div class="doc doc-object doc-function">
 
 
-<h3 id="src.drug_discovery.Complex.show_docking_results" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">show_docking_results</span>
-
-
-<a href="#src.drug_discovery.Complex.show_docking_results" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">show_docking_results</span><span class="p">()</span>
-</code></pre></div>
-
-    <div class="doc doc-contents ">
-
-        <p>show results of bulk Docking run in a table, rendering 2D structures of molecules</p>
+  </div>
 
     </div>
 
 </div>
 
-<div class="doc doc-object doc-function">
-
-
-<h3 id="src.drug_discovery.Complex.show_ligands" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">show_ligands</span>
-
-
-<a href="#src.drug_discovery.Complex.show_ligands" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">show_ligands</span><span class="p">()</span>
-</code></pre></div>
-
-    <div class="doc doc-contents ">
-
-        <p>Show all ligands in complex object in a table, rendering ligands as 2D structures</p>
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h3 id="src.drug_discovery.Complex.show_rbfe_results" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">show_rbfe_results</span>
-
-
-<a href="#src.drug_discovery.Complex.show_rbfe_results" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">show_rbfe_results</span><span class="p">()</span>
-</code></pre></div>
-
-    <div class="doc doc-contents ">
-
-        <p>Show RBFE results in a dataframe.</p>
-<p>This method returns a dataframe showing the results of RBFE runs associated with this simulation session. The ligand file name, 2-D structure, and ΔΔG are shown.</p>
-
-    </div>
-
-</div>
 
 
 
@@ -3632,7 +3006,7 @@
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="chemistry.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Chemistry">
+          <a href="docking.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: docking">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -3642,20 +3016,20 @@
                 Previous
               </span>
               <div class="md-ellipsis">
-                Chemistry
+                docking
               </div>
             </div>
           </a>
         
         
           
-          <a href="../../platform/index.html" class="md-footer__link md-footer__link--next" aria-label="Next: Platform API">
+          <a href="rbfe.html" class="md-footer__link md-footer__link--next" aria-label="Next: rbfe">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Platform API
+                rbfe
               </div>
             </div>
             <div class="md-footer__button md-icon">

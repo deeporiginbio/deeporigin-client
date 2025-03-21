@@ -1008,6 +1008,12 @@
       
         
       
+        
+      
+        
+      
+        
+      
     
     
       
@@ -1056,7 +1062,7 @@
         
   
   <span class="md-ellipsis">
-    Chemistry
+    chemistry
     
   </span>
   
@@ -1074,11 +1080,77 @@
   
   
     <li class="md-nav__item">
-      <a href="../ref/drug-discovery.html" class="md-nav__link">
+      <a href="../ref/complex.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Drug Discovery
+    complex
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ref/docking.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    docking
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ref/abfe.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    abfe
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ref/rbfe.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    rbfe
     
   </span>
   
@@ -2694,7 +2766,7 @@ For more details on how to get started, see <a href="getting-started.html"><span
 <h2 id="starting-an-rbfe-run">Starting an RBFE run<a class="headerlink" href="#starting-an-rbfe-run" title="Permanent link">&para;</a></h2>
 <h3 id="single-pair-of-ligands">Single pair of ligands<a class="headerlink" href="#single-pair-of-ligands" title="Permanent link">&para;</a></h3>
 <p>To run an end-to-end RBFE workflow on a single pair of ligands, we use:</p>
-<div class="language-python highlight"><pre><span></span><code><span class="n">sim</span><span class="o">.</span><span class="n">run_rbfe_end_to_end</span><span class="p">(</span>
+<div class="language-python highlight"><pre><span></span><code><span class="n">sim</span><span class="o">.</span><span class="n">rbfe</span><span class="o">.</span><span class="n">run_end_to_end</span><span class="p">(</span>
     <span class="n">ligand1_id</span><span class="o">=</span><span class="s2">&quot;Ligands-1&quot;</span><span class="p">,</span>  <span class="c1"># for example</span>
     <span class="n">ligand2_id</span><span class="o">=</span><span class="s2">&quot;Ligands-2&quot;</span><span class="p">,</span>
 <span class="p">)</span>
@@ -2713,7 +2785,7 @@ For more details on how to get started, see <a href="getting-started.html"><span
 </div>
 <h3 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h3>
 <p>The end to end RBFE tool has a number of user-accessible parameters. To view all parameters, use:</p>
-<div class="language-python highlight"><pre><span></span><code><span class="n">sim</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">rbfe_end_to_end</span>
+<div class="language-python highlight"><pre><span></span><code><span class="n">sim</span><span class="o">.</span><span class="n">rbfe</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">end_to_end</span>
 </code></pre></div>
 <details class="success">
 <summary>Expected output</summary>
@@ -2984,12 +3056,12 @@ For more details on how to get started, see <a href="getting-started.html"><span
 </code></pre></div>
 </details>
 <p>Any of these parameters are modifiable using dot notation. For example, to change the number of steps in the RBFE step, we can use:</p>
-<div class="language-python highlight"><pre><span></span><code><span class="n">sim</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">rbfe_end_to_end</span><span class="o">.</span><span class="n">rbfe</span><span class="o">.</span><span class="n">steps</span> <span class="o">=</span> <span class="mi">500000</span>
+<div class="language-python highlight"><pre><span></span><code><span class="n">sim</span><span class="o">.</span><span class="n">rbfe</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">end_to_end</span><span class="o">.</span><span class="n">rbfe</span><span class="o">.</span><span class="n">steps</span> <span class="o">=</span> <span class="mi">500000</span>
 </code></pre></div>
 <h2 id="results">Results<a class="headerlink" href="#results" title="Permanent link">&para;</a></h2>
 <h3 id="viewing-results">Viewing results<a class="headerlink" href="#viewing-results" title="Permanent link">&para;</a></h3>
 <p>After initiating a run, we can view results using:</p>
-<div class="language-python highlight"><pre><span></span><code><span class="n">sim</span><span class="o">.</span><span class="n">show_rbfe_results</span><span class="p">()</span>
+<div class="language-python highlight"><pre><span></span><code><span class="n">sim</span><span class="o">.</span><span class="n">rbfe</span><span class="o">.</span><span class="n">show_results</span><span class="p">()</span>
 </code></pre></div>
 <p>This shows a table similar to:</p>
 <div class="admonition success">
@@ -2998,7 +3070,7 @@ For more details on how to get started, see <a href="getting-started.html"><span
 </div>
 <h3 id="exporting-results-for-analysis">Exporting results for analysis<a class="headerlink" href="#exporting-results-for-analysis" title="Permanent link">&para;</a></h3>
 <p>These results can be exported for analysis using:</p>
-<div class="language-python highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">get_rbfe_results</span><span class="p">()</span>
+<div class="language-python highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">rbfe</span><span class="o">.</span><span class="n">get_results</span><span class="p">()</span>
 <span class="n">df</span>
 </code></pre></div>
 <div class="admonition success">

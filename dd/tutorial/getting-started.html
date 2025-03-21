@@ -740,9 +740,18 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#viewing-ligands" class="md-nav__link">
+  <a href="#viewing-ligands-2d-in-table" class="md-nav__link">
     <span class="md-ellipsis">
-      Viewing Ligands
+      Viewing Ligands (2D in table)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#viewing-ligands-3d-structures" class="md-nav__link">
+    <span class="md-ellipsis">
+      Viewing Ligands (3D structures)
     </span>
   </a>
   
@@ -984,6 +993,12 @@
       
         
       
+        
+      
+        
+      
+        
+      
     
     
       
@@ -1032,7 +1047,7 @@
         
   
   <span class="md-ellipsis">
-    Chemistry
+    chemistry
     
   </span>
   
@@ -1050,11 +1065,77 @@
   
   
     <li class="md-nav__item">
-      <a href="../ref/drug-discovery.html" class="md-nav__link">
+      <a href="../ref/complex.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Drug Discovery
+    complex
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ref/docking.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    docking
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ref/abfe.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    abfe
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ref/rbfe.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    rbfe
     
   </span>
   
@@ -2593,9 +2674,18 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#viewing-ligands" class="md-nav__link">
+  <a href="#viewing-ligands-2d-in-table" class="md-nav__link">
     <span class="md-ellipsis">
-      Viewing Ligands
+      Viewing Ligands (2D in table)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#viewing-ligands-3d-structures" class="md-nav__link">
+    <span class="md-ellipsis">
+      Viewing Ligands (3D structures)
     </span>
   </a>
   
@@ -2635,8 +2725,8 @@
 
 
 <h1 id="getting-started-with-the-drug-discovery-toolbox">Getting started with the Drug Discovery toolbox<a class="headerlink" href="#getting-started-with-the-drug-discovery-toolbox" title="Permanent link">&para;</a></h1>
-<p>This document describes how to use the Drug Discovery toolbox to perform docking and run ABFE and RBFE runs on Deep Origin. Functionality for this is built around the <a href="../ref/drug-discovery.html"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 22a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2h-6v7L9.5 7.5 7 9V2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2z"/></svg></span>drug_discovery</a> module, that can be imported using:</p>
-<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin</span><span class="w"> </span><span class="kn">import</span> <span class="n">drug_discovery</span> <span class="k">as</span> <span class="n">dd</span>
+<p>This document describes how to use the Drug Discovery toolbox to perform docking and run ABFE and RBFE runs on Deep Origin. Functionality for this is built around the <a href="../ref/complex.html"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 22a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2h-6v7L9.5 7.5 7 9V2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2z"/></svg></span>Complex</a> class, that can be imported using:</p>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin.drug_discovery</span><span class="w"> </span><span class="kn">import</span> <span class="n">Complex</span>
 </code></pre></div>
 <p>For the rest of this tutorial, we will assume that this module is imported as <code>dd</code>. </p>
 <h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h2>
@@ -2652,14 +2742,14 @@
 <div class="admonition tip">
 <p class="admonition-title">Example data</p>
 <p>If you want to explore these tools using some example data, we provide the BRD protein and a few ligands. This is built into the <code>deeporigin</code> package and can be accessed using:</p>
-<div class="language-python highlight"><pre><span></span><code><span class="n">dd</span><span class="o">.</span><span class="n">EXAMPLE_DATA_DIR</span>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin.drug_discovery</span><span class="w"> </span><span class="kn">import</span> <span class="n">EXAMPLE_DATA_DIR</span>
 </code></pre></div>
 </div>
 <h2 id="creating-a-complex-object">Creating a <code>Complex</code> object<a class="headerlink" href="#creating-a-complex-object" title="Permanent link">&para;</a></h2>
 <p>The core of the Drug Discovery toolbox is the <code>Complex</code> class, that acts as a container for a protein and a set of ligand.</p>
 <p>The <code>Complex</code> object can be created using:</p>
 <div class="language-python highlight"><pre><span></span><code><span class="c1"># here, we&#39;re using the example data directory</span>
-<span class="n">sim</span> <span class="o">=</span> <span class="n">dd</span><span class="o">.</span><span class="n">Complex</span><span class="o">.</span><span class="n">from_dir</span><span class="p">(</span><span class="n">dd</span><span class="o">.</span><span class="n">EXAMPLE_DATA_DIR</span><span class="p">)</span>
+<span class="n">sim</span> <span class="o">=</span> <span class="n">Complex</span><span class="o">.</span><span class="n">from_dir</span><span class="p">(</span><span class="n">EXAMPLE_DATA_DIR</span><span class="p">)</span>
 </code></pre></div>
 <p>Inspecting the object shows that it contains a protein and 8 ligands:</p>
 <div class="language-python highlight"><pre><span></span><code><span class="n">sim</span>
@@ -2687,14 +2777,26 @@
 <p class="admonition-title">Jupyter notebooks</p>
 <p>It is assumed that you are working in a Jupyter notebook (or similar IPython environment). This makes it easier to run the workflow, and some functions assume that you are in a Jupyter notebook.</p>
 </div>
-<h3 id="viewing-ligands">Viewing Ligands<a class="headerlink" href="#viewing-ligands" title="Permanent link">&para;</a></h3>
-<p>We can also view a table of 2D structures of the ligands using the <code>show_ligands</code> method:</p>
+<h3 id="viewing-ligands-2d-in-table">Viewing Ligands (2D in table)<a class="headerlink" href="#viewing-ligands-2d-in-table" title="Permanent link">&para;</a></h3>
+<p>We can also view a table of 2D structures of the ligands, together with user-defined properties using the <code>show_ligands</code> method:</p>
 <div class="language-python highlight"><pre><span></span><code><span class="n">sim</span><span class="o">.</span><span class="n">show_ligands</span><span class="p">()</span>
 </code></pre></div>
 <div class="admonition success">
 <p class="admonition-title">Expected output</p>
 <p><img alt="" src="../../images/tools/ligands.png" /></p>
 </div>
+<h3 id="viewing-ligands-3d-structures">Viewing Ligands (3D structures)<a class="headerlink" href="#viewing-ligands-3d-structures" title="Permanent link">&para;</a></h3>
+<p>We can also view a table of 3D structures as follows:</p>
+<div class="language-python highlight"><pre><span></span><code><span class="n">sim</span><span class="o">.</span><span class="n">show_ligands</span><span class="p">(</span><span class="s2">&quot;3D&quot;</span><span class="p">)</span>
+</code></pre></div>
+<iframe 
+    src="../how-to/brd-ligands.html" 
+    width="100%" 
+    height="650" 
+    style="border:none;"
+    title="Protein visualization"
+></iframe>
+
 <h2 id="initialization">Initialization<a class="headerlink" href="#initialization" title="Permanent link">&para;</a></h2>
 <p>Notice that the ID column in the Ligands table shows <code>None</code> for every ligand. This means that we haven't uploaded Ligand SDF files to Deep Origin yet. We can do using the <code>connect</code> method:</p>
 <div class="language-python highlight"><pre><span></span><code><span class="n">sim</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
