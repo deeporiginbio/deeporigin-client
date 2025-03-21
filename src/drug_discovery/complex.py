@@ -140,7 +140,7 @@ class Complex:
 
     # these params are not user facing
     _db: Optional[dict] = None
-    _params: PrettyDict = PrettyDict()
+    _params: PrettyDict = field(default_factory=PrettyDict)
 
     """stores a hash of all ligands and the protein. This will be computed post initialization"""
     _hash: Optional[str] = None
