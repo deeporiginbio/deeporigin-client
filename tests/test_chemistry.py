@@ -3,7 +3,7 @@
 import os
 
 import pytest
-from deeporigin import chemistry
+from deeporigin.drug_discovery import chemistry
 from deeporigin.exceptions import DeepOriginException
 
 base_path = os.path.join(os.path.dirname(__file__), "fixtures")
