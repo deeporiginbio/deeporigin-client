@@ -7,7 +7,7 @@ import os
 import shutil
 from datetime import datetime
 from pathlib import Path
-from typing import List, Union
+from typing import Union
 
 from beartype import beartype
 from box import Box
@@ -77,7 +77,7 @@ def hash_file(file_path: str | Path) -> str:
 
 
 @beartype
-def hash_strings(strings: List[str]) -> str:
+def hash_strings(strings: list[str]) -> str:
     """
     Computes a SHA-256 hash for a list of strings in an order-insensitive manner.
 
@@ -85,7 +85,7 @@ def hash_strings(strings: List[str]) -> str:
     and returns the hexadecimal digest of the SHA-256 hash.
 
     Parameters:
-        strings (List[str]): A list of strings.
+        strings (list[str]): A list of strings.
 
     Returns:
         str: The hexadecimal SHA-256 hash of the sorted list.
@@ -253,7 +253,7 @@ def in_aws_lambda():
 
 
 @beartype
-def find_last_updated_row(rows: List[dict]) -> dict | None:
+def find_last_updated_row(rows: list[dict]) -> dict | None:
     """utility function to find the most recently updated row and return that object"""
 
     if len(rows) == 0:
