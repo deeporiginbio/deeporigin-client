@@ -82,6 +82,18 @@ class Docking:
 
         JupyterViewer.visualize(html_content)
 
+    def get_poses(self, output_sdf_file: str) -> None:
+        """generate a single SDF file containing all the poses of all ligands docked to the protein
+
+        Args:
+            output_sdf_file (str): path to output SDF file. All poses will be written to a SDF file in this location.
+
+        """
+
+        files = self.parent.get_result_files_for("Docking")
+
+        chem.merge_sdf_files(files, output_sdf_file)
+
     @beartype
     def run(
         self,
