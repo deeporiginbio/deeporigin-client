@@ -7,10 +7,11 @@ This document describes how to [dock :octicons-link-external-16:](https://en.wik
 We assume that we have an initialized and configured `Complex` object:
 
 ```python
-from deeporigin import drug_discovery as dd
-sim = dd.Complex.from_dir("/path/to/folder/")
+from deeporigin.drug_discovery import Complex
+sim = Complex.from_dir("/path/to/folder/")
 sim.connect()
 ```
+
 For more details on how to get started, see [:material-page-previous: Getting Started ](./getting-started.md).
 
 ## Starting a docking run
@@ -19,7 +20,7 @@ To dock all ligands to the protein, parallelizing and batching across all ligand
 
 
 ```python
-sim.dock(
+sim.docking.run(
     box_size=(15, 15, 15),      # match to your protein
     pocket_center=(13, -6, 22), # match to your protein
 )
@@ -79,22 +80,37 @@ sim.get_status_for("Docking")
 
 ### Viewing results
 
-
-
-After completion of bulk docking, we can view results using:
+After completion of docking, we can view results using:
 
 ```python
-sim.show_docking_results()
+sim.docking.show_results()
 ```  
 
 This shows a table similar to:
 
 ![Docking results](../../images/tools/docking-results.png)
 
+### Viewing docked poses
+
+To view the docked poses of all ligands in the complex, use:
+
+```python
+sim.docking.show_poses()
+```
+
+<iframe 
+    src="./docked-poses.html" 
+    width="100%" 
+    height="650" 
+    style="border:none;"
+    title="Protein visualization"
+></iframe>
+
+
 ### Exporting for further analysis
 
 To obtain the raw dataframe for further analysis, use:
 
 ```python
-df = sim.get_docking_results()
+df = sim.docking.get_results()
 ```

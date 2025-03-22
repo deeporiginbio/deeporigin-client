@@ -7,8 +7,8 @@ This document describes how to run a [ABFE :octicons-link-external-16:](https://
 We assume that we have an initialized and configured `Complex` object:
 
 ```python
-from deeporigin import drug_discovery as dd
-sim = dd.Complex.from_dir("/path/to/folder/")
+from deeporigin.drug_discovery import Complex
+sim = Complex.from_dir("/path/to/folder/")
 sim.connect()
 ```
 For more details on how to get started, see [:material-page-previous: Getting Started ](./getting-started.md).
@@ -26,7 +26,7 @@ To run an end-to-end ABFE workflow on a single ligand, we use:
 
 
 ```python
-sim.run_abfe_end_to_end(ligand_ids=["Ligands-1"]) # for example
+sim.abfe.run_end_to_end(ligand_ids=["Ligands-1"]) # for example
 ```
 
 This queues up a task on Deep Origin. When it completes, outputs will be written to the appropriate column in this database. 
@@ -46,14 +46,14 @@ You will see a message printed to screen similar to:
 To run an end-to-end ABFE workflow on multiple ligands, we use:
 
 ```python
-sim.run_abfe_end_to_end(ligand_ids=["Ligands-1", "Ligands-2"]) 
+sim.abfe.run_end_to_end(ligand_ids=["Ligands-1", "Ligands-2"]) 
 ```
 
 Omitting the ligand IDs will run ABFE on all ligands in the `Complex` object.
 
 
 ```python
-sim.run_abfe_end_to_end() 
+sim.abfe.run_end_to_end() 
 ```
 
 Each ligand will be run in parallel on a separate instance. 
@@ -66,7 +66,7 @@ Each ligand will be run in parallel on a separate instance.
 The end to end ABFE tool has a number of user-accessible parameters. To view all parameters, use:
 
 ```python
-sim._params.abfe_end_to_end
+sim.abfe._params.end_to_end
 ```
 ??? success "Expected output" 
     This will print a dictionary of the parameters used for ABFE, similar to:
@@ -304,7 +304,7 @@ sim._params.abfe_end_to_end
 Any of these parameters are modifiable using dot notation. For example, to change the number of steps in the MD step, we can use:
 
 ```python
-sim._params.abfe_end_to_end.md.steps = 500000
+sim.abfe._params.end_to_end.md.steps = 500000
 ```
 
 ### Using `test_run`
@@ -316,7 +316,7 @@ To set the test run parameter to 1, we can use:
 
 ```python
 from deeporigin.utils.core import set_key_to_value
-set_key_to_value(sim._params.abfe_end_to_end, "test_run", 1)
+set_key_to_value(sim.abfe._params.end_to_end, "test_run", 1)
 ```
 
 
@@ -328,7 +328,7 @@ set_key_to_value(sim._params.abfe_end_to_end, "test_run", 1)
 After initiating a run, we can view results using:
 
 ```python
-sim.show_abfe_results()
+sim.abfe.show_results()
 ```  
 
 This shows a table similar to:
@@ -344,7 +344,7 @@ This shows a table similar to:
 These results can be exported for analysis using:
 
 ```python
-df = sim.get_abfe_results()
+df = sim.abfe.get_results()
 df
 ```
 
