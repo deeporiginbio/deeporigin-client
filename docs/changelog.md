@@ -1,5 +1,14 @@
 # Changelog
 
+
+## `deeporigin v3.15.0`
+
+- Ability to provide user with a SDF of all ligands that have been docked
+- When viewing docking results, output now includes user-supplied properties
+- Ability to filter SDF so that we only get structures for some list of smiles strings
+- Ability to limit the number of rows shown by `show_ligands`
+- Docs update showing users how to visualize protein in Complex
+
 ## `deeporigin v3.14.0`
 
 - Ability to visualize proteins in 3D
