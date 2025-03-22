@@ -42,6 +42,8 @@ The `Complex` object can be created using:
 sim = Complex.from_dir(EXAMPLE_DATA_DIR)
 ```
 
+## Inspecting the `Complex` object
+
 Inspecting the object shows that it contains a protein and 8 ligands:
 
 ```python
@@ -53,6 +55,25 @@ sim
     ```python
     Complex(protein=brd.pdb with 8 ligands)
     ```
+
+### Viewing the protein
+
+The 3D structure of the protein can be viewed using the built-in `show` method in the `Protein` class:
+
+```python
+sim.protein.show()
+```
+
+This generates a 3D visualization of the protein, similar to:
+
+<iframe 
+    src="../how-to/protein.html" 
+    width="100%" 
+    height="650" 
+    style="border:none;"
+    title="Protein visualization"
+></iframe>
+
 
 ### Listing Ligands
 
