@@ -4,9 +4,9 @@ Defines `Ligand` as `Protein` classes, as well as functions for reading/writing 
 SMILES / SDF Conversion, validating data,  `DataFrame` integration, and preparing visualizations.
 These can be used together with the `drug_discovery` module for tasks such as docking.
 
-* [`Ligand`][src.chemistry.Ligand]: Represents a small molecule ligand, accepting either a file path (SDF) or a SMILES
+* [`Ligand`][src.drug_discovery.chemistry.Ligand]: Represents a small molecule ligand, accepting either a file path (SDF) or a SMILES
 string. Provides `show()` method to display it.
-* [`Protein`][src.chemistry.Protein]: Represents a protein, accepting a local file path (PDB) or a PDB ID.
+* [`Protein`][src.drug_discovery.chemistry.Protein]: Represents a protein, accepting a local file path (PDB) or a PDB ID.
 Provides `show()` method to display it.
 """
 
