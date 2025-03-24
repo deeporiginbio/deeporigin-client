@@ -12,11 +12,9 @@ Provides `show()` method to display it.
 
 import base64
 import hashlib
-import importlib.util
 import os
 import re
 from dataclasses import dataclass, fields
-from functools import wraps
 from pathlib import Path
 from typing import Optional, Tuple
 
@@ -96,6 +94,66 @@ class Ligand:
             from IPython.display import HTML, display
 
             display(HTML(img))
+
+    @classmethod
+    def from_smiles(cls, smiles: str) -> "Ligand":
+        """create a ligand from a SMILES string"""
+        return cls(smiles_string=smiles)
+
+    @classmethod
+    def from_csv(
+        cls,
+        *,
+        file: str | Path,
+        smiles_column: str,
+        properties_columns: list[str] = None,
+    ) -> list["Ligand"]:
+        """create a list of ligands from a CSV file
+
+        Args:
+            file: Path to CSV file
+            smiles_column: Column name containing SMILES strings
+            properties_columns: List of column names to extract as properties
+
+        Returns:
+            List of Ligand objects
+        """
+        import pandas as pd
+
+        # Read the CSV file
+        df = pd.read_csv(file)
+
+        # Validate column existence
+        if smiles_column not in df.columns:
+            raise ValueError(f"SMILES column '{smiles_column}' not found in CSV file")
+
+        # Create empty list to store ligands
+        ligands = []
+
+        # Process each row
+        for _, row in df.iterrows():
+            smiles = row[smiles_column]
+
+            # Skip empty SMILES
+            if pd.isna(smiles) or not smiles.strip():
+                continue
+
+            # Extract properties if columns were specified
+            properties = None
+            if properties_columns:
+                properties = {}
+                for col in properties_columns:
+                    if col in df.columns:
+                        properties[col] = row[col]
+                    else:
+                        # Skip non-existent columns with a warning
+                        print(f"Warning: Property column '{col}' not found in CSV file")
+
+            # Create ligand and add to list
+            ligand = cls(smiles_string=smiles, properties=properties)
+            ligands.append(ligand)
+
+        return ligands
 
 
 @beartype
