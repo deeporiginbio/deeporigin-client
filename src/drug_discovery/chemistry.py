@@ -430,6 +430,7 @@ def read_property_values(sdf_file: str | Path, key: str):
 
 @beartype
 def split_sdf_file(
+    *,
     input_sdf_path: str | Path,
     output_prefix: str = "ligand",
     output_dir: Optional[str | Path] = None,

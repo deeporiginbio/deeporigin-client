@@ -126,7 +126,8 @@ def _ensure_dbs() -> dict:
 class Complex:
     """class to represent a set of a protein and 1 or many ligands"""
 
-    ligands: list[chem.Ligand]
+    # Using a private attribute for ligands with the property decorator below
+    _ligands: list[chem.Ligand] = field(repr=False)
     protein: chem.Protein
 
     # these params are not user facing
@@ -153,10 +154,25 @@ class Complex:
         self.abfe = ABFE(parent=self)
         self.rbfe = RBFE(parent=self)
 
-        # hash protein and ligands
+        # Initialize the _hash
+        self._compute_hash()
+
+    def _compute_hash(self):
+        """Compute and update the hash based on protein and ligands"""
         protein_hash = hash_file(self.protein.file)
         ligands_hash = hash_strings([ligand.smiles_string for ligand in self.ligands])
         self._hash = hash_strings([protein_hash, ligands_hash])
+
+    @property
+    def ligands(self) -> list[chem.Ligand]:
+        """Get the current ligands"""
+        return self._ligands
+
+    @ligands.setter
+    def ligands(self, new_ligands: list[chem.Ligand]):
+        """Set new ligands and recompute the hash"""
+        self._ligands = new_ligands
+        self._compute_hash()
 
     @classmethod
     def from_dir(cls, directory: str) -> "Complex":
@@ -207,7 +223,7 @@ class Complex:
 
         # Create the Complex instance
         instance = cls(
-            ligands=ligands,
+            _ligands=ligands,
             protein=protein,
         )
 
@@ -301,14 +317,30 @@ class Complex:
             p.text(f" with {len(self.ligands)} ligands")
             p.text(")")
 
-    def show_ligands(self, view="2d"):
-        """Show all ligands in complex object in a table, rendering ligands as 2D structures"""
+    @beartype
+    def show_ligands(self, *, view="2d", limit: Optional[int] = None):
+        """Display ligands in the complex object.
+
+        Args:
+            view: Visualization type, either "2d" (default) or "3d".
+                 - "2d": Shows ligands in a table with 2D structure renderings
+                 - "3d": Shows 3D molecular structures using SDF files
+            limit: Optional; maximum number of ligands to display.
+                  If None, all ligands will be shown.
+        """
 
         if view == "3d":
             files = [ligand.file for ligand in self.ligands]
+
+            if limit is not None:
+                files = files[:limit]
+
             chem.show_molecules_in_sdf_files(files)
         else:
-            chem.show_ligands(self.ligands)
+            if limit is not None:
+                chem.show_ligands(self.ligands[:limit])
+            else:
+                chem.show_ligands(self.ligands)
 
     def get_result_files_for(self, tool: utils.VALID_TOOLS):
         """Generic method to get output results for a particular tool and combine them as need be

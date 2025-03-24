@@ -1,5 +1,32 @@
 This document describes how to visualuze proteins and ligands constructed using the Protein and Ligand classes, and tools to visualize SDF files.
 
+## Visualizing a protein
+
+??? warning "Browser support"
+    These visualizations work best on Google Chrome. We are aware of issues on other browsers, especially Safari on macOS.
+
+A protein object can be visualized using `show`:
+
+```python
+protein.show()
+```
+
+A visualization such as this will be shown:
+
+<iframe 
+    src="./protein.html" 
+    width="100%" 
+    height="600" 
+    style="border:none;"
+    title="Protein visualization"
+></iframe>
+
+!!! info "Jupyter notebook required"
+    Visualizations such as these require this code to be run in a jupyter notebook. We recommend using [these instructions](../../install.md) to install Jupyter.
+
+
+
+
 ## Ligands
 
 ### `Ligand` objects
