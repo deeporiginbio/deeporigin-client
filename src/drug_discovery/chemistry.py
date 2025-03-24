@@ -782,12 +782,10 @@ def filter_sdf_by_smiles(
     Extracts the SMILES strings of all valid molecules from an SDF file using RDKit.
 
     Args:
-        sdf_file (str | Path): Path to the SDF file.
+        input_sdf_file (str | Path): Path to the SDF file.
         output_sdf_file (str | Path): Path to the output SDF file.
         keep_only_smiles (list[str] | pd.Series): List or Series of SMILES strings to keep.
 
-    Returns:
-        list[str]: A list of SMILES strings for all valid molecules in the file.
     """
     writer = Chem.SDWriter(str(output_sdf_file))
 

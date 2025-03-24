@@ -318,7 +318,7 @@ class Complex:
             p.text(")")
 
     @beartype
-    def show_ligands(self, *, view="2d", limit: Optional[int] = None):
+    def show_ligands(self, *, view: str = "2d", limit: Optional[int] = None):
         """Display ligands in the complex object.
 
         Args:
