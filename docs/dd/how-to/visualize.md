@@ -25,7 +25,7 @@ A visualization such as this will be shown:
     width="100%" 
     height="650" 
     style="border:none;"
-    title="ligand visualization"
+    title="Ligand visualization"
 ></iframe>
 
 !!! info "Jupyter notebook required"
@@ -52,6 +52,6 @@ show_molecules_in_sdf_file("path/to/file.sdf")
     width="100%" 
     height="650" 
     style="border:none;"
-    title="Protein visualization"
+    title="Ligands visualization"
 ></iframe>
 

@@ -18,6 +18,7 @@ from dataclasses import dataclass, fields
 from pathlib import Path
 from typing import Optional, Tuple
 
+import pandas as pd
 from beartype import beartype
 from deeporigin.exceptions import DeepOriginException
 from rdkit import Chem
@@ -118,7 +119,6 @@ class Ligand:
         Returns:
             List of Ligand objects
         """
-        import pandas as pd
 
         # Read the CSV file
         df = pd.read_csv(file)
@@ -775,19 +775,24 @@ def filter_sdf_by_smiles(
     *,
     input_sdf_file: str | Path,
     output_sdf_file: str | Path,
-    keep_only_smiles: list[str],
+    keep_only_smiles: list[str] | pd.Series,
 ):
     """
     Extracts the SMILES strings of all valid molecules from an SDF file using RDKit.
 
     Args:
         sdf_file (str | Path): Path to the SDF file.
+        output_sdf_file (str | Path): Path to the output SDF file.
+        keep_only_smiles (list[str] | pd.Series): List or Series of SMILES strings to keep.
 
     Returns:
         list[str]: A list of SMILES strings for all valid molecules in the file.
     """
-
     writer = Chem.SDWriter(str(output_sdf_file))
+
+    # Convert pandas Series to list if necessary
+    if isinstance(keep_only_smiles, pd.Series):
+        keep_only_smiles = keep_only_smiles.tolist()
 
     keep_only_smiles = [canonicalize_smiles(smiles) for smiles in keep_only_smiles]
 
