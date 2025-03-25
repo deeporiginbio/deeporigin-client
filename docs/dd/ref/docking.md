@@ -1,6 +1,6 @@
-# `deeporigin.drug_discovery.chemistry`
+# `deeporigin.drug_discovery.docking`
 
-::: src.drug_discovery.chemistry
+::: src.drug_discovery.docking
     options:
       docstring_style: google
       show_root_heading: false

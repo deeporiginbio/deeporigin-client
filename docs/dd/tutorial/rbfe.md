@@ -25,7 +25,7 @@ To run an end-to-end RBFE workflow on a single pair of ligands, we use:
 
 
 ```python
-sim.run_rbfe_end_to_end(
+sim.rbfe.run_end_to_end(
     ligand1_id="Ligands-1",  # for example
     ligand2_id="Ligands-2",
 )
@@ -56,7 +56,7 @@ You will see a message printed to screen similar to:
 The end to end RBFE tool has a number of user-accessible parameters. To view all parameters, use:
 
 ```python
-sim._params.rbfe_end_to_end
+sim.rbfe._params.end_to_end
 ```
 ??? success "Expected output" 
     This will print a dictionary of the parameters used for RBFE, similar to:
@@ -330,7 +330,7 @@ sim._params.rbfe_end_to_end
 Any of these parameters are modifiable using dot notation. For example, to change the number of steps in the RBFE step, we can use:
 
 ```python
-sim._params.rbfe_end_to_end.rbfe.steps = 500000
+sim.rbfe._params.end_to_end.rbfe.steps = 500000
 ```
 
 
@@ -342,7 +342,7 @@ sim._params.rbfe_end_to_end.rbfe.steps = 500000
 After initiating a run, we can view results using:
 
 ```python
-sim.show_rbfe_results()
+sim.rbfe.show_results()
 ```  
 
 This shows a table similar to:
@@ -358,7 +358,7 @@ This shows a table similar to:
 These results can be exported for analysis using:
 
 ```python
-df = sim.get_rbfe_results()
+df = sim.rbfe.get_results()
 df
 ```
 
