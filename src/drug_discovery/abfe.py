@@ -2,7 +2,7 @@
 
 The ABFE object instantiated here is contained in the Complex class is meant to be used within that class."""
 
-from typing import Optional, Literal
+from typing import Literal, Optional
 
 import pandas as pd
 from beartype import beartype
@@ -149,8 +149,8 @@ class ABFE:
 
         # Import necessary libraries for file operations
         import os
-        import zipfile
         import pathlib
+        import zipfile
 
         # Get the file path and create directory path with same name
         file_path = pathlib.Path(file)
