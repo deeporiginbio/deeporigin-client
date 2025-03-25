@@ -55,6 +55,7 @@ nav:
     - Visualize proteins and ligands: dd/how-to/visualize.md
     - Filter outputs of Docking: dd/how-to/filter-docking-outputs.md
     - Use outputs of Docking for FEP: dd/how-to/use-docking-outputs-for-fep.md
+    - Visualize ABFE trajectories: dd/how-to/visualize-abfe-trajectories.md
   - Reference: 
     - chemistry: dd/ref/chemistry.md
     - complex: dd/ref/complex.md

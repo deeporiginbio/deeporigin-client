@@ -2,7 +2,10 @@
 
 The ABFE object instantiated here is contained in the Complex class is meant to be used within that class."""
 
-from typing import Optional
+import os
+import pathlib
+import zipfile
+from typing import Literal, Optional
 
 import pandas as pd
 from beartype import beartype
@@ -132,3 +135,53 @@ class ABFE:
             )
 
             self.parent._job_ids[utils.DB_ABFE].append(job_id)
+
+    @beartype
+    def show_trajectory(self, ligand_id: str, step: Literal["md", "binding"]):
+        """Show the system trajectory FEP run.
+
+        Args:
+            ligand_id (str): The ID of the ligand to show the trajectory for.
+            step (Literal["md", "abfe"]): The step to show the trajectory for.
+        """
+
+        # get the files for the run
+        files = self.parent.get_result_files_for(tool="ABFE", ligand_ids=[ligand_id])
+
+        file = files[0]
+
+        # Get the file path and create directory path with same name
+        file_path = pathlib.Path(file)
+        dir_name = f"{file_path.stem}-execution"
+        dir_path = file_path.parent / dir_name
+
+        # Check if directory already exists
+        if not os.path.exists(dir_path):
+            os.makedirs(dir_path, exist_ok=True)
+
+            # Unzip the file into the directory
+            print(f"Extracting trajectory files to {dir_path}...")
+            with zipfile.ZipFile(file_path, "r") as zip_ref:
+                zip_ref.extractall(dir_path)
+
+        pdb_file = dir_path / "execution/protein/ligand/systems/complex/complex.pdb"
+
+        if step == "binding":
+            xtc_file = (
+                dir_path
+                / "execution/protein/ligand/binding/binding/window_1/Prod_1/_allatom_trajectory_40ps.xtc"
+            )
+        else:
+            xtc_file = (
+                dir_path
+                / "execution/protein/ligand/simple_md/md/prod/_allatom_trajectory_40ps.xtc"
+            )
+
+        from deeporigin_molstar.src.viewers import ProteinViewer
+
+        protein_viewer = ProteinViewer(data=str(pdb_file), format="pdb")
+        html_content = protein_viewer.render_trajectory(str(xtc_file))
+
+        from deeporigin_molstar import JupyterViewer
+
+        JupyterViewer.visualize(html_content)
