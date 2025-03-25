@@ -1,5 +1,81 @@
 # Changelog
 
+
+## `deeporigin v3.15.0`
+
+- Ability to provide user with a SDF of all ligands that have been docked
+- When viewing docking results, output now includes user-supplied properties
+- Ability to filter SDF so that we only get structures for some list of smiles strings
+- Ability to limit the number of rows shown by `show_ligands`
+- Docs update showing users how to visualize protein in Complex
+
+## `deeporigin v3.14.0`
+
+- Ability to visualize proteins in 3D
+- Ability to visualize ligands in 3D
+- Ability to view docked poses with protein
+- New streamlined and improved class structure for `Complex`
+
+## `deeporigin v3.13.0`
+
+- Ability to visualize proteins in 3D
+
+## `deeporigin v3.12.0`
+
+- Streamlined easy install powered by `uv`
+- Numerous small improvements and bugfixes to FEP and Docking tools
+
+## `deeporigin v3.11.0`
+
+- New `Complex` class to work with RBFE, ABFE and Docking
+
+## `deeporigin v3.10.0`
+
+- Initial support for docking
+
+## `deeporigin v3.9.0`
+
+- Ability to read user defined properties from a SDF file
+- Improvements and bugfixes to ABFE
+
+## `deeporigin v3.8.0`
+
+- Unified class that can do both ABFE and RBFE
+
+## `deeporigin v3.7.0`
+
+- Updated to use more modern sonarlint
+- Updated to more modern ruff
+- Included FEP parameters as JSON
+- The `chemistry` module: tools to work with SDF files
+- Support for end-to-end ABFE
+- Ability to render mermaid graphs of FEP flow
+
+## `deeporigin v3.6.0`
+
+- Fixed a bug stemming from unconstrained urllib versions
+- Fixed a bug in wrappers for platform APIs
+
+## `deeporigin v3.5.0`
+
+- Initial support for ABFE
+
+## `deeporigin v3.4.0`
+
+- Changed scope of tests to better work in parallel
+- Added `tools` extra
+- Support for the core toolkit
+
+## `deeporigin v3.3.0`
+
+- Parallelization of job query and download
+- Ability to wait for jobs to finish
+
+## `deeporigin v3.2.0`
+
+- Added the PDB to PDBQT tool
+- Bugfixes to platform API tools
+
 ## `deeporigin v3.1.0`
 
 !!! warning "Deleted functions"

@@ -49,9 +49,12 @@ nav:
     - ABFE: dd/tutorial/abfe.md
     - RBFE: dd/tutorial/rbfe.md
   - How To:
+    - Create a Complex: dd/how-to/complex.md
     - Work with proteins: dd/how-to/proteins.md
     - Work with ligands: dd/how-to/ligands.md
     - Visualize proteins and ligands: dd/how-to/visualize.md
+    - Filter outputs of Docking: dd/how-to/filter-docking-outputs.md
+    - Use outputs of Docking for FEP: dd/how-to/use-docking-outputs-for-fep.md
   - Reference: 
     - chemistry: dd/ref/chemistry.md
     - complex: dd/ref/complex.md
