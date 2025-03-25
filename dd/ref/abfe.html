@@ -755,6 +755,14 @@
       
         
       
+        
+      
+        
+      
+        
+      
+        
+      
     
     
       
@@ -791,6 +799,28 @@
             How To
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-to/complex.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Create a Complex
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
             
               
                 
@@ -848,6 +878,72 @@
   
   <span class="md-ellipsis">
     Visualize proteins and ligands
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-to/filter-docking-outputs.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Filter outputs of Docking
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-to/use-docking-outputs-for-fep.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Use outputs of Docking for FEP
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-to/visualize-abfe-trajectories.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Visualize ABFE trajectories
     
   </span>
   
@@ -1122,6 +1218,15 @@
   <a href="#src.drug_discovery.abfe.ABFE.show_results" class="md-nav__link">
     <span class="md-ellipsis">
       show_results
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.drug_discovery.abfe.ABFE.show_trajectory" class="md-nav__link">
+    <span class="md-ellipsis">
+      show_trajectory
     </span>
   </a>
   
@@ -2744,6 +2849,15 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#src.drug_discovery.abfe.ABFE.show_trajectory" class="md-nav__link">
+    <span class="md-ellipsis">
+      show_trajectory
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -2948,6 +3062,74 @@
 
         <p>Show ABFE results in a dataframe.</p>
 <p>This method returns a dataframe showing the results of ABFE runs associated with this simulation session. The ligand file name, 2-D structure, and ΔG are shown.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h5 id="src.drug_discovery.abfe.ABFE.show_trajectory" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">show_trajectory</span>
+
+
+<a href="#src.drug_discovery.abfe.ABFE.show_trajectory" class="headerlink" title="Permanent link">&para;</a></h5>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">show_trajectory</span><span class="p">(</span>
+    <span class="n">ligand_id</span><span class="p">:</span> <span class="n">str</span><span class="p">,</span> <span class="n">step</span><span class="p">:</span> <span class="n"><span title="typing.Literal">Literal</span></span><span class="p">[</span><span class="s2">&quot;md&quot;</span><span class="p">,</span> <span class="s2">&quot;binding&quot;</span><span class="p">]</span>
+<span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Show the system trajectory FEP run.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>ligand_id</code>
+            </td>
+            <td>
+                  <code>str</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The ID of the ligand to show the trajectory for.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>step</code>
+            </td>
+            <td>
+                  <code><span title="typing.Literal">Literal</span>[&#39;md&#39;, &#39;abfe&#39;]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The step to show the trajectory for.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
 
     </div>
 

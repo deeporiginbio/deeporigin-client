@@ -13,7 +13,7 @@
         <link rel="canonical" href="https://client-docs.deeporigin.io/dd/ref/chemistry.html">
       
       
-        <link rel="prev" href="../how-to/visualize.html">
+        <link rel="prev" href="../how-to/visualize-abfe-trajectories.html">
       
       
         <link rel="next" href="complex.html">
@@ -755,6 +755,14 @@
       
         
       
+        
+      
+        
+      
+        
+      
+        
+      
     
     
       
@@ -791,6 +799,28 @@
             How To
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-to/complex.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Create a Complex
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
             
               
                 
@@ -848,6 +878,72 @@
   
   <span class="md-ellipsis">
     Visualize proteins and ligands
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-to/filter-docking-outputs.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Filter outputs of Docking
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-to/use-docking-outputs-for-fep.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Use outputs of Docking for FEP
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-to/visualize-abfe-trajectories.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Visualize ABFE trajectories
     
   </span>
   
@@ -1053,6 +1149,24 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#src.drug_discovery.chemistry.Ligand.from_csv" class="md-nav__link">
+    <span class="md-ellipsis">
+      from_csv
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.drug_discovery.chemistry.Ligand.from_smiles" class="md-nav__link">
+    <span class="md-ellipsis">
+      from_smiles
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#src.drug_discovery.chemistry.Ligand.show" class="md-nav__link">
     <span class="md-ellipsis">
       show
@@ -1168,6 +1282,15 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#src.drug_discovery.chemistry.canonicalize_smiles" class="md-nav__link">
+    <span class="md-ellipsis">
+      canonicalize_smiles
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#src.drug_discovery.chemistry.count_molecules_in_sdf_file" class="md-nav__link">
     <span class="md-ellipsis">
       count_molecules_in_sdf_file
@@ -1180,6 +1303,15 @@
   <a href="#src.drug_discovery.chemistry.download_protein" class="md-nav__link">
     <span class="md-ellipsis">
       download_protein
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.drug_discovery.chemistry.filter_sdf_by_smiles" class="md-nav__link">
+    <span class="md-ellipsis">
+      filter_sdf_by_smiles
     </span>
   </a>
   
@@ -2976,6 +3108,24 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#src.drug_discovery.chemistry.Ligand.from_csv" class="md-nav__link">
+    <span class="md-ellipsis">
+      from_csv
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.drug_discovery.chemistry.Ligand.from_smiles" class="md-nav__link">
+    <span class="md-ellipsis">
+      from_smiles
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#src.drug_discovery.chemistry.Ligand.show" class="md-nav__link">
     <span class="md-ellipsis">
       show
@@ -3091,6 +3241,15 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#src.drug_discovery.chemistry.canonicalize_smiles" class="md-nav__link">
+    <span class="md-ellipsis">
+      canonicalize_smiles
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#src.drug_discovery.chemistry.count_molecules_in_sdf_file" class="md-nav__link">
     <span class="md-ellipsis">
       count_molecules_in_sdf_file
@@ -3103,6 +3262,15 @@
   <a href="#src.drug_discovery.chemistry.download_protein" class="md-nav__link">
     <span class="md-ellipsis">
       download_protein
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.drug_discovery.chemistry.filter_sdf_by_smiles" class="md-nav__link">
+    <span class="md-ellipsis">
+      filter_sdf_by_smiles
     </span>
   </a>
   
@@ -3268,7 +3436,16 @@
 
     <div class="doc doc-contents first">
 
-        <p>Module that contains some utility functions for working with molecules and proteins</p>
+        <p>Contains classes and functions for working with molecules, proteins, and related files.</p>
+<p>Defines <code>Ligand</code> as <code>Protein</code> classes, as well as functions for reading/writing SDF files,
+SMILES / SDF Conversion, validating data,  <code>DataFrame</code> integration, and preparing visualizations.
+These can be used together with the <code>drug_discovery</code> module for tasks such as docking.</p>
+<ul>
+<li><a class="autorefs autorefs-internal" href="#src.drug_discovery.chemistry.Ligand"><code>Ligand</code></a>: Represents a small molecule ligand, accepting either a file path (SDF) or a SMILES
+string. Provides <code>show()</code> method to display it.</li>
+<li><a class="autorefs autorefs-internal" href="#src.drug_discovery.chemistry.Protein"><code>Protein</code></a>: Represents a protein, accepting a local file path (PDB) or a PDB ID.
+Provides <code>show()</code> method to display it.</li>
+</ul>
 
 
 
@@ -3389,6 +3566,143 @@
 </div>
 
 <h4 id="src.drug_discovery.chemistry.Ligand-functions">Functions<a href="#src.drug_discovery.chemistry.Ligand-functions" class="headerlink" title="Permanent link">&para;</a></h4>
+
+<div class="doc doc-object doc-function">
+
+
+<h5 id="src.drug_discovery.chemistry.Ligand.from_csv" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">from_csv</span>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
+  </span>
+
+<a href="#src.drug_discovery.chemistry.Ligand.from_csv" class="headerlink" title="Permanent link">&para;</a></h5>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">from_csv</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">file</span><span class="p">:</span> <span class="n">str</span> <span class="o">|</span> <span class="n"><span title="pathlib.Path">Path</span></span><span class="p">,</span>
+    <span class="n">smiles_column</span><span class="p">:</span> <span class="n">str</span><span class="p">,</span>
+    <span class="n">properties_columns</span><span class="p">:</span> <span class="n">list</span><span class="p">[</span><span class="n">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">list</span><span class="p">[</span><span class="n"><a class="autorefs autorefs-internal" title="src.drug_discovery.chemistry.Ligand" href="#src.drug_discovery.chemistry.Ligand">Ligand</a></span><span class="p">]</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>create a list of ligands from a CSV file</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>file</code>
+            </td>
+            <td>
+                  <code>str | <span title="pathlib.Path">Path</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Path to CSV file</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>smiles_column</code>
+            </td>
+            <td>
+                  <code>str</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Column name containing SMILES strings</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>properties_columns</code>
+            </td>
+            <td>
+                  <code>list[str]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>List of column names to extract as properties</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code>list[<a class="autorefs autorefs-internal" title="src.drug_discovery.chemistry.Ligand" href="#src.drug_discovery.chemistry.Ligand">Ligand</a>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>List of Ligand objects</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h5 id="src.drug_discovery.chemistry.Ligand.from_smiles" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">from_smiles</span>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
+  </span>
+
+<a href="#src.drug_discovery.chemistry.Ligand.from_smiles" class="headerlink" title="Permanent link">&para;</a></h5>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">from_smiles</span><span class="p">(</span><span class="n">smiles</span><span class="p">:</span> <span class="n">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-internal" title="src.drug_discovery.chemistry.Ligand" href="#src.drug_discovery.chemistry.Ligand">Ligand</a></span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>create a ligand from a SMILES string</p>
+
+    </div>
+
+</div>
 
 <div class="doc doc-object doc-function">
 
@@ -3548,6 +3862,79 @@
 
 </div>
 <h2 id="src.drug_discovery.chemistry-functions">Functions<a href="#src.drug_discovery.chemistry-functions" class="headerlink" title="Permanent link">&para;</a></h2>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.drug_discovery.chemistry.canonicalize_smiles" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>            <span class="doc doc-object-name doc-function-name">canonicalize_smiles</span>
+
+
+<a href="#src.drug_discovery.chemistry.canonicalize_smiles" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">canonicalize_smiles</span><span class="p">(</span><span class="n">smiles</span><span class="p">:</span> <span class="n">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">str</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Canonicalize a SMILES string.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>smiles</code>
+            </td>
+            <td>
+                  <code>str</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>SMILES string.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>str</code></td>            <td>
+                  <code>str</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Canonicalized SMILES string.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+    </div>
+
+</div>
 
 <div class="doc doc-object doc-function">
 
@@ -3726,6 +4113,93 @@ while suppressing RDKit's error logging for sanitization issues.</p>
               <div class="doc-md-description">
                 <p>If the download fails.</p>
               </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.drug_discovery.chemistry.filter_sdf_by_smiles" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>            <span class="doc doc-object-name doc-function-name">filter_sdf_by_smiles</span>
+
+
+<a href="#src.drug_discovery.chemistry.filter_sdf_by_smiles" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">filter_sdf_by_smiles</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">input_sdf_file</span><span class="p">:</span> <span class="n">str</span> <span class="o">|</span> <span class="n"><span title="pathlib.Path">Path</span></span><span class="p">,</span>
+    <span class="n">output_sdf_file</span><span class="p">:</span> <span class="n">str</span> <span class="o">|</span> <span class="n"><span title="pathlib.Path">Path</span></span><span class="p">,</span>
+    <span class="n">keep_only_smiles</span><span class="p">:</span> <span class="n">list</span><span class="p">[</span><span class="n">str</span><span class="p">]</span> <span class="o">|</span> <span class="n"><span title="pandas.Series">Series</span></span>
+<span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Extracts the SMILES strings of all valid molecules from an SDF file using RDKit.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>input_sdf_file</code>
+            </td>
+            <td>
+                  <code>str | <span title="pathlib.Path">Path</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Path to the SDF file.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>output_sdf_file</code>
+            </td>
+            <td>
+                  <code>str | <span title="pathlib.Path">Path</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Path to the output SDF file.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>keep_only_smiles</code>
+            </td>
+            <td>
+                  <code>list[str] | <span title="pandas.Series">Series</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>List or Series of SMILES strings to keep.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
             </td>
           </tr>
       </tbody>
@@ -4492,10 +4966,11 @@ while suppressing RDKit's error logging for sanitization issues.</p>
 
 <a href="#src.drug_discovery.chemistry.split_sdf_file" class="headerlink" title="Permanent link">&para;</a></h3>
 <div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">split_sdf_file</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span>
     <span class="n">input_sdf_path</span><span class="p">:</span> <span class="n">str</span> <span class="o">|</span> <span class="n"><span title="pathlib.Path">Path</span></span><span class="p">,</span>
     <span class="n">output_prefix</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="s2">&quot;ligand&quot;</span><span class="p">,</span>
     <span class="n">output_dir</span><span class="p">:</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n">str</span> <span class="o">|</span> <span class="n"><span title="pathlib.Path">Path</span></span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">name_by_property</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="s2">&quot;_Name&quot;</span><span class="p">,</span>
+    <span class="n">name_by_property</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="s2">&quot;_Name&quot;</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">list</span><span class="p">[</span><span class="n"><span title="pathlib.Path">Path</span></span><span class="p">]</span>
 </code></pre></div>
 
@@ -4640,7 +5115,7 @@ output files are written to the same directory as input_sdf_path.</p>
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../how-to/visualize.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Visualize proteins and ligands">
+          <a href="../how-to/visualize-abfe-trajectories.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Visualize ABFE trajectories">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -4650,7 +5125,7 @@ output files are written to the same directory as input_sdf_path.</p>
                 Previous
               </span>
               <div class="md-ellipsis">
-                Visualize proteins and ligands
+                Visualize ABFE trajectories
               </div>
             </div>
           </a>

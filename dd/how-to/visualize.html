@@ -16,7 +16,7 @@
         <link rel="prev" href="ligands.html">
       
       
-        <link rel="next" href="../ref/chemistry.html">
+        <link rel="next" href="filter-docking-outputs.html">
       
       
       <link rel="icon" href="../../images/favicon.png">
@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#ligands" class="md-skip">
+        <a href="#visualizing-a-protein" class="md-skip">
           Skip to content
         </a>
       
@@ -757,6 +757,14 @@
       
         
       
+        
+      
+        
+      
+        
+      
+        
+      
     
     
       
@@ -793,6 +801,28 @@
             How To
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="complex.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Create a Complex
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
             
               
                 
@@ -891,6 +921,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#visualizing-a-protein" class="md-nav__link">
+    <span class="md-ellipsis">
+      Visualizing a protein
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#ligands" class="md-nav__link">
     <span class="md-ellipsis">
       Ligands
@@ -927,6 +966,72 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="filter-docking-outputs.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Filter outputs of Docking
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="use-docking-outputs-for-fep.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Use outputs of Docking for FEP
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="visualize-abfe-trajectories.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Visualize ABFE trajectories
+    
+  </span>
+  
+
+      </a>
     </li>
   
 
@@ -2595,6 +2700,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#visualizing-a-protein" class="md-nav__link">
+    <span class="md-ellipsis">
+      Visualizing a protein
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#ligands" class="md-nav__link">
     <span class="md-ellipsis">
       Ligands
@@ -2649,6 +2763,27 @@
   <h1>Visualize proteins and ligands</h1>
 
 <p>This document describes how to visualuze proteins and ligands constructed using the Protein and Ligand classes, and tools to visualize SDF files.</p>
+<h2 id="visualizing-a-protein">Visualizing a protein<a class="headerlink" href="#visualizing-a-protein" title="Permanent link">&para;</a></h2>
+<details class="warning">
+<summary>Browser support</summary>
+<p>These visualizations work best on Google Chrome. We are aware of issues on other browsers, especially Safari on macOS.</p>
+</details>
+<p>A protein object can be visualized using <code>show</code>:</p>
+<div class="language-python highlight"><pre><span></span><code><span class="n">protein</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+<p>A visualization such as this will be shown:</p>
+<iframe 
+    src="./protein.html" 
+    width="100%" 
+    height="600" 
+    style="border:none;"
+    title="Protein visualization"
+></iframe>
+
+<div class="admonition info">
+<p class="admonition-title">Jupyter notebook required</p>
+<p>Visualizations such as these require this code to be run in a jupyter notebook. We recommend using <a href="../../install.html">these instructions</a> to install Jupyter.</p>
+</div>
 <h2 id="ligands">Ligands<a class="headerlink" href="#ligands" title="Permanent link">&para;</a></h2>
 <h3 id="ligand-objects"><code>Ligand</code> objects<a class="headerlink" href="#ligand-objects" title="Permanent link">&para;</a></h3>
 <p>The <a href="../ref/chemistry.html#src.chemistry.Ligand"><code>Ligand</code> class</a> is the primary way to work with ligands in Deep Origin.</p>
@@ -2666,7 +2801,7 @@
     width="100%" 
     height="650" 
     style="border:none;"
-    title="ligand visualization"
+    title="Ligand visualization"
 ></iframe>
 
 <div class="admonition info">
@@ -2685,7 +2820,7 @@
     width="100%" 
     height="650" 
     style="border:none;"
-    title="Protein visualization"
+    title="Ligands visualization"
 ></iframe>
 
 
@@ -2741,13 +2876,13 @@
         
         
           
-          <a href="../ref/chemistry.html" class="md-footer__link md-footer__link--next" aria-label="Next: chemistry">
+          <a href="filter-docking-outputs.html" class="md-footer__link md-footer__link--next" aria-label="Next: Filter outputs of Docking">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                chemistry
+                Filter outputs of Docking
               </div>
             </div>
             <div class="md-footer__button md-icon">

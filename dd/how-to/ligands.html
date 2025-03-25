@@ -757,6 +757,14 @@
       
         
       
+        
+      
+        
+      
+        
+      
+        
+      
     
     
       
@@ -793,6 +801,28 @@
             How To
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="complex.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Create a Complex
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
             
               
                 
@@ -905,6 +935,39 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#from-a-csv-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      From a CSV file
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="From a CSV file">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Basic Usage
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#including-properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      Including Properties
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -940,6 +1003,72 @@
   
   <span class="md-ellipsis">
     Visualize proteins and ligands
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="filter-docking-outputs.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Filter outputs of Docking
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="use-docking-outputs-for-fep.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Use outputs of Docking for FEP
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="visualize-abfe-trajectories.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Visualize ABFE trajectories
     
   </span>
   
@@ -2649,6 +2778,39 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#from-a-csv-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      From a CSV file
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="From a CSV file">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Basic Usage
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#including-properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      Including Properties
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -2700,6 +2862,34 @@
 <div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin.chemistry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Ligand</span>
 <span class="n">ligand</span> <span class="o">=</span> <span class="n">Ligand</span><span class="p">(</span><span class="n">smiles_string</span><span class="o">=</span><span class="s2">&quot;[H]C1=C([H])C(C(=O)N(C([H])([H])[H])C([H])([H])[H])=C([H])C(C2=C([H])N(C([H])([H])[H])C(=O)C3=C2C([H])=C([H])N3[H])=C1[H]&quot;</span><span class="p">)</span>
 </code></pre></div>
+<h3 id="from-a-csv-file">From a CSV file<a class="headerlink" href="#from-a-csv-file" title="Permanent link">&para;</a></h3>
+<p>You can create multiple ligands at once from a CSV file using the <code>from_csv</code> class method. This is useful when you have a dataset of molecules with their SMILES strings and associated properties. The <code>from_csv</code> method:</p>
+<ul>
+<li>Requires a path to the CSV file and the name of the column containing SMILES strings</li>
+<li>Optionally accepts a list of column names to extract as properties</li>
+<li>Skips rows with empty or invalid SMILES</li>
+<li>Returns a list of <code>Ligand</code> objects</li>
+</ul>
+<p>This approach is ideal for processing large datasets of molecules where each row represents a different compound.</p>
+<h4 id="basic-usage">Basic Usage<a class="headerlink" href="#basic-usage" title="Permanent link">&para;</a></h4>
+<p>For the simplest case, just specify the file path and which column contains the SMILES strings:</p>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin.chemistry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Ligand</span>
+
+<span class="c1"># Basic usage - just extracting SMILES from a column</span>
+<span class="n">ligands</span> <span class="o">=</span> <span class="n">Ligand</span><span class="o">.</span><span class="n">from_csv</span><span class="p">(</span>
+    <span class="n">file</span><span class="o">=</span><span class="s2">&quot;molecules.csv&quot;</span><span class="p">,</span>
+    <span class="n">smiles_column</span><span class="o">=</span><span class="s2">&quot;SMILES&quot;</span>
+<span class="p">)</span>
+</code></pre></div>
+<h4 id="including-properties">Including Properties<a class="headerlink" href="#including-properties" title="Permanent link">&para;</a></h4>
+<p>You can also extract additional properties from other columns in the CSV file:</p>
+<div class="language-python highlight"><pre><span></span><code><span class="n">ligands</span> <span class="o">=</span> <span class="n">Ligand</span><span class="o">.</span><span class="n">from_csv</span><span class="p">(</span>
+    <span class="n">file</span><span class="o">=</span><span class="s2">&quot;molecules.csv&quot;</span><span class="p">,</span>
+    <span class="n">smiles_column</span><span class="o">=</span><span class="s2">&quot;SMILES&quot;</span><span class="p">,</span>
+    <span class="n">properties_columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Name&quot;</span><span class="p">,</span> <span class="s2">&quot;MW&quot;</span><span class="p">,</span> <span class="s2">&quot;LogP&quot;</span><span class="p">,</span> <span class="s2">&quot;Activity&quot;</span><span class="p">]</span>
+<span class="p">)</span>
+</code></pre></div>
+<p>This will store all the specified column values as properties for each ligand, making it easy to keep track of important molecular characteristics alongside the structure information.</p>
 <h2 id="visualizing-a-ligand">Visualizing a ligand<a class="headerlink" href="#visualizing-a-ligand" title="Permanent link">&para;</a></h2>
 <details class="warning">
 <summary>Browser support</summary>

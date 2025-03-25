@@ -755,6 +755,14 @@
       
         
       
+        
+      
+        
+      
+        
+      
+        
+      
     
     
       
@@ -791,6 +799,28 @@
             How To
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-to/complex.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Create a Complex
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
             
               
                 
@@ -848,6 +878,72 @@
   
   <span class="md-ellipsis">
     Visualize proteins and ligands
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-to/filter-docking-outputs.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Filter outputs of Docking
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-to/use-docking-outputs-for-fep.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Use outputs of Docking for FEP
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-to/visualize-abfe-trajectories.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Visualize ABFE trajectories
     
   </span>
   
@@ -3010,7 +3106,8 @@
 
 
   <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+      <small class="doc doc-label doc-label-writable"><code>writable</code></small>
   </span>
 
 <a href="#src.drug_discovery.complex.Complex.ligands" class="headerlink" title="Permanent link">&para;</a></h5>
@@ -3018,6 +3115,8 @@
 </code></pre></div>
 
     <div class="doc doc-contents ">
+
+        <p>Get the current ligands</p>
     </div>
 
 </div>
@@ -3178,12 +3277,19 @@
 
 
 <a href="#src.drug_discovery.complex.Complex.get_result_files_for" class="headerlink" title="Permanent link">&para;</a></h5>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">get_result_files_for</span><span class="p">(</span><span class="n">tool</span><span class="p">:</span> <span class="n"><span title="deeporigin.drug_discovery.utils.VALID_TOOLS">VALID_TOOLS</span></span><span class="p">)</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">get_result_files_for</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">tool</span><span class="p">:</span> <span class="n"><span title="deeporigin.drug_discovery.utils.VALID_TOOLS">VALID_TOOLS</span></span><span class="p">,</span>
+    <span class="n">ligand_ids</span><span class="p">:</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n">list</span><span class="p">[</span><span class="n">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
-        <p>Generic method to get output results for a particular tool and combine them as need be</p>
+        <p>Retrieve result files for a specific computational tool used with this complex.</p>
+<p>This method fetches data from the specified tool's database, filters for results
+associated with this complex, downloads any missing result files to the local
+storage directory, and returns paths to all result files.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -3206,11 +3312,29 @@
             </td>
             <td>
               <div class="doc-md-description">
-                <p>One of "Docking", "ABFE", "RBFE"</p>
+                <p>One of "Docking", "ABFE", "RBFE" - specifies which computational
+ method's results to retrieve</p>
               </div>
             </td>
             <td>
                 <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>ligand_ids</code>
+            </td>
+            <td>
+                  <code><span title="typing.Optional">Optional</span>[list[str]]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional; list of ligand IDs to filter results. If None,
+       results for all ligands in the complex will be retrieved.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
             </td>
           </tr>
       </tbody>
@@ -3297,12 +3421,64 @@
 
 
 <a href="#src.drug_discovery.complex.Complex.show_ligands" class="headerlink" title="Permanent link">&para;</a></h5>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">show_ligands</span><span class="p">(</span><span class="n">view</span><span class="o">=</span><span class="s1">&#39;2d&#39;</span><span class="p">)</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">show_ligands</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span> <span class="n">view</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="s2">&quot;2d&quot;</span><span class="p">,</span> <span class="n">limit</span><span class="p">:</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
-        <p>Show all ligands in complex object in a table, rendering ligands as 2D structures</p>
+        <p>Display ligands in the complex object.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>view</code>
+            </td>
+            <td>
+                  <code>str</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Visualization type, either "2d" (default) or "3d".
+ - "2d": Shows ligands in a table with 2D structure renderings
+ - "3d": Shows 3D molecular structures using SDF files</p>
+              </div>
+            </td>
+            <td>
+                  <code>&#39;2d&#39;</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>limit</code>
+            </td>
+            <td>
+                  <code><span title="typing.Optional">Optional</span>[int]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional; maximum number of ligands to display.
+  If None, all ligands will be shown.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
 
     </div>
 

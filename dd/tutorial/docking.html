@@ -788,6 +788,15 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#exporting-a-sdf-with-docked-poses" class="md-nav__link">
+    <span class="md-ellipsis">
+      Exporting a SDF with docked poses
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -869,6 +878,14 @@
       
         
       
+        
+      
+        
+      
+        
+      
+        
+      
     
     
       
@@ -905,6 +922,28 @@
             How To
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-to/complex.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Create a Complex
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
             
               
                 
@@ -962,6 +1001,72 @@
   
   <span class="md-ellipsis">
     Visualize proteins and ligands
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-to/filter-docking-outputs.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Filter outputs of Docking
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-to/use-docking-outputs-for-fep.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Use outputs of Docking for FEP
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-to/visualize-abfe-trajectories.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Visualize ABFE trajectories
     
   </span>
   
@@ -2700,6 +2805,15 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#exporting-a-sdf-with-docked-poses" class="md-nav__link">
+    <span class="md-ellipsis">
+      Exporting a SDF with docked poses
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -2796,6 +2910,11 @@
 <p>To obtain the raw dataframe for further analysis, use:</p>
 <div class="language-python highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">docking</span><span class="o">.</span><span class="n">get_results</span><span class="p">()</span>
 </code></pre></div>
+<h3 id="exporting-a-sdf-with-docked-poses">Exporting a SDF with docked poses<a class="headerlink" href="#exporting-a-sdf-with-docked-poses" title="Permanent link">&para;</a></h3>
+<p>To export a SDF with docked poses, use:</p>
+<div class="language-python highlight"><pre><span></span><code><span class="n">sim</span><span class="o">.</span><span class="n">docking</span><span class="o">.</span><span class="n">get_poses</span><span class="p">(</span><span class="s2">&quot;/path/to/output.sdf&quot;</span><span class="p">)</span>
+</code></pre></div>
+<p>This generates a SDF file with the docked poses for all ligands in the Complex. </p>
 
 
 

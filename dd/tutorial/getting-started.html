@@ -727,8 +727,26 @@
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Creating a Complex object">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#inspecting-the-complex-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      Inspecting the Complex object
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Inspecting the Complex object">
       <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#viewing-the-protein" class="md-nav__link">
+    <span class="md-ellipsis">
+      Viewing the protein
+    </span>
+  </a>
+  
+</li>
         
           <li class="md-nav__item">
   <a href="#listing-ligands" class="md-nav__link">
@@ -869,6 +887,14 @@
       
         
       
+        
+      
+        
+      
+        
+      
+        
+      
     
     
       
@@ -905,6 +931,28 @@
             How To
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-to/complex.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Create a Complex
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
             
               
                 
@@ -962,6 +1010,72 @@
   
   <span class="md-ellipsis">
     Visualize proteins and ligands
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-to/filter-docking-outputs.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Filter outputs of Docking
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-to/use-docking-outputs-for-fep.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Use outputs of Docking for FEP
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-to/visualize-abfe-trajectories.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Visualize ABFE trajectories
     
   </span>
   
@@ -2661,8 +2775,26 @@
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Creating a Complex object">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#inspecting-the-complex-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      Inspecting the Complex object
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Inspecting the Complex object">
       <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#viewing-the-protein" class="md-nav__link">
+    <span class="md-ellipsis">
+      Viewing the protein
+    </span>
+  </a>
+  
+</li>
         
           <li class="md-nav__item">
   <a href="#listing-ligands" class="md-nav__link">
@@ -2751,6 +2883,7 @@
 <div class="language-python highlight"><pre><span></span><code><span class="c1"># here, we&#39;re using the example data directory</span>
 <span class="n">sim</span> <span class="o">=</span> <span class="n">Complex</span><span class="o">.</span><span class="n">from_dir</span><span class="p">(</span><span class="n">EXAMPLE_DATA_DIR</span><span class="p">)</span>
 </code></pre></div>
+<h2 id="inspecting-the-complex-object">Inspecting the <code>Complex</code> object<a class="headerlink" href="#inspecting-the-complex-object" title="Permanent link">&para;</a></h2>
 <p>Inspecting the object shows that it contains a protein and 8 ligands:</p>
 <div class="language-python highlight"><pre><span></span><code><span class="n">sim</span>
 </code></pre></div>
@@ -2759,6 +2892,19 @@
 <div class="language-python highlight"><pre><span></span><code><span class="n">Complex</span><span class="p">(</span><span class="n">protein</span><span class="o">=</span><span class="n">brd</span><span class="o">.</span><span class="n">pdb</span> <span class="k">with</span> <span class="mi">8</span> <span class="n">ligands</span><span class="p">)</span>
 </code></pre></div>
 </div>
+<h3 id="viewing-the-protein">Viewing the protein<a class="headerlink" href="#viewing-the-protein" title="Permanent link">&para;</a></h3>
+<p>The 3D structure of the protein can be viewed using the built-in <code>show</code> method in the <code>Protein</code> class:</p>
+<div class="language-python highlight"><pre><span></span><code><span class="n">sim</span><span class="o">.</span><span class="n">protein</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+<p>This generates a 3D visualization of the protein, similar to:</p>
+<iframe 
+    src="../how-to/protein.html" 
+    width="100%" 
+    height="650" 
+    style="border:none;"
+    title="Protein visualization"
+></iframe>
+
 <h3 id="listing-ligands">Listing Ligands<a class="headerlink" href="#listing-ligands" title="Permanent link">&para;</a></h3>
 <p>We can further inspect the ligands by inspecting the <code>ligands</code> attribute:</p>
 <div class="language-python highlight"><pre><span></span><code><span class="n">sim</span><span class="o">.</span><span class="n">ligands</span>
