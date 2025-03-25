@@ -137,13 +137,29 @@ class ABFE:
             self.parent._job_ids[utils.DB_ABFE].append(job_id)
 
     @beartype
-    def show_trajectory(self, ligand_id: str, step: Literal["md", "binding"]):
+    def show_trajectory(
+        self,
+        ligand_id: str,
+        step: Literal["md", "binding"],
+    ):
         """Show the system trajectory FEP run.
 
         Args:
             ligand_id (str): The ID of the ligand to show the trajectory for.
             step (Literal["md", "abfe"]): The step to show the trajectory for.
         """
+
+        valid_ids = [ligand._do_id for ligand in self.parent.ligands]
+
+        if None in valid_ids:
+            self.parent.connect()
+
+            valid_ids = [ligand._do_id for ligand in self.parent.ligands]
+
+        if ligand_id not in valid_ids:
+            raise DeepOriginException(
+                f"Ligand ID {ligand_id} not found in the list of ligands. Should be one of {valid_ids}"
+            )
 
         # get the files for the run
         files = self.parent.get_result_files_for(tool="ABFE", ligand_ids=[ligand_id])
