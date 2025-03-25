@@ -2,6 +2,9 @@
 
 The ABFE object instantiated here is contained in the Complex class is meant to be used within that class."""
 
+import os
+import pathlib
+import zipfile
 from typing import Literal, Optional
 
 import pandas as pd
@@ -147,19 +150,13 @@ class ABFE:
 
         file = files[0]
 
-        # Import necessary libraries for file operations
-        import os
-        import pathlib
-        import zipfile
-
         # Get the file path and create directory path with same name
         file_path = pathlib.Path(file)
-        dir_name = f"{file_path.stem}-execution"  # Use pattern {filename}-execution
+        dir_name = f"{file_path.stem}-execution"
         dir_path = file_path.parent / dir_name
 
         # Check if directory already exists
         if not os.path.exists(dir_path):
-            # Create directory
             os.makedirs(dir_path, exist_ok=True)
 
             # Unzip the file into the directory
