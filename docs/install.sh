@@ -9,7 +9,7 @@ uv init
 uv python install 3.13
 
 # install deeporigin with the tools extra
-uv add deeporigin --extra tools
+uv add --upgrade deeporigin --extra tools
 
 # also install as a uv tool to run from the command line
 uv tool install deeporigin
