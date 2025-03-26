@@ -25,7 +25,7 @@ class ABFE:
         self.parent = parent
         self._params = PrettyDict()
 
-        self._params.end_to_end = utils._load_params("rbfe_end_to_end")
+        self._params.end_to_end = utils._load_params("abfe_end_to_end")
 
     def get_results(self) -> pd.DataFrame:
         """get ABFE results and return in a dataframe.
