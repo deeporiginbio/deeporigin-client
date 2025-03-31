@@ -4,7 +4,7 @@ from importlib.resources import path
 # eager import
 from deeporigin.drug_discovery import chemistry
 
-__all__ = ["chemistry", "Complex"]
+__all__ = ["chemistry", "Complex", "Protein", "Ligand"]
 
 
 def __getattr__(name):
@@ -13,6 +13,16 @@ def __getattr__(name):
         from deeporigin.drug_discovery.complex import Complex
 
         return Complex
+    elif name == "Protein":
+        # lazy import
+        from deeporigin.drug_discovery.chemistry import Protein
+
+        return Protein
+    elif name == "Ligand":
+        # lazy import
+        from deeporigin.drug_discovery.chemistry import Ligand
+
+        return Ligand
     raise AttributeError(f"module {__name__} has no attribute {name}")
 
 
