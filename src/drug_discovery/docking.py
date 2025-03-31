@@ -66,7 +66,7 @@ class Docking:
     def show_poses(self):
         """show docked ligands with protein in 3D"""
 
-        files = self.parent.get_result_files_for("Docking")
+        files = self.parent.get_result_files_for(tool="Docking")
 
         sdf_file = chem.merge_sdf_files(files)
 
@@ -90,7 +90,7 @@ class Docking:
 
         """
 
-        files = self.parent.get_result_files_for("Docking")
+        files = self.parent.get_result_files_for(tool="Docking")
 
         chem.merge_sdf_files(files, output_sdf_file)
 

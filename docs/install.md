@@ -69,7 +69,15 @@ This sections describes how to install the Deep Origin CLI and Python client on 
     # run jupyter using this environment
     uv run --with jupyter jupyter lab
     ```
+## Upgrading to a new version
 
+If you followed the recommended installation steps, you can upgrade to the latest version of the Deep Origin Python client by running:
+
+```bash
+uv add --upgrade deeporigin
+```
+
+in your project root. 
 
 ## For developers
 

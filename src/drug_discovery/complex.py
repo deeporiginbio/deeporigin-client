@@ -342,11 +342,26 @@ class Complex:
             else:
                 chem.show_ligands(self.ligands)
 
-    def get_result_files_for(self, tool: utils.VALID_TOOLS):
-        """Generic method to get output results for a particular tool and combine them as need be
+    @beartype
+    def get_result_files_for(
+        self,
+        *,
+        tool: utils.VALID_TOOLS,
+        ligand_ids: Optional[list[str]] = None,
+    ):
+        """Retrieve result files for a specific computational tool used with this complex.
+
+        This method fetches data from the specified tool's database, filters for results
+        associated with this complex, downloads any missing result files to the local
+        storage directory, and returns paths to all result files.
 
         Args:
-            tool: One of "Docking", "ABFE", "RBFE"
+            tool: One of "Docking", "ABFE", "RBFE" - specifies which computational
+                 method's results to retrieve
+            ligand_ids: Optional; list of ligand IDs to filter results. If None,
+                       results for all ligands in the complex will be retrieved.
+
+
         """
 
         df = pd.DataFrame(
@@ -358,6 +373,9 @@ class Complex:
         )
 
         df = df[self._hash == df[utils.COL_COMPLEX_HASH]]
+
+        if ligand_ids is not None:
+            df = df[df[utils.COL_LIGAND1].isin(ligand_ids)]
 
         # this makes sure that we only retain rows
         # where there is a valid output being generated

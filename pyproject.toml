@@ -65,7 +65,7 @@ docs = [
     "black"
 ]
 plots = ["bokeh"]
-tools = ["rdkit", "deeporigin-molstar","biotite"]
+tools = ["rdkit", "deeporigin-molstar>=0.2.0","biotite"]
 
 [tool.setuptools]
 package-dir = {"deeporigin" = "src"}
