@@ -103,7 +103,7 @@
         "softcore_alpha": 0.5,
         "steps": 1250000,
         "test_run": 0,
-        "thread_pinning": 1,
+        "thread_pinning": 0,
         "thread_pinning_offset": 0,
         "threads": 0,
         "workers": 0
@@ -212,7 +212,7 @@
         "softcore_alpha": 0.5,
         "steps": 300000,
         "test_run": 0,
-        "thread_pinning": 1,
+        "thread_pinning": 0,
         "thread_pinning_offset": 0,
         "threads": 0,
         "workers": 0
@@ -276,7 +276,7 @@
         "softcore_alpha": 0.5,
         "steps": 300000,
         "test_run": 0,
-        "thread_pinning": 1,
+        "thread_pinning": 0,
         "thread_pinning_offset": 0,
         "threads": 0,
         "workers": 0

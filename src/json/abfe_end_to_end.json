@@ -71,7 +71,7 @@
         "softcore_alpha": 0.5,
         "steps": 1250000,
         "test_run": 0,
-        "thread_pinning": 1,
+        "thread_pinning": 0,
         "thread_pinning_offset": 0,
         "threads": 0,
         "workers": 0
@@ -105,7 +105,7 @@
         "npt_reduce_restraints_ns": 2.0,
         "nvt_heating_ns": 1.0,
         "test_run": 0,
-        "thread_pinning": 1,
+        "thread_pinning": 0,
         "thread_pinning_offset": 0,
         "threads": 0
     },
@@ -139,7 +139,7 @@
         },
         "steps": 1000,
         "test_run": 0,
-        "thread_pinning": 1,
+        "thread_pinning": 0,
         "thread_pinning_offset": 0,
         "threads": 0
     },
@@ -202,7 +202,7 @@
         "softcore_alpha": 0.5,
         "steps": 300000,
         "test_run": 0,
-        "thread_pinning": 1,
+        "thread_pinning": 0,
         "thread_pinning_offset": 0,
         "threads": 0,
         "workers": 0
