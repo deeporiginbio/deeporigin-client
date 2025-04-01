@@ -137,7 +137,7 @@
             "integrator": "BAOABIntegrator",
             "Δt": 0.004
         },
-        "steps": 1000,
+        "steps": 250000,
         "test_run": 0,
         "thread_pinning": 0,
         "thread_pinning_offset": 0,
