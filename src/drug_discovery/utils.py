@@ -71,7 +71,7 @@ def _start_tool_run(
     tool_key_mapper = dict(
         ABFE="deeporigin.abfe-end-to-end",
         RBFE="deeporigin.rbfe-end-to-end",
-        Docking="deeporigin.bulk-docking",
+        Docking="deeporigin.bulk-docking/0.3.0",
     )
 
     from deeporigin.tools import run
