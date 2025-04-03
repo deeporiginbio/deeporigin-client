@@ -2586,6 +2586,24 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#src.tools.utils.get_status_and_progress" class="md-nav__link">
+    <span class="md-ellipsis">
+      get_status_and_progress
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#src.tools.utils.get_statuses_and_progress" class="md-nav__link">
+    <span class="md-ellipsis">
+      get_statuses_and_progress
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#src.tools.utils.make_payload" class="md-nav__link">
     <span class="md-ellipsis">
       make_payload
@@ -2755,6 +2773,24 @@
   <a href="#src.tools.utils.get_job_dataframe" class="md-nav__link">
     <span class="md-ellipsis">
       get_job_dataframe
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#src.tools.utils.get_status_and_progress" class="md-nav__link">
+    <span class="md-ellipsis">
+      get_status_and_progress
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#src.tools.utils.get_statuses_and_progress" class="md-nav__link">
+    <span class="md-ellipsis">
+      get_statuses_and_progress
     </span>
   </a>
   
@@ -2961,6 +2997,106 @@ Return the modified data structure.</p>
               <div class="doc-md-description">
                 <p>pd.DataFrame: A dataframe containing job information</p>
               </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="src.tools.utils.get_status_and_progress" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>            <span class="doc doc-object-name doc-function-name">get_status_and_progress</span>
+
+
+<a href="#src.tools.utils.get_status_and_progress" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">get_status_and_progress</span><span class="p">(</span><span class="n">execution_id</span><span class="p">:</span> <span class="n">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">dict</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Determine the status of a run, identified by execution_id ID</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>execution_id</code>
+            </td>
+            <td>
+                  <code>str</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>execution_id ID</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="src.tools.utils.get_statuses_and_progress" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>            <span class="doc doc-object-name doc-function-name">get_statuses_and_progress</span>
+
+
+<a href="#src.tools.utils.get_statuses_and_progress" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">get_statuses_and_progress</span><span class="p">(</span><span class="n">job_ids</span><span class="p">:</span> <span class="n">list</span><span class="p">[</span><span class="n">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">list</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>get statuses and progress reports for multiple jobs in parallel</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>job_ids</code>
+            </td>
+            <td>
+                  <code>list[str]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>list of job IDs</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
             </td>
           </tr>
       </tbody>
