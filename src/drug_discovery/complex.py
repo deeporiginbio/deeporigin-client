@@ -14,6 +14,7 @@ from deeporigin.drug_discovery import utils
 from deeporigin.drug_discovery.abfe import ABFE
 from deeporigin.drug_discovery.docking import Docking
 from deeporigin.drug_discovery.rbfe import RBFE
+from deeporigin.drug_discovery.structures import Ligand, Protein
 from deeporigin.tools.toolkit import _ensure_columns, _ensure_database
 from deeporigin.tools.utils import query_run_statuses
 from deeporigin.utils.core import PrettyDict, hash_file, hash_strings
@@ -127,8 +128,8 @@ class Complex:
     """class to represent a set of a protein and 1 or many ligands"""
 
     # Using a private attribute for ligands with the property decorator below
-    _ligands: list[chem.Ligand] = field(repr=False)
-    protein: chem.Protein
+    _ligands: list[Ligand] = field(repr=False)
+    protein: Protein
 
     # these params are not user facing
     _db: Optional[dict] = None
@@ -164,12 +165,12 @@ class Complex:
         self._hash = hash_strings([protein_hash, ligands_hash])
 
     @property
-    def ligands(self) -> list[chem.Ligand]:
+    def ligands(self) -> list[Ligand]:
         """Get the current ligands"""
         return self._ligands
 
     @ligands.setter
-    def ligands(self, new_ligands: list[chem.Ligand]):
+    def ligands(self, new_ligands: list[Ligand]):
         """Set new ligands and recompute the hash"""
         self._ligands = new_ligands
         self._compute_hash()
