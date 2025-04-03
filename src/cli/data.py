@@ -2,6 +2,7 @@
 data_hub.py"""
 
 import cement
+
 from deeporigin.data_hub import api
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.utils.constants import (

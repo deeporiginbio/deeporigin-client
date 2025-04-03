@@ -19,8 +19,9 @@ from typing import Optional, Tuple
 
 import pandas as pd
 from beartype import beartype
-from deeporigin.exceptions import DeepOriginException
 from rdkit import Chem
+
+from deeporigin.exceptions import DeepOriginException
 
 
 @beartype

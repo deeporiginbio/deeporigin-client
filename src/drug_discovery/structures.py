@@ -4,15 +4,17 @@ import os
 from dataclasses import dataclass, fields
 from pathlib import Path
 from typing import Optional
-from biotite.structure.io.pdb import PDBFile
+
 import numpy as np
 import pandas as pd
 from beartype import beartype
-from deeporigin.exceptions import DeepOriginException
-from deeporigin.drug_discovery import chemistry
-from deeporigin.functions.pocket_finder import find_pockets
-from tabulate import tabulate
 from biotite.structure import AtomArrayStack
+from biotite.structure.io.pdb import PDBFile
+from tabulate import tabulate
+
+from deeporigin.drug_discovery import chemistry
+from deeporigin.exceptions import DeepOriginException
+from deeporigin.functions.pocket_finder import find_pockets
 
 
 @dataclass
@@ -106,8 +108,9 @@ class Pocket:
             List of Pocket objects with properties from the CSV file.
         """
 
-        import pandas as pd
         from pathlib import Path
+
+        import pandas as pd
 
         # Convert to Path object for consistent handling
         results_dir = Path(pocket_finder_results_dir)

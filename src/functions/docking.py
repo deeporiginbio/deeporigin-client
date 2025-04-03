@@ -11,10 +11,12 @@ import base64
 import hashlib
 import json
 import os
-import requests
 from pathlib import Path
+from typing import Optional, Tuple
+
+import requests
 from beartype import beartype
-from typing import Tuple, Optional
+
 from deeporigin.drug_discovery.structures import Pocket, Protein
 from deeporigin.exceptions import DeepOriginException
 

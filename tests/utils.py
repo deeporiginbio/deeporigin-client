@@ -5,9 +5,10 @@ from contextlib import redirect_stderr, redirect_stdout
 
 import pytest
 from beartype import beartype
+from mock_client import MockClient
+
 from deeporigin import cli
 from deeporigin.data_hub import api
-from mock_client import MockClient
 
 TEST_PREFIX = "tc-4Qzkrn57rM-"
 TEST_DB_NAME = TEST_PREFIX + "db"

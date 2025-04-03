@@ -1,7 +1,7 @@
 # example data
 from importlib.resources import path
 
-from deeporigin.drug_discovery.structures import Protein, Ligand, Pocket
+from deeporigin.drug_discovery.structures import Ligand, Pocket, Protein
 
 __all__ = ["chemistry", "Complex", "Protein", "Ligand", "Pocket"]
 

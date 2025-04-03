@@ -8,13 +8,14 @@ from typing import Any, Optional, Union
 from urllib.parse import urlparse, urlunparse
 
 from beartype import beartype
+from tqdm import tqdm
+
 from deeporigin.data_hub import _api
 from deeporigin.data_hub._api import *  # noqa: F403
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.platform.api import get_user_name
 from deeporigin.utils import constants, network
 from deeporigin.utils.core import find_last_updated_row, sha256_checksum
-from tqdm import tqdm
 
 network.check_for_updates()
 
