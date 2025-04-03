@@ -350,8 +350,42 @@ class Protein:
         pockets: Optional[list[Pocket]] = None,
         sdf_file=None,
     ):
-        """visualize the protein in a Jupyter notebook using molstar"""
+        """Visualize the protein structure in a Jupyter notebook using MolStar viewer.
 
+        This method provides interactive 3D visualization of the protein structure with optional
+        highlighting of binding pockets and docked ligands. The visualization is rendered directly
+        in Jupyter notebooks using the MolStar viewer.
+
+        Args:
+            pockets (Optional[list[Pocket]], optional): List of Pocket objects to highlight
+                in the visualization. Each pocket will be displayed with its defined color
+                and transparency. Defaults to None.
+            sdf_file (Optional[str], optional): Path to an SDF file containing docked ligand
+                structures. When provided, the ligands will be displayed alongside the protein
+                structure. Defaults to None.
+
+        Examples:
+            # Visualize protein structure only
+            >>> protein = Protein(file="protein.pdb")
+            >>> protein.show()
+
+            # Visualize protein with highlighted pockets
+            >>> pockets = protein.find_pockets(pocket_count=3)
+            >>> protein.show(pockets=pockets)
+
+            # Visualize protein with docked ligands
+            >>> protein.show(sdf_file="docked_ligands.sdf")
+
+            # Visualize protein with both pockets and docked ligands
+            >>> protein.show(pockets=pockets, sdf_file="docked_ligands.sdf")
+
+        Notes:
+            - When pockets are provided, they are displayed with semi-transparent surfaces
+              (alpha=0.7) while the protein is shown with a more transparent surface (alpha=0.1)
+            - The protein is displayed in cartoon representation when pockets are shown
+            - When an SDF file is provided, the visualization includes both the protein and
+              the docked ligands in their respective binding poses
+        """
         from deeporigin_molstar import JupyterViewer, ProteinViewer
 
         if pockets is None and sdf_file is None:
@@ -407,7 +441,31 @@ class Protein:
         pocket_count: int = 5,
         pocket_min_size: int = 30,
     ) -> list[Pocket]:
-        """find pockets in the protein"""
+        """Find potential binding pockets in the protein structure.
+
+        This method analyzes the protein structure to identify cavities or pockets
+        that could potentially serve as binding sites for ligands. It uses the
+        Deep Origin pocket finding algorithm to detect and characterize these pockets.
+
+        Args:
+            pocket_count (int, optional): Maximum number of pockets to identify.
+                Defaults to 5.
+            pocket_min_size (int, optional): Minimum size of pockets to consider,
+                measured in cubic Angstroms. Defaults to 30.
+
+        Returns:
+            list[Pocket]: A list of Pocket objects, each representing a potential
+                binding site in the protein. Each Pocket object contains:
+                - The 3D structure of the pocket
+                - Properties such as volume, surface area, hydrophobicity, etc.
+                - Visualization parameters (color, etc.)
+
+        Examples:
+            >>> protein = Protein(file="protein.pdb")
+            >>> pockets = protein.find_pockets(pocket_count=3, pocket_min_size=50)
+            >>> for pocket in pockets:
+            ...     print(f"Pocket: {pocket.name}, Volume: {pocket.properties.get('volume')} Å³")
+        """
         results_dir = find_pockets(
             self.file,
             pocket_count=pocket_count,
@@ -422,6 +480,20 @@ class Protein:
         ligand: Ligand,
         pocket: Pocket,
     ):
+        """Dock a ligand into a specific pocket of the protein.
+
+        This method performs molecular docking of a ligand into a specified pocket
+        of the protein structure. It uses the Deep Origin docking to
+        generate a 3D structure of the docked ligand.
+
+        Args:
+            ligand (Ligand): The ligand to dock into the protein pocket.
+            pocket (Pocket): The specific pocket in the protein where the ligand
+                should be docked.
+
+        Returns:
+            str: Path to the SDF file containing the docked ligand structure.
+        """
         from deeporigin.functions import docking
 
         docked_ligand_sdf_file = docking.dock(
