@@ -17,7 +17,7 @@ from typing import Optional, Tuple
 import requests
 from beartype import beartype
 
-from deeporigin.drug_discovery.structures import Pocket, Protein, Ligand
+from deeporigin.drug_discovery.structures import Ligand, Pocket, Protein
 from deeporigin.exceptions import DeepOriginException
 
 URL = "http://docking.default.jobs.edge.deeporigin.io/dock"

@@ -345,12 +345,16 @@ class Protein:
             self.name = self.file.name
 
     @beartype
-    def show(self, pockets: Optional[list[Pocket]] = None):
+    def show(
+        self,
+        pockets: Optional[list[Pocket]] = None,
+        sdf_file=None,
+    ):
         """visualize the protein in a Jupyter notebook using molstar"""
 
         from deeporigin_molstar import JupyterViewer, ProteinViewer
 
-        if pockets is None:
+        if pockets is None and sdf_file is None:
             protein_viewer = ProteinViewer(
                 data=str(self.file),
                 format="pdb",
@@ -358,9 +362,9 @@ class Protein:
             html_content = protein_viewer.render_protein()
 
             JupyterViewer.visualize(html_content)
-        else:
+        elif pockets is not None and sdf_file is None:
             pocket_surface_alpha: float = 0.7
-            protein_surface_alpha: float = 0
+            protein_surface_alpha: float = 0.1
 
             protein_viewer = ProteinViewer(data=str(self.file), format="pdb")
             pocket_paths = [pocket.file for pocket in pockets]
@@ -381,6 +385,19 @@ class Protein:
                 protein_config=protein_config,
             )
             from deeporigin_molstar import JupyterViewer
+
+            JupyterViewer.visualize(html_content)
+
+        elif sdf_file is not None:
+            from deeporigin_molstar import DockingViewer, JupyterViewer
+
+            docking_viewer = DockingViewer()
+            html_content = docking_viewer.render_with_seperate_crystal(
+                protein_data=str(self.file),
+                protein_format="pdb",
+                ligands_data=[sdf_file],
+                ligand_format="sdf",
+            )
 
             JupyterViewer.visualize(html_content)
 
@@ -413,17 +430,7 @@ class Protein:
             pocket=pocket,
         )
 
-        from deeporigin_molstar import DockingViewer, JupyterViewer
-
-        docking_viewer = DockingViewer()
-        html_content = docking_viewer.render_with_seperate_crystal(
-            protein_data=str(self.file),
-            protein_format="pdb",
-            ligands_data=[docked_ligand_sdf_file],
-            ligand_format="sdf",
-        )
-
-        JupyterViewer.visualize(html_content)
+        return docked_ligand_sdf_file
 
 
 @beartype
