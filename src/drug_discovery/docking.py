@@ -10,7 +10,7 @@ from deeporigin.data_hub import api
 from deeporigin.drug_discovery import chemistry as chem
 from deeporigin.drug_discovery import utils
 from deeporigin.exceptions import DeepOriginException
-from deeporigin.tools.utils import query_run_statuses
+from deeporigin.tools.utils import get_statuses_and_progress, query_run_statuses
 from deeporigin.utils.core import PrettyDict, hash_strings
 from deeporigin_molstar import DockingViewer, JupyterViewer
 
@@ -45,6 +45,35 @@ class Docking:
             how="inner",
         )
         return df
+
+    def show_progress(self):
+        """show progress of bulk Docking run"""
+
+        data = get_statuses_and_progress(self.parent._job_ids["Docking"])
+
+        total_docked = 0
+
+        total_ligands = 0
+        for item in data:
+            progress = item["progress"]
+            if progress is None:
+                continue
+
+            batch_size, batch_docked = _parse_progress(progress)
+            total_docked += batch_docked
+            total_ligands += batch_size
+
+        if total_ligands == 0:
+            print("Cannot show progress yet. Jobs are yet to start.")
+            return
+
+        from deeporigin.utils.notebook import show_progress_bar
+
+        show_progress_bar(
+            completed=total_docked,
+            total=total_ligands,
+            title="Docking Progress",
+        )
 
     def show_results(self):
         """show results of bulk Docking run in a table, rendering 2D structures of molecules"""
@@ -173,3 +202,14 @@ class Docking:
             )
 
             self.parent._job_ids["Docking"].append(job_id)
+
+
+@beartype
+def _parse_progress(txt: str) -> tuple[int, int]:
+    """Parse Docking progress from raw progress text"""
+
+    txt = txt.split("\n")
+    num_ligands = int(txt[0].split()[-1])
+    num_docked_ligands = len(txt) - 1
+
+    return num_ligands, num_docked_ligands

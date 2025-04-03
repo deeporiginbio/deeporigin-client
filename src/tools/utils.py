@@ -22,6 +22,55 @@ NON_TERMINAL_STATES = {"Created", "Queued", "Running"}
 
 
 @beartype
+def get_status_and_progress(execution_id: str) -> dict:
+    """Determine the status of a run, identified by execution_id ID
+
+    Args:
+        execution_id (str): execution_id ID
+
+
+    """
+
+    data = tools.get_tool_execution(
+        org_friendly_id=get_value()["organization_id"],
+        execution_id=execution_id,
+    )
+
+    return dict(
+        status=data.attributes.status,
+        progress=data.attributes.progressReport,
+        execution_id=execution_id,
+    )
+
+
+@beartype
+def get_statuses_and_progress(job_ids: list[str]) -> list:
+    """get statuses and progress reports for multiple jobs in parallel
+
+    Args:
+        job_ids (list[str]): list of job IDs
+
+    """
+    results = []
+
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        # Submit all jobs and create a mapping from future to job_id
+        future_to_job_id = {
+            executor.submit(get_status_and_progress, job_id): job_id
+            for job_id in job_ids
+        }
+
+        # As each future completes, store the result in the status dictionary
+        for future in concurrent.futures.as_completed(future_to_job_id):
+            try:
+                results.append(future.result())
+            except Exception:
+                pass
+
+    return results
+
+
+@beartype
 def query_run_statuses(job_ids: list[str]) -> dict:
     """get statuses for multiple jobs in parallel
 
@@ -61,20 +110,9 @@ def query_run_status(execution_id: str) -> str:
     """
 
     data = tools.get_tool_execution(
-        org_friendly_id=get_value()["organization_id"], execution_id=execution_id
+        org_friendly_id=get_value()["organization_id"],
+        execution_id=execution_id,
     )
-
-    # Define the cache directory and file path
-
-    if not JOBS_CACHE_DIR.exists():
-        JOBS_CACHE_DIR.mkdir(parents=True)
-    cache_file = os.path.join(JOBS_CACHE_DIR, f"{execution_id}.json")
-
-    # Ensure the cache directory exists
-    os.makedirs(JOBS_CACHE_DIR, exist_ok=True)
-
-    with open(cache_file, "w") as file:
-        json.dump(data, file, indent=4)
 
     return data.attributes.status
 
