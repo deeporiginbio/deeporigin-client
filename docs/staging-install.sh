@@ -47,10 +47,16 @@ print_step "Installing Python 3.13..."
 uv python install 3.13
 
 print_step "Installing deeporigin with tools extra..."
-uv add --upgrade deeporigin --extra tools
+uv add deeporigin==3.16.0a2 --extra tools
 
 print_step "Installing deeporigin as a uv tool..."
 uv tool install deeporigin
 
+print_step "Configuring to use staging..."
+curl -L -o ~/.deeporigin/staging.yml https://client-docs.deeporigin.io/staging.yml
+deeporigin config load staging
+
 print_step "Installation complete!"
 
+print_step "Starting JupyterLab..."
+uv run --with jupyter jupyter lab
