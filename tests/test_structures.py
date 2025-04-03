@@ -1,4 +1,4 @@
-from deeporigin.drug_discovery.structures import Ligand, ligands_to_dataframe
+from deeporigin.drug_discovery.structures import Ligand
 from deeporigin.drug_discovery import chemistry
 import pytest
 from deeporigin.exceptions import DeepOriginException

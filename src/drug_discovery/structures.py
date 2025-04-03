@@ -1,24 +1,18 @@
 """module that contains classes for various chemical structures, including Ligands, Proteins, Complexes, and Pockets"""
 
-import base64
-import glob
-import hashlib
 import os
-import re
 from dataclasses import dataclass, fields
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Optional
 from biotite.structure.io.pdb import PDBFile
 import numpy as np
 import pandas as pd
 from beartype import beartype
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.drug_discovery import chemistry
-from rdkit import Chem
 from deeporigin.functions.pocket_finder import find_pockets
-from typing import Literal
 from tabulate import tabulate
-from biotite.structure import AtomArrayStack, centroid
+from biotite.structure import AtomArrayStack
 
 
 @dataclass

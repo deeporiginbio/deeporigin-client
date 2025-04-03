@@ -13,7 +13,7 @@ from deeporigin.exceptions import DeepOriginException
 from deeporigin.tools.utils import get_statuses_and_progress, query_run_statuses
 from deeporigin.utils.core import PrettyDict, hash_strings
 from deeporigin_molstar import DockingViewer, JupyterViewer
-from deeporigin.drug_discovery.structures import Ligand, ligands_to_dataframe
+from deeporigin.drug_discovery.structures import ligands_to_dataframe
 
 Number = float | int
 

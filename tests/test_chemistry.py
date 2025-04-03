@@ -4,10 +4,9 @@ import os
 
 import pytest
 from deeporigin.drug_discovery import chemistry
-from deeporigin.exceptions import DeepOriginException
 
 # Import shared test fixtures
-from tests.utils_ligands import ligands, bad_ligands
+from tests.utils_ligands import ligands
 
 base_path = os.path.join(os.path.dirname(__file__), "fixtures")
 
