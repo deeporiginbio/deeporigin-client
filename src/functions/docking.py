@@ -17,7 +17,7 @@ from typing import Optional, Tuple
 import requests
 from beartype import beartype
 
-from deeporigin.drug_discovery.structures import Pocket, Protein
+from deeporigin.drug_discovery.structures import Pocket, Protein, Ligand
 from deeporigin.exceptions import DeepOriginException
 
 URL = "http://docking.default.jobs.edge.deeporigin.io/dock"
@@ -26,12 +26,14 @@ CACHE_DIR = os.path.expanduser("~/.deeporigin/docking")
 
 @beartype
 def dock(
+    *,
     protein: Protein,
-    smiles_string: str,
+    smiles_string: Optional[str] = None,
+    ligand: Optional[Ligand] = None,
     box_size: Tuple[float, float, float] = (20.0, 20.0, 20.0),
     pocket_center: Optional[Tuple[int, int, int]] = None,
     pocket: Optional[Pocket] = None,
-):
+) -> str:
     """
     Run molecular docking using the DeepOrigin API.
 
@@ -50,6 +52,12 @@ def dock(
 
     if pocket_center is None:
         raise DeepOriginException("Pocket center is required")
+
+    if ligand is not None:
+        smiles_string = ligand.smiles_string
+
+    if smiles_string is None:
+        raise DeepOriginException("Either smiles_string or ligand must be provided")
 
     # Create hash of inputs
     hasher = hashlib.sha256()
@@ -111,14 +119,4 @@ def dock(
             for solution in response[0]["solutions"]:
                 file.write(solution["output_sdf_content"])
 
-    from deeporigin_molstar import DockingViewer, JupyterViewer
-
-    docking_viewer = DockingViewer()
-    html_content = docking_viewer.render_with_seperate_crystal(
-        protein_data=str(protein.file),
-        protein_format="pdb",
-        ligands_data=[sdf_file],
-        ligand_format="sdf",
-    )
-
-    JupyterViewer.visualize(html_content)
+    return sdf_file

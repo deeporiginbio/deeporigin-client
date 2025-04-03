@@ -3,7 +3,7 @@
 import os
 from dataclasses import dataclass, fields
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Tuple
 
 import numpy as np
 import pandas as pd
@@ -15,6 +15,138 @@ from tabulate import tabulate
 from deeporigin.drug_discovery import chemistry
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.functions.pocket_finder import find_pockets
+
+
+@dataclass
+class Ligand:
+    """Class to represent a ligand (typically backed by a SDF file)"""
+
+    file: Optional[str | Path] = None
+    smiles_string: Optional[str] = None
+
+    # this ID keeps track of whether it is uploaded to deep origin or not
+    _do_id: Optional[str] = None
+
+    # this stores user-defined properties
+    properties: Optional[dict] = None
+
+    def __post_init__(self):
+        """post init tasks"""
+
+        if self.file is not None and not os.path.exists(self.file):
+            raise DeepOriginException(f"File {self.file} does not exist")
+
+        # we require either a SMILES string or a file
+        if self.file is None and self.smiles_string is None:
+            raise DeepOriginException("Must specify either a file or a SMILES string")
+
+        # read user-defined properties
+        if self.file is not None:
+            self.properties = chemistry.read_sdf_properties(self.file)
+
+            # check that there's only one molecule here
+            if chemistry.count_molecules_in_sdf_file(self.file) > 1:
+                raise ValueError(
+                    "Too many molecules. Expected a single molecule in the SDF file, but got multiple"
+                )
+
+        if self.smiles_string is None:
+            smiles_string = chemistry.sdf_to_smiles(self.file)
+            if len(smiles_string) > 1:
+                raise ValueError("Expected a single SMILES strings, but got multiple")
+            self.smiles_string = smiles_string[0]
+
+    def _repr_pretty_(self, p, cycle):
+        """pretty print a ligand"""
+
+        if cycle:
+            p.text("Ligand(...)")
+        else:
+            p.text("Ligand(")
+
+            with p.group(2, "\n  ", "\n"):
+                all_fields = fields(self)
+                for idx, field in enumerate(all_fields):
+                    value = getattr(self, field.name)
+                    p.text(f"{field.name}: {value!r}")
+                    # Only add a breakable if this isn't the last field.
+                    if idx < len(all_fields) - 1:
+                        p.breakable()
+            p.text(")")
+
+    def show(self):
+        """show a ligand in a Jupyter notebook using molstar"""
+
+        if self.file is not None:
+            # backed by SDF file. use a 3D viewer
+
+            chemistry.show_molecules_in_sdf_file(self.file)
+        else:
+            # only SMILES. use a 2D viewer
+            img = chemistry.smiles_to_base64_png(self.smiles_string)
+
+            from IPython.display import HTML, display
+
+            display(HTML(img))
+
+    @classmethod
+    def from_smiles(cls, smiles: str) -> "Ligand":
+        """create a ligand from a SMILES string"""
+        return cls(smiles_string=smiles)
+
+    @classmethod
+    def from_csv(
+        cls,
+        *,
+        file: str | Path,
+        smiles_column: str,
+        properties_columns: list[str] = None,
+    ) -> list["Ligand"]:
+        """create a list of ligands from a CSV file
+
+        Args:
+            file: Path to CSV file
+            smiles_column: Column name containing SMILES strings
+            properties_columns: List of column names to extract as properties
+
+        Returns:
+            List of Ligand objects
+        """
+
+        # Read the CSV file
+        df = pd.read_csv(file)
+
+        # Validate column existence
+        if smiles_column not in df.columns:
+            raise ValueError(f"SMILES column '{smiles_column}' not found in CSV file")
+
+        # Create empty list to store ligands
+        ligands = []
+
+        # Process each row
+        for _, row in df.iterrows():
+            smiles = row[smiles_column]
+
+            # Skip empty SMILES
+            if pd.isna(smiles) or not smiles.strip():
+                continue
+
+            # Extract properties if columns were specified
+            properties = None
+            if properties_columns:
+                properties = {}
+                for col in properties_columns:
+                    if col in df.columns:
+                        properties[col] = row[col]
+                    else:
+                        # Skip non-existent columns with a warning
+                        print(f"Warning: Property column '{col}' not found in CSV file")
+
+            # Create ligand and add to list
+            ligand = cls(smiles_string=smiles, properties=properties)
+            ligands.append(ligand)
+
+        return ligands
 
 
 @dataclass
@@ -267,137 +399,31 @@ class Protein:
 
         return Pocket.from_pocket_finder_results(results_dir)
 
-
-@dataclass
-class Ligand:
-    """Class to represent a ligand (typically backed by a SDF file)"""
-
-    file: Optional[str | Path] = None
-    smiles_string: Optional[str] = None
-
-    # this ID keeps track of whether it is uploaded to deep origin or not
-    _do_id: Optional[str] = None
-
-    # this stores user-defined properties
-    properties: Optional[dict] = None
-
-    def __post_init__(self):
-        """post init tasks"""
-
-        if self.file is not None and not os.path.exists(self.file):
-            raise DeepOriginException(f"File {self.file} does not exist")
-
-        # we require either a SMILES string or a file
-        if self.file is None and self.smiles_string is None:
-            raise DeepOriginException("Must specify either a file or a SMILES string")
-
-        # read user-defined properties
-        if self.file is not None:
-            self.properties = chemistry.read_sdf_properties(self.file)
-
-            # check that there's only one molecule here
-            if chemistry.count_molecules_in_sdf_file(self.file) > 1:
-                raise ValueError(
-                    "Too many molecules. Expected a single molecule in the SDF file, but got multiple"
-                )
-
-        if self.smiles_string is None:
-            smiles_string = chemistry.sdf_to_smiles(self.file)
-            if len(smiles_string) > 1:
-                raise ValueError("Expected a single SMILES strings, but got multiple")
-            self.smiles_string = smiles_string[0]
-
-    def _repr_pretty_(self, p, cycle):
-        """pretty print a ligand"""
-
-        if cycle:
-            p.text("Ligand(...)")
-        else:
-            p.text("Ligand(")
-
-            with p.group(2, "\n  ", "\n"):
-                all_fields = fields(self)
-                for idx, field in enumerate(all_fields):
-                    value = getattr(self, field.name)
-                    p.text(f"{field.name}: {value!r}")
-                    # Only add a breakable if this isn't the last field.
-                    if idx < len(all_fields) - 1:
-                        p.breakable()
-            p.text(")")
-
-    def show(self):
-        """show a ligand in a Jupyter notebook using molstar"""
-
-        if self.file is not None:
-            # backed by SDF file. use a 3D viewer
-
-            chemistry.show_molecules_in_sdf_file(self.file)
-        else:
-            # only SMILES. use a 2D viewer
-            img = chemistry.smiles_to_base64_png(self.smiles_string)
-
-            from IPython.display import HTML, display
-
-            display(HTML(img))
-
-    @classmethod
-    def from_smiles(cls, smiles: str) -> "Ligand":
-        """create a ligand from a SMILES string"""
-        return cls(smiles_string=smiles)
-
-    @classmethod
-    def from_csv(
-        cls,
+    def dock(
+        self,
         *,
-        file: str | Path,
-        smiles_column: str,
-        properties_columns: list[str] = None,
-    ) -> list["Ligand"]:
-        """create a list of ligands from a CSV file
+        ligand: Ligand,
+        pocket: Pocket,
+    ):
+        from deeporigin.functions import docking
 
-        Args:
-            file: Path to CSV file
-            smiles_column: Column name containing SMILES strings
-            properties_columns: List of column names to extract as properties
+        docked_ligand_sdf_file = docking.dock(
+            protein=self,
+            ligand=ligand,
+            pocket=pocket,
+        )
 
-        Returns:
-            List of Ligand objects
-        """
+        from deeporigin_molstar import DockingViewer, JupyterViewer
 
-        # Read the CSV file
-        df = pd.read_csv(file)
+        docking_viewer = DockingViewer()
+        html_content = docking_viewer.render_with_seperate_crystal(
+            protein_data=str(self.file),
+            protein_format="pdb",
+            ligands_data=[docked_ligand_sdf_file],
+            ligand_format="sdf",
+        )
 
-        # Validate column existence
-        if smiles_column not in df.columns:
-            raise ValueError(f"SMILES column '{smiles_column}' not found in CSV file")
-
-        # Create empty list to store ligands
-        ligands = []
-
-        # Process each row
-        for _, row in df.iterrows():
-            smiles = row[smiles_column]
-
-            # Skip empty SMILES
-            if pd.isna(smiles) or not smiles.strip():
-                continue
-
-            # Extract properties if columns were specified
-            properties = None
-            if properties_columns:
-                properties = {}
-                for col in properties_columns:
-                    if col in df.columns:
-                        properties[col] = row[col]
-                    else:
-                        # Skip non-existent columns with a warning
-                        print(f"Warning: Property column '{col}' not found in CSV file")
-
-            # Create ligand and add to list
-            ligand = cls(smiles_string=smiles, properties=properties)
-            ligands.append(ligand)
-
-        return ligands
+        JupyterViewer.visualize(html_content)
 
 
 @beartype
