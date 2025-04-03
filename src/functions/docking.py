@@ -1,12 +1,11 @@
 import base64
 import requests
 from beartype import beartype
-from deeporigin.drug_discovery.chemistry import Protein
-from typing import Tuple
-
+from typing import Tuple, Optional
+from deeporigin.drug_discovery.structures import Pocket, Protein
+from deeporigin.exceptions import DeepOriginException
 
 URL = "http://docking.default.jobs.edge.deeporigin.io/dock"
-# URL = "https://os.edge.deeporigin.io/api/functions"
 
 
 @beartype
@@ -14,7 +13,8 @@ def dock(
     protein: Protein,
     smiles_list: list[str],
     box_size: Tuple[float, float, float] = (20.0, 20.0, 20.0),
-    pocket_center: Tuple[int, int, int] = (13, -6, 22),
+    pocket_center: Optional[Tuple[int, int, int]] = None,
+    pocket: Optional[Pocket] = None,
 ):
     """
     Run molecular docking using the DeepOrigin API.
@@ -28,6 +28,13 @@ def dock(
     Returns:
         dict: API response
     """
+
+    if pocket is not None:
+        pocket_center = pocket.get_center().tolist()
+
+    if pocket_center is None:
+        raise DeepOriginException("Pocket center is required")
+
     # Read and encode the protein file
     with open(protein.file, "rb") as f:
         encoded_protein = base64.b64encode(f.read()).decode("utf-8")

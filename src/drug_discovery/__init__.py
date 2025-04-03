@@ -1,28 +1,22 @@
 # example data
 from importlib.resources import path
 
-# eager import
-from deeporigin.drug_discovery import chemistry
+from deeporigin.drug_discovery.structures import Protein, Ligand, Pocket
 
-__all__ = ["chemistry", "Complex", "Protein", "Ligand"]
+__all__ = ["chemistry", "Complex", "Protein", "Ligand", "Pocket"]
 
 
+# Lazy imports for better performance
 def __getattr__(name):
     if name == "Complex":
-        # lazy import
         from deeporigin.drug_discovery.complex import Complex
 
         return Complex
-    elif name == "Protein":
-        # lazy import
-        from deeporigin.drug_discovery.chemistry import Protein
+    elif name == "chemistry":
+        from deeporigin.drug_discovery import chemistry
 
-        return Protein
-    elif name == "Ligand":
-        # lazy import
-        from deeporigin.drug_discovery.chemistry import Ligand
+        return chemistry
 
-        return Ligand
     raise AttributeError(f"module {__name__} has no attribute {name}")
 
 
