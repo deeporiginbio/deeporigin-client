@@ -2,7 +2,7 @@
 
 import importlib.resources
 import json
-from typing import Literal, Optional
+from typing import Any, Literal, Optional
 
 from beartype import beartype
 from deeporigin.data_hub import api
@@ -223,7 +223,7 @@ def _start_tool_run(
 
 
 @beartype
-def is_test_run(data: dict) -> bool:
+def is_test_run(data: Any) -> bool:
     """check if test_run=1 in a dict"""
 
     if isinstance(data, dict):
