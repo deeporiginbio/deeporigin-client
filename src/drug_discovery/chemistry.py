@@ -1,230 +1,17 @@
-"""Contains classes and functions for working with molecules, proteins, and related files.
-
-Defines `Ligand` as `Protein` classes, as well as functions for reading/writing SDF files,
-SMILES / SDF Conversion, validating data,  `DataFrame` integration, and preparing visualizations.
-These can be used together with the `drug_discovery` module for tasks such as docking.
-
-* [`Ligand`][src.drug_discovery.chemistry.Ligand]: Represents a small molecule ligand, accepting either a file path (SDF) or a SMILES
-string. Provides `show()` method to display it.
-* [`Protein`][src.drug_discovery.chemistry.Protein]: Represents a protein, accepting a local file path (PDB) or a PDB ID.
-Provides `show()` method to display it.
-"""
+"""Contains functions for working with SDF files."""
 
 import base64
 import hashlib
 import os
 import re
-from dataclasses import dataclass, fields
 from pathlib import Path
 from typing import Optional, Tuple
 
 import pandas as pd
 from beartype import beartype
-from deeporigin.exceptions import DeepOriginException
 from rdkit import Chem
 
-
-@dataclass
-class Ligand:
-    """Class to represent a ligand (typically backed by a SDF file)"""
-
-    file: Optional[str | Path] = None
-    smiles_string: Optional[str] = None
-
-    # this ID keeps track of whether it is uploaded to deep origin or not
-    _do_id: Optional[str] = None
-
-    # this stores user-defined properties
-    properties: Optional[dict] = None
-
-    def __post_init__(self):
-        """post init tasks"""
-
-        if self.file is not None and not os.path.exists(self.file):
-            raise DeepOriginException(f"File {self.file} does not exist")
-
-        # we require either a SMILES string or a file
-        if self.file is None and self.smiles_string is None:
-            raise DeepOriginException("Must specify either a file or a SMILES string")
-
-        # read user-defined properties
-        if self.file is not None:
-            self.properties = read_sdf_properties(self.file)
-
-            # check that there's only one molecule here
-            if count_molecules_in_sdf_file(self.file) > 1:
-                raise ValueError(
-                    "Too many molecules. Expected a single molecule in the SDF file, but got multiple"
-                )
-
-        if self.smiles_string is None:
-            smiles_string = sdf_to_smiles(self.file)
-            if len(smiles_string) > 1:
-                raise ValueError("Expected a single SMILES strings, but got multiple")
-            self.smiles_string = smiles_string[0]
-
-    def _repr_pretty_(self, p, cycle):
-        """pretty print a ligand"""
-
-        if cycle:
-            p.text("Ligand(...)")
-        else:
-            p.text("Ligand(")
-
-            with p.group(2, "\n  ", "\n"):
-                all_fields = fields(self)
-                for idx, field in enumerate(all_fields):
-                    value = getattr(self, field.name)
-                    p.text(f"{field.name}: {value!r}")
-                    # Only add a breakable if this isn't the last field.
-                    if idx < len(all_fields) - 1:
-                        p.breakable()
-            p.text(")")
-
-    def show(self):
-        """show a ligand in a Jupyter notebook using molstar"""
-
-        if self.file is not None:
-            # backed by SDF file. use a 3D viewer
-
-            show_molecules_in_sdf_file(self.file)
-        else:
-            # only SMILES. use a 2D viewer
-            img = smiles_to_base64_png(self.smiles_string)
-
-            from IPython.display import HTML, display
-
-            display(HTML(img))
-
-    @classmethod
-    def from_smiles(cls, smiles: str) -> "Ligand":
-        """create a ligand from a SMILES string"""
-        return cls(smiles_string=smiles)
-
-    @classmethod
-    def from_csv(
-        cls,
-        *,
-        file: str | Path,
-        smiles_column: str,
-        properties_columns: list[str] = None,
-    ) -> list["Ligand"]:
-        """create a list of ligands from a CSV file
-
-        Args:
-            file: Path to CSV file
-            smiles_column: Column name containing SMILES strings
-            properties_columns: List of column names to extract as properties
-
-        Returns:
-            List of Ligand objects
-        """
-
-        # Read the CSV file
-        df = pd.read_csv(file)
-
-        # Validate column existence
-        if smiles_column not in df.columns:
-            raise ValueError(f"SMILES column '{smiles_column}' not found in CSV file")
-
-        # Create empty list to store ligands
-        ligands = []
-
-        # Process each row
-        for _, row in df.iterrows():
-            smiles = row[smiles_column]
-
-            # Skip empty SMILES
-            if pd.isna(smiles) or not smiles.strip():
-                continue
-
-            # Extract properties if columns were specified
-            properties = None
-            if properties_columns:
-                properties = {}
-                for col in properties_columns:
-                    if col in df.columns:
-                        properties[col] = row[col]
-                    else:
-                        # Skip non-existent columns with a warning
-                        print(f"Warning: Property column '{col}' not found in CSV file")
-
-            # Create ligand and add to list
-            ligand = cls(smiles_string=smiles, properties=properties)
-            ligands.append(ligand)
-
-        return ligands
-
-
-@beartype
-def show_molecules_in_sdf_file(sdf_file: str | Path):
-    """show molecules in an SDF file in a Jupyter notebook using molstar"""
-
-    from deeporigin_molstar import JupyterViewer, MoleculeViewer
-
-    molecule_viewer = MoleculeViewer(
-        data=str(sdf_file),
-        format="sdf",
-    )
-    html_content = molecule_viewer.render_ligand()
-    JupyterViewer.visualize(html_content)
-
-
-@beartype
-def show_molecules_in_sdf_files(sdf_files: list[str]):
-    """show molecules in an SDF file in a Jupyter notebook using molstar"""
-
-    import tempfile
-
-    temp_dir = tempfile.TemporaryDirectory()
-
-    sdf_file = os.path.join(temp_dir.name, "temp.sdf")
-
-    # combine the SDF files
-    merge_sdf_files(sdf_files, sdf_file)
-
-    from deeporigin_molstar import JupyterViewer, MoleculeViewer
-
-    molecule_viewer = MoleculeViewer(
-        data=str(sdf_file),
-        format="sdf",
-    )
-    html_content = molecule_viewer.render_ligand()
-    JupyterViewer.visualize(html_content)
-
-
-@dataclass
-class Protein:
-    """Class to represent a protein (typically backed by a PDB file)"""
-
-    file: Optional[str | Path] = None
-    name: Optional[str] = None
-    pdb_id: Optional[str] = None
-
-    # this ID keeps track of whether it is uploaded to deep origin or not
-    _do_id: Optional[str] = None
-
-    def __post_init__(self):
-        if self.pdb_id is not None:
-            self.file = download_protein(self.pdb_id)
-
-        self.file = Path(self.file)
-        if self.name is None:
-            self.name = self.file.name
-
-    def show(self):
-        """visualize the protein in a Jupyter notebook using molstar"""
-
-        from deeporigin_molstar import JupyterViewer
-        from deeporigin_molstar.src.viewers.protein_viewer import ProteinViewer
-
-        protein_viewer = ProteinViewer(
-            data=str(self.file),
-            format="pdb",
-        )
-        html_content = protein_viewer.render_protein()
-
-        JupyterViewer.visualize(html_content)
+from deeporigin.exceptions import DeepOriginException
 
 
 @beartype
@@ -260,56 +47,6 @@ def read_molecules_in_sdf_file(sdf_file: str | Path) -> list[dict]:
         output.append({"smiles_string": smiles_str, "properties": properties})
 
     return output
-
-
-def ligands_to_dataframe(ligands: list[Ligand]):
-    """convert a list of ligands to a pandas dataframe"""
-
-    import pandas as pd
-
-    smiles_list = [ligand.smiles_string for ligand in ligands]
-    id_list = [ligand._do_id for ligand in ligands]
-    file_list = [
-        os.path.basename(ligand.file) if ligand.file is not None else None
-        for ligand in ligands
-    ]
-
-    data = {
-        "Ligand": smiles_list,
-        "ID": id_list,
-        "File": file_list,
-    }
-
-    # find all the common properties in all ligands
-    common_keys = set.intersection(
-        *(set(ligand.properties.keys()) for ligand in ligands)
-    )
-    for key in common_keys:
-        data[key] = [ligand.properties[key] for ligand in ligands]
-
-    df = pd.DataFrame(data)
-
-    return df
-
-
-def show_ligands(ligands: list[Ligand]):
-    """show ligands in the FEP object in a dataframe. This function visualizes the ligands using core-aligned 2D visualizations.
-
-    Args:
-        ligands (list[Ligand]): list of ligands
-
-    """
-
-    df = ligands_to_dataframe(ligands)
-
-    # convert SMILES to aligned images
-    images = smiles_list_to_base64_png_list(df["Ligand"].tolist())
-    df["Ligand"] = images
-
-    # Use escape=False to allow the <img> tags to render as images
-    from IPython.display import HTML, display
-
-    display(HTML(df.to_html(escape=False)))
 
 
 @beartype
@@ -826,3 +563,40 @@ def canonicalize_smiles(smiles: str) -> str:
     if mol is None:
         raise ValueError(f"Invalid SMILES: {smiles}")
     return Chem.MolToSmiles(mol, canonical=True)
+
+
+@beartype
+def show_molecules_in_sdf_files(sdf_files: list[str]):
+    """show molecules in an SDF file in a Jupyter notebook using molstar"""
+
+    import tempfile
+
+    temp_dir = tempfile.TemporaryDirectory()
+
+    sdf_file = os.path.join(temp_dir.name, "temp.sdf")
+
+    # combine the SDF files
+    merge_sdf_files(sdf_files, sdf_file)
+
+    from deeporigin_molstar import JupyterViewer, MoleculeViewer
+
+    molecule_viewer = MoleculeViewer(
+        data=str(sdf_file),
+        format="sdf",
+    )
+    html_content = molecule_viewer.render_ligand()
+    JupyterViewer.visualize(html_content)
+
+
+@beartype
+def show_molecules_in_sdf_file(sdf_file: str | Path):
+    """show molecules in an SDF file in a Jupyter notebook using molstar"""
+
+    from deeporigin_molstar import JupyterViewer, MoleculeViewer
+
+    molecule_viewer = MoleculeViewer(
+        data=str(sdf_file),
+        format="sdf",
+    )
+    html_content = molecule_viewer.render_ligand()
+    JupyterViewer.visualize(html_content)

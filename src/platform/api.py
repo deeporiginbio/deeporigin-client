@@ -10,13 +10,14 @@ import jwt
 import requests
 from beartype import beartype
 from beartype.typing import Literal
+from jwt.algorithms import RSAAlgorithm
+from tqdm import tqdm
+
 from deeporigin import auth
 from deeporigin.config import get_value
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.utils.core import _ensure_do_folder
 from deeporigin.utils.network import _get_domain_name, check_for_updates
-from jwt.algorithms import RSAAlgorithm
-from tqdm import tqdm
 
 check_for_updates()
 

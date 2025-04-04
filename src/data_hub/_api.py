@@ -11,15 +11,16 @@ from pathlib import Path
 
 from beartype import beartype
 from box import Box
-from deeporigin import auth
-from deeporigin.exceptions import DeepOriginException
-from deeporigin.utils.core import PersistentDict, _get_method, _redact_responses
 from deeporigin_data import (
     AuthenticationError,
     ConflictError,
     DeeporiginData,
     NotFoundError,
 )
+
+from deeporigin import auth
+from deeporigin.exceptions import DeepOriginException
+from deeporigin.utils.core import PersistentDict, _get_method, _redact_responses
 
 # this list specifies methods in the low level API that should
 # not be automatically wrapped
@@ -89,6 +90,7 @@ def _get_default_client(
         access_token = tokens["access"]
 
         import httpx
+
         from deeporigin.config import get_value
 
         value = get_value()

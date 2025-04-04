@@ -17,6 +17,7 @@ from bokeh.models import (
 )
 from bokeh.palettes import Category10
 from bokeh.plotting import figure
+
 from deeporigin.data_hub.dataframe import DataFrame
 from deeporigin.exceptions import DeepOriginException
 

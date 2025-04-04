@@ -96,9 +96,11 @@ include = [
 ignore = ["E203", "E266", "E501"]
 
 
-
 [tool.ruff.lint.isort]
 case-sensitive = false
+known-first-party = ["deeporigin"]
+known-third-party = ["numpy", "pandas", "rdkit", "beartype"]
+section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
 
 [tool.distutils.bdist_wheel]
 universal = true

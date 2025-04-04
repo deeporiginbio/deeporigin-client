@@ -9,6 +9,7 @@ from urllib.parse import urljoin
 
 import requests
 from beartype import beartype
+
 from deeporigin.config import get_value as get_config
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.utils.core import _get_api_tokens_filepath, read_cached_tokens

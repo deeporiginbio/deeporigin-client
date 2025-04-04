@@ -5,6 +5,7 @@ from typing import Optional
 
 import confuse
 import yaml
+
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.utils.core import _ensure_do_folder, in_aws_lambda
 

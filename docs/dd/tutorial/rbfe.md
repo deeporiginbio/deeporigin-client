@@ -7,8 +7,8 @@ This document describes how to run a [RBFE :octicons-link-external-16:](https://
 We assume that we have an initialized and configured `Complex` object:
 
 ```python
-from deeporigin import drug_discovery as dd
-sim = dd.Complex.from_dir("/path/to/folder/")
+from deeporigin.drug_discovery import Complex
+sim = Complex.from_dir("/path/to/folder/")
 sim.connect()
 ```
 For more details on how to get started, see [:material-page-previous: Getting Started ](./getting-started.md).

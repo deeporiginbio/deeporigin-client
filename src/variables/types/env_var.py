@@ -7,6 +7,7 @@ import warnings
 
 import dotenv
 import pydantic
+
 from deeporigin.utils.core import _ensure_do_folder, expand_user
 
 from ...warnings import DeepOriginWarning

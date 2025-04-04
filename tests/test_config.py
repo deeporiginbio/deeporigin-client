@@ -5,6 +5,7 @@ import unittest
 import unittest.mock
 
 import yaml
+
 from deeporigin import config
 from deeporigin.exceptions import DeepOriginException
 
