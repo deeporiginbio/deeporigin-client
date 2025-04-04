@@ -59,9 +59,9 @@ class Docking:
             if progress is None:
                 continue
 
-            batch_size, batch_docked = _parse_progress(progress)
+            batch_docked = _parse_progress(progress)
             total_docked += batch_docked
-            total_ligands += batch_size
+            total_ligands += len(item["inputs"].smiles_list)
 
         if total_ligands == 0:
             print("Cannot show progress yet. Jobs are yet to start.")
@@ -205,11 +205,10 @@ class Docking:
 
 
 @beartype
-def _parse_progress(txt: str) -> tuple[int, int]:
+def _parse_progress(txt: str) -> int:
     """Parse Docking progress from raw progress text"""
 
     txt = txt.split("\n")
-    num_ligands = int(txt[0].split()[-1])
     num_docked_ligands = len(txt) - 1
 
-    return num_ligands, num_docked_ligands
+    return num_docked_ligands
