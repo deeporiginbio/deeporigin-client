@@ -164,15 +164,16 @@ class Pocket:
         if self.file is not None:
             self.load_structure(self.file)
 
-    def load_structure(self, structure_file_path: str):
+    def load_structure(
+        self,
+        structure_file_path: str,
+    ) -> None:
         """
-        Load a PDB structure from a file path.
+        Load a PDB structure from a file path into the `structure` attribute
 
         Args:
-            - structure_file_path (str): Path to the PDB file.
+            structure_file_path (str): Path to the PDB file.
 
-        Returns:
-            AtomArray: Loaded structure.
         """
         structure_file = PDBFile.read(structure_file_path)
 
@@ -474,12 +475,13 @@ class Protein:
 
         return Pocket.from_pocket_finder_results(results_dir)
 
+    @beartype
     def dock(
         self,
         *,
         ligand: Ligand,
         pocket: Pocket,
-    ):
+    ) -> str:
         """Dock a ligand into a specific pocket of the protein.
 
         This method performs molecular docking of a ligand into a specified pocket

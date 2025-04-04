@@ -1,14 +1,4 @@
-"""Contains classes and functions for working with molecules, proteins, and related files.
-
-Defines `Ligand` as `Protein` classes, as well as functions for reading/writing SDF files,
-SMILES / SDF Conversion, validating data,  `DataFrame` integration, and preparing visualizations.
-These can be used together with the `drug_discovery` module for tasks such as docking.
-
-* [`Ligand`][src.drug_discovery.chemistry.Ligand]: Represents a small molecule ligand, accepting either a file path (SDF) or a SMILES
-string. Provides `show()` method to display it.
-* [`Protein`][src.drug_discovery.chemistry.Protein]: Represents a protein, accepting a local file path (PDB) or a PDB ID.
-Provides `show()` method to display it.
-"""
+"""Contains functions for working with SDF files."""
 
 import base64
 import hashlib
