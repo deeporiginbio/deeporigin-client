@@ -208,7 +208,7 @@ class Complex:
         ligands = []
 
         for mol in mols:
-            ligands.append(chem.Ligand(**mol))
+            ligands.append(Ligand(**mol))
 
         pdb_files = [
             os.path.join(directory, f)
@@ -221,7 +221,7 @@ class Complex:
                 f"Expected exactly one PDB file in the directory, but found {len(pdb_files)}."
             )
         protein_file = pdb_files[0]
-        protein = chem.Protein(protein_file)
+        protein = Protein(protein_file)
 
         # Create the Complex instance
         instance = cls(
