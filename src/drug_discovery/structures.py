@@ -3,7 +3,7 @@
 import os
 from dataclasses import dataclass, fields
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Optional
 
 import numpy as np
 import pandas as pd
@@ -211,20 +211,18 @@ class Pocket:
 
         return f"Pocket:\n{tabulate(basic_info, tablefmt='rounded_grid')}"
 
-    def get_center(self) -> Optional[list[float]]:
+    def get_center(self) -> np.ndarray:
         """
         Get the center of the pocket based on its coordinates.
 
         Returns:
-            - list of floats: The center coordinates of the pocket.
+            - a numpy array containing the center of the pocket
 
         """
 
         center = self.structure.coord.mean(axis=0)
 
         return center
-
-        # return [float(x) for x in center.tolist()]
 
     @classmethod
     def from_pocket_finder_results(
