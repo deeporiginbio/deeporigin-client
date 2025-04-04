@@ -1,7 +1,6 @@
 {
     "binding": {
         "add_fep_repeats": 0,
-        "amend": "__NO_AMEND",
         "annihilate": true,
         "atom_mapping_threshold": 0.01,
         "em_all": true,
@@ -9,9 +8,9 @@
         "emeq_md_options": {
             "T": 298.15,
             "cutoff": 0.9,
+            "dt": 0.004,
             "fourier_spacing": 0.12,
-            "hydrogen_mass": 2.0,
-            "Δt": 0.004
+            "hydrogen_mass": 2.0
         },
         "fep_windows": [
             {
@@ -30,16 +29,6 @@
             {
                 "coul_A": [
                     1.0,
-                    0.8,
-                    0.6,
-                    0.4,
-                    0.2,
-                    0.0
-                ]
-            },
-            {
-                "vdw_A": [
-                    1.0,
                     0.9,
                     0.8,
                     0.7,
@@ -49,6 +38,24 @@
                     0.3,
                     0.2,
                     0.1,
+                    0.0
+                ]
+            },
+            {
+                "vdw_A": [
+                    1.0,
+                    0.923,
+                    0.846,
+                    0.769,
+                    0.692,
+                    0.615,
+                    0.538,
+                    0.462,
+                    0.385,
+                    0.308,
+                    0.231,
+                    0.154,
+                    0.077,
                     0.0
                 ]
             }
@@ -61,24 +68,22 @@
             "barostat": "MonteCarloBarostat",
             "barostat_exchange_interval": 1150,
             "cutoff": 0.9,
+            "dt": 0.004,
             "fourier_spacing": 0.12,
             "hydrogen_mass": 2.0,
-            "integrator": "BAOABIntegrator",
-            "Δt": 0.004
+            "integrator": "BAOABIntegrator"
         },
         "repeats": 1,
         "skip_emeq": "__NO",
         "softcore_alpha": 0.5,
         "steps": 1250000,
-        "test_run": 0,
-        "thread_pinning": 0,
+        "test_run": 1,
+        "thread_pinning": 1,
         "thread_pinning_offset": 0,
         "threads": 0,
         "workers": 0
     },
     "complex_prep": {
-        "include_ligands": 1,
-        "include_protein": 1,
         "sysprep_params": {
             "charge_method": "bcc",
             "do_loop_modelling": false,
@@ -92,26 +97,23 @@
         }
     },
     "emeq": {
-        "amend": "__NO_AMEND",
         "em_all": true,
         "em_solvent": true,
         "emeq_md_options": {
             "T": 298.15,
             "cutoff": 0.9,
+            "dt": 0.004,
             "fourier_spacing": 0.12,
-            "hydrogen_mass": 2.0,
-            "Δt": 0.004
+            "hydrogen_mass": 2.0
         },
         "npt_reduce_restraints_ns": 2.0,
         "nvt_heating_ns": 1.0,
-        "test_run": 0,
-        "thread_pinning": 0,
+        "test_run": 1,
+        "thread_pinning": 1,
         "thread_pinning_offset": 0,
         "threads": 0
     },
     "ligand_prep": {
-        "include_ligands": 1,
-        "include_protein": 0,
         "sysprep_params": {
             "charge_method": "bcc",
             "do_loop_modelling": false,
@@ -125,27 +127,25 @@
         }
     },
     "md": {
-        "amend": "__NO_AMEND",
         "continue": 0,
         "md_options": {
             "T": 298.15,
             "barostat": "MonteCarloBarostat",
             "barostat_exchange_interval": 1150,
             "cutoff": 0.9,
+            "dt": 0.004,
             "fourier_spacing": 0.12,
             "hydrogen_mass": 2.0,
-            "integrator": "BAOABIntegrator",
-            "Δt": 0.004
+            "integrator": "BAOABIntegrator"
         },
         "steps": 250000,
-        "test_run": 0,
-        "thread_pinning": 0,
+        "test_run": 1,
+        "thread_pinning": 1,
         "thread_pinning_offset": 0,
         "threads": 0
     },
     "solvation": {
         "add_fep_repeats": 0,
-        "amend": "__NO_AMEND",
         "annihilate": true,
         "atom_mapping_threshold": 0.01,
         "em_all": true,
@@ -153,23 +153,13 @@
         "emeq_md_options": {
             "T": 298.15,
             "cutoff": 0.9,
+            "dt": 0.004,
             "fourier_spacing": 0.12,
-            "hydrogen_mass": 2.0,
-            "Δt": 0.004
+            "hydrogen_mass": 2.0
         },
         "fep_windows": [
             {
                 "coul_A": [
-                    1.0,
-                    0.8,
-                    0.6,
-                    0.4,
-                    0.2,
-                    0.0
-                ]
-            },
-            {
-                "vdw_A": [
                     1.0,
                     0.9,
                     0.8,
@@ -182,6 +172,24 @@
                     0.1,
                     0.0
                 ]
+            },
+            {
+                "vdw_A": [
+                    1.0,
+                    0.923,
+                    0.846,
+                    0.769,
+                    0.692,
+                    0.615,
+                    0.538,
+                    0.462,
+                    0.385,
+                    0.308,
+                    0.231,
+                    0.154,
+                    0.077,
+                    0.0
+                ]
             }
         ],
         "mbar": 1,
@@ -192,17 +200,17 @@
             "barostat": "MonteCarloBarostat",
             "barostat_exchange_interval": 1150,
             "cutoff": 0.9,
+            "dt": 0.004,
             "fourier_spacing": 0.12,
             "hydrogen_mass": 2.0,
-            "integrator": "BAOABIntegrator",
-            "Δt": 0.004
+            "integrator": "BAOABIntegrator"
         },
         "repeats": 1,
         "skip_emeq": "__NO",
         "softcore_alpha": 0.5,
-        "steps": 300000,
-        "test_run": 0,
-        "thread_pinning": 0,
+        "steps": 500000,
+        "test_run": 1,
+        "thread_pinning": 1,
         "thread_pinning_offset": 0,
         "threads": 0,
         "workers": 0
