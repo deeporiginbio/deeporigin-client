@@ -10,6 +10,7 @@ import requests
 from beartype import beartype
 
 URL = "http://pocketfinder.default.jobs.edge.deeporigin.io/find_pockets"
+# URL = "http://localhost:8080/find_pockets"
 CACHE_DIR = os.path.expanduser("~/.deeporigin/pocket-finder")
 
 
