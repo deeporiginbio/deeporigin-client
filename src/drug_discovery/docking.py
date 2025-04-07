@@ -6,13 +6,15 @@ from typing import Optional
 import more_itertools
 import pandas as pd
 from beartype import beartype
+from deeporigin_molstar import DockingViewer, JupyterViewer
+
 from deeporigin.data_hub import api
 from deeporigin.drug_discovery import chemistry as chem
 from deeporigin.drug_discovery import utils
+from deeporigin.drug_discovery.structures import ligands_to_dataframe
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.tools.utils import get_statuses_and_progress, query_run_statuses
 from deeporigin.utils.core import PrettyDict, hash_strings
-from deeporigin_molstar import DockingViewer, JupyterViewer
 
 Number = float | int
 
@@ -34,7 +36,7 @@ class Docking:
 
         df1 = self.parent.get_csv_results_for("Docking")
 
-        df2 = chem.ligands_to_dataframe(self.parent.ligands)
+        df2 = ligands_to_dataframe(self.parent.ligands)
         df2["SMILES"] = df2["Ligand"]
         df2.drop(columns=["Ligand"], inplace=True)
 

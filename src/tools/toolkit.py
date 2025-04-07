@@ -1,6 +1,7 @@
 """this module contains high level utility functions that makes it easier to use tools by providing wrappers over tools"""
 
 from beartype import beartype
+
 from deeporigin.data_hub import api
 from deeporigin.tools import run
 

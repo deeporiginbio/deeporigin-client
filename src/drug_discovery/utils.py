@@ -5,6 +5,7 @@ import json
 from typing import Any, Literal, Optional
 
 from beartype import beartype
+
 from deeporigin.data_hub import api
 from deeporigin.utils.core import PrettyDict, hash_strings
 

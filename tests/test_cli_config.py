@@ -1,5 +1,4 @@
 from deeporigin.config import get_value
-
 from tests.utils import _run_cli_command
 from tests.utils import minimal_config as config  # noqa: F401
 
