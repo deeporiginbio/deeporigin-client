@@ -732,14 +732,15 @@ class Protein:
         """
         from deeporigin_molstar import JupyterViewer, ProteinViewer
 
-        if pockets is None and sdf_file is None:
-            unique_suffix = uuid.uuid4().hex
-            current_protein_file = (
-                Path(tempfile.gettempdir())
-                / f"{self.name}_visualize_{unique_suffix}.pdb"
-            )
-            self.to_pdb(str(current_protein_file))
+        # the state of the protein may not match what's in the PDB, so let's dump it
+        unique_suffix = uuid.uuid4().hex
+        current_protein_file = (
+            Path(tempfile.gettempdir()) / f"{self.name}_visualize_{unique_suffix}.pdb"
+        )
+        current_protein_file = str(current_protein_file)
+        self.to_pdb(current_protein_file)
 
+        if pockets is None and sdf_file is None:
             protein_viewer = ProteinViewer(
                 data=str(current_protein_file),
                 format="pdb",
@@ -751,7 +752,7 @@ class Protein:
             pocket_surface_alpha: float = 0.7
             protein_surface_alpha: float = 0.1
 
-            protein_viewer = ProteinViewer(data=str(self.file_path), format="pdb")
+            protein_viewer = ProteinViewer(data=current_protein_file, format="pdb")
             pocket_paths = [str(pocket.file_path) for pocket in pockets]
 
             # Retrieve and customize pocket visualization configuration
@@ -778,7 +779,7 @@ class Protein:
 
             docking_viewer = DockingViewer()
             html_content = docking_viewer.render_with_seperate_crystal(
-                protein_data=str(self.file_path),
+                protein_data=current_protein_file,
                 protein_format="pdb",
                 ligands_data=[sdf_file],
                 ligand_format="sdf",
