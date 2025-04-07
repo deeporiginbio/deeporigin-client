@@ -45,7 +45,6 @@ protein.visualize()
 """
 
 import os
-import uuid
 import io
 import tempfile
 import numpy as np
@@ -58,7 +57,7 @@ from biotite.structure.io.pdb import PDBFile
 from biotite.structure import filter_solvent
 from biotite.database.rcsb import fetch
 from deeporigin_molstar import ProteinViewer
-from deeporigin.drug_discovery.constants import METALS
+from deeporigin.drug_discovery.constants import METALS, STATE_DUMP_PATH
 from deeporigin_molstar import JupyterViewer, DockingViewer
 from biotite.structure.geometry import centroid
 from deeporigin.functions.pocket_finder import find_pockets
@@ -209,6 +208,37 @@ class Protein:
         proteins_dir = home_dir / ".deeporigin" / "proteins"
         proteins_dir.mkdir(parents=True, exist_ok=True)
         return str(proteins_dir)
+
+    @beartype
+    def dock(
+        self,
+        *,
+        ligand: Ligand,
+        pocket: Pocket,
+    ) -> str:
+        """Dock a ligand into a specific pocket of the protein.
+
+        This method performs molecular docking of a ligand into a specified pocket
+        of the protein structure. It uses the Deep Origin docking to
+        generate a 3D structure of the docked ligand.
+
+        Args:
+            ligand (Ligand): The ligand to dock into the protein pocket.
+            pocket (Pocket): The specific pocket in the protein where the ligand
+                should be docked.
+
+        Returns:
+            str: Path to the SDF file containing the docked ligand structure.
+        """
+        from deeporigin.functions import docking
+
+        docked_ligand_sdf_file = docking.dock(
+            protein=self,
+            ligand=ligand,
+            pocket=pocket,
+        )
+
+        return docked_ligand_sdf_file
 
     @property
     def coordinates(self):
@@ -689,10 +719,24 @@ class Protein:
             )
 
     @beartype
+    def _dump_state(self) -> str:
+        """Dump the current protein state to a fixed location in the user's home directory.
+
+        Returns:
+            str: Path to the state dump file containing the protein structure.
+        """
+        # Create the .deeporigin directory if it doesn't exist
+        STATE_DUMP_PATH.parent.mkdir(exist_ok=True)
+
+        # Use the constant file path
+        self.to_pdb(str(STATE_DUMP_PATH))
+        return str(STATE_DUMP_PATH)
+
+    @beartype
     def show(
         self,
         pockets: Optional[list[Pocket]] = None,
-        sdf_file=None,
+        sdf_file: Optional[str] = None,
     ):
         """Visualize the protein structure in a Jupyter notebook using MolStar viewer.
 
@@ -730,23 +774,16 @@ class Protein:
             - When an SDF file is provided, the visualization includes both the protein and
               the docked ligands in their respective binding poses
         """
-        from deeporigin_molstar import JupyterViewer, ProteinViewer
+        from deeporigin_molstar import JupyterViewer
 
-        # the state of the protein may not match what's in the PDB, so let's dump it
-        unique_suffix = uuid.uuid4().hex
-        current_protein_file = (
-            Path(tempfile.gettempdir()) / f"{self.name}_visualize_{unique_suffix}.pdb"
-        )
-        current_protein_file = str(current_protein_file)
-        self.to_pdb(current_protein_file)
+        current_protein_file = self._dump_state()
 
         if pockets is None and sdf_file is None:
             protein_viewer = ProteinViewer(
-                data=str(current_protein_file),
+                data=current_protein_file,
                 format="pdb",
             )
             html_content = protein_viewer.render_protein()
-
             JupyterViewer.visualize(html_content)
         elif pockets is not None and sdf_file is None:
             pocket_surface_alpha: float = 0.7
@@ -770,12 +807,9 @@ class Protein:
                 pocket_config=pocket_config,
                 protein_config=protein_config,
             )
-            from deeporigin_molstar import JupyterViewer
-
             JupyterViewer.visualize(html_content)
-
         elif sdf_file is not None:
-            from deeporigin_molstar import DockingViewer, JupyterViewer
+            from deeporigin_molstar import DockingViewer
 
             docking_viewer = DockingViewer()
             html_content = docking_viewer.render_with_seperate_crystal(
@@ -784,7 +818,6 @@ class Protein:
                 ligands_data=[sdf_file],
                 ligand_format="sdf",
             )
-
             JupyterViewer.visualize(html_content)
 
     def _repr_html_(self):
@@ -809,37 +842,6 @@ class Protein:
 
     def update_coordinates(self, coords: np.ndarray):
         self.structure.coord = coords
-
-    @beartype
-    def dock(
-        self,
-        *,
-        ligand: Ligand,
-        pocket: Pocket,
-    ) -> str:
-        """Dock a ligand into a specific pocket of the protein.
-
-        This method performs molecular docking of a ligand into a specified pocket
-        of the protein structure. It uses the Deep Origin docking to
-        generate a 3D structure of the docked ligand.
-
-        Args:
-            ligand (Ligand): The ligand to dock into the protein pocket.
-            pocket (Pocket): The specific pocket in the protein where the ligand
-                should be docked.
-
-        Returns:
-            str: Path to the SDF file containing the docked ligand structure.
-        """
-        from deeporigin.functions import docking
-
-        docked_ligand_sdf_file = docking.dock(
-            protein=self,
-            ligand=ligand,
-            pocket=pocket,
-        )
-
-        return docked_ligand_sdf_file
 
     def get_center_by_residues(self, residues: list[str]) -> np.ndarray:
         """

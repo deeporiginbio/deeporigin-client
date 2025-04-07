@@ -177,7 +177,12 @@ class Ligand:
         Returns:
             Ligand: A new Ligand instance
         """
-        return cls(file_path=file_path, name=name, save_to_file=save_to_file, **kwargs)
+        return cls(
+            file_path=file_path,
+            name=name,
+            save_to_file=save_to_file,
+            **kwargs,
+        )
 
     @classmethod
     def from_smiles(
@@ -270,52 +275,48 @@ class Ligand:
                 "Please provide exactly one of identifier, file_path, smiles, or block_content."
             )
 
-        try:
-            if self.block_content:
-                if not self.block_type:
-                    raise ValueError(
-                        "block_type must be provided when initializing from block_content."
-                    )
-
-                self.mol = mol_from_block(self.block_type, self.block_content)
-            elif self.identifier:
-                self.mol = Molecule.from_smiles_or_name(
-                    name=self.identifier, add_coords=True, seed=self.seed
+        if self.block_content:
+            if not self.block_type:
+                raise ValueError(
+                    "block_type must be provided when initializing from block_content."
                 )
-            elif self.file_path:
-                self.mol = self._initialize_from_file(self.file_path)
-            elif self.smiles:
-                self.mol = mol_from_smiles(self.smiles)
-                self.block_type = "mol"
-                self.block_content = self.mol.molblock()
-            else:
-                raise ValueError("No valid source provided for ligand initialization.")
 
-            if self.mol is None:
-                raise ValueError("Failed to create molecule.")
-
-            self.name = (
-                self.mol.name if self.mol.name else self.name or "Unknown_Ligand"
+            self.mol = mol_from_block(self.block_type, self.block_content)
+        elif self.identifier:
+            self.mol = Molecule.from_smiles_or_name(
+                name=self.identifier, add_coords=True, seed=self.seed
             )
-            directory = Path(self._get_directory())
-            if self.name == "Unknown_Ligand":
-                num = len(list(directory.glob(f"{self.name}*")))
-                self.name = f"{self.name}_{num + 1}"
+        elif self.file_path:
+            self.mol = self._initialize_from_file(self.file_path)
+        elif self.smiles:
+            self.mol = mol_from_smiles(self.smiles)
+            self.block_type = "mol"
+            self.block_content = self.mol.molblock()
+        else:
+            raise ValueError("No valid source provided for ligand initialization.")
 
-            self.hac = self.mol.m.GetNumHeavyAtoms()
-            if self.hac < 5:
-                print("Warning: Ligand has less than 5 heavy atoms.")
+        if self.mol is None:
+            raise ValueError("Failed to create molecule.")
 
-            file_props = self.mol.m.GetPropsAsDict()
-            for key, value in file_props.items():
-                self.properties[key] = value
+        self.smiles = self.mol.smiles
 
-            self.available_for_docking = not self.mol.contains_boron
-            if self.save_to_file:
-                self.write_to_file(output_format="sdf")
+        self.name = self.mol.name if self.mol.name else self.name or "Unknown_Ligand"
+        directory = Path(self._get_directory())
+        if self.name == "Unknown_Ligand":
+            num = len(list(directory.glob(f"{self.name}*")))
+            self.name = f"{self.name}_{num + 1}"
 
-        except Exception as e:
-            raise
+        self.hac = self.mol.m.GetNumHeavyAtoms()
+        if self.hac < 5:
+            print("Warning: Ligand has less than 5 heavy atoms.")
+
+        file_props = self.mol.m.GetPropsAsDict()
+        for key, value in file_props.items():
+            self.properties[key] = value
+
+        self.available_for_docking = not self.mol.contains_boron
+        if self.save_to_file:
+            self.write_to_file(output_format="sdf")
 
     @property
     def coordinates(self):
