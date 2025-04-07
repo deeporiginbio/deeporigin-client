@@ -70,7 +70,7 @@ def _start_tool_run(
 
     # tool key mapper
     tool_key_mapper = dict(
-        ABFE="deeporigin.abfe-end-to-end",
+        ABFE="deeporigin.abfe-end-to-end/0.2.3",
         RBFE="deeporigin.rbfe-end-to-end",
         Docking="deeporigin.bulk-docking/0.3.0",
     )
@@ -149,6 +149,9 @@ def _start_tool_run(
             },
         }
 
+    if is_test_run(params):
+        print("⚠️ Warning: test_run=1 in these parameters. Results may not be accurate.")
+
     job_id = run._process_job(
         inputs=params,
         outputs=outputs,
@@ -218,3 +221,20 @@ def _start_tool_run(
         )
 
     return job_id
+
+
+@beartype
+def is_test_run(data: dict) -> bool:
+    """check if test_run=1 in a dict"""
+
+    if isinstance(data, dict):
+        if data.get("test_run") == 1:
+            return True
+        for value in data.values():
+            if is_test_run(value):
+                return True
+    elif isinstance(data, list):
+        for item in data:
+            if is_test_run(item):
+                return True
+    return False
