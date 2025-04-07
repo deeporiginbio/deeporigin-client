@@ -1,7 +1,8 @@
 # example data
 from importlib.resources import path
-
-from deeporigin.drug_discovery.structures import Ligand, Pocket, Protein
+import asyncio
+import nest_asyncio  # we need this for asyncio
+from deeporigin.drug_discovery.structures import Protein
 
 __all__ = ["chemistry", "Complex", "Protein", "Ligand", "Pocket"]
 
