@@ -112,7 +112,8 @@ omit = [
 
 [tool.interrogate]
 fail-under = 100
-exclude = ["setup.py", "docs", "build","tests","variables","conftest.py"]
+# Skip files module coverage for now as it has lots of auto-gen code
+exclude = ["setup.py", "docs", "build","tests","variables","conftest.py", "src/files"]
 ignore-init-method = true
 ignore-init-module = true
 ignore-magic = true
