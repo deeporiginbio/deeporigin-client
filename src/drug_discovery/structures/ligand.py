@@ -75,7 +75,7 @@ from deeporigin.drug_discovery.structures.internal_structures import (
     mol_from_smiles,
     mol_from_block,
 )
-from deeporigin.drug_discovery.utilities.props import predict_properties, protonate
+# from deeporigin.drug_discovery.utilities.props import predict_properties, protonate
 
 from dataclasses import dataclass, field
 
@@ -199,7 +199,12 @@ class Ligand:
         Returns:
             Ligand: A new Ligand instance
         """
-        return cls(smiles=smiles, name=name, save_to_file=save_to_file, **kwargs)
+        return cls(
+            smiles=smiles,
+            name=name,
+            save_to_file=save_to_file,
+            **kwargs,
+        )
 
     @classmethod
     def from_block_content(
@@ -500,7 +505,7 @@ class Ligand:
         return self.mol.draw()
 
     @jupyter_visualization
-    def visualize(self) -> str:
+    def show(self) -> str:
         """
         Visualize the current state of the ligand molecule.
 
@@ -512,7 +517,7 @@ class Ligand:
 
         Example:
         ```python
-        ligand.visualize()
+        ligand.show()
         ```
         """
         try:
@@ -688,7 +693,10 @@ class Ligand:
         """
         try:
             molecule = mol_from_block(
-                block_type, block_content, sanitize=True, remove_hs=False
+                block_type,
+                block_content,
+                sanitize=True,
+                remove_hs=False,
             )
             writer = Chem.SDWriter(str(tempfile.mktemp(suffix=".sdf")))
             writer.write(molecule.m)
@@ -793,7 +801,7 @@ class Ligand:
         """
         try:
             print(self.mol.m)
-            return self.visualize()
+            return self.show()
         except Exception as e:
             print(f"Warning: Failed to generate HTML representation: {str(e)}")
             return self.__str__()
@@ -839,6 +847,8 @@ class Ligand:
         Returns:
             str: A string containing the predicted ADMET properties.
         """
+
+        raise NotImplementedError("ADMET properties prediction not implemented yet.")
         try:
             props = predict_properties(smiles=self.mol.smiles)[0]
             for key, value in props.items():
@@ -862,6 +872,8 @@ class Ligand:
         Returns:
         - ProtonationReport: A ProtonationReport instance.
         """
+
+        raise NotImplementedError("Protonation prediction not implemented yet.")
         try:
             smiles = protonate(
                 pH=pH,

@@ -1,10 +1,11 @@
 from .protein import Protein
 from .ligand import Ligand
+from .pocket import Pocket
 
 __all__ = [
     "Ligand",
     "Protein",
-    # "Pocket",
+    "Pocket",
     # "PocketData",
     # "PainsReport",
     # "DockingResult",
