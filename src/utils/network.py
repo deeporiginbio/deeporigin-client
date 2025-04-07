@@ -7,6 +7,8 @@ from urllib.parse import parse_qs, urljoin, urlparse
 
 import requests
 from beartype import beartype
+from packaging.version import Version
+
 from deeporigin import __version__
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.utils.config import _get_domain_name
@@ -15,7 +17,6 @@ from deeporigin.utils.core import (
     _get_api_tokens_filepath,
     in_aws_lambda,
 )
-from packaging.version import Version
 
 
 @functools.cache

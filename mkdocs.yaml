@@ -58,6 +58,7 @@ nav:
     - Visualize ABFE trajectories: dd/how-to/visualize-abfe-trajectories.md
   - Reference: 
     - chemistry: dd/ref/chemistry.md
+    - structures: dd/ref/structures.md
     - complex: dd/ref/complex.md
     - docking: dd/ref/docking.md
     - abfe: dd/ref/abfe.md
