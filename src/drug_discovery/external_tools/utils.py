@@ -31,9 +31,9 @@ import biotite.database.rcsb as rcsb
 import biotite.structure as struc
 import biotite.structure.io.pdb as pdb
 import nest_asyncio
+from beartype import beartype
 from Bio.PDB.MMCIFParser import MMCIFParser
 from Bio.PDB.PDBIO import PDBIO
-from beartype import beartype
 
 
 @beartype

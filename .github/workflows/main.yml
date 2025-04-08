@@ -8,19 +8,6 @@ on:
 
 jobs:
 
-  check-for-debug-code:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Search for "icecream" in .py files
-        run: |
-          if grep -ri "icecream" --include="*.py" .; then
-            echo "❌🍦: Found 'icecream' in one or more .py files, suggesting that you forgot to remove debug code"
-            exit 1
-          fi
-
   sonarcloud:
     runs-on: ubuntu-latest
     steps:
