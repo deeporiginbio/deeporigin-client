@@ -1,3 +1,26 @@
+"""
+Utility functions for drug discovery and protein structure analysis.
+
+This module provides a collection of utility functions for working with protein structures,
+sequence analysis, and drug discovery tasks. It includes functionality for:
+- Protein sequence conversion (3-letter to 1-letter code)
+- Structure file handling (PDB, CIF formats)
+- Protein information retrieval from RCSB PDB
+- Structure and sequence alignment analysis
+- HTML report generation for protein information
+
+Key functions:
+- three2one(): Convert protein sequences between 3-letter and 1-letter codes
+- download_struct(): Download protein structures from RCSB PDB
+- read_structure(): Read and parse structure files
+- get_structure_sequence(): Extract sequence information from structures
+- get_protein_info_dict(): Retrieve comprehensive protein information from PDB
+- generate_html_output(): Generate interactive HTML reports for protein data
+
+The module integrates with various bioinformatics tools and databases to provide
+a comprehensive set of utilities for protein structure analysis and drug discovery.
+"""
+
 import asyncio
 import os
 import pathlib
@@ -10,9 +33,11 @@ import biotite.structure.io.pdb as pdb
 import nest_asyncio
 from Bio.PDB.MMCIFParser import MMCIFParser
 from Bio.PDB.PDBIO import PDBIO
+from beartype import beartype
 
 
-def three2one(prot):
+@beartype
+def three2one(prot: str) -> str:
     """Translate a protein sequence from 3 to 1 letter code.
 
     Args:
@@ -20,7 +45,6 @@ def three2one(prot):
 
     Returns:
         str: The protein sequence in 1 letter code.
-
     """
     code = {
         "GLY": "G",
@@ -58,7 +82,6 @@ def three2one(prot):
     return newprot
 
 
-# Download specified PDB structure using Biotitie fetch function
 def download_struct(pid, path=None, format="cif", overwrite=False):
     """
     Downloads a structure file from the RCSB Protein Data Bank (PDB) using the given PDB ID.
@@ -71,14 +94,12 @@ def download_struct(pid, path=None, format="cif", overwrite=False):
 
     Returns:
         str: The path to the downloaded file.
-
     """
     if path is None:
         path = gettempdir()
     return rcsb.fetch(pid, format, target_path=path, overwrite=overwrite)
 
 
-# Read structure from all supported file types
 def read_structure(file_name, model=1, use_author_fields_flag=True):
     """
     Read a structure file and return the file object and structure object.
@@ -93,7 +114,6 @@ def read_structure(file_name, model=1, use_author_fields_flag=True):
 
     Raises:
         None
-
     """
     if file_name.endswith(".cif"):
         file = pdb.PDBFile.read(file_name)
@@ -121,7 +141,6 @@ def get_structure_sequence(structure):
 
     Returns:
         The sequence of the structure.
-
     """
     return three2one(struc.get_residues(structure)[1])
 
@@ -158,7 +177,6 @@ def get_gap_and_mut_residues(alignment, res_ids):
     return gap_id_list, mut_id_list
 
 
-# Filter out alignments that do not agree with the residue order in the structures (when available)
 def filter_for_valid_alignments(
     alignments, res_list_1=None, res_list_2=None, n_breaks_tol=0
 ):
@@ -250,7 +268,6 @@ def clear_stdout(stdout_str):
 
     Returns:
     str: The cleared stdout string.
-
     """
     ind = stdout_str.find("Existed execution")
     return stdout_str[:ind]
@@ -276,6 +293,17 @@ def clear_std_err(stderr_str):
 
 
 def extract_dict_field(json, json_keys, default_return="N/A"):
+    """
+    Extract a field from a nested dictionary using a list of keys.
+
+    Args:
+        json (dict): The dictionary to extract from.
+        json_keys (list): List of keys to traverse in the dictionary.
+        default_return (str, optional): Default value to return if the field is not found. Defaults to "N/A".
+
+    Returns:
+        The value at the specified path in the dictionary, or the default value if not found.
+    """
     result = json.copy()
     for key in json_keys:
         try:
@@ -286,6 +314,24 @@ def extract_dict_field(json, json_keys, default_return="N/A"):
 
 
 async def aget_protein_info_dict(pdb_id):
+    """
+    Asynchronously retrieve protein information from RCSB PDB using GraphQL API.
+
+    Args:
+        pdb_id (str): The PDB ID of the protein.
+
+    Returns:
+        dict: A dictionary containing comprehensive protein information including:
+            - Title, method, resolution
+            - R-factors
+            - Classification
+            - Source organism
+            - Sequence information
+            - Citations
+            - Macromolecules
+            - Small molecules
+            - Assemblies
+    """
     current_dir = pathlib.Path(__file__).parent
     assets = current_dir / "assets"
     assets.mkdir(parents=True, exist_ok=True)
@@ -569,7 +615,6 @@ def get_protein_info_dict(pdb_id: str):
 
     Raises:
     - Any exceptions raised by the underlying `aload_protein_from_pdb` function.
-
     """
     nest_asyncio.apply()
     data = asyncio.get_event_loop().run_until_complete(aget_protein_info_dict(pdb_id))
@@ -578,6 +623,24 @@ def get_protein_info_dict(pdb_id: str):
 
 
 def generate_html_output(info):
+    """
+    Generate an interactive HTML report for protein information.
+
+    Args:
+        info (dict): A dictionary containing protein information including:
+            - Title, method, resolution
+            - R-factors
+            - Classification
+            - Source organism
+            - Sequence information
+            - Citations
+            - Macromolecules
+            - Small molecules
+            - Assemblies
+
+    Returns:
+        str: HTML iframe code that can be embedded in a webpage to display the protein information report.
+    """
     # Including DataTables CSS and JS via CDN
     html_content = f"""
     <!DOCTYPE html>

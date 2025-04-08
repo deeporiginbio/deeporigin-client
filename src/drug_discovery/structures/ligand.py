@@ -1,59 +1,60 @@
-# LigandModule
-#
-# Description: This module encapsulates the Ligand class, which represents and manages small molecules (ligands)
-# in computational biology workflows. It provides functionalities to initialize ligands from various sources,
-# handle molecular properties, predict ADMET (Absorption, Distribution, Metabolism, Excretion, and Toxicity)
-# properties, perform protonation state predictions, and visualize ligands within protein structures. The
-# primary features and methods include:
-#
-# - **Ligand Class**: Represents a ligand molecule, managing its data loaded from identifiers, file paths,
-#   SMILES strings, or direct block content. Handles molecule creation, property assignment, and ensures data
-#   integrity during initialization.
-#
-# - **Initialization**: Allows creating a Ligand instance using an identifier (e.g., PubChem ID), local file,
-#   SMILES string, or block content. Ensures only one source is provided and properly parses the molecular data.
-#
-# - **Property Management**: Stores and manages ligand-specific properties such as volume, SASA (Solvent Accessible
-#   Surface Area), hydrophobicity, polarity, and drugability scores. Provides methods to set and retrieve these
-#   properties, facilitating comprehensive molecular analysis.
-#
-# - **ADMET Prediction**: Integrates with predictive models to estimate ADMET properties of ligands, aiding in the
-#   assessment of their drug-likeness and suitability for therapeutic applications.
-#
-# - **Protonation State Prediction**: Predicts the protonation states of ligands at specified pH levels, providing
-#   insights into their chemical behavior and interactions within biological environments.
-#
-# - **Visualization**: Integrates with the MoleculeViewer to render interactive visualizations of ligands within
-#   Jupyter Notebooks, facilitating intuitive analysis and presentation of molecular structures.
-#
-# - **Utility Methods**: Includes static and class methods for creating Ligand instances from SDF and CSV files,
-#   converting molecular formats, fetching SMILES strings from APIs, and handling bulk visualization of multiple
-#   ligands.
-#
-# Dependencies: Utilizes libraries such as RDKit for cheminformatics, Pandas for data manipulation, Termcolor for
-# colored terminal output, Requests for API interactions, and integrates with the MoleculeViewer from the
-# deeporigin_molstar package for visualization purposes.
-#
-# Usage Example:
-# ```python
-# # Initialize a Ligand instance from a SMILES string
-# ligand = Ligand(smiles="CCO", name="Ethanol")
-#
-# # Initialize a Ligand instance from a file
-# ligand = Ligand.create_ligands_from_file("/path/to/ligand.sdf", "sdf")[0]
-#
-# # Predict ADMET properties for the ligand
-# admet = ligand.admet_properties()
-#
-# # Predict protonation states at pH 7.4
-# ligand.protonate(pH=7.4)
-#
-# # Display ligand properties
-# print(ligand)
-#
-# # Visualize the ligand within a protein structure
-# ligand.visualize()
-# ```
+"""
+LigandModule
+
+Description: This module encapsulates the Ligand class, which represents and manages small molecules (ligands)
+in computational biology workflows. It provides functionalities to initialize ligands from various sources,
+handle molecular properties, predict ADMET (Absorption, Distribution, Metabolism, Excretion, and Toxicity)
+properties, perform protonation state predictions, and visualize ligands within protein structures. The
+primary features and methods include:
+
+- **Ligand Class**: Represents a ligand molecule, managing its data loaded from identifiers, file paths,
+  SMILES strings, or direct block content. Handles molecule creation, property assignment, and ensures data
+  integrity during initialization.
+
+- **Initialization**: Allows creating a Ligand instance using an identifier (e.g., PubChem ID), local file,
+  SMILES string, or block content. Ensures only one source is provided and properly parses the molecular data.
+
+- **Property Management**: Stores and manages ligand-specific properties such as volume, SASA (Solvent Accessible
+  Surface Area), hydrophobicity, polarity, and drugability scores. Provides methods to set and retrieve these
+  properties, facilitating comprehensive molecular analysis.
+
+- **ADMET Prediction**: Integrates with predictive models to estimate ADMET properties of ligands, aiding in the
+  assessment of their drug-likeness and suitability for therapeutic applications.
+
+- **Protonation State Prediction**: Predicts the protonation states of ligands at specified pH levels, providing
+  insights into their chemical behavior and interactions within biological environments.
+
+- **Visualization**: Integrates with the MoleculeViewer to render interactive visualizations of ligands within
+  Jupyter Notebooks, facilitating intuitive analysis and presentation of molecular structures.
+
+- **Utility Methods**: Includes static and class methods for creating Ligand instances from SDF and CSV files,
+  converting molecular formats, fetching SMILES strings from APIs, and handling bulk visualization of multiple
+  ligands.
+
+Dependencies: Utilizes libraries such as RDKit for cheminformatics, Pandas for data manipulation, Termcolor for
+colored terminal output, Requests for API interactions, and integrates with the MoleculeViewer from the
+deeporigin_molstar package for visualization purposes.
+
+Usage Example:
+```python
+# Initialize a Ligand instance from a SMILES string
+ligand = Ligand(smiles="CCO", name="Ethanol")
+
+# Initialize a Ligand instance from a file
+ligand = Ligand.create_ligands_from_file("/path/to/ligand.sdf", "sdf")[0]
+
+# Predict ADMET properties for the ligand
+admet = ligand.admet_properties()
+
+# Predict protonation states at pH 7.4
+ligand.protonate(pH=7.4)
+
+# Display ligand properties
+print(ligand)
+
+# Visualize the ligand within a protein structure
+ligand.visualize()
+"""
 
 import tempfile
 
@@ -891,6 +892,8 @@ class Ligand:
         #     raise ValueError(f"Failed to protonate the ligand molecule: {str(e)}")
 
     def update_coordinates(self, coords: np.ndarray):
+        """update coordinates of the ligand structure"""
+
         if self.mol.m.GetNumConformers() == 0:
             raise ValueError("Ligand molecule has no conformers to update.")
 

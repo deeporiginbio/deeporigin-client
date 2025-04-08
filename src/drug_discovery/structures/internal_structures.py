@@ -84,6 +84,13 @@ RDLogger.DisableLog("rdApp.*")
 
 
 class FileFormat(Enum):
+    """
+    Enumeration of supported file formats for molecular data.
+
+    This enum class defines the various file formats that can be used to represent molecular structures,
+    including MOL, MOL2, PDB, PDBQT, XYZ, and SDF formats.
+    """
+
     MOL = "mol"
     MOL2 = "mol2"
 
@@ -104,7 +111,31 @@ RDKIT_SUPPORTED_INPUT_TYPES = [
 
 
 class Molecule:
+    """
+    A class representing a small molecule with various properties and manipulation capabilities.
+
+    This class provides a comprehensive interface for working with molecular structures, including
+    initialization from different sources, property calculation, coordinate generation, and visualization.
+
+    Attributes:
+        m (rdkit.Chem.Mol): The RDKit molecule object
+        n (int): Number of atoms in the molecule
+        formula (str): Molecular formula
+        smiles (str): Canonical SMILES representation
+        name (str): Name of the molecule
+        contains_boron (bool): Whether the molecule contains boron atoms
+    """
+
     def __init__(self, mol_rdk, name=None, add_coords=False, seed=None):
+        """
+        Initialize a Molecule instance.
+
+        Args:
+            mol_rdk (rdkit.Chem.Mol): RDKit molecule object
+            name (str, optional): Name of the molecule
+            add_coords (bool, optional): Whether to generate 3D coordinates
+            seed (int, optional): Random seed for coordinate generation
+        """
         self.m = self.process_mol(mol_rdk)
         self.n = mol_rdk.GetNumAtoms()
         self.formula = rdMolDescriptors.CalcMolFormula(self.m)
@@ -129,6 +160,15 @@ class Molecule:
     def process_mol(self, mol):
         """
         Clean the ligand molecule by removing hydrogens and sanitizing the structure.
+
+        Args:
+            mol (rdkit.Chem.Mol): Input molecule to process
+
+        Returns:
+            rdkit.Chem.Mol: Processed molecule
+
+        Raises:
+            ValueError: If salt removal or kekulization fails
         """
         remover = SaltRemover.SaltRemover()
 
@@ -144,17 +184,54 @@ class Molecule:
         return stripped_mol
 
     def molblock(self):
+        """
+        Generate a MOL block representation of the molecule.
+
+        Returns:
+            str: MOL block string
+        """
         return Chem.MolToMolBlock(self.m)
 
     def species(self):
+        """
+        Get the atomic symbols of all atoms in the molecule.
+
+        Returns:
+            list: List of atomic symbols
+        """
         return [a.GetSymbol() for a in self.m.GetAtoms()]
 
     def coords(self, i: int = 0):
+        """
+        Get the coordinates of atoms in a specific conformer.
+
+        Args:
+            i (int): Conformer index
+
+        Returns:
+            numpy.ndarray: Array of atomic coordinates
+        """
         conf = self.conformer(i)
         return conf.GetPositions()
 
     @classmethod
     def from_smiles_or_name(cls, smiles=None, name=None, add_coords=False, seed=None):
+        """
+        Create a Molecule instance from a SMILES string or compound name.
+
+        Args:
+            smiles (str, optional): SMILES string
+            name (str, optional): Compound name
+            add_coords (bool, optional): Whether to generate 3D coordinates
+            seed (int, optional): Random seed for coordinate generation
+
+        Returns:
+            Molecule: New Molecule instance
+
+        Raises:
+            ValueError: If no compound is found for the given name
+            AssertionError: If neither smiles nor name is provided
+        """
         if smiles is None and name is not None:
             compounds = get_compounds(name, "name")
             if not compounds:
@@ -170,9 +247,21 @@ class Molecule:
         return cls(mol_rdk, name=name, add_coords=add_coords, seed=seed)
 
     def copy(self):
+        """
+        Create a deep copy of the molecule.
+
+        Returns:
+            Molecule: Copy of the current molecule
+        """
         return Molecule(Chem.Mol(self.m), name=self.name)
 
     def _draw(self):
+        """
+        Generate an HTML image representation of the molecule.
+
+        Returns:
+            str: HTML img tag with base64-encoded PNG
+        """
         try:
             mol = self.copy()
             m = Chem.RemoveHs(mol.m)
@@ -194,6 +283,12 @@ class Molecule:
             return ""
 
     def draw(self):
+        """
+        Generate a 2D representation of the molecule.
+
+        Returns:
+            rdkit.Chem.Mol: Molecule with 2D coordinates
+        """
         try:
             mol = self.copy()
             AllChem.Compute2DCoords(mol.m)
@@ -203,15 +298,43 @@ class Molecule:
             return self.m
 
     def conformer(self, i=0):
+        """
+        Get a specific conformer of the molecule.
+
+        Args:
+            i (int): Conformer index
+
+        Returns:
+            rdkit.Chem.Conformer: The requested conformer
+        """
         return self.m.GetConformer(i)
 
     def conformer_id(self):
+        """
+        Get the ID of the current conformer.
+
+        Returns:
+            int: Conformer ID
+        """
         return self.m.GetConformer().GetId()
 
     def set_conformer_id(self, i=0):
+        """
+        Set the ID of the current conformer.
+
+        Args:
+            i (int): New conformer ID
+        """
         self.m.GetConformer().SetId(i)
 
     def embed(self, add_hs=True, seed=-1):
+        """
+        Generate 3D coordinates for the molecule.
+
+        Args:
+            add_hs (bool): Whether to add hydrogens
+            seed (int): Random seed for coordinate generation
+        """
         if add_hs:
             self.add_hydrogens()
 
@@ -219,9 +342,21 @@ class Molecule:
         self.set_conformer_id(0)
 
     def add_hydrogens(self, add_coords=True):
+        """
+        Add hydrogens to the molecule.
+
+        Args:
+            add_coords (bool): Whether to generate coordinates for added hydrogens
+        """
         self.m = Chem.AddHs(self.m, addCoords=add_coords)
 
     def assign_bond_order_from_smiles(self, smiles):
+        """
+        Assign bond orders from a template SMILES string.
+
+        Args:
+            smiles (str): Template SMILES string
+        """
         template = Chem.MolFromSmiles(smiles)
         try:
             self.m = AllChem.AssignBondOrdersFromTemplate(template, self.m)
@@ -233,6 +368,22 @@ class Molecule:
 
 
 def mol_from_file(file_type, file_path, sanitize=True, remove_hs=False):
+    """
+    Create a Molecule instance from a file.
+
+    Args:
+        file_type (str): Type of the input file (must be in RDKIT_SUPPORTED_INPUT_TYPES)
+        file_path (str): Path to the input file
+        sanitize (bool): Whether to sanitize the molecule
+        remove_hs (bool): Whether to remove hydrogens
+
+    Returns:
+        Molecule: New Molecule instance
+
+    Raises:
+        ValueError: If the file format is invalid or parsing fails
+        NotImplementedError: If the file type is not supported
+    """
     if file_type in RDKIT_SUPPORTED_INPUT_TYPES:
         mol_rdk = None
 
@@ -261,17 +412,22 @@ def mol_from_file(file_type, file_path, sanitize=True, remove_hs=False):
         raise NotImplementedError(
             f"Conversions of file types not supported yet. File format {file_type} is not supported."
         )
-        # temp_mol_file_path = tempfile.mktemp()
-        # convert_file(file_type, file_path, FileFormat.MOL.value, temp_mol_file_path)
-        # return mol_from_file(
-        #     FileFormat.MOL.value,
-        #     temp_mol_file_path,
-        #     sanitize=sanitize,
-        #     remove_hs=remove_hs,
-        # )
 
 
 def mol_from_smiles(smiles, sanitize=True):
+    """
+    Create a Molecule instance from a SMILES string.
+
+    Args:
+        smiles (str): SMILES string
+        sanitize (bool): Whether to sanitize the molecule
+
+    Returns:
+        Molecule: New Molecule instance
+
+    Raises:
+        ValueError: If the SMILES string is invalid
+    """
     mol_rdk = Chem.MolFromSmiles(smiles, sanitize=sanitize)
     if mol_rdk is None:
         raise ValueError("Invalid SMILES string")
@@ -280,6 +436,18 @@ def mol_from_smiles(smiles, sanitize=True):
 
 
 def mol_from_block(block_type, block, sanitize=True, remove_hs=False):
+    """
+    Create a Molecule instance from a block of text.
+
+    Args:
+        block_type (str): Type of the input block
+        block (str): Text block containing molecular data
+        sanitize (bool): Whether to sanitize the molecule
+        remove_hs (bool): Whether to remove hydrogens
+
+    Returns:
+        Molecule: New Molecule instance
+    """
     with tempfile.TemporaryFile(mode="w+") as temp_file:
         temp_file.write(block)
         temp_file.seek(0)  # Reset file pointer to beginning

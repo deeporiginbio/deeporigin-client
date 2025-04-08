@@ -841,6 +841,8 @@ class Protein:
         return f"Protein:\n  {info_str}"
 
     def update_coordinates(self, coords: np.ndarray):
+        """update coordinates of the protein structure"""
+
         self.structure.coord = coords
 
     def get_center_by_residues(self, residues: list[str]) -> np.ndarray:

@@ -1,3 +1,12 @@
+"""
+A class representing a binding pocket in a protein structure.
+
+Attributes:
+    file_path (Optional[Path]): Path to the PDB file containing the pocket.
+    block_type (str): Format of the block content ('pdb').
+    block_content (str): String containing the pocket data.
+"""
+
 import io
 import os
 import shutil
@@ -440,6 +449,8 @@ class Pocket:
 
     @jupyter_visualization
     def show(self):
+        """show the pocket in a jupyter notebook"""
+
         pocket_paths = [str(self.file_path)]
         pocket_names = ["Name: " + self.name + " | " + self.pocket_props()]
 
@@ -463,6 +474,8 @@ class Pocket:
         )
 
     def pocket_props(self):
+        """get the properties of the pocket"""
+
         properties_line = ""
         if self.props:
             properties_line = (
@@ -504,5 +517,7 @@ class Pocket:
         return str(pockets_base_dir)
 
     def update_coordinates(self, coords: np.ndarray):
+        """update coordinates of the pocket structure"""
+
         self.structure.coord = coords
         self.coordinates = coords

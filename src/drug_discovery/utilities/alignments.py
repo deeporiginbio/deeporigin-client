@@ -1,3 +1,26 @@
+"""
+This module provides utilities for molecular structure alignment and bounding box calculations.
+
+The module contains functions and classes for:
+- Calculating bounding boxes around molecular structures
+- Creating visual representations of bounding boxes using atoms
+- Aligning molecular structures using Principal Component Analysis (PCA)
+- Saving bounding box representations to PDB files
+
+Key components:
+- Bounding box calculations with flexible or fixed sizes
+- Structure alignment using PCA for consistent orientation
+- Visualization tools for bounding boxes
+- Error handling and logging for robust operation
+
+Example usage:
+    >>> from drug_discovery.utilities.alignments import StructureAligner, create_bounding_box
+    >>> aligner = StructureAligner()
+    >>> aligner.calculate_pca(coordinates)
+    >>> aligned_coords = aligner.align_structure(coordinates)
+    >>> box_info = create_bounding_box(ligand, padding=2.0, output_file="box.pdb")
+"""
+
 from typing import Optional
 
 import biotite.structure as struc
@@ -12,12 +35,21 @@ def calculate_bounding_box(structure_coord, padding=0.0):
     """
     Calculate the bounding box dimensions and center for a given structure.
 
-    Parameters:
-    - structure (AtomArray): The structure containing atom coordinates.
-    - padding (float): Padding to add around the bounding box.
+    Parameters
+    ----------
+    structure_coord : np.ndarray
+        The structure coordinates array.
+    padding : float, optional
+        Padding to add around the bounding box, by default 0.0
 
-    Returns:
-    - tuple: min_coords, max_coords, dimensions, and center.
+    Returns
+    -------
+    tuple
+        A tuple containing:
+        - min_coords (np.ndarray): Minimum coordinates of the bounding box
+        - max_coords (np.ndarray): Maximum coordinates of the bounding box
+        - dimensions (np.ndarray): Dimensions of the bounding box
+        - center (np.ndarray): Center point of the bounding box
     """
     min_coords = np.min(structure_coord, axis=0) - padding
     max_coords = np.max(structure_coord, axis=0) + padding
@@ -31,12 +63,21 @@ def calculate_fixed_bounding_box(structure_coord, box_size=24.0):
     """
     Calculate a fixed bounding box centered on the structure.
 
-    Parameters:
-    - structure (AtomArray): The structure containing atom coordinates.
-    - box_size (float): The size of the bounding box in angstroms (default is 24.0).
+    Parameters
+    ----------
+    structure_coord : np.ndarray
+        The structure coordinates array.
+    box_size : float, optional
+        The size of the bounding box in angstroms, by default 24.0
 
-    Returns:
-    - tuple: min_coords, max_coords, dimensions, and center.
+    Returns
+    -------
+    tuple
+        A tuple containing:
+        - min_coords (np.ndarray): Minimum coordinates of the bounding box
+        - max_coords (np.ndarray): Maximum coordinates of the bounding box
+        - dimensions (np.ndarray): Dimensions of the bounding box
+        - center (np.ndarray): Center point of the bounding box
     """
     # Calculate the centroid of the structure
     center = np.mean(structure_coord, axis=0)
@@ -58,13 +99,19 @@ def create_bounding_box_atoms(min_coords, max_coords, dimensions):
     """
     Create atoms at the corners of the bounding box.
 
-    Parameters:
-    - min_coords (np.ndarray): Minimum coordinates of the bounding box.
-    - max_coords (np.ndarray): Maximum coordinates of the bounding box.
-    - dimensions (np.ndarray): Dimensions of the bounding box.
+    Parameters
+    ----------
+    min_coords : np.ndarray
+        Minimum coordinates of the bounding box.
+    max_coords : np.ndarray
+        Maximum coordinates of the bounding box.
+    dimensions : np.ndarray
+        Dimensions of the bounding box.
 
-    Returns:
-    - AtomArray: An array of atoms at the bounding box corners.
+    Returns
+    -------
+    struc.AtomArray
+        An array of atoms at the bounding box corners.
     """
     atoms = []
     atom_index = 1
@@ -132,15 +179,30 @@ def create_bounding_box(
     ligand, padding=0.0, output_file=None, around_ligand=False, box_size=20.0
 ):
     """
-    Calculates the bounding box and optionally creates a PDB file with atoms at the corners.
+    Calculate the bounding box and optionally create a PDB file with atoms at the corners.
 
-    Parameters:
-    - ligand (Ligand): Ligand structure to create a bounding box for.
-    - padding (float): Padding to add to the bounding box dimensions.
-    - output_file (str): If provided, saves the atoms to this PDB file.
+    Parameters
+    ----------
+    ligand : object
+        Ligand structure to create a bounding box for. Must have a 'coordinates' attribute.
+    padding : float, optional
+        Padding to add to the bounding box dimensions, by default 0.0
+    output_file : str, optional
+        If provided, saves the atoms to this PDB file, by default None
+    around_ligand : bool, optional
+        If True, creates a box around the ligand, otherwise uses fixed size, by default False
+    box_size : float, optional
+        Size of the bounding box in angstroms when around_ligand is False, by default 20.0
 
-    Returns:
-    - dict: Contains min_coords, max_coords, dimensions, center, and optionally 'atom_array' if output_file is provided.
+    Returns
+    -------
+    dict
+        A dictionary containing:
+        - min_coords (np.ndarray): Minimum coordinates of the bounding box
+        - max_coords (np.ndarray): Maximum coordinates of the bounding box
+        - dimensions (np.ndarray): Dimensions of the bounding box
+        - center (np.ndarray): Center point of the bounding box
+        - atom_array (struc.AtomArray, optional): Array of atoms if output_file is provided
     """
     structure_coord = ligand.coordinates
     if around_ligand:
@@ -172,10 +234,14 @@ def save_bounding_box(center, box_size, output_file):
     """
     Save atoms at the corners of the bounding box to a PDB file.
 
-    Parameters:
-    - center (np.ndarray): Box center.
-    - box_size (np.ndarray): Dimensions of the bounding box.
-    - output_file (str): File to save the atoms to.
+    Parameters
+    ----------
+    center : np.ndarray
+        Center coordinates of the bounding box.
+    box_size : np.ndarray
+        Dimensions of the bounding box.
+    output_file : str
+        Path to save the PDB file containing the bounding box atoms.
     """
     min_coords, max_coords = calculate_box_min_max(center, box_size)
     atom_array = create_bounding_box_atoms(min_coords, max_coords, box_size)
@@ -186,10 +252,19 @@ class StructureAligner:
     """
     A class to handle structure alignment using PCA transformations.
     Maintains PCA state and provides methods for alignment and restoration.
+
+    Attributes
+    ----------
+    pca : Optional[PCA]
+        The PCA object used for transformations.
+    _components_fixed : bool
+        Flag indicating if PCA components have been fixed.
     """
 
     def __init__(self):
-        """Initialize the StructureAligner with no initial PCA."""
+        """
+        Initialize the StructureAligner with no initial PCA.
+        """
         self.pca: Optional[PCA] = None
         self._components_fixed: bool = False
 
@@ -197,12 +272,17 @@ class StructureAligner:
         """
         Calculate and store PCA components using provided coordinates.
 
-        Parameters:
-        - coords: np.ndarray containing coordinates for PCA calculation
+        Parameters
+        ----------
+        coords : np.ndarray
+            Array containing coordinates for PCA calculation.
 
-        Raises:
-        - ValueError: If coordinates are None
-        - Exception: For general PCA calculation failures
+        Raises
+        ------
+        ValueError
+            If coordinates are None.
+        Exception
+            For general PCA calculation failures.
         """
         try:
             if coords is None:
@@ -224,22 +304,36 @@ class StructureAligner:
 
     @property
     def is_fitted(self) -> bool:
-        """Check if PCA has been calculated."""
+        """
+        Check if PCA has been calculated and components are fixed.
+
+        Returns
+        -------
+        bool
+            True if PCA is fitted and components are fixed, False otherwise.
+        """
         return self.pca is not None and self._components_fixed
 
     def align_structure(self, coords: np.ndarray) -> np.ndarray:
         """
         Align coordinates using the stored PCA components.
 
-        Parameters:
-        - coords: np.ndarray to align
+        Parameters
+        ----------
+        coords : np.ndarray
+            Coordinates to align.
 
-        Returns:
-        - np.ndarray: Aligned coordinates
+        Returns
+        -------
+        np.ndarray
+            Aligned coordinates.
 
-        Raises:
-        - ValueError: If PCA hasn't been calculated or coordinates are None
-        - Exception: For general alignment failures
+        Raises
+        ------
+        ValueError
+            If PCA hasn't been calculated or coordinates are None.
+        Exception
+            For general alignment failures.
         """
         if not self.is_fitted:
             raise ValueError(
@@ -264,15 +358,22 @@ class StructureAligner:
         """
         Restore coordinates from PCA-aligned space back to original space.
 
-        Parameters:
-        - coords: np.ndarray to restore
+        Parameters
+        ----------
+        coords : np.ndarray
+            Aligned coordinates to restore.
 
-        Returns:
-        - np.ndarray: Restored coordinates in original space
+        Returns
+        -------
+        np.ndarray
+            Restored coordinates in original space.
 
-        Raises:
-        - ValueError: If PCA hasn't been calculated or coordinates are None
-        - Exception: For general restoration failures
+        Raises
+        ------
+        ValueError
+            If PCA hasn't been calculated or coordinates are None.
+        Exception
+            For general restoration failures.
         """
         if not self.is_fitted:
             raise ValueError(
