@@ -88,7 +88,9 @@ def scatter(
         cat10_colors[1] = cat10_colors[3][:1]
         cat10_colors[2] = cat10_colors[3][:2]
         cat10_colors = cat10_colors[len(labels)]
-        color_map = {label: color for label, color in zip(labels, cat10_colors, strict=False)}
+        color_map = {
+            label: color for label, color in zip(labels, cat10_colors, strict=False)
+        }
         color_map[default_label] = default_color
 
         legend_labels = [

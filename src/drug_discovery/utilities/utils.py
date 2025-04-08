@@ -38,8 +38,12 @@ def chunker(iterable, size):
 
 def calculate_box_min_max(box_center, box_dimensions):
     half_dims = [dim / 2 for dim in box_dimensions]
-    min_corner = [center - half for center, half in zip(box_center, half_dims, strict=False)]
-    max_corner = [center + half for center, half in zip(box_center, half_dims, strict=False)]
+    min_corner = [
+        center - half for center, half in zip(box_center, half_dims, strict=False)
+    ]
+    max_corner = [
+        center + half for center, half in zip(box_center, half_dims, strict=False)
+    ]
     return min_corner, max_corner
 
 
