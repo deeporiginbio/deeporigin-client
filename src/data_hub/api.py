@@ -630,7 +630,7 @@ def set_data_in_cells(
             "row": {},
             "rowId": row_id,
         }
-        for (row_id, validated_value) in zip(row_ids, validated_values)
+        for (row_id, validated_value) in zip(row_ids, validated_values, strict=False)
     ]
 
     # we cannot write more than a 1000 rows at once.
@@ -1218,7 +1218,7 @@ def download_files(
 
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = []
-        for file_id, save_path in zip(file_ids, save_paths):
+        for file_id, save_path in zip(file_ids, save_paths, strict=False):
             futures.append(
                 executor.submit(
                     lambda file_id, save_path: network.download_sync(

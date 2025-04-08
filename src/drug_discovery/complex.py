@@ -450,7 +450,7 @@ class Complex:
             ligand2_ids = [None for _ in file_ids]
 
         all_dfs = []
-        for file_id, ligand1_id, ligand2_id in zip(file_ids, ligand1_ids, ligand2_ids):
+        for file_id, ligand1_id, ligand2_id in zip(file_ids, ligand1_ids, ligand2_ids, strict=False):
             file_loc = os.path.join(DATA_DIRS[tool], file_id.replace("_file:", ""))
             df = pd.read_csv(file_loc)
 

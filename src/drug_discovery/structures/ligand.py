@@ -851,16 +851,16 @@ class Ligand:
         """
 
         raise NotImplementedError("ADMET properties prediction not implemented yet.")
-        try:
-            props = predict_properties(smiles=self.mol.smiles)[0]
-            for key, value in props.items():
-                if key == "smiles":
-                    continue
-                self.set_property(key, value)
+        # try:
+        #     props = predict_properties(smiles=self.mol.smiles)[0]
+        #     for key, value in props.items():
+        #         if key == "smiles":
+        #             continue
+        #         self.set_property(key, value)
 
-            return props
-        except Exception as e:
-            raise ValueError(f"Failed to predict ADMET properties: {str(e)}")
+        #     return props
+        # except Exception as e:
+        #     raise ValueError(f"Failed to predict ADMET properties: {str(e)}")
 
     def protonate(self, pH: float = 7.4, filter_percentage: float = 1):
         """
@@ -876,17 +876,17 @@ class Ligand:
         """
 
         raise NotImplementedError("Protonation prediction not implemented yet.")
-        try:
-            smiles = protonate(
-                pH=pH,
-                smiles=self.mol.smiles,
-                filter_percentage=filter_percentage,
-            )
-            if smiles:
-                self.protonated_smiles = smiles
-                self.set_property("ProtonatedSMILES", smiles)
-        except Exception as e:
-            raise ValueError(f"Failed to protonate the ligand molecule: {str(e)}")
+        # try:
+        #     smiles = protonate(
+        #         pH=pH,
+        #         smiles=self.mol.smiles,
+        #         filter_percentage=filter_percentage,
+        #     )
+        #     if smiles:
+        #         self.protonated_smiles = smiles
+        #         self.set_property("ProtonatedSMILES", smiles)
+        # except Exception as e:
+        #     raise ValueError(f"Failed to protonate the ligand molecule: {str(e)}")
 
     def update_coordinates(self, coords: np.ndarray):
         if self.mol.m.GetNumConformers() == 0:

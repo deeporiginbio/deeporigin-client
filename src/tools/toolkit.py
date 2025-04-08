@@ -91,7 +91,7 @@ def _ensure_db_for_vina_outputs() -> None:
 
     # check if we need to make columns
 
-    for col, col_type in zip(cols, col_types):
+    for col, col_type in zip(cols, col_types, strict=False):
         if col in existing_cols:
             continue
         print(f"making {col}")
@@ -276,7 +276,7 @@ def dock_ligands_to_protein(
     # for each row with ligand, run a vina job
     for ligand_row, output_row in zip(
         rows_with_ligand,
-        output_rows,
+        output_rows, strict=False,
     ):
         inputs = dict(
             receptor={
