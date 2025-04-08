@@ -1,4 +1,3 @@
-
 # TODO: use openbabel function running on knative to support this
 # def convert_file(
 #     source_type, source, destination_type, destination=None, add_hydrogens=False
