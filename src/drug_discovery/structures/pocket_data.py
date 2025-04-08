@@ -1,40 +1,57 @@
-import numpy as np
-
 import tempfile
-from pathlib import Path
 from copy import deepcopy
+from pathlib import Path
 from typing import List, Optional
 
+import numpy as np
 from deeporigin_molstar import DockingViewer as DockingMolstarViewer
 
-from .pocket import Pocket
-from .ligand import Ligand
-from .protein import Protein
-
-from deeporigin.src.utilities.logging import DEFAULT_LOGGER
-from deeporigin.src.utilities.visualize import jupyter_visualization
 from deeporigin.src.utilities.alignments import StructureAligner, create_bounding_box
-from deeporigin.src.utilities.utils import calculate_box_min_max, calculate_box_dimensions
+from deeporigin.src.utilities.logging import DEFAULT_LOGGER
+from deeporigin.src.utilities.utils import (
+    calculate_box_dimensions,
+    calculate_box_min_max,
+)
+from deeporigin.src.utilities.visualize import jupyter_visualization
+
+from .ligand import Ligand
+from .pocket import Pocket
+from .protein import Protein
 
 
 class PocketData:
-    def __init__(self, pocket: List | Pocket | Ligand, xref_protein: Protein, box_size: Optional[List]=None, fit_box: Optional[bool]=None, padding: Optional[int]=2):
+    def __init__(
+        self,
+        pocket: List | Pocket | Ligand,
+        xref_protein: Protein,
+        box_size: Optional[List] = None,
+        fit_box: Optional[bool] = None,
+        padding: Optional[int] = 2,
+    ):
         if box_size and fit_box:
             raise ValueError("Cannot specify both box_size and [fit_box and padding]")
-        
+
         if not box_size and not fit_box:
-            DEFAULT_LOGGER.log_warning("No box size or fit box specified. Defaulting to 24Å box.")
+            DEFAULT_LOGGER.log_warning(
+                "No box size or fit box specified. Defaulting to 24Å box."
+            )
             box_size = [24, 24, 24]
 
         self.__pocket = deepcopy(pocket)
         if isinstance(self.__pocket, list):
             if len(self.__pocket) != 3:
-                raise ValueError("If pocket is a list, it must have 3 elements (x, y, z)")
-            
+                raise ValueError(
+                    "If pocket is a list, it must have 3 elements (x, y, z)"
+                )
+
             for i in self.__pocket:
-                if not isinstance(i, (int, float, np.int32, np.int64, np.float32, np.float64)):
-                    raise ValueError("All elements in pocket must be integers or floats")
-            
+                if not isinstance(
+                    i, (int, float, np.int32, np.int64, np.float32, np.float64)
+                ):
+                    raise ValueError(
+                        "All elements in pocket must be integers or floats"
+                    )
+
             self.__aligner = None
 
             if fit_box:
@@ -53,16 +70,31 @@ class PocketData:
         self.__fit_box = fit_box
         self.__xref_protein = xref_protein
         self.__box_center = self._get_center(self.__pocket)
-        self.__box_min_coords, self.__box_max_coords, self.__box_size = self.calculate_box_params(box_size)
-    
+        self.__box_min_coords, self.__box_max_coords, self.__box_size = (
+            self.calculate_box_params(box_size)
+        )
+
     @classmethod
-    def create_from_residues(cls, xref_protein: Protein, residue_ids: List[str], box_size: Optional[List]=None, fit_box: Optional[bool]=None, padding: Optional[int]=2):
+    def create_from_residues(
+        cls,
+        xref_protein: Protein,
+        residue_ids: List[str],
+        box_size: Optional[List] = None,
+        fit_box: Optional[bool] = None,
+        padding: Optional[int] = 2,
+    ):
         center, warning, _ = xref_protein.get_center_by_residues(residue_ids)
         if warning:
             DEFAULT_LOGGER.log_warning(warning)
 
-        return cls(pocket=center, xref_protein=xref_protein, box_size=box_size, fit_box=fit_box, padding=padding)
-    
+        return cls(
+            pocket=center,
+            xref_protein=xref_protein,
+            box_size=box_size,
+            fit_box=fit_box,
+            padding=padding,
+        )
+
     @property
     def pocket(self):
         return self.__pocket
@@ -70,7 +102,7 @@ class PocketData:
     @property
     def xref_protein(self):
         return self.__xref_protein
-    
+
     @property
     def padding(self):
         return self.__padding
@@ -78,23 +110,23 @@ class PocketData:
     @property
     def fit_box(self):
         return self.__fit_box
-    
+
     @property
     def box_size(self):
         return self.__box_size
-    
+
     @property
     def box_center(self):
         return self.__box_center
-    
+
     @property
     def aligner(self):
         return self.__aligner
-    
+
     @property
     def box_min_coords(self):
         return self.__box_min_coords
-    
+
     @property
     def box_max_coords(self):
         return self.__box_max_coords
@@ -118,7 +150,7 @@ class PocketData:
             raise ValueError("Invalid pocket type.")
 
         return pocket
-    
+
     def transform(self, coords: np.ndarray) -> np.ndarray:
         """
         Transform coordinates to the PCA-aligned space.
@@ -131,7 +163,7 @@ class PocketData:
         """
         if self.aligner is None:
             return coords
-        
+
         return self.aligner.align_structure(coords)
 
     def inverse_transform(self, coords: np.ndarray) -> np.ndarray:
@@ -146,9 +178,9 @@ class PocketData:
         """
         if self.aligner is None:
             return coords
-        
+
         return self.aligner.restore_structure(coords)
-    
+
     def match_protein(self, protein: Protein) -> bool:
         """
         Check if the protein matches the xref protein.
@@ -161,11 +193,16 @@ class PocketData:
         """
         if protein != self.xref_protein:
             raise ValueError("Provided protein does not match xref protein.")
-        
-    def calculate_box_params(self, box_size: Optional[List]=None):
+
+    def calculate_box_params(self, box_size: Optional[List] = None):
         if self.fit_box:
-            result = create_bounding_box(self.pocket, padding=self.padding, around_ligand=True)
-            box_min_coords, box_max_coords = list(result["min_coords"]), list(result["max_coords"])
+            result = create_bounding_box(
+                self.pocket, padding=self.padding, around_ligand=True
+            )
+            box_min_coords, box_max_coords = (
+                list(result["min_coords"]),
+                list(result["max_coords"]),
+            )
         else:
             box_min_coords, box_max_coords = calculate_box_min_max(
                 box_center=self.box_center, box_dimensions=box_size
@@ -175,7 +212,7 @@ class PocketData:
             box_size = calculate_box_dimensions(box_min_coords, box_max_coords)
 
         return box_min_coords, box_max_coords, box_size
-    
+
     def from_xyz(self):
         if isinstance(self.pocket, (Ligand, Pocket)):
             return False
@@ -183,7 +220,6 @@ class PocketData:
             return True
         else:
             raise ValueError("Invalid pocket type")
-        
 
     @jupyter_visualization
     def show_box(
@@ -209,11 +245,11 @@ class PocketData:
 
         if raise_for_protein_mismatch:
             self.match_protein(protein)
-        
+
         protein = deepcopy(protein)
         aligned_protein_coords = self.transform(protein.structure.coord)
         protein.update_coordinates(aligned_protein_coords)
-        
+
         if not self.from_xyz():
             with tempfile.TemporaryDirectory() as temp_dir:
                 tmp_protein_file = Path(temp_dir) / "protein.pdb"

@@ -1,10 +1,9 @@
-import numpy as np
-
-import biotite.structure as struc
-
 from typing import Optional
 
+import biotite.structure as struc
+import numpy as np
 from sklearn.decomposition import PCA
+
 from deeporigin.src.utilities.logging import DEFAULT_LOGGER
 from deeporigin.src.utilities.utils import calculate_box_min_max
 
@@ -26,6 +25,7 @@ def calculate_bounding_box(structure_coord, padding=0.0):
     center = 0.5 * (max_coords + min_coords)
 
     return min_coords, max_coords, dimensions, center
+
 
 def calculate_fixed_bounding_box(structure_coord, box_size=24.0):
     """
@@ -53,6 +53,7 @@ def calculate_fixed_bounding_box(structure_coord, box_size=24.0):
 
     return min_coords, max_coords, dimensions, center
 
+
 def create_bounding_box_atoms(min_coords, max_coords, dimensions):
     """
     Create atoms at the corners of the bounding box.
@@ -69,7 +70,14 @@ def create_bounding_box_atoms(min_coords, max_coords, dimensions):
     atom_index = 1
 
     # Create an atom at the minimum corner
-    atom = struc.Atom(min_coords, chain_id="A", res_id=1, res_name="BOX", atom_name=f"XE{atom_index}", element="XE")
+    atom = struc.Atom(
+        min_coords,
+        chain_id="A",
+        res_id=1,
+        res_name="BOX",
+        atom_name=f"XE{atom_index}",
+        element="XE",
+    )
     atoms.append(atom)
     atom_index += 1
 
@@ -77,12 +85,26 @@ def create_bounding_box_atoms(min_coords, max_coords, dimensions):
     for i in range(3):
         coord = min_coords.copy()
         coord[i] += dimensions[i]
-        atom = struc.Atom(coord, chain_id="A", res_id=1, res_name="BOX", atom_name=f"XE{atom_index}", element="XE")
+        atom = struc.Atom(
+            coord,
+            chain_id="A",
+            res_id=1,
+            res_name="BOX",
+            atom_name=f"XE{atom_index}",
+            element="XE",
+        )
         atoms.append(atom)
         atom_index += 1
 
     # Create an atom at the maximum corner
-    atom = struc.Atom(max_coords, chain_id="A", res_id=1, res_name="BOX", atom_name=f"XE{atom_index}", element="XE")
+    atom = struc.Atom(
+        max_coords,
+        chain_id="A",
+        res_id=1,
+        res_name="BOX",
+        atom_name=f"XE{atom_index}",
+        element="XE",
+    )
     atoms.append(atom)
     atom_index += 1
 
@@ -90,7 +112,14 @@ def create_bounding_box_atoms(min_coords, max_coords, dimensions):
     for i in range(3):
         coord = max_coords.copy()
         coord[i] -= dimensions[i]
-        atom = struc.Atom(coord, chain_id="A", res_id=1, res_name="BOX", atom_name=f"XE{atom_index}", element="XE")
+        atom = struc.Atom(
+            coord,
+            chain_id="A",
+            res_id=1,
+            res_name="BOX",
+            atom_name=f"XE{atom_index}",
+            element="XE",
+        )
         atoms.append(atom)
         atom_index += 1
 
@@ -99,7 +128,9 @@ def create_bounding_box_atoms(min_coords, max_coords, dimensions):
     return atom_array
 
 
-def create_bounding_box(ligand, padding=0.0, output_file=None, around_ligand=False, box_size=20.0):
+def create_bounding_box(
+    ligand, padding=0.0, output_file=None, around_ligand=False, box_size=20.0
+):
     """
     Calculates the bounding box and optionally creates a PDB file with atoms at the corners.
 
@@ -113,21 +144,25 @@ def create_bounding_box(ligand, padding=0.0, output_file=None, around_ligand=Fal
     """
     structure_coord = ligand.coordinates
     if around_ligand:
-        min_coords, max_coords, dimensions, center = calculate_bounding_box(structure_coord, padding)
+        min_coords, max_coords, dimensions, center = calculate_bounding_box(
+            structure_coord, padding
+        )
     else:
-        min_coords, max_coords, dimensions, center = calculate_fixed_bounding_box(structure_coord, box_size)
+        min_coords, max_coords, dimensions, center = calculate_fixed_bounding_box(
+            structure_coord, box_size
+        )
 
     result = {
-        'min_coords': min_coords,
-        'max_coords': max_coords,
-        'dimensions': dimensions,
-        'center': center
+        "min_coords": min_coords,
+        "max_coords": max_coords,
+        "dimensions": dimensions,
+        "center": center,
     }
 
     if output_file:
         atom_array = create_bounding_box_atoms(min_coords, max_coords, dimensions)
         struc.io.save_structure(output_file, atom_array)
-        result['atom_array'] = atom_array
+        result["atom_array"] = atom_array
         print(f"Bounding box atoms saved to {output_file}")
 
     return result
@@ -207,7 +242,9 @@ class StructureAligner:
         - Exception: For general alignment failures
         """
         if not self.is_fitted:
-            raise ValueError("PCA components haven't been calculated. Call calculate_pca first.")
+            raise ValueError(
+                "PCA components haven't been calculated. Call calculate_pca first."
+            )
 
         try:
             if coords is None:
@@ -238,7 +275,9 @@ class StructureAligner:
         - Exception: For general restoration failures
         """
         if not self.is_fitted:
-            raise ValueError("PCA components haven't been calculated. Call calculate_pca first.")
+            raise ValueError(
+                "PCA components haven't been calculated. Call calculate_pca first."
+            )
 
         try:
             if coords is None:

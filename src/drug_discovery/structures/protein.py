@@ -44,31 +44,31 @@ protein.visualize()
 ```
 """
 
-import os
 import io
+import os
 import tempfile
-import numpy as np
-from pathlib import Path
-from typing import Optional, Tuple
 from collections import defaultdict
 from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Optional, Tuple
+
+import numpy as np
 from beartype import beartype
-from biotite.structure.io.pdb import PDBFile
-from biotite.structure import filter_solvent
 from biotite.database.rcsb import fetch
-from deeporigin_molstar import ProteinViewer
-from deeporigin.drug_discovery.constants import METALS, STATE_DUMP_PATH
-from deeporigin_molstar import JupyterViewer, DockingViewer
+from biotite.structure import filter_solvent
 from biotite.structure.geometry import centroid
-from deeporigin.functions.pocket_finder import find_pockets
-from deeporigin.drug_discovery.utilities.visualize import jupyter_visualization
+from biotite.structure.io.pdb import PDBFile
+from deeporigin_molstar import DockingViewer, JupyterViewer, ProteinViewer
+
+from deeporigin.drug_discovery.constants import METALS, STATE_DUMP_PATH
 from deeporigin.drug_discovery.external_tools.utils import (
     generate_html_output,
     get_protein_info_dict,
 )
+from deeporigin.functions.pocket_finder import find_pockets
 
-from .pocket import Pocket
 from .ligand import Ligand
+from .pocket import Pocket
 
 
 @dataclass

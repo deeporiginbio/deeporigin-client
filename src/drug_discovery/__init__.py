@@ -1,8 +1,10 @@
 # example data
-from importlib.resources import path
 import asyncio
+from importlib.resources import path
+
 import nest_asyncio  # we need this for asyncio
-from .structures import Protein, Ligand, Pocket
+
+from .structures import Ligand, Pocket, Protein
 
 __all__ = ["chemistry", "Complex", "Protein", "Ligand", "Pocket"]
 

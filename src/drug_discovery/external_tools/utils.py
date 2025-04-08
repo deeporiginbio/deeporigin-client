@@ -1,18 +1,15 @@
-import os
-
-import pathlib
-import aiohttp
 import asyncio
-import nest_asyncio
-
+import os
+import pathlib
 from tempfile import gettempdir
-from Bio.PDB.PDBIO import PDBIO
-from Bio.PDB.MMCIFParser import MMCIFParser
 
-
+import aiohttp
 import biotite.database.rcsb as rcsb
 import biotite.structure as struc
 import biotite.structure.io.pdb as pdb
+import nest_asyncio
+from Bio.PDB.MMCIFParser import MMCIFParser
+from Bio.PDB.PDBIO import PDBIO
 
 
 def three2one(prot):

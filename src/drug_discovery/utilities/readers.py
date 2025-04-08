@@ -1,20 +1,21 @@
 import os
+
 import numpy as np
-
 from rdkit import Chem
-from .utils import Logger
-from ..structures.internal_structures import FileFormat
 
+from ..structures.internal_structures import FileFormat
+from .utils import Logger
 
 N_PT_ELEMENTS = 118
 PERIODIC_TABLE = {
-    'id': [],
-    'symbol': [],
-    'name': [],
-    'weight': [],
-    'rvdw': [],
-    'rcov': []
+    "id": [],
+    "symbol": [],
+    "name": [],
+    "weight": [],
+    "rvdw": [],
+    "rcov": [],
 }
+
 
 def init_periodic_table():
     logger = Logger("INFO", os.getenv("LOG_BIOSIM_CLIENT"))
@@ -34,14 +35,16 @@ def init_periodic_table():
             assert isinstance(rvdw, float), "rvdw must be a float"
             assert isinstance(rcov, float), "rcov must be a float"
 
-            PERIODIC_TABLE['id'].append(id)
-            PERIODIC_TABLE['symbol'].append(symbol)
-            PERIODIC_TABLE['name'].append(name)
-            PERIODIC_TABLE['weight'].append(weight)
-            PERIODIC_TABLE['rvdw'].append(rvdw)
-            PERIODIC_TABLE['rcov'].append(rcov)
+            PERIODIC_TABLE["id"].append(id)
+            PERIODIC_TABLE["symbol"].append(symbol)
+            PERIODIC_TABLE["name"].append(name)
+            PERIODIC_TABLE["weight"].append(weight)
+            PERIODIC_TABLE["rvdw"].append(rvdw)
+            PERIODIC_TABLE["rcov"].append(rcov)
         except Exception as e:
-            logger.log_error(f"Failed to load Periodic Table on atom with id: {id}. Error: {str(e)}")
+            logger.log_error(
+                f"Failed to load Periodic Table on atom with id: {id}. Error: {str(e)}"
+            )
 
 
 def from_pdbqt_atom_type(atom_type: str):
@@ -57,17 +60,21 @@ def from_pdbqt_atom_type(atom_type: str):
         return "S"
     else:
         return ""
-    
+
 
 def read_pdb_pdbqt_block(block_type, block):
     lines = block.split("\n")
-    uppercase_atom_symbols = [symbol.upper() for symbol in PERIODIC_TABLE['symbol']]
+    uppercase_atom_symbols = [symbol.upper() for symbol in PERIODIC_TABLE["symbol"]]
 
     if block_type == FileFormat.PDB:
-        compnd_line_id = next((i for i, line in enumerate(lines) if line.startswith("COMPND")), None)
+        compnd_line_id = next(
+            (i for i, line in enumerate(lines) if line.startswith("COMPND")), None
+        )
         name = lines[compnd_line_id][7:].strip() if compnd_line_id is not None else None
     else:
-        name_line_id = next((i for i, line in enumerate(lines) if line.startswith("REMARK  Name")), None)
+        name_line_id = next(
+            (i for i, line in enumerate(lines) if line.startswith("REMARK  Name")), None
+        )
         name = lines[name_line_id][15:].strip() if name_line_id is not None else None
 
     atom_line_ids = [i for i, line in enumerate(lines) if line.startswith("ATOM")]
@@ -87,7 +94,7 @@ def read_pdb_pdbqt_block(block_type, block):
         if atom_type not in uppercase_atom_symbols:
             atom_type = from_pdbqt_atom_type(atom_type)
 
-        if atom_type == '':
+        if atom_type == "":
             atom_type = line[76:79].strip()
             if atom_type not in uppercase_atom_symbols:
                 atom_type = from_pdbqt_atom_type(atom_type)
@@ -98,17 +105,19 @@ def read_pdb_pdbqt_block(block_type, block):
 
 
 def read_mol2_block(block: str):
-    mol = Chem.rdmolfiles.MolFromMol2Block(block, removeHs = False, sanitize = False)
-    name = mol.GetProp('_Name')
-    
+    mol = Chem.rdmolfiles.MolFromMol2Block(block, removeHs=False, sanitize=False)
+    name = mol.GetProp("_Name")
+
     atoms = mol.GetAtoms()
     atom_types = np.empty(len(atoms), dtype=str)
     coordinates = np.empty((3, len(atoms)), dtype=np.float32)
 
     for i, atom in enumerate(atoms):
-        atom_types[i] =  atom.GetSymbol()
+        atom_types[i] = atom.GetSymbol()
         positions = mol.GetConformer(0).GetAtomPosition(i)
-        coordinates[:, i] = np.array([positions.x, positions.y, positions.z], dtype=np.float32)
+        coordinates[:, i] = np.array(
+            [positions.x, positions.y, positions.z], dtype=np.float32
+        )
 
     return name, atom_types, np.transpose(coordinates)
 
@@ -122,7 +131,7 @@ def read_xyz_block(block: str):
     atom_types = np.empty(atom_count, dtype=str)
     coordinates = np.empty((3, atom_count), dtype=np.float32)
 
-    atom_lines = lines[2:2+atom_count]
+    atom_lines = lines[2 : 2 + atom_count]
     for i, line in enumerate(atom_lines):
         tokens = line.split()
         atom_types[i] = tokens[0]
@@ -131,6 +140,7 @@ def read_xyz_block(block: str):
         coordinates[2, i] = float(tokens[3])
 
     return name, atom_types, coordinates
+
 
 def read_block(block_type, block_content):
     if block_type == FileFormat.MOL2:

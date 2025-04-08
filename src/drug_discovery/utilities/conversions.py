@@ -1,4 +1,3 @@
-import tempfile
 
 # TODO: use openbabel function running on knative to support this
 # def convert_file(

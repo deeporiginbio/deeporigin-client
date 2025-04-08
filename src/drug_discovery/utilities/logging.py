@@ -1,6 +1,6 @@
-import sys
-import enum
 import datetime
+import enum
+import sys
 import threading
 
 
@@ -14,7 +14,13 @@ class LogLevel(enum.Enum):
 class Logger:
     def __init__(self, log_level, log_dest):
         self.level = self.str_to_loglevel(log_level)
-        self.file = open(log_dest, "a") if isinstance(log_dest, str) else log_dest if log_dest else sys.stdout
+        self.file = (
+            open(log_dest, "a")
+            if isinstance(log_dest, str)
+            else log_dest
+            if log_dest
+            else sys.stdout
+        )
         self.lock = threading.Lock()
         self.depth = 0
 

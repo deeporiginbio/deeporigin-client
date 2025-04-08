@@ -1,10 +1,6 @@
 import os
 import shutil
-import numpy as np
-
-from .logging import Logger
 from itertools import islice
-
 
 DEFAULT_MAX_DEPTH = 2
 
@@ -16,9 +12,15 @@ def move_file_with_extension(file_path, extension):
     target_file_path = os.path.join(dir_path, f"{file_base_name}.{extension}")
 
     if os.path.isfile(target_file_path):
-        existing_files = [f for f in os.listdir(dir_path) if f.startswith(f"{file_base_name}_#") and f.endswith(f".{extension}")]
+        existing_files = [
+            f
+            for f in os.listdir(dir_path)
+            if f.startswith(f"{file_base_name}_#") and f.endswith(f".{extension}")
+        ]
         counter = len(existing_files) + 1
-        new_file_path = os.path.join(dir_path, f"{file_base_name}_#{counter}.{extension}")
+        new_file_path = os.path.join(
+            dir_path, f"{file_base_name}_#{counter}.{extension}"
+        )
 
         shutil.move(target_file_path, new_file_path)
 
@@ -26,7 +28,6 @@ def move_file_with_extension(file_path, extension):
 def remove_file(file_path):
     if os.path.isfile(file_path):
         os.remove(file_path)
-
 
 
 def chunker(iterable, size):

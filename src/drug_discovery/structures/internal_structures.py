@@ -69,17 +69,12 @@ import base64
 import random
 import tempfile
 import warnings
-
 from enum import Enum
 
-from rdkit import Chem
-from rdkit.Chem import AllChem
-from rdkit.Chem import rdMolDescriptors
-from rdkit.Chem import SaltRemover
-from rdkit.Chem.Draw import rdMolDraw2D
-
-from rdkit import RDLogger
 from pubchempy import get_compounds
+from rdkit import Chem, RDLogger
+from rdkit.Chem import AllChem, SaltRemover, rdMolDescriptors
+from rdkit.Chem.Draw import rdMolDraw2D
 
 # from ..utilities.conversions import convert_file
 
@@ -195,7 +190,7 @@ class Molecule:
             )
 
             return html_img
-        except Exception as e:
+        except Exception:
             return ""
 
     def draw(self):
@@ -204,7 +199,7 @@ class Molecule:
             AllChem.Compute2DCoords(mol.m)
 
             return Chem.RemoveHs(mol.m)
-        except Exception as e:
+        except Exception:
             return self.m
 
     def conformer(self, i=0):

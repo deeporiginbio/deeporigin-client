@@ -2,19 +2,20 @@ import io
 import os
 import shutil
 import tempfile
-from pathlib import Path
-from typing import Optional, Dict, Any, List
-from termcolor import colored
 from dataclasses import dataclass, field
-from tabulate import tabulate
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 import numpy as np
 import pandas as pd
-from biotite.structure.io.pdb import PDBFile
 from biotite.structure import AtomArrayStack
-
+from biotite.structure.io.pdb import PDBFile
 from deeporigin_molstar import ProteinViewer
+from tabulate import tabulate
+from termcolor import colored
+
 from deeporigin.drug_discovery.utilities.visualize import jupyter_visualization
+
 # from deeporigin.drug_discovery.utilities.conversions import convert_file
 
 

@@ -55,36 +55,32 @@
 # ligand.visualize()
 # ```
 
-import requests
 import tempfile
+
+# from deeporigin.drug_discovery.utilities.props import predict_properties, protonate
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Any, Optional
+
 import numpy as np
 import pandas as pd
-from typing import Any
+import requests
+from deeporigin_molstar import MoleculeViewer
+from rdkit import Chem
 from tqdm import tqdm
 
-from rdkit import Chem
-from pathlib import Path
-from typing import Optional
-
-from deeporigin_molstar import MoleculeViewer
-
-from deeporigin.drug_discovery.utilities.visualize import jupyter_visualization
 from deeporigin.drug_discovery.structures.internal_structures import (
     Molecule,
+    mol_from_block,
     mol_from_file,
     mol_from_smiles,
-    mol_from_block,
 )
-# from deeporigin.drug_discovery.utilities.props import predict_properties, protonate
-
-from dataclasses import dataclass, field
+from deeporigin.drug_discovery.utilities.visualize import jupyter_visualization
 
 
 @dataclass
 class Ligand:
-    """
-    A class representing a ligand molecule in drug discovery workflows.
-
+    """A class representing a ligand molecule in drug discovery workflows.
     The Ligand class provides functionality to create, manipulate, and analyze small molecules
     (ligands) in computational drug discovery. It supports various input formats and provides
     methods for property prediction, visualization, and file operations.
@@ -137,7 +133,7 @@ class Ligand:
         >>> ligand.write_to_file("output.pdb")
     """
 
-    identifier: Optional[str] = ""
+    identifier: str | None = ""
     file_path: Optional[str] = ""
     smiles: Optional[str] = ""
     block_type: Optional[str] = ""

@@ -1,6 +1,6 @@
-from .protein import Protein
 from .ligand import Ligand
 from .pocket import Pocket
+from .protein import Protein
 
 __all__ = [
     "Ligand",
