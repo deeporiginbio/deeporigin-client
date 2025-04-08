@@ -4,7 +4,6 @@ import pytest
 
 from deeporigin.drug_discovery import chemistry
 from deeporigin.drug_discovery.structures import Ligand
-from deeporigin.exceptions import DeepOriginException
 
 # Import shared test fixtures
 from tests.utils_ligands import bad_ligands, ligands
@@ -42,7 +41,7 @@ def test_ligand_from_smiles():
 
 @pytest.mark.parametrize("ligand", bad_ligands)
 def test_ligand_errors(ligand):
-    with pytest.raises(Exception):
+    with pytest.raises(Exception):  # noqa: B017
         Ligand(
             file_path=ligand["file"],
             smiles=ligand["smiles_string"],
