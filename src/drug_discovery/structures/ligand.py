@@ -134,23 +134,23 @@ class Ligand:
         >>> ligand.write_to_file("output.pdb")
     """
 
-    identifier: str | None = ""
-    file_path: Optional[str] = ""
-    smiles: Optional[str] = ""
-    block_type: Optional[str] = ""
-    block_content: Optional[str] = ""
-    name: Optional[str] = ""
-    seed: Optional[int] = None
-    xref_protein: Optional[str] = ""
-    xref_ins_code: Optional[str] = ""
-    xref_residue_id: Optional[str] = ""
-    xref_protein_chain_id: Optional[str] = ""
+    identifier: str | None = None
+    file_path: str | None = None
+    smiles: str | None = None
+    block_type: str | None = None
+    block_content: str | None = None
+    name: str | None = None
+    seed: int | None = None
+    xref_protein: str | None = None
+    xref_ins_code: str | None = None
+    xref_residue_id: str | None = None
+    xref_protein_chain_id: str | None = None
     save_to_file: bool = False
     properties: dict = field(default_factory=dict)
 
     # Additional attributes that are initialized in __post_init__
-    protonated_smiles: Optional[str] = field(init=False, default=None)
-    mol: Optional[Molecule] = field(init=False, default=None)
+    mol: Molecule | None = field(init=False, default=None)
+    protonated_smiles: str | None = field(init=False, default=None)
     hac: int = field(init=False, default=0)
     available_for_docking: bool = field(init=False, default=True)
 
@@ -268,7 +268,7 @@ class Ligand:
         or block content.
         """
         sources_provided = sum(
-            bool(x)
+            x is not None
             for x in [self.identifier, self.file_path, self.smiles, self.block_content]
         )
         if sources_provided != 1:
@@ -276,20 +276,20 @@ class Ligand:
                 "Please provide exactly one of identifier, file_path, smiles, or block_content."
             )
 
-        if self.block_content:
-            if not self.block_type:
+        if self.block_content is not None:
+            if self.block_type is None:
                 raise ValueError(
                     "block_type must be provided when initializing from block_content."
                 )
 
             self.mol = mol_from_block(self.block_type, self.block_content)
-        elif self.identifier:
+        elif self.identifier is not None:
             self.mol = Molecule.from_smiles_or_name(
                 name=self.identifier, add_coords=True, seed=self.seed
             )
-        elif self.file_path:
+        elif self.file_path is not None:
             self.mol = self._initialize_from_file(self.file_path)
-        elif self.smiles:
+        elif self.smiles is not None:
             self.mol = mol_from_smiles(self.smiles)
             self.block_type = "mol"
             self.block_content = self.mol.molblock()
@@ -438,9 +438,9 @@ class Ligand:
                 )
                 extension = output_format
 
-            if self.name:
+            if self.name is not None:
                 self.set_property("_Name", self.name)
-            if self.mol.smiles:
+            if self.mol.smiles is not None:
                 self.set_property("_SMILES", self.mol.smiles)
             if self.properties:
                 for prop_name, prop_value in self.properties.items():
@@ -454,10 +454,15 @@ class Ligand:
                 pdb_block_with_remarks = remark_lines + pdb_block
                 path.write_text(pdb_block_with_remarks)
             elif extension == ".sdf":
-                with tempfile.TemporaryFile(mode="w+", suffix=".sdf") as temp_file:
+                with tempfile.NamedTemporaryFile(
+                    mode="w+", suffix=".sdf", delete=False
+                ) as temp_file:
                     writer = Chem.SDWriter(temp_file.name)
                     writer.write(self.mol.m)
                     writer.close()
+                    temp_file.flush()
+                    temp_file.seek(0)
+                    path.write_text(temp_file.read())
             elif extension == ".mol":
                 mol_block = Chem.MolToMolBlock(self.mol.m)
                 prop_lines = ""
@@ -582,33 +587,41 @@ class Ligand:
         return ligands
 
     @classmethod
-    def create_ligands_from_csv(cls, file_path: str) -> list["Ligand"]:
+    def from_csv(cls, file_path: str, smiles_column: str = "smiles") -> list["Ligand"]:
         """
         Create Ligand instances from a CSV file containing SMILES strings and additional properties.
 
         Args:
             file_path (str): The path to the CSV file.
+            smiles_column (str, optional): The name of the column containing SMILES strings. Defaults to "smiles".
 
         Returns:
             list[Ligand]: A list of Ligand instances created from the CSV file.
 
         Raises:
             FileNotFoundError: If the file does not exist.
-            ValueError: If the CSV does not contain a 'smiles' column or if SMILES strings are invalid.
+            ValueError: If the CSV does not contain the specified smiles column or if SMILES strings are invalid.
         """
         path = Path(file_path)
         if not path.exists():
             raise FileNotFoundError(f"The file '{file_path}' does not exist.")
+
+        # First read just the header to check for the smiles column
+        df_header = pd.read_csv(file_path, nrows=0)
+        if smiles_column not in df_header.columns:
+            raise ValueError(
+                f"Column '{smiles_column}' not found in CSV file '{file_path}'. Available columns: {', '.join(df_header.columns)}"
+            )
 
         ligands = []
         try:
             df = pd.read_csv(file_path)
             normalized_columns = [col.strip().lower() for col in df.columns]
 
-            if "smiles" not in normalized_columns:
-                raise ValueError("CSV file must contain a 'smiles' column.")
+            if smiles_column.lower() not in normalized_columns:
+                raise ValueError(f"CSV file must contain a '{smiles_column}' column.")
 
-            smiles_col_index = normalized_columns.index("smiles")
+            smiles_col_index = normalized_columns.index(smiles_column.lower())
             smiles_col = df.columns[smiles_col_index]
             other_columns = [col for col in df.columns if col != smiles_col]
 
@@ -820,7 +833,7 @@ class Ligand:
             for prop_name, prop_value in self.properties.items():
                 info_str += f"  {prop_name}: {prop_value}\n"
 
-        if self.xref_protein:
+        if self.xref_protein is not None:
             info_str += (
                 f"Cross-reference Protein Chain ID: {self.xref_protein_chain_id}\n"
             )

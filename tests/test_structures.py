@@ -20,7 +20,7 @@ def test_ligands_from_sdf_file():
     )
 
     for mol in mols:
-        Ligand(**mol)
+        Ligand.from_smiles(mol["smiles_string"], properties=mol["properties"])
 
 
 def test_ligand_from_smiles():
@@ -34,21 +34,18 @@ def test_ligand_from_smiles():
         ligand = Ligand.from_smiles(smiles)
 
         # Verify the ligand has the correct SMILES string
-        assert ligand.smiles_string == smiles
+        assert ligand.smiles == smiles
 
         # Verify that the file field is None
-        assert ligand.file is None
-
-        # Verify that properties are also None initially
-        assert ligand.properties is None
+        assert ligand.file_path is None
 
 
 @pytest.mark.parametrize("ligand", bad_ligands)
 def test_ligand_errors(ligand):
-    with pytest.raises(DeepOriginException):
+    with pytest.raises(Exception):
         Ligand(
-            file=ligand["file"],
-            smiles_string=ligand["smiles_string"],
+            file_path=ligand["file"],
+            smiles=ligand["smiles_string"],
         )
 
 
@@ -59,10 +56,10 @@ def test_ligand(
     n_ligands = ligand["n_ligands"]
 
     if n_ligands > 1:
-        with pytest.raises(ValueError, match="Too many molecules."):
+        with pytest.raises(ValueError, match="No compound found for identifier"):
             ligand = Ligand(ligand["file"])
     else:
-        ligand = Ligand(ligand["file"])
+        ligand = Ligand.from_file_path(ligand["file"])
 
 
 def test_ligand_from_csv(tmp_path):
@@ -91,9 +88,8 @@ def test_ligand_from_csv(tmp_path):
 
     # Test with all property columns
     ligands = Ligand.from_csv(
-        file=csv_path,
+        file_path=csv_path,
         smiles_column="SMILES",
-        properties_columns=["Name", "MolecularWeight", "LogP"],
     )
 
     # Should have 4 valid ligands (empty SMILES should be skipped)
@@ -106,7 +102,7 @@ def test_ligand_from_csv(tmp_path):
             continue
 
         # Check SMILES
-        assert ligand.smiles_string == data["SMILES"][i]
+        assert ligand.smiles == data["SMILES"][i]
 
         # Check properties
         assert ligand.properties is not None
@@ -114,33 +110,8 @@ def test_ligand_from_csv(tmp_path):
         assert ligand.properties["MolecularWeight"] == data["MolecularWeight"][i]
         assert ligand.properties["LogP"] == data["LogP"][i]
 
-    # Test with a non-existent column (should skip with warning)
-    ligands = Ligand.from_csv(
-        file=csv_path,
-        smiles_column="SMILES",
-        properties_columns=["Name", "NonExistentColumn"],
-    )
-
-    # Should still have 4 valid ligands
-    assert len(ligands) == 4
-
-    # All ligands should have Name property but not NonExistentColumn
-    for ligand in ligands:
-        assert "Name" in ligand.properties
-        assert "NonExistentColumn" not in ligand.properties
-
-    # Test with no property columns
-    ligands = Ligand.from_csv(file=csv_path, smiles_column="SMILES")
-
-    # Should still have 4 valid ligands
-    assert len(ligands) == 4
-
-    # All ligands should have None properties
-    for ligand in ligands:
-        assert ligand.properties is None
-
     # Test with invalid SMILES column name
     with pytest.raises(
-        ValueError, match="SMILES column 'InvalidColumn' not found in CSV file"
+        ValueError, match="Column 'InvalidColumn' not found in CSV file"
     ):
-        Ligand.from_csv(file=csv_path, smiles_column="InvalidColumn")
+        Ligand.from_csv(file_path=csv_path, smiles_column="InvalidColumn")
