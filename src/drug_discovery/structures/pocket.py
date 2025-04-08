@@ -193,10 +193,9 @@ class Pocket:
         cls,
         block_content: str,
         block_type: str = "pdb",
-        **kwargs: Any,
+        **kwargs: Any,  # noqa: ANN401
     ) -> "Pocket":
-        """
-        Create a Pocket instance from block content.
+        """Create a Pocket instance from block content.
 
         Args:
             block_content (str): The content of the pocket structure.
