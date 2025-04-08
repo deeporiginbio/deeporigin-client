@@ -208,7 +208,7 @@ class StructureAligner:
             if coords is None:
                 raise ValueError("Coordinates are None.")
 
-            self.pca = PCA(n_components=3)
+            self.pca = PCA(n_components=3, random_state=42)
             self.pca.fit(coords)
 
             components = self.pca.components_
