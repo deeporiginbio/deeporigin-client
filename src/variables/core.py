@@ -204,7 +204,7 @@ def get_variables_from_do_platform(
     """
     if not get_feature_flags().variables:
         msg = "Updating variables is not yet available. For beta access, please contact support at support@deeporigin.com."
-        warnings.warn(msg, FeatureNotAvailableWarning)
+        warnings.warn(msg, FeatureNotAvailableWarning, stacklevel=2)
         return []
 
     classes = tuple([type.value for type in types])
@@ -367,7 +367,7 @@ def enable_variable_auto_updating(
     # login
     if not get_feature_flags().variables:
         msg = "Updating variables is not yet available. For beta access, please contact support at support@deeporigin.com."
-        warnings.warn(msg, FeatureNotAvailableWarning)
+        warnings.warn(msg, FeatureNotAvailableWarning, stacklevel=2)
         return []
 
     # load the CronTab configuration

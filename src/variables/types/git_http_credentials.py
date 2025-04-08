@@ -112,10 +112,11 @@ class GitHttpCredentials(Variable):
         else:
             warnings.warn(
                 (
-                    f"Variable {self.name or ''} was not uninstalled because it has been modified directly. "
+                    f"Variable {self.name or ''} was not modified because it has been modified directly. "
                     "To update its value, rerun with the `overwrite` option."
                 ),
                 DeepOriginWarning,
+                stacklevel=2,
             )
 
         self.write_git_credentials(other_config, do_config, user_home_dirname)
