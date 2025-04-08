@@ -38,6 +38,7 @@ dependencies = [
     "more-itertools",
     "nest_asyncio",
     "asyncio",
+    "aiohttp",
 ]
 dynamic = ["version"]
 
