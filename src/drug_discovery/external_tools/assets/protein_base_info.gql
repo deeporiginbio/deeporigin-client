@@ -1,0 +1,31 @@
+query($entryIDs: [String!]!) {
+  entries(entry_ids: $entryIDs){
+    struct {
+      title
+    },
+
+    exptl {
+        method
+    }
+    refine {
+        ls_d_res_high
+    }
+    
+    struct_keywords {
+        pdbx_keywords
+    }
+    rcsb_accession_info {
+        deposit_date
+    }
+    
+    polymer_entities{
+      rcsb_entity_source_organism {
+        scientific_name
+      }
+      entity_poly {
+        rcsb_sample_sequence_length
+        rcsb_mutation_count
+      }
+    }
+  }
+}

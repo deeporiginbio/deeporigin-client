@@ -100,7 +100,7 @@ def get_value(
             title="Invalid configuration",
             message=f"The Deep Origin CLI and Python client requires a valid configuration. The {key} field is not valid:\n {detail}",
             fix=f"To fix this issue, run `deeporigin config set {key} <value>`",
-        )
+        ) from exception
 
     return validated_value
 

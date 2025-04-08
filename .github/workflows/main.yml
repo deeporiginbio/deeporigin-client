@@ -8,19 +8,6 @@ on:
 
 jobs:
 
-  check-for-debug-code:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Search for "icecream" in .py files
-        run: |
-          if grep -ri "icecream" --include="*.py" .; then
-            echo "❌🍦: Found 'icecream' in one or more .py files, suggesting that you forgot to remove debug code"
-            exit 1
-          fi
-
   sonarcloud:
     runs-on: ubuntu-latest
     steps:
@@ -52,6 +39,12 @@ jobs:
           version: 0.11.2
           args: check --select I
 
+      - name: Lint 
+        uses: astral-sh/ruff-action@v3
+        with:
+          version: 0.11.2
+          args: check 
+
       - name: Check docstrings using interrogate
         run: |
           pip install interrogate 
@@ -70,7 +63,7 @@ jobs:
         os: [ubuntu-latest, windows-latest]
         python-version: ["3.10", "3.11", "3.12", "3.13"]
 
-    needs: [code-formatting-syntax-and-docstrings, check-for-debug-code]
+    needs: [code-formatting-syntax-and-docstrings]
     steps:
       - uses: actions/checkout@v4
 

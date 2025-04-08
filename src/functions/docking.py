@@ -54,7 +54,7 @@ def dock(
         raise DeepOriginException("Pocket center is required")
 
     if ligand is not None:
-        smiles_string = ligand.smiles_string
+        smiles_string = ligand.smiles
 
     if smiles_string is None:
         raise DeepOriginException("Either smiles_string or ligand must be provided")
@@ -63,12 +63,13 @@ def dock(
     hasher = hashlib.sha256()
 
     # Hash protein file contents
-    with open(protein.file, "rb") as f:
+    protein_file = protein._dump_state()
+    with open(protein_file, "rb") as f:
         hasher.update(f.read())
 
     # Hash pocket file if provided
-    if pocket is not None and pocket.file is not None:
-        with open(pocket.file, "rb") as f:
+    if pocket is not None and pocket.file_path is not None:
+        with open(pocket.file_path, "rb") as f:
             hasher.update(f.read())
 
     # Hash other inputs
@@ -88,7 +89,7 @@ def dock(
     # Check if cached result exists
     if not os.path.exists(sdf_file):
         # Read and encode the protein file
-        with open(protein.file, "rb") as f:
+        with open(protein_file, "rb") as f:
             encoded_protein = base64.b64encode(f.read()).decode("utf-8")
 
         # Prepare the request payload

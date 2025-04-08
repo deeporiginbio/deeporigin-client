@@ -51,6 +51,7 @@ nav:
   - How To:
     - Create a Complex: dd/how-to/complex.md
     - Work with proteins: dd/how-to/proteins.md
+    - Prepare proteins: dd/how-to/prepare-protein.md
     - Work with ligands: dd/how-to/ligands.md
     - Visualize proteins and ligands: dd/how-to/visualize.md
     - Filter outputs of Docking: dd/how-to/filter-docking-outputs.md

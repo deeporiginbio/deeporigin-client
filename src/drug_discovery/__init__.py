@@ -1,7 +1,19 @@
+"""
+Drug Discovery Module
+
+This module provides tools and utilities for drug discovery workflows, including
+molecule manipulation, protein-ligand interactions, and computational chemistry
+calculations.
+"""
+
 # example data
+import asyncio  # noqa: F401
 from importlib.resources import path
 
-from deeporigin.drug_discovery.structures import Ligand, Pocket, Protein
+import nest_asyncio  # we need this for asyncio  # noqa: F401
+
+from . import chemistry
+from .structures import Ligand, Pocket, Protein
 
 __all__ = ["chemistry", "Complex", "Protein", "Ligand", "Pocket"]
 
@@ -12,10 +24,6 @@ def __getattr__(name):
         from deeporigin.drug_discovery.complex import Complex
 
         return Complex
-    elif name == "chemistry":
-        from deeporigin.drug_discovery import chemistry
-
-        return chemistry
 
     raise AttributeError(f"module {__name__} has no attribute {name}")
 

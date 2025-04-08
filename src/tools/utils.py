@@ -309,7 +309,7 @@ def add_provider_if_databaseid_found(data):
             data["$provider"] = "datahub-cell"
 
         # Recursively check all values that are dicts or lists
-        for key, value in data.items():
+        for _, value in data.items():
             if isinstance(value, dict):
                 add_provider_if_databaseid_found(value)
             elif isinstance(value, list):

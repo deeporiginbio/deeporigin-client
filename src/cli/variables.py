@@ -99,7 +99,7 @@ class InstallVariablesController(cement.Controller):
         feature_flags = get_feature_flags()
         if not feature_flags.variables:
             msg = "Updating variables is not yet available. For beta access, please contact support at support@deeporigin.com."
-            warnings.warn(msg, FeatureNotAvailableWarning)
+            warnings.warn(msg, FeatureNotAvailableWarning, stacklevel=2)
             return
 
         args = self.app.pargs
@@ -277,7 +277,7 @@ class AutoInstallVariablesController(cement.Controller):
         feature_flags = get_feature_flags()
         if not feature_flags.variables:
             msg = "Updating variables is not yet available. For beta access, please contact support at support@deeporigin.com."
-            warnings.warn(msg, FeatureNotAvailableWarning)
+            warnings.warn(msg, FeatureNotAvailableWarning, stacklevel=2)
             return
 
         args = self.app.pargs
@@ -364,7 +364,7 @@ class UninstallVariablesController(cement.Controller):
         feature_flags = get_feature_flags()
         if not feature_flags.variables:
             msg = "Updating variables is not yet available. For beta access, please contact support at support@deeporigin.com."
-            warnings.warn(msg, FeatureNotAvailableWarning)
+            warnings.warn(msg, FeatureNotAvailableWarning, stacklevel=2)
             return
 
         args = self.app.pargs
