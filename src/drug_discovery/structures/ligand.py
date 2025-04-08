@@ -59,7 +59,7 @@ import requests
 import tempfile
 import numpy as np
 import pandas as pd
-
+from typing import Any
 from tqdm import tqdm
 
 from rdkit import Chem
@@ -163,7 +163,7 @@ class Ligand:
         file_path: str,
         name: str = "",
         save_to_file: bool = False,
-        **kwargs,
+        **kwargs: Any,
     ) -> "Ligand":
         """
         Create a Ligand instance from a file path.
@@ -190,7 +190,7 @@ class Ligand:
         smiles: str,
         name: str = "",
         save_to_file: bool = False,
-        **kwargs,
+        **kwargs: Any,
     ) -> "Ligand":
         """
         Create a Ligand instance from a SMILES string.
@@ -218,7 +218,7 @@ class Ligand:
         block_type: str,
         name: str = "",
         save_to_file: bool = False,
-        **kwargs,
+        **kwargs: Any,
     ) -> "Ligand":
         """
         Create a Ligand instance from block content.
@@ -243,7 +243,11 @@ class Ligand:
 
     @classmethod
     def from_identifier(
-        cls, identifier: str, name: str = "", save_to_file: bool = False, **kwargs
+        cls,
+        identifier: str,
+        name: str = "",
+        save_to_file: bool = False,
+        **kwargs: Any,
     ) -> "Ligand":
         """
         Create a Ligand instance from an identifier.
@@ -681,7 +685,7 @@ class Ligand:
             )
 
     @classmethod
-    def convert_to_sdf(cls, block_content: str, block_type: str):
+    def convert_to_sdf(cls, block_content: str, block_type: str) -> str:
         """
         Convert a ligand block content to SDF format.
 

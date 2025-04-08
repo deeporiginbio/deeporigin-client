@@ -189,7 +189,10 @@ class Pocket:
 
     @classmethod
     def from_block(
-        cls, block_content: str, block_type: str = "pdb", **kwargs
+        cls,
+        block_content: str,
+        block_type: str = "pdb",
+        **kwargs: Any,
     ) -> "Pocket":
         """
         Create a Pocket instance from block content.
@@ -217,7 +220,7 @@ class Pocket:
         return pocket
 
     @classmethod
-    def from_file(cls, file_path: str, **kwargs) -> "Pocket":
+    def from_file(cls, file_path: str, **kwargs: Any) -> "Pocket":
         """
         Create a Pocket instance from a file.
 
@@ -250,7 +253,11 @@ class Pocket:
         return pocket
 
     @classmethod
-    def from_name(cls, name: str, **kwargs) -> "Pocket":
+    def from_name(
+        cls,
+        name: str,
+        **kwargs: Any,
+    ) -> "Pocket":
         """
         Create a Pocket instance by searching for a file with the given name in the pockets directory.
 
@@ -282,7 +289,10 @@ class Pocket:
 
     @classmethod
     def from_structure(
-        cls, structure: np.ndarray, name: Optional[str] = None, **kwargs
+        cls,
+        structure: np.ndarray,
+        name: Optional[str] = None,
+        **kwargs: Any,
     ) -> "Pocket":
         """
         Create a Pocket instance directly from a structure array.
