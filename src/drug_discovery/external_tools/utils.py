@@ -73,7 +73,7 @@ def download_struct(pid, path=None, format="cif", overwrite=False):
         str: The path to the downloaded file.
 
     """
-    if path == None:
+    if path is None:
         path = gettempdir()
     return rcsb.fetch(pid, format, target_path=path, overwrite=overwrite)
 
@@ -973,7 +973,6 @@ def generate_html_output(info):
             if binding_affinities:
                 affinities = "<ul>"
                 for affinity in binding_affinities:
-                    comp_id = affinity.get("comp_id", "N/A")
                     aff_type = affinity.get("type", "N/A")
                     value = affinity.get("value", "N/A")
                     unit = affinity.get("unit", "")

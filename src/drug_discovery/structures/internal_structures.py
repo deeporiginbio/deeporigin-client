@@ -138,8 +138,8 @@ class Molecule:
 
         try:
             Chem.Kekulize(stripped_mol, clearAromaticFlags=False)
-        except Chem.KekulizeException:
-            raise ValueError("Kekulization failed.")
+        except Chem.KekulizeException as e:
+            raise ValueError("Kekulization failed.") from e
 
         return stripped_mol
 

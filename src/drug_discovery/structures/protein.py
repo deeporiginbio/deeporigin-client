@@ -119,7 +119,7 @@ class Protein:
         except Exception as e:
             raise RuntimeError(
                 f"Failed to create Protein from PDB ID {pdb_id}: {str(e)}"
-            )
+            ) from e
 
     @classmethod
     def from_file(cls, file_path: str, struct_ind: int = 0) -> "Protein":
@@ -161,7 +161,7 @@ class Protein:
         except Exception as e:
             raise RuntimeError(
                 f"Failed to create Protein from file {file_path}: {str(e)}"
-            )
+            ) from e
 
     @staticmethod
     def load_structure_from_block(block_content: str, block_type: str) -> np.ndarray:
@@ -197,7 +197,7 @@ class Protein:
             try:
                 fetch(pdb_id, "pdb", save_dir_path)
             except Exception as e:
-                raise RuntimeError(f"Failed to download PDB {pdb_id}: {str(e)}")
+                raise RuntimeError(f"Failed to download PDB {pdb_id}: {str(e)}") from e
 
         return str(file_path)
 
@@ -645,7 +645,7 @@ class Protein:
 
         metal_resnames = set()
         cofactor_resnames = set()
-        for key, atoms in residue_groups.items():
+        for _, atoms in residue_groups.items():
             res_name = atoms[0].res_name.strip().upper()
             is_metal = all(
                 atom.element.strip().upper() in metal_elements for atom in atoms
@@ -695,7 +695,7 @@ class Protein:
         except Exception as e:
             raise RuntimeError(
                 f"Failed to create new Protein with modified structure: {str(e)}"
-            )
+            ) from e
 
     def to_pdb(self, file_path: str):
         """
@@ -716,7 +716,7 @@ class Protein:
         except Exception as e:
             raise RuntimeError(
                 f"Failed to write structure to file {file_path}: {str(e)}"
-            )
+            ) from e
 
     @beartype
     def _dump_state(self) -> str:

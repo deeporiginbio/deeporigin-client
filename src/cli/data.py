@@ -575,10 +575,7 @@ class DataController(cement.Controller):
                 raise DeepOriginException(
                     "You must specify a database to create a column in using --database"
                 )
-            if self.app.pargs.key is None:
-                key = self.app.pargs.name
-            else:
-                key = self.app.pargs.key
+
             if self.app.pargs.type is None:
                 raise DeepOriginException(
                     f"You must specify a type for a column from one of {DataType} using --type"

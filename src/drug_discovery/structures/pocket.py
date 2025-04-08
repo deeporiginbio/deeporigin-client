@@ -1,7 +1,6 @@
 import io
 import os
 import shutil
-import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -328,7 +327,9 @@ class Pocket:
             self.file_path = directory / f"{self.name}.{self.block_type}"
             self.write_to_file(self.file_path)
         except Exception as e:
-            raise RuntimeError(f"Failed to initialize pocket from block: {str(e)}")
+            raise RuntimeError(
+                f"Failed to initialize pocket from block: {str(e)}"
+            ) from e
 
     def _initialize_from_file(self):
         """Initialize the pocket from a file."""
@@ -344,7 +345,9 @@ class Pocket:
             )
             self._post_structure_initialization()
         except Exception as e:
-            raise RuntimeError(f"Failed to initialize pocket from file: {str(e)}")
+            raise RuntimeError(
+                f"Failed to initialize pocket from file: {str(e)}"
+            ) from e
 
     def _initialize_from_structure(self):
         """Initialize the pocket from a structure array."""
@@ -358,7 +361,9 @@ class Pocket:
             self.file_path = directory / f"{self.name}.pdb"
             self.write_to_file(self.file_path)
         except Exception as e:
-            raise RuntimeError(f"Failed to initialize pocket from structure: {str(e)}")
+            raise RuntimeError(
+                f"Failed to initialize pocket from structure: {str(e)}"
+            ) from e
 
     def _post_structure_initialization(self):
         """Common initialization steps after structure is loaded."""
@@ -421,16 +426,17 @@ class Pocket:
                 path.parent.mkdir(parents=True, exist_ok=True)
 
             if path.suffix.lower() != ".pdb":
-                with tempfile.NamedTemporaryFile(delete=True) as temp:
-                    write_to_pdb_file(self.structure, temp.name)
-                    convert_file("pdb", temp.name, output_format, output_path)
+                raise NotImplementedError("convert_file not implemented yet")
+                # with tempfile.NamedTemporaryFile(delete=True) as temp:
+                #     write_to_pdb_file(self.structure, temp.name)
+                #     convert_file("pdb", temp.name, output_format, output_path)
             else:
                 write_to_pdb_file(self.structure, output_path)
 
         except Exception as e:
             raise RuntimeError(
                 f"Failed to write structure to file {output_path}: {str(e)}"
-            )
+            ) from e
 
     @jupyter_visualization
     def show(self):

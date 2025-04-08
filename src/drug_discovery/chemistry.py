@@ -91,7 +91,7 @@ def get_properties_in_sdf_file(sdf_file: str | Path) -> list:
 
     properties = []
 
-    for i, mol in enumerate(supplier):
+    for _, mol in enumerate(supplier):
         if mol is None:
             continue  # Skip invalid molecules
 
@@ -153,7 +153,7 @@ def read_property_values(sdf_file: str | Path, key: str):
         sanitize=False,
     )
     values = []
-    for i, mol in enumerate(suppl, start=1):
+    for _, mol in enumerate(suppl, start=1):
         if mol is None:
             value = None
         else:
@@ -452,7 +452,9 @@ def download_protein(
         try:
             fetch(pdb_id, "pdb", save_dir_path)
         except Exception as e:
-            raise DeepOriginException(f"Failed to download PDB {pdb_id}: {str(e)}")
+            raise DeepOriginException(
+                f"Failed to download PDB {pdb_id}: {str(e)}"
+            ) from e
 
     return str(file_path)
 

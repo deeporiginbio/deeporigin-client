@@ -354,7 +354,7 @@ class Ligand:
         except Exception as e:
             raise ValueError(
                 f"Failed to initialize Ligand from file {file_path}: {str(e)}"
-            )
+            ) from e
 
     def set_property(self, prop_name: str, prop_value):
         """
@@ -472,7 +472,7 @@ class Ligand:
         except Exception as e:
             raise ValueError(
                 f"Failed to write structure to file {output_path}: {str(e)}"
-            )
+            ) from e
 
     def get_center(self) -> Optional[list[float]]:
         """
@@ -531,7 +531,7 @@ class Ligand:
 
             return html
         except Exception as e:
-            raise ValueError(f"Visualization failed: {str(e)}")
+            raise ValueError(f"Visualization failed: {str(e)}") from e
 
     @classmethod
     def create_ligands_from_sdf(cls, file_path: str) -> list["Ligand"]:
@@ -576,7 +576,7 @@ class Ligand:
         except Exception as e:
             raise ValueError(
                 f"Failed to create Ligands from SDF file '{file_path}': {str(e)}"
-            )
+            ) from e
 
         return ligands
 
@@ -636,14 +636,14 @@ class Ligand:
                         f"Error: Failed to create Ligand from CSV file row {idx + 1}: {str(e)}"
                     )
 
-        except pd.errors.EmptyDataError:
-            raise ValueError(f"The CSV file '{file_path}' is empty.")
+        except pd.errors.EmptyDataError as e:
+            raise ValueError(f"The CSV file '{file_path}' is empty.") from e
         except pd.errors.ParserError as e:
-            raise ValueError(f"Error parsing CSV file '{file_path}': {str(e)}")
+            raise ValueError(f"Error parsing CSV file '{file_path}': {str(e)}") from e
         except Exception as e:
             raise ValueError(
                 f"Failed to create Ligands from CSV file '{file_path}': {str(e)}"
-            )
+            ) from e
 
         return ligands
 
@@ -706,7 +706,9 @@ class Ligand:
 
             return molecule.molblock()
         except Exception as e:
-            raise ValueError(f"Failed to convert ligand block content to SDF: {str(e)}")
+            raise ValueError(
+                f"Failed to convert ligand block content to SDF: {str(e)}"
+            ) from e
 
     @classmethod
     def fetch_smiles_from_pdb_api(cls, res_name: str) -> str:
@@ -737,7 +739,7 @@ class Ligand:
                 raise ValueError(f"SMILES not found for ligand '{res_name}'.")
             return smiles
         except Exception as e:
-            raise ValueError(f"Failed to fetch SMILES from PDB API: {str(e)}")
+            raise ValueError(f"Failed to fetch SMILES from PDB API: {str(e)}") from e
 
     @classmethod
     @jupyter_visualization
@@ -759,7 +761,7 @@ class Ligand:
 
             return html
         except Exception as e:
-            raise ValueError(f"Visualization failed: {str(e)}")
+            raise ValueError(f"Visualization failed: {str(e)}") from e
 
     @classmethod
     @jupyter_visualization
@@ -792,7 +794,7 @@ class Ligand:
 
             return html
         except Exception as e:
-            raise ValueError(f"Visualization failed: {str(e)}")
+            raise ValueError(f"Visualization failed: {str(e)}") from e
 
     def _repr_html_(self) -> str:
         """

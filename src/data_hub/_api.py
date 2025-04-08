@@ -176,14 +176,14 @@ def _create_function(method_path):
                 message,
                 fix="The resource could not be found. Please check the ID and organization.",
                 title="Deep Origin error: [Resource not found]",
-            )
+            ) from error
         except ConflictError as error:
             message = error.body["errors"][0]["title"]
             raise DeepOriginException(
                 message,
                 fix="The name you are trying to use cannot be used because it is already in use. Please try another name.",
                 title="Deep Origin error: [Name conflicts]",
-            )
+            ) from error
 
         if not isinstance(response, dict):
             if "json" in response.headers["content-type"]:

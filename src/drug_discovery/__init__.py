@@ -1,8 +1,8 @@
 # example data
-import asyncio
+import asyncio  # noqa: F401
 from importlib.resources import path
 
-import nest_asyncio  # we need this for asyncio
+import nest_asyncio  # we need this for asyncio  # noqa: F401
 
 from .structures import Ligand, Pocket, Protein
 

@@ -761,10 +761,10 @@ def _validate_value_for_column(*, column: dict, value: Any):
         else:
             try:
                 validated_value = int(value)
-            except ValueError:
+            except ValueError as e:
                 raise DeepOriginException(
                     message=f"{value} is not valid for cell {column['name']} of type integer. The value must be an integer."
-                )
+                ) from e
 
     elif column["type"] == "float":
         from pandas._libs.missing import NAType
@@ -774,10 +774,10 @@ def _validate_value_for_column(*, column: dict, value: Any):
         else:
             try:
                 validated_value = float(value)
-            except ValueError:
+            except ValueError as e:
                 raise DeepOriginException(
                     message=f"{value} is not valid for cell {column['name']} of type float. The value must be a float."
-                )
+                ) from e
 
     elif column["type"] == "boolean":
         if isinstance(value, bool) or value is None:
