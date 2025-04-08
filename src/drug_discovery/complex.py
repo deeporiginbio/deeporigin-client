@@ -1,13 +1,13 @@
 """Module to support Drug Discovery workflows using Deep Origin"""
 
 import concurrent.futures
+from dataclasses import dataclass, field
 import json
 import os
-from dataclasses import dataclass, field
 from typing import Optional, get_args
 
-import pandas as pd
 from beartype import beartype
+import pandas as pd
 
 from deeporigin.data_hub import api
 from deeporigin.drug_discovery import chemistry as chem
@@ -16,8 +16,7 @@ from deeporigin.drug_discovery.abfe import ABFE
 from deeporigin.drug_discovery.docking import Docking
 from deeporigin.drug_discovery.rbfe import RBFE
 from deeporigin.drug_discovery.structures import Ligand, Protein
-from deeporigin.tools.toolkit import _ensure_columns, _ensure_database
-from deeporigin.tools.utils import query_run_statuses
+from deeporigin.tools.utils import _ensure_columns, _ensure_database, query_run_statuses
 from deeporigin.utils.core import PrettyDict, hash_file, hash_strings
 
 DATA_DIRS = dict()
@@ -161,8 +160,8 @@ class Complex:
 
     def _compute_hash(self):
         """Compute and update the hash based on protein and ligands"""
-        protein_hash = hash_file(self.protein.file)
-        ligands_hash = hash_strings([ligand.smiles_string for ligand in self.ligands])
+        protein_hash = hash_file(self.protein.file_path)
+        ligands_hash = hash_strings([ligand.smiles for ligand in self.ligands])
         self._hash = hash_strings([protein_hash, ligands_hash])
 
     @property
@@ -208,7 +207,11 @@ class Complex:
         ligands = []
 
         for mol in mols:
-            ligands.append(Ligand(**mol))
+            if "file" in mol:
+                ligand = Ligand.from_file_path(mol["file"])
+            else:
+                ligand = Ligand.from_smiles(mol["smiles"])
+            ligands.append(ligand)
 
         pdb_files = [
             os.path.join(directory, f)
@@ -221,7 +224,7 @@ class Complex:
                 f"Expected exactly one PDB file in the directory, but found {len(pdb_files)}."
             )
         protein_file = pdb_files[0]
-        protein = Protein(protein_file)
+        protein = Protein.from_file(protein_file)
 
         # Create the Complex instance
         instance = cls(
@@ -243,19 +246,19 @@ class Complex:
         df = api.get_dataframe(utils.DB_LIGANDS)
 
         for ligand in self.ligands:
-            if ligand.file is None:
+            if ligand.file_path is None:
                 # no ligand file, we only have a SMILES string. this means that there is no need to upload or otherwise manage this ligand
 
                 continue
 
-            ligand_file = os.path.basename(ligand.file)
+            ligand_file = os.path.basename(ligand.file_path)
             matching_indices = df.index[df[utils.COL_LIGAND] == ligand_file].tolist()
             if len(matching_indices) == 0:
-                print(f"Uploading {ligand.file}...")
+                print(f"Uploading {ligand.file_path}...")
                 response = api.upload_file_to_new_database_row(
                     database_id=utils.DB_LIGANDS,
                     column_id=utils.COL_LIGAND,
-                    file_path=str(ligand.file),
+                    file_path=str(ligand.file_path),
                 )
 
                 ligand._do_id = response.rows[0].hid
@@ -264,14 +267,14 @@ class Complex:
 
         # ensure that protein is uploaded
         df = api.get_dataframe(utils.DB_PROTEINS)
-        protein_file = os.path.basename(self.protein.file)
+        protein_file = os.path.basename(self.protein.file_path)
         matching_indices = df.index[df[utils.COL_PROTEIN] == protein_file].tolist()
         if len(matching_indices) == 0:
-            print(f"Uploading {self.protein.file}...")
+            print(f"Uploading {self.protein.file_path}...")
             response = api.upload_file_to_new_database_row(
                 database_id=utils.DB_PROTEINS,
                 column_id=utils.COL_PROTEIN,
-                file_path=str(self.protein.file),
+                file_path=str(self.protein.file_path),
             )
 
             self.protein._do_id = response.rows[0].hid
@@ -332,17 +335,21 @@ class Complex:
         """
 
         if view == "3d":
-            files = [ligand.file for ligand in self.ligands]
+            files = [ligand.file_path for ligand in self.ligands]
 
             if limit is not None:
                 files = files[:limit]
 
             chem.show_molecules_in_sdf_files(files)
         else:
+            from deeporigin.drug_discovery.structures.ligand import (
+                show_ligands as _show_ligands,
+            )
+
             if limit is not None:
-                chem.show_ligands(self.ligands[:limit])
+                _show_ligands(self.ligands[:limit])
             else:
-                chem.show_ligands(self.ligands)
+                _show_ligands(self.ligands)
 
     @beartype
     def get_result_files_for(

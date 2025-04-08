@@ -66,10 +66,10 @@ molecule.visualize()
 """
 
 import base64
+from enum import Enum
 import random
 import tempfile
 import warnings
-from enum import Enum
 
 from pubchempy import get_compounds
 from rdkit import Chem, RDLogger

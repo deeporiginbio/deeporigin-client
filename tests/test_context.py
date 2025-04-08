@@ -1,8 +1,8 @@
+from contextlib import redirect_stderr, redirect_stdout
 import io
 import json
 import unittest
 import unittest.mock
-from contextlib import redirect_stderr, redirect_stdout
 
 from deeporigin import cli, context
 

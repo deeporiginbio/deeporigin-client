@@ -4,8 +4,8 @@ import sys
 import textwrap
 from typing import Optional
 
-import termcolor
 from tabulate import tabulate
+import termcolor
 
 __all__ = ["DeepOriginException"]
 

@@ -3,11 +3,11 @@
 import base64
 import hashlib
 import os
-import zipfile
 from pathlib import Path
+import zipfile
 
-import requests
 from beartype import beartype
+import requests
 
 URL = "http://pocketfinder.default.jobs.edge.deeporigin.io/find_pockets"
 # URL = "http://localhost:8080/find_pockets"

@@ -3,15 +3,15 @@
 import math
 from typing import Optional
 
-import more_itertools
-import pandas as pd
 from beartype import beartype
 from deeporigin_molstar import DockingViewer, JupyterViewer
+import more_itertools
+import pandas as pd
 
 from deeporigin.data_hub import api
 from deeporigin.drug_discovery import chemistry as chem
 from deeporigin.drug_discovery import utils
-from deeporigin.drug_discovery.structures import ligands_to_dataframe
+from deeporigin.drug_discovery.structures.ligand import ligands_to_dataframe
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.tools.utils import get_statuses_and_progress, query_run_statuses
 from deeporigin.utils.core import PrettyDict, hash_strings

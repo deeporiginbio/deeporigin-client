@@ -6,8 +6,8 @@ with these functions via api.py
 
 import inspect
 import json
-import sys
 from pathlib import Path
+import sys
 
 from beartype import beartype
 from box import Box

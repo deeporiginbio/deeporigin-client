@@ -2,8 +2,8 @@
 
 The RBFE object instantiated here is contained in the Complex class is meant to be used within that class."""
 
-import pandas as pd
 from beartype import beartype
+import pandas as pd
 
 from deeporigin.data_hub import api
 from deeporigin.drug_discovery import chemistry as chem
