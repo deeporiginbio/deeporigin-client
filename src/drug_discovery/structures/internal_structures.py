@@ -285,9 +285,9 @@ def mol_from_smiles(smiles, sanitize=True):
 
 
 def mol_from_block(block_type, block, sanitize=True, remove_hs=False):
-    temp_file_path = tempfile.mktemp()
-    with open(temp_file_path, "w") as f:
-        f.write(block)
-    return mol_from_file(
-        block_type, temp_file_path, sanitize=sanitize, remove_hs=remove_hs
-    )
+    with tempfile.TemporaryFile(mode="w+") as temp_file:
+        temp_file.write(block)
+        temp_file.seek(0)  # Reset file pointer to beginning
+        return mol_from_file(
+            block_type, temp_file.name, sanitize=sanitize, remove_hs=remove_hs
+        )

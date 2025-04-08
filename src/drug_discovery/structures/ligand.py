@@ -453,10 +453,10 @@ class Ligand:
                 pdb_block_with_remarks = remark_lines + pdb_block
                 path.write_text(pdb_block_with_remarks)
             elif extension == ".sdf":
-                writer = Chem.SDWriter(str(path))
-                writer.SetKekulize(False)
-                writer.write(self.mol.m)
-                writer.close()
+                with tempfile.TemporaryFile(mode="w+", suffix=".sdf") as temp_file:
+                    writer = Chem.SDWriter(temp_file.name)
+                    writer.write(self.mol.m)
+                    writer.close()
             elif extension == ".mol":
                 mol_block = Chem.MolToMolBlock(self.mol.m)
                 prop_lines = ""
@@ -699,9 +699,10 @@ class Ligand:
                 sanitize=True,
                 remove_hs=False,
             )
-            writer = Chem.SDWriter(str(tempfile.mktemp(suffix=".sdf")))
-            writer.write(molecule.m)
-            writer.close()
+            with tempfile.TemporaryFile(mode="w+", suffix=".sdf") as temp_file:
+                writer = Chem.SDWriter(temp_file.name)
+                writer.write(molecule.m)
+                writer.close()
 
             return molecule.molblock()
         except Exception as e:
