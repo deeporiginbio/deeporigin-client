@@ -6,7 +6,7 @@ import json
 import time
 from typing import Any, Callable, Optional
 
-from IPython.display import HTML, clear_output, display, update_display
+from IPython.display import HTML, display, update_display
 import nest_asyncio
 
 from deeporigin.tools import utils
@@ -17,7 +17,20 @@ nest_asyncio.apply()
 
 @dataclass
 class Job:
-    """Job class"""
+    """A class representing a job that can be monitored and managed.
+
+    This class provides functionality to track the status and progress of jobs,
+    with support for real-time monitoring in Jupyter notebooks.
+
+    Attributes:
+        name: A string representing the name of the job.
+        _ids: A list of job IDs being tracked.
+        _viz_func: Optional function to customize job visualization.
+        _parse_func: Optional function to parse job data.
+        _progress_reports: List of progress reports for each job.
+        _status: List of statuses for each job.
+        _task: The asyncio task handling job monitoring.
+    """
 
     name: str
     _ids: list[str]
@@ -32,14 +45,20 @@ class Job:
         """Create a Job instance from a list of IDs.
 
         Args:
-            ids: List of job IDs
+            ids: List of job IDs to track.
 
         Returns:
-            Job instance
+            A new Job instance with the given IDs.
         """
         return cls(name="job", _ids=ids)
 
     def sync(self):
+        """Synchronize the job status and progress reports.
+
+        This method updates the internal state by fetching the latest status
+        and progress reports for each job ID. It skips jobs that have already
+        reached a terminal state (Succeeded or Failed).
+        """
         for i, job_id in enumerate(self._ids):
             # Skip if this job has already succeeded or failed
             if i < len(self._status) and self._status[i] in ["Succeeded", "Failed"]:
@@ -63,19 +82,31 @@ class Job:
                 self._status.append(None)
 
     def show(self):
-        """Show the job status and progress reports."""
-        # Display the output widget in the current cell
+        """Display the current job status and progress reports.
 
+        This method renders and displays the current state of all jobs
+        using the visualization function if set, or a default HTML representation.
+        """
+        # Display the output widget in the current cell
         display(HTML(self._render_progress_html()))
 
     def _render_progress_html(self):
-        """Render a HTML element reflecting the job status and progress reports."""
-        # Display the output widget in the current cell
+        """Render HTML representation of job progress.
 
+        Returns:
+            HTML string representing the current job status and progress.
+        """
         return self._viz_func(self)
 
     def watch(self):
-        """start polling job status and show progress report"""
+        """Start monitoring job progress in real-time.
+
+        This method initiates a background task that periodically updates
+        and displays the job status. It will automatically stop when all
+        jobs reach a terminal state (Succeeded or Failed). If there are no
+        active jobs to monitor, it will display a message and show the current
+        state once.
+        """
         # Check if there are any active jobs (not Failed or Succeeded)
         if not any(status not in ["Failed", "Succeeded"] for status in self._status):
             display(HTML("<div style='color: gray;'>No active jobs to monitor</div>"))
@@ -90,6 +121,12 @@ class Job:
         display(initial_html, display_id=display_id)
 
         async def update_progress_report():
+            """Update and display job progress at regular intervals.
+
+            This coroutine runs in the background, updating the display
+            with the latest job status and progress every 5 seconds.
+            It automatically stops when all jobs reach a terminal state.
+            """
             while True:
                 current_time = time.strftime("%Y-%m-%d %H:%M:%S")
                 new_html = (
@@ -111,8 +148,12 @@ class Job:
         self._task = asyncio.create_task(update_progress_report())
 
     def stop_watching(self):
-        """Stop any ongoing background polling"""
+        """Stop the background monitoring task.
 
+        This method safely cancels and cleans up any running monitoring task.
+        It is called automatically when all jobs reach a terminal state,
+        or can be called manually to stop monitoring.
+        """
         if self._task is not None:
             self._task.cancel()
             self._task = None
@@ -120,8 +161,12 @@ class Job:
     def _repr_html_(self) -> str:
         """Return HTML representation for Jupyter notebooks.
 
-        If a visualization function is set, it will be called.
-        Otherwise, a basic HTML representation is returned.
+        This method is called by Jupyter to display the job object in a notebook.
+        It uses the visualization function if set, otherwise returns a basic
+        HTML representation of the job's state.
+
+        Returns:
+            HTML string representing the job object.
         """
         if self._viz_func is not None:
             return self._render_progress_html()
@@ -136,6 +181,12 @@ class Job:
             """
 
     def cancel(self):
-        """Cancel the job."""
+        """Cancel the job.
 
+        This method is a placeholder for job cancellation functionality.
+        Currently raises NotImplementedError as cancellation is not implemented.
+
+        Raises:
+            NotImplementedError: Always raised as cancellation is not implemented.
+        """
         raise NotImplementedError("Job cancellation is not implemented")
