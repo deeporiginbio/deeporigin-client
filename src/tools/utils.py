@@ -70,7 +70,36 @@ def get_statuses_and_progress(job_ids: list[str]) -> list:
             except Exception:
                 pass
 
-    return results
+
+@beartype
+def cancel_runs(job_ids: list[str]) -> None:
+    """Cancel multiple jobs in parallel.
+
+    Args:
+        job_ids: List of job IDs to cancel.
+    """
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        futures = [executor.submit(cancel_run, job_id) for job_id in job_ids]
+        concurrent.futures.wait(futures)
+
+
+@beartype
+def cancel_run(execution_id: str) -> None:
+    """cancel a run
+
+    Args:
+        execution_id (str): execution ID
+    """
+
+    data = get_status_and_progress(execution_id)
+    if data["status"] in ["Cancelled", "Failed", "Succeeded"]:
+        return
+
+    tools.action_tool_execution(
+        org_friendly_id=get_value()["organization_id"],
+        execution_id=execution_id,
+        action="cancel",
+    )
 
 
 @beartype
@@ -268,6 +297,7 @@ def make_payload(
     outputs: dict,
     cluster_id: Optional[str] = None,
     cols: Optional[list] = None,
+    metadata: Optional[dict] = None,
 ) -> dict:
     """helper function to create payload for tool execution. This helper function is used by all wrapper functions in the run module to create the payload.
 
@@ -276,6 +306,7 @@ def make_payload(
         outputs (dict): outputs
         cluster_id (Optional[str], optional): cluster ID. Defaults to None. If not provided, the default cluster (us-west-2) is used.
         cols: (Optional[list], optional): list of columns. Defaults to None. If provided, column names (in inputs or outputs) are converted to column IDs.
+        metadata: (Optional[dict], optional): metadata to be added to the payload. Defaults to None.
 
     Returns:
         dict: correctly formatted payload, ready to be passed to execute_tool
@@ -288,6 +319,7 @@ def make_payload(
         inputs=inputs,
         outputs=outputs,
         clusterId=cluster_id,
+        metadata=metadata,
     )
 
     if cols:
