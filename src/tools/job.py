@@ -38,6 +38,7 @@ class Job:
     _parse_func: Optional[Callable[["Job"], Any]] = None
     _progress_reports: list = field(default_factory=list)
     _status: list = field(default_factory=list)
+    _inputs: list = field(default_factory=list)
     _task = None
 
     @classmethod
@@ -72,6 +73,14 @@ class Job:
                     self._progress_reports.append(json.loads(data["progress"]))
             elif i >= len(self._progress_reports):
                 self._progress_reports.append(None)
+
+            if data["inputs"]:
+                if i < len(self._inputs):
+                    self._inputs[i] = data["inputs"]
+                else:
+                    self._inputs.append(data["inputs"])
+            elif i >= len(self._inputs):
+                self._inputs.append(None)
 
             if data["status"]:
                 if i < len(self._status):
@@ -133,6 +142,7 @@ class Job:
                     f"<div style='color: gray;'>Last updated: {current_time}</div>"
                 )
 
+                self.sync()
                 new_html += self._render_progress_html()
 
                 update_display(HTML(new_html), display_id=display_id)
