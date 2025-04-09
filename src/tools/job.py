@@ -191,12 +191,12 @@ class Job:
             """
 
     def cancel(self):
-        """Cancel the job.
+        """Cancel all jobs being tracked by this instance.
 
-        This method is a placeholder for job cancellation functionality.
-        Currently raises NotImplementedError as cancellation is not implemented.
+        This method sends cancellation requests for all job IDs tracked by this instance
+        using the utils.cancel_runs function.
 
-        Raises:
-            NotImplementedError: Always raised as cancellation is not implemented.
+        Returns:
+            The result of the cancellation operation from utils.cancel_runs.
         """
-        raise NotImplementedError("Job cancellation is not implemented")
+        utils.cancel_runs(self._ids)
