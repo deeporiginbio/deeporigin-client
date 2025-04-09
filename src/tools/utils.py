@@ -73,22 +73,14 @@ def get_statuses_and_progress(job_ids: list[str]) -> list:
 
 @beartype
 def cancel_runs(job_ids: list[str]) -> None:
-    """cancel many jobs in parallel
+    """Cancel multiple jobs in parallel.
 
     Args:
-        job_ids (list[str]): list of job IDs
-
+        job_ids: List of job IDs to cancel.
     """
-
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        # Submit all jobs and create a mapping from future to job_id
-        future_to_job_id = {
-            executor.submit(cancel_run, job_id): job_id for job_id in job_ids
-        }
-
-        # As each future completes, store the result in the status dictionary
-        for _ in concurrent.futures.as_completed(future_to_job_id):
-            pass
+        futures = [executor.submit(cancel_run, job_id) for job_id in job_ids]
+        concurrent.futures.wait(futures)
 
 
 @beartype
