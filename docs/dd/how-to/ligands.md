@@ -27,6 +27,46 @@ from deeporigin.chemistry import Ligand
 ligand = Ligand(smiles_string="[H]C1=C([H])C(C(=O)N(C([H])([H])[H])C([H])([H])[H])=C([H])C(C2=C([H])N(C([H])([H])[H])C(=O)C3=C2C([H])=C([H])N3[H])=C1[H]")
 ```
 
+### From a CSV file
+
+You can create multiple ligands at once from a CSV file using the `from_csv` class method. This is useful when you have a dataset of molecules with their SMILES strings and associated properties. The `from_csv` method:
+
+- Requires a path to the CSV file and the name of the column containing SMILES strings
+- Optionally accepts a list of column names to extract as properties
+- Skips rows with empty or invalid SMILES
+- Returns a list of `Ligand` objects
+
+This approach is ideal for processing large datasets of molecules where each row represents a different compound.
+
+#### Basic Usage
+
+For the simplest case, just specify the file path and which column contains the SMILES strings:
+
+```python
+from deeporigin.chemistry import Ligand
+
+# Basic usage - just extracting SMILES from a column
+ligands = Ligand.from_csv(
+    file="molecules.csv",
+    smiles_column="SMILES"
+)
+```
+
+#### Including Properties
+
+You can also extract additional properties from other columns in the CSV file:
+
+```python
+ligands = Ligand.from_csv(
+    file="molecules.csv",
+    smiles_column="SMILES",
+    properties_columns=["Name", "MW", "LogP", "Activity"]
+)
+```
+
+This will store all the specified column values as properties for each ligand, making it easy to keep track of important molecular characteristics alongside the structure information.
+
+
 
 ## Visualizing a ligand
 

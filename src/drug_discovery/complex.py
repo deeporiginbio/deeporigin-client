@@ -8,12 +8,14 @@ from typing import Optional, get_args
 
 import pandas as pd
 from beartype import beartype
+
 from deeporigin.data_hub import api
 from deeporigin.drug_discovery import chemistry as chem
 from deeporigin.drug_discovery import utils
 from deeporigin.drug_discovery.abfe import ABFE
 from deeporigin.drug_discovery.docking import Docking
 from deeporigin.drug_discovery.rbfe import RBFE
+from deeporigin.drug_discovery.structures import Ligand, Protein
 from deeporigin.tools.toolkit import _ensure_columns, _ensure_database
 from deeporigin.tools.utils import query_run_statuses
 from deeporigin.utils.core import PrettyDict, hash_file, hash_strings
@@ -126,8 +128,9 @@ def _ensure_dbs() -> dict:
 class Complex:
     """class to represent a set of a protein and 1 or many ligands"""
 
-    ligands: list[chem.Ligand]
-    protein: chem.Protein
+    # Using a private attribute for ligands with the property decorator below
+    _ligands: list[Ligand] = field(repr=False)
+    protein: Protein
 
     # these params are not user facing
     _db: Optional[dict] = None
@@ -153,10 +156,25 @@ class Complex:
         self.abfe = ABFE(parent=self)
         self.rbfe = RBFE(parent=self)
 
-        # hash protein and ligands
+        # Initialize the _hash
+        self._compute_hash()
+
+    def _compute_hash(self):
+        """Compute and update the hash based on protein and ligands"""
         protein_hash = hash_file(self.protein.file)
         ligands_hash = hash_strings([ligand.smiles_string for ligand in self.ligands])
         self._hash = hash_strings([protein_hash, ligands_hash])
+
+    @property
+    def ligands(self) -> list[Ligand]:
+        """Get the current ligands"""
+        return self._ligands
+
+    @ligands.setter
+    def ligands(self, new_ligands: list[Ligand]):
+        """Set new ligands and recompute the hash"""
+        self._ligands = new_ligands
+        self._compute_hash()
 
     @classmethod
     def from_dir(cls, directory: str) -> "Complex":
@@ -190,7 +208,7 @@ class Complex:
         ligands = []
 
         for mol in mols:
-            ligands.append(chem.Ligand(**mol))
+            ligands.append(Ligand(**mol))
 
         pdb_files = [
             os.path.join(directory, f)
@@ -203,11 +221,11 @@ class Complex:
                 f"Expected exactly one PDB file in the directory, but found {len(pdb_files)}."
             )
         protein_file = pdb_files[0]
-        protein = chem.Protein(protein_file)
+        protein = Protein(protein_file)
 
         # Create the Complex instance
         instance = cls(
-            ligands=ligands,
+            _ligands=ligands,
             protein=protein,
         )
 
@@ -301,20 +319,51 @@ class Complex:
             p.text(f" with {len(self.ligands)} ligands")
             p.text(")")
 
-    def show_ligands(self, view="2d"):
-        """Show all ligands in complex object in a table, rendering ligands as 2D structures"""
+    @beartype
+    def show_ligands(self, *, view: str = "2d", limit: Optional[int] = None):
+        """Display ligands in the complex object.
+
+        Args:
+            view: Visualization type, either "2d" (default) or "3d".
+                 - "2d": Shows ligands in a table with 2D structure renderings
+                 - "3d": Shows 3D molecular structures using SDF files
+            limit: Optional; maximum number of ligands to display.
+                  If None, all ligands will be shown.
+        """
 
         if view == "3d":
             files = [ligand.file for ligand in self.ligands]
+
+            if limit is not None:
+                files = files[:limit]
+
             chem.show_molecules_in_sdf_files(files)
         else:
-            chem.show_ligands(self.ligands)
+            if limit is not None:
+                chem.show_ligands(self.ligands[:limit])
+            else:
+                chem.show_ligands(self.ligands)
 
-    def get_result_files_for(self, tool: utils.VALID_TOOLS):
-        """Generic method to get output results for a particular tool and combine them as need be
+    @beartype
+    def get_result_files_for(
+        self,
+        *,
+        tool: utils.VALID_TOOLS,
+        ligand_ids: Optional[list[str]] = None,
+    ):
+        """Retrieve result files for a specific computational tool used with this complex.
+
+        This method fetches data from the specified tool's database, filters for results
+        associated with this complex, downloads any missing result files to the local
+        storage directory, and returns paths to all result files.
 
         Args:
-            tool: One of "Docking", "ABFE", "RBFE"
+            tool: One of "Docking", "ABFE", "RBFE" - specifies which computational
+                 method's results to retrieve
+            ligand_ids: Optional; list of ligand IDs to filter results. If None,
+                       results for all ligands in the complex will be retrieved.
+
+
         """
 
         df = pd.DataFrame(
@@ -326,6 +375,9 @@ class Complex:
         )
 
         df = df[self._hash == df[utils.COL_COMPLEX_HASH]]
+
+        if ligand_ids is not None:
+            df = df[df[utils.COL_LIGAND1].isin(ligand_ids)]
 
         # this makes sure that we only retain rows
         # where there is a valid output being generated
@@ -398,7 +450,9 @@ class Complex:
             ligand2_ids = [None for _ in file_ids]
 
         all_dfs = []
-        for file_id, ligand1_id, ligand2_id in zip(file_ids, ligand1_ids, ligand2_ids):
+        for file_id, ligand1_id, ligand2_id in zip(
+            file_ids, ligand1_ids, ligand2_ids, strict=False
+        ):
             file_loc = os.path.join(DATA_DIRS[tool], file_id.replace("_file:", ""))
             df = pd.read_csv(file_loc)
 

@@ -1,187 +1,20 @@
-"""Module that contains some utility functions for working with molecules and proteins"""
+"""Contains functions for working with SDF files."""
 
 import base64
 import hashlib
-import importlib.util
 import os
 import re
-from dataclasses import dataclass, fields
-from functools import wraps
 from pathlib import Path
 from typing import Optional, Tuple
 
+import pandas as pd
 from beartype import beartype
+from rdkit import Chem
+
 from deeporigin.exceptions import DeepOriginException
 
 
-@dataclass
-class Ligand:
-    """Class to represent a ligand (typically backed by a SDF file)"""
-
-    file: Optional[str | Path] = None
-    smiles_string: Optional[str] = None
-
-    # this ID keeps track of whether it is uploaded to deep origin or not
-    _do_id: Optional[str] = None
-
-    # this stores user-defined properties
-    properties: Optional[dict] = None
-
-    def __post_init__(self):
-        """post init tasks"""
-
-        if self.file is not None and not os.path.exists(self.file):
-            raise DeepOriginException(f"File {self.file} does not exist")
-
-        # we require either a SMILES string or a file
-        if self.file is None and self.smiles_string is None:
-            raise DeepOriginException("Must specify either a file or a SMILES string")
-
-        # read user-defined properties
-        if self.file is not None:
-            self.properties = read_sdf_properties(self.file)
-
-            # check that there's only one molecule here
-            if count_molecules_in_sdf_file(self.file) > 1:
-                raise ValueError(
-                    "Too many molecules. Expected a single molecule in the SDF file, but got multiple"
-                )
-
-        if self.smiles_string is None:
-            smiles_string = sdf_to_smiles(self.file)
-            if len(smiles_string) > 1:
-                raise ValueError("Expected a single SMILES strings, but got multiple")
-            self.smiles_string = smiles_string[0]
-
-    def _repr_pretty_(self, p, cycle):
-        """pretty print a ligand"""
-
-        if cycle:
-            p.text("Ligand(...)")
-        else:
-            p.text("Ligand(")
-
-            with p.group(2, "\n  ", "\n"):
-                all_fields = fields(self)
-                for idx, field in enumerate(all_fields):
-                    value = getattr(self, field.name)
-                    p.text(f"{field.name}: {value!r}")
-                    # Only add a breakable if this isn't the last field.
-                    if idx < len(all_fields) - 1:
-                        p.breakable()
-            p.text(")")
-
-    def show(self):
-        """show a ligand in a Jupyter notebook using molstar"""
-
-        if self.file is not None:
-            # backed by SDF file. use a 3D viewer
-
-            show_molecules_in_sdf_file(self.file)
-        else:
-            # only SMILES. use a 2D viewer
-            img = smiles_to_base64_png(self.smiles_string)
-
-            from IPython.display import HTML, display
-
-            display(HTML(img))
-
-
 @beartype
-def show_molecules_in_sdf_file(sdf_file: str | Path):
-    """show molecules in an SDF file in a Jupyter notebook using molstar"""
-
-    from deeporigin_molstar import JupyterViewer, MoleculeViewer
-
-    molecule_viewer = MoleculeViewer(
-        data=str(sdf_file),
-        format="sdf",
-    )
-    html_content = molecule_viewer.render_ligand()
-    JupyterViewer.visualize(html_content)
-
-
-@beartype
-def show_molecules_in_sdf_files(sdf_files: list[str]):
-    """show molecules in an SDF file in a Jupyter notebook using molstar"""
-
-    import tempfile
-
-    temp_dir = tempfile.TemporaryDirectory()
-
-    sdf_file = os.path.join(temp_dir.name, "temp.sdf")
-
-    # combine the SDF files
-    merge_sdf_files(sdf_files, sdf_file)
-
-    from deeporigin_molstar import JupyterViewer, MoleculeViewer
-
-    molecule_viewer = MoleculeViewer(
-        data=str(sdf_file),
-        format="sdf",
-    )
-    html_content = molecule_viewer.render_ligand()
-    JupyterViewer.visualize(html_content)
-
-
-@dataclass
-class Protein:
-    """Class to represent a protein (typically backed by a PDB file)"""
-
-    file: Optional[str | Path] = None
-    name: Optional[str] = None
-    pdb_id: Optional[str] = None
-
-    # this ID keeps track of whether it is uploaded to deep origin or not
-    _do_id: Optional[str] = None
-
-    def __post_init__(self):
-        if self.pdb_id is not None:
-            self.file = download_protein(self.pdb_id)
-
-        self.file = Path(self.file)
-        if self.name is None:
-            self.name = self.file.name
-
-    def show(self):
-        """visualize the protein in a Jupyter notebook using molstar"""
-
-        from deeporigin_molstar import JupyterViewer
-        from deeporigin_molstar.src.viewers.protein_viewer import ProteinViewer
-
-        protein_viewer = ProteinViewer(
-            data=str(self.file),
-            format="pdb",
-        )
-        html_content = protein_viewer.render_protein()
-
-        JupyterViewer.visualize(html_content)
-
-
-def _requires_rdkit(func):
-    """
-    A decorator that checks for the presence of RDKit via importlib.util.find_spec.
-    If RDKit is unavailable, raises a user-friendly ImportError.
-
-    Internal use only.
-    """
-
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        if importlib.util.find_spec("rdkit") is None:
-            raise ImportError(
-                "RDKit is required for this functionality.\n"
-                "Please install it manually \n"
-                "or install this package with the extra [tools], for example:\n\n"
-                "   pip install deeporigin[tools]\n"
-            )
-        return func(*args, **kwargs)
-
-    return wrapper
-
-
-@beartype
-@_requires_rdkit
 def read_molecules_in_sdf_file(sdf_file: str | Path) -> list[dict]:
     """
     Reads an SDF file containing one or more molecules, and for each molecule:
@@ -216,58 +49,7 @@ def read_molecules_in_sdf_file(sdf_file: str | Path) -> list[dict]:
     return output
 
 
-def ligands_to_dataframe(ligands: list[Ligand]):
-    """convert a list of ligands to a pandas dataframe"""
-
-    import pandas as pd
-
-    smiles_list = [ligand.smiles_string for ligand in ligands]
-    id_list = [ligand._do_id for ligand in ligands]
-    file_list = [
-        os.path.basename(ligand.file) if ligand.file is not None else None
-        for ligand in ligands
-    ]
-
-    data = {
-        "Ligand": smiles_list,
-        "ID": id_list,
-        "File": file_list,
-    }
-
-    # find all the common properties in all ligands
-    common_keys = set.intersection(
-        *(set(ligand.properties.keys()) for ligand in ligands)
-    )
-    for key in common_keys:
-        data[key] = [ligand.properties[key] for ligand in ligands]
-
-    df = pd.DataFrame(data)
-
-    return df
-
-
-def show_ligands(ligands: list[Ligand]):
-    """show ligands in the FEP object in a dataframe. This function visualizes the ligands using core-aligned 2D visualizations.
-
-    Args:
-        ligands (list[Ligand]): list of ligands
-
-    """
-
-    df = ligands_to_dataframe(ligands)
-
-    # convert SMILES to aligned images
-    images = smiles_list_to_base64_png_list(df["Ligand"].tolist())
-    df["Ligand"] = images
-
-    # Use escape=False to allow the <img> tags to render as images
-    from IPython.display import HTML, display
-
-    display(HTML(df.to_html(escape=False)))
-
-
 @beartype
-@_requires_rdkit
 def read_sdf_properties(sdf_file: str | Path) -> dict:
     """Reads all user-defined properties from an SDF file (single molecule) and returns them as a dictionary.
 
@@ -291,7 +73,6 @@ def read_sdf_properties(sdf_file: str | Path) -> dict:
 
 
 @beartype
-@_requires_rdkit
 def get_properties_in_sdf_file(sdf_file: str | Path) -> list:
     """Returns a list of all user-defined properties in an SDF file
 
@@ -310,7 +91,7 @@ def get_properties_in_sdf_file(sdf_file: str | Path) -> list:
 
     properties = []
 
-    for i, mol in enumerate(supplier):
+    for _, mol in enumerate(supplier):
         if mol is None:
             continue  # Skip invalid molecules
 
@@ -321,7 +102,6 @@ def get_properties_in_sdf_file(sdf_file: str | Path) -> list:
 
 
 @beartype
-@_requires_rdkit
 def count_molecules_in_sdf_file(sdf_file: str | Path) -> int:
     """
     Count the number of valid (sanitizable) molecules in an SDF file using RDKit,
@@ -356,7 +136,6 @@ def count_molecules_in_sdf_file(sdf_file: str | Path) -> int:
 
 
 @beartype
-@_requires_rdkit
 def read_property_values(sdf_file: str | Path, key: str):
     """Given a SDF file with more than 1 molecule, return the values of the properties for each molecule
 
@@ -374,7 +153,7 @@ def read_property_values(sdf_file: str | Path, key: str):
         sanitize=False,
     )
     values = []
-    for i, mol in enumerate(suppl, start=1):
+    for _, mol in enumerate(suppl, start=1):
         if mol is None:
             value = None
         else:
@@ -387,8 +166,8 @@ def read_property_values(sdf_file: str | Path, key: str):
 
 
 @beartype
-@_requires_rdkit
 def split_sdf_file(
+    *,
     input_sdf_path: str | Path,
     output_prefix: str = "ligand",
     output_dir: Optional[str | Path] = None,
@@ -461,7 +240,6 @@ def split_sdf_file(
 
 
 @beartype
-@_requires_rdkit
 def smiles_list_to_base64_png_list(
     smiles_list: list[str],
     *,
@@ -540,7 +318,6 @@ def smiles_list_to_base64_png_list(
 
 
 @beartype
-@_requires_rdkit
 def smiles_to_base64_png(
     smiles: str,
     *,
@@ -585,7 +362,6 @@ def smiles_to_base64_png(
 
 
 @beartype
-@_requires_rdkit
 def smiles_to_sdf(smiles: str, sdf_path: str) -> None:
     """convert a SMILES string to a SDF file
 
@@ -617,7 +393,6 @@ def smiles_to_sdf(smiles: str, sdf_path: str) -> None:
 
 
 @beartype
-@_requires_rdkit
 def sdf_to_smiles(sdf_file: str | Path) -> list[str]:
     """
     Extracts the SMILES strings of all valid molecules from an SDF file using RDKit.
@@ -640,7 +415,7 @@ def sdf_to_smiles(sdf_file: str | Path) -> list[str]:
     smiles_list = []
     for mol in suppl:
         if mol is not None:
-            smiles_list.append(Chem.MolToSmiles(mol))
+            smiles_list.append(Chem.MolToSmiles(mol, canonical=True))
 
     smiles_list = sorted(set(smiles_list))
 
@@ -677,13 +452,14 @@ def download_protein(
         try:
             fetch(pdb_id, "pdb", save_dir_path)
         except Exception as e:
-            raise DeepOriginException(f"Failed to download PDB {pdb_id}: {str(e)}")
+            raise DeepOriginException(
+                f"Failed to download PDB {pdb_id}: {str(e)}"
+            ) from e
 
     return str(file_path)
 
 
 @beartype
-@_requires_rdkit
 def merge_sdf_files(
     sdf_file_list: list[str],
     output_path: Optional[str] = None,
@@ -732,3 +508,97 @@ def merge_sdf_files(
     writer.close()
 
     return output_path
+
+
+@beartype
+def filter_sdf_by_smiles(
+    *,
+    input_sdf_file: str | Path,
+    output_sdf_file: str | Path,
+    keep_only_smiles: list[str] | pd.Series,
+):
+    """
+    Extracts the SMILES strings of all valid molecules from an SDF file using RDKit.
+
+    Args:
+        input_sdf_file (str | Path): Path to the SDF file.
+        output_sdf_file (str | Path): Path to the output SDF file.
+        keep_only_smiles (list[str] | pd.Series): List or Series of SMILES strings to keep.
+
+    """
+    writer = Chem.SDWriter(str(output_sdf_file))
+
+    # Convert pandas Series to list if necessary
+    if isinstance(keep_only_smiles, pd.Series):
+        keep_only_smiles = keep_only_smiles.tolist()
+
+    keep_only_smiles = [canonicalize_smiles(smiles) for smiles in keep_only_smiles]
+
+    if isinstance(input_sdf_file, Path):
+        input_sdf_file = str(input_sdf_file)
+
+    suppl = Chem.SDMolSupplier(
+        input_sdf_file,
+        sanitize=False,
+    )
+
+    for mol in suppl:
+        if mol is not None:
+            this_smiles = canonicalize_smiles(Chem.MolToSmiles(mol))
+            if this_smiles in keep_only_smiles:
+                writer.write(mol)
+
+    writer.close()
+
+
+@beartype
+def canonicalize_smiles(smiles: str) -> str:
+    """Canonicalize a SMILES string.
+
+    Args:
+        smiles (str): SMILES string.
+
+    Returns:
+        str: Canonicalized SMILES string.
+    """
+    mol = Chem.MolFromSmiles(smiles)
+    if mol is None:
+        raise ValueError(f"Invalid SMILES: {smiles}")
+    return Chem.MolToSmiles(mol, canonical=True)
+
+
+@beartype
+def show_molecules_in_sdf_files(sdf_files: list[str]):
+    """show molecules in an SDF file in a Jupyter notebook using molstar"""
+
+    import tempfile
+
+    temp_dir = tempfile.TemporaryDirectory()
+
+    sdf_file = os.path.join(temp_dir.name, "temp.sdf")
+
+    # combine the SDF files
+    merge_sdf_files(sdf_files, sdf_file)
+
+    from deeporigin_molstar import JupyterViewer, MoleculeViewer
+
+    molecule_viewer = MoleculeViewer(
+        data=str(sdf_file),
+        format="sdf",
+    )
+    html_content = molecule_viewer.render_ligand()
+    JupyterViewer.visualize(html_content)
+
+
+@beartype
+def show_molecules_in_sdf_file(sdf_file: str | Path):
+    """show molecules in an SDF file in a Jupyter notebook using molstar"""
+
+    from deeporigin_molstar import JupyterViewer, MoleculeViewer
+
+    molecule_viewer = MoleculeViewer(
+        data=str(sdf_file),
+        format="sdf",
+    )
+    html_content = molecule_viewer.render_ligand()
+    JupyterViewer.visualize(html_content)

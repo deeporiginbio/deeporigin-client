@@ -1,0 +1,7 @@
+query($comp_ids: [String!]!) {
+    chem_comps(comp_ids: $comp_ids){ 
+        rcsb_chem_comp_descriptor {
+            SMILES_stereo
+        }
+    }
+}

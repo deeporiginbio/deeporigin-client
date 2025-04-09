@@ -5,6 +5,7 @@ from typing import Optional
 
 import confuse
 import yaml
+
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.utils.core import _ensure_do_folder, in_aws_lambda
 
@@ -99,7 +100,7 @@ def get_value(
             title="Invalid configuration",
             message=f"The Deep Origin CLI and Python client requires a valid configuration. The {key} field is not valid:\n {detail}",
             fix=f"To fix this issue, run `deeporigin config set {key} <value>`",
-        )
+        ) from exception
 
     return validated_value
 

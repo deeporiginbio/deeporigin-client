@@ -1,59 +1,5 @@
 {
-    "complex_prep": {
-        "include_ligands": 1,
-        "include_protein": 1,
-        "sysprep_params": {
-            "charge_method": "bcc",
-            "do_loop_modelling": false,
-            "force_field": "ff14SB",
-            "is_lig_protonated": false,
-            "is_protein_protonated": false,
-            "keep_waters": false,
-            "lig_force_field": "gaff2",
-            "padding": 1.0,
-            "save_gmx_files": false
-        },
-        "test_run": 0,
-        "thread_pinning": 0,
-        "thread_pinning_offset": 0
-    },
-    "ligand1_prep": {
-        "include_ligands": 1,
-        "include_protein": 0,
-        "sysprep_params": {
-            "charge_method": "bcc",
-            "do_loop_modelling": false,
-            "force_field": "ff14SB",
-            "is_lig_protonated": false,
-            "is_protein_protonated": false,
-            "keep_waters": false,
-            "lig_force_field": "gaff2",
-            "padding": 1.0,
-            "save_gmx_files": false
-        },
-        "test_run": 0,
-        "thread_pinning": 0,
-        "thread_pinning_offset": 0
-    },
-    "ligand2_prep": {
-        "include_ligands": 1,
-        "include_protein": 0,
-        "sysprep_params": {
-            "charge_method": "bcc",
-            "do_loop_modelling": false,
-            "force_field": "ff14SB",
-            "is_lig_protonated": false,
-            "is_protein_protonated": false,
-            "keep_waters": false,
-            "lig_force_field": "gaff2",
-            "padding": 1.0,
-            "save_gmx_files": false
-        },
-        "test_run": 0,
-        "thread_pinning": 1,
-        "thread_pinning_offset": 0
-    },
-    "rbfe": {
+    "binding": {
         "add_fep_repeats": 0,
         "amend": "__NO_AMEND",
         "annihilate": true,
@@ -79,6 +25,19 @@
                     0.5,
                     0.75,
                     1.0
+                ],
+                "vdw_B": [
+                    0.0,
+                    0.1,
+                    0.2,
+                    0.3,
+                    0.4,
+                    0.5,
+                    0.6,
+                    0.7,
+                    0.8,
+                    0.9,
+                    1.0
                 ]
             },
             {
@@ -89,9 +48,28 @@
                     0.4,
                     0.2,
                     0.0
+                ],
+                "coul_B": [
+                    0.0,
+                    0.2,
+                    0.4,
+                    0.6,
+                    0.8,
+                    1.0
                 ]
             },
             {
+                "restraints_B": [
+                    1.0,
+                    0.75,
+                    0.5,
+                    0.35,
+                    0.1,
+                    0.05,
+                    0.025,
+                    0.01,
+                    0.0
+                ],
                 "vdw_A": [
                     1.0,
                     0.9,
@@ -121,16 +99,59 @@
             "Δt": 0.004
         },
         "repeats": 1,
-        "run_name": "binding",
         "skip_emeq": "__NO",
         "softcore_alpha": 0.5,
         "steps": 1250000,
-        "system": "complex",
         "test_run": 0,
         "thread_pinning": 0,
         "thread_pinning_offset": 0,
         "threads": 0,
         "workers": 0
+    },
+    "complex_prep": {
+        "include_ligands": 1,
+        "include_protein": 1,
+        "sysprep_params": {
+            "charge_method": "bcc",
+            "do_loop_modelling": false,
+            "force_field": "ff14SB",
+            "is_lig_protonated": false,
+            "is_protein_protonated": false,
+            "keep_waters": true,
+            "lig_force_field": "gaff2",
+            "padding": 1.0,
+            "save_gmx_files": false
+        }
+    },
+    "ligand1_prep": {
+        "include_ligands": 1,
+        "include_protein": 0,
+        "sysprep_params": {
+            "charge_method": "bcc",
+            "do_loop_modelling": false,
+            "force_field": "ff14SB",
+            "is_lig_protonated": false,
+            "is_protein_protonated": false,
+            "keep_waters": true,
+            "lig_force_field": "gaff2",
+            "padding": 1.0,
+            "save_gmx_files": false
+        }
+    },
+    "ligand2_prep": {
+        "include_ligands": 1,
+        "include_protein": 0,
+        "sysprep_params": {
+            "charge_method": "bcc",
+            "do_loop_modelling": false,
+            "force_field": "ff14SB",
+            "is_lig_protonated": false,
+            "is_protein_protonated": false,
+            "keep_waters": true,
+            "lig_force_field": "gaff2",
+            "padding": 1.0,
+            "save_gmx_files": false
+        }
     },
     "solvation1": {
         "add_fep_repeats": 0,
