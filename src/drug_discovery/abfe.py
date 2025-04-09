@@ -267,6 +267,10 @@ class ABFE:
             else:
                 progress[step] = "Succeeded"
 
+        # if the job failed, mark the step that is running as failed
+        if job._status[0] == "Failed":
+            progress[current_step] = "Failed"
+
         return progress
 
     @classmethod
