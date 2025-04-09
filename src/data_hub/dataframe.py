@@ -6,11 +6,11 @@ updating of Deep Origin databases.
 
 from datetime import datetime, timezone
 
-import humanize
-import pandas as pd
 from beartype import beartype
 from beartype.typing import Optional
 from dateutil.parser import parse
+import humanize
+import pandas as pd
 
 from deeporigin.data_hub import api
 from deeporigin.exceptions import DeepOriginException

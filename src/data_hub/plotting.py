@@ -1,6 +1,5 @@
 """module to make plots from a Deep Origin dataframe"""
 
-import pandas as pd
 from beartype import beartype
 from beartype.typing import Optional
 from bokeh.io import show
@@ -17,6 +16,7 @@ from bokeh.models import (
 )
 from bokeh.palettes import Category10
 from bokeh.plotting import figure
+import pandas as pd
 
 from deeporigin.data_hub.dataframe import DataFrame
 from deeporigin.exceptions import DeepOriginException

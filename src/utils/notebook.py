@@ -60,23 +60,14 @@ def show_progress_bar(
     display(HTML(progress_html))
 
 
-@beartype
-def render_mermaid(diagram_code: str) -> None:
+def mermaid_to_html(diagram_code: str) -> str:
     """
-    Renders a Mermaid diagram in a Jupyter Notebook cell.
-
-    Parameters:
-      diagram_code (str): The Mermaid diagram definition, e.g.,
-        'graph TD; A-->B;'
+    Converts a Mermaid diagram code to HTML.
     """
-    # Create the HTML for the diagram.
-    diagram_html = f'<div class="mermaid">{diagram_code}</div>'
-    display(HTML(diagram_html))
 
-    # Check if mermaid is defined; if not, load it.
-    # This snippet checks if window.mermaid exists, and if not, loads the script.
-    display(
-        HTML("""
+    html_code = f'<div class="mermaid">{diagram_code}</div>'
+
+    html_code += """
     <script>
       if (typeof mermaid === 'undefined') {
         var script = document.createElement('script');
@@ -90,5 +81,21 @@ def render_mermaid(diagram_code: str) -> None:
           mermaid.init(undefined, document.getElementsByClassName("mermaid"));
       }
     </script>
-    """)
-    )
+    """
+
+    return html_code
+
+
+@beartype
+def render_mermaid(diagram_code: str) -> None:
+    """
+    Renders a Mermaid diagram in a Jupyter Notebook cell.
+
+    Parameters:
+      diagram_code (str): The Mermaid diagram definition, e.g.,
+        'graph TD; A-->B;'
+    """
+
+    # Check if mermaid is defined; if not, load it.
+    # This snippet checks if window.mermaid exists, and if not, loads the script.
+    display(HTML(mermaid_to_html(diagram_code)))

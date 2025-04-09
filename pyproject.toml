@@ -80,12 +80,13 @@ build-backend = "setuptools.build_meta"
 
 [tool.ruff]
 include = ["**/src/**/*.py", "**/tests/**/*.py"]
-
+fix = true
 
 [tool.ruff.lint]
 ignore = ["E203", "E266", "E501"]
-select = ["E4", "E7", "E9", "F", "B", "Q", "F401", "E711", "F841", "F821"]
-
+select = ["E4", "E7", "E9", "F", "B", "Q", "F401", "E711", "F841", "F821", "I"]
+fixable = ["ALL"]
+unfixable = []
 
 [tool.ruff.lint.isort]
 case-sensitive = false
@@ -98,6 +99,7 @@ section-order = [
     "first-party",
     "local-folder",
 ]
+force-sort-within-sections = true
 
 [tool.distutils.bdist_wheel]
 universal = true
