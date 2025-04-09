@@ -166,26 +166,25 @@ def run_tests():
     print_header("File Service API Integration Test")
 
     # Initialize client
+    base_url = globals().get("API_BASE_URL") # return none if not defined
     try:
-        client = FilesClient(
-            base_url=API_BASE_URL if "API_BASE_URL" in globals() else None,
-            token=AUTH_TOKEN if "AUTH_TOKEN" in globals() and AUTH_TOKEN else None,
-        )
+        client = FilesClient(base_url, token=globals().get("AUTH_TOKEN"))
+        base_url = client.get_base_url()
 
         if not client.check_health():
-            print(f"❌ File service health check failed")
-            print(f"Please check if the service at {API_BASE_URL} is running")
+            print("❌ File service health check failed")
+            print(f"Please check if the service at {base_url} is running")
             sys.exit(1)
         if not client.check_auth_ok():
-            print(f"❌ Authentication failed")
-            print(f"Please check your AUTH_TOKEN")
+            print("❌ Authentication failed")
+            print("Please check your AUTH_TOKEN")
             sys.exit(1)
 
         print("✅ Authentication successful")
 
     except Exception as e:
         print(f"❌ Failed to establish connection: {str(e)}")
-        print(f"Please check your API_BASE_URL ({API_BASE_URL}) and AUTH_TOKEN")
+        print(f"Please check your API_BASE_URL ({base_url}) and AUTH_TOKEN")
         sys.exit(1)  # Exit with error code
 
     # Clean up any existing test data
@@ -241,12 +240,12 @@ def run_tests():
         print_step(f"Uploading {local_path} to {remote_path}")
 
         try:
-            success = client.upload_file(src=local_path, dest=remote_path)
+            success = client.upload_file(src=local_path, dest=remote_path, overwrite=True)
             if success:
-                print(f"  Upload successful")
+                print("  Upload successful")
                 file_info["uploaded"] = True
             else:
-                print(f"  Upload failed")
+                print("  Upload failed")
                 upload_success = False
                 file_info["uploaded"] = False
         except Exception as e:
@@ -324,7 +323,7 @@ def run_tests():
             try:
                 success = client.download_file(src=remote_path, dest=download_path)
                 if success:
-                    print(f"  Download successful")
+                    print("  Download successful")
 
                     # Verify content integrity
                     original_hash = get_file_hash(original_path)
@@ -337,7 +336,7 @@ def run_tests():
                         print("  Content verification failed: files are different")
                         file_info["download_verified"] = False
                 else:
-                    print(f"  Download failed")
+                    print("  Download failed")
                     file_info["download_verified"] = False
             except Exception as e:
                 print(f"  Download failed with error: {e}")
@@ -358,7 +357,7 @@ def run_tests():
         try:
             success = client.delete_file(remote_path)
             if success:
-                print(f"  Delete successful")
+                print("  Delete successful")
                 file_to_delete["deleted"] = True
 
                 # Verify deletion by trying to get metadata
@@ -376,7 +375,7 @@ def run_tests():
                     print(f"  Got error when checking metadata (expected): {e}")
                     file_to_delete["deletion_verified"] = True
             else:
-                print(f"  Delete failed")
+                print("  Delete failed")
                 file_to_delete["deleted"] = False
         except Exception as e:
             print(f"  Delete failed with error: {e}")
@@ -391,7 +390,7 @@ def run_tests():
     try:
         success = client.sync_dir(src=SYNC_SOURCE_DIR, dst=sync_remote_path)
         if success:
-            print(f"  Sync upload successful")
+            print("  Sync upload successful")
             sync_upload_success = True
 
             # List remote files after successful sync
@@ -401,7 +400,7 @@ def run_tests():
             subfolder_remote_path = f"{sync_remote_path}/subfolder"
             print_remote_files(client, subfolder_remote_path)
         else:
-            print(f"  Sync upload failed")
+            print("  Sync upload failed")
             sync_upload_success = False
     except Exception as e:
         print(f"  Sync upload failed with error: {e}")
@@ -421,7 +420,7 @@ def run_tests():
         try:
             success = client.sync_dir(src=sync_remote_path, dst=SYNC_DOWNLOAD_DIR)
             if success:
-                print(f"  Sync download successful")
+                print("  Sync download successful")
 
                 # Verify content integrity for a sample of files
                 print_step("Verifying content integrity of synced files")
@@ -451,7 +450,7 @@ def run_tests():
                 else:
                     print("  Some files failed verification")
             else:
-                print(f"  Sync download failed")
+                print("  Sync download failed")
         except Exception as e:
             print(f"  Sync download failed with error: {e}")
 
@@ -475,9 +474,9 @@ def run_tests():
             try:
                 success = client.delete_file(remote_path)
                 if success:
-                    print(f"  Delete successful")
+                    print("  Delete successful")
                 else:
-                    print(f"  Delete failed")
+                    print("  Delete failed")
             except Exception as e:
                 print(f"  Delete failed with error: {e}")
 
@@ -488,9 +487,9 @@ def run_tests():
             try:
                 success = client.delete_file(sync_dir_path)
                 if success:
-                    print(f"  Directory delete successful")
+                    print("  Directory delete successful")
                 else:
-                    print(f"  Directory delete failed")
+                    print("  Directory delete failed")
             except Exception as e:
                 print(f"  Directory delete failed with error: {e}")
 

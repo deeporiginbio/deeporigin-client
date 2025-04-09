@@ -31,10 +31,8 @@ Example usage:
 
 import logging
 import os
-import pathlib
 import re
 from typing import Any, Dict, List, Optional, Union
-from urllib.parse import urlparse
 
 from deeporigin import auth
 from deeporigin.utils.network import _get_domain_name
@@ -45,15 +43,16 @@ from .file_service.api.default import (
     get_object,
     head_object,
     put_object,
-    sync_objects,
+    # sync_objects,
 )
-from .file_service.models.put_object_body import PutObjectBody
-from .file_service.models.sync_file_schema_dto import SyncFileSchemaDto
-from .file_service.models.sync_file_schema_dto_credentials import (
-    SyncFileSchemaDtoCredentials,
-)
-from .file_service.models.sync_file_schema_dto_provider import SyncFileSchemaDtoProvider
 from .file_service.types import File
+from .file_service.models.put_object_body import PutObjectBody
+#from .file_service.models.sync_file_schema_dto import SyncFileSchemaDto
+#from .file_service.models.sync_file_schema_dto_credentials import (
+#    SyncFileSchemaDtoCredentials,
+#)
+#from .file_service.models.sync_file_schema_dto_provider import SyncFileSchemaDtoProvider
+
 
 logger = logging.getLogger(__name__)
 
@@ -80,20 +79,29 @@ class FilesClient:
             base_url: Base URL of the file service API
             token: Authentication token (optional)
             verify_ssl: Whether to verify SSL certificates or path to CA bundle
-        """
+        """        
 
         if not base_url:
             base_url = _get_domain_name()
+        self._base_url = base_url        
         if not token:
             tokens = auth.get_tokens(refresh=False)
             token = tokens["access"]
 
         if token:
             self.client = AuthenticatedClient(
-                base_url=base_url, token=token, verify_ssl=verify_ssl
+                base_url=self._base_url, token=token, verify_ssl=verify_ssl
             )
         else:
-            self.client = Client(base_url=base_url, verify_ssl=verify_ssl)
+            self.client = Client(base_url=self._base_url, verify_ssl=verify_ssl)
+
+    def get_base_url(self) -> str:
+        """
+        Get the base URL of the file service API, mostly for visibilty purposes.
+        Returns:
+            Base URL of the file service API
+        """
+        return self._base_url
 
     def _parse_files_url(self, url: str) -> tuple[str, str]:
         """
@@ -172,17 +180,45 @@ class FilesClient:
             logger.warning("Could not parse list response as JSON")
             return []
 
-    def upload_file(self, src: str, dest: str) -> bool:
+    def _remote_file_exists(self, path: str) -> bool:
+        """
+        Check if a file exists in remote storage.
+        
+        Args:
+            path: Path in the format files:///path
+        
+        Returns:
+            True if the file exists, False otherwise
+        """
+        try:
+            metadata = self.get_metadata(path)
+            # If we got metadata without an error, the file exists
+            return bool(metadata)
+        except Exception:
+            # If there was an error getting metadata, the file probably doesn't exist
+            return False
+
+    def upload_file(self, src: str, dest: str, overwrite: bool = False) -> bool:
         """
         Upload a file from local path to remote storage.
+        
         Args:
             src: Local file path
             dest: Remote path in the format files:///path
+            overwrite: If True, delete the file first if it exists
+            
         Returns:
             True if successful, False otherwise
         """
         if not os.path.exists(src):
             raise FileNotFoundError(f"Source file not found: {src}")
+
+        # Check if file exists and delete if overwrite is True
+        if overwrite and self._remote_file_exists(dest):
+            logger.info(f"Deleting existing file at {dest} before upload")
+            if not self.delete_file(dest):
+                logger.warning(f"Failed to delete existing file at {dest}")
+                # Continue with upload anyway
 
         org_friendly_id, remote_path = self._parse_files_url(dest)
 
