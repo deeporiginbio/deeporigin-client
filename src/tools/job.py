@@ -6,8 +6,7 @@ import json
 import time
 from typing import Any, Callable, Optional
 
-from IPython.display import HTML, clear_output, display
-from ipywidgets import Output
+from IPython.display import HTML, clear_output, display, update_display
 import nest_asyncio
 
 from deeporigin.tools import utils
@@ -42,8 +41,8 @@ class Job:
 
     def sync(self):
         for i, job_id in enumerate(self._ids):
-            # Skip if this job has already succeeded
-            if i < len(self._status) and self._status[i] == "Succeeded":
+            # Skip if this job has already succeeded or failed
+            if i < len(self._status) and self._status[i] in ["Succeeded", "Failed"]:
                 continue
 
             data = utils.get_status_and_progress(job_id)
@@ -63,61 +62,57 @@ class Job:
             elif i >= len(self._status):
                 self._status.append(None)
 
-    async def _poll_and_show(self):
-        """Internal method that handles the polling and display loop"""
-        while True:
-            self.sync()
-            with self._output:
-                clear_output(wait=True)
-                # First show the timestamp
-                display(
-                    HTML(
-                        f"<div style='color: gray;'>Last updated: {time.strftime('%Y-%m-%d %H:%M:%S')}</div>"
-                    )
-                )
-                # Then show the visualization
-                self._viz_func(self)
-
-            # Check if all jobs are either Succeeded or Failed
-            if all(status in ["Succeeded", "Failed"] for status in self._status):
-                break
-
-            await asyncio.sleep(10)
-
     def show(self):
         """Show the job status and progress reports."""
         # Display the output widget in the current cell
 
+        display(HTML(self._render_progress_html()))
+
+    def _render_progress_html(self):
+        """Render a HTML element reflecting the job status and progress reports."""
+        # Display the output widget in the current cell
+
         return self._viz_func(self)
 
-    def start_polling(self):
-        import asyncio
-        import time
-        from IPython.display import display, update_display, HTML
+    def watch(self):
+        """start polling job status and show progress report"""
+        # Check if there are any active jobs (not Failed or Succeeded)
+        if not any(status not in ["Failed", "Succeeded"] for status in self._status):
+            display(HTML("<div style='color: gray;'>No active jobs to monitor</div>"))
+            self.show()
+            return
 
-        # Create the initial display and store its display_id.
+        # Stop any existing task before starting a new one
+        self.stop_watching()
+
         initial_html = HTML("<div style='color: gray;'>Initializing...</div>")
         display_id = "timestamp_display"
         display(initial_html, display_id=display_id)
 
-        async def update_timestamp():
+        async def update_progress_report():
             while True:
                 current_time = time.strftime("%Y-%m-%d %H:%M:%S")
                 new_html = (
                     f"<div style='color: gray;'>Last updated: {current_time}</div>"
                 )
 
-                new_html += self.show()
+                new_html += self._render_progress_html()
 
                 update_display(HTML(new_html), display_id=display_id)
+
+                # Check if all jobs are in terminal states
+                if all(status in ["Failed", "Succeeded"] for status in self._status):
+                    self.stop_watching()
+                    break
 
                 await asyncio.sleep(5)
 
         # Schedule the task.
-        self._task = asyncio.create_task(update_timestamp())
+        self._task = asyncio.create_task(update_progress_report())
 
-    def stop_polling(self):
+    def stop_watching(self):
         """Stop any ongoing background polling"""
+
         if self._task is not None:
             self._task.cancel()
             self._task = None
@@ -129,8 +124,7 @@ class Job:
         Otherwise, a basic HTML representation is returned.
         """
         if self._viz_func is not None:
-            self.show()
-            return ""
+            return self._render_progress_html()
         else:
             return f"""
             <div style="border: 1px solid #ccc; padding: 10px; border-radius: 5px;">
@@ -140,3 +134,8 @@ class Job:
                 <p>Progress Reports: {self._progress_reports}</p>
             </div>
             """
+
+    def cancel(self):
+        """Cancel the job."""
+
+        raise NotImplementedError("Job cancellation is not implemented")
