@@ -43,6 +43,7 @@ def get_status_and_progress(execution_id: str) -> dict:
         progress=data.attributes.progressReport,
         execution_id=execution_id,
         inputs=data.attributes.userInputs,
+        attributes=data.attributes,
     )
 
 
@@ -69,6 +70,8 @@ def get_statuses_and_progress(job_ids: list[str]) -> list:
                 results.append(future.result())
             except Exception:
                 pass
+
+    return results
 
 
 @beartype
