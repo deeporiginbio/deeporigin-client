@@ -14,6 +14,7 @@ from deeporigin.data_hub import api
 from deeporigin.drug_discovery import chemistry as chem
 from deeporigin.drug_discovery import utils
 from deeporigin.exceptions import DeepOriginException
+from deeporigin.tools.job import Job
 from deeporigin.utils.core import PrettyDict
 
 
@@ -27,6 +28,22 @@ class ABFE:
         self._params = PrettyDict()
 
         self._params.end_to_end = utils._load_params("abfe_end_to_end")
+
+    def get_jobs(self) -> list[Job]:
+        """get a list of ABFE jobs"""
+
+        job_ids = self.parent._job_ids["ABFE"]
+        jobs = []
+        for job_id in job_ids:
+            job = Job.from_ids([job_id])
+            job._viz_func = self.show_progress
+            # from IPython.display import HTML, display
+
+            # job._viz_func = lambda job: display(HTML("<p>Simple visualization</p>"))
+            job.sync()
+            jobs.append(job)
+
+        return jobs
 
     def get_results(self) -> pd.DataFrame:
         """get ABFE results and return in a dataframe.
@@ -202,3 +219,119 @@ class ABFE:
         from deeporigin_molstar import JupyterViewer
 
         JupyterViewer.visualize(html_content)
+
+    @classmethod
+    def parse_progress(cls, job) -> dict:
+        """parse progress from a ABFE job"""
+
+        steps = [
+            "init",
+            "complex",
+            "ligand",
+            "simple_md",
+            "solvation",
+            "binding",
+            "delta_g",
+        ]
+
+        data = job._progress_reports[0]
+
+        if data is None:
+            progress = {step: "NotStarted" for step in steps}
+            progress["init"] = "Running"
+            return progress
+
+        status_value = job._status[0]
+
+        # If the overall status is Succeeded, return a dictionary with every key set to "Succeeded".
+        if status_value == "Succeeded":
+            return {step: "Succeeded" for step in steps}
+
+        current_step = data["run_name"]
+
+        # Validate the input step
+        if current_step not in steps:
+            raise ValueError(
+                f"Invalid process step provided: {current_step}. "
+                f"Valid steps are: {', '.join(steps)}."
+            )
+
+        progress = {}
+        for step in steps:
+            if step == current_step:
+                progress[step] = "Running"
+                # Once we hit the current step, stop processing further steps.
+                break
+            else:
+                progress[step] = "Succeeded"
+
+        return progress
+
+    @classmethod
+    def show_progress(cls, job):
+        """
+        Render a Mermaid diagram where each node is drawn as arounded rectangle
+        with a color indicating its status.
+
+        Any node not specified in the node_status dict willdefault to "notStarted".
+        """
+
+        from deeporigin.utils.notebook import mermaid_to_html
+
+        statuses = cls.parse_progress(job)
+
+        # Define the fixed nodes in the diagram.
+        nodes = [
+            "init",
+            "complex(Complex Prep)",
+            "ligand(Ligand Prep)",
+            "solvation(Solvation FEP)",
+            "simple_md(Simple MD)",
+            "binding(Binding FEP)",
+            "delta_g(ΔG)",
+        ]
+
+        # Build node definitions. For each node, use the providedstatus or default to "notStarted".
+        node_defs = ""
+        for node in nodes:
+            label = node.split("(")[0]
+            status = statuses.get(label, "NotStarted")
+            node_defs += f"    {node}:::{status};\n"
+
+        # Define the fixed edges of the diagram.
+        edges = """
+        init --> complex;
+        init --> ligand;
+        ligand ----> solvation;
+        solvation --> delta_g;
+        complex ---> simple_md --> binding -->delta_g;
+        """
+
+        # Build the complete Mermaid diagram definition.
+        mermaid_code = f"""
+    graph LR;
+        %% Define styles for statuses:
+        classDef NotStarted   fill:#cccccc,stroke:#333,stroke-width:2px;
+        classDef Queued    fill:#cccccc,stroke:#222,stroke-width:2px;
+        classDef Succeeded   fill:#90ee90,stroke:#333,stroke-width:2px;
+        classDef Running      fill:#87CEFA,stroke:#333,stroke-width:2px;
+        classDef Failed    fill:#ff7f7f,stroke:#333,stroke-width:2px;
+
+    {node_defs}
+    {edges}
+        """
+
+        # Render the diagram using your helper function.
+        html = mermaid_to_html(mermaid_code)
+
+        # Define HTML for the legend. Each status is displayed asa colored span.
+        legend_html = """
+        <div style="margin-top: 20px; font-family: sans-serif;">
+          <span style="background-color:#cccccc; color: black;padding:2px 4px; margin: 0 8px;">NotStarted</span>
+          <span style="background-color:#90ee90; color: black;padding:2px 4px; margin: 0 8px;">Suceedeed</span>
+          <span style="background-color:#87CEFA; color: black;padding:2px 4px; margin: 0 8px;">Running</span>
+          <span style="background-color:#ff7f7f; color: black;padding:2px 4px; margin: 0 8px;">Failed</span>
+        </div>
+        """
+        # Display the legend below the Mermaid diagram.
+        return html + legend_html

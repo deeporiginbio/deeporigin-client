@@ -39,6 +39,7 @@ dependencies = [
     "nest_asyncio",
     "asyncio",
     "aiohttp",
+    "ipywidgets",
 ]
 dynamic = ["version"]
 
