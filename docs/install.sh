@@ -1,16 +1,56 @@
-# install uv if needed
-curl -LsSf https://astral.sh/uv/install.sh | sh
+#!/bin/sh
 
-# If uv tells you to add something to PATH,
-# you may need to do that first
+# Detect shell type
+if [ -n "$ZSH_VERSION" ]; then
+    SHELL_TYPE="zsh"
+elif [ -n "$BASH_VERSION" ]; then
+    SHELL_TYPE="bash"
+elif [ -n "$FISH_VERSION" ]; then
+    SHELL_TYPE="fish"
+else
+    SHELL_TYPE="sh"
+fi
+
+# Pretty print function
+print_step() {
+    printf "\033[1;34m🧬==>\033[0m %s\n" "$1"
+}
+
+# Check if uv is installed
+if ! command -v uv >/dev/null 2>&1; then
+    print_step "Installing uv..."
+    if command -v curl >/dev/null 2>&1; then
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+    elif command -v wget >/dev/null 2>&1; then
+        wget -qO- https://astral.sh/uv/install.sh | sh
+    else
+        echo "Error: Neither curl nor wget is installed. Please install one of them first."
+        exit 1
+    fi
+else
+    print_step "uv is already installed, skipping installation"
+fi
+
+# Source uv environment based on shell type
+if [ -f "$HOME/.local/bin/env" ] && [ "$SHELL_TYPE" != "fish" ]; then
+    print_step "Sourcing uv environment for $SHELL_TYPE"
+    . "$HOME/.local/bin/env"
+elif [ -f "$HOME/.local/bin/env.fish" ] && [ "$SHELL_TYPE" = "fish" ]; then
+    print_step "Sourcing uv environment for fish"
+    source "$HOME/.local/bin/env.fish"
+fi
+
+print_step "Initializing uv..."
 uv init
 
-# we use the latest stable version of python
+print_step "Installing Python 3.13..."
 uv python install 3.13
 
-# install deeporigin with the tools extra
-uv add deeporigin --extra tools
+print_step "Installing deeporigin with tools extra..."
+uv add --upgrade deeporigin --extra tools
 
-# also install as a uv tool to run from the command line
+print_step "Installing deeporigin as a uv tool..."
 uv tool install deeporigin
+
+print_step "Installation complete!"
 

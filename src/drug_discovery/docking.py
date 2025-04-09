@@ -6,13 +6,15 @@ from typing import Optional
 import more_itertools
 import pandas as pd
 from beartype import beartype
+from deeporigin_molstar import DockingViewer, JupyterViewer
+
 from deeporigin.data_hub import api
 from deeporigin.drug_discovery import chemistry as chem
 from deeporigin.drug_discovery import utils
+from deeporigin.drug_discovery.structures import ligands_to_dataframe
 from deeporigin.exceptions import DeepOriginException
-from deeporigin.tools.utils import query_run_statuses
+from deeporigin.tools.utils import get_statuses_and_progress, query_run_statuses
 from deeporigin.utils.core import PrettyDict, hash_strings
-from deeporigin_molstar import DockingViewer, JupyterViewer
 
 Number = float | int
 
@@ -34,7 +36,7 @@ class Docking:
 
         df1 = self.parent.get_csv_results_for("Docking")
 
-        df2 = chem.ligands_to_dataframe(self.parent.ligands)
+        df2 = ligands_to_dataframe(self.parent.ligands)
         df2["SMILES"] = df2["Ligand"]
         df2.drop(columns=["Ligand"], inplace=True)
 
@@ -45,6 +47,35 @@ class Docking:
             how="inner",
         )
         return df
+
+    def show_progress(self):
+        """show progress of bulk Docking run"""
+
+        data = get_statuses_and_progress(self.parent._job_ids["Docking"])
+
+        total_docked = 0
+
+        total_ligands = 0
+        for item in data:
+            progress = item["progress"]
+            if progress is None:
+                continue
+
+            batch_docked = _parse_progress(progress)
+            total_docked += batch_docked
+            total_ligands += len(item["inputs"].smiles_list)
+
+        if total_ligands == 0:
+            print("Cannot show progress yet. Jobs are yet to start.")
+            return
+
+        from deeporigin.utils.notebook import show_progress_bar
+
+        show_progress_bar(
+            completed=total_docked,
+            total=total_ligands,
+            title="Docking Progress",
+        )
 
     def show_results(self):
         """show results of bulk Docking run in a table, rendering 2D structures of molecules"""
@@ -66,7 +97,7 @@ class Docking:
     def show_poses(self):
         """show docked ligands with protein in 3D"""
 
-        files = self.parent.get_result_files_for("Docking")
+        files = self.parent.get_result_files_for(tool="Docking")
 
         sdf_file = chem.merge_sdf_files(files)
 
@@ -81,6 +112,18 @@ class Docking:
         )
 
         JupyterViewer.visualize(html_content)
+
+    def get_poses(self, output_sdf_file: str) -> None:
+        """generate a single SDF file containing all the poses of all ligands docked to the protein
+
+        Args:
+            output_sdf_file (str): path to output SDF file. All poses will be written to a SDF file in this location.
+
+        """
+
+        files = self.parent.get_result_files_for(tool="Docking")
+
+        chem.merge_sdf_files(files, output_sdf_file)
 
     @beartype
     def run(
@@ -161,3 +204,13 @@ class Docking:
             )
 
             self.parent._job_ids["Docking"].append(job_id)
+
+
+@beartype
+def _parse_progress(txt: str) -> int:
+    """Parse Docking progress from raw progress text"""
+
+    txt = txt.split("\n")
+    num_docked_ligands = len(txt) - 1
+
+    return num_docked_ligands

@@ -1,9 +1,7 @@
 [project]
 name = "deeporigin"
 description = "Command line tool and Python client for working with Deep Origin"
-authors = [
-    {name = "Deep Origin", email = "support@deeporigin.com"},
-]
+authors = [{ name = "Deep Origin", email = "support@deeporigin.com" }]
 readme = "README.md"
 classifiers = [
     "Environment :: Console",
@@ -35,81 +33,77 @@ dependencies = [
     "pyjwt",
     "cryptography",
     "python-box",
-    "do-sdk-platform==2.1.0",
+    "do-sdk-platform==3.1.0",
     "urllib3>=2.0.0",
     "more-itertools",
+    "nest_asyncio",
+    "asyncio",
+    "aiohttp",
 ]
 dynamic = ["version"]
 
 [project.optional-dependencies]
-lint = [
-    "ruff",
-]
-test = [
-    "pytest",
-    "parameterized",
-    "coverage",
-    "interrogate",
-    "pytest-xdist",
-]
-dev = [
-    "ipykernel",
-    "jupyter-black",
-]
+lint = ["ruff"]
+test = ["pytest", "parameterized", "coverage", "interrogate", "pytest-xdist"]
+dev = ["ipykernel", "jupyter-black"]
 docs = [
-    "mkdocs", 
-    "mkdocs-material-extensions", 
-    "mkdocs-material>=8.2.0", 
+    "mkdocs",
+    "mkdocs-material-extensions",
+    "mkdocs-material>=8.2.0",
     "mkdocstrings",
     "mkdocstrings-python",
-    "black"
+    "black",
 ]
 plots = ["bokeh"]
-tools = ["rdkit", "deeporigin-molstar","biotite"]
+tools = [
+    "rdkit",
+    "deeporigin-molstar>=0.2.0",
+    "biotite",
+    "PubChemPy",
+    "biopython",
+]
 
 [tool.setuptools]
-package-dir = {"deeporigin" = "src"}
+package-dir = { "deeporigin" = "src" }
 include-package-data = true
 
 [tool.setuptools.dynamic]
-version = {file = ["src/VERSION"]}
+version = { file = ["src/VERSION"] }
 
 [project.scripts]
 deeporigin = "deeporigin.cli:main"
 
 [build-system]
-requires = [
-  "setuptools >= 40.9.0",
-]
+requires = ["setuptools >= 40.9.0"]
 build-backend = "setuptools.build_meta"
 
 
 [tool.ruff]
-include = [
-    "**/src/**/*.py",
-    "**/tests/**/*.py",
-]
-# Exclude file-service auto-gen code for now
-exclude = [
-    "src/files/file_service",
-]
+include = ["**/src/**/*.py", "**/tests/**/*.py"]# Exclude file-service auto-gen code for now
+exclude = [ "src/files/file_service",]
 
 [tool.ruff.lint]
 ignore = ["E203", "E266", "E501"]
-
+select = ["E4", "E7", "E9", "F", "B", "Q", "F401", "E711", "F841", "F821"]
 
 
 [tool.ruff.lint.isort]
 case-sensitive = false
+known-first-party = ["deeporigin"]
+known-third-party = ["numpy", "pandas", "rdkit", "beartype"]
+section-order = [
+    "future",
+    "standard-library",
+    "third-party",
+    "first-party",
+    "local-folder",
+]
 
 [tool.distutils.bdist_wheel]
 universal = true
 
 [tool.coverage.run]
-omit = [
-    "src/data_hub/client.py",
-    "tests/*.py",
-]
+omit = ["src/data_hub/client.py", "tests/*.py"]
 
 
 [tool.interrogate]

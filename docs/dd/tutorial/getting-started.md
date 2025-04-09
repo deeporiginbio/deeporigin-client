@@ -25,7 +25,7 @@ Docking, ABFE, and RBFE require a protein to be in a PDB file as input.
 Ligands can be imported from SDF files or SMILES strings. To run ABFE and RBFE, the ligand must be in a SDF file.
 
 !!! tip "Example data"
-    If you want to explore these tools using some example data, we provide the BRD protein and a few ligands. This is built into the `deeporigin` package and can be accessed using:
+    If you want to explore these tools using some example data, we provide the [BRD4 protein](https://pubs.acs.org/doi/10.1021/acs.jctc.0c00660) and a few ligands. This is built into the `deeporigin` package and can be accessed using:
 
     ```python
     from deeporigin.drug_discovery import EXAMPLE_DATA_DIR
@@ -42,6 +42,8 @@ The `Complex` object can be created using:
 sim = Complex.from_dir(EXAMPLE_DATA_DIR)
 ```
 
+## Inspecting the `Complex` object
+
 Inspecting the object shows that it contains a protein and 8 ligands:
 
 ```python
@@ -53,6 +55,25 @@ sim
     ```python
     Complex(protein=brd.pdb with 8 ligands)
     ```
+
+### Viewing the protein
+
+The 3D structure of the protein can be viewed using the built-in `show` method in the `Protein` class:
+
+```python
+sim.protein.show()
+```
+
+This generates a 3D visualization of the protein, similar to:
+
+<iframe 
+    src="../how-to/protein.html" 
+    width="100%" 
+    height="650" 
+    style="border:none;"
+    title="Protein visualization"
+></iframe>
+
 
 ### Listing Ligands
 
