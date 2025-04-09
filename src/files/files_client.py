@@ -29,11 +29,11 @@ Example usage:
     ```
 """
 
-import os
-import re
-import pathlib
 import logging
-from typing import Optional, List, Dict, Any, Union
+import os
+import pathlib
+import re
+from typing import Any, Dict, List, Optional, Union
 from urllib.parse import urlparse
 
 from deeporigin import auth
@@ -41,18 +41,18 @@ from deeporigin.utils.network import _get_domain_name
 
 from .file_service import AuthenticatedClient, Client
 from .file_service.api.default import (
-    get_object,
-    put_object,
     delete_object,
+    get_object,
     head_object,
+    put_object,
     sync_objects,
 )
+from .file_service.models.put_object_body import PutObjectBody
 from .file_service.models.sync_file_schema_dto import SyncFileSchemaDto
 from .file_service.models.sync_file_schema_dto_credentials import (
     SyncFileSchemaDtoCredentials,
 )
 from .file_service.models.sync_file_schema_dto_provider import SyncFileSchemaDtoProvider
-from .file_service.models.put_object_body import PutObjectBody
 from .file_service.types import File
 
 logger = logging.getLogger(__name__)

@@ -17,16 +17,16 @@ If the script is run and temp_test_data already exists, it will be deleted
 and recreated to ensure a clean test environment.
 """
 
-import os
-import sys
-import shutil
-import random
-import string
-import time
 import hashlib
-from pathlib import Path
+import os
+import random
+import shutil
+import string
+import sys
 import tempfile
-from typing import List, Dict, Any
+import time
+from pathlib import Path
+from typing import Any, Dict, List
 
 from deeporigin.files import FilesClient
 
