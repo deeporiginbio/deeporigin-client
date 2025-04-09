@@ -89,8 +89,10 @@ include = [
     "**/src/**/*.py",
     "**/tests/**/*.py",
 ]
-
-
+# Exclude file-service auto-gen code for now
+exclude = [
+    "src/files/file_service",
+]
 
 [tool.ruff.lint]
 ignore = ["E203", "E266", "E501"]
