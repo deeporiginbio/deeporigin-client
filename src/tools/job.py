@@ -40,6 +40,9 @@ class Job:
     _status: list = field(default_factory=list)
     _inputs: list = field(default_factory=list)
     _task = None
+    _attributes: list = field(default_factory=list)
+    _execution_ids: list = field(default_factory=list)
+    _metadata: list = field(default_factory=list)
 
     @classmethod
     def from_ids(cls, ids: list[str]) -> "Job":
@@ -60,35 +63,16 @@ class Job:
         and progress reports for each job ID. It skips jobs that have already
         reached a terminal state (Succeeded or Failed).
         """
-        for i, job_id in enumerate(self._ids):
-            # Skip if this job has already succeeded or failed
-            if i < len(self._status) and self._status[i] in ["Succeeded", "Failed"]:
-                continue
 
-            data = utils.get_status_and_progress(job_id)
-            if data["progress"]:
-                if i < len(self._progress_reports):
-                    self._progress_reports[i] = json.loads(data["progress"])
-                else:
-                    self._progress_reports.append(json.loads(data["progress"]))
-            elif i >= len(self._progress_reports):
-                self._progress_reports.append(None)
+        # use
+        results = utils.get_statuses_and_progress(self._ids)
 
-            if data["inputs"]:
-                if i < len(self._inputs):
-                    self._inputs[i] = data["inputs"]
-                else:
-                    self._inputs.append(data["inputs"])
-            elif i >= len(self._inputs):
-                self._inputs.append(None)
-
-            if data["status"]:
-                if i < len(self._status):
-                    self._status[i] = data["status"]
-                else:
-                    self._status.append(data["status"])
-            elif i >= len(self._status):
-                self._status.append(None)
+        self._status = [result["status"] for result in results]
+        self._progress_reports = [result["progress"] for result in results]
+        self._execution_ids = [result["execution_id"] for result in results]
+        self._inputs = [result["inputs"] for result in results]
+        self._attributes = [result["attributes"] for result in results]
+        self._metadata = [result["attributes"]["metadata"] for result in results]
 
     def show(self):
         """Display the current job status and progress reports.
@@ -138,12 +122,13 @@ class Job:
             """
             while True:
                 current_time = time.strftime("%Y-%m-%d %H:%M:%S")
-                new_html = (
-                    f"<div style='color: gray;'>Last updated: {current_time}</div>"
-                )
 
                 self.sync()
-                new_html += self._render_progress_html()
+                new_html = self._render_progress_html()
+
+                new_html += (
+                    f"<div style='color: gray;'>Last updated: {current_time}</div>"
+                )
 
                 update_display(HTML(new_html), display_id=display_id)
 
