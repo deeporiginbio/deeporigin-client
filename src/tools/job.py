@@ -5,8 +5,10 @@ from dataclasses import dataclass, field
 import json
 import time
 from typing import Any, Callable, Optional
+from pathlib import Path
+from jinja2 import Environment, FileSystemLoader
 
-from IPython.display import HTML, display, update_display
+from IPython.display import HTML, display, update_display, IFrame
 import nest_asyncio
 
 from deeporigin.tools import utils
@@ -34,8 +36,14 @@ class Job:
 
     name: str
     _ids: list[str]
+
+    # functions
     _viz_func: Optional[Callable[["Job"], Any]] = None
     _parse_func: Optional[Callable[["Job"], Any]] = None
+    _name_func: Optional[Callable[["Job"], Any]] = field(
+        default_factory=lambda: lambda self: "Job"
+    )
+
     _progress_reports: list = field(default_factory=list)
     _status: list = field(default_factory=list)
     _inputs: list = field(default_factory=list)
@@ -80,8 +88,48 @@ class Job:
         This method renders and displays the current state of all jobs
         using the visualization function if set, or a default HTML representation.
         """
-        # Display the output widget in the current cell
-        display(HTML(self._render_progress_html()))
+        # Get the template directory
+        template_dir = Path(__file__).parent.parent / "templates"
+        env = Environment(loader=FileSystemLoader(str(template_dir)))
+        template = env.get_template("job.html")
+
+        # Prepare template variables
+        template_vars = {
+            "status_html": self._render_progress_html(),
+            "last_updated": time.strftime("%Y-%m-%d %H:%M:%S"),
+            "outputs_json": json.dumps(
+                [attribute.userOutputs for attribute in self._attributes], indent=2
+            ),
+            "inputs_json": json.dumps(
+                [attribute.userInputs for attribute in self._attributes], indent=2
+            ),
+            "job_ids": self._ids,
+            "execution_ids": self._execution_ids,
+            "statuses": self._status,
+            "card_title": self._name_func(self),
+            "status": self._status[0] if self._status else "Unknown",
+        }
+
+        # Try to parse progress reports as JSON, fall back to raw text if it fails
+        try:
+            # Try to parse each item in the list as JSON
+            parsed_reports = []
+            for report in self._progress_reports:
+                try:
+                    parsed_reports.append(json.loads(str(report)))
+                except json.JSONDecodeError:
+                    parsed_reports.append(report)
+            template_vars["raw_progress_json"] = json.dumps(parsed_reports, indent=2)
+        except Exception:
+            # If something goes wrong with the list processing, fall back to raw text
+            template_vars["raw_progress_json"] = str(self._progress_reports)
+
+        # Render the template
+        rendered_html = template.render(**template_vars)
+
+        # Create and display iframe
+        # iframe_html = f"""<iframe srcdoc='{rendered_html.replace("'", "&apos;")}' style="width: 100%; height: 500px; border: none;"></iframe>"""
+        display(HTML(rendered_html))
 
     def _render_progress_html(self):
         """Render HTML representation of job progress.
