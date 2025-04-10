@@ -5,12 +5,12 @@ import functools
 from typing import Optional
 from urllib.parse import urljoin
 
-import diskcache as dc
-import jwt
-import requests
 from beartype import beartype
 from beartype.typing import Literal
+import diskcache as dc
+import jwt
 from jwt.algorithms import RSAAlgorithm
+import requests
 from tqdm import tqdm
 
 from deeporigin import auth

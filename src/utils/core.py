@@ -1,12 +1,12 @@
 """this module contains some core utility functions that in turn do not depend on anything else in this library"""
 
 import base64
+from datetime import datetime
 import hashlib
 import json
 import os
-import shutil
-from datetime import datetime
 from pathlib import Path
+import shutil
 from typing import Union
 
 from beartype import beartype

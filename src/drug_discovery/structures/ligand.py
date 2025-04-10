@@ -56,18 +56,19 @@ print(ligand)
 ligand.visualize()
 """
 
-import tempfile
-
 # from deeporigin.drug_discovery.utilities.props import predict_properties, protonate
 from dataclasses import dataclass, field
+import os
 from pathlib import Path
+import tempfile
 from typing import Any, Optional
 
+from beartype import beartype
+from deeporigin_molstar import MoleculeViewer
 import numpy as np
 import pandas as pd
-import requests
-from deeporigin_molstar import MoleculeViewer
 from rdkit import Chem
+import requests
 from tqdm import tqdm
 
 from deeporigin.drug_discovery.structures.internal_structures import (
@@ -147,6 +148,7 @@ class Ligand:
     xref_protein_chain_id: str | None = None
     save_to_file: bool = False
     properties: dict = field(default_factory=dict)
+    _do_id: str | None = None
 
     # Additional attributes that are initialized in __post_init__
     mol: Molecule | None = field(init=False, default=None)
@@ -954,3 +956,57 @@ class Ligand:
 
             mols.append(ligand)
         return mols
+
+
+@beartype
+def ligands_to_dataframe(ligands: list[Ligand]):
+    """convert a list of ligands to a pandas dataframe"""
+
+    import pandas as pd
+
+    smiles_list = [ligand.smiles for ligand in ligands]
+    id_list = [ligand._do_id for ligand in ligands]
+    file_list = [
+        os.path.basename(ligand.file_path) if ligand.file_path is not None else None
+        for ligand in ligands
+    ]
+
+    data = {
+        "Ligand": smiles_list,
+        "ID": id_list,
+        "File": file_list,
+    }
+
+    # find all the common properties in all ligands
+    common_keys = set.intersection(
+        *(set(ligand.properties.keys()) for ligand in ligands)
+    )
+    for key in common_keys:
+        data[key] = [ligand.properties[key] for ligand in ligands]
+
+    df = pd.DataFrame(data)
+
+    return df
+
+
+@beartype
+def show_ligands(ligands: list[Ligand]):
+    """show ligands in the FEP object in a dataframe. This function visualizes the ligands using core-aligned 2D visualizations.
+
+    Args:
+        ligands (list[Ligand]): list of ligands
+
+    """
+
+    df = ligands_to_dataframe(ligands)
+
+    # convert SMILES to aligned images
+    from deeporigin.drug_discovery import chemistry
+
+    images = chemistry.smiles_list_to_base64_png_list(df["Ligand"].tolist())
+    df["Ligand"] = images
+
+    # Use escape=False to allow the <img> tags to render as images
+    from IPython.display import HTML, display
+
+    display(HTML(df.to_html(escape=False)))

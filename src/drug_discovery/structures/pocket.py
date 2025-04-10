@@ -7,18 +7,18 @@ Attributes:
     block_content (str): String containing the pocket data.
 """
 
+from dataclasses import dataclass, field
 import io
 import os
-import shutil
-from dataclasses import dataclass, field
 from pathlib import Path
+import shutil
 from typing import Any, Dict, List, Optional
 
-import numpy as np
-import pandas as pd
 from biotite.structure import AtomArrayStack
 from biotite.structure.io.pdb import PDBFile
 from deeporigin_molstar import ProteinViewer
+import numpy as np
+import pandas as pd
 from tabulate import tabulate
 from termcolor import colored
 

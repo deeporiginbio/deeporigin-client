@@ -2,10 +2,10 @@
 
 import uuid
 
+from box import BoxList
 import numpy as np
 import pandas as pd
 import pytest
-from box import BoxList
 
 from deeporigin.data_hub import api
 from deeporigin.data_hub.dataframe import DataFrame

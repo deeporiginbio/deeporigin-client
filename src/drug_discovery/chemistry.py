@@ -3,12 +3,12 @@
 import base64
 import hashlib
 import os
-import re
 from pathlib import Path
+import re
 from typing import Optional, Tuple
 
-import pandas as pd
 from beartype import beartype
+import pandas as pd
 from rdkit import Chem
 
 from deeporigin.exceptions import DeepOriginException

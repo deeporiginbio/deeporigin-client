@@ -14,8 +14,8 @@ import os
 from pathlib import Path
 from typing import Optional, Tuple
 
-import requests
 from beartype import beartype
+import requests
 
 from deeporigin.drug_discovery.structures import Ligand, Pocket, Protein
 from deeporigin.exceptions import DeepOriginException

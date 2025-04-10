@@ -5,9 +5,9 @@ import json
 from pathlib import Path
 from urllib.parse import parse_qs, urljoin, urlparse
 
-import requests
 from beartype import beartype
 from packaging.version import Version
+import requests
 
 from deeporigin import __version__
 from deeporigin.exceptions import DeepOriginException

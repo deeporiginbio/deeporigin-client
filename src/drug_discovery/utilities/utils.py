@@ -5,9 +5,9 @@ This module provides various utility functions for file operations, data process
 and geometric calculations commonly used in drug discovery workflows.
 """
 
+from itertools import islice
 import os
 import shutil
-from itertools import islice
 
 DEFAULT_MAX_DEPTH = 2
 
