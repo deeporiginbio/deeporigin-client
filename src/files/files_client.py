@@ -3,7 +3,7 @@ DeepOrigin FilesClient Module
 
 This module provides a client for interacting with the DeepOrigin file service.
 It offers high-level methods for file operations such as upload, download,
-listing directories, and synchronizing files between local and remote storage.
+listing and synchronizing directories between local and remote storage.
 
 Example usage:
     ```python
