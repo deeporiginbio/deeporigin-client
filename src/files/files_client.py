@@ -47,11 +47,11 @@ from .file_service.api.default import (
 )
 from .file_service.types import File
 from .file_service.models.put_object_body import PutObjectBody
-#from .file_service.models.sync_file_schema_dto import SyncFileSchemaDto
-#from .file_service.models.sync_file_schema_dto_credentials import (
+# from .file_service.models.sync_file_schema_dto import SyncFileSchemaDto
+# from .file_service.models.sync_file_schema_dto_credentials import (
 #    SyncFileSchemaDtoCredentials,
-#)
-#from .file_service.models.sync_file_schema_dto_provider import SyncFileSchemaDtoProvider
+# )
+# from .file_service.models.sync_file_schema_dto_provider import SyncFileSchemaDtoProvider
 
 
 logger = logging.getLogger(__name__)
@@ -79,11 +79,11 @@ class FilesClient:
             base_url: Base URL of the file service API
             token: Authentication token (optional)
             verify_ssl: Whether to verify SSL certificates or path to CA bundle
-        """        
+        """
 
         if not base_url:
             base_url = _get_domain_name()
-        self._base_url = base_url        
+        self._base_url = base_url
         if not token:
             tokens = auth.get_tokens(refresh=False)
             token = tokens["access"]
@@ -183,10 +183,10 @@ class FilesClient:
     def _remote_file_exists(self, path: str) -> bool:
         """
         Check if a file exists in remote storage.
-        
+
         Args:
             path: Path in the format files:///path
-        
+
         Returns:
             True if the file exists, False otherwise
         """
@@ -201,12 +201,12 @@ class FilesClient:
     def upload_file(self, src: str, dest: str, overwrite: bool = False) -> bool:
         """
         Upload a file from local path to remote storage.
-        
+
         Args:
             src: Local file path
             dest: Remote path in the format files:///path
             overwrite: If True, delete the file first if it exists
-            
+
         Returns:
             True if successful, False otherwise
         """

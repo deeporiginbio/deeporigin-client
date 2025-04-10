@@ -166,7 +166,7 @@ def run_tests():
     print_header("File Service API Integration Test")
 
     # Initialize client
-    base_url = globals().get("API_BASE_URL") # return none if not defined
+    base_url = globals().get("API_BASE_URL")  # return none if not defined
     try:
         client = FilesClient(base_url, token=globals().get("AUTH_TOKEN"))
         base_url = client.get_base_url()
@@ -240,7 +240,9 @@ def run_tests():
         print_step(f"Uploading {local_path} to {remote_path}")
 
         try:
-            success = client.upload_file(src=local_path, dest=remote_path, overwrite=True)
+            success = client.upload_file(
+                src=local_path, dest=remote_path, overwrite=True
+            )
             if success:
                 print("  Upload successful")
                 file_info["uploaded"] = True
