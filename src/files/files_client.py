@@ -83,7 +83,7 @@ class FileMetadata:
     # Note: For our request content-length is size, but technically may be size of HTTP instead
     # if it changes, we'd need its mapping
     _FIELD_MAPPING = {
-        "key": "KeyPath",
+        "key": "KeyPath",  # Only comes in list (not HEAD)
         "last-modified": "LastModified",
         "x-last-modified": "LastModified", # comes in different in list and HEAD
         "etag": "ETag",

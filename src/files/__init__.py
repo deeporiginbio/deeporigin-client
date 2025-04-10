@@ -1,3 +1,3 @@
-from .files_client import FilesClient, FileMetadata
+from .files_client import FileMetadata, FilesClient
 
 __all__ = ["FilesClient", "FileMetadata"]
