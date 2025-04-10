@@ -236,7 +236,7 @@ class FilesClient:
 
         return org_friendly_id, path
 
-    def list_dir(self, path: str, flag: Optional[str] = None) -> List[FileMetadata]:
+    def list_dir(self, path: str) -> List[FileMetadata]:
         """
         List files and directories at the specified path.
         Args:
@@ -249,9 +249,7 @@ class FilesClient:
 
         # The list_type parameter seems to be required in the API
         # We'll map the flag to an appropriate value
-        list_type = 2.0  # Default value
-        if flag == "recursive":
-            list_type = 1.0
+        list_type = 2  # Default value
 
         response = get_object.sync_detailed(
             org_friendly_id=org_friendly_id,
@@ -609,7 +607,7 @@ class FilesClient:
                 org_friendly_id=org_friendly_id,
                 file_path="",
                 client=self.client,
-                list_type=2.0,  # Default list type
+                list_type=2,  # Default list type
             )
 
             # If we get a 200 or 404, authentication is working
