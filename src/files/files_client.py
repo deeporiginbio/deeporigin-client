@@ -45,8 +45,9 @@ from .file_service.api.default import (
     put_object,
     # sync_objects,
 )
-from .file_service.types import File
 from .file_service.models.put_object_body import PutObjectBody
+from .file_service.types import File
+
 # from .file_service.models.sync_file_schema_dto import SyncFileSchemaDto
 # from .file_service.models.sync_file_schema_dto_credentials import (
 #    SyncFileSchemaDtoCredentials,

@@ -19,13 +19,13 @@ and recreated to ensure a clean test environment.
 
 import hashlib
 import os
+from pathlib import Path
 import random
 import shutil
 import string
 import sys
 import tempfile
 import time
-from pathlib import Path
 from typing import Any, Dict, List
 
 from deeporigin.files import FilesClient

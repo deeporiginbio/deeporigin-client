@@ -37,10 +37,9 @@ class ABFE:
         jobs = []
         for job_id in job_ids:
             job = Job.from_ids([job_id])
-            job._viz_func = self.show_progress
-            # from IPython.display import HTML, display
+            job._viz_func = self._render_progress
+            job._name_func = self._name_job
 
-            # job._viz_func = lambda job: display(HTML("<p>Simple visualization</p>"))
             job.sync()
             jobs.append(job)
 
@@ -236,12 +235,13 @@ class ABFE:
         ]
 
         data = job._progress_reports[0]
-        data = json.loads(data)
 
         if data is None:
             progress = {step: "NotStarted" for step in steps}
             progress["init"] = "Running"
             return progress
+        else:
+            data = json.loads(data)
 
         status_value = job._status[0]
 
@@ -274,7 +274,12 @@ class ABFE:
         return progress
 
     @classmethod
-    def show_progress(cls, job) -> str:
+    def _name_job(cls, job) -> str:
+        """utility function to name a job using inputs to that job"""
+        return f"ABFE run using <code>{job._metadata[0]['protein_id']}</code> and <code>{job._metadata[0]['ligand1_id']}</code>"
+
+    @classmethod
+    def _render_progress(cls, job) -> str:
         """
         Render HTML for a Mermaid diagram where each node is drawn as arounded rectangle
         with a color indicating its status.
@@ -285,13 +290,6 @@ class ABFE:
         from deeporigin.utils.notebook import mermaid_to_html
 
         statuses = cls.parse_progress(job)
-
-        header_html = f"""
-        <div style="text-align: left; font-family: sans-serif;">
-            <h2>ABFE run using <code>{job._metadata[0]["protein_id"]}</code> and <code>{job._metadata[0]["ligand1_id"]}</code></h2>
-            <p>Job ID: <code>{job._ids[0]}</code></p>
-        </div>
-        """
 
         # Define the fixed nodes in the diagram.
         nodes = [
@@ -347,4 +345,4 @@ class ABFE:
         </div>
         """
         # Display the legend below the Mermaid diagram.
-        return header_html + mermaid_html + legend_html
+        return mermaid_html + legend_html
