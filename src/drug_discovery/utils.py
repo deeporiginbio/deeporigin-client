@@ -152,11 +152,19 @@ def _start_tool_run(
     if is_test_run(params):
         print("⚠️ Warning: test_run=1 in these parameters. Results may not be accurate.")
 
+    metadata = dict(
+        protein_id=protein_id,
+        complex_hash=complex_hash,
+        ligand1_id=ligand1_id,
+        ligand2_id=ligand2_id,
+    )
+
     job_id = run._process_job(
         inputs=params,
         outputs=outputs,
         tool_key=tool_key_mapper[tool],
         cols=database_columns,
+        metadata=metadata,
     )
 
     # write job ID

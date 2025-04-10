@@ -1,8 +1,8 @@
 import json
 from typing import Union
 
-import pytest
 from beartype import beartype
+import pytest
 
 from tests.utils import (
     _run_cli_command,

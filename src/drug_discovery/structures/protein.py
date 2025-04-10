@@ -44,21 +44,21 @@ protein.visualize()
 ```
 """
 
-import io
-import os
-import tempfile
 from collections import defaultdict
 from dataclasses import dataclass, field
+import io
+import os
 from pathlib import Path
+import tempfile
 from typing import Optional, Tuple
 
-import numpy as np
 from beartype import beartype
 from biotite.database.rcsb import fetch
 from biotite.structure import filter_solvent
 from biotite.structure.geometry import centroid
 from biotite.structure.io.pdb import PDBFile
 from deeporigin_molstar import DockingViewer, JupyterViewer, ProteinViewer
+import numpy as np
 
 from deeporigin.drug_discovery.constants import METALS, STATE_DUMP_PATH
 from deeporigin.drug_discovery.external_tools.utils import (
@@ -84,6 +84,7 @@ class Protein:
     atom_types: Optional[np.ndarray] = None
     block_type: str = "pdb"
     block_content: Optional[str] = None
+    _do_id: str | None = None
 
     @classmethod
     def from_pdb_id(cls, pdb_id: str, struct_ind: int = 0) -> "Protein":

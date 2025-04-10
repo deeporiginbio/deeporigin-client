@@ -7,8 +7,8 @@ import os
 import time
 from urllib.parse import urljoin
 
-import requests
 from beartype import beartype
+import requests
 
 from deeporigin.config import get_value as get_config
 from deeporigin.exceptions import DeepOriginException
