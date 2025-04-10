@@ -3,12 +3,12 @@
 import asyncio
 from dataclasses import dataclass, field
 import json
+from pathlib import Path
 import time
 from typing import Any, Callable, Optional
-from pathlib import Path
-from jinja2 import Environment, FileSystemLoader
 
-from IPython.display import HTML, display, update_display, IFrame
+from IPython.display import HTML, display, update_display
+from jinja2 import Environment, FileSystemLoader
 import nest_asyncio
 
 from deeporigin.tools import utils
@@ -82,7 +82,7 @@ class Job:
         self._attributes = [result["attributes"] for result in results]
         self._metadata = [result["attributes"]["metadata"] for result in results]
 
-    def show(self):
+    def _render_job_view(self):
         """Display the current job status and progress reports.
 
         This method renders and displays the current state of all jobs
@@ -95,7 +95,7 @@ class Job:
 
         # Prepare template variables
         template_vars = {
-            "status_html": self._render_progress_html(),
+            "status_html": self._viz_func(self),
             "last_updated": time.strftime("%Y-%m-%d %H:%M:%S"),
             "outputs_json": json.dumps(
                 [attribute.userOutputs for attribute in self._attributes], indent=2
@@ -107,8 +107,19 @@ class Job:
             "execution_ids": self._execution_ids,
             "statuses": self._status,
             "card_title": self._name_func(self),
-            "status": self._status[0] if self._status else "Unknown",
         }
+
+        # Determine overall status based on priority: Failed > Cancelled > Succeeded
+        if not self._status:
+            template_vars["status"] = "Unknown"
+        elif any(status == "Failed" for status in self._status):
+            template_vars["status"] = "Failed"
+        elif any(status == "Cancelled" for status in self._status):
+            template_vars["status"] = "Cancelled"
+        elif all(status == "Succeeded" for status in self._status):
+            template_vars["status"] = "Succeeded"
+        else:
+            template_vars["status"] = "Running"
 
         # Try to parse progress reports as JSON, fall back to raw text if it fails
         try:
@@ -125,19 +136,15 @@ class Job:
             template_vars["raw_progress_json"] = str(self._progress_reports)
 
         # Render the template
-        rendered_html = template.render(**template_vars)
+        return template.render(**template_vars)
 
-        # Create and display iframe
-        # iframe_html = f"""<iframe srcdoc='{rendered_html.replace("'", "&apos;")}' style="width: 100%; height: 500px; border: none;"></iframe>"""
-        display(HTML(rendered_html))
+    def show(self):
+        """Display the job view in a Jupyter notebook.
 
-    def _render_progress_html(self):
-        """Render HTML representation of job progress.
-
-        Returns:
-            HTML string representing the current job status and progress.
+        This method renders the job view and displays it in a Jupyter notebook.
         """
-        return self._viz_func(self)
+        rendered_html = self._render_job_view()
+        display(HTML(rendered_html))
 
     def watch(self):
         """Start monitoring job progress in real-time.
@@ -150,7 +157,11 @@ class Job:
         """
         # Check if there are any active jobs (not Failed or Succeeded)
         if not any(status not in ["Failed", "Succeeded"] for status in self._status):
-            display(HTML("<div style='color: gray;'>No active jobs to monitor</div>"))
+            display(
+                HTML(
+                    "<div style='color: gray;'>No active jobs to monitor. This display will not update.</div>"
+                )
+            )
             self.show()
             return
 
@@ -169,16 +180,10 @@ class Job:
             It automatically stops when all jobs reach a terminal state.
             """
             while True:
-                current_time = time.strftime("%Y-%m-%d %H:%M:%S")
-
                 self.sync()
-                new_html = self._render_progress_html()
+                html = self._render_job_view()
 
-                new_html += (
-                    f"<div style='color: gray;'>Last updated: {current_time}</div>"
-                )
-
-                update_display(HTML(new_html), display_id=display_id)
+                update_display(HTML(html), display_id=display_id)
 
                 # Check if all jobs are in terminal states
                 if all(status in ["Failed", "Succeeded"] for status in self._status):
@@ -212,7 +217,7 @@ class Job:
             HTML string representing the job object.
         """
         if self._viz_func is not None:
-            return self._render_progress_html()
+            return self._render_job_view()
         else:
             return f"""
             <div style="border: 1px solid #ccc; padding: 10px; border-radius: 5px;">

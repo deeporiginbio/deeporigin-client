@@ -235,12 +235,13 @@ class ABFE:
         ]
 
         data = job._progress_reports[0]
-        data = json.loads(data)
 
         if data is None:
             progress = {step: "NotStarted" for step in steps}
             progress["init"] = "Running"
             return progress
+        else:
+            data = json.loads(data)
 
         status_value = job._status[0]
 
