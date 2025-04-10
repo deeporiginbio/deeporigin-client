@@ -128,8 +128,8 @@ class Complex:
     """class to represent a set of a protein and 1 or many ligands"""
 
     # Using a private attribute for ligands with the property decorator below
-    _ligands: list[Ligand] = field(repr=False)
     protein: Protein
+    _ligands: list[Ligand] = field(default_factory=list, repr=False)
 
     # these params are not user facing
     _db: Optional[dict] = None
@@ -145,6 +145,25 @@ class Complex:
             utils.DB_RBFE: [],
         }
     )
+
+    def __init__(
+        self,
+        protein: Protein,
+        *,
+        ligands: list[Ligand] | None = None,
+        **kwargs,
+    ):
+        """Initialize a Complex with either ligands or _ligands parameter"""
+        self._ligands = ligands if ligands is not None else []
+        self.protein = protein
+        self._db = None
+        self._hash = None
+        self._job_ids = {
+            utils.DB_DOCKING: [],
+            utils.DB_ABFE: [],
+            utils.DB_RBFE: [],
+        }
+        self.__post_init__()
 
     def __post_init__(self):
         """various post init tasks"""
@@ -228,8 +247,8 @@ class Complex:
 
         # Create the Complex instance
         instance = cls(
-            _ligands=ligands,
             protein=protein,
+            ligands=ligands,
         )
 
         return instance

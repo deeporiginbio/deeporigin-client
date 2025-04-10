@@ -29,8 +29,6 @@ visualize molecular structures. The primary features and methods include:
 
 - **Utility Functions**:
   - **convert_to_sdf**: Converts molecular block content to SDF format, ensuring compatibility with various tools.
-  - **fetch_smiles_from_pdb_api**: Retrieves SMILES strings for ligands using the RCSB PDB REST API, enhancing data
-    integration and accuracy.
 
 - **Visualization**: Integrates with the `MoleculeViewer` to render interactive visualizations of molecules within
   Jupyter Notebooks, facilitating intuitive analysis and presentation of molecular structures.

@@ -38,9 +38,7 @@ class ABFE:
         for job_id in job_ids:
             job = Job.from_ids([job_id])
             job._viz_func = self.show_progress
-            # from IPython.display import HTML, display
 
-            # job._viz_func = lambda job: display(HTML("<p>Simple visualization</p>"))
             job.sync()
             jobs.append(job)
 
