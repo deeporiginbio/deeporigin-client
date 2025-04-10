@@ -144,7 +144,7 @@ def print_remote_files(client, remote_path):
             for file_metadata in files:
                 # Extract relevant information from FileMetadata object
                 name = file_metadata.KeyPath or "Unknown"
-                size = file_metadata.Size or file_metadata.ContentLength or "Unknown"
+                size = file_metadata.Size or "Unknown"
                 file_type = "Directory" if name.endswith("/") else "File"
 
                 print(f"  - {name} ({file_type}, {size} bytes)")
@@ -237,6 +237,9 @@ def run_tests():
             success = client.upload_file(
                 src=local_path, dest=remote_path, overwrite=True
             )
+            metadata = client.get_metadata(remote_path)
+            print(f"  Metadata: {metadata}")
+
             if success:
                 print("  Upload successful")
                 file_info["uploaded"] = True
@@ -267,7 +270,7 @@ def run_tests():
                 metadata = client.get_metadata(remote_path)
                 if metadata:
                     # Print the metadata using both object attributes and raw dictionary
-                    print(f"  Metadata as object: KeyPath={metadata.KeyPath}, Size={metadata.Size}, ContentLength={metadata.ContentLength}")
+                    print(f"  Metadata as object: KeyPath={metadata.KeyPath}, Size={metadata.Size}")
                     print(f"  Raw metadata dictionary: {metadata.get_dict()}")
 
                     # Try to extract file size from metadata

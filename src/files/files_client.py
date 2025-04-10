@@ -69,30 +69,31 @@ class FileMetadata:
     compatibility with dictionary-based access.
     """
     # Common S3-like metadata fields
-    KeyPath: Optional[str] = None  # Key
+    KeyPath: Optional[str] = None  # File path or its key in the storage system
     LastModified: Optional[str] = None
     ETag: Optional[str] = None
-    Size: Optional[int] = None
+    Size: Optional[int] = None # Size of file/object in bytes
     StorageClass: Optional[str] = None
     ContentType: Optional[str] = None
-    ContentLength: Optional[int] = None
     
     # Store the original dictionary for access to all fields
     _raw_dict: Dict[str, Any] = field(default_factory=dict)
     
     # Mapping between S3/HTTP header names and class attribute names - shared across instances
+    # Note: For our request content-length is size, but technically may be size of HTTP instead
+    # if it changes, we'd need its mapping
     _FIELD_MAPPING = {
         "key": "KeyPath",
         "last-modified": "LastModified",
+        "x-last-modified": "LastModified", # comes in different in list and HEAD
         "etag": "ETag",
-        "size": "Size",
-        "content-length": "ContentLength",
+        "content-length": "Size",
         "content-type": "ContentType",
         "x-amz-storage-class": "StorageClass",
     }       
     
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "FileMetadata":
+    def from_dict(cls, data: Dict[str, Any], key_path : str = None) -> "FileMetadata":
         """
         Create a FileMetadata instance from a dictionary.        
         Args:
@@ -111,14 +112,16 @@ class FileMetadata:
             
             # Only set the attribute if it exists in the class
             if hasattr(instance, attr_name):            
-                if attr_name == "Size" or attr_name == "ContentLength":
+                if attr_name == "Size":
                     try:
                         value = int(value)
                     except (ValueError, TypeError):
                         pass
                 
                 setattr(instance, attr_name, value)
-        
+
+        if key_path:
+            instance.KeyPath = key_path        
         return instance
     
     def to_updated_dict(self) -> Dict[str, Any]:
@@ -132,6 +135,8 @@ class FileMetadata:
         
         # This assumes _FIELD_MAPPING includes all needed attributes.
         # For each _FIELD_MAPPING entry, if the attribute exists assign it as string.
+        # TBD -- may result in repeated keys if there is repeated field mapping
+        #   (ex: last-midified)
         for header_key, attr_name in self._FIELD_MAPPING.items():
             if hasattr(self, attr_name) and getattr(self, attr_name) is not None:
                 result[header_key] = str(getattr(self, attr_name))
@@ -395,7 +400,7 @@ class FilesClient:
 
         if response.status_code == 200:
             # Extract metadata from response headers and create a FileMetadata object
-            return FileMetadata.from_dict(dict(response.headers))
+            return FileMetadata.from_dict(dict(response.headers), remote_path)
         else:
             logger.error(f"Failed to get metadata for {path}: {response.status_code}")
             return None
