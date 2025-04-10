@@ -29,6 +29,8 @@ Example usage:
     ```
 """
 
+from dataclasses import dataclass, field
+from datetime import datetime
 import logging
 import os
 import re
@@ -45,8 +47,9 @@ from .file_service.api.default import (
     put_object,
     # sync_objects,
 )
-from .file_service.types import File
 from .file_service.models.put_object_body import PutObjectBody
+from .file_service.types import File
+
 # from .file_service.models.sync_file_schema_dto import SyncFileSchemaDto
 # from .file_service.models.sync_file_schema_dto_credentials import (
 #    SyncFileSchemaDtoCredentials,
@@ -55,6 +58,107 @@ from .file_service.models.put_object_body import PutObjectBody
 
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass
+class FileMetadata:
+    """
+    Structured representation of file metadata, similar to S3 metadata.
+    
+    This class provides a typed interface to file metadata while maintaining
+    compatibility with dictionary-based access.
+    """
+    # Common S3-like metadata fields
+    KeyPath: Optional[str] = None  # Key
+    LastModified: Optional[str] = None
+    ETag: Optional[str] = None
+    Size: Optional[int] = None
+    StorageClass: Optional[str] = None
+    ContentType: Optional[str] = None
+    ContentLength: Optional[int] = None
+    
+    # Store the original dictionary for access to all fields
+    _raw_dict: Dict[str, Any] = field(default_factory=dict)
+    
+    # Mapping between S3/HTTP header names and class attribute names - shared across instances
+    _FIELD_MAPPING = {
+        "key": "KeyPath",
+        "last-modified": "LastModified",
+        "etag": "ETag",
+        "size": "Size",
+        "content-length": "ContentLength",
+        "content-type": "ContentType",
+        "x-amz-storage-class": "StorageClass",
+    }       
+    
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "FileMetadata":
+        """
+        Create a FileMetadata instance from a dictionary.        
+        Args:
+            data: Dictionary containing metadata fields            
+        Returns:
+            FileMetadata instance with fields populated from the dictionary
+        """
+        instance = cls()
+        instance._raw_dict = data  # Store reference, no need to copy
+        
+        # Process each key in the input dictionary
+        for key, value in data.items():
+            # Convert to lowercase for case-insensitive matching
+            key_lower = key.lower()            
+            attr_name = cls._FIELD_MAPPING.get(key_lower, key)
+            
+            # Only set the attribute if it exists in the class
+            if hasattr(instance, attr_name):            
+                if attr_name == "Size" or attr_name == "ContentLength":
+                    try:
+                        value = int(value)
+                    except (ValueError, TypeError):
+                        pass
+                
+                setattr(instance, attr_name, value)
+        
+        return instance
+    
+    def to_updated_dict(self) -> Dict[str, Any]:
+        """
+        Get a copy of the original dictionary with updated values from attributes.
+        Maintains original key capitalization.
+        Returns:
+            Updated copy of the original metadata dictionary
+        """        
+        result = self._raw_dict.copy()
+        
+        # This assumes _FIELD_MAPPING includes all needed attributes.
+        # For each _FIELD_MAPPING entry, if the attribute exists assign it as string.
+        for header_key, attr_name in self._FIELD_MAPPING.items():
+            if hasattr(self, attr_name) and getattr(self, attr_name) is not None:
+                result[header_key] = str(getattr(self, attr_name))
+        return result
+    
+    def get_dict(self) -> Dict[str, Any]:
+        """
+        Get the original dictionary that was used to create this instance.
+        Returns:
+            The original metadata dictionary
+        """
+        return self._raw_dict
+    
+    def get_last_modified_timestamp(self) -> Optional[float]:
+        """
+        Get the LastModified field as a timestamp.        
+        Returns:
+            Timestamp as float, or None if LastModified is not available or invalid
+        """
+        if not self.LastModified:
+            return None
+        try:
+            # Parse ISO format timestamp
+            dt = datetime.fromisoformat(self.LastModified.replace("Z", "+00:00"))
+            return dt.timestamp()
+        except (ValueError, TypeError):
+            return None
 
 
 class FilesClient:
@@ -127,14 +231,14 @@ class FilesClient:
 
         return org_friendly_id, path
 
-    def list_dir(self, path: str, flag: Optional[str] = None) -> List[Dict[str, Any]]:
+    def list_dir(self, path: str, flag: Optional[str] = None) -> List[FileMetadata]:
         """
         List files and directories at the specified path.
         Args:
             path: Path in the format files:///path
             flag: Optional flags, e.g., "recursive"
         Returns:
-            List of file/directory metadata objects
+            List of FileMetadata objects
         """
         org_friendly_id, remote_path = self._parse_files_url(path)
 
@@ -156,7 +260,8 @@ class FilesClient:
         if response.status_code == 200:
             # Parse the response content as needed
             # This will depend on the actual response format from the API
-            return self._parse_list_response(response.content)
+            raw_files = self._parse_list_response(response.content)
+            return [FileMetadata.from_dict(file_data) for file_data in raw_files]
         else:
             logger.error(f"Failed to list directory {path}: {response.status_code}")
             response.raise_for_status()
@@ -274,13 +379,13 @@ class FilesClient:
             logger.error(f"Failed to download file {src}: {response.status_code}")
             return False
 
-    def get_metadata(self, path: str) -> Dict[str, Any]:
+    def get_metadata(self, path: str) -> Optional[FileMetadata]:
         """
         Get metadata about a file or directory.
         Args:
             path: Path in the format files:///path
         Returns:
-            Metadata dictionary
+            FileMetadata object containing the metadata
         """
         org_friendly_id, remote_path = self._parse_files_url(path)
 
@@ -289,11 +394,11 @@ class FilesClient:
         )
 
         if response.status_code == 200:
-            # Extract metadata from response headers
-            return dict(response.headers)
+            # Extract metadata from response headers and create a FileMetadata object
+            return FileMetadata.from_dict(dict(response.headers))
         else:
             logger.error(f"Failed to get metadata for {path}: {response.status_code}")
-            return {}
+            return None
 
     def sync_dir(self, src: str, dst: str) -> bool:
         """
@@ -330,9 +435,9 @@ class FilesClient:
         os.makedirs(local_path, exist_ok=True)
 
         success = True
-        for file_info in remote_files:
+        for file_metadata in remote_files:
             # Extract the relative path from the Key
-            rel_path = file_info.get("Key", "")
+            rel_path = file_metadata.KeyPath or ""
 
             # Don't append the Key to remote_path - it already contains the full path
             # Instead, construct a new files:/// URL with the path
@@ -349,17 +454,8 @@ class FilesClient:
             # Check if we need to download this file
             if os.path.exists(local_file_path):
                 local_mtime = os.path.getmtime(local_file_path)
-                # Convert the remote timestamp to a comparable format
-                remote_mtime_str = file_info.get("LastModified", "")
-                try:
-                    # Parse ISO format timestamp
-                    from datetime import datetime
-
-                    remote_mtime = datetime.fromisoformat(
-                        remote_mtime_str.replace("Z", "+00:00")
-                    ).timestamp()
-                except (ValueError, TypeError):
-                    remote_mtime = 0
+                # Get the remote timestamp
+                remote_mtime = file_metadata.get_last_modified_timestamp() or 0
 
                 if local_mtime >= remote_mtime:
                     continue  # Local file is newer or same age
@@ -384,10 +480,12 @@ class FilesClient:
         """
         # Get list of remote files with metadata to compare
         try:
-            remote_files = {
-                file_info["Key"]: file_info.get("LastModified", 0)
-                for file_info in self.list_dir(remote_path, flag="recursive")
-            }
+            remote_files_list = self.list_dir(remote_path, flag="recursive")
+            # Create a dictionary mapping keys to timestamps
+            remote_files = {}
+            for file_metadata in remote_files_list:
+                if file_metadata.KeyPath:
+                    remote_files[file_metadata.KeyPath] = file_metadata.get_last_modified_timestamp() or 0
         except Exception as e:
             logger.warning(f"Could not list remote directory, assuming it's empty: {e}")
             remote_files = {}

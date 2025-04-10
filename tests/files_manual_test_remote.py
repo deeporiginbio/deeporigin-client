@@ -23,10 +23,6 @@ import random
 import shutil
 import string
 import sys
-import tempfile
-import time
-from pathlib import Path
-from typing import Any, Dict, List
 
 from deeporigin.files import FilesClient
 
@@ -145,13 +141,11 @@ def print_remote_files(client, remote_path):
         files = client.list_dir(remote_path)
         if files and len(files) > 0:
             print(f"  Found {len(files)} files/directories:")
-            for file_info in files:
-                # Extract relevant information from file_info
-                # Adjust these fields based on the actual structure returned by list_dir
-                name = file_info.get("Key", "Unknown")
-                size = file_info.get("Size", "Unknown")
-                # last_modified = file_info.get("LastModified", "Unknown")
-                file_type = "Directory" if file_info.get("is_dir", False) else "File"
+            for file_metadata in files:
+                # Extract relevant information from FileMetadata object
+                name = file_metadata.KeyPath or "Unknown"
+                size = file_metadata.Size or file_metadata.ContentLength or "Unknown"
+                file_type = "Directory" if name.endswith("/") else "File"
 
                 print(f"  - {name} ({file_type}, {size} bytes)")
         else:
@@ -272,24 +266,19 @@ def run_tests():
             try:
                 metadata = client.get_metadata(remote_path)
                 if metadata:
-                    print(f"  Metadata retrieved: {metadata}")
+                    # Print the metadata using both object attributes and raw dictionary
+                    print(f"  Metadata as object: KeyPath={metadata.KeyPath}, Size={metadata.Size}, ContentLength={metadata.ContentLength}")
+                    print(f"  Raw metadata dictionary: {metadata.get_dict()}")
 
                     # Try to extract file size from metadata
-                    # This depends on the actual API response format
-                    file_size = None
-                    if "content-length" in metadata:
-                        file_size = int(metadata["content-length"])
-                    elif "Content-Length" in metadata:
-                        file_size = int(metadata["Content-Length"])
-
+                    file_size = metadata.Size or metadata.ContentLength
+                    
                     if file_size is not None:
                         if file_size == expected_size:
                             print(f"  Size matches: {file_size} bytes")
                             file_info["size_verified"] = True
                         else:
-                            print(
-                                f"  Size mismatch: expected {expected_size}, got {file_size}"
-                            )
+                            print(f"  Size mismatch: expected {expected_size}, got {file_size}")
                             file_info["size_verified"] = False
                     else:
                         print("  Could not find file size in metadata")
@@ -363,7 +352,7 @@ def run_tests():
                 file_to_delete["deleted"] = True
 
                 # Verify deletion by trying to get metadata
-                print_step(f"Verifying deletion by checking metadata")
+                print_step("Verifying deletion by checking metadata")
                 try:
                     metadata = client.get_metadata(remote_path)
                     if metadata:
