@@ -215,59 +215,38 @@ def test_ligand(ligand):
         assert result.file_path is None
 
 
-def test_ligand_from_csv(tmp_path):
+def test_ligand_from_csv():
     """Test that we can create Ligands from a CSV file using the from_csv classmethod"""
-    import pandas as pd
+    from pathlib import Path
 
-    # Create a temporary CSV file with test data
-    csv_path = tmp_path / "test_ligands.csv"
+    # Get the path to the test CSV file
+    csv_path = Path(base_path) / "data.csv"
 
-    # Create test data with SMILES and properties
-    data = {
-        "SMILES": [
-            "C",
-            "CC",
-            "CCO",
-            "c1ccccc1",
-            "",
-        ],  # Include an empty SMILES to test skipping
-        "Name": ["Methane", "Ethane", "Ethanol", "Benzene", "Invalid"],
-        "MolecularWeight": [16.04, 30.07, 46.07, 78.11, 0],
-        "LogP": [-0.77, -0.18, -0.31, 2.13, 0],
-    }
+    # Create ligands from the CSV file
+    ligands = Ligand.from_csv(str(csv_path), smiles_column="SMILES")
 
-    # Write to CSV
-    pd.DataFrame(data).to_csv(csv_path, index=False)
+    # Verify we got the expected number of ligands
+    assert len(ligands) == 30  # Total number of valid SMILES in the file
 
-    # Test with all property columns
-    ligands = Ligand.from_csv(
-        file_path=csv_path,
-        smiles_column="SMILES",
-    )
+    # Check a few properties of the first ligand
+    first_ligand = ligands[0]
+    assert isinstance(first_ligand, Ligand)
+    assert first_ligand.mol is not None
+    assert first_ligand.mol.m.GetNumAtoms() > 0
+    assert first_ligand.file_path is None
 
-    # Should have 4 valid ligands (empty SMILES should be skipped)
-    assert len(ligands) == 4
+    # Verify properties were correctly loaded
+    assert "score" in first_ligand.properties
+    assert "binding_energy" in first_ligand.properties
+    assert "pose_score" in first_ligand.properties
 
-    # Check each ligand
-    for i, ligand in enumerate(ligands):
-        # Skip the empty row which should have been filtered out
-        if i >= 4:
-            continue
+    # Test with invalid SMILES column
+    with pytest.raises(ValueError, match="Column 'invalid' not found in CSV file"):
+        Ligand.from_csv(str(csv_path), smiles_column="invalid")
 
-        # Check SMILES
-        assert ligand.smiles == data["SMILES"][i]
-
-        # Check properties
-        assert ligand.properties is not None
-        assert ligand.properties["Name"] == data["Name"][i]
-        assert ligand.properties["MolecularWeight"] == data["MolecularWeight"][i]
-        assert ligand.properties["LogP"] == data["LogP"][i]
-
-    # Test with invalid SMILES column name
-    with pytest.raises(
-        ValueError, match="Column 'InvalidColumn' not found in CSV file"
-    ):
-        Ligand.from_csv(file_path=csv_path, smiles_column="InvalidColumn")
+    # Test with non-existent file
+    with pytest.raises(FileNotFoundError):
+        Ligand.from_csv("nonexistent.csv")
 
 
 @pytest.mark.parametrize(

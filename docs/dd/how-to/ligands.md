@@ -138,7 +138,7 @@ This is particularly useful when you're working with RDKit's molecular manipulat
 You can create multiple ligands at once from a CSV file using the `from_csv` class method. This is useful when you have a dataset of molecules with their SMILES strings and associated properties. The `from_csv` method:
 
 - Requires a path to the CSV file and the name of the column containing SMILES strings
-- Optionally accepts a list of column names to extract as properties
+- Automatically extracts all non-SMILES columns as properties
 - Skips rows with empty or invalid SMILES
 - Returns a list of `Ligand` objects
 
@@ -153,26 +153,22 @@ from deeporigin.chemistry import Ligand
 
 # Basic usage - just extracting SMILES from a column
 ligands = Ligand.from_csv(
-    file="molecules.csv",
-    smiles_column="SMILES"
+    file_path="molecules.csv",
+    smiles_column="SMILES"  # Optional, defaults to "smiles"
 )
 ```
 
-#### Including Properties
+The method will:
+- Read the CSV file using pandas
+- Extract SMILES strings from the specified column
+- Create a Ligand instance for each valid SMILES
+- Store all other columns as properties in each Ligand instance
+- Skip any rows with empty or invalid SMILES strings
 
-You can also extract additional properties from other columns in the CSV file:
-
-```python
-ligands = Ligand.from_csv(
-    file="molecules.csv",
-    smiles_column="SMILES",
-    properties_columns=["Name", "MW", "LogP", "Activity"]
-)
-```
-
-This will store all the specified column values as properties for each ligand, making it easy to keep track of important molecular characteristics alongside the structure information.
-
-
+!!! note "Error Handling"
+    The method will raise:
+    - `FileNotFoundError` if the CSV file does not exist
+    - `ValueError` if the specified SMILES column is not found in the CSV file
 
 ## Visualizing a ligand
 

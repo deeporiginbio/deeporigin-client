@@ -357,6 +357,97 @@ class Ligand:
             return ligands[0]
         return ligands
 
+    @classmethod
+    def from_csv(
+        cls,
+        file_path: str,
+        smiles_column: str = "smiles",
+    ) -> list["Ligand"]:
+        """
+        Create Ligand instances from a CSV file containing SMILES strings and additional properties.
+
+        Args:
+            file_path (str): The path to the CSV file.
+            smiles_column (str, optional): The name of the column containing SMILES strings. Defaults to "smiles".
+
+        Returns:
+            list[Ligand]: A list of Ligand instances created from the CSV file.
+
+        Raises:
+            FileNotFoundError: If the file does not exist.
+            ValueError: If the CSV does not contain the specified smiles column or if SMILES strings are invalid.
+        """
+        path = Path(file_path)
+        if not path.exists():
+            raise FileNotFoundError(f"The file '{file_path}' does not exist.")
+
+        # First read just the header to check for the smiles column
+        df_header = pd.read_csv(file_path, nrows=0)
+        if smiles_column not in df_header.columns:
+            raise ValueError(
+                f"Column '{smiles_column}' not found in CSV file '{file_path}'. Available columns: {', '.join(df_header.columns)}"
+            )
+
+        ligands = []
+        try:
+            df = pd.read_csv(file_path)
+            normalized_columns = [col.strip().lower() for col in df.columns]
+
+            if smiles_column.lower() not in normalized_columns:
+                raise ValueError(f"CSV file must contain a '{smiles_column}' column.")
+
+            smiles_col_index = normalized_columns.index(smiles_column.lower())
+            smiles_col = df.columns[smiles_col_index]
+            other_columns = [col for col in df.columns if col != smiles_col]
+
+            for idx, row in df.iterrows():
+                try:
+                    smiles = row[smiles_col]
+                    if pd.isna(smiles):
+                        print(
+                            f"Warning: Skipping row {idx + 1}: SMILES value is missing."
+                        )
+                        continue
+                    mol = Chem.MolFromSmiles(smiles)
+                    if mol is None:
+                        print(
+                            f"Warning: Skipping row {idx + 1}: Invalid SMILES '{smiles}'."
+                        )
+                        continue
+
+                    # Create properties dictionary
+                    properties = {}
+                    for col in other_columns:
+                        value = row[col]
+                        if pd.notna(value):
+                            properties[col] = value
+
+                    # Get name from properties if available
+                    name = properties.get("Name", "")
+
+                    # Create ligand using from_smiles
+                    ligand = cls.from_smiles(
+                        smiles=smiles,
+                        name=name,
+                        properties=properties,
+                    )
+                    ligands.append(ligand)
+                except Exception as e:
+                    print(
+                        f"Error: Failed to create Ligand from CSV file row {idx + 1}: {str(e)}"
+                    )
+
+        except pd.errors.EmptyDataError as e:
+            raise ValueError(f"The CSV file '{file_path}' is empty.") from e
+        except pd.errors.ParserError as e:
+            raise ValueError(f"Error parsing CSV file '{file_path}': {str(e)}") from e
+        except Exception as e:
+            raise ValueError(
+                f"Failed to create Ligands from CSV file '{file_path}': {str(e)}"
+            ) from e
+
+        return ligands
+
     def __post_init__(self):
         """
         Initialize a Ligand instance from an identifier, file path, SMILES string,
@@ -409,36 +500,6 @@ class Ligand:
     @property
     def atom_types(self):
         return self.mol.species()
-
-    def _initialize_from_file(self, file_path: str) -> Molecule:
-        """
-        Initialize Ligand from a file.
-
-        Parameters:
-        - file_path (str): Path to the ligand file.
-
-        Returns:
-        - Molecule: Initialized molecule.
-
-        Raises:
-        - FileNotFoundError: If the file does not exist.
-        - ValueError: If the file format is unsupported or molecule cannot be parsed.
-        """
-        path = Path(file_path)
-        if not path.exists():
-            raise FileNotFoundError(f"The file {file_path} does not exist.")
-
-        extension = path.suffix.lower().lstrip(".")
-        self.block_type = extension
-        self.file_path = path
-
-        try:
-            molecule = mol_from_file(extension, str(path))
-            return molecule
-        except Exception as e:
-            raise ValueError(
-                f"Failed to initialize Ligand from file {file_path}: {str(e)}"
-            ) from e
 
     def set_property(self, prop_name: str, prop_value):
         """
@@ -621,93 +682,6 @@ class Ligand:
             return html
         except Exception as e:
             raise ValueError(f"Visualization failed: {str(e)}") from e
-
-    @classmethod
-    def from_csv(cls, file_path: str, smiles_column: str = "smiles") -> list["Ligand"]:
-        """
-        Create Ligand instances from a CSV file containing SMILES strings and additional properties.
-
-        Args:
-            file_path (str): The path to the CSV file.
-            smiles_column (str, optional): The name of the column containing SMILES strings. Defaults to "smiles".
-
-        Returns:
-            list[Ligand]: A list of Ligand instances created from the CSV file.
-
-        Raises:
-            FileNotFoundError: If the file does not exist.
-            ValueError: If the CSV does not contain the specified smiles column or if SMILES strings are invalid.
-        """
-        path = Path(file_path)
-        if not path.exists():
-            raise FileNotFoundError(f"The file '{file_path}' does not exist.")
-
-        # First read just the header to check for the smiles column
-        df_header = pd.read_csv(file_path, nrows=0)
-        if smiles_column not in df_header.columns:
-            raise ValueError(
-                f"Column '{smiles_column}' not found in CSV file '{file_path}'. Available columns: {', '.join(df_header.columns)}"
-            )
-
-        ligands = []
-        try:
-            df = pd.read_csv(file_path)
-            normalized_columns = [col.strip().lower() for col in df.columns]
-
-            if smiles_column.lower() not in normalized_columns:
-                raise ValueError(f"CSV file must contain a '{smiles_column}' column.")
-
-            smiles_col_index = normalized_columns.index(smiles_column.lower())
-            smiles_col = df.columns[smiles_col_index]
-            other_columns = [col for col in df.columns if col != smiles_col]
-
-            for idx, row in df.iterrows():
-                try:
-                    smiles = row[smiles_col]
-                    if pd.isna(smiles):
-                        print(
-                            f"Warning: Skipping row {idx + 1}: SMILES value is missing."
-                        )
-                        continue
-                    mol = Chem.MolFromSmiles(smiles)
-                    if mol is None:
-                        print(
-                            f"Warning: Skipping row {idx + 1}: Invalid SMILES '{smiles}'."
-                        )
-                        continue
-
-                    # Create properties dictionary
-                    properties = {}
-                    for col in other_columns:
-                        value = row[col]
-                        if pd.notna(value):
-                            properties[col] = value
-
-                    # Get name from properties if available
-                    name = properties.get("Name", "")
-
-                    # Create ligand using from_smiles
-                    ligand = cls.from_smiles(
-                        smiles=smiles,
-                        name=name,
-                        properties=properties,
-                    )
-                    ligands.append(ligand)
-                except Exception as e:
-                    print(
-                        f"Error: Failed to create Ligand from CSV file row {idx + 1}: {str(e)}"
-                    )
-
-        except pd.errors.EmptyDataError as e:
-            raise ValueError(f"The CSV file '{file_path}' is empty.") from e
-        except pd.errors.ParserError as e:
-            raise ValueError(f"Error parsing CSV file '{file_path}': {str(e)}") from e
-        except Exception as e:
-            raise ValueError(
-                f"Failed to create Ligands from CSV file '{file_path}': {str(e)}"
-            ) from e
-
-        return ligands
 
     @classmethod
     @beartype
