@@ -357,6 +357,8 @@ class Ligand:
             ) from e
 
         if len(ligands) == 1:
+            # Set file_path for single ligand case
+            ligands[0].file_path = str(path)
             return ligands[0]
         return ligands
 

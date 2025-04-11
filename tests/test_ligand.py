@@ -208,12 +208,14 @@ def test_ligand(ligand):
             assert isinstance(lig, Ligand)
             assert lig.mol is not None
             assert lig.mol.m.GetNumAtoms() > 0
-            assert lig.file_path is None
+            assert lig.file_path is None  # Multi-ligand case should have no file_path
     else:
         assert isinstance(result, Ligand)
         assert result.mol is not None
         assert result.mol.m.GetNumAtoms() > 0
-        assert result.file_path is None
+        assert (
+            result.file_path == ligand["file"]
+        )  # Single ligand case should have file_path
 
 
 def test_ligand_from_csv():
@@ -260,6 +262,7 @@ def test_ligand_from_csv():
                 "expected_name": "cmpd 7 (n-propyl)",
                 "has_atoms": True,
                 "is_multi": False,
+                "should_have_file_path": True,
             },
             id="single_molecule_sdf",
         ),
@@ -270,6 +273,7 @@ def test_ligand_from_csv():
                 "expected_name": None,  # Multiple molecules, names vary
                 "has_atoms": True,
                 "is_multi": True,
+                "should_have_file_path": False,
             },
             id="multi_molecule_sdf",
         ),
@@ -287,6 +291,7 @@ def test_ligand_from_csv():
                 "expected_name": None,
                 "has_atoms": True,
                 "is_multi": True,
+                "should_have_file_path": False,
             },
             id="large_multi_molecule_sdf",
         ),
@@ -296,6 +301,7 @@ def test_ligand_from_csv():
                 "expected_type": Ligand,
                 "has_atoms": True,
                 "sanitize": False,
+                "should_have_file_path": True,
             },
             id="sanitize_false",
         ),
@@ -306,6 +312,7 @@ def test_ligand_from_csv():
                 "has_atoms": True,
                 "removeHs": True,
                 "check_no_hydrogens": True,
+                "should_have_file_path": True,
             },
             id="remove_hydrogens",
         ),
@@ -345,7 +352,12 @@ def test_ligand_from_sdf(test_case):
         ligand = result
         assert ligand.mol is not None
         assert ligand.mol.m.GetNumAtoms() > 0
-        assert ligand.file_path is None  # Should not store the source file path
+
+        # Check file_path based on whether it should have one
+        if test_case.get("should_have_file_path", False):
+            assert ligand.file_path == str(file_path)
+        else:
+            assert ligand.file_path is None
 
         if "expected_name" in test_case:
             assert ligand.name == test_case["expected_name"]
@@ -360,4 +372,5 @@ def test_ligand_from_sdf(test_case):
             assert isinstance(ligand, Ligand)
             assert ligand.mol is not None
             assert ligand.mol.m.GetNumAtoms() > 0
-            assert ligand.file_path is None  # Should not store the source file path
+            # In multi-molecule case, file_path should always be None
+            assert ligand.file_path is None
