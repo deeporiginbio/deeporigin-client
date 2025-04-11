@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 import time
 from typing import Any, Callable, Optional
+import uuid
 
 from IPython.display import HTML, display, update_display
 from jinja2 import Environment, FileSystemLoader
@@ -107,6 +108,7 @@ class Job:
             "execution_ids": self._execution_ids,
             "statuses": self._status,
             "card_title": self._name_func(self),
+            "unique_id": str(uuid.uuid4()),
         }
 
         # Determine overall status based on priority: Failed > Cancelled > Succeeded
