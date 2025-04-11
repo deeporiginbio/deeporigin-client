@@ -44,6 +44,12 @@ jupyter:
 
 # install in a virtual env with all extras
 install:
+	@echo "Checking python version, venv and pip availability..."
+	@python3 -c 'import sys; exit(0 if sys.version_info >= (3,10) else 1)' \
+		|| (echo "You need Python 3.10 or higher. Please install it, e.g.: \n  sudo apt install python3.10 python3.10-venv python3.10-dev" && exit 1)	
+	@(python3 -m venv --help >/dev/null 2>&1 && python3 -m pip --version >/dev/null 2>&1) \
+		|| (echo "Python venv and/or pip are not available. Please install them, e.g.: \n  sudo apt install python3.10-venv python3.10-dev python3-pip" && exit 1)
+
 	@echo "Installing deeporigin in editable mode in a venv..."
 	@python3 -m venv venv
 	@source $(CURDIR)/venv/bin/activate && \
