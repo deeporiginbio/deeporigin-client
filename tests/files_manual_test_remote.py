@@ -24,7 +24,7 @@ import shutil
 import string
 import sys
 
-from deeporigin.files import FilesClient
+from deeporigin.files import FilesClient, DirSyncMode
 
 # ==== Configuration ====
 # Define the Base URL or AUTH_TOKEN to override default URL and token the file service API
@@ -234,9 +234,7 @@ def run_tests():
         print_step(f"Uploading {local_path} to {remote_path}")
 
         try:
-            success = client.upload_file(
-                src=local_path, dest=remote_path, overwrite=True
-            )
+            success = client.upload_file(src=local_path, dest=remote_path, overwrite=True)
             metadata = client.get_metadata(remote_path)
             print(f"  Metadata: {metadata}")
 
@@ -382,10 +380,15 @@ def run_tests():
     print_step(f"Syncing {SYNC_SOURCE_DIR} to {sync_remote_path}")
 
     try:
-        success = client.sync_dir(src=SYNC_SOURCE_DIR, dst=sync_remote_path)
+        success, file_statuses = client.sync_dir(src=SYNC_SOURCE_DIR, dst=sync_remote_path)
         if success:
             print("  Sync upload successful")
             sync_upload_success = True
+
+            # Print file statuses
+            print_step("File operation statuses:")
+            for file_path, status in file_statuses.items():
+                print(f"  {file_path}: {status}")
 
             # List remote files after successful sync
             print_remote_files(client, sync_remote_path)
@@ -412,9 +415,14 @@ def run_tests():
         print_step(f"Syncing {sync_remote_path} to {SYNC_DOWNLOAD_DIR}")
 
         try:
-            success = client.sync_dir(src=sync_remote_path, dst=SYNC_DOWNLOAD_DIR)
+            success, file_statuses = client.sync_dir(src=sync_remote_path, dst=SYNC_DOWNLOAD_DIR)
             if success:
                 print("  Sync download successful")
+                
+                # Print file statuses
+                print_step("File operation statuses:")
+                for file_path, status in file_statuses.items():
+                    print(f"  {file_path}: {status}")
 
                 # Verify content integrity for a sample of files
                 print_step("Verifying content integrity of synced files")

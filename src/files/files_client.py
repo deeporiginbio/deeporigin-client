@@ -13,7 +13,7 @@ Example usage:
     client = FilesClient()
 
     # List files in a directory
-    files = client.list_dir('files:///data/', flag="recursive")
+    files = client.list_dir('files:///data/')
     print(f"Found {len(files)} files")
 
     # Download a file from remote storage to local path
@@ -34,7 +34,8 @@ from datetime import datetime
 import logging
 import os
 import re
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union, Tuple
+from enum import Enum
 
 from deeporigin import auth
 from deeporigin.utils.network import _get_domain_name
@@ -50,14 +51,34 @@ from .file_service.api.default import (
 from .file_service.models.put_object_body import PutObjectBody
 from .file_service.types import File
 
-# from .file_service.models.sync_file_schema_dto import SyncFileSchemaDto
-# from .file_service.models.sync_file_schema_dto_credentials import (
-#    SyncFileSchemaDtoCredentials,
-# )
-# from .file_service.models.sync_file_schema_dto_provider import SyncFileSchemaDtoProvider
-
 
 logger = logging.getLogger(__name__)
+
+# Remote path prefix for file service URLs
+REMOTE_PATH_PREFIX = "files:///"
+FILES_URL_PATTERN = re.compile(rf"^{REMOTE_PATH_PREFIX}(?P<path>.*)$")
+
+
+class DirSyncMode(Enum):
+    """
+    Enum for directory synchronization modes.
+    """
+    # We don't know if the destination file not present locally was deleted locally or not.
+    # This means we can't do "proper" sync, we just have different overwrite modes.
+
+    REPLACE = "replace_older" # replace older files, delete files not present in source
+    MERGE = "merge" # replace older files, does NOT delete files not present in source
+    FORCE_OVERWRITE = "force_overwrite" # replace ALL files, delete files not present in source
+    COPY_NON_EXISTING = "copy_non_existing" # copy files that don't exist in destination
+    
+    @classmethod
+    def default(cls) -> 'DirSyncMode':
+        """Return the default sync mode (REPLACE)"""
+        return cls.REPLACE
+
+    def can_delete_nonexisting(self) -> bool:
+        return self == DirSyncMode.REPLACE_ALL or self == DirSyncMode.REPLACE_OLDER
+
 
 
 @dataclass
@@ -172,9 +193,7 @@ class FilesClient:
 
     This client provides high-level methods for file operations like upload, download,
     listing directories, and synchronizing files between local and remote storage.
-    """
-
-    FILES_URL_PATTERN = re.compile(r"^files:///(?P<path>.*)$")
+    """    
 
     def __init__(
         self,
@@ -222,7 +241,7 @@ class FilesClient:
         Raises:
             ValueError: If the URL is not in the expected format
         """
-        match = self.FILES_URL_PATTERN.match(url)
+        match = FILES_URL_PATTERN.match(url)
         if not match:
             raise ValueError(
                 f"Invalid files URL: {url}. Expected format: files:///path"
@@ -236,7 +255,7 @@ class FilesClient:
 
         return org_friendly_id, path
 
-    def list_dir(self, path: str) -> List[FileMetadata]:
+    def list_dir(self, path: str, flag: Optional[str] = None) -> List[FileMetadata]:
         """
         List files and directories at the specified path.
         Args:
@@ -246,6 +265,9 @@ class FilesClient:
             List of FileMetadata objects
         """
         org_friendly_id, remote_path = self._parse_files_url(path)
+
+        if flag == "recursive":
+             raise ValueError(f"list_dir recursive flag not implemented")
 
         # The list_type parameter seems to be required in the API
         # We'll map the flag to an appropriate value
@@ -403,97 +425,155 @@ class FilesClient:
             logger.error(f"Failed to get metadata for {path}: {response.status_code}")
             return None
 
-    def sync_dir(self, src: str, dst: str) -> bool:
+    def sync_dir(self, src: str, dst: str, mode: DirSyncMode = DirSyncMode.default()) -> Tuple[bool, Dict[str, str]]:
         """
         Synchronize files between local and remote directories.
         Args:
             src: Source path (can be local or files:/// URL)
             dst: Destination path (can be local or files:/// URL)
+            mode: Synchronization mode (default: DirSyncMode.REPLACE)
         Returns:
-            True if successful, False otherwise
+            Tuple containing:
+                - Boolean indicating if the sync was successful
+                - Dictionary mapping file paths to their status (e.g., "copied", "kept", "deleted")
         """
         # Determine sync direction
-        if src.startswith("files:///") and not dst.startswith("files:///"):
+        if src.startswith(REMOTE_PATH_PREFIX) and not dst.startswith(REMOTE_PATH_PREFIX):
             # Download from remote to local
-            return self._sync_remote_to_local(src, dst)
-        elif not src.startswith("files:///") and dst.startswith("files:///"):
+            return self._sync_remote_to_local(src, dst, mode)
+        elif not src.startswith(REMOTE_PATH_PREFIX) and dst.startswith(REMOTE_PATH_PREFIX):
             # Upload from local to remote
-            return self._sync_local_to_remote(src, dst)
+            return self._sync_local_to_remote(src, dst, mode)
         else:
             raise ValueError("Either src or dst must be a files:/// URL, but not both")
 
-    def _sync_remote_to_local(self, remote_path: str, local_path: str) -> bool:
+    def _sync_remote_to_local(self, remote_path: str, local_path: str, mode: DirSyncMode) -> Tuple[bool, Dict[str, str]]:
         """
         Sync files from remote to local directory.
         Args:
             remote_path: Remote path in the format files:///path
             local_path: Local directory path
+            mode: Synchronization mode
         Returns:
-            True if successful, False otherwise
+            Tuple containing:
+                - Boolean indicating if the sync was successful
+                - Dictionary mapping file paths to their status
         """
         # Get list of remote files with metadata
-        remote_files = self.list_dir(remote_path, flag="recursive")
+        remote_files = self.list_dir(remote_path) # todo: add recursive flag
+        
+        # Create a dictionary mapping paths to metadata
+        remote_files_dict = {}
+        for file_metadata in remote_files:
+            if file_metadata.KeyPath:
+                remote_files_dict[file_metadata.KeyPath] = file_metadata
 
         # Ensure local directory exists
         os.makedirs(local_path, exist_ok=True)
 
+        # Track all file operations
+        file_statuses = {}
         success = True
-        for file_metadata in remote_files:
-            # Extract the relative path from the Key
-            rel_path = file_metadata.KeyPath or ""
 
-            # Don't append the Key to remote_path - it already contains the full path
-            # Instead, construct a new files:/// URL with the path
-            remote_file_path = f"files:///{rel_path}"
+        # Process remote files
+        for rel_path, file_metadata in remote_files_dict.items():
+            # Construct paths
+            remote_file_path = f"{REMOTE_PATH_PREFIX}{rel_path}"
+            local_file_path = os.path.join(local_path, rel_path)
 
-            # For the local path, join the base local path with just the filename part
-            local_file_path = os.path.join(local_path, os.path.basename(rel_path))
-
-            # If the file is in a subdirectory, make sure that directory exists locally
+            # Ensure local directory exists
             local_dir = os.path.dirname(local_file_path)
             if local_dir:
                 os.makedirs(local_dir, exist_ok=True)
 
-            # Check if we need to download this file
+            # Check if local file exists
             if os.path.exists(local_file_path):
                 local_mtime = os.path.getmtime(local_file_path)
-                # Get the remote timestamp
                 remote_mtime = file_metadata.get_last_modified_timestamp() or 0
 
-                if local_mtime >= remote_mtime:
-                    continue  # Local file is newer or same age
+                # Determine if we should update the file based on mode
+                should_update = False
+                if mode == DirSyncMode.FORCE_OVERWRITE:
+                    should_update = True
+                elif mode == DirSyncMode.REPLACE:
+                    should_update = local_mtime < remote_mtime
+                elif mode == DirSyncMode.MERGE:
+                    should_update = local_mtime < remote_mtime
+                elif mode == DirSyncMode.COPY_NON_EXISTING:
+                    should_update = False
 
-            # Download the file
-            if not self.download_file(remote_file_path, local_file_path):
-                logger.error(
-                    f"Failed to download file {remote_file_path} to {local_file_path}"
-                )
-                success = False
+                if should_update:
+                    # Download the file
+                    if self.download_file(remote_file_path, local_file_path):
+                        file_statuses[local_file_path] = "copied"
+                    else:
+                        logger.error(f"Failed to download file {remote_file_path} to {local_file_path}")
+                        file_statuses[local_file_path] = "error"
+                        success = False
+                else:
+                    file_statuses[local_file_path] = "kept"
+            else:
+                # File doesn't exist locally, download it
+                if self.download_file(remote_file_path, local_file_path):
+                    file_statuses[local_file_path] = "copied"
+                else:
+                    logger.error(f"Failed to download file {remote_file_path} to {local_file_path}")
+                    file_statuses[local_file_path] = "error"
+                    success = False
 
-        return success
+        # Handle deletion of files in destination that don't exist in source
+        if mode.can_delete_nonexisting():
+            # Get all local files
+            local_files = []
+            for root, _, files in os.walk(local_path):
+                for filename in files:
+                    local_file_path = os.path.join(root, filename)
+                    rel_path = os.path.relpath(local_file_path, local_path)
+                    local_files.append(rel_path)
 
-    def _sync_local_to_remote(self, local_path: str, remote_path: str) -> bool:
+            # Find files to delete
+            for local_file in local_files:
+                if local_file not in remote_files_dict:
+                    full_local_path = os.path.join(local_path, local_file)
+                    try:
+                        os.remove(full_local_path)
+                        file_statuses[full_local_path] = "deleted"
+                    except Exception as e:
+                        logger.error(f"Failed to delete file {full_local_path}: {e}")
+                        file_statuses[full_local_path] = "error"
+                        success = False
+
+        return success, file_statuses
+
+    def _sync_local_to_remote(self, local_path: str, remote_path: str, mode: DirSyncMode) -> Tuple[bool, Dict[str, str]]:
         """
         Sync files from local to remote directory.
         Args:
             local_path: Local directory path
             remote_path: Remote path in the format files:///path
+            mode: Synchronization mode
         Returns:
-            True if successful, False otherwise
+            Tuple containing:
+                - Boolean indicating if the sync was successful
+                - Dictionary mapping file paths to their status
         """
         # Get list of remote files with metadata to compare
         try:
-            remote_files_list = self.list_dir(remote_path, flag="recursive")
-            # Create a dictionary mapping keys to timestamps
+            remote_files_list = self.list_dir(remote_path) # todo: add recursive flag
+            # Create a dictionary mapping keys to metadata
             remote_files = {}
             for file_metadata in remote_files_list:
                 if file_metadata.KeyPath:
-                    remote_files[file_metadata.KeyPath] = file_metadata.get_last_modified_timestamp() or 0
+                    remote_files[file_metadata.KeyPath] = file_metadata
         except Exception as e:
             logger.warning(f"Could not list remote directory, assuming it's empty: {e}")
             remote_files = {}
 
+        # Track all file operations
+        file_statuses = {}
         success = True
+
+        # Process local files
         for root, _, files in os.walk(local_path):
             for filename in files:
                 local_file_path = os.path.join(root, filename)
@@ -502,18 +582,63 @@ class FilesClient:
                 rel_path = os.path.relpath(local_file_path, local_path)
                 remote_file_path = f"{remote_path}/{rel_path}"
 
-                # Check if we need to upload this file
-                local_mtime = os.path.getmtime(local_file_path)
-                remote_mtime = remote_files.get(rel_path, 0)
+                # Check if remote file exists
+                if rel_path in remote_files:
+                    local_mtime = os.path.getmtime(local_file_path)
+                    remote_mtime = remote_files[rel_path].get_last_modified_timestamp() or 0
 
-                if local_mtime <= remote_mtime:
-                    continue  # Remote file is newer or same age
+                    # Determine if we should update the file based on mode
+                    should_update = False
+                    if mode == DirSyncMode.FORCE_OVERWRITE:
+                        should_update = True
+                    elif mode == DirSyncMode.REPLACE:
+                        should_update = local_mtime > remote_mtime
+                    elif mode == DirSyncMode.MERGE:
+                        should_update = local_mtime > remote_mtime
+                    elif mode == DirSyncMode.COPY_NON_EXISTING:
+                        should_update = False
 
-                # Upload the file
-                if not self.upload_file(local_file_path, remote_file_path):
-                    success = False
+                    if should_update:
+                        # Upload the file
+                        if self.upload_file(local_file_path, remote_file_path):
+                            file_statuses[remote_file_path] = "copied"
+                        else:
+                            logger.error(f"Failed to upload file {local_file_path} to {remote_file_path}")
+                            file_statuses[remote_file_path] = "error"
+                            success = False
+                    else:
+                        file_statuses[remote_file_path] = "kept"
+                else:
+                    # File doesn't exist remotely, upload it
+                    if self.upload_file(local_file_path, remote_file_path):
+                        file_statuses[remote_file_path] = "copied"
+                    else:
+                        logger.error(f"Failed to upload file {local_file_path} to {remote_file_path}")
+                        file_statuses[remote_file_path] = "error"
+                        success = False
 
-        return success
+        # Handle deletion of files in destination that don't exist in source
+        if mode.can_delete_nonexisting():
+            # Get all local files
+            local_files = []
+            for root, _, files in os.walk(local_path):
+                for filename in files:
+                    local_file_path = os.path.join(root, filename)
+                    rel_path = os.path.relpath(local_file_path, local_path)
+                    local_files.append(rel_path)
+
+            # Find files to delete
+            for remote_path_key in remote_files:
+                if remote_path_key not in local_files:
+                    full_remote_path = f"{remote_path}/{remote_path_key}"
+                    if self.delete_file(full_remote_path):
+                        file_statuses[full_remote_path] = "deleted"
+                    else:
+                        logger.error(f"Failed to delete file {full_remote_path}")
+                        file_statuses[full_remote_path] = "error"
+                        success = False
+
+        return success, file_statuses
 
     def delete_file(self, path: str) -> bool:
         """
@@ -531,41 +656,6 @@ class FilesClient:
 
         return response.status_code == 200
 
-    '''
-    def sync_with_external_provider(self, path: str, provider_config: Dict[str, Any]) -> bool:
-        """
-        Sync files with an external provider (e.g., S3).        
-        Args:
-            path: Path in the format files:///path
-            provider_config: Provider configuration
-            
-        Returns:
-            True if successful, False otherwise
-        """
-        org_friendly_id, remote_path = self._parse_files_url(path)
-        
-        # Create the sync request body
-        credentials = SyncFileSchemaDtoCredentials(
-            region=provider_config.get("region", ""),
-            secret_key=provider_config.get("secretKey", ""),
-            access_key=provider_config.get("accessKey", "")
-        )
-        
-        sync_request = SyncFileSchemaDto(
-            provider=SyncFileSchemaDtoProvider.S3,
-            credentials=credentials,
-            path=provider_config.get("path", "")
-        )
-        
-        response = sync_objects.sync_detailed(
-            org_friendly_id=org_friendly_id,
-            file_path=remote_path,
-            client=self.client,
-            json_body=sync_request
-        )
-        
-        return response.status_code == 201
-    '''
 
     def check_health(self) -> bool:
         """
