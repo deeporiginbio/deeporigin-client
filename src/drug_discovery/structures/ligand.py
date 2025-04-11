@@ -208,8 +208,11 @@ class Ligand:
             >>> print(ligand.smiles)
             CCO
         """
-        # Create a Molecule object from the SMILES string
-        mol = mol_from_smiles(smiles)
+        try:
+            # Create a Molecule object from the SMILES string
+            mol = mol_from_smiles(smiles)
+        except ValueError as e:
+            raise DeepOriginException(str(e)) from e
 
         return cls(
             mol=mol,
