@@ -69,6 +69,7 @@ import random
 import tempfile
 import warnings
 
+from beartype import beartype
 from pubchempy import get_compounds
 from rdkit import Chem, RDLogger
 from rdkit.Chem import AllChem, SaltRemover, rdMolDescriptors
@@ -365,7 +366,13 @@ class Molecule:
         self.smiles = smiles
 
 
-def mol_from_file(file_type, file_path, sanitize=True, remove_hs=False):
+@beartype
+def mol_from_file(
+    file_type: str,
+    file_path: str,
+    sanitize: bool = True,
+    remove_hs: bool = False,
+) -> Molecule:
     """
     Create a Molecule instance from a file.
 
@@ -412,7 +419,8 @@ def mol_from_file(file_type, file_path, sanitize=True, remove_hs=False):
         )
 
 
-def mol_from_smiles(smiles, sanitize=True):
+@beartype
+def mol_from_smiles(smiles: str, sanitize: bool = True) -> Molecule:
     """
     Create a Molecule instance from a SMILES string.
 
@@ -433,7 +441,13 @@ def mol_from_smiles(smiles, sanitize=True):
     return Molecule(mol_rdk, add_coords=False)
 
 
-def mol_from_block(block_type, block, sanitize=True, remove_hs=False):
+@beartype
+def mol_from_block(
+    block_type: str,
+    block: str,
+    sanitize: bool = True,
+    remove_hs: bool = False,
+) -> Molecule:
     """
     Create a Molecule instance from a block of text.
 
@@ -450,5 +464,8 @@ def mol_from_block(block_type, block, sanitize=True, remove_hs=False):
         temp_file.write(block)
         temp_file.seek(0)  # Reset file pointer to beginning
         return mol_from_file(
-            block_type, temp_file.name, sanitize=sanitize, remove_hs=remove_hs
+            block_type,
+            temp_file.name,
+            sanitize=sanitize,
+            remove_hs=remove_hs,
         )

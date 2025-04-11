@@ -137,15 +137,6 @@ class Complex:
     """stores a hash of all ligands and the protein. This will be computed post initialization"""
     _hash: Optional[str] = None
 
-    """stores job ids for all jobs, organized by tool. """
-    _job_ids: dict = field(
-        default_factory=lambda: {
-            utils.DB_DOCKING: [],
-            utils.DB_ABFE: [],
-            utils.DB_RBFE: [],
-        }
-    )
-
     def __init__(
         self,
         protein: Protein,
@@ -158,11 +149,7 @@ class Complex:
         self.protein = protein
         self._db = None
         self._hash = None
-        self._job_ids = {
-            utils.DB_DOCKING: [],
-            utils.DB_ABFE: [],
-            utils.DB_RBFE: [],
-        }
+
         self.__post_init__()
 
     def __post_init__(self):
@@ -310,7 +297,11 @@ class Complex:
                 )
             )
             df = df[df["ComplexHash"] == self._hash]
-            self._job_ids[tool] = df[utils.COL_JOBID].tolist()
+            job_ids = df[utils.COL_JOBID].tolist()
+
+            # now that we have job IDs, construct Job object from them
+            tool_instance = getattr(self, tool.lower())
+            tool_instance._get_jobs(job_ids)
 
     @beartype
     def get_status_for(self, tool: utils.VALID_TOOLS) -> dict:
