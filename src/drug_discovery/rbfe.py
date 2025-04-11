@@ -8,20 +8,29 @@ import pandas as pd
 from deeporigin.data_hub import api
 from deeporigin.drug_discovery import chemistry as chem
 from deeporigin.drug_discovery import utils
+from deeporigin.drug_discovery.workflow_step import WorkflowStep
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.utils.core import PrettyDict
 
 
-class RBFE:
+class RBFE(WorkflowStep):
     """class to handle RBFE-related tasks within the Complex class.
 
     Objects instantiated here are meant to be used within the Complex class."""
 
     def __init__(self, parent):
-        self.parent = parent
+        super().__init__(parent)
         self._params = PrettyDict()
-
         self._params.end_to_end = utils._load_params("rbfe_end_to_end")
+
+    def _render_progress(self, job) -> str:
+        """Render progress visualization for a job."""
+        # TODO: Implement RBFE-specific progress visualization
+        return "RBFE Progress Visualization"
+
+    def _name_job(self, job) -> str:
+        """Generate a name for a job."""
+        return f"RBFE run using <code>{job._metadata[0]['protein_id']}</code>, <code>{job._metadata[0]['ligand1_id']}</code>, and <code>{job._metadata[0]['ligand2_id']}</code>"
 
     def get_results(self):
         """Fetch RBFE results and return in a dataframe.
@@ -128,4 +137,4 @@ class RBFE:
             complex_hash=self.parent._hash,
         )
 
-        self.parent._job_ids[utils.DB_RBFE].append(job_id)
+        self._job_ids.append(job_id)

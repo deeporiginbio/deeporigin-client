@@ -12,27 +12,39 @@ from deeporigin.data_hub import api
 from deeporigin.drug_discovery import chemistry as chem
 from deeporigin.drug_discovery import utils
 from deeporigin.drug_discovery.structures.ligand import ligands_to_dataframe
+from deeporigin.drug_discovery.workflow_step import WorkflowStep
 from deeporigin.exceptions import DeepOriginException
+from deeporigin.tools.job import Job
 from deeporigin.tools.utils import get_statuses_and_progress, query_run_statuses
-from deeporigin.utils.core import PrettyDict, hash_strings
+from deeporigin.utils.core import hash_strings
 
 Number = float | int
 
 
-class Docking:
+class Docking(WorkflowStep):
     """class to handle Docking-related tasks within the Complex class.
 
     Objects instantiated here are meant to be used within the Complex class."""
 
     def __init__(self, parent):
-        self.parent = parent
-        self._params = PrettyDict()
+        super().__init__(parent)
+        self._fuse_jobs = True
+
+    @beartype
+    def _render_progress(self, job: Job) -> str:
+        """Render progress visualization for a job."""
+        # TODO: Implement Docking-specific progress visualization
+        return "Docking Progress Visualization"
+
+    @beartype
+    def _name_job(self, job: Job) -> str:
+        """Generate a name for a job."""
+
+        num_ligands = sum(len(inputs["smiles_list"]) for inputs in job.user_inputs)
+        return f"Docking run. Docking protein: <code>{job._metadata[0]['protein_id']}</code> to {num_ligands} ligands."
 
     def get_results(self) -> pd.DataFrame:
         """Get docking results from Deep Origin"""
-
-        # to do -- some way to make sure that we handle failed runs, complete runs, etc.
-        # status = self.get_status("Docking")
 
         df1 = self.parent.get_csv_results_for("Docking")
 
@@ -51,7 +63,7 @@ class Docking:
     def show_progress(self):
         """show progress of bulk Docking run"""
 
-        data = get_statuses_and_progress(self.parent._job_ids["Docking"])
+        data = get_statuses_and_progress(self._job_ids)
 
         total_docked = 0
 
@@ -203,7 +215,7 @@ class Docking:
                 tool="Docking",
             )
 
-            self.parent._job_ids["Docking"].append(job_id)
+            self._job_ids.append(job_id)
 
 
 @beartype
