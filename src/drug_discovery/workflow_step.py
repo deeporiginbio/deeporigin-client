@@ -20,25 +20,31 @@ class WorkflowStep:
         self.parent = parent
         self._params = PrettyDict()
 
-    @property
-    def jobs(self) -> list[Job]:
+    def show_jobs(self):
+        """Show the jobs for this workflow step."""
+
+        for job in self.jobs:
+            job.show()
+
+    def _make_jobs_from_ids(self, job_ids: list[str]):
         """Get a list of jobs for this workflow step. When _fuse_jobs is True, the jobs will be fused into a single job."""
 
-        if self._fuse_jobs and self._job_ids:
-            job = Job.from_ids(self._job_ids)
+        if self._fuse_jobs and job_ids:
+            job = Job.from_ids(job_ids)
             job._viz_func = self._render_progress
             job._name_func = self._name_job
             job.sync()
             return [job]
 
         jobs = []
-        for job_id in self._job_ids:
+        for job_id in job_ids:
             job = Job.from_ids([job_id])
             job._viz_func = self._render_progress
             job._name_func = self._name_job
             job.sync()
             jobs.append(job)
-        return jobs
+
+        self.jobs = jobs
 
     def _render_progress(self, job: Job) -> str:
         """Render progress visualization for a job. To be implemented by subclasses."""

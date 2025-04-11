@@ -262,7 +262,10 @@ class ABFE(WorkflowStep):
     @beartype
     def _name_job(cls, job: Job) -> str:
         """utility function to name a job using inputs to that job"""
-        return f"ABFE run using <code>{job._metadata[0]['protein_id']}</code> and <code>{job._metadata[0]['ligand1_id']}</code>"
+        try:
+            return f"ABFE run using <code>{job._metadata[0]['protein_id']}</code> and <code>{job._metadata[0]['ligand1_id']}</code>"
+        except Exception:
+            return "ABFE run"
 
     @classmethod
     @beartype
