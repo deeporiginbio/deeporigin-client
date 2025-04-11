@@ -136,7 +136,7 @@ class ABFE(WorkflowStep):
                 complex_hash=self.parent._hash,
             )
 
-            self.parent._job_ids[utils.DB_ABFE].append(job_id)
+            self.jobs.append(Job.from_ids([job_id]))
 
     @beartype
     def show_trajectory(
