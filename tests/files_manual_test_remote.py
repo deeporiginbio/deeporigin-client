@@ -234,9 +234,11 @@ def run_tests():
         print_step(f"Uploading {local_path} to {remote_path}")
 
         try:
-            success = client.upload_file(src=local_path, dest=remote_path, overwrite=True)
+            success = client.upload_file(
+                src=local_path, dest=remote_path, overwrite=True
+            )
             metadata = client.get_metadata(remote_path)
-            print(f"  Metadata: {metadata}")
+            # print(f"  Metadata: {metadata}")
 
             if success:
                 print("  Upload successful")
@@ -268,18 +270,22 @@ def run_tests():
                 metadata = client.get_metadata(remote_path)
                 if metadata:
                     # Print the metadata using both object attributes and raw dictionary
-                    print(f"  Metadata as object: KeyPath={metadata.KeyPath}, Size={metadata.Size}")
-                  #  print(f"  Raw metadata dictionary: {metadata.get_dict()}")
+                    print(
+                        f"  Metadata as object: KeyPath={metadata.KeyPath}, Size={metadata.Size}"
+                    )
+                    #  print(f"  Raw metadata dictionary: {metadata.get_dict()}")
 
                     # Try to extract file size from metadata
                     file_size = metadata.Size or metadata.ContentLength
-                    
+
                     if file_size is not None:
                         if file_size == expected_size:
                             print(f"  Size matches: {file_size} bytes")
                             file_info["size_verified"] = True
                         else:
-                            print(f"  Size mismatch: expected {expected_size}, got {file_size}")
+                            print(
+                                f"  Size mismatch: expected {expected_size}, got {file_size}"
+                            )
                             file_info["size_verified"] = False
                     else:
                         print("  Could not find file size in metadata")
@@ -380,7 +386,9 @@ def run_tests():
     print_step(f"Syncing {SYNC_SOURCE_DIR} to {sync_remote_path}")
 
     try:
-        success, file_statuses = client.sync_dir(src=SYNC_SOURCE_DIR, dst=sync_remote_path)
+        success, file_statuses = client.sync_dir(
+            src=SYNC_SOURCE_DIR, dst=sync_remote_path
+        )
         if success:
             print("  Sync upload successful")
             sync_upload_success = True
@@ -415,10 +423,12 @@ def run_tests():
         print_step(f"Syncing {sync_remote_path} to {SYNC_DOWNLOAD_DIR}")
 
         try:
-            success, file_statuses = client.sync_dir(src=sync_remote_path, dst=SYNC_DOWNLOAD_DIR)
+            success, file_statuses = client.sync_dir(
+                src=sync_remote_path, dst=SYNC_DOWNLOAD_DIR
+            )
             if success:
                 print("  Sync download successful")
-                
+
                 # Print file statuses
                 print_step("File operation statuses:")
                 for file_path, status in file_statuses.items():

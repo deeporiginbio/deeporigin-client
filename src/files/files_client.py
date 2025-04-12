@@ -62,14 +62,19 @@ class DirSyncMode(Enum):
     """
     Enum for directory synchronization modes.
     """
+
     # We don't know if the destination file not present locally was deleted locally or not.
     # This means we can't do "proper" sync, we just have different overwrite modes.
 
-    REPLACE = "replace_older" # replace older files, delete files not present in source
-    MERGE = "merge" # replace older files, does NOT delete files not present in source
-    FORCE_OVERWRITE = "force_overwrite" # replace ALL files, delete files not present in source
-    COPY_NON_EXISTING = "copy_non_existing" # copy files that don't exist in destination
-    
+    REPLACE = "replace_older"  # replace older files, delete files not present in source
+    MERGE = "merge"  # replace older files, does NOT delete files not present in source
+    FORCE_OVERWRITE = (
+        "force_overwrite"  # replace ALL files, delete files not present in source
+    )
+    COPY_NON_EXISTING = (
+        "copy_non_existing"  # copy files that don't exist in destination
+    )
+
     @classmethod
     def default(cls) -> "DirSyncMode":
         """Return the default sync mode (REPLACE)"""
@@ -79,80 +84,77 @@ class DirSyncMode(Enum):
         return self == DirSyncMode.REPLACE or self == DirSyncMode.FORCE_OVERWRITE
 
 
-
 @dataclass
 class FileMetadata:
     """
     Structured representation of file metadata, similar to S3 metadata.
-    
+
     This class provides a typed interface to file metadata while maintaining
     compatibility with dictionary-based access.
     """
+
     # Common S3-like metadata fields
     KeyPath: Optional[str] = None  # File path or its key in the storage system
     LastModified: Optional[str] = None
     ETag: Optional[str] = None
-    Size: Optional[int] = None # Size of file/object in bytes
+    Size: Optional[int] = None  # Size of file/object in bytes
     StorageClass: Optional[str] = None
     ContentType: Optional[str] = None
-    
+
     # Store the original dictionary for access to all fields
     _raw_dict: Dict[str, Any] = field(default_factory=dict)
-    
+
     # Mapping between S3/HTTP header names and class attribute names - shared across instances
     # Note: For our request content-length is size, but technically may be size of HTTP instead
     # if it changes, we'd need its mapping
     _FIELD_MAPPING = {
         "key": "KeyPath",  # Only comes in list (not HEAD)
         "last-modified": "LastModified",
-        "x-last-modified": "LastModified", # comes in different in list and HEAD
+        "x-last-modified": "LastModified",  # comes in different in list and HEAD
         "etag": "ETag",
         "content-length": "Size",
         "content-type": "ContentType",
         "x-amz-storage-class": "StorageClass",
-    }       
-    
+    }
+
     @classmethod
-    def from_dict(cls, data: Dict[str, Any], key_path : str = None) -> "FileMetadata":
+    def from_dict(cls, data: Dict[str, Any], key_path: str = None) -> "FileMetadata":
         """
-        Create a FileMetadata instance from a dictionary.        
+        Create a FileMetadata instance from a dictionary.
         Args:
-            data: Dictionary containing metadata fields            
+            data: Dictionary containing metadata fields
         Returns:
             FileMetadata instance with fields populated from the dictionary
         """
         instance = cls()
         instance._raw_dict = data  # Store reference, no need to copy
-        
-        # Process each key in the input dictionary
+
+        # Process each key in the input dictionary, setting matching attributes
         for key, value in data.items():
-            # Convert to lowercase for case-insensitive matching
-            key_lower = key.lower()            
+            key_lower = key.lower()
             attr_name = cls._FIELD_MAPPING.get(key_lower, key)
-            
-            # Only set the attribute if it exists in the class
-            if hasattr(instance, attr_name):            
+
+            if hasattr(instance, attr_name):
                 if attr_name == "Size":
                     try:
                         value = int(value)
                     except (ValueError, TypeError):
                         pass
-                
                 setattr(instance, attr_name, value)
 
         if key_path:
-            instance.KeyPath = key_path        
+            instance.KeyPath = key_path
         return instance
-    
+
     def to_updated_dict(self) -> Dict[str, Any]:
         """
         Get a copy of the original dictionary with updated values from attributes.
         Maintains original key capitalization.
         Returns:
             Updated copy of the original metadata dictionary
-        """        
+        """
         result = self._raw_dict.copy()
-        
+
         # This assumes _FIELD_MAPPING includes all needed attributes.
         # For each _FIELD_MAPPING entry, if the attribute exists assign it as string.
         # TBD -- may result in repeated keys if there is repeated field mapping
@@ -161,7 +163,7 @@ class FileMetadata:
             if hasattr(self, attr_name) and getattr(self, attr_name) is not None:
                 result[header_key] = str(getattr(self, attr_name))
         return result
-    
+
     def get_dict(self) -> Dict[str, Any]:
         """
         Get the original dictionary that was used to create this instance.
@@ -169,10 +171,10 @@ class FileMetadata:
             The original metadata dictionary
         """
         return self._raw_dict
-    
+
     def get_last_modified_timestamp(self) -> Optional[float]:
         """
-        Get the LastModified field as a timestamp.        
+        Get the LastModified field as a timestamp.
         Returns:
             Timestamp as float, or None if LastModified is not available or invalid
         """
@@ -192,7 +194,7 @@ class FilesClient:
 
     This client provides high-level methods for file operations like upload, download,
     listing directories, and synchronizing files between local and remote storage.
-    """    
+    """
 
     def __init__(
         self,
@@ -266,7 +268,7 @@ class FilesClient:
         org_friendly_id, remote_path = self._parse_files_url(path)
 
         if flag == "recursive":
-             raise ValueError("list_dir recursive flag not implemented")
+            raise ValueError("list_dir recursive flag not implemented")
 
         # The list_type parameter seems to be required in the API
         # We'll map the flag to an appropriate value
@@ -312,10 +314,8 @@ class FilesClient:
     def _remote_file_exists(self, path: str) -> bool:
         """
         Check if a file exists in remote storage.
-
         Args:
             path: Path in the format files:///path
-
         Returns:
             True if the file exists, False otherwise
         """
@@ -330,12 +330,10 @@ class FilesClient:
     def upload_file(self, src: str, dest: str, overwrite: bool = False) -> bool:
         """
         Upload a file from local path to remote storage.
-
         Args:
             src: Local file path
             dest: Remote path in the format files:///path
             overwrite: If True, delete the file first if it exists
-
         Returns:
             True if successful, False otherwise
         """
@@ -424,7 +422,9 @@ class FilesClient:
             logger.error(f"Failed to get metadata for {path}: {response.status_code}")
             return None
 
-    def sync_dir(self, src: str, dst: str, mode: DirSyncMode = DirSyncMode.REPLACE) -> Tuple[bool, Dict[str, str]]:
+    def sync_dir(
+        self, src: str, dst: str, mode: DirSyncMode = DirSyncMode.REPLACE
+    ) -> Tuple[bool, Dict[str, str]]:
         """
         Synchronize files between local and remote directories.
         Args:
@@ -437,16 +437,22 @@ class FilesClient:
                 - Dictionary mapping file paths to their status (e.g., "copied", "kept", "deleted")
         """
         # Determine sync direction
-        if src.startswith(REMOTE_PATH_PREFIX) and not dst.startswith(REMOTE_PATH_PREFIX):
+        if src.startswith(REMOTE_PATH_PREFIX) and not dst.startswith(
+            REMOTE_PATH_PREFIX
+        ):
             # Download from remote to local
             return self._sync_remote_to_local(src, dst, mode)
-        elif not src.startswith(REMOTE_PATH_PREFIX) and dst.startswith(REMOTE_PATH_PREFIX):
+        elif not src.startswith(REMOTE_PATH_PREFIX) and dst.startswith(
+            REMOTE_PATH_PREFIX
+        ):
             # Upload from local to remote
             return self._sync_local_to_remote(src, dst, mode)
         else:
             raise ValueError("Either src or dst must be a files:/// URL, but not both")
 
-    def _sync_remote_to_local(self, remote_path: str, local_path: str, mode: DirSyncMode) -> Tuple[bool, Dict[str, str]]:
+    def _sync_remote_to_local(
+        self, remote_path: str, local_path: str, mode: DirSyncMode
+    ) -> Tuple[bool, Dict[str, str]]:
         """
         Sync files from remote to local directory.
         Args:
@@ -459,17 +465,17 @@ class FilesClient:
                 - Dictionary mapping file paths to their status
         """
         # Get list of remote files with metadata
-        remote_files = self.list_dir(remote_path) # todo: add recursive flag
-        
+        remote_files = self.list_dir(remote_path)  # todo: add recursive flag
+
         # Extract the base remote path without the prefix for path comparisons
         _, base_remote_path = self._parse_files_url(remote_path)
-        
+
         # Create a dictionary mapping paths to metadata
         remote_files_dict = {}
         for file_metadata in remote_files:
             if file_metadata.KeyPath:
                 # Store the full remote path as the key
-                #full_remote_path = f"{REMOTE_PATH_PREFIX}{file_metadata.KeyPath}"
+                # full_remote_path = f"{REMOTE_PATH_PREFIX}{file_metadata.KeyPath}"
                 remote_files_dict[file_metadata.KeyPath] = file_metadata
 
         # Ensure local directory exists
@@ -512,7 +518,9 @@ class FilesClient:
                     if self.download_file(full_remote_file_path, local_file_path):
                         file_statuses[local_file_path] = "copied"
                     else:
-                        logger.error(f"Failed to download file {full_remote_file_path} to {local_file_path}")
+                        logger.error(
+                            f"Failed to download file {full_remote_file_path} to {local_file_path}"
+                        )
                         file_statuses[local_file_path] = "error"
                         success = False
                 else:
@@ -522,7 +530,9 @@ class FilesClient:
                 if self.download_file(full_remote_file_path, local_file_path):
                     file_statuses[local_file_path] = "copied"
                 else:
-                    logger.error(f"Failed to download file {full_remote_file_path} to {local_file_path}")
+                    logger.error(
+                        f"Failed to download file {full_remote_file_path} to {local_file_path}"
+                    )
                     file_statuses[local_file_path] = "error"
                     success = False
 
@@ -551,7 +561,9 @@ class FilesClient:
 
         return success, file_statuses
 
-    def _sync_local_to_remote(self, local_path: str, remote_path: str, mode: DirSyncMode) -> Tuple[bool, Dict[str, str]]:
+    def _sync_local_to_remote(
+        self, local_path: str, remote_path: str, mode: DirSyncMode
+    ) -> Tuple[bool, Dict[str, str]]:
         """
         Sync files from local to remote directory.
         Args:
@@ -565,10 +577,10 @@ class FilesClient:
         """
         # Extract the base remote path without the prefix for path comparisons
         _, base_remote_path = self._parse_files_url(remote_path)
-        
+
         # Get list of remote files with metadata to compare
         try:
-            remote_files_list = self.list_dir(remote_path) # todo: add recursive flag
+            remote_files_list = self.list_dir(remote_path)  # todo: add recursive flag
             # Create a dictionary mapping keys to metadata
             remote_files_dict = {}
             for file_metadata in remote_files_list:
@@ -595,7 +607,10 @@ class FilesClient:
                 # Check if remote file exists
                 if rel_key_path in remote_files_dict:
                     local_mtime = os.path.getmtime(local_file_path)
-                    remote_mtime = remote_files_dict[rel_key_path].get_last_modified_timestamp() or 0
+                    remote_mtime = (
+                        remote_files_dict[rel_key_path].get_last_modified_timestamp()
+                        or 0
+                    )
 
                     # Determine if we should update the file based on mode
                     should_update = False
@@ -613,7 +628,9 @@ class FilesClient:
                         if self.upload_file(local_file_path, remote_file_path):
                             file_statuses[remote_file_path] = "copied"
                         else:
-                            logger.error(f"Failed to upload file {local_file_path} to {remote_file_path}")
+                            logger.error(
+                                f"Failed to upload file {local_file_path} to {remote_file_path}"
+                            )
                             file_statuses[remote_file_path] = "error"
                             success = False
                     else:
@@ -623,7 +640,9 @@ class FilesClient:
                     if self.upload_file(local_file_path, remote_file_path):
                         file_statuses[remote_file_path] = "copied"
                     else:
-                        logger.error(f"Failed to upload file {local_file_path} to {remote_file_path}")
+                        logger.error(
+                            f"Failed to upload file {local_file_path} to {remote_file_path}"
+                        )
                         file_statuses[remote_file_path] = "error"
                         success = False
 
@@ -639,7 +658,10 @@ class FilesClient:
 
             # Find files to delete
             for remote_file_key in remote_files_dict:
-                if os.path.relpath(remote_file_key, base_remote_path) not in local_files:
+                if (
+                    os.path.relpath(remote_file_key, base_remote_path)
+                    not in local_files
+                ):
                     full_remote_path = f"{remote_path}/{remote_file_key}"
                     if self.delete_file(full_remote_path):
                         file_statuses[full_remote_path] = "deleted"
@@ -665,7 +687,6 @@ class FilesClient:
         )
 
         return response.status_code == 200
-
 
     def check_health(self) -> bool:
         """
