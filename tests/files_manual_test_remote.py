@@ -24,7 +24,7 @@ import shutil
 import string
 import sys
 
-from deeporigin.files import FilesClient, DirSyncMode
+from deeporigin.files import FilesClient
 
 # ==== Configuration ====
 # Define the Base URL or AUTH_TOKEN to override default URL and token the file service API
@@ -269,7 +269,7 @@ def run_tests():
                 if metadata:
                     # Print the metadata using both object attributes and raw dictionary
                     print(f"  Metadata as object: KeyPath={metadata.KeyPath}, Size={metadata.Size}")
-                    print(f"  Raw metadata dictionary: {metadata.get_dict()}")
+                  #  print(f"  Raw metadata dictionary: {metadata.get_dict()}")
 
                     # Try to extract file size from metadata
                     file_size = metadata.Size or metadata.ContentLength

@@ -1,3 +1,3 @@
-from .files_client import FileMetadata, FilesClient, DirSyncMode
+from .files_client import DirSyncMode, FileMetadata, FilesClient
 
 __all__ = ["FilesClient", "FileMetadata", "DirSyncMode"]

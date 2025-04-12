@@ -31,11 +31,11 @@ Example usage:
 
 from dataclasses import dataclass, field
 from datetime import datetime
+from enum import Enum
 import logging
 import os
 import re
-from typing import Any, Dict, List, Optional, Union, Tuple
-from enum import Enum
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from deeporigin import auth
 from deeporigin.utils.network import _get_domain_name
@@ -50,7 +50,6 @@ from .file_service.api.default import (
 )
 from .file_service.models.put_object_body import PutObjectBody
 from .file_service.types import File
-
 
 logger = logging.getLogger(__name__)
 
@@ -72,12 +71,12 @@ class DirSyncMode(Enum):
     COPY_NON_EXISTING = "copy_non_existing" # copy files that don't exist in destination
     
     @classmethod
-    def default(cls) -> 'DirSyncMode':
+    def default(cls) -> "DirSyncMode":
         """Return the default sync mode (REPLACE)"""
         return cls.REPLACE
 
     def can_delete_nonexisting(self) -> bool:
-        return self == DirSyncMode.REPLACE_ALL or self == DirSyncMode.REPLACE_OLDER
+        return self == DirSyncMode.REPLACE or self == DirSyncMode.FORCE_OVERWRITE
 
 
 
@@ -267,7 +266,7 @@ class FilesClient:
         org_friendly_id, remote_path = self._parse_files_url(path)
 
         if flag == "recursive":
-             raise ValueError(f"list_dir recursive flag not implemented")
+             raise ValueError("list_dir recursive flag not implemented")
 
         # The list_type parameter seems to be required in the API
         # We'll map the flag to an appropriate value
@@ -425,7 +424,7 @@ class FilesClient:
             logger.error(f"Failed to get metadata for {path}: {response.status_code}")
             return None
 
-    def sync_dir(self, src: str, dst: str, mode: DirSyncMode = DirSyncMode.default()) -> Tuple[bool, Dict[str, str]]:
+    def sync_dir(self, src: str, dst: str, mode: DirSyncMode = DirSyncMode.REPLACE) -> Tuple[bool, Dict[str, str]]:
         """
         Synchronize files between local and remote directories.
         Args:
@@ -462,10 +461,15 @@ class FilesClient:
         # Get list of remote files with metadata
         remote_files = self.list_dir(remote_path) # todo: add recursive flag
         
+        # Extract the base remote path without the prefix for path comparisons
+        _, base_remote_path = self._parse_files_url(remote_path)
+        
         # Create a dictionary mapping paths to metadata
         remote_files_dict = {}
         for file_metadata in remote_files:
             if file_metadata.KeyPath:
+                # Store the full remote path as the key
+                #full_remote_path = f"{REMOTE_PATH_PREFIX}{file_metadata.KeyPath}"
                 remote_files_dict[file_metadata.KeyPath] = file_metadata
 
         # Ensure local directory exists
@@ -476,10 +480,11 @@ class FilesClient:
         success = True
 
         # Process remote files
-        for rel_path, file_metadata in remote_files_dict.items():
+        for remote_file_key, file_metadata in remote_files_dict.items():
             # Construct paths
-            remote_file_path = f"{REMOTE_PATH_PREFIX}{rel_path}"
-            local_file_path = os.path.join(local_path, rel_path)
+            full_remote_file_path = f"{REMOTE_PATH_PREFIX}{remote_file_key}"
+            remote_file_key_tail = os.path.relpath(remote_file_key, base_remote_path)
+            local_file_path = os.path.join(local_path, remote_file_key_tail)
 
             # Ensure local directory exists
             local_dir = os.path.dirname(local_file_path)
@@ -504,20 +509,20 @@ class FilesClient:
 
                 if should_update:
                     # Download the file
-                    if self.download_file(remote_file_path, local_file_path):
+                    if self.download_file(full_remote_file_path, local_file_path):
                         file_statuses[local_file_path] = "copied"
                     else:
-                        logger.error(f"Failed to download file {remote_file_path} to {local_file_path}")
+                        logger.error(f"Failed to download file {full_remote_file_path} to {local_file_path}")
                         file_statuses[local_file_path] = "error"
                         success = False
                 else:
                     file_statuses[local_file_path] = "kept"
             else:
                 # File doesn't exist locally, download it
-                if self.download_file(remote_file_path, local_file_path):
+                if self.download_file(full_remote_file_path, local_file_path):
                     file_statuses[local_file_path] = "copied"
                 else:
-                    logger.error(f"Failed to download file {remote_file_path} to {local_file_path}")
+                    logger.error(f"Failed to download file {full_remote_file_path} to {local_file_path}")
                     file_statuses[local_file_path] = "error"
                     success = False
 
@@ -533,7 +538,8 @@ class FilesClient:
 
             # Find files to delete
             for local_file in local_files:
-                if local_file not in remote_files_dict:
+                local_file_in_remote = os.path.join(base_remote_path, local_file)
+                if local_file_in_remote not in remote_files_dict:
                     full_local_path = os.path.join(local_path, local_file)
                     try:
                         os.remove(full_local_path)
@@ -557,17 +563,20 @@ class FilesClient:
                 - Boolean indicating if the sync was successful
                 - Dictionary mapping file paths to their status
         """
+        # Extract the base remote path without the prefix for path comparisons
+        _, base_remote_path = self._parse_files_url(remote_path)
+        
         # Get list of remote files with metadata to compare
         try:
             remote_files_list = self.list_dir(remote_path) # todo: add recursive flag
             # Create a dictionary mapping keys to metadata
-            remote_files = {}
+            remote_files_dict = {}
             for file_metadata in remote_files_list:
                 if file_metadata.KeyPath:
-                    remote_files[file_metadata.KeyPath] = file_metadata
+                    remote_files_dict[file_metadata.KeyPath] = file_metadata
         except Exception as e:
             logger.warning(f"Could not list remote directory, assuming it's empty: {e}")
-            remote_files = {}
+            remote_files_dict = {}
 
         # Track all file operations
         file_statuses = {}
@@ -581,11 +590,12 @@ class FilesClient:
                 # Get relative path from the local_path
                 rel_path = os.path.relpath(local_file_path, local_path)
                 remote_file_path = f"{remote_path}/{rel_path}"
+                rel_key_path = base_remote_path + "/" + rel_path
 
                 # Check if remote file exists
-                if rel_path in remote_files:
+                if rel_key_path in remote_files_dict:
                     local_mtime = os.path.getmtime(local_file_path)
-                    remote_mtime = remote_files[rel_path].get_last_modified_timestamp() or 0
+                    remote_mtime = remote_files_dict[rel_key_path].get_last_modified_timestamp() or 0
 
                     # Determine if we should update the file based on mode
                     should_update = False
@@ -628,9 +638,9 @@ class FilesClient:
                     local_files.append(rel_path)
 
             # Find files to delete
-            for remote_path_key in remote_files:
-                if remote_path_key not in local_files:
-                    full_remote_path = f"{remote_path}/{remote_path_key}"
+            for remote_file_key in remote_files_dict:
+                if os.path.relpath(remote_file_key, base_remote_path) not in local_files:
+                    full_remote_path = f"{remote_path}/{remote_file_key}"
                     if self.delete_file(full_remote_path):
                         file_statuses[full_remote_path] = "deleted"
                     else:
