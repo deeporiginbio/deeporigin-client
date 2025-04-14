@@ -106,35 +106,39 @@
             <div class="card-header">
                 <!-- Added extra margin below the title -->
                 <h2 class="card-title mb-3">{{ card_title }}</h2>
-                <ul class="nav nav-tabs card-header-tabs" id="myTab" role="tablist">
+                <ul class="nav nav-tabs card-header-tabs" id="myTab-{{ unique_id }}" role="tablist">
                     <li class="nav-item">
-                        <button class="nav-link active" id="status-tab" data-bs-toggle="tab" data-bs-target="#status"
-                            type="button" role="tab" aria-controls="status" aria-selected="true">
+                        <button class="nav-link active" id="status-tab-{{ unique_id }}" data-bs-toggle="tab"
+                            data-bs-target="#status-{{ unique_id }}" type="button" role="tab"
+                            aria-controls="status-{{ unique_id }}" aria-selected="true">
                             Status
                         </button>
                     </li>
                     <li class="nav-item">
-                        <button class="nav-link" id="details-tab" data-bs-toggle="tab" data-bs-target="#details"
-                            type="button" role="tab" aria-controls="details" aria-selected="false">
+                        <button class="nav-link" id="details-tab-{{ unique_id }}" data-bs-toggle="tab"
+                            data-bs-target="#details-{{ unique_id }}" type="button" role="tab"
+                            aria-controls="details-{{ unique_id }}" aria-selected="false">
                             Details
                         </button>
                     </li>
                     <li class="nav-item">
-                        <button class="nav-link" id="inputs-tab" data-bs-toggle="tab" data-bs-target="#inputs"
-                            type="button" role="tab" aria-controls="inputs" aria-selected="false">
+                        <button class="nav-link" id="inputs-tab-{{ unique_id }}" data-bs-toggle="tab"
+                            data-bs-target="#inputs-{{ unique_id }}" type="button" role="tab"
+                            aria-controls="inputs-{{ unique_id }}" aria-selected="false">
                             Inputs
                         </button>
                     </li>
                     <li class="nav-item">
-                        <button class="nav-link" id="outputs-tab" data-bs-toggle="tab" data-bs-target="#outputs"
-                            type="button" role="tab" aria-controls="outputs" aria-selected="false">
+                        <button class="nav-link" id="outputs-tab-{{ unique_id }}" data-bs-toggle="tab"
+                            data-bs-target="#outputs-{{ unique_id }}" type="button" role="tab"
+                            aria-controls="outputs-{{ unique_id }}" aria-selected="false">
                             Outputs
                         </button>
                     </li>
                     <li class="nav-item">
-                        <button class="nav-link" id="raw-progress-tab" data-bs-toggle="tab"
-                            data-bs-target="#raw-progress" type="button" role="tab" aria-controls="raw-progress"
-                            aria-selected="false">
+                        <button class="nav-link" id="raw-progress-tab-{{ unique_id }}" data-bs-toggle="tab"
+                            data-bs-target="#raw-progress-{{ unique_id }}" type="button" role="tab"
+                            aria-controls="raw-progress-{{ unique_id }}" aria-selected="false">
                             Raw Progress Reports
                         </button>
                     </li>
@@ -142,13 +146,15 @@
             </div>
             <!-- Card Body with Tab Content -->
             <div class="card-body">
-                <div class="tab-content" id="myTabContent">
+                <div class="tab-content" id="myTabContent-{{ unique_id }}">
                     <!-- Status Tab -->
-                    <div class="tab-pane fade show active" id="status" role="tabpanel" aria-labelledby="status-tab">
+                    <div class="tab-pane fade show active" id="status-{{ unique_id }}" role="tabpanel"
+                        aria-labelledby="status-tab-{{ unique_id }}">
                         {{ status_html|safe }}
                     </div>
                     <!-- Details Tab with Table -->
-                    <div class="tab-pane fade" id="details" role="tabpanel" aria-labelledby="details-tab">
+                    <div class="tab-pane fade" id="details-{{ unique_id }}" role="tabpanel"
+                        aria-labelledby="details-tab-{{ unique_id }}">
                         <table class="table table-bordered table-striped mb-0">
                             <thead>
                                 <tr>
@@ -169,19 +175,22 @@
                         </table>
                     </div>
                     <!-- Inputs Tab with JSON (no extra text or collapsible behavior) -->
-                    <div class="tab-pane fade" id="inputs" role="tabpanel" aria-labelledby="inputs-tab">
+                    <div class="tab-pane fade" id="inputs-{{ unique_id }}" role="tabpanel"
+                        aria-labelledby="inputs-tab-{{ unique_id }}">
                         <pre>
 {{ inputs_json|safe }}
             </pre>
                     </div>
                     <!-- Outputs Tab with JSON (no extra text or collapsible behavior) -->
-                    <div class="tab-pane fade" id="outputs" role="tabpanel" aria-labelledby="outputs-tab">
+                    <div class="tab-pane fade" id="outputs-{{ unique_id }}" role="tabpanel"
+                        aria-labelledby="outputs-tab-{{ unique_id }}">
                         <pre>
 {{ outputs_json|safe }}
             </pre>
                     </div>
                     <!-- Raw Progress Reports Tab -->
-                    <div class="tab-pane fade" id="raw-progress" role="tabpanel" aria-labelledby="raw-progress-tab">
+                    <div class="tab-pane fade" id="raw-progress-{{ unique_id }}" role="tabpanel"
+                        aria-labelledby="raw-progress-tab-{{ unique_id }}">
                         <div
                             style="white-space: pre-wrap; font-family: monospace; background-color: #f8f9fa; padding: 1rem; border: 1px solid #e3e3e3; border-radius: 0.25rem;">
                             {{ raw_progress_json|safe }}

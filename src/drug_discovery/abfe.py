@@ -14,36 +14,20 @@ import pandas as pd
 from deeporigin.data_hub import api
 from deeporigin.drug_discovery import chemistry as chem
 from deeporigin.drug_discovery import utils
+from deeporigin.drug_discovery.workflow_step import WorkflowStep
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.tools.job import Job
-from deeporigin.utils.core import PrettyDict
 
 
-class ABFE:
+class ABFE(WorkflowStep):
     """class to handle ABFE-related tasks within the Complex class.
 
     Objects instantiated here are meant to be used within the Complex class."""
 
     def __init__(self, parent):
-        self.parent = parent
-        self._params = PrettyDict()
+        super().__init__(parent)
 
         self._params.end_to_end = utils._load_params("abfe_end_to_end")
-
-    def get_jobs(self) -> list[Job]:
-        """get a list of ABFE jobs"""
-
-        job_ids = self.parent._job_ids["ABFE"]
-        jobs = []
-        for job_id in job_ids:
-            job = Job.from_ids([job_id])
-            job._viz_func = self._render_progress
-            job._name_func = self._name_job
-
-            job.sync()
-            jobs.append(job)
-
-        return jobs
 
     def get_results(self) -> pd.DataFrame:
         """get ABFE results and return in a dataframe.
@@ -152,7 +136,7 @@ class ABFE:
                 complex_hash=self.parent._hash,
             )
 
-            self.parent._job_ids[utils.DB_ABFE].append(job_id)
+            self.jobs.append(Job.from_ids([job_id]))
 
     @beartype
     def show_trajectory(
@@ -221,7 +205,8 @@ class ABFE:
         JupyterViewer.visualize(html_content)
 
     @classmethod
-    def parse_progress(cls, job) -> dict:
+    @beartype
+    def parse_progress(cls, job: Job) -> dict:
         """parse progress from a ABFE job"""
 
         steps = [
@@ -274,12 +259,17 @@ class ABFE:
         return progress
 
     @classmethod
-    def _name_job(cls, job) -> str:
+    @beartype
+    def _name_job(cls, job: Job) -> str:
         """utility function to name a job using inputs to that job"""
-        return f"ABFE run using <code>{job._metadata[0]['protein_id']}</code> and <code>{job._metadata[0]['ligand1_id']}</code>"
+        try:
+            return f"ABFE run using <code>{job._metadata[0]['protein_id']}</code> and <code>{job._metadata[0]['ligand1_id']}</code>"
+        except Exception:
+            return "ABFE run"
 
     @classmethod
-    def _render_progress(cls, job) -> str:
+    @beartype
+    def _render_progress(cls, job: Job) -> str:
         """
         Render HTML for a Mermaid diagram where each node is drawn as arounded rectangle
         with a color indicating its status.

@@ -38,6 +38,7 @@ dependencies = [
     "more-itertools",
     "nest_asyncio",
     "asyncio",
+    "jinja2",
     "aiohttp",
 ]
 dynamic = ["version"]
@@ -81,7 +82,7 @@ build-backend = "setuptools.build_meta"
 [tool.ruff]
 include = ["**/src/**/*.py", "**/tests/**/*.py"]
 # Exclude file-service auto-gen code for now
-exclude = [ "src/files/file_service",]
+exclude = ["src/files/file_service"]
 fix = true
 
 [tool.ruff.lint]
@@ -113,7 +114,15 @@ omit = ["src/data_hub/client.py", "tests/*.py"]
 [tool.interrogate]
 fail-under = 100
 # Skip files module coverage for now as it has lots of auto-gen code
-exclude = ["setup.py", "docs", "build","tests","variables","conftest.py", "src/files"]
+exclude = [
+    "setup.py",
+    "docs",
+    "build",
+    "tests",
+    "variables",
+    "conftest.py",
+    "src/files",
+]
 ignore-init-method = true
 ignore-init-module = true
 ignore-magic = true
