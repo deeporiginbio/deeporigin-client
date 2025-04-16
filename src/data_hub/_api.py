@@ -69,7 +69,7 @@ def _get_client_methods() -> set:
 def _get_default_client(
     *,
     client=None,
-    refresh: bool = True,
+    refresh: bool = False,
     use_async: bool = False,
 ):
     """Internal function to instantiate client
@@ -149,6 +149,11 @@ def _create_function(method_path):
             response = method(**kwargs)
         except AuthenticationError as error:
             if "expired token" in error.message:
+                # TODO: this is a hack to refresh the token
+                # This can likely be safely removed, and I do not think
+                # this code block is ever reached, because the client
+                # is configured to refresh the token when it expires.
+
                 print("⚠️ Token expired. Refreshing credentials...")
                 tokens = auth.read_cached_tokens()
                 tokens["access"] = auth.refresh_tokens(tokens["refresh"])
