@@ -321,9 +321,6 @@ def _process_job(
         data=payload,
         tool_key=tool_key,
     )
-
-    execution_id = response.attributes.executionId
     job_id = response.id
 
-    print(f"🧬 Job started with ID: {job_id}, execution ID: {execution_id}")
     return job_id
