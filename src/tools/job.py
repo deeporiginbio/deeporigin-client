@@ -128,14 +128,13 @@ class Job:
             # Try to parse each item in the list as JSON
             parsed_reports = []
             for report in self._progress_reports:
-                try:
-                    parsed_reports.append(json.loads(str(report)))
-                except json.JSONDecodeError:
-                    parsed_reports.append(report)
+                parsed_reports.append(json.loads(str(report)))
+
             template_vars["raw_progress_json"] = json.dumps(parsed_reports, indent=2)
         except Exception:
             # If something goes wrong with the list processing, fall back to raw text
             template_vars["raw_progress_json"] = str(self._progress_reports)
+            template_vars["raw_progress_json"].replace("\n", "<br>")
 
         # Render the template
         return template.render(**template_vars)
