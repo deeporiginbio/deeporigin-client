@@ -126,6 +126,10 @@ class ABFE(WorkflowStep):
         already_run_ligands = set(df[utils.COL_LIGAND1])
         ligand_ids = set(ligand_ids) - already_run_ligands
 
+        if len(ligand_ids) == 0:
+            print("All requested ligands have already been run.")
+            return
+
         for ligand_id in ligand_ids:
             job_id = utils._start_tool_run(
                 protein_id=self.parent.protein._do_id,
@@ -136,7 +140,12 @@ class ABFE(WorkflowStep):
                 complex_hash=self.parent._hash,
             )
 
-            self.jobs.append(Job.from_ids([job_id]))
+            job = Job.from_ids([job_id])
+
+            job._viz_func = self._render_progress
+            job._name_func = self._name_job
+
+            self.jobs.append(job)
 
     @beartype
     def show_trajectory(
@@ -218,6 +227,9 @@ class ABFE(WorkflowStep):
             "binding",
             "delta_g",
         ]
+
+        if len(job._progress_reports) == 0:
+            return {step: "NotStarted" for step in steps}
 
         data = job._progress_reports[0]
 

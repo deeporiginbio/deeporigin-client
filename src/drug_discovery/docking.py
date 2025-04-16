@@ -6,12 +6,14 @@ from typing import Optional
 from beartype import beartype
 from deeporigin_molstar import DockingViewer, JupyterViewer
 import more_itertools
+import numpy as np
 import pandas as pd
 
 from deeporigin.data_hub import api
 from deeporigin.drug_discovery import chemistry as chem
 from deeporigin.drug_discovery import utils
 from deeporigin.drug_discovery.structures.ligand import ligands_to_dataframe
+from deeporigin.drug_discovery.structures.pocket import Pocket
 from deeporigin.drug_discovery.workflow_step import WorkflowStep
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.tools.job import Job
@@ -40,7 +42,7 @@ class Docking(WorkflowStep):
     def _name_job(self, job: Job) -> str:
         """Generate a name for a job."""
 
-        num_ligands = sum(len(inputs["smiles_list"]) for inputs in job.user_inputs)
+        num_ligands = sum(len(inputs["smiles_list"]) for inputs in job._inputs)
         return f"Docking run. Docking protein: <code>{job._metadata[0]['protein_id']}</code> to {num_ligands} ligands."
 
     def get_results(self) -> pd.DataFrame:
@@ -141,8 +143,9 @@ class Docking(WorkflowStep):
     def run(
         self,
         *,
-        box_size: tuple[Number, Number, Number],
-        pocket_center: tuple[Number, Number, Number],
+        pocket: Optional[Pocket] = None,
+        box_size: Optional[tuple[Number, Number, Number]] = None,
+        pocket_center: Optional[tuple[Number, Number, Number]] = None,
         batch_size: Optional[int] = 32,
         n_workers: Optional[int] = None,
     ):
@@ -173,6 +176,16 @@ class Docking(WorkflowStep):
         if n_workers is not None:
             batch_size = math.ceil(len(self.parent.ligands) / n_workers)
 
+        if pocket is None and box_size is None and pocket_center is None:
+            raise DeepOriginException(
+                "Specify a pocket, or a box size and pocket center."
+            )
+
+        if pocket is not None:
+            box_size = float(2 * np.cbrt(pocket.props["volume"]))
+            box_size = [box_size, box_size, box_size]
+            pocket_center = pocket.get_center().tolist()
+
         df = pd.DataFrame(
             api.get_dataframe(
                 utils.DB_DOCKING,
@@ -188,7 +201,7 @@ class Docking(WorkflowStep):
         df["Status"] = df["JobID"].replace(statuses)
         df = df["Failed" != df["Status"]]
 
-        smiles_strings = [ligand.smiles_string for ligand in self.parent.ligands]
+        smiles_strings = [ligand.smiles for ligand in self.parent.ligands]
 
         chunks = list(more_itertools.chunked(smiles_strings, batch_size))
 
@@ -198,6 +211,8 @@ class Docking(WorkflowStep):
         )
 
         database_columns = self.parent._db.proteins.cols + self.parent._db.docking.cols
+
+        job_ids = []
 
         for chunk in chunks:
             params["smiles_list"] = chunk
@@ -214,8 +229,17 @@ class Docking(WorkflowStep):
                 complex_hash=self.parent._hash,
                 tool="Docking",
             )
+            job_ids.append(job_id)
 
-            self._job_ids.append(job_id)
+        if self.jobs is None:
+            self.jobs = []
+
+        job = Job.from_ids(job_ids)
+
+        job._viz_func = self._render_progress
+        job._name_func = self._name_job
+
+        self.jobs.append(job)
 
 
 @beartype
