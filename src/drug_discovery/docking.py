@@ -2,6 +2,8 @@
 
 import math
 from typing import Optional
+import concurrent.futures
+from tqdm import tqdm
 
 from beartype import beartype
 from deeporigin_molstar import DockingViewer, JupyterViewer
@@ -159,12 +161,13 @@ class Docking(WorkflowStep):
                 "Either batch_size or n_workers must be specified."
             )
         elif batch_size is not None and n_workers is not None:
-            raise DeepOriginException(
-                "Either batch_size or n_workers must be specified, but not both."
+            print(
+                "Both batch_size and n_workers are specified. Using n_workers to determine batch_size..."
             )
 
         if n_workers is not None:
             batch_size = math.ceil(len(self.parent.ligands) / n_workers)
+            print(f"Using a batch size of {batch_size}")
 
         if pocket is None and box_size is None and pocket_center is None:
             raise DeepOriginException(
@@ -194,39 +197,52 @@ class Docking(WorkflowStep):
         smiles_strings = [ligand.smiles for ligand in self.parent.ligands]
 
         chunks = list(more_itertools.chunked(smiles_strings, batch_size))
-
-        params = dict(
-            box_size=list(box_size),
-            pocket_center=list(pocket_center),
-        )
-
-        database_columns = self.parent._db.proteins.cols + self.parent._db.docking.cols
-
         job_ids = []
 
-        for chunk in chunks:
-            params["smiles_list"] = chunk
+        def process_chunk(chunk):
+            params = dict(
+                box_size=list(box_size),
+                pocket_center=list(pocket_center),
+                smiles_list=chunk,
+            )
+
             smiles_hash = hash_strings(params["smiles_list"])
 
             if smiles_hash in df[utils.COL_SMILES_HASH].tolist():
                 print("Skipping this tranche because this has already been run...")
-                continue
+                return None
 
-            job_id = utils._start_tool_run(
+            return utils._start_tool_run(
                 params=params,
                 protein_id=self.parent.protein._do_id,
-                database_columns=database_columns,
+                database_columns=self.parent._db.proteins.cols
+                + self.parent._db.docking.cols,
                 complex_hash=self.parent._hash,
                 tool="Docking",
             )
-            job_ids.append(job_id)
+
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            # Submit all chunks to the executor
+            future_to_chunk = {
+                executor.submit(process_chunk, chunk): chunk for chunk in chunks
+            }
+
+            # Process results with progress bar
+            for future in tqdm(
+                concurrent.futures.as_completed(future_to_chunk),
+                total=len(chunks),
+                desc="Running docking jobs",
+            ):
+                job_id = future.result()
+                if job_id is not None:
+                    job_ids.append(job_id)
 
         if self.jobs is None:
             self.jobs = []
 
         job = Job.from_ids(job_ids)
-
         job._viz_func = self._render_progress
         job._name_func = self._name_job
+        job.sync()
 
         self.jobs.append(job)
