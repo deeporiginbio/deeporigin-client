@@ -17,7 +17,7 @@ from deeporigin.drug_discovery.structures.pocket import Pocket
 from deeporigin.drug_discovery.workflow_step import WorkflowStep
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.tools.job import Job
-from deeporigin.tools.utils import get_statuses_and_progress, query_run_statuses
+from deeporigin.tools.utils import query_run_statuses
 from deeporigin.utils.core import hash_strings
 
 Number = float | int
@@ -33,17 +33,11 @@ class Docking(WorkflowStep):
         self._fuse_jobs = True
 
     @beartype
-    def _render_progress(self, job: Job) -> str:
-        """Render progress visualization for a job."""
-        # TODO: Implement Docking-specific progress visualization
-        return "Docking Progress Visualization"
-
-    @beartype
     def _name_job(self, job: Job) -> str:
         """Generate a name for a job."""
 
         num_ligands = sum(len(inputs["smiles_list"]) for inputs in job._inputs)
-        return f"Docking run. Docking protein: <code>{job._metadata[0]['protein_id']}</code> to {num_ligands} ligands."
+        return f"Docking protein: <code>{job._metadata[0]['protein_id']}</code> to {num_ligands} ligands."
 
     def get_results(self) -> pd.DataFrame:
         """Get docking results from Deep Origin"""
@@ -62,30 +56,26 @@ class Docking(WorkflowStep):
         )
         return df
 
-    def show_progress(self):
-        """show progress of bulk Docking run"""
+    @classmethod
+    @beartype
+    def _render_progress(cls, job: Job) -> str:
+        """Render progress visualization for a job."""
 
-        data = get_statuses_and_progress(self._job_ids)
+        data = job._progress_reports
 
+        total_ligands = sum([len(inputs["smiles_list"]) for inputs in job._inputs])
         total_docked = 0
+        total_failed = 0
 
-        total_ligands = 0
         for item in data:
-            progress = item["progress"]
-            if progress is None:
+            if item is None:
                 continue
+            total_docked += item.count("ligand docked")
+            total_failed += item.count("ligand failed")
 
-            batch_docked = _parse_progress(progress)
-            total_docked += batch_docked
-            total_ligands += len(item["inputs"].smiles_list)
+        from deeporigin.utils.notebook import render_progress_bar
 
-        if total_ligands == 0:
-            print("Cannot show progress yet. Jobs are yet to start.")
-            return
-
-        from deeporigin.utils.notebook import show_progress_bar
-
-        show_progress_bar(
+        return render_progress_bar(
             completed=total_docked,
             total=total_ligands,
             title="Docking Progress",
@@ -240,13 +230,3 @@ class Docking(WorkflowStep):
         job._name_func = self._name_job
 
         self.jobs.append(job)
-
-
-@beartype
-def _parse_progress(txt: str) -> int:
-    """Parse Docking progress from raw progress text"""
-
-    txt = txt.split("\n")
-    num_docked_ligands = len(txt) - 1
-
-    return num_docked_ligands
