@@ -20,7 +20,7 @@ def test_ligands_from_sdf_file():
     )
 
     for mol in mols:
-        Ligand.from_smiles(mol["smiles_string"], properties=mol["properties"])
+        Ligand.from_smiles(mol["smiles"], properties=mol["properties"])
 
 
 def test_ligand_from_smiles():
@@ -191,7 +191,7 @@ def test_ligand_errors(ligand):
     with pytest.raises(Exception):  # noqa: B017
         Ligand(
             file_path=ligand["file"],
-            smiles=ligand["smiles_string"],
+            smiles=ligand["smiles"],
         )
 
 

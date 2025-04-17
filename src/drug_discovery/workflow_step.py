@@ -1,5 +1,8 @@
 """Base class for workflow steps like ABFE, RBFE, and Docking."""
 
+from collections import Counter
+from typing import Optional
+
 from beartype import beartype
 
 from deeporigin.tools.job import Job
@@ -22,11 +25,66 @@ class WorkflowStep:
         self.parent = parent
         self._params = PrettyDict()
 
-    def show_jobs(self):
+    def show_jobs(self, summary: Optional[bool] = None):
         """Show the jobs for this workflow step."""
 
-        for job in self.jobs:
-            job.show()
+        if len(self.jobs) > 5 and summary is None:
+            summary = True
+        else:
+            summary = False
+
+        if summary:
+            html = """
+            <style>
+                .status-circle {
+                    display: inline-block;
+                    width: 12px;
+                    height: 12px;
+                    border-radius: 50%;
+                    margin-right: 2px;
+                }
+                .failed { background-color: #ff4444; }
+                .running { background-color: #4444ff; }
+                .succeeded { background-color: #44ff44; }
+            </style>
+            """
+            for job in self.jobs:
+                counts = Counter(job._status)
+                failed = counts.get("Failed", 0)
+                running = counts.get("Running", 0)
+                succeeded = counts.get("Succeeded", 0)
+
+                html += self._name_job(job)
+                html += " | "
+
+                # Add circles for each status
+                html += "".join(
+                    [
+                        '<span class="status-circle failed"></span>'
+                        for _ in range(failed)
+                    ]
+                )
+                html += "".join(
+                    [
+                        '<span class="status-circle running"></span>'
+                        for _ in range(running)
+                    ]
+                )
+                html += "".join(
+                    [
+                        '<span class="status-circle succeeded"></span>'
+                        for _ in range(succeeded)
+                    ]
+                )
+                html += "<br>"
+
+            from IPython.display import HTML, display
+
+            display(HTML(html))
+
+        else:
+            for job in self.jobs:
+                job.show()
 
     @beartype
     def _make_jobs_from_ids(self, job_ids: list[str]) -> None:

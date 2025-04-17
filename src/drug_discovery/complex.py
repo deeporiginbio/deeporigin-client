@@ -435,7 +435,10 @@ class Complex:
             )
         )
 
-        df = df[self._hash == df[utils.COL_COMPLEX_HASH]]
+        ligand_ids = [ligand._do_id for ligand in self.ligands]
+
+        df = df[df[utils.COL_PROTEIN] == self.protein._do_id]
+        df = df[(df[utils.COL_LIGAND1].isin(ligand_ids))]
 
         # this makes sure that we only retain rows
         # where there is a valid output being generated
@@ -466,7 +469,10 @@ class Complex:
 
         all_dfs = []
         for file_id, ligand1_id, ligand2_id in zip(
-            file_ids, ligand1_ids, ligand2_ids, strict=False
+            file_ids,
+            ligand1_ids,
+            ligand2_ids,
+            strict=False,
         ):
             file_loc = os.path.join(DATA_DIRS[tool], file_id.replace("_file:", ""))
             df = pd.read_csv(file_loc)
@@ -481,9 +487,7 @@ class Complex:
                     errors="ignore",
                 )
 
-            smiles_mapping = {
-                ligand._do_id: ligand.smiles_string for ligand in self.ligands
-            }
+            smiles_mapping = {ligand._do_id: ligand.smiles for ligand in self.ligands}
 
             if tool == "RBFE":
                 df["Ligand1"] = ligand1_id
@@ -492,9 +496,9 @@ class Complex:
                 df["SMILES1"] = df[utils.COL_LIGAND1].map(smiles_mapping)
                 df["SMILES2"] = df[utils.COL_LIGAND2].map(smiles_mapping)
             elif tool == "ABFE":
-                df["Ligand"] = ligand1_id
+                df["Ligand1"] = ligand1_id
 
-                df["SMILES"] = df["Ligand"].map(smiles_mapping)
+                df["SMILES"] = df["Ligand1"].map(smiles_mapping)
 
             all_dfs.append(df)
 

@@ -14,6 +14,7 @@ import pandas as pd
 from deeporigin.data_hub import api
 from deeporigin.drug_discovery import chemistry as chem
 from deeporigin.drug_discovery import utils
+from deeporigin.drug_discovery.structures.ligand import ligands_to_dataframe
 from deeporigin.drug_discovery.workflow_step import WorkflowStep
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.tools.job import Job
@@ -40,10 +41,10 @@ class ABFE(WorkflowStep):
             print("No ABFE results to display.")
             return
 
-        df1["ID"] = df1["Ligand"]
-        df1.drop(columns=["Ligand", "SMILES"], inplace=True)
+        df1["ID"] = df1["Ligand1"]
+        df1.drop(columns=["Ligand1", "SMILES"], inplace=True)
 
-        df2 = chem.ligands_to_dataframe(self.parent.ligands)
+        df2 = ligands_to_dataframe(self.parent.ligands)
         df2["SMILES"] = df2["Ligand"]
         df2.drop(columns=["Ligand"], inplace=True)
 
@@ -72,6 +73,12 @@ class ABFE(WorkflowStep):
         df.drop("SMILES", axis=1, inplace=True)
 
         df["Structure"] = chem.smiles_list_to_base64_png_list(smiles_list)
+
+        # show structure first
+        new_order = ["Structure"] + [col for col in df.columns if col != "Structure"]
+
+        # re‑index your DataFrame
+        df = df[new_order]
 
         # Use escape=False to allow the <img> tags to render as images
         from IPython.display import HTML, display
