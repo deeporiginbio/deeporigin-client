@@ -74,6 +74,12 @@ class ABFE(WorkflowStep):
 
         df["Structure"] = chem.smiles_list_to_base64_png_list(smiles_list)
 
+        # show structure first
+        new_order = ["Structure"] + [col for col in df.columns if col != "Structure"]
+
+        # re‑index your DataFrame
+        df = df[new_order]
+
         # Use escape=False to allow the <img> tags to render as images
         from IPython.display import HTML, display
 
