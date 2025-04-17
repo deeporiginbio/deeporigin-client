@@ -286,8 +286,25 @@ class Complex:
             self.protein._do_id = matching_indices[0]
 
         # fetch all relevant jobIDs
-        # TODO -- parallelize this
+        # fetch from ABFE first
+        df = pd.DataFrame(
+            api.get_dataframe(
+                "ABFE",
+                return_type="dict",
+            )
+        )
+        df = df[df["Protein"] == self.protein._do_id]
+        ligand_ids = [ligand._do_id for ligand in self.ligands]
+        df = df[df["Ligand1"].isin(ligand_ids)]
+        job_ids = df[utils.COL_JOBID].tolist()
+        self.abfe._make_jobs_from_ids(job_ids)
+
         for tool in list(get_args(utils.VALID_TOOLS)):
+            if tool == "ABFE":
+                continue
+
+            # TODO remove this and have tool sepecific code here
+
             df = pd.DataFrame(
                 api.get_dataframe(
                     tool,

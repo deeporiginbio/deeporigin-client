@@ -1,15 +1,15 @@
 """This module encapsulates methods to run docking and show docking results on Deep Origin"""
 
+import concurrent.futures
 import math
 from typing import Optional
-import concurrent.futures
-from tqdm import tqdm
 
 from beartype import beartype
 from deeporigin_molstar import DockingViewer, JupyterViewer
 import more_itertools
 import numpy as np
 import pandas as pd
+from tqdm import tqdm
 
 from deeporigin.data_hub import api
 from deeporigin.drug_discovery import chemistry as chem
