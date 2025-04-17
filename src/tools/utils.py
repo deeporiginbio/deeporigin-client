@@ -41,7 +41,7 @@ def get_status_and_progress(execution_id: str) -> dict:
     return dict(
         status=data.attributes.status,
         progress=data.attributes.progressReport,
-        execution_id=execution_id,
+        execution_id=data.attributes.executionId,  # confusingly, this is not the execution_id coming in
         inputs=data.attributes.userInputs,
         attributes=data.attributes,
     )

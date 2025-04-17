@@ -248,5 +248,8 @@ def decode_access_token(token: Optional[str] = None) -> dict:
         token,
         public_key,
         algorithms=["RS256"],
-        options={"verify_aud": False},  # matches what platform does
+        options={
+            "verify_aud": False,  # matches what platform does
+            "verify_exp": False,  # we want to decode this no matter what, because we'll check the expiration in the caller
+        },
     )
