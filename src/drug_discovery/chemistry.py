@@ -23,7 +23,7 @@ def read_molecules_in_sdf_file(sdf_file: str | Path) -> list[dict]:
 
     Returns:
         list[dict]: A list of dictionaries, where each dictionary has:
-            - "smiles_string": str
+            - "smiles": str
             - "properties": dict
     """
     from rdkit import Chem
@@ -44,7 +44,7 @@ def read_molecules_in_sdf_file(sdf_file: str | Path) -> list[dict]:
         smiles_str = Chem.MolToSmiles(mol)
         properties = {prop: mol.GetProp(prop) for prop in mol.GetPropNames()}
 
-        output.append({"smiles_string": smiles_str, "properties": properties})
+        output.append({"smiles": smiles_str, "properties": properties})
 
     return output
 

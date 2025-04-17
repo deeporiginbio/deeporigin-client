@@ -481,9 +481,7 @@ class Complex:
                     errors="ignore",
                 )
 
-            smiles_mapping = {
-                ligand._do_id: ligand.smiles_string for ligand in self.ligands
-            }
+            smiles_mapping = {ligand._do_id: ligand.smiles for ligand in self.ligands}
 
             if tool == "RBFE":
                 df["Ligand1"] = ligand1_id
