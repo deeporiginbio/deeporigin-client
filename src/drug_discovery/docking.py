@@ -1,38 +1,48 @@
 """This module encapsulates methods to run docking and show docking results on Deep Origin"""
 
+import concurrent.futures
 import math
 from typing import Optional
 
 from beartype import beartype
 from deeporigin_molstar import DockingViewer, JupyterViewer
 import more_itertools
+import numpy as np
 import pandas as pd
+from tqdm import tqdm
 
 from deeporigin.data_hub import api
 from deeporigin.drug_discovery import chemistry as chem
 from deeporigin.drug_discovery import utils
 from deeporigin.drug_discovery.structures.ligand import ligands_to_dataframe
+from deeporigin.drug_discovery.structures.pocket import Pocket
+from deeporigin.drug_discovery.workflow_step import WorkflowStep
 from deeporigin.exceptions import DeepOriginException
-from deeporigin.tools.utils import get_statuses_and_progress, query_run_statuses
-from deeporigin.utils.core import PrettyDict, hash_strings
+from deeporigin.tools.job import Job
+from deeporigin.tools.utils import query_run_statuses
+from deeporigin.utils.core import hash_strings
 
 Number = float | int
 
 
-class Docking:
+class Docking(WorkflowStep):
     """class to handle Docking-related tasks within the Complex class.
 
     Objects instantiated here are meant to be used within the Complex class."""
 
     def __init__(self, parent):
-        self.parent = parent
-        self._params = PrettyDict()
+        super().__init__(parent)
+        self._fuse_jobs = True
+
+    @beartype
+    def _name_job(self, job: Job) -> str:
+        """Generate a name for a job."""
+
+        num_ligands = sum(len(inputs["smiles_list"]) for inputs in job._inputs)
+        return f"Docking protein: <code>{job._metadata[0]['protein_id']}</code> to {num_ligands} ligands."
 
     def get_results(self) -> pd.DataFrame:
         """Get docking results from Deep Origin"""
-
-        # to do -- some way to make sure that we handle failed runs, complete runs, etc.
-        # status = self.get_status("Docking")
 
         df1 = self.parent.get_csv_results_for("Docking")
 
@@ -48,30 +58,26 @@ class Docking:
         )
         return df
 
-    def show_progress(self):
-        """show progress of bulk Docking run"""
+    @classmethod
+    @beartype
+    def _render_progress(cls, job: Job) -> str:
+        """Render progress visualization for a job."""
 
-        data = get_statuses_and_progress(self.parent._job_ids["Docking"])
+        data = job._progress_reports
 
+        total_ligands = sum([len(inputs["smiles_list"]) for inputs in job._inputs])
         total_docked = 0
+        total_failed = 0
 
-        total_ligands = 0
         for item in data:
-            progress = item["progress"]
-            if progress is None:
+            if item is None:
                 continue
+            total_docked += item.count("ligand docked")
+            total_failed += item.count("ligand failed")
 
-            batch_docked = _parse_progress(progress)
-            total_docked += batch_docked
-            total_ligands += len(item["inputs"].smiles_list)
+        from deeporigin.utils.notebook import render_progress_bar
 
-        if total_ligands == 0:
-            print("Cannot show progress yet. Jobs are yet to start.")
-            return
-
-        from deeporigin.utils.notebook import show_progress_bar
-
-        show_progress_bar(
+        return render_progress_bar(
             completed=total_docked,
             total=total_ligands,
             title="Docking Progress",
@@ -129,8 +135,9 @@ class Docking:
     def run(
         self,
         *,
-        box_size: tuple[Number, Number, Number],
-        pocket_center: tuple[Number, Number, Number],
+        pocket: Optional[Pocket] = None,
+        box_size: Optional[tuple[Number, Number, Number]] = None,
+        pocket_center: Optional[tuple[Number, Number, Number]] = None,
         batch_size: Optional[int] = 32,
         n_workers: Optional[int] = None,
     ):
@@ -154,12 +161,23 @@ class Docking:
                 "Either batch_size or n_workers must be specified."
             )
         elif batch_size is not None and n_workers is not None:
-            raise DeepOriginException(
-                "Either batch_size or n_workers must be specified, but not both."
+            print(
+                "Both batch_size and n_workers are specified. Using n_workers to determine batch_size..."
             )
 
         if n_workers is not None:
             batch_size = math.ceil(len(self.parent.ligands) / n_workers)
+            print(f"Using a batch size of {batch_size}")
+
+        if pocket is None and box_size is None and pocket_center is None:
+            raise DeepOriginException(
+                "Specify a pocket, or a box size and pocket center."
+            )
+
+        if pocket is not None:
+            box_size = float(2 * np.cbrt(pocket.props["volume"]))
+            box_size = [box_size, box_size, box_size]
+            pocket_center = pocket.get_center().tolist()
 
         df = pd.DataFrame(
             api.get_dataframe(
@@ -176,41 +194,55 @@ class Docking:
         df["Status"] = df["JobID"].replace(statuses)
         df = df["Failed" != df["Status"]]
 
-        smiles_strings = [ligand.smiles_string for ligand in self.parent.ligands]
+        smiles_strings = [ligand.smiles for ligand in self.parent.ligands]
 
         chunks = list(more_itertools.chunked(smiles_strings, batch_size))
+        job_ids = []
 
-        params = dict(
-            box_size=list(box_size),
-            pocket_center=list(pocket_center),
-        )
+        def process_chunk(chunk):
+            params = dict(
+                box_size=list(box_size),
+                pocket_center=list(pocket_center),
+                smiles_list=chunk,
+            )
 
-        database_columns = self.parent._db.proteins.cols + self.parent._db.docking.cols
-
-        for chunk in chunks:
-            params["smiles_list"] = chunk
             smiles_hash = hash_strings(params["smiles_list"])
 
             if smiles_hash in df[utils.COL_SMILES_HASH].tolist():
                 print("Skipping this tranche because this has already been run...")
-                continue
+                return None
 
-            job_id = utils._start_tool_run(
+            return utils._start_tool_run(
                 params=params,
                 protein_id=self.parent.protein._do_id,
-                database_columns=database_columns,
+                database_columns=self.parent._db.proteins.cols
+                + self.parent._db.docking.cols,
                 complex_hash=self.parent._hash,
                 tool="Docking",
             )
 
-            self.parent._job_ids["Docking"].append(job_id)
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            # Submit all chunks to the executor
+            future_to_chunk = {
+                executor.submit(process_chunk, chunk): chunk for chunk in chunks
+            }
 
+            # Process results with progress bar
+            for future in tqdm(
+                concurrent.futures.as_completed(future_to_chunk),
+                total=len(chunks),
+                desc="Running docking jobs",
+            ):
+                job_id = future.result()
+                if job_id is not None:
+                    job_ids.append(job_id)
 
-@beartype
-def _parse_progress(txt: str) -> int:
-    """Parse Docking progress from raw progress text"""
+        if self.jobs is None:
+            self.jobs = []
 
-    txt = txt.split("\n")
-    num_docked_ligands = len(txt) - 1
+        job = Job.from_ids(job_ids)
+        job._viz_func = self._render_progress
+        job._name_func = self._name_job
+        job.sync()
 
-    return num_docked_ligands
+        self.jobs.append(job)

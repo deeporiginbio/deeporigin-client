@@ -128,8 +128,8 @@ class Complex:
     """class to represent a set of a protein and 1 or many ligands"""
 
     # Using a private attribute for ligands with the property decorator below
-    _ligands: list[Ligand] = field(repr=False)
     protein: Protein
+    _ligands: list[Ligand] = field(default_factory=list, repr=False)
 
     # these params are not user facing
     _db: Optional[dict] = None
@@ -137,14 +137,20 @@ class Complex:
     """stores a hash of all ligands and the protein. This will be computed post initialization"""
     _hash: Optional[str] = None
 
-    """stores job ids for all jobs, organized by tool. """
-    _job_ids: dict = field(
-        default_factory=lambda: {
-            utils.DB_DOCKING: [],
-            utils.DB_ABFE: [],
-            utils.DB_RBFE: [],
-        }
-    )
+    def __init__(
+        self,
+        protein: Protein,
+        *,
+        ligands: list[Ligand] | None = None,
+        **kwargs,
+    ):
+        """Initialize a Complex with either ligands or _ligands parameter"""
+        self._ligands = ligands if ligands is not None else []
+        self.protein = protein
+        self._db = None
+        self._hash = None
+
+        self.__post_init__()
 
     def __post_init__(self):
         """various post init tasks"""
@@ -177,17 +183,22 @@ class Complex:
 
     @classmethod
     def from_dir(cls, directory: str) -> "Complex":
-        """initialize an FEP class given some files in a directory
+        """Initialize a Complex from a directory containing protein and ligand files.
 
         Args:
-            directory (str): directory containing ligand and protein files.
+            directory (str): Directory containing ligand and protein files.
 
-        Protein file should be in PDB format. Ligand files should be in SDF format. Each SDF file should contain a single molecule. If your SDF files contain more than one molecule, use `deeporigin.chemistry.split_sdf_file` to split them into separate files.
+        The directory should contain:
+        - Exactly one PDB file for the protein
+        - One or more SDF files for the ligands. Each SDF file can contain one or more molecules.
 
+        Returns:
+            Complex: A new Complex instance initialized from the files in the directory.
 
+        Raises:
+            ValueError: If no PDB file is found or if multiple PDB files are found.
         """
-
-        # figure out all the SDF files
+        # Find all SDF files in the directory
         sdf_files = sorted(
             [
                 os.path.join(directory, f)
@@ -195,24 +206,17 @@ class Complex:
                 if f.lower().endswith(".sdf")
             ]
         )
-        mols = []
-        for sdf_file in sdf_files:
-            mols_from_this_sdf_file = chem.read_molecules_in_sdf_file(sdf_file)
-            if len(mols_from_this_sdf_file) == 1:
-                # there's only one molecule in thie SDF file, so we should track the file it came from.
-                mols_from_this_sdf_file[0]["file"] = sdf_file
 
-            mols.extend(mols_from_this_sdf_file)
-
+        # Load all ligands from SDF files
         ligands = []
-
-        for mol in mols:
-            if "file" in mol:
-                ligand = Ligand.from_file_path(mol["file"])
+        for sdf_file in sdf_files:
+            result = Ligand.from_sdf(sdf_file)
+            if isinstance(result, list):
+                ligands.extend(result)
             else:
-                ligand = Ligand.from_smiles(mol["smiles"])
-            ligands.append(ligand)
+                ligands.append(result)
 
+        # Find PDB file
         pdb_files = [
             os.path.join(directory, f)
             for f in os.listdir(directory)
@@ -228,8 +232,8 @@ class Complex:
 
         # Create the Complex instance
         instance = cls(
-            _ligands=ligands,
             protein=protein,
+            ligands=ligands,
         )
 
         return instance
@@ -282,8 +286,25 @@ class Complex:
             self.protein._do_id = matching_indices[0]
 
         # fetch all relevant jobIDs
-        # TODO -- parallelize this
+        # fetch from ABFE first
+        df = pd.DataFrame(
+            api.get_dataframe(
+                "ABFE",
+                return_type="dict",
+            )
+        )
+        df = df[df["Protein"] == self.protein._do_id]
+        ligand_ids = [ligand._do_id for ligand in self.ligands]
+        df = df[df["Ligand1"].isin(ligand_ids)]
+        job_ids = df[utils.COL_JOBID].tolist()
+        self.abfe._make_jobs_from_ids(job_ids)
+
         for tool in list(get_args(utils.VALID_TOOLS)):
+            if tool == "ABFE":
+                continue
+
+            # TODO remove this and have tool sepecific code here
+
             df = pd.DataFrame(
                 api.get_dataframe(
                     tool,
@@ -291,24 +312,11 @@ class Complex:
                 )
             )
             df = df[df["ComplexHash"] == self._hash]
-            self._job_ids[tool] = df[utils.COL_JOBID].tolist()
+            job_ids = df[utils.COL_JOBID].tolist()
 
-    @beartype
-    def get_status_for(self, tool: utils.VALID_TOOLS) -> dict:
-        """Return status for jobs corresponding to a particular tool
-
-        Args:
-            tool: one of "Docking", "ABFE", "RBFE"
-        """
-        return query_run_statuses(self._job_ids[tool])
-
-    def get_status(self):
-        """Returns status for all runs for all tools"""
-
-        data = dict()
-        for tool in list(get_args(utils.VALID_TOOLS)):
-            data[tool] = self.get_status_for(tool)
-        print(json.dumps(data, indent=2))
+            # now that we have job IDs, construct Job object from them
+            tool_instance = getattr(self, tool.lower())
+            tool_instance._make_jobs_from_ids(job_ids)
 
     def _repr_pretty_(self, p, cycle):
         """pretty print a Docking object"""
@@ -427,7 +435,10 @@ class Complex:
             )
         )
 
-        df = df[self._hash == df[utils.COL_COMPLEX_HASH]]
+        ligand_ids = [ligand._do_id for ligand in self.ligands]
+
+        df = df[df[utils.COL_PROTEIN] == self.protein._do_id]
+        df = df[(df[utils.COL_LIGAND1].isin(ligand_ids))]
 
         # this makes sure that we only retain rows
         # where there is a valid output being generated
@@ -458,7 +469,10 @@ class Complex:
 
         all_dfs = []
         for file_id, ligand1_id, ligand2_id in zip(
-            file_ids, ligand1_ids, ligand2_ids, strict=False
+            file_ids,
+            ligand1_ids,
+            ligand2_ids,
+            strict=False,
         ):
             file_loc = os.path.join(DATA_DIRS[tool], file_id.replace("_file:", ""))
             df = pd.read_csv(file_loc)
@@ -473,9 +487,7 @@ class Complex:
                     errors="ignore",
                 )
 
-            smiles_mapping = {
-                ligand._do_id: ligand.smiles_string for ligand in self.ligands
-            }
+            smiles_mapping = {ligand._do_id: ligand.smiles for ligand in self.ligands}
 
             if tool == "RBFE":
                 df["Ligand1"] = ligand1_id
@@ -484,9 +496,9 @@ class Complex:
                 df["SMILES1"] = df[utils.COL_LIGAND1].map(smiles_mapping)
                 df["SMILES2"] = df[utils.COL_LIGAND2].map(smiles_mapping)
             elif tool == "ABFE":
-                df["Ligand"] = ligand1_id
+                df["Ligand1"] = ligand1_id
 
-                df["SMILES"] = df["Ligand"].map(smiles_mapping)
+                df["SMILES"] = df["Ligand1"].map(smiles_mapping)
 
             all_dfs.append(df)
 

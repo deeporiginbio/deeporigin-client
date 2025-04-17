@@ -14,36 +14,21 @@ import pandas as pd
 from deeporigin.data_hub import api
 from deeporigin.drug_discovery import chemistry as chem
 from deeporigin.drug_discovery import utils
+from deeporigin.drug_discovery.structures.ligand import ligands_to_dataframe
+from deeporigin.drug_discovery.workflow_step import WorkflowStep
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.tools.job import Job
-from deeporigin.utils.core import PrettyDict
 
 
-class ABFE:
+class ABFE(WorkflowStep):
     """class to handle ABFE-related tasks within the Complex class.
 
     Objects instantiated here are meant to be used within the Complex class."""
 
     def __init__(self, parent):
-        self.parent = parent
-        self._params = PrettyDict()
+        super().__init__(parent)
 
         self._params.end_to_end = utils._load_params("abfe_end_to_end")
-
-    def get_jobs(self) -> list[Job]:
-        """get a list of ABFE jobs"""
-
-        job_ids = self.parent._job_ids["ABFE"]
-        jobs = []
-        for job_id in job_ids:
-            job = Job.from_ids([job_id])
-            job._viz_func = self._render_progress
-            job._name_func = self._name_job
-
-            job.sync()
-            jobs.append(job)
-
-        return jobs
 
     def get_results(self) -> pd.DataFrame:
         """get ABFE results and return in a dataframe.
@@ -56,10 +41,10 @@ class ABFE:
             print("No ABFE results to display.")
             return
 
-        df1["ID"] = df1["Ligand"]
-        df1.drop(columns=["Ligand", "SMILES"], inplace=True)
+        df1["ID"] = df1["Ligand1"]
+        df1.drop(columns=["Ligand1", "SMILES"], inplace=True)
 
-        df2 = chem.ligands_to_dataframe(self.parent.ligands)
+        df2 = ligands_to_dataframe(self.parent.ligands)
         df2["SMILES"] = df2["Ligand"]
         df2.drop(columns=["Ligand"], inplace=True)
 
@@ -88,6 +73,12 @@ class ABFE:
         df.drop("SMILES", axis=1, inplace=True)
 
         df["Structure"] = chem.smiles_list_to_base64_png_list(smiles_list)
+
+        # show structure first
+        new_order = ["Structure"] + [col for col in df.columns if col != "Structure"]
+
+        # re‑index your DataFrame
+        df = df[new_order]
 
         # Use escape=False to allow the <img> tags to render as images
         from IPython.display import HTML, display
@@ -142,6 +133,10 @@ class ABFE:
         already_run_ligands = set(df[utils.COL_LIGAND1])
         ligand_ids = set(ligand_ids) - already_run_ligands
 
+        if len(ligand_ids) == 0:
+            print("All requested ligands have already been run.")
+            return
+
         for ligand_id in ligand_ids:
             job_id = utils._start_tool_run(
                 protein_id=self.parent.protein._do_id,
@@ -152,7 +147,12 @@ class ABFE:
                 complex_hash=self.parent._hash,
             )
 
-            self.parent._job_ids[utils.DB_ABFE].append(job_id)
+            job = Job.from_ids([job_id])
+
+            job._viz_func = self._render_progress
+            job._name_func = self._name_job
+
+            self.jobs.append(job)
 
     @beartype
     def show_trajectory(
@@ -221,7 +221,8 @@ class ABFE:
         JupyterViewer.visualize(html_content)
 
     @classmethod
-    def parse_progress(cls, job) -> dict:
+    @beartype
+    def parse_progress(cls, job: Job) -> dict:
         """parse progress from a ABFE job"""
 
         steps = [
@@ -233,6 +234,9 @@ class ABFE:
             "binding",
             "delta_g",
         ]
+
+        if len(job._progress_reports) == 0:
+            return {step: "NotStarted" for step in steps}
 
         data = job._progress_reports[0]
 
@@ -274,12 +278,17 @@ class ABFE:
         return progress
 
     @classmethod
-    def _name_job(cls, job) -> str:
+    @beartype
+    def _name_job(cls, job: Job) -> str:
         """utility function to name a job using inputs to that job"""
-        return f"ABFE run using <code>{job._metadata[0]['protein_id']}</code> and <code>{job._metadata[0]['ligand1_id']}</code>"
+        try:
+            return f"ABFE run using <code>{job._metadata[0]['protein_id']}</code> and <code>{job._metadata[0]['ligand1_id']}</code>"
+        except Exception:
+            return "ABFE run"
 
     @classmethod
-    def _render_progress(cls, job) -> str:
+    @beartype
+    def _render_progress(cls, job: Job) -> str:
         """
         Render HTML for a Mermaid diagram where each node is drawn as arounded rectangle
         with a color indicating its status.

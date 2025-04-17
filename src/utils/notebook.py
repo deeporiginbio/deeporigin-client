@@ -14,6 +14,28 @@ def show_progress_bar(
 ) -> None:
     """
     Displays a Bootstrap progress bar in a Jupyter Notebook with a title and external text.
+    """
+
+    progress_html = render_progress_bar(
+        completed=completed,
+        total=total,
+        failed=failed,
+        title=title,
+    )
+
+    display(HTML(progress_html))
+
+
+@beartype
+def render_progress_bar(
+    *,
+    completed: int,
+    total: int,
+    failed: int = 0,
+    title: str = "Progress Report",
+) -> str:
+    """
+    Displays a Bootstrap progress bar in a Jupyter Notebook with a title and external text.
 
     Parameters:
       completed (int): Total tasks attempted.
@@ -43,8 +65,7 @@ def show_progress_bar(
     """
 
     progress_html = f"""
-    <!-- Load Bootstrap CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    
     
     <h2>{title}</h2>
     {text_html}
@@ -57,7 +78,8 @@ def show_progress_bar(
            aria-valuenow="{pending}" aria-valuemin="0" aria-valuemax="{total}"></div>
     </div>
     """
-    display(HTML(progress_html))
+
+    return progress_html
 
 
 def mermaid_to_html(diagram_code: str) -> str:
