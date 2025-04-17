@@ -35,10 +35,11 @@ from enum import Enum
 import logging
 import os
 import re
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union, Callable
 
 from deeporigin import auth
 from deeporigin.utils.network import _get_domain_name
+from deeporigin.utils.config import get_value
 
 from .file_service import AuthenticatedClient, Client
 from .file_service.api.default import (
@@ -201,6 +202,7 @@ class FilesClient:
         base_url: Optional[str] = None,
         token: Optional[str] = None,
         verify_ssl: Union[bool, str] = True,
+        organization_id: Optional[str] = None,
     ):
         """
         Initialize the FilesClient.
@@ -209,6 +211,11 @@ class FilesClient:
             token: Authentication token (optional)
             verify_ssl: Whether to verify SSL certificates or path to CA bundle
         """
+
+        if not organization_id:
+            self.organization_id = get_value()["organization_id"]
+        else:
+            self.organization_id = organization_id
 
         if not base_url:
             base_url = _get_domain_name()
@@ -232,13 +239,13 @@ class FilesClient:
         """
         return self._base_url
 
-    def _parse_files_url(self, url: str) -> tuple[str, str]:
+    def _extract_path_from_url(self, url: str) -> str:
         """
-        Parse a files:/// URL to extract org ID and path.
+        Extract the path from a files:/// URL.
         Args:
             url: URL in the format files:///path
         Returns:
-            Tuple of (org_friendly_id, path)
+            The path part of the URL
         Raises:
             ValueError: If the URL is not in the expected format
         """
@@ -248,24 +255,18 @@ class FilesClient:
                 f"Invalid files URL: {url}. Expected format: files:///path"
             )
 
-        path = match.group("path")
-
-        # In a real implementation, we might extract the org_friendly_id from the path
-        # For now, we'll use a default value
-        org_friendly_id = "default"
-
-        return org_friendly_id, path
+        return match.group("path")
 
     def list_dir(self, path: str, flag: Optional[str] = None) -> List[FileMetadata]:
         """
         List files and directories at the specified path.
         Args:
             path: Path in the format files:///path
-            flag: Optional flags, e.g., "recursive"
+            flag: Optional flag for listing behavior
         Returns:
             List of FileMetadata objects
         """
-        org_friendly_id, remote_path = self._parse_files_url(path)
+        remote_path = self._extract_path_from_url(path)
 
         if flag == "recursive":
             raise ValueError("list_dir recursive flag not implemented")
@@ -275,7 +276,7 @@ class FilesClient:
         list_type = 2  # Default value
 
         response = get_object.sync_detailed(
-            org_friendly_id=org_friendly_id,
+            org_friendly_id=self.organization_id,
             file_path=remote_path,
             client=self.client,
             list_type=list_type,
@@ -331,23 +332,27 @@ class FilesClient:
         """
         Upload a file from local path to remote storage.
         Args:
-            src: Local file path
-            dest: Remote path in the format files:///path
-            overwrite: If True, delete the file first if it exists
+            src: Local source path
+            dest: Remote destination path in the format files:///path
+            overwrite: Whether to overwrite existing file (default: False)
         Returns:
-            True if successful, False otherwise
+            True if upload was successful, False otherwise
         """
         if not os.path.exists(src):
             raise FileNotFoundError(f"Source file not found: {src}")
 
         # Check if file exists and delete if overwrite is True
-        if overwrite and self._remote_file_exists(dest):
-            logger.info(f"Deleting existing file at {dest} before upload")
-            if not self.delete_file(dest):
-                logger.warning(f"Failed to delete existing file at {dest}")
-                # Continue with upload anyway
+        if self._remote_file_exists(dest):
+            if overwrite:
+                logger.info(f"Deleting existing file at {dest} before upload")
+                if not self.delete_file(dest):
+                    logger.warning(f"Failed to delete existing file at {dest}")
+                    # Continue with upload anyway
+            else:
+                logger.warning(f"File already exists at {dest} and overwrite is False")
+                return False
 
-        org_friendly_id, remote_path = self._parse_files_url(dest)
+        remote_path = self._extract_path_from_url(dest)
 
         # Create a File object first
         with open(src, "rb") as f:
@@ -362,7 +367,7 @@ class FilesClient:
 
             # Send the request with the proper body and include the remote path
             response = put_object.sync_detailed(
-                org_friendly_id=org_friendly_id,
+                org_friendly_id=self.organization_id,
                 file_path=remote_path,
                 client=self.client,
                 body=body,
@@ -374,18 +379,20 @@ class FilesClient:
         """
         Download a file from remote storage to local path.
         Args:
-            src: Remote path in the format files:///path
-            dest: Local file path
+            src: Remote source path in the format files:///path
+            dest: Local destination path
+            chunk_size: Size of chunks for large file downloads (default: 10MB)
+            progress_callback: Optional callback function to report download progress
         Returns:
-            True if successful, False otherwise
+            True if download was successful, False otherwise
         """
-        org_friendly_id, remote_path = self._parse_files_url(src)
+        remote_path = self._extract_path_from_url(src)
 
         # The get_object API will need to be called differently for file download
         # vs. directory listing. This implementation assumes that omitting list_type
         # will result in a file download.
         response = get_object.sync_detailed(
-            org_friendly_id=org_friendly_id, file_path=remote_path, client=self.client
+            org_friendly_id=self.organization_id, file_path=remote_path, client=self.client
         )  # list_type=0.0  - wasn't working # Assuming 0.0 means download file
         # looks like bad if(type) check in file-service controller --TBD Niels
 
@@ -409,10 +416,10 @@ class FilesClient:
         Returns:
             FileMetadata object containing the metadata
         """
-        org_friendly_id, remote_path = self._parse_files_url(path)
+        remote_path = self._extract_path_from_url(path)
 
         response = head_object.sync_detailed(
-            org_friendly_id=org_friendly_id, file_path=remote_path, client=self.client
+            org_friendly_id=self.organization_id, file_path=remote_path, client=self.client
         )
 
         if response.status_code == 200:
@@ -468,7 +475,7 @@ class FilesClient:
         remote_files = self.list_dir(remote_path)  # todo: add recursive flag
 
         # Extract the base remote path without the prefix for path comparisons
-        _, base_remote_path = self._parse_files_url(remote_path)
+        base_remote_path = self._extract_path_from_url(remote_path)
 
         # Create a dictionary mapping paths to metadata
         remote_files_dict = {}
@@ -576,7 +583,7 @@ class FilesClient:
                 - Dictionary mapping file paths to their status
         """
         # Extract the base remote path without the prefix for path comparisons
-        _, base_remote_path = self._parse_files_url(remote_path)
+        base_remote_path = self._extract_path_from_url(remote_path)
 
         # Get list of remote files with metadata to compare
         try:
@@ -625,7 +632,7 @@ class FilesClient:
 
                     if should_update:
                         # Upload the file
-                        if self.upload_file(local_file_path, remote_file_path):
+                        if self.upload_file(local_file_path, remote_file_path, True):
                             file_statuses[remote_file_path] = "copied"
                         else:
                             logger.error(
@@ -678,12 +685,12 @@ class FilesClient:
         Args:
             path: Path in the format files:///path
         Returns:
-            True if successful, False otherwise
+            True if deletion was successful, False otherwise
         """
-        org_friendly_id, remote_path = self._parse_files_url(path)
+        remote_path = self._extract_path_from_url(path)
 
         response = delete_object.sync_detailed(
-            org_friendly_id=org_friendly_id, file_path=remote_path, client=self.client
+            org_friendly_id=self.organization_id, file_path=remote_path, client=self.client
         )
 
         return response.status_code == 200
