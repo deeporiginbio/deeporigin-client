@@ -17,6 +17,7 @@ from deeporigin.drug_discovery import utils
 from deeporigin.drug_discovery.workflow_step import WorkflowStep
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.tools.job import Job
+from deeporigin.drug_discovery.structures.ligand import ligands_to_dataframe
 
 
 class ABFE(WorkflowStep):
@@ -40,10 +41,10 @@ class ABFE(WorkflowStep):
             print("No ABFE results to display.")
             return
 
-        df1["ID"] = df1["Ligand"]
-        df1.drop(columns=["Ligand", "SMILES"], inplace=True)
+        df1["ID"] = df1["Ligand1"]
+        df1.drop(columns=["Ligand1", "SMILES"], inplace=True)
 
-        df2 = chem.ligands_to_dataframe(self.parent.ligands)
+        df2 = ligands_to_dataframe(self.parent.ligands)
         df2["SMILES"] = df2["Ligand"]
         df2.drop(columns=["Ligand"], inplace=True)
 
