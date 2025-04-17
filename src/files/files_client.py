@@ -35,7 +35,7 @@ from enum import Enum
 import logging
 import os
 import re
-from typing import Any, Dict, List, Optional, Tuple, Union, Callable
+from typing import Callable
 
 from deeporigin import auth
 from deeporigin.utils.network import _get_domain_name
@@ -95,15 +95,15 @@ class FileMetadata:
     """
 
     # Common S3-like metadata fields
-    KeyPath: Optional[str] = None  # File path or its key in the storage system
-    LastModified: Optional[str] = None
-    ETag: Optional[str] = None
-    Size: Optional[int] = None  # Size of file/object in bytes
-    StorageClass: Optional[str] = None
-    ContentType: Optional[str] = None
+    KeyPath: str | None = None  # File path or its key in the storage system
+    LastModified: str | None = None
+    ETag: str | None = None
+    Size: int | None = None  # Size of file/object in bytes
+    StorageClass: str | None = None
+    ContentType: str | None = None
 
     # Store the original dictionary for access to all fields
-    _raw_dict: Dict[str, Any] = field(default_factory=dict)
+    _raw_dict: dict[str, any] = field(default_factory=dict)
 
     # Mapping between S3/HTTP header names and class attribute names - shared across instances
     # Note: For our request content-length is size, but technically may be size of HTTP instead
@@ -119,7 +119,7 @@ class FileMetadata:
     }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any], key_path: str = None) -> "FileMetadata":
+    def from_dict(cls, data: dict[str, any], key_path: str | None = None) -> "FileMetadata":
         """
         Create a FileMetadata instance from a dictionary.
         Args:
@@ -147,7 +147,7 @@ class FileMetadata:
             instance.KeyPath = key_path
         return instance
 
-    def to_updated_dict(self) -> Dict[str, Any]:
+    def to_updated_dict(self) -> dict[str, any]:
         """
         Get a copy of the original dictionary with updated values from attributes.
         Maintains original key capitalization.
@@ -165,7 +165,7 @@ class FileMetadata:
                 result[header_key] = str(getattr(self, attr_name))
         return result
 
-    def get_dict(self) -> Dict[str, Any]:
+    def get_dict(self) -> dict[str, any]:
         """
         Get the original dictionary that was used to create this instance.
         Returns:
@@ -173,7 +173,7 @@ class FileMetadata:
         """
         return self._raw_dict
 
-    def get_last_modified_timestamp(self) -> Optional[float]:
+    def get_last_modified_timestamp(self) -> float | None:
         """
         Get the LastModified field as a timestamp.
         Returns:
@@ -199,10 +199,10 @@ class FilesClient:
 
     def __init__(
         self,
-        base_url: Optional[str] = None,
-        token: Optional[str] = None,
-        verify_ssl: Union[bool, str] = True,
-        organization_id: Optional[str] = None,
+        base_url: str | None = None,
+        token: str | None = None,
+        verify_ssl: bool | str = True,
+        organization_id: str | None = None,
     ):
         """
         Initialize the FilesClient.
@@ -257,7 +257,7 @@ class FilesClient:
 
         return match.group("path")
 
-    def list_dir(self, path: str, flag: Optional[str] = None) -> List[FileMetadata]:
+    def list_dir(self, path: str, flag: str | None = None) -> list[FileMetadata]:
         """
         List files and directories at the specified path.
         Args:
@@ -294,7 +294,7 @@ class FilesClient:
             response.raise_for_status()
             return []
 
-    def _parse_list_response(self, content: bytes) -> List[Dict[str, Any]]:
+    def _parse_list_response(self, content: bytes) -> list[dict[str, any]]:
         """
         Parse the response from a list directory operation.
         Args:
@@ -381,8 +381,6 @@ class FilesClient:
         Args:
             src: Remote source path in the format files:///path
             dest: Local destination path
-            chunk_size: Size of chunks for large file downloads (default: 10MB)
-            progress_callback: Optional callback function to report download progress
         Returns:
             True if download was successful, False otherwise
         """
@@ -408,7 +406,7 @@ class FilesClient:
             logger.error(f"Failed to download file {src}: {response.status_code}")
             return False
 
-    def get_metadata(self, path: str) -> Optional[FileMetadata]:
+    def get_metadata(self, path: str) -> FileMetadata | None:
         """
         Get metadata about a file or directory.
         Args:
@@ -431,7 +429,7 @@ class FilesClient:
 
     def sync_dir(
         self, src: str, dst: str, mode: DirSyncMode = DirSyncMode.REPLACE
-    ) -> Tuple[bool, Dict[str, str]]:
+    ) -> tuple[bool, dict[str, str]]:
         """
         Synchronize files between local and remote directories.
         Args:
@@ -459,7 +457,7 @@ class FilesClient:
 
     def _sync_remote_to_local(
         self, remote_path: str, local_path: str, mode: DirSyncMode
-    ) -> Tuple[bool, Dict[str, str]]:
+    ) -> tuple[bool, dict[str, str]]:
         """
         Sync files from remote to local directory.
         Args:
@@ -570,7 +568,7 @@ class FilesClient:
 
     def _sync_local_to_remote(
         self, local_path: str, remote_path: str, mode: DirSyncMode
-    ) -> Tuple[bool, Dict[str, str]]:
+    ) -> tuple[bool, dict[str, str]]:
         """
         Sync files from local to remote directory.
         Args:
