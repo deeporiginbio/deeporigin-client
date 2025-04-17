@@ -1,6 +1,7 @@
 """Base class for workflow steps like ABFE, RBFE, and Docking."""
 
 from collections import Counter
+from typing import Optional
 
 from beartype import beartype
 
@@ -24,8 +25,13 @@ class WorkflowStep:
         self.parent = parent
         self._params = PrettyDict()
 
-    def show_jobs(self, summary: bool = False):
+    def show_jobs(self, summary: Optional[bool] = None):
         """Show the jobs for this workflow step."""
+
+        if len(self.jobs) > 5 and summary is None:
+            summary = True
+        else:
+            summary = False
 
         if summary:
             html = """
