@@ -163,7 +163,7 @@ def run_tests():
     base_url = globals().get("API_BASE_URL")  # return none if not defined
     try:
         client = FilesClient(base_url, token=globals().get("AUTH_TOKEN"))
-        base_url = client.get_base_url()
+        base_url = client.base_url
 
         if not client.check_health():
             print("❌ File service health check failed")

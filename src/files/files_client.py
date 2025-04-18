@@ -105,9 +105,9 @@ class FileMetadata:
     raw_dict: dict[str, any] = field(default_factory=dict)
 
     # Mapping between S3/HTTP header names and class attribute names - shared across instances
-    # Note: For our request content-length is size, but technically may be size of HTTP instead
-    # if it changes, we'd need its mapping.
-    # Note that metadata and and list filed mapping retunr different fields, so we have
+    # Note: Metadata and list dictionary return different fields, so we have two mappings.
+    # For our request content-length is size, but technically may be size of HTTP instead
+    # if is content, so may need to adjust with protocol in the future.
     METADATA_HEAD_FIELD_MAPPING = {
         "key": "key_path",  # Only comes in list (not HEAD)
         "last-modified": "last_modified",
@@ -147,8 +147,7 @@ class FileMetadata:
         # Process each key in the input dictionary, setting matching attributes
         for key, value in data.items():
             key_lower = key.lower()
-            attr_name = mapping.get(key_lower, key)
-            # cls.cls._FIELD_MAPPING
+            attr_name = mapping.get(key_lower, key)            
 
             if hasattr(instance, attr_name):
                 if attr_name == "size":
@@ -206,6 +205,11 @@ class FilesClient:
     listing directories, and synchronizing files between local and remote storage.
     """
 
+    # FilesClient instance attributes
+    base_url: str
+    organization_id: str
+    client: AuthenticatedClient | Client
+
     def __init__(
         self,
         base_url: str | None = None,
@@ -228,25 +232,16 @@ class FilesClient:
 
         if not base_url:
             base_url = _get_domain_name()
-        self._base_url = base_url
+        self.base_url = base_url
         if not token:
             tokens = auth.get_tokens(refresh=False)
             token = tokens["access"]
 
-        if token:
-            self.client = AuthenticatedClient(
-                base_url=self._base_url, token=token, verify_ssl=verify_ssl
-            )
-        else:
-            self.client = Client(base_url=self._base_url, verify_ssl=verify_ssl)
+        # TBD: Do we want to still check null token and maybe throw exception?
+        self.client = AuthenticatedClient(
+            base_url=self.base_url, token=token, verify_ssl=verify_ssl
+        )
 
-    def get_base_url(self) -> str:
-        """
-        Get the base URL of the file service API, mostly for visibilty purposes.
-        Returns:
-            Base URL of the file service API
-        """
-        return self._base_url
 
     def _extract_path_from_url(self, url: str) -> str:
         """
