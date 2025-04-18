@@ -511,47 +511,6 @@ def merge_sdf_files(
 
 
 @beartype
-def filter_sdf_by_smiles(
-    *,
-    input_sdf_file: str | Path,
-    output_sdf_file: str | Path,
-    keep_only_smiles: list[str] | pd.Series,
-):
-    """
-    Extracts the SMILES strings of all valid molecules from an SDF file using RDKit.
-
-    Args:
-        input_sdf_file (str | Path): Path to the SDF file.
-        output_sdf_file (str | Path): Path to the output SDF file.
-        keep_only_smiles (list[str] | pd.Series): List or Series of SMILES strings to keep.
-
-    """
-    writer = Chem.SDWriter(str(output_sdf_file))
-
-    # Convert pandas Series to list if necessary
-    if isinstance(keep_only_smiles, pd.Series):
-        keep_only_smiles = keep_only_smiles.tolist()
-
-    keep_only_smiles = [canonicalize_smiles(smiles) for smiles in keep_only_smiles]
-
-    if isinstance(input_sdf_file, Path):
-        input_sdf_file = str(input_sdf_file)
-
-    suppl = Chem.SDMolSupplier(
-        input_sdf_file,
-        sanitize=False,
-    )
-
-    for mol in suppl:
-        if mol is not None:
-            this_smiles = canonicalize_smiles(Chem.MolToSmiles(mol))
-            if this_smiles in keep_only_smiles:
-                writer.write(mol)
-
-    writer.close()
-
-
-@beartype
 def canonicalize_smiles(smiles: str) -> str:
     """Canonicalize a SMILES string.
 

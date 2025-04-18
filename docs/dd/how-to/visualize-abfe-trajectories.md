@@ -45,8 +45,14 @@ sim.abfe.show_trajectory(ligand_id="ligand1", step="md")
 ### Visualizing Binding Step
 
 ```python
+# Show the binding trajectory for the default window (window 1)
 sim.abfe.show_trajectory(ligand_id="ligand1", step="binding")
+
+# Show the binding trajectory for a specific window
+sim.abfe.show_trajectory(ligand_id="ligand1", step="binding", window=5)
 ```
+
+When visualizing the binding step, you can specify which window to visualize using the `window` parameter. The windows represent different stages of the binding process. If you specify an invalid window number, the method will show you a list of available windows.
 
 <iframe 
     src="./traj.html" 
