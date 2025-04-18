@@ -19,14 +19,10 @@ and recreated to ensure a clean test environment.
 
 import hashlib
 import os
-from pathlib import Path
 import random
 import shutil
 import string
 import sys
-import tempfile
-import time
-from typing import Any, Dict, List
 
 from deeporigin.files import FilesClient
 
@@ -145,13 +141,11 @@ def print_remote_files(client, remote_path):
         files = client.list_dir(remote_path)
         if files and len(files) > 0:
             print(f"  Found {len(files)} files/directories:")
-            for file_info in files:
-                # Extract relevant information from file_info
-                # Adjust these fields based on the actual structure returned by list_dir
-                name = file_info.get("Key", "Unknown")
-                size = file_info.get("Size", "Unknown")
-                # last_modified = file_info.get("LastModified", "Unknown")
-                file_type = "Directory" if file_info.get("is_dir", False) else "File"
+            for file_metadata in files:
+                # Extract relevant information from FileMetadata object
+                name = file_metadata.key_path or "Unknown"
+                size = file_metadata.size or "Unknown"
+                file_type = "Directory" if name.endswith("/") else "File"
 
                 print(f"  - {name} ({file_type}, {size} bytes)")
         else:
@@ -243,6 +237,9 @@ def run_tests():
             success = client.upload_file(
                 src=local_path, dest=remote_path, overwrite=True
             )
+            metadata = client.get_metadata(remote_path)
+            # print(f"  Metadata: {metadata}")
+
             if success:
                 print("  Upload successful")
                 file_info["uploaded"] = True
@@ -272,23 +269,20 @@ def run_tests():
             try:
                 metadata = client.get_metadata(remote_path)
                 if metadata:
-                    print(f"  Metadata retrieved: {metadata}")
+                    # Print the metadata using both object attributes and raw dictionary
+                    print(
+                        f"  Metadata as object: KeyPath={metadata.key_path}, Size={metadata.size}"
+                    )
+                    #  print(f"  Raw metadata dictionary: {metadata.get_dict()}")
 
-                    # Try to extract file size from metadata
-                    # This depends on the actual API response format
-                    file_size = None
-                    if "content-length" in metadata:
-                        file_size = int(metadata["content-length"])
-                    elif "Content-Length" in metadata:
-                        file_size = int(metadata["Content-Length"])
-
-                    if file_size is not None:
-                        if file_size == expected_size:
-                            print(f"  Size matches: {file_size} bytes")
+                    # Verify file size
+                    if metadata.size is not None:
+                        if metadata.size == expected_size:
+                            print(f"  Size matches: {metadata.size} bytes")
                             file_info["size_verified"] = True
                         else:
                             print(
-                                f"  Size mismatch: expected {expected_size}, got {file_size}"
+                                f"  Size mismatch: expected {expected_size}, got {metadata.size}"
                             )
                             file_info["size_verified"] = False
                     else:
@@ -363,7 +357,7 @@ def run_tests():
                 file_to_delete["deleted"] = True
 
                 # Verify deletion by trying to get metadata
-                print_step(f"Verifying deletion by checking metadata")
+                print_step("Verifying deletion by checking metadata")
                 try:
                     metadata = client.get_metadata(remote_path)
                     if metadata:
@@ -390,10 +384,17 @@ def run_tests():
     print_step(f"Syncing {SYNC_SOURCE_DIR} to {sync_remote_path}")
 
     try:
-        success = client.sync_dir(src=SYNC_SOURCE_DIR, dst=sync_remote_path)
+        success, file_statuses = client.sync_dir(
+            src=SYNC_SOURCE_DIR, dst=sync_remote_path
+        )
         if success:
             print("  Sync upload successful")
             sync_upload_success = True
+
+            # Print file statuses
+            print_step("File operation statuses:")
+            for file_path, status in file_statuses.items():
+                print(f"  {file_path}: {status}")
 
             # List remote files after successful sync
             print_remote_files(client, sync_remote_path)
@@ -420,9 +421,16 @@ def run_tests():
         print_step(f"Syncing {sync_remote_path} to {SYNC_DOWNLOAD_DIR}")
 
         try:
-            success = client.sync_dir(src=sync_remote_path, dst=SYNC_DOWNLOAD_DIR)
+            success, file_statuses = client.sync_dir(
+                src=sync_remote_path, dst=SYNC_DOWNLOAD_DIR
+            )
             if success:
                 print("  Sync download successful")
+
+                # Print file statuses
+                print_step("File operation statuses:")
+                for file_path, status in file_statuses.items():
+                    print(f"  {file_path}: {status}")
 
                 # Verify content integrity for a sample of files
                 print_step("Verifying content integrity of synced files")
