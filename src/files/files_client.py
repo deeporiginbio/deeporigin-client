@@ -35,7 +35,6 @@ from enum import Enum
 import logging
 import os
 import re
-from typing import Callable
 
 from deeporigin import auth
 from deeporigin.utils.network import _get_domain_name
@@ -95,31 +94,46 @@ class FileMetadata:
     """
 
     # Common S3-like metadata fields
-    KeyPath: str | None = None  # File path or its key in the storage system
-    LastModified: str | None = None
-    ETag: str | None = None
-    Size: int | None = None  # Size of file/object in bytes
-    StorageClass: str | None = None
-    ContentType: str | None = None
+    key_path: str | None = None  # File path or its key in the storage system
+    last_modified: str | None = None
+    etag: str | None = None
+    size: int | None = None  # Size of file/object in bytes
+    storage_class: str | None = None
+    content_type: str | None = None
 
     # Store the original dictionary for access to all fields
-    _raw_dict: dict[str, any] = field(default_factory=dict)
+    raw_dict: dict[str, any] = field(default_factory=dict)
 
     # Mapping between S3/HTTP header names and class attribute names - shared across instances
     # Note: For our request content-length is size, but technically may be size of HTTP instead
-    # if it changes, we'd need its mapping
-    _FIELD_MAPPING = {
-        "key": "KeyPath",  # Only comes in list (not HEAD)
-        "last-modified": "LastModified",
-        "x-last-modified": "LastModified",  # comes in different in list and HEAD
-        "etag": "ETag",
-        "content-length": "Size",
-        "content-type": "ContentType",
-        "x-amz-storage-class": "StorageClass",
+    # if it changes, we'd need its mapping.
+    # Note that metadata and and list filed mapping retunr different fields, so we have
+    METADATA_HEAD_FIELD_MAPPING = {
+        "key": "key_path",  # Only comes in list (not HEAD)
+        "last-modified": "last_modified",
+        "x-last-modified": "last_modified",  # comes in different in list and HEAD
+        "etag": "etag",
+        "content-length": "size",
+        "content-type": "content_type",
+        "x-amz-storage-class": "storage_class",
+    }
+    METADATA_LIST_FIELD_MAPPING = {
+        "key": "key_path",  # Only comes in list (not HEAD)
+        "etag": "etag",
+        "lastmodified": "last_modified",  # LastModified -> last_modified
+        "size": "size",  # Size -> size  (in list)
+        "contenttype": "content_type",  # ContentType -> content_type
+        "storageclass": "storage_class",  # StorageClass -> storage_c
     }
 
     @classmethod
-    def from_dict(cls, data: dict[str, any], key_path: str | None = None) -> "FileMetadata":
+    def from_dict(
+        cls,
+        data: dict[str, any],
+        *,
+        key_path: str | None = None,
+        mapping: dict[str, str] = METADATA_HEAD_FIELD_MAPPING,
+    ) -> "FileMetadata":
         """
         Create a FileMetadata instance from a dictionary.
         Args:
@@ -128,15 +142,16 @@ class FileMetadata:
             FileMetadata instance with fields populated from the dictionary
         """
         instance = cls()
-        instance._raw_dict = data  # Store reference, no need to copy
+        instance.raw_dict = data  # Store reference, no need to copy
 
         # Process each key in the input dictionary, setting matching attributes
         for key, value in data.items():
             key_lower = key.lower()
-            attr_name = cls._FIELD_MAPPING.get(key_lower, key)
+            attr_name = mapping.get(key_lower, key)
+            # cls.cls._FIELD_MAPPING
 
             if hasattr(instance, attr_name):
-                if attr_name == "Size":
+                if attr_name == "size":
                     try:
                         value = int(value)
                     except (ValueError, TypeError):
@@ -144,17 +159,19 @@ class FileMetadata:
                 setattr(instance, attr_name, value)
 
         if key_path:
-            instance.KeyPath = key_path
+            instance.key_path = key_path
         return instance
 
-    def to_updated_dict(self) -> dict[str, any]:
+    def to_updated_dict(
+        self, *, mapping: dict[str, str] = METADATA_HEAD_FIELD_MAPPING
+    ) -> dict[str, any]:
         """
         Get a copy of the original dictionary with updated values from attributes.
         Maintains original key capitalization.
         Returns:
             Updated copy of the original metadata dictionary
         """
-        result = self._raw_dict.copy()
+        result = self.raw_dict.copy()
 
         # This assumes _FIELD_MAPPING includes all needed attributes.
         # For each _FIELD_MAPPING entry, if the attribute exists assign it as string.
@@ -165,25 +182,17 @@ class FileMetadata:
                 result[header_key] = str(getattr(self, attr_name))
         return result
 
-    def get_dict(self) -> dict[str, any]:
-        """
-        Get the original dictionary that was used to create this instance.
-        Returns:
-            The original metadata dictionary
-        """
-        return self._raw_dict
-
     def get_last_modified_timestamp(self) -> float | None:
         """
-        Get the LastModified field as a timestamp.
+        Get the last_modified field as a timestamp.
         Returns:
-            Timestamp as float, or None if LastModified is not available or invalid
+            Timestamp as float, or None if last_modified is not available or invalid
         """
-        if not self.LastModified:
+        if not self.last_modified:
             return None
         try:
             # Parse ISO format timestamp
-            dt = datetime.fromisoformat(self.LastModified.replace("Z", "+00:00"))
+            dt = datetime.fromisoformat(self.last_modified.replace("Z", "+00:00"))
             return dt.timestamp()
         except (ValueError, TypeError):
             return None
@@ -288,7 +297,12 @@ class FilesClient:
             # Parse the response content as needed
             # This will depend on the actual response format from the API
             raw_files = self._parse_list_response(response.content)
-            return [FileMetadata.from_dict(file_data) for file_data in raw_files]
+            return [
+                FileMetadata.from_dict(
+                    file_data, mapping=FileMetadata.METADATA_LIST_FIELD_MAPPING
+                )
+                for file_data in raw_files
+            ]
         else:
             logger.error(f"Failed to list directory {path}: {response.status_code}")
             response.raise_for_status()
@@ -390,7 +404,9 @@ class FilesClient:
         # vs. directory listing. This implementation assumes that omitting list_type
         # will result in a file download.
         response = get_object.sync_detailed(
-            org_friendly_id=self.organization_id, file_path=remote_path, client=self.client
+            org_friendly_id=self.organization_id,
+            file_path=remote_path,
+            client=self.client,
         )  # list_type=0.0  - wasn't working # Assuming 0.0 means download file
         # looks like bad if(type) check in file-service controller --TBD Niels
 
@@ -417,12 +433,14 @@ class FilesClient:
         remote_path = self._extract_path_from_url(path)
 
         response = head_object.sync_detailed(
-            org_friendly_id=self.organization_id, file_path=remote_path, client=self.client
+            org_friendly_id=self.organization_id,
+            file_path=remote_path,
+            client=self.client,
         )
 
         if response.status_code == 200:
             # Extract metadata from response headers and create a FileMetadata object
-            return FileMetadata.from_dict(dict(response.headers), remote_path)
+            return FileMetadata.from_dict(dict(response.headers), key_path=remote_path)
         else:
             logger.error(f"Failed to get metadata for {path}: {response.status_code}")
             return None
@@ -478,10 +496,10 @@ class FilesClient:
         # Create a dictionary mapping paths to metadata
         remote_files_dict = {}
         for file_metadata in remote_files:
-            if file_metadata.KeyPath:
+            if file_metadata.key_path:
                 # Store the full remote path as the key
-                # full_remote_path = f"{REMOTE_PATH_PREFIX}{file_metadata.KeyPath}"
-                remote_files_dict[file_metadata.KeyPath] = file_metadata
+                # full_remote_path = f"{REMOTE_PATH_PREFIX}{file_metadata.key_path}"
+                remote_files_dict[file_metadata.key_path] = file_metadata
 
         # Ensure local directory exists
         os.makedirs(local_path, exist_ok=True)
@@ -589,8 +607,8 @@ class FilesClient:
             # Create a dictionary mapping keys to metadata
             remote_files_dict = {}
             for file_metadata in remote_files_list:
-                if file_metadata.KeyPath:
-                    remote_files_dict[file_metadata.KeyPath] = file_metadata
+                if file_metadata.key_path:
+                    remote_files_dict[file_metadata.key_path] = file_metadata
         except Exception as e:
             logger.warning(f"Could not list remote directory, assuming it's empty: {e}")
             remote_files_dict = {}
@@ -688,7 +706,9 @@ class FilesClient:
         remote_path = self._extract_path_from_url(path)
 
         response = delete_object.sync_detailed(
-            org_friendly_id=self.organization_id, file_path=remote_path, client=self.client
+            org_friendly_id=self.organization_id,
+            file_path=remote_path,
+            client=self.client,
         )
 
         return response.status_code == 200

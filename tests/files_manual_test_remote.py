@@ -143,8 +143,8 @@ def print_remote_files(client, remote_path):
             print(f"  Found {len(files)} files/directories:")
             for file_metadata in files:
                 # Extract relevant information from FileMetadata object
-                name = file_metadata.KeyPath or "Unknown"
-                size = file_metadata.Size or "Unknown"
+                name = file_metadata.key_path or "Unknown"
+                size = file_metadata.size or "Unknown"
                 file_type = "Directory" if name.endswith("/") else "File"
 
                 print(f"  - {name} ({file_type}, {size} bytes)")
@@ -271,20 +271,18 @@ def run_tests():
                 if metadata:
                     # Print the metadata using both object attributes and raw dictionary
                     print(
-                        f"  Metadata as object: KeyPath={metadata.KeyPath}, Size={metadata.Size}"
+                        f"  Metadata as object: KeyPath={metadata.key_path}, Size={metadata.size}"
                     )
                     #  print(f"  Raw metadata dictionary: {metadata.get_dict()}")
 
-                    # Try to extract file size from metadata
-                    file_size = metadata.Size or metadata.ContentLength
-
-                    if file_size is not None:
-                        if file_size == expected_size:
-                            print(f"  Size matches: {file_size} bytes")
+                    # Verify file size
+                    if metadata.size is not None:
+                        if metadata.size == expected_size:
+                            print(f"  Size matches: {metadata.size} bytes")
                             file_info["size_verified"] = True
                         else:
                             print(
-                                f"  Size mismatch: expected {expected_size}, got {file_size}"
+                                f"  Size mismatch: expected {expected_size}, got {metadata.size}"
                             )
                             file_info["size_verified"] = False
                     else:
