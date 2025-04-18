@@ -152,6 +152,8 @@ class ABFE(WorkflowStep):
             job._viz_func = self._render_progress
             job._name_func = self._name_job
 
+            job.sync()
+
             self.jobs.append(job)
 
     def download_data_dir(self, ligand_id: str) -> str:
