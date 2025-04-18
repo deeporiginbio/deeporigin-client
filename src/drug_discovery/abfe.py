@@ -154,20 +154,14 @@ class ABFE(WorkflowStep):
 
             self.jobs.append(job)
 
-    @beartype
-    def show_trajectory(
-        self,
-        *,
-        ligand_id: str,
-        step: Literal["md", "binding"],
-        window: int = 1,
-    ):
-        """Show the system trajectory FEP run.
+    def download_data_dir(self, ligand_id: str) -> str:
+        """Download the data directory for a given ligand ID.
 
         Args:
-            ligand_id (str): The ID of the ligand to show the trajectory for.
-            step (Literal["md", "abfe"]): The step to show the trajectory for.
-            window (int, optional): The window number to show the trajectory for. Defaults to 1.
+            ligand_id (str): The ID of the ligand to download the data directory for.
+
+        Returns:
+            str: The path to the data directory.
         """
 
         valid_ids = [ligand._do_id for ligand in self.parent.ligands]
@@ -200,6 +194,26 @@ class ABFE(WorkflowStep):
             print(f"Extracting trajectory files to {dir_path}...")
             with zipfile.ZipFile(file_path, "r") as zip_ref:
                 zip_ref.extractall(dir_path)
+
+        return dir_path
+
+    @beartype
+    def show_trajectory(
+        self,
+        *,
+        ligand_id: str,
+        step: Literal["md", "binding"],
+        window: int = 1,
+    ):
+        """Show the system trajectory FEP run.
+
+        Args:
+            ligand_id (str): The ID of the ligand to show the trajectory for.
+            step (Literal["md", "abfe"]): The step to show the trajectory for.
+            window (int, optional): The window number to show the trajectory for. Defaults to 1.
+        """
+
+        dir_path = self.download_data_dir(ligand_id)
 
         pdb_file = dir_path / "execution/protein/ligand/systems/complex/complex.pdb"
 
@@ -259,42 +273,47 @@ class ABFE(WorkflowStep):
         if len(job._progress_reports) == 0:
             return {step: "NotStarted" for step in steps}
 
-        data = job._progress_reports[0]
+        try:
+            data = job._progress_reports[0]
 
-        if data is None:
-            progress = {step: "NotStarted" for step in steps}
-            progress["init"] = "Running"
-            return progress
-        else:
-            data = json.loads(data)
-
-        status_value = job._status[0]
-
-        # If the overall status is Succeeded, return a dictionary with every key set to "Succeeded".
-        if status_value == "Succeeded":
-            return {step: "Succeeded" for step in steps}
-
-        current_step = data["run_name"]
-
-        # Validate the input step
-        if current_step not in steps:
-            raise ValueError(
-                f"Invalid process step provided: {current_step}. "
-                f"Valid steps are: {', '.join(steps)}."
-            )
-
-        progress = {}
-        for step in steps:
-            if step == current_step:
-                progress[step] = "Running"
-                # Once we hit the current step, stop processing further steps.
-                break
+            if data is None:
+                progress = {step: "NotStarted" for step in steps}
+                progress["init"] = "Running"
+                return progress
             else:
-                progress[step] = "Succeeded"
+                data = json.loads(data)
 
-        # if the job failed, mark the step that is running as failed
-        if job._status[0] == "Failed":
-            progress[current_step] = "Failed"
+            status_value = job._status[0]
+
+            # If the overall status is Succeeded, return a dictionary with every key set to "Succeeded".
+            if status_value == "Succeeded":
+                return {step: "Succeeded" for step in steps}
+
+            current_step = data["run_name"]
+
+            # Validate the input step
+            if current_step not in steps:
+                raise ValueError(
+                    f"Invalid process step provided: {current_step}. "
+                    f"Valid steps are: {', '.join(steps)}."
+                )
+
+            progress = {}
+            for step in steps:
+                if step == current_step:
+                    progress[step] = "Running"
+                    # Once we hit the current step, stop processing further steps.
+                    break
+                else:
+                    progress[step] = "Succeeded"
+
+            # if the job failed, mark the step that is running as failed
+            if job._status[0] == "Failed":
+                progress[current_step] = "Failed"
+
+        except Exception:
+            progress = {step: "Indeterminate" for step in steps}
+            progress["init"] = "Indeterminate"
 
         return progress
 

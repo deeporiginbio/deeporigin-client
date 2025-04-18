@@ -1,6 +1,7 @@
 {
     "binding": {
         "add_fep_repeats": 0,
+        "thread_pinning": 1,
         "annihilate": true,
         "atom_mapping_threshold": 0.01,
         "em_all": true,
@@ -77,11 +78,7 @@
         "skip_emeq": "__NO",
         "softcore_alpha": 0.5,
         "steps": 1250000,
-        "test_run": 0,
-        "thread_pinning": 1,
-        "thread_pinning_offset": 0,
-        "threads": 0,
-        "workers": 0
+        "test_run": 0
     },
     "complex_prep": {
         "sysprep_params": {
@@ -97,6 +94,7 @@
         }
     },
     "emeq": {
+        "thread_pinning": 1,
         "em_all": true,
         "em_solvent": true,
         "emeq_md_options": {
@@ -108,10 +106,7 @@
         },
         "npt_reduce_restraints_ns": 2.0,
         "nvt_heating_ns": 1.0,
-        "test_run": 0,
-        "thread_pinning": 1,
-        "thread_pinning_offset": 0,
-        "threads": 0
+        "test_run": 0
     },
     "ligand_prep": {
         "sysprep_params": {
@@ -128,6 +123,7 @@
     },
     "md": {
         "continue": 0,
+        "thread_pinning": 1,
         "md_options": {
             "T": 298.15,
             "barostat": "MonteCarloBarostat",
@@ -139,13 +135,11 @@
             "integrator": "BAOABIntegrator"
         },
         "steps": 250000,
-        "test_run": 0,
-        "thread_pinning": 1,
-        "thread_pinning_offset": 0,
-        "threads": 0
+        "test_run": 0
     },
     "solvation": {
         "add_fep_repeats": 0,
+        "thread_pinning": 1,
         "annihilate": true,
         "atom_mapping_threshold": 0.01,
         "em_all": true,
@@ -209,10 +203,6 @@
         "skip_emeq": "__NO",
         "softcore_alpha": 0.5,
         "steps": 500000,
-        "test_run": 0,
-        "thread_pinning": 1,
-        "thread_pinning_offset": 0,
-        "threads": 0,
-        "workers": 0
+        "test_run": 0
     }
 }
