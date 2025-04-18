@@ -160,12 +160,14 @@ class ABFE(WorkflowStep):
         *,
         ligand_id: str,
         step: Literal["md", "binding"],
+        window: int = 1,
     ):
         """Show the system trajectory FEP run.
 
         Args:
             ligand_id (str): The ID of the ligand to show the trajectory for.
             step (Literal["md", "abfe"]): The step to show the trajectory for.
+            window (int, optional): The window number to show the trajectory for. Defaults to 1.
         """
 
         valid_ids = [ligand._do_id for ligand in self.parent.ligands]
@@ -202,9 +204,27 @@ class ABFE(WorkflowStep):
         pdb_file = dir_path / "execution/protein/ligand/systems/complex/complex.pdb"
 
         if step == "binding":
+            # Check for valid windows
+            binding_path = dir_path / "execution/protein/ligand/binding/binding"
+            if not binding_path.exists():
+                raise DeepOriginException("Binding directory not found")
+
+            # Get all window directories
+            window_dirs = [
+                d
+                for d in binding_path.iterdir()
+                if d.is_dir() and d.name.startswith("window_")
+            ]
+            valid_windows = [int(d.name.split("_")[1]) for d in window_dirs]
+
+            if window not in valid_windows:
+                raise DeepOriginException(
+                    f"Invalid window number: {window}. Valid windows are: {sorted(valid_windows)}"
+                )
+
             xtc_file = (
                 dir_path
-                / "execution/protein/ligand/binding/binding/window_1/Prod_1/_allatom_trajectory_40ps.xtc"
+                / f"execution/protein/ligand/binding/binding/window_{window}/Prod_1/_allatom_trajectory_40ps.xtc"
             )
         else:
             xtc_file = (
