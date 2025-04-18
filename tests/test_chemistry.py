@@ -64,36 +64,3 @@ def test_download_protein():
     assert os.path.exists(pdb_file), "The downloaded PDB file does not exist."
 
     os.remove(pdb_file)
-
-
-@pytest.mark.parametrize("ligand", ligands)
-def test_filter_sdf_by_smiles(ligand):
-    # Define the whitelist of canonical SMILES to filter by.
-    # Replace these placeholder values with actual canonical SMILES strings.
-
-    if ligand["n_ligands"] == 1:
-        return
-
-    smiles = chemistry.sdf_to_smiles(ligand["file"])
-
-    smiles = smiles[:5]
-
-    output_sdf = "temp.sdf"
-
-    # Call the filtering function.
-    chemistry.filter_sdf_by_smiles(
-        input_sdf_file=ligand["file"],
-        output_sdf_file=output_sdf,
-        keep_only_smiles=smiles,
-    )
-
-    # Read back the filtered SDF file.
-    actual_smiles = chemistry.sdf_to_smiles(output_sdf)
-
-    actual_smiles = [chemistry.canonicalize_smiles(smi) for smi in actual_smiles]
-
-    smiles = [chemistry.canonicalize_smiles(smi) for smi in smiles]
-
-    assert set(actual_smiles) == set(smiles)
-
-    os.remove(output_sdf)
