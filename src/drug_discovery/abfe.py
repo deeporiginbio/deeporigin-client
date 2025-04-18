@@ -157,6 +157,7 @@ class ABFE(WorkflowStep):
     @beartype
     def show_trajectory(
         self,
+        *,
         ligand_id: str,
         step: Literal["md", "binding"],
     ):
@@ -208,7 +209,7 @@ class ABFE(WorkflowStep):
         else:
             xtc_file = (
                 dir_path
-                / "execution/protein/ligand/simple_md/md/prod/_allatom_trajectory_40ps.xtc"
+                / "execution/protein/ligand/simple_md/simple_md/prod/_allatom_trajectory_40ps.xtc"
             )
 
         from deeporigin_molstar.src.viewers import ProteinViewer
