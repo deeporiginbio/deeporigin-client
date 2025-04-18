@@ -1,6 +1,7 @@
 {
     "binding": {
         "add_fep_repeats": 0,
+        "thread_pinning": 1,
         "annihilate": true,
         "atom_mapping_threshold": 0.01,
         "em_all": true,
@@ -93,6 +94,7 @@
         }
     },
     "emeq": {
+        "thread_pinning": 1,
         "em_all": true,
         "em_solvent": true,
         "emeq_md_options": {
@@ -121,6 +123,7 @@
     },
     "md": {
         "continue": 0,
+        "thread_pinning": 1,
         "md_options": {
             "T": 298.15,
             "barostat": "MonteCarloBarostat",
@@ -136,6 +139,7 @@
     },
     "solvation": {
         "add_fep_repeats": 0,
+        "thread_pinning": 1,
         "annihilate": true,
         "atom_mapping_threshold": 0.01,
         "em_all": true,

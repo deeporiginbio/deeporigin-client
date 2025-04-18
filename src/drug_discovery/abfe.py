@@ -273,42 +273,47 @@ class ABFE(WorkflowStep):
         if len(job._progress_reports) == 0:
             return {step: "NotStarted" for step in steps}
 
-        data = job._progress_reports[0]
+        try:
+            data = job._progress_reports[0]
 
-        if data is None:
-            progress = {step: "NotStarted" for step in steps}
-            progress["init"] = "Running"
-            return progress
-        else:
-            data = json.loads(data)
-
-        status_value = job._status[0]
-
-        # If the overall status is Succeeded, return a dictionary with every key set to "Succeeded".
-        if status_value == "Succeeded":
-            return {step: "Succeeded" for step in steps}
-
-        current_step = data["run_name"]
-
-        # Validate the input step
-        if current_step not in steps:
-            raise ValueError(
-                f"Invalid process step provided: {current_step}. "
-                f"Valid steps are: {', '.join(steps)}."
-            )
-
-        progress = {}
-        for step in steps:
-            if step == current_step:
-                progress[step] = "Running"
-                # Once we hit the current step, stop processing further steps.
-                break
+            if data is None:
+                progress = {step: "NotStarted" for step in steps}
+                progress["init"] = "Running"
+                return progress
             else:
-                progress[step] = "Succeeded"
+                data = json.loads(data)
 
-        # if the job failed, mark the step that is running as failed
-        if job._status[0] == "Failed":
-            progress[current_step] = "Failed"
+            status_value = job._status[0]
+
+            # If the overall status is Succeeded, return a dictionary with every key set to "Succeeded".
+            if status_value == "Succeeded":
+                return {step: "Succeeded" for step in steps}
+
+            current_step = data["run_name"]
+
+            # Validate the input step
+            if current_step not in steps:
+                raise ValueError(
+                    f"Invalid process step provided: {current_step}. "
+                    f"Valid steps are: {', '.join(steps)}."
+                )
+
+            progress = {}
+            for step in steps:
+                if step == current_step:
+                    progress[step] = "Running"
+                    # Once we hit the current step, stop processing further steps.
+                    break
+                else:
+                    progress[step] = "Succeeded"
+
+            # if the job failed, mark the step that is running as failed
+            if job._status[0] == "Failed":
+                progress[current_step] = "Failed"
+
+        except Exception:
+            progress = {step: "Indeterminate" for step in steps}
+            progress["init"] = "Indeterminate"
 
         return progress
 
