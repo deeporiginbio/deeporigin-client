@@ -19,7 +19,7 @@ Example usage:
     # Download a file from remote storage to local path
     success = client.download_file(
         src="path/to/remote/file.txt",
-        dest="/local/path/file.txt"
+        dest="local/path/file.txt"
     )
 
     if success:
@@ -61,9 +61,9 @@ logger = logging.getLogger(__name__)
 REMOTE_PATH_PREFIX = ""
 
 
-class DirSyncMode(Enum):
+class FolderSyncMode(Enum):
     """
-    Enum for directory synchronization modes.
+    Enum for folder synchronization modes.
     """
 
     # We don't know if the destination file not present locally was deleted locally or not.
@@ -79,12 +79,12 @@ class DirSyncMode(Enum):
     )
 
     @classmethod
-    def default(cls) -> "DirSyncMode":
+    def default(cls) -> "FolderSyncMode":
         """Return the default sync mode (REPLACE)"""
         return cls.REPLACE
 
     def can_delete_nonexisting(self) -> bool:
-        return self == DirSyncMode.REPLACE or self == DirSyncMode.FORCE_OVERWRITE
+        return self == FolderSyncMode.REPLACE or self == FolderSyncMode.FORCE_OVERWRITE
 
 
 @dataclass
@@ -205,7 +205,7 @@ class FilesClient:
     Client for interacting with the DeepOrigin file service.
 
     This client provides high-level methods for file operations like upload, download,
-    listing directories, and synchronizing files between local and remote storage.
+    listing folder, and synchronizing files between local and remote storage.
     """
 
     # FilesClient instance attributes
@@ -261,14 +261,14 @@ class FilesClient:
     def list_folder(self, path: str, flag: str | None = None) -> dict[str, FileMetadata]:
         """
         List files and folders at the specified path. Returned dictionary keys will have
-        the full remote path as the key, including the provided path argument part.
-        This means that the resulting path key can be used directly for download, etc.
+        the full remote path, so the resulting path key can be used directly for download, etc.
         Args:
-            path: Path in the format files:///path
-            flag: Optional flag for listing behavior
+            path: Remote path where to list files from
+            flag: Optional "recursive" flag. TBD: Currently always recursive?
         Returns:
             Dictionary mapping file paths to FileMetadata objects, maintaining the order
-            from the response
+            from the underlying list response. Key string will include the argument 
+            path part; it is not removed.
         """
         remote_path = self._extract_path_from_url(path)
 
@@ -337,11 +337,10 @@ class FilesClient:
 
     def upload_file(self, src: str, dest: str) -> bool:
         """
-        Upload a file from local path to remote storage.
+        Upload a file from local path to remote storage. File is overwritten if it exists.
         Args:
             src: Local source path
-            dest: Remote destination path
-            overwrite: Whether to overwrite existing file (default: False)
+            dest: Remote destination path            
         Returns:
             True if upload was successful, False otherwise
         """
@@ -351,7 +350,8 @@ class FilesClient:
 
     def upload_files(self, src_to_dest: dict[str, str]) -> tuple[bool, dict[str, str]]:
         """
-        Upload multiple files from local paths to remote storage in parallel.
+        Upload multiple files from local paths to remote storage paths. Upload is
+        done in parallel and may execute out of order.
         Args:
             src_to_dest: Dictionary mapping source file paths to destination paths
         Returns:
@@ -367,7 +367,8 @@ class FilesClient:
 
     def download_files(self, src_to_dest: dict[str, str]) -> tuple[bool, dict[str, str]]:
         """
-        Download multiple files from remote storage to local paths in parallel.
+        Download multiple files from remote storage to local paths. Download is
+        done in parallel and may execute out of order. 
         Args:
             src_to_dest: Dictionary mapping source file paths to destination paths
         Returns:
@@ -392,53 +393,63 @@ class FilesClient:
         """
         success, _ = self.download_files({src: dest})
         return success
-
         
     def delete_file(self, path: str) -> bool:
         """
         Delete a file from remote storage.
         Args:
-            path: Path in the format files:///path
+            path: Path in the format 
         Returns:
             True if deletion was successful, False otherwise
         """
-        remote_path = self._extract_path_from_url(path)
+        success, _ = self.delete_files([path])
+        return success
 
-        response = delete_object.sync_detailed(
-            org_friendly_id=self.organization_id,
-            file_path=remote_path,
-            client=self.client,
+    def delete_files(self, paths: list[str]) -> tuple[bool, dict[str, str]]:
+        """
+        Delete multiple files from remote storage in parallel.
+        Args:
+            paths: List of file paths to delete
+        Returns:
+            Tuple containing:
+                - Boolean indicating if all deletions were successful
+                - Dictionary mapping paths to status ("DELETED" or error message)
+        """
+        return self._process_files_in_parallel(
+            paths,
+            self._delete_single_file,
+            "Delete"
         )
-
-        return response.status_code == 200
-
 
     def _process_files_in_parallel(
         self,
-        src_to_dest: dict[str, str],
+        _args_list: dict[str, str] | list[str],
         single_file_io_func,
         operation_name: str
         ) -> tuple[bool, dict[str, str]]:
 
-        if not src_to_dest:
+        if not _args_list:
             return True, {}
 
         results = {}
         all_success = True
+        args_list = _args_list.items() if isinstance(_args_list, dict) else _args_list
 
         # For a single file, use the function directly
-        if len(src_to_dest) == 1:
-            src, dest = next(iter(src_to_dest.items()))
-            success, status = single_file_io_func(src, dest)
+        if len(_args_list) == 1:
+            src_dest_args = next(iter(args_list))
+            src = src_dest_args[0] if isinstance(src_dest_args, tuple) else src_dest_args
+            success, status = single_file_io_func(src_dest_args)
             results[src] = status
             return success, results
-        else:
+        else:            
             # For multiple files, use concurrent futures
             with concurrent.futures.ThreadPoolExecutor() as executor:
                 future_to_src = {}
                 
-                for src, dest in src_to_dest.items():                   
-                    future = executor.submit(single_file_io_func, src, dest)
+                for src_dest_args in args_list:
+                    future = executor.submit(single_file_io_func, src_dest_args)
+                    src = src_dest_args[0] if isinstance(src_dest_args, tuple) else src_dest_args
                     future_to_src[future] = src
                 
                 for future in concurrent.futures.as_completed(future_to_src):
@@ -455,7 +466,8 @@ class FilesClient:
         return all_success, results
 
 
-    def _upload_single_file(self, src: str, dest: str) -> tuple[bool, str]:        
+    def _upload_single_file(self, str_to_dest_tuple: tuple[str, str]) -> tuple[bool, str]:
+        src, dest = str_to_dest_tuple
         if not os.path.exists(src):
             return False,  f"Source file not found: {src}"
 
@@ -510,8 +522,8 @@ class FilesClient:
         # We've exhausted all retries, return the last error message
         return False, last_error
 
-    def _download_single_file(self, src: str, dest: str) -> tuple[bool, str]:        
-        
+    def _download_single_file(self, str_to_dest_tuple: tuple[str, str]) -> tuple[bool, str]:
+        src, dest = str_to_dest_tuple
         remote_path = self._extract_path_from_url(src)
         last_error = None
         
@@ -563,6 +575,49 @@ class FilesClient:
         # We've exhausted all retries, return the last error message
         return False, last_error
 
+    def _delete_single_file(self, path : str) -> tuple[bool, str]:        
+        remote_path = self._extract_path_from_url(path)
+        last_error = None
+        
+        for attempt in range(self.io_max_retries):
+            try:
+                response = delete_object.sync_detailed(
+                    org_friendly_id=self.organization_id,
+                    file_path=remote_path,
+                    client=self.client,
+                )
+
+                # Successful deletion (200 OK or 204 No Content)
+                # Also treat 404 Not Found as success (idempotent delete)
+                if response.status_code in [200, 204]:
+                    return True, "DELETED"
+                
+                # Determine if we should retry based on status code
+                if response.status_code in [429, 408] or (500 <= response.status_code < 600):
+                    if attempt < self.io_max_retries - 1:
+                        last_error = f"Attempt {attempt+1} failed with status {response.status_code}"
+                        logger.warning(f"{last_error}, retrying {path} deletion in {self.io_retry_delay}s...")
+                        time.sleep(self.io_retry_delay)
+                        continue
+                
+                # For other status codes, don't retry
+                return False, f"Delete failed with status code: {response.status_code}"
+                
+            except (ConnectionError, TimeoutError) as e:
+                # Retry on connection errors
+                if attempt < self.io_max_retries - 1:
+                    last_error = f"Connection error on attempt {attempt+1}: {str(e)}"
+                    logger.warning(f"{last_error}, retrying {path} deletion in {self.io_retry_delay}s")
+                    time.sleep(self.io_retry_delay)
+                    continue
+                return False, f"Delete failed with connection error: {str(e)}"
+                
+            except Exception as e:
+                return False, f"Delete failed with error: {str(e)}"
+        
+        # We've exhausted all retries, return the last error message
+        return False, last_error
+
 
     def get_metadata(self, path: str) -> FileMetadata | None:
         """
@@ -589,18 +644,21 @@ class FilesClient:
 
 
     def sync_folder_down(
-        self, remote_path: str, local_path: str, mode: DirSyncMode = DirSyncMode.REPLACE
+        self, remote_path: str, local_path: str, mode: FolderSyncMode = FolderSyncMode.REPLACE
     ) -> tuple[bool, dict[str, str]]:
         """
-        Sync files from remote to local directory.
+        Sync files from remote to local directory. 
         Args:
-            remote_path: Remote path in the format files:///path
+            remote_path: Remote path on the server
             local_path: Local directory path
-            mode: Synchronization mode
+            mode: Synchronization mode; REPLACE by default, indicating that older files are
+            overwritten by newer remote files, and non-existing remote files are deleted locally.
         Returns:
             Tuple containing:
-                - Boolean indicating if the sync was successful
-                - Dictionary mapping file paths to their status
+                - Boolean True if the sync of all files was successful, False if there was any error.
+                  Need to look at the dictonary entry to see what happened per file.
+                - Dictionary mapping file paths to their status. Possibles success status include:
+                  "OK", "DELETED", "KEPT". Othewise the string will contain the error message.
         """
         # Get list of remote files with metadata
         remote_files_dict = self.list_folder(remote_path)  # todo: add recursive flag
@@ -637,13 +695,13 @@ class FilesClient:
 
                 # Determine if we should update the file based on mode
                 should_update = False
-                if mode == DirSyncMode.FORCE_OVERWRITE:
+                if mode == FolderSyncMode.FORCE_OVERWRITE:
                     should_update = True
-                elif mode == DirSyncMode.REPLACE:
+                elif mode == FolderSyncMode.REPLACE:
                     should_update = local_mtime < remote_mtime
-                elif mode == DirSyncMode.MERGE:
+                elif mode == FolderSyncMode.MERGE:
                     should_update = local_mtime < remote_mtime
-                elif mode == DirSyncMode.COPY_NON_EXISTING:
+                elif mode == FolderSyncMode.COPY_NON_EXISTING:
                     should_update = False
 
                 if should_update:
@@ -692,18 +750,21 @@ class FilesClient:
         return success, file_statuses
 
     def sync_folder_up(
-        self, local_path: str, remote_path: str, mode: DirSyncMode = DirSyncMode.REPLACE
+        self, local_path: str, remote_path: str, mode: FolderSyncMode = FolderSyncMode.REPLACE
     ) -> tuple[bool, dict[str, str]]:
         """
-        Sync files from local to remote directory.
+        Sync files from local to remote directory.                    
         Args:
             local_path: Local directory path
-            remote_path: Remote path in the format files:///path
-            mode: Synchronization mode
+            remote_path: Remote path on server
+            mode: Synchronization mode; REPLACE by default, indicating that older remote files are
+            overwritten by newer local files, and non-existing local files are deleted on remote.
         Returns:
             Tuple containing:
-                - Boolean indicating if the sync was successful
-                - Dictionary mapping file paths to their status
+                - Boolean True if the sync of all files was successful, False if there was any error.
+                  Need to look at the dictonary entry to see what happened per file.
+                - Dictionary mapping file paths to their status. Possibles success status include:
+                  "OK", "DELETED", "KEPT". Otherwise the string will contain the error message.
         """
         # Extract the base remote path without the prefix for path comparisons
         base_remote_path = self._extract_path_from_url(remote_path)
@@ -721,6 +782,7 @@ class FilesClient:
 
         # Build a dictionary of files to upload
         files_to_upload = {}
+        local_rel_paths = set() # Initialize set to store relative paths
 
         # Process local files
         for root, _, files in os.walk(local_path):
@@ -729,6 +791,8 @@ class FilesClient:
 
                 # Get relative path from the local_path
                 rel_path = os.path.relpath(local_file_path, local_path)
+                local_rel_paths.add(rel_path) # Add for deletion loop below
+                
                 remote_file_path = f"{remote_path}/{rel_path}"
                 rel_key_path = base_remote_path + "/" + rel_path
 
@@ -742,13 +806,13 @@ class FilesClient:
 
                     # Determine if we should update the file based on mode
                     should_update = False
-                    if mode == DirSyncMode.FORCE_OVERWRITE:
+                    if mode == FolderSyncMode.FORCE_OVERWRITE:
                         should_update = True
-                    elif mode == DirSyncMode.REPLACE:
+                    elif mode == FolderSyncMode.REPLACE:
                         should_update = local_mtime > remote_mtime
-                    elif mode == DirSyncMode.MERGE:
+                    elif mode == FolderSyncMode.MERGE:
                         should_update = local_mtime > remote_mtime
-                    elif mode == DirSyncMode.COPY_NON_EXISTING:
+                    elif mode == FolderSyncMode.COPY_NON_EXISTING:
                         should_update = False
 
                     if should_update:
@@ -773,27 +837,23 @@ class FilesClient:
 
         # Handle deletion of files in destination that don't exist in source
         if mode.can_delete_nonexisting():
-            # Get all local files
-            local_files = []
-            for root, _, files in os.walk(local_path):
-                for filename in files:
-                    local_file_path = os.path.join(root, filename)
-                    rel_path = os.path.relpath(local_file_path, local_path)
-                    local_files.append(rel_path)
-
-            # Find files to delete
+            # local_rel_paths is already populated from the first loop
+            # Find remote files to delete
+            files_to_delete_list = []
             for remote_file_key in remote_files_dict:
-                if (
-                    os.path.relpath(remote_file_key, base_remote_path)
-                    not in local_files
-                ):
-                    full_remote_path = f"{remote_path}/{remote_file_key}"
-                    if self.delete_file(full_remote_path):
-                        file_statuses[full_remote_path] = "DELETED"
-                    else:
-                        logger.error(f"Failed to delete file {full_remote_path}")
-                        file_statuses[full_remote_path] = "Error deleting file"
-                        success = False
+                remote_rel_path = os.path.relpath(remote_file_key, base_remote_path)
+                if remote_rel_path not in local_rel_paths:
+                    # Construct the full remote path using the original input format
+                    full_remote_path = f"{remote_path}/{remote_rel_path}"
+                    files_to_delete_list.append(full_remote_path)
+            
+            # Delete files in parallel if any exist
+            if files_to_delete_list:
+                delete_success, delete_results = self.delete_files(files_to_delete_list)
+                if not delete_success:
+                    success = False                
+                # Merge deletion results into the main status dictionary
+                file_statuses.update(delete_results)
 
         return success, file_statuses
 
