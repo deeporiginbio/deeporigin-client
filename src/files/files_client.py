@@ -13,7 +13,7 @@ Example usage:
     client = FilesClient()
 
     # List files in a directory
-    files = client.list_folder('files:///data/')
+    files = client.list_folder('data/')
     print(f"Found {len(files)} files")
 
     # Download a file from remote storage to local path
@@ -54,8 +54,9 @@ from .file_service.types import File
 logger = logging.getLogger(__name__)
 
 # Remote path prefix for file service URLs
-REMOTE_PATH_PREFIX = "files:///"
-FILES_URL_PATTERN = re.compile(rf"^{REMOTE_PATH_PREFIX}(?P<path>.*)$")
+#REMOTE_PATH_PREFIX = "files:///"
+#FILES_URL_PATTERN = re.compile(rf"^{REMOTE_PATH_PREFIX}(?P<path>.*)$")
+REMOTE_PATH_PREFIX = ""
 
 
 class DirSyncMode(Enum):
@@ -244,26 +245,16 @@ class FilesClient:
 
 
     def _extract_path_from_url(self, url: str) -> str:
-        """
-        Extract the path from a files:/// URL.
-        Args:
-            url: URL in the format files:///path
-        Returns:
-            The path part of the URL
-        Raises:
-            ValueError: If the URL is not in the expected format
-        """
-        match = FILES_URL_PATTERN.match(url)
-        if not match:
-            raise ValueError(
-                f"Invalid files URL: {url}. Expected format: files:///path"
-            )
-
-        return match.group("path")
+        # This was used in the past to extract the path from the URL, seems unnecessary.
+        # match = FILES_URL_PATTERN.match(url)
+        # return match.group("path")
+        return url
 
     def list_folder(self, path: str, flag: str | None = None) -> dict[str, FileMetadata]:
         """
-        List files and directories at the specified path.
+        List files and folders at the specified path. Returned dictionary keys will have
+        the full remote path as the key, including the provided path argument part.
+        This means that the resulting path key can be used directly for download, etc.
         Args:
             path: Path in the format files:///path
             flag: Optional flag for listing behavior
@@ -440,36 +431,9 @@ class FilesClient:
             logger.error(f"Failed to get metadata for {path}: {response.status_code}")
             return None
 
-    def sync_dir(
-        self, src: str, dst: str, mode: DirSyncMode = DirSyncMode.REPLACE
-    ) -> tuple[bool, dict[str, str]]:
-        """
-        Synchronize files between local and remote directories.
-        Args:
-            src: Source path (can be local or files:/// URL)
-            dst: Destination path (can be local or files:/// URL)
-            mode: Synchronization mode (default: DirSyncMode.REPLACE)
-        Returns:
-            Tuple containing:
-                - Boolean indicating if the sync was successful
-                - Dictionary mapping file paths to their status (e.g., "copied", "kept", "deleted")
-        """
-        # Determine sync direction
-        if src.startswith(REMOTE_PATH_PREFIX) and not dst.startswith(
-            REMOTE_PATH_PREFIX
-        ):
-            # Download from remote to local
-            return self._sync_remote_to_local(src, dst, mode)
-        elif not src.startswith(REMOTE_PATH_PREFIX) and dst.startswith(
-            REMOTE_PATH_PREFIX
-        ):
-            # Upload from local to remote
-            return self._sync_local_to_remote(src, dst, mode)
-        else:
-            raise ValueError("Either src or dst must be a files:/// URL, but not both")
 
-    def _sync_remote_to_local(
-        self, remote_path: str, local_path: str, mode: DirSyncMode
+    def sync_folder_down(
+        self, remote_path: str, local_path: str, mode: DirSyncMode = DirSyncMode.REPLACE
     ) -> tuple[bool, dict[str, str]]:
         """
         Sync files from remote to local directory.
@@ -571,8 +535,8 @@ class FilesClient:
 
         return success, file_statuses
 
-    def _sync_local_to_remote(
-        self, local_path: str, remote_path: str, mode: DirSyncMode
+    def sync_folder_up(
+        self, local_path: str, remote_path: str, mode: DirSyncMode = DirSyncMode.REPLACE
     ) -> tuple[bool, dict[str, str]]:
         """
         Sync files from local to remote directory.

@@ -39,7 +39,8 @@ SYNC_SUBFOLDER = os.path.join(SYNC_SOURCE_DIR, "subfolder")
 SYNC_DOWNLOAD_DIR = os.path.join(TEST_ROOT_DIR, "sync_download")
 
 # Remote path prefix (where files will be stored in remote service)
-REMOTE_PREFIX = "files:///test_files"
+#REMOTE_PREFIX = "files:///test_files". Prefix not used any more.
+REMOTE_PREFIX = "test_files"
 FILE_PREFIX = "td_"  # Prefix for test data files
 
 # Number of files to create
@@ -384,8 +385,8 @@ def run_tests():
     print_step(f"Syncing {SYNC_SOURCE_DIR} to {sync_remote_path}")
 
     try:
-        success, file_statuses = client.sync_dir(
-            src=SYNC_SOURCE_DIR, dst=sync_remote_path
+        success, file_statuses = client.sync_folder_up(
+            SYNC_SOURCE_DIR, remote_path = sync_remote_path
         )
         if success:
             print("  Sync upload successful")
@@ -421,8 +422,8 @@ def run_tests():
         print_step(f"Syncing {sync_remote_path} to {SYNC_DOWNLOAD_DIR}")
 
         try:
-            success, file_statuses = client.sync_dir(
-                src=sync_remote_path, dst=SYNC_DOWNLOAD_DIR
+            success, file_statuses = client.sync_folder_down(
+                remote_path = sync_remote_path, local_path = SYNC_DOWNLOAD_DIR
             )
             if success:
                 print("  Sync download successful")
