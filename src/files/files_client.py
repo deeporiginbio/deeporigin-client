@@ -35,6 +35,8 @@ from enum import Enum
 import logging
 import os
 import re
+import concurrent.futures
+import time
 
 from deeporigin import auth
 from deeporigin.utils.network import _get_domain_name
@@ -210,6 +212,8 @@ class FilesClient:
     base_url: str
     organization_id: str
     client: AuthenticatedClient | Client
+    io_max_retries: int
+    io_retry_delay: float
 
     def __init__(
         self,
@@ -225,6 +229,9 @@ class FilesClient:
             token: Authentication token (optional)
             verify_ssl: Whether to verify SSL certificates or path to CA bundle
         """
+
+        self.io_max_retries = 3
+        self.io_retry_delay = 0.5
 
         if not organization_id:
             self.organization_id = get_value()["organization_id"]
@@ -327,53 +334,124 @@ class FilesClient:
             # If there was an error getting metadata, the file probably doesn't exist
             return False
 
-    def upload_file(self, src: str, dest: str, overwrite: bool = False) -> bool:
+    def upload_file(self, src: str, dest: str) -> bool:
         """
         Upload a file from local path to remote storage.
         Args:
             src: Local source path
-            dest: Remote destination path in the format files:///path
+            dest: Remote destination path
             overwrite: Whether to overwrite existing file (default: False)
         Returns:
             True if upload was successful, False otherwise
         """
-        if not os.path.exists(src):
-            raise FileNotFoundError(f"Source file not found: {src}")
+        # Use the new upload_files method with a single file
+        success, _ = self.upload_files({src: dest})
+        return success
 
-        # Check if file exists and delete if overwrite is True
-        #MA: Not necessry as there will be overwrite in the API call
-        if self._remote_file_exists(dest):
-            if overwrite:
-                logger.info(f"Deleting existing file at {dest} before upload")
-                if not self.delete_file(dest):
-                    logger.warning(f"Failed to delete existing file at {dest}")
-                    # Continue with upload anyway
-            else:
-                logger.warning(f"File already exists at {dest} and overwrite is False")
-                return False
+    def upload_files(self, src_to_dest: dict[str, str]) -> tuple[bool, dict[str, str]]:
+        """
+        Upload multiple files from local paths to remote storage in parallel.
+        Args:
+            src_to_dest: Dictionary mapping source file paths to destination paths
+        Returns:
+            Tuple containing:
+                - Boolean indicating if all uploads were successful
+                - Dictionary mapping source paths to status ("OK" or error message)
+        """
+        if not src_to_dest:
+            return True, {}
 
+        results = {}
+        all_success = True
+
+        # For a single file, use _upload_single_file directly
+        if len(src_to_dest) == 1:
+            src, dest = next(iter(src_to_dest.items()))
+            success, status = self._upload_single_file(src, dest)
+            results[src] = status
+            return success, results
+        else:
+            # For multiple files, use concurrent futures
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                future_to_src = {}
+                
+                for src, dest in src_to_dest.items():
+                    if not os.path.exists(src):
+                        results[src] = f"Source file not found: {src}"
+                        all_success = False
+                        continue
+                        
+                    future = executor.submit(self._upload_single_file, src, dest)
+                    future_to_src[future] = src
+                
+                for future in concurrent.futures.as_completed(future_to_src):
+                    src = future_to_src[future]
+                    try:
+                        success, status = future.result()
+                        results[src] = status
+                        if not success:
+                            all_success = False
+                    except Exception as e:
+                        results[src] = f"Upload failed with error: {str(e)}"
+                        all_success = False
+
+        return all_success, results
+
+    def _upload_single_file(self, src: str, dest: str) -> tuple[bool, str]:
         remote_path = self._extract_path_from_url(dest)
+        last_error = None
+        
+        for attempt in range(self.io_max_retries):
+            try:
+                if not os.path.exists(src):                    
+                    return False,  f"Source file not found: {src}"
 
-        # Create a File object first
-        with open(src, "rb") as f:
-            file_obj = File(
-                payload=f,
-                file_name=os.path.basename(src),
-                mime_type="application/octet-stream",
-            )
+                with open(src, "rb") as f:
+                    file_obj = File(
+                        payload=f,
+                        file_name=os.path.basename(src),
+                        mime_type="application/octet-stream",
+                    )
 
-            # Create the PutObjectBody with the File object
-            body = PutObjectBody(file=file_obj)
+                    body = PutObjectBody(file=file_obj)
 
-            # Send the request with the proper body and include the remote path
-            response = put_object.sync_detailed(
-                org_friendly_id=self.organization_id,
-                file_path=remote_path,
-                client=self.client,
-                body=body,
-            )
+                    response = put_object.sync_detailed(
+                        org_friendly_id=self.organization_id,
+                        file_path=remote_path,
+                        client=self.client,
+                        body=body,
+                    )
 
-        return response.status_code == 200
+                if response.status_code == 200:
+                    return True, "OK"
+                
+                # Determine if we should retry based on status code. 500 codes are server errors.
+                # 429 is rate limit exceeded, 408 is request timeout.
+                if response.status_code in [429, 408] or (500 <= response.status_code < 600):
+                    if attempt < self.io_max_retries - 1:
+                        last_error = f"Attempt {attempt+1} failed with status {response.status_code}"
+                        logger.warning(f"{last_error}, retrying {src} upload in {self.io_retry_delay}s...")
+                        time.sleep(self.io_retry_delay)
+                        continue
+                
+                # For other status codes, don't retry
+                return False, f"Upload failed with status code: {response.status_code}"
+                
+            except (ConnectionError, TimeoutError) as e:
+                # Retry on connection errors
+                if attempt < self.io_max_retries - 1:
+                    last_error = f"Connection error on attempt {attempt+1}: {str(e)}"
+                    logger.warning(f"{last_error}, retrying {src} upload in {self.io_retry_delay}s")
+                    time.sleep(self.io_retry_delay)
+                    continue
+                return False, f"Upload failed with connection error: {str(e)}"
+                
+            except Exception as e:
+                return False, f"Upload failed with error: {str(e)}"
+        
+        # We've exhausted all retries, return the last error message
+        return False, last_error
+
 
     def download_file(self, src: str, dest: str) -> bool:
         """
@@ -594,7 +672,7 @@ class FilesClient:
 
                     if should_update:
                         # Upload the file
-                        if self.upload_file(local_file_path, remote_file_path, True):
+                        if self.upload_file(local_file_path, remote_file_path):
                             file_statuses[remote_file_path] = "copied"
                         else:
                             logger.error(

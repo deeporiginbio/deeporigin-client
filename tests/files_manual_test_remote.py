@@ -23,6 +23,7 @@ import random
 import shutil
 import string
 import sys
+import time
 
 from deeporigin.files import FilesClient
 
@@ -235,9 +236,7 @@ def run_tests():
         print_step(f"Uploading {local_path} to {remote_path}")
 
         try:
-            success = client.upload_file(
-                src=local_path, dest=remote_path, overwrite=True
-            )
+            success = client.upload_file(src=local_path, dest=remote_path)
             metadata = client.get_metadata(remote_path)
             # print(f"  Metadata: {metadata}")
 
@@ -385,9 +384,14 @@ def run_tests():
     print_step(f"Syncing {SYNC_SOURCE_DIR} to {sync_remote_path}")
 
     try:
+        start_time = time.time()
         success, file_statuses = client.sync_folder_up(
             SYNC_SOURCE_DIR, remote_path = sync_remote_path
         )
+        end_time = time.time()
+        elapsed_time = end_time - start_time
+        print(f"  Sync upload completed in {elapsed_time:.2f} seconds")
+        
         if success:
             print("  Sync upload successful")
             sync_upload_success = True
@@ -422,9 +426,14 @@ def run_tests():
         print_step(f"Syncing {sync_remote_path} to {SYNC_DOWNLOAD_DIR}")
 
         try:
+            start_time = time.time()
             success, file_statuses = client.sync_folder_down(
                 remote_path = sync_remote_path, local_path = SYNC_DOWNLOAD_DIR
             )
+            end_time = time.time()
+            elapsed_time = end_time - start_time
+            print(f"  Sync download completed in {elapsed_time:.2f} seconds")
+            
             if success:
                 print("  Sync download successful")
 
