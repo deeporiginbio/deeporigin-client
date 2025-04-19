@@ -358,16 +358,46 @@ class FilesClient:
                 - Boolean indicating if all uploads were successful
                 - Dictionary mapping source paths to status ("OK" or error message)
         """
+        return self._process_files_in_parallel(
+            src_to_dest,
+            self._upload_single_file,
+            "Upload"
+        )
+
+    def download_files(self, src_to_dest: dict[str, str]) -> tuple[bool, dict[str, str]]:
+        """
+        Download multiple files from remote storage to local paths in parallel.
+        Args:
+            src_to_dest: Dictionary mapping source file paths to destination paths
+        Returns:
+            Tuple containing:
+                - Boolean indicating if all downloads were successful
+                - Dictionary mapping source paths to status ("OK" or error message)
+        """
+        return self._process_files_in_parallel(
+            src_to_dest,
+            self._download_single_file,
+            "Download"
+        )        
+
+
+    def _process_files_in_parallel(
+        self,
+        src_to_dest: dict[str, str],
+        single_file_io_func,
+        operation_name: str
+        ) -> tuple[bool, dict[str, str]]:
+
         if not src_to_dest:
             return True, {}
 
         results = {}
         all_success = True
 
-        # For a single file, use _upload_single_file directly
+        # For a single file, use the function directly
         if len(src_to_dest) == 1:
             src, dest = next(iter(src_to_dest.items()))
-            success, status = self._upload_single_file(src, dest)
+            success, status = single_file_io_func(src, dest)
             results[src] = status
             return success, results
         else:
@@ -375,13 +405,8 @@ class FilesClient:
             with concurrent.futures.ThreadPoolExecutor() as executor:
                 future_to_src = {}
                 
-                for src, dest in src_to_dest.items():
-                    if not os.path.exists(src):
-                        results[src] = f"Source file not found: {src}"
-                        all_success = False
-                        continue
-                        
-                    future = executor.submit(self._upload_single_file, src, dest)
+                for src, dest in src_to_dest.items():                   
+                    future = executor.submit(single_file_io_func, src, dest)
                     future_to_src[future] = src
                 
                 for future in concurrent.futures.as_completed(future_to_src):
@@ -392,20 +417,21 @@ class FilesClient:
                         if not success:
                             all_success = False
                     except Exception as e:
-                        results[src] = f"Upload failed with error: {str(e)}"
+                        results[src] = f"{operation_name} failed with error: {str(e)}"
                         all_success = False
 
         return all_success, results
 
-    def _upload_single_file(self, src: str, dest: str) -> tuple[bool, str]:
+
+    def _upload_single_file(self, src: str, dest: str) -> tuple[bool, str]:        
+        if not os.path.exists(src):
+            return False,  f"Source file not found: {src}"
+
         remote_path = self._extract_path_from_url(dest)
         last_error = None
         
         for attempt in range(self.io_max_retries):
-            try:
-                if not os.path.exists(src):                    
-                    return False,  f"Source file not found: {src}"
-
+            try:                
                 with open(src, "rb") as f:
                     file_obj = File(
                         payload=f,
@@ -452,6 +478,59 @@ class FilesClient:
         # We've exhausted all retries, return the last error message
         return False, last_error
 
+    def _download_single_file(self, src: str, dest: str) -> tuple[bool, str]:        
+        
+        remote_path = self._extract_path_from_url(src)
+        last_error = None
+        
+        for attempt in range(self.io_max_retries):
+            try:                
+                # The get_object API will need to be called differently for file download
+                # vs. directory listing. This implementation assumes that omitting list_type
+                # will result in a file download.
+                response = get_object.sync_detailed(
+                    org_friendly_id=self.organization_id,
+                    file_path=remote_path,
+                    client=self.client,
+                )  # list_type=0.0  - wasn't working # Assuming 0.0 means download file
+                # looks like bad if(type) check in file-service controller --TBD Niels
+
+                if response.status_code == 200:
+                    # Ensure the directory exists
+                    os.makedirs(os.path.dirname(os.path.abspath(dest)), exist_ok=True)
+
+                    # Write the content to the destination file
+                    with open(dest, "wb") as f:
+                        f.write(response.content)
+                    return True, "OK"
+                               
+                # Determine if we should retry based on status code. 500 codes are server errors.
+                # 429 is rate limit exceeded, 408 is request timeout.
+                if response.status_code in [429, 408] or (500 <= response.status_code < 600):
+                    if attempt < self.io_max_retries - 1:
+                        last_error = f"Attempt {attempt+1} failed with status {response.status_code}"
+                        logger.warning(f"{last_error}, retrying {src} download in {self.io_retry_delay}s...")
+                        time.sleep(self.io_retry_delay)
+                        continue
+                
+                # For other status codes, don't retry
+                return False, f"Download failed with status code: {response.status_code}"
+                
+            except (ConnectionError, TimeoutError) as e:
+                # Retry on connection errors
+                if attempt < self.io_max_retries - 1:
+                    last_error = f"Connection error on attempt {attempt+1}: {str(e)}"
+                    logger.warning(f"{last_error}, retrying {src} download in {self.io_retry_delay}s")
+                    time.sleep(self.io_retry_delay)
+                    continue
+                return False, f"Download failed with connection error: {str(e)}"
+                
+            except Exception as e:
+                return False, f"Download failed with error: {str(e)}"
+        
+        # We've exhausted all retries, return the last error message
+        return False, last_error
+
 
     def download_file(self, src: str, dest: str) -> bool:
         """
@@ -462,29 +541,10 @@ class FilesClient:
         Returns:
             True if download was successful, False otherwise
         """
-        remote_path = self._extract_path_from_url(src)
+        success, _ = self.download_files({src: dest})
+        return success
 
-        # The get_object API will need to be called differently for file download
-        # vs. directory listing. This implementation assumes that omitting list_type
-        # will result in a file download.
-        response = get_object.sync_detailed(
-            org_friendly_id=self.organization_id,
-            file_path=remote_path,
-            client=self.client,
-        )  # list_type=0.0  - wasn't working # Assuming 0.0 means download file
-        # looks like bad if(type) check in file-service controller --TBD Niels
 
-        if response.status_code == 200:
-            # Ensure the directory exists
-            os.makedirs(os.path.dirname(os.path.abspath(dest)), exist_ok=True)
-
-            # Write the content to the destination file
-            with open(dest, "wb") as f:
-                f.write(response.content)
-            return True
-        else:
-            logger.error(f"Failed to download file {src}: {response.status_code}")
-            return False
 
     def get_metadata(self, path: str) -> FileMetadata | None:
         """
