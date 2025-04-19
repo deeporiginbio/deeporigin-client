@@ -138,10 +138,10 @@ def print_remote_files(client, remote_path):
     print_step(f"Listing files at {remote_path}")
 
     try:
-        files = client.list_dir(remote_path)
+        files = client.list_folder(remote_path)
         if files and len(files) > 0:
             print(f"  Found {len(files)} files/directories:")
-            for file_metadata in files:
+            for key_path, file_metadata in files.items():
                 # Extract relevant information from FileMetadata object
                 name = file_metadata.key_path or "Unknown"
                 size = file_metadata.size or "Unknown"

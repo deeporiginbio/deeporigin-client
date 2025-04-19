@@ -13,7 +13,7 @@ Example usage:
     client = FilesClient()
 
     # List files in a directory
-    files = client.list_dir('files:///data/')
+    files = client.list_folder('files:///data/')
     print(f"Found {len(files)} files")
 
     # Download a file from remote storage to local path
@@ -261,19 +261,20 @@ class FilesClient:
 
         return match.group("path")
 
-    def list_dir(self, path: str, flag: str | None = None) -> list[FileMetadata]:
+    def list_folder(self, path: str, flag: str | None = None) -> dict[str, FileMetadata]:
         """
         List files and directories at the specified path.
         Args:
             path: Path in the format files:///path
             flag: Optional flag for listing behavior
         Returns:
-            List of FileMetadata objects
+            Dictionary mapping file paths to FileMetadata objects, maintaining the order
+            from the response
         """
         remote_path = self._extract_path_from_url(path)
 
         if flag == "recursive":
-            raise ValueError("list_dir recursive flag not implemented")
+            raise ValueError("list_folder recursive flag not implemented")
 
         # The list_type parameter seems to be required in the API
         # We'll map the flag to an appropriate value
@@ -292,16 +293,21 @@ class FilesClient:
             # Parse the response content as needed
             # This will depend on the actual response format from the API
             raw_files = self._parse_list_response(response.content)
-            return [
-                FileMetadata.from_dict(
+            
+            # Create a dictionary with key_path as keys, maintaining order
+            result = {}
+            for file_data in raw_files:
+                metadata = FileMetadata.from_dict(
                     file_data, mapping=FileMetadata.METADATA_LIST_FIELD_MAPPING
                 )
-                for file_data in raw_files
-            ]
+                if metadata.key_path:
+                    result[metadata.key_path] = metadata
+            
+            return result
         else:
             logger.error(f"Failed to list directory {path}: {response.status_code}")
             response.raise_for_status()
-            return []
+            return {}
 
     def _parse_list_response(self, content: bytes) -> list[dict[str, any]]:
         """
@@ -322,16 +328,9 @@ class FilesClient:
             return []
 
     def _remote_file_exists(self, path: str) -> bool:
-        """
-        Check if a file exists in remote storage.
-        Args:
-            path: Path in the format files:///path
-        Returns:
-            True if the file exists, False otherwise
-        """
+        # If we got metadata without an error, the file exists
         try:
-            metadata = self.get_metadata(path)
-            # If we got metadata without an error, the file exists
+            metadata = self.get_metadata(path)            
             return bool(metadata)
         except Exception:
             # If there was an error getting metadata, the file probably doesn't exist
@@ -351,6 +350,7 @@ class FilesClient:
             raise FileNotFoundError(f"Source file not found: {src}")
 
         # Check if file exists and delete if overwrite is True
+        #MA: Not necessry as there will be overwrite in the API call
         if self._remote_file_exists(dest):
             if overwrite:
                 logger.info(f"Deleting existing file at {dest} before upload")
@@ -483,18 +483,10 @@ class FilesClient:
                 - Dictionary mapping file paths to their status
         """
         # Get list of remote files with metadata
-        remote_files = self.list_dir(remote_path)  # todo: add recursive flag
+        remote_files_dict = self.list_folder(remote_path)  # todo: add recursive flag
 
         # Extract the base remote path without the prefix for path comparisons
         base_remote_path = self._extract_path_from_url(remote_path)
-
-        # Create a dictionary mapping paths to metadata
-        remote_files_dict = {}
-        for file_metadata in remote_files:
-            if file_metadata.key_path:
-                # Store the full remote path as the key
-                # full_remote_path = f"{REMOTE_PATH_PREFIX}{file_metadata.key_path}"
-                remote_files_dict[file_metadata.key_path] = file_metadata
 
         # Ensure local directory exists
         os.makedirs(local_path, exist_ok=True)
@@ -597,16 +589,11 @@ class FilesClient:
         base_remote_path = self._extract_path_from_url(remote_path)
 
         # Get list of remote files with metadata to compare
+        remote_files_dict = {}
         try:
-            remote_files_list = self.list_dir(remote_path)  # todo: add recursive flag
-            # Create a dictionary mapping keys to metadata
-            remote_files_dict = {}
-            for file_metadata in remote_files_list:
-                if file_metadata.key_path:
-                    remote_files_dict[file_metadata.key_path] = file_metadata
+            remote_files_dict = self.list_folder(remote_path)  # todo: add recursive flag
         except Exception as e:
-            logger.warning(f"Could not list remote directory, assuming it's empty: {e}")
-            remote_files_dict = {}
+            logger.warning(f"Could not list remote directory, assuming it's empty: {e}")            
 
         # Track all file operations
         file_statuses = {}
