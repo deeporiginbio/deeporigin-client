@@ -18,7 +18,7 @@ Example usage:
 
     # Download a file from remote storage to local path
     success = client.download_file(
-        src="files:///path/to/remote/file.txt",
+        src="path/to/remote/file.txt",
         dest="/local/path/file.txt"
     )
 
@@ -212,6 +212,7 @@ class FilesClient:
     base_url: str
     organization_id: str
     client: AuthenticatedClient | Client
+    # These control retries for upload and download
     io_max_retries: int
     io_retry_delay: float
 
@@ -378,7 +379,38 @@ class FilesClient:
             src_to_dest,
             self._download_single_file,
             "Download"
-        )        
+        )
+    
+    def download_file(self, src: str, dest: str) -> bool:
+        """
+        Download a file from remote storage to local path.
+        Args:
+            src: Remote source path
+            dest: Local destination path
+        Returns:
+            True if download was successful, False otherwise
+        """
+        success, _ = self.download_files({src: dest})
+        return success
+
+        
+    def delete_file(self, path: str) -> bool:
+        """
+        Delete a file from remote storage.
+        Args:
+            path: Path in the format files:///path
+        Returns:
+            True if deletion was successful, False otherwise
+        """
+        remote_path = self._extract_path_from_url(path)
+
+        response = delete_object.sync_detailed(
+            org_friendly_id=self.organization_id,
+            file_path=remote_path,
+            client=self.client,
+        )
+
+        return response.status_code == 200
 
 
     def _process_files_in_parallel(
@@ -532,20 +564,6 @@ class FilesClient:
         return False, last_error
 
 
-    def download_file(self, src: str, dest: str) -> bool:
-        """
-        Download a file from remote storage to local path.
-        Args:
-            src: Remote source path in the format files:///path
-            dest: Local destination path
-        Returns:
-            True if download was successful, False otherwise
-        """
-        success, _ = self.download_files({src: dest})
-        return success
-
-
-
     def get_metadata(self, path: str) -> FileMetadata | None:
         """
         Get metadata about a file or directory.
@@ -597,6 +615,9 @@ class FilesClient:
         file_statuses = {}
         success = True
 
+        # Build a dictionary of files to download
+        files_to_download = {}
+
         # Process remote files
         for remote_file_key, file_metadata in remote_files_dict.items():
             # Construct paths
@@ -626,27 +647,24 @@ class FilesClient:
                     should_update = False
 
                 if should_update:
-                    # Download the file
-                    if self.download_file(full_remote_file_path, local_file_path):
-                        file_statuses[local_file_path] = "copied"
-                    else:
-                        logger.error(
-                            f"Failed to download file {full_remote_file_path} to {local_file_path}"
-                        )
-                        file_statuses[local_file_path] = "error"
-                        success = False
+                    # Add to files to download
+                    files_to_download[full_remote_file_path] = local_file_path
                 else:
-                    file_statuses[local_file_path] = "kept"
+                    file_statuses[local_file_path] = "KEPT"
             else:
-                # File doesn't exist locally, download it
-                if self.download_file(full_remote_file_path, local_file_path):
-                    file_statuses[local_file_path] = "copied"
-                else:
-                    logger.error(
-                        f"Failed to download file {full_remote_file_path} to {local_file_path}"
-                    )
-                    file_statuses[local_file_path] = "error"
-                    success = False
+                # File doesn't exist locally, add to files to download
+                files_to_download[full_remote_file_path] = local_file_path
+
+        # Download files in parallel
+        if files_to_download:
+            download_success, download_results = self.download_files(files_to_download)
+            if not download_success:
+                success = False
+            
+            # Add download results to file statuses
+            for src, status in download_results.items():
+                dest = files_to_download[src]
+                file_statuses[dest] = status
 
         # Handle deletion of files in destination that don't exist in source
         if mode.can_delete_nonexisting():
@@ -665,10 +683,10 @@ class FilesClient:
                     full_local_path = os.path.join(local_path, local_file)
                     try:
                         os.remove(full_local_path)
-                        file_statuses[full_local_path] = "deleted"
+                        file_statuses[full_local_path] = "DELETED"
                     except Exception as e:
                         logger.error(f"Failed to delete file {full_local_path}: {e}")
-                        file_statuses[full_local_path] = "error"
+                        file_statuses[full_local_path] = f"Error deleting file: {str(e)}"
                         success = False
 
         return success, file_statuses
@@ -695,11 +713,14 @@ class FilesClient:
         try:
             remote_files_dict = self.list_folder(remote_path)  # todo: add recursive flag
         except Exception as e:
-            logger.warning(f"Could not list remote directory, assuming it's empty: {e}")            
+            logger.warning(f"Could not list remote directory, assuming it's empty: {e}")
 
         # Track all file operations
         file_statuses = {}
         success = True
+
+        # Build a dictionary of files to upload
+        files_to_upload = {}
 
         # Process local files
         for root, _, files in os.walk(local_path):
@@ -731,27 +752,24 @@ class FilesClient:
                         should_update = False
 
                     if should_update:
-                        # Upload the file
-                        if self.upload_file(local_file_path, remote_file_path):
-                            file_statuses[remote_file_path] = "copied"
-                        else:
-                            logger.error(
-                                f"Failed to upload file {local_file_path} to {remote_file_path}"
-                            )
-                            file_statuses[remote_file_path] = "error"
-                            success = False
+                        # Add to files to upload
+                        files_to_upload[local_file_path] = remote_file_path
                     else:
-                        file_statuses[remote_file_path] = "kept"
+                        file_statuses[remote_file_path] = "KEPT"
                 else:
-                    # File doesn't exist remotely, upload it
-                    if self.upload_file(local_file_path, remote_file_path):
-                        file_statuses[remote_file_path] = "copied"
-                    else:
-                        logger.error(
-                            f"Failed to upload file {local_file_path} to {remote_file_path}"
-                        )
-                        file_statuses[remote_file_path] = "error"
-                        success = False
+                    # File doesn't exist remotely, add to files to upload
+                    files_to_upload[local_file_path] = remote_file_path
+
+        # Upload files in parallel
+        if files_to_upload:
+            upload_success, upload_results = self.upload_files(files_to_upload)
+            if not upload_success:
+                success = False
+            
+            # Add upload results to file statuses
+            for src, status in upload_results.items():
+                dest = files_to_upload[src]
+                file_statuses[dest] = status
 
         # Handle deletion of files in destination that don't exist in source
         if mode.can_delete_nonexisting():
@@ -771,31 +789,14 @@ class FilesClient:
                 ):
                     full_remote_path = f"{remote_path}/{remote_file_key}"
                     if self.delete_file(full_remote_path):
-                        file_statuses[full_remote_path] = "deleted"
+                        file_statuses[full_remote_path] = "DELETED"
                     else:
                         logger.error(f"Failed to delete file {full_remote_path}")
-                        file_statuses[full_remote_path] = "error"
+                        file_statuses[full_remote_path] = "Error deleting file"
                         success = False
 
         return success, file_statuses
 
-    def delete_file(self, path: str) -> bool:
-        """
-        Delete a file from remote storage.
-        Args:
-            path: Path in the format files:///path
-        Returns:
-            True if deletion was successful, False otherwise
-        """
-        remote_path = self._extract_path_from_url(path)
-
-        response = delete_object.sync_detailed(
-            org_friendly_id=self.organization_id,
-            file_path=remote_path,
-            client=self.client,
-        )
-
-        return response.status_code == 200
 
     def check_health(self) -> bool:
         """
