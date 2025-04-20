@@ -53,8 +53,6 @@ from .file_service.api.default import (
 from .file_service.models.put_object_body import PutObjectBody
 from .file_service.types import File
 
-logger = logging.getLogger(__name__)
-
 # Remote path prefix for file service URLs
 # REMOTE_PATH_PREFIX = "files:///"
 # FILES_URL_PATTERN = re.compile(rf"^{REMOTE_PATH_PREFIX}(?P<path>.*)$")
@@ -217,6 +215,9 @@ class FilesClient:
     base_url: str
     organization_id: str
     client: AuthenticatedClient | Client
+    # Logger used for client logging. Re-assign if you need to override.
+    # We'll generally log errors if expected i/o fails, warnings on retries
+    logger: logging.Logger
     # Function to be called to create a progress callback for multi-file i/o operations.
     # None by default, tqdm for a Jupyter notebook. To turn off set to None after constructor.
     progress_callback_create_func: Callable[[str], Callable[[int, int], None] | None] | None
@@ -238,6 +239,8 @@ class FilesClient:
             token: Authentication token (optional)
             verify_ssl: Whether to verify SSL certificates or path to CA bundle
         """
+
+        self.logger = logging.getLogger(__name__)
 
         self.io_max_retries = 3
         self.io_retry_delay = 0.5
@@ -317,7 +320,7 @@ class FilesClient:
 
             return result
         else:
-            logger.error(f"Failed to list directory {path}: {response.status_code}")
+            self.logger.error(f"Failed to list directory {path}: {response.status_code}")
             response.raise_for_status()
             return {}
 
@@ -336,7 +339,7 @@ class FilesClient:
         try:
             return json.loads(content)
         except json.JSONDecodeError:
-            logger.warning("Could not parse list response as JSON")
+            self.logger.error("Could not parse list response as JSON")
             return []
 
     def _remote_file_exists(self, path: str) -> bool:
@@ -456,6 +459,7 @@ class FilesClient:
         operation_name: str,
         progress_callback: Callable[[int, int], None] | None = None,
     ) -> tuple[bool, dict[str, str]]:
+
         if not _args_list:
             return True, {}
 
@@ -500,8 +504,10 @@ class FilesClient:
                         results[src] = status
                         if not success:
                             all_success = False
+
                     except Exception as e:
                         results[src] = f"{operation_name} failed with error: {str(e)}"
+                        self.logger.error(results[src])
                         all_success = False
                     finally:
                         # Increment counter and call the callback
@@ -549,30 +555,34 @@ class FilesClient:
                 ):
                     if attempt < self.io_max_retries - 1:
                         last_error = f"Attempt {attempt+1} failed with status {response.status_code}"
-                        logger.warning(
+                        self.logger.warning(
                             f"{last_error}, retrying {src} upload in {self.io_retry_delay}s..."
                         )
                         time.sleep(self.io_retry_delay)
                         continue
 
                 # For other status codes, don't retry
-                return False, f"Upload failed with status code: {response.status_code}"
+                last_error = f"Upload failed with status code: {response.status_code}"
+                break                
 
             except (ConnectionError, TimeoutError) as e:
                 # Retry on connection errors
                 if attempt < self.io_max_retries - 1:
                     last_error = f"Connection error on attempt {attempt+1}: {str(e)}"
-                    logger.warning(
+                    self.logger.warning(
                         f"{last_error}, retrying {src} upload in {self.io_retry_delay}s"
                     )
                     time.sleep(self.io_retry_delay)
                     continue
-                return False, f"Upload failed with connection error: {str(e)}"
+                last_error = f"Upload failed with connection error: {str(e)}"
+                break
 
             except Exception as e:
-                return False, f"Upload failed with error: {str(e)}"
+                last_error = f"Upload failed with error: {str(e)}"
+                break
 
         # We've exhausted all retries, return the last error message
+        self.logger.error(last_error)
         return False, last_error
 
     def _download_single_file(
@@ -610,33 +620,34 @@ class FilesClient:
                 ):
                     if attempt < self.io_max_retries - 1:
                         last_error = f"Attempt {attempt+1} failed with status {response.status_code}"
-                        logger.warning(
+                        self.logger.warning(
                             f"{last_error}, retrying {src} download in {self.io_retry_delay}s..."
                         )
                         time.sleep(self.io_retry_delay)
                         continue
 
                 # For other status codes, don't retry
-                return (
-                    False,
-                    f"Download failed with status code: {response.status_code}",
-                )
-
+                last_error = f"Download failed with status code: {response.status_code}"
+                break
+                
             except (ConnectionError, TimeoutError) as e:
                 # Retry on connection errors
                 if attempt < self.io_max_retries - 1:
                     last_error = f"Connection error on attempt {attempt+1}: {str(e)}"
-                    logger.warning(
+                    self.logger.warning(
                         f"{last_error}, retrying {src} download in {self.io_retry_delay}s"
                     )
                     time.sleep(self.io_retry_delay)
                     continue
-                return False, f"Download failed with connection error: {str(e)}"
+                last_error = f"Download failed with connection error: {str(e)}"
+                break
 
             except Exception as e:
-                return False, f"Download failed with error: {str(e)}"
+                last_error = f"Download failed with error: {str(e)}"
+                break
 
         # We've exhausted all retries, return the last error message
+        self.logger.error(last_error)
         return False, last_error
 
     def _delete_single_file(self, path: str) -> tuple[bool, str]:
@@ -662,30 +673,33 @@ class FilesClient:
                 ):
                     if attempt < self.io_max_retries - 1:
                         last_error = f"Attempt {attempt+1} failed with status {response.status_code}"
-                        logger.warning(
+                        self.logger.warning(
                             f"{last_error}, retrying {path} deletion in {self.io_retry_delay}s..."
                         )
                         time.sleep(self.io_retry_delay)
                         continue
-
-                # For other status codes, don't retry
-                return False, f"Delete failed with status code: {response.status_code}"
+                # For other status codes, don't retry                
+                last_error = f"Delete failed with status code: {response.status_code}"
+                break
 
             except (ConnectionError, TimeoutError) as e:
                 # Retry on connection errors
                 if attempt < self.io_max_retries - 1:
                     last_error = f"Connection error on attempt {attempt+1}: {str(e)}"
-                    logger.warning(
+                    self.logger.warning(
                         f"{last_error}, retrying {path} deletion in {self.io_retry_delay}s"
                     )
                     time.sleep(self.io_retry_delay)
                     continue
-                return False, f"Delete failed with connection error: {str(e)}"
+                last_error = f"Delete failed with connection error: {str(e)}"
+                break
 
             except Exception as e:
-                return False, f"Delete failed with error: {str(e)}"
+                last_error = f"Delete failed with error: {str(e)}"
+                break
 
         # We've exhausted all retries, return the last error message
+        self.logger.error(last_error)
         return False, last_error
 
     def get_metadata(self, path: str) -> FileMetadata | None:
@@ -708,7 +722,7 @@ class FilesClient:
             # Extract metadata from response headers and create a FileMetadata object
             return FileMetadata.from_dict(dict(response.headers), key_path=remote_path)
         else:
-            logger.error(f"Failed to get metadata for {path}: {response.status_code}")
+            self.logger.error(f"Failed to get metadata for {path}: {response.status_code}")
             return None
 
     def sync_folder_down(
@@ -733,7 +747,8 @@ class FilesClient:
                   "OK", "DELETED", "KEPT". Othewise the string will contain the error message.
         """
         # Get list of remote files with metadata
-        remote_files_dict = self.list_folder(remote_path)  # todo: add recursive flag
+        # todo: add/figure out recursive flag
+        remote_files_dict = self.list_folder(remote_path)
 
         # Extract the base remote path without the prefix for path comparisons
         base_remote_path = self._extract_path_from_url(remote_path)
@@ -817,7 +832,7 @@ class FilesClient:
                         os.remove(full_local_path)
                         file_statuses[full_local_path] = "DELETED"
                     except Exception as e:
-                        logger.error(f"Failed to delete file {full_local_path}: {e}")
+                        self.logger.error(f"Failed to delete file {full_local_path}: {e}")
                         file_statuses[full_local_path] = (
                             f"Error deleting file: {str(e)}"
                         )
@@ -856,7 +871,9 @@ class FilesClient:
                 remote_path
             )  # todo: add recursive flag
         except Exception as e:
-            logger.warning(f"Could not list remote directory, assuming it's empty: {e}")
+            # MA: TBD - the above won't actually re-throw exception
+            # if we care bount this -- need special list function or parameter
+            self.logger.warning(f"Could not list remote directory, assuming it's empty: {e}")
 
         # Track all file operations
         file_statuses = {}
@@ -964,7 +981,7 @@ class FilesClient:
             # Check if the response indicates the service is healthy
             return response.status_code == 200 and response.parsed is not None
         except Exception as e:
-            logger.error(f"Health check failed: {e}")
+            self.logger.error(f"Health check failed: {e}")
             return False
 
     def check_auth_ok(self) -> bool:
@@ -990,7 +1007,7 @@ class FilesClient:
             # 404 would mean the path doesn't exist, but auth is still valid
             return response.status_code in (200, 404)
         except Exception as e:
-            logger.error(f"Authentication check failed: {e}")
+            self.logger.error(f"Authentication check failed: {e}")
             return False
 
 
