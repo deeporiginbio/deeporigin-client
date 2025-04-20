@@ -29,18 +29,17 @@ Example usage:
     ```
 """
 
+import concurrent.futures
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 import logging
 import os
-import re
-import concurrent.futures
 import time
 
 from deeporigin import auth
-from deeporigin.utils.network import _get_domain_name
 from deeporigin.utils.config import get_value
+from deeporigin.utils.network import _get_domain_name
 
 from .file_service import AuthenticatedClient, Client
 from .file_service.api.default import (
@@ -59,6 +58,11 @@ logger = logging.getLogger(__name__)
 #REMOTE_PATH_PREFIX = "files:///"
 #FILES_URL_PATTERN = re.compile(rf"^{REMOTE_PATH_PREFIX}(?P<path>.*)$")
 REMOTE_PATH_PREFIX = ""
+# The intent of path-prefix was to distinguish between local and remote paths.
+# This is only really useful if multiple destinations were supported by the same
+# API, if this happens we may re-enable this. The down side is that it complicates
+# use; how if we introduce it may (a) report it in all paths as part of list results
+# and/or (b) consider setting it or the whole Client instead of every url.
 
 
 class FolderSyncMode(Enum):
