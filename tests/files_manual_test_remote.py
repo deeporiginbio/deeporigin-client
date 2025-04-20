@@ -25,7 +25,7 @@ import string
 import sys
 import time
 
-from deeporigin.files import FilesClient
+from deeporigin.files import FilesClient, create_files_tqdm_callback
 
 # ==== Configuration ====
 # Define the Base URL or AUTH_TOKEN to override default URL and token the file service API
@@ -387,6 +387,7 @@ def run_tests():
         start_time = time.time()
         success, file_statuses = client.sync_folder_up(
             SYNC_SOURCE_DIR, remote_path = sync_remote_path
+#            progress_callback = create_files_tqdm_callback("Uploading folder")
         )
         end_time = time.time()
         elapsed_time = end_time - start_time
@@ -428,7 +429,8 @@ def run_tests():
         try:
             start_time = time.time()
             success, file_statuses = client.sync_folder_down(
-                remote_path = sync_remote_path, local_path = SYNC_DOWNLOAD_DIR
+                remote_path = sync_remote_path, local_path = SYNC_DOWNLOAD_DIR,
+                progress_callback = create_files_tqdm_callback("Downloading folder")
             )
             end_time = time.time()
             elapsed_time = end_time - start_time

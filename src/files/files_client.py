@@ -36,6 +36,7 @@ from enum import Enum
 import logging
 import os
 import time
+from typing import Callable
 
 from deeporigin import auth
 from deeporigin.utils.config import get_value
@@ -55,8 +56,8 @@ from .file_service.types import File
 logger = logging.getLogger(__name__)
 
 # Remote path prefix for file service URLs
-#REMOTE_PATH_PREFIX = "files:///"
-#FILES_URL_PATTERN = re.compile(rf"^{REMOTE_PATH_PREFIX}(?P<path>.*)$")
+# REMOTE_PATH_PREFIX = "files:///"
+# FILES_URL_PATTERN = re.compile(rf"^{REMOTE_PATH_PREFIX}(?P<path>.*)$")
 REMOTE_PATH_PREFIX = ""
 # The intent of path-prefix was to distinguish between local and remote paths.
 # This is only really useful if multiple destinations were supported by the same
@@ -154,7 +155,7 @@ class FileMetadata:
         # Process each key in the input dictionary, setting matching attributes
         for key, value in data.items():
             key_lower = key.lower()
-            attr_name = mapping.get(key_lower, key)            
+            attr_name = mapping.get(key_lower, key)
 
             if hasattr(instance, attr_name):
                 if attr_name == "size":
@@ -216,6 +217,9 @@ class FilesClient:
     base_url: str
     organization_id: str
     client: AuthenticatedClient | Client
+    # Function to be called to create a progress callback for multi-file i/o operations.
+    # None by default, tqdm for a Jupyter notebook. To turn off set to None after constructor.
+    progress_callback_create_func: Callable[[str], Callable[[int, int], None] | None] | None
     # These control retries for upload and download
     io_max_retries: int
     io_retry_delay: float
@@ -238,6 +242,10 @@ class FilesClient:
         self.io_max_retries = 3
         self.io_retry_delay = 0.5
 
+        self.progress_callback_create_func = None
+        if _is_notebook():
+            self.progress_callback_create_func = create_files_tqdm_callback
+
         if not organization_id:
             self.organization_id = get_value()["organization_id"]
         else:
@@ -255,14 +263,15 @@ class FilesClient:
             base_url=self.base_url, token=token, verify_ssl=verify_ssl
         )
 
-
     def _extract_path_from_url(self, url: str) -> str:
         # This was used in the past to extract the path from the URL, seems unnecessary.
         # match = FILES_URL_PATTERN.match(url)
         # return match.group("path")
         return url
 
-    def list_folder(self, path: str, flag: str | None = None) -> dict[str, FileMetadata]:
+    def list_folder(
+        self, path: str, flag: str | None = None
+    ) -> dict[str, FileMetadata]:
         """
         List files and folders at the specified path. Returned dictionary keys will have
         the full remote path, so the resulting path key can be used directly for download, etc.
@@ -271,7 +280,7 @@ class FilesClient:
             flag: Optional "recursive" flag. TBD: Currently always recursive?
         Returns:
             Dictionary mapping file paths to FileMetadata objects, maintaining the order
-            from the underlying list response. Key string will include the argument 
+            from the underlying list response. Key string will include the argument
             path part; it is not removed.
         """
         remote_path = self._extract_path_from_url(path)
@@ -296,7 +305,7 @@ class FilesClient:
             # Parse the response content as needed
             # This will depend on the actual response format from the API
             raw_files = self._parse_list_response(response.content)
-            
+
             # Create a dictionary with key_path as keys, maintaining order
             result = {}
             for file_data in raw_files:
@@ -305,7 +314,7 @@ class FilesClient:
                 )
                 if metadata.key_path:
                     result[metadata.key_path] = metadata
-            
+
             return result
         else:
             logger.error(f"Failed to list directory {path}: {response.status_code}")
@@ -333,7 +342,7 @@ class FilesClient:
     def _remote_file_exists(self, path: str) -> bool:
         # If we got metadata without an error, the file exists
         try:
-            metadata = self.get_metadata(path)            
+            metadata = self.get_metadata(path)
             return bool(metadata)
         except Exception:
             # If there was an error getting metadata, the file probably doesn't exist
@@ -344,7 +353,7 @@ class FilesClient:
         Upload a file from local path to remote storage. File is overwritten if it exists.
         Args:
             src: Local source path
-            dest: Remote destination path            
+            dest: Remote destination path
         Returns:
             True if upload was successful, False otherwise
         """
@@ -352,7 +361,11 @@ class FilesClient:
         success, _ = self.upload_files({src: dest})
         return success
 
-    def upload_files(self, src_to_dest: dict[str, str]) -> tuple[bool, dict[str, str]]:
+    def upload_files(
+        self,
+        src_to_dest: dict[str, str],
+        progress_callback: Callable[[int, int], None] | None = None,
+    ) -> tuple[bool, dict[str, str]]:
         """
         Upload multiple files from local paths to remote storage paths. Upload is
         done in parallel and may execute out of order.
@@ -363,16 +376,21 @@ class FilesClient:
                 - Boolean indicating if all uploads were successful
                 - Dictionary mapping source paths to status ("OK" or error message)
         """
+        if progress_callback is None and self.progress_callback_create_func:
+            progress_callback = self.progress_callback_create_func("Uploading")
+
         return self._process_files_in_parallel(
-            src_to_dest,
-            self._upload_single_file,
-            "Upload"
+            src_to_dest, self._upload_single_file, "Upload", progress_callback
         )
 
-    def download_files(self, src_to_dest: dict[str, str]) -> tuple[bool, dict[str, str]]:
+    def download_files(
+        self,
+        src_to_dest: dict[str, str],
+        progress_callback: Callable[[int, int], None] | None = None,
+    ) -> tuple[bool, dict[str, str]]:
         """
         Download multiple files from remote storage to local paths. Download is
-        done in parallel and may execute out of order. 
+        done in parallel and may execute out of order.
         Args:
             src_to_dest: Dictionary mapping source file paths to destination paths
         Returns:
@@ -380,12 +398,13 @@ class FilesClient:
                 - Boolean indicating if all downloads were successful
                 - Dictionary mapping source paths to status ("OK" or error message)
         """
+        if progress_callback is None and self.progress_callback_create_func:
+            progress_callback = self.progress_callback_create_func("Downloading")
+
         return self._process_files_in_parallel(
-            src_to_dest,
-            self._download_single_file,
-            "Download"
+            src_to_dest, self._download_single_file, "Download", progress_callback
         )
-    
+
     def download_file(self, src: str, dest: str) -> bool:
         """
         Download a file from remote storage to local path.
@@ -397,19 +416,23 @@ class FilesClient:
         """
         success, _ = self.download_files({src: dest})
         return success
-        
+
     def delete_file(self, path: str) -> bool:
         """
         Delete a file from remote storage.
         Args:
-            path: Path in the format 
+            path: Path in the format
         Returns:
             True if deletion was successful, False otherwise
         """
         success, _ = self.delete_files([path])
         return success
 
-    def delete_files(self, paths: list[str]) -> tuple[bool, dict[str, str]]:
+    def delete_files(
+        self,
+        paths: list[str],
+        progress_callback: Callable[[int, int], None] | None = None,
+    ) -> tuple[bool, dict[str, str]]:
         """
         Delete multiple files from remote storage in parallel.
         Args:
@@ -419,43 +442,57 @@ class FilesClient:
                 - Boolean indicating if all deletions were successful
                 - Dictionary mapping paths to status ("DELETED" or error message)
         """
+        if progress_callback is None and self.progress_callback_create_func:
+            progress_callback = self.progress_callback_create_func("Deleting")
+
         return self._process_files_in_parallel(
-            paths,
-            self._delete_single_file,
-            "Delete"
+            paths, self._delete_single_file, "Delete", progress_callback
         )
 
     def _process_files_in_parallel(
         self,
         _args_list: dict[str, str] | list[str],
         single_file_io_func,
-        operation_name: str
-        ) -> tuple[bool, dict[str, str]]:
-
+        operation_name: str,
+        progress_callback: Callable[[int, int], None] | None = None,
+    ) -> tuple[bool, dict[str, str]]:
         if not _args_list:
             return True, {}
 
         results = {}
         all_success = True
+        total_items = len(_args_list)  # Get total count
+        items_completed = 0  # Initialize counter
+
+        # Determine the iterable based on input type
         args_list = _args_list.items() if isinstance(_args_list, dict) else _args_list
 
-        # For a single file, use the function directly
-        if len(_args_list) == 1:
+        # For a single file, use the function directly (no loop, callback called once)
+        if total_items == 1:
             src_dest_args = next(iter(args_list))
-            src = src_dest_args[0] if isinstance(src_dest_args, tuple) else src_dest_args
+            src = (
+                src_dest_args[0] if isinstance(src_dest_args, tuple) else src_dest_args
+            )
             success, status = single_file_io_func(src_dest_args)
+            items_completed = 1
+            if progress_callback:
+                progress_callback(items_completed, total_items)
             results[src] = status
             return success, results
-        else:            
+        else:
             # For multiple files, use concurrent futures
             with concurrent.futures.ThreadPoolExecutor() as executor:
                 future_to_src = {}
-                
+
                 for src_dest_args in args_list:
                     future = executor.submit(single_file_io_func, src_dest_args)
-                    src = src_dest_args[0] if isinstance(src_dest_args, tuple) else src_dest_args
+                    src = (
+                        src_dest_args[0]
+                        if isinstance(src_dest_args, tuple)
+                        else src_dest_args
+                    )
                     future_to_src[future] = src
-                
+
                 for future in concurrent.futures.as_completed(future_to_src):
                     src = future_to_src[future]
                     try:
@@ -466,20 +503,26 @@ class FilesClient:
                     except Exception as e:
                         results[src] = f"{operation_name} failed with error: {str(e)}"
                         all_success = False
+                    finally:
+                        # Increment counter and call the callback
+                        items_completed += 1
+                        if progress_callback:
+                            progress_callback(items_completed, total_items)
 
         return all_success, results
 
-
-    def _upload_single_file(self, str_to_dest_tuple: tuple[str, str]) -> tuple[bool, str]:
+    def _upload_single_file(
+        self, str_to_dest_tuple: tuple[str, str]
+    ) -> tuple[bool, str]:
         src, dest = str_to_dest_tuple
         if not os.path.exists(src):
-            return False,  f"Source file not found: {src}"
+            return False, f"Source file not found: {src}"
 
         remote_path = self._extract_path_from_url(dest)
         last_error = None
-        
+
         for attempt in range(self.io_max_retries):
-            try:                
+            try:
                 with open(src, "rb") as f:
                     file_obj = File(
                         payload=f,
@@ -498,41 +541,49 @@ class FilesClient:
 
                 if response.status_code == 200:
                     return True, "OK"
-                
+
                 # Determine if we should retry based on status code. 500 codes are server errors.
                 # 429 is rate limit exceeded, 408 is request timeout.
-                if response.status_code in [429, 408] or (500 <= response.status_code < 600):
+                if response.status_code in [429, 408] or (
+                    500 <= response.status_code < 600
+                ):
                     if attempt < self.io_max_retries - 1:
                         last_error = f"Attempt {attempt+1} failed with status {response.status_code}"
-                        logger.warning(f"{last_error}, retrying {src} upload in {self.io_retry_delay}s...")
+                        logger.warning(
+                            f"{last_error}, retrying {src} upload in {self.io_retry_delay}s..."
+                        )
                         time.sleep(self.io_retry_delay)
                         continue
-                
+
                 # For other status codes, don't retry
                 return False, f"Upload failed with status code: {response.status_code}"
-                
+
             except (ConnectionError, TimeoutError) as e:
                 # Retry on connection errors
                 if attempt < self.io_max_retries - 1:
                     last_error = f"Connection error on attempt {attempt+1}: {str(e)}"
-                    logger.warning(f"{last_error}, retrying {src} upload in {self.io_retry_delay}s")
+                    logger.warning(
+                        f"{last_error}, retrying {src} upload in {self.io_retry_delay}s"
+                    )
                     time.sleep(self.io_retry_delay)
                     continue
                 return False, f"Upload failed with connection error: {str(e)}"
-                
+
             except Exception as e:
                 return False, f"Upload failed with error: {str(e)}"
-        
+
         # We've exhausted all retries, return the last error message
         return False, last_error
 
-    def _download_single_file(self, str_to_dest_tuple: tuple[str, str]) -> tuple[bool, str]:
+    def _download_single_file(
+        self, str_to_dest_tuple: tuple[str, str]
+    ) -> tuple[bool, str]:
         src, dest = str_to_dest_tuple
         remote_path = self._extract_path_from_url(src)
         last_error = None
-        
+
         for attempt in range(self.io_max_retries):
-            try:                
+            try:
                 # The get_object API will need to be called differently for file download
                 # vs. directory listing. This implementation assumes that omitting list_type
                 # will result in a file download.
@@ -551,38 +602,47 @@ class FilesClient:
                     with open(dest, "wb") as f:
                         f.write(response.content)
                     return True, "OK"
-                               
+
                 # Determine if we should retry based on status code. 500 codes are server errors.
                 # 429 is rate limit exceeded, 408 is request timeout.
-                if response.status_code in [429, 408] or (500 <= response.status_code < 600):
+                if response.status_code in [429, 408] or (
+                    500 <= response.status_code < 600
+                ):
                     if attempt < self.io_max_retries - 1:
                         last_error = f"Attempt {attempt+1} failed with status {response.status_code}"
-                        logger.warning(f"{last_error}, retrying {src} download in {self.io_retry_delay}s...")
+                        logger.warning(
+                            f"{last_error}, retrying {src} download in {self.io_retry_delay}s..."
+                        )
                         time.sleep(self.io_retry_delay)
                         continue
-                
+
                 # For other status codes, don't retry
-                return False, f"Download failed with status code: {response.status_code}"
-                
+                return (
+                    False,
+                    f"Download failed with status code: {response.status_code}",
+                )
+
             except (ConnectionError, TimeoutError) as e:
                 # Retry on connection errors
                 if attempt < self.io_max_retries - 1:
                     last_error = f"Connection error on attempt {attempt+1}: {str(e)}"
-                    logger.warning(f"{last_error}, retrying {src} download in {self.io_retry_delay}s")
+                    logger.warning(
+                        f"{last_error}, retrying {src} download in {self.io_retry_delay}s"
+                    )
                     time.sleep(self.io_retry_delay)
                     continue
                 return False, f"Download failed with connection error: {str(e)}"
-                
+
             except Exception as e:
                 return False, f"Download failed with error: {str(e)}"
-        
+
         # We've exhausted all retries, return the last error message
         return False, last_error
 
-    def _delete_single_file(self, path : str) -> tuple[bool, str]:        
+    def _delete_single_file(self, path: str) -> tuple[bool, str]:
         remote_path = self._extract_path_from_url(path)
         last_error = None
-        
+
         for attempt in range(self.io_max_retries):
             try:
                 response = delete_object.sync_detailed(
@@ -595,33 +655,38 @@ class FilesClient:
                 # Also treat 404 Not Found as success (idempotent delete)
                 if response.status_code in [200, 204]:
                     return True, "DELETED"
-                
+
                 # Determine if we should retry based on status code
-                if response.status_code in [429, 408] or (500 <= response.status_code < 600):
+                if response.status_code in [429, 408] or (
+                    500 <= response.status_code < 600
+                ):
                     if attempt < self.io_max_retries - 1:
                         last_error = f"Attempt {attempt+1} failed with status {response.status_code}"
-                        logger.warning(f"{last_error}, retrying {path} deletion in {self.io_retry_delay}s...")
+                        logger.warning(
+                            f"{last_error}, retrying {path} deletion in {self.io_retry_delay}s..."
+                        )
                         time.sleep(self.io_retry_delay)
                         continue
-                
+
                 # For other status codes, don't retry
                 return False, f"Delete failed with status code: {response.status_code}"
-                
+
             except (ConnectionError, TimeoutError) as e:
                 # Retry on connection errors
                 if attempt < self.io_max_retries - 1:
                     last_error = f"Connection error on attempt {attempt+1}: {str(e)}"
-                    logger.warning(f"{last_error}, retrying {path} deletion in {self.io_retry_delay}s")
+                    logger.warning(
+                        f"{last_error}, retrying {path} deletion in {self.io_retry_delay}s"
+                    )
                     time.sleep(self.io_retry_delay)
                     continue
                 return False, f"Delete failed with connection error: {str(e)}"
-                
+
             except Exception as e:
                 return False, f"Delete failed with error: {str(e)}"
-        
+
         # We've exhausted all retries, return the last error message
         return False, last_error
-
 
     def get_metadata(self, path: str) -> FileMetadata | None:
         """
@@ -646,12 +711,15 @@ class FilesClient:
             logger.error(f"Failed to get metadata for {path}: {response.status_code}")
             return None
 
-
     def sync_folder_down(
-        self, remote_path: str, local_path: str, mode: FolderSyncMode = FolderSyncMode.REPLACE
+        self,
+        remote_path: str,
+        local_path: str,
+        mode: FolderSyncMode = FolderSyncMode.REPLACE,
+        progress_callback: Callable[[int, int], None] | None = None,
     ) -> tuple[bool, dict[str, str]]:
         """
-        Sync files from remote to local directory. 
+        Sync files from remote to local directory.
         Args:
             remote_path: Remote path on the server
             local_path: Local directory path
@@ -719,10 +787,12 @@ class FilesClient:
 
         # Download files in parallel
         if files_to_download:
-            download_success, download_results = self.download_files(files_to_download)
+            download_success, download_results = self.download_files(
+                files_to_download, progress_callback=progress_callback
+            )
             if not download_success:
                 success = False
-            
+
             # Add download results to file statuses
             for src, status in download_results.items():
                 dest = files_to_download[src]
@@ -748,16 +818,22 @@ class FilesClient:
                         file_statuses[full_local_path] = "DELETED"
                     except Exception as e:
                         logger.error(f"Failed to delete file {full_local_path}: {e}")
-                        file_statuses[full_local_path] = f"Error deleting file: {str(e)}"
+                        file_statuses[full_local_path] = (
+                            f"Error deleting file: {str(e)}"
+                        )
                         success = False
 
         return success, file_statuses
 
     def sync_folder_up(
-        self, local_path: str, remote_path: str, mode: FolderSyncMode = FolderSyncMode.REPLACE
+        self,
+        local_path: str,
+        remote_path: str,
+        mode: FolderSyncMode = FolderSyncMode.REPLACE,
+        progress_callback: Callable[[int, int], None] | None = None,
     ) -> tuple[bool, dict[str, str]]:
         """
-        Sync files from local to remote directory.                    
+        Sync files from local to remote directory.
         Args:
             local_path: Local directory path
             remote_path: Remote path on server
@@ -776,7 +852,9 @@ class FilesClient:
         # Get list of remote files with metadata to compare
         remote_files_dict = {}
         try:
-            remote_files_dict = self.list_folder(remote_path)  # todo: add recursive flag
+            remote_files_dict = self.list_folder(
+                remote_path
+            )  # todo: add recursive flag
         except Exception as e:
             logger.warning(f"Could not list remote directory, assuming it's empty: {e}")
 
@@ -786,7 +864,7 @@ class FilesClient:
 
         # Build a dictionary of files to upload
         files_to_upload = {}
-        local_rel_paths = set() # Initialize set to store relative paths
+        local_rel_paths = set()  # Initialize set to store relative paths
 
         # Process local files
         for root, _, files in os.walk(local_path):
@@ -795,8 +873,8 @@ class FilesClient:
 
                 # Get relative path from the local_path
                 rel_path = os.path.relpath(local_file_path, local_path)
-                local_rel_paths.add(rel_path) # Add for deletion loop below
-                
+                local_rel_paths.add(rel_path)  # Add for deletion loop below
+
                 remote_file_path = f"{remote_path}/{rel_path}"
                 rel_key_path = base_remote_path + "/" + rel_path
 
@@ -830,10 +908,12 @@ class FilesClient:
 
         # Upload files in parallel
         if files_to_upload:
-            upload_success, upload_results = self.upload_files(files_to_upload)
+            upload_success, upload_results = self.upload_files(
+                files_to_upload, progress_callback=progress_callback
+            )
             if not upload_success:
                 success = False
-            
+
             # Add upload results to file statuses
             for src, status in upload_results.items():
                 dest = files_to_upload[src]
@@ -850,17 +930,18 @@ class FilesClient:
                     # Construct the full remote path using the original input format
                     full_remote_path = f"{remote_path}/{remote_rel_path}"
                     files_to_delete_list.append(full_remote_path)
-            
+
             # Delete files in parallel if any exist
             if files_to_delete_list:
-                delete_success, delete_results = self.delete_files(files_to_delete_list)
+                delete_success, delete_results = self.delete_files(
+                    files_to_delete_list, progress_callback=progress_callback
+                )
                 if not delete_success:
-                    success = False                
+                    success = False
                 # Merge deletion results into the main status dictionary
                 file_statuses.update(delete_results)
 
         return success, file_statuses
-
 
     def check_health(self) -> bool:
         """
@@ -911,3 +992,57 @@ class FilesClient:
         except Exception as e:
             logger.error(f"Authentication check failed: {e}")
             return False
+
+
+def _is_notebook() -> bool:
+    """Determine if code is running in a Jupyter notebook environment."""
+    try:
+        shell = get_ipython().__class__.__name__
+        # If shell is either ZMQInteractiveShell (Jupyter notebook or qtconsole)
+        # or TerminalInteractiveShell (IPython terminal), we return True/False
+        if shell == "ZMQInteractiveShell":
+            return True  # Jupyter notebook or qtconsole
+        elif shell == "TerminalInteractiveShell":
+            return False
+    except NameError:
+        pass  # Standard Python interpreter
+    return False
+
+
+def create_files_tqdm_callback(description: str) -> Callable[[int, int], None] | None:
+    """
+    Creates a callback closure to manage a tqdm progress bar, usable to pass to
+    download_files, sync_folder_up, etc. First callback initializes total.
+    """
+    pbar = None
+    try:
+        # Import appropriate tqdm version based for runing in notebook/not.
+        if _is_notebook():
+            from tqdm.notebook import tqdm
+        else:
+            from tqdm.auto import tqdm
+
+        def _callback(completed, total, status=None):
+            nonlocal pbar
+            if total <= 0:
+                return
+            if pbar is None:
+                pbar = tqdm(total=total, desc=description)
+
+            # Update progress count
+            pbar.n = completed
+            # If status information is provided, update the postfix
+            if status:
+                if isinstance(status, str):
+                    pbar.set_postfix_str(status)
+                elif isinstance(status, dict):
+                    pbar.set_postfix(**status)
+
+            pbar.refresh()
+            if completed >= total:
+                pbar.close()
+                pbar = None
+
+        return _callback
+    except ImportError:
+        return None
