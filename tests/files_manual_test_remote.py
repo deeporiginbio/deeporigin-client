@@ -414,6 +414,70 @@ def run_tests():
     except Exception as e:
         print(f"  Sync upload failed with error: {e}")
         sync_upload_success = False
+        
+    # === Test 5B: Test folder creation and deletion ===
+
+    """
+    print_header("Test 5B: Test folder creation and deletion")
+    
+    folder_test_success = True
+    test_folders = [
+        f"{REMOTE_PREFIX}/test_folder/",
+        f"{REMOTE_PREFIX}/test_folder/subfolder1/",
+        f"{REMOTE_PREFIX}/test_folder/subfolder1/subfolder2/"
+    ]
+    
+    # Create folders
+    print_step("Creating test folders")
+    for folder_path in test_folders:
+        try:
+            print(f"  Creating folder: {folder_path}")
+            success = client.create_folder(folder_path)
+            if success:
+                print(f"  ✅ Folder created successfully: {folder_path}")
+                
+                # Verify folder exists using metadata
+                metadata = client.get_metadata(folder_path)
+                if metadata and metadata.is_folder:
+                    print(f"  ✅ Folder verified via metadata: {folder_path}")
+                    print(f"  Content-type: {metadata.content_type}")
+                else:
+                    print(f"  ❌ Folder verification failed: {folder_path}")
+                    folder_test_success = False
+            else:
+                print(f"  ❌ Failed to create folder: {folder_path}")
+                folder_test_success = False
+        except Exception as e:
+            print(f"  ❌ Error creating folder {folder_path}: {e}")
+            folder_test_success = False
+    
+    # List the main test folder to see contents
+    print_step(f"Listing folder: {REMOTE_PREFIX}/test_folder/")
+    print_remote_files(client, f"{REMOTE_PREFIX}/test_folder/")
+    
+    # Delete folders in reverse order (deepest first)
+    print_step("Deleting test folders")
+    for folder_path in reversed(test_folders):
+        try:
+            print(f"  Deleting folder: {folder_path}")
+            success = client.delete_folder(folder_path)
+            if success:
+                print(f"  ✅ Folder deleted successfully: {folder_path}")
+                
+                # Verify folder no longer exists
+                metadata = client.get_metadata(folder_path)
+                if metadata is None:
+                    print(f"  ✅ Folder deletion verified: {folder_path}")
+                else:
+                    print(f"  ❌ Folder still exists after deletion: {folder_path}")
+                    folder_test_success = False
+            else:
+                print(f"  ❌ Failed to delete folder: {folder_path}")
+                folder_test_success = False
+        except Exception as e:
+            print(f"  ❌ Error deleting folder {folder_path}: {e}")
+            folder_test_success = False
+    """
 
     # === Test 6: Test sync_dir (download) ===
     print_header("Test 6: Test sync_dir (download)")
@@ -522,6 +586,7 @@ def run_tests():
     delete_test_result = "FAILED"
     sync_upload_test_result = "FAILED"
     sync_download_test_result = "FAILED"
+    folder_test_result = "FAILED"
 
     # Only mark as PASSED if we have evidence of success
     if upload_success:
@@ -553,6 +618,9 @@ def run_tests():
         # Only check this if sync upload succeeded
         if verification_success:
             sync_download_test_result = "PASSED"
+            
+#   if folder_test_success:
+#       folder_test_result = "PASSED"
 
     # Clean up any existing test data
     if (
@@ -562,6 +630,7 @@ def run_tests():
         and delete_test_result == "PASSED"
         and sync_upload_test_result == "PASSED"
         and sync_download_test_result == "PASSED"
+#        and folder_test_result == "PASSED"
     ):
         if os.path.exists(TEST_ROOT_DIR):
             print_step(f"Removing existing {TEST_ROOT_DIR} directory")
@@ -577,6 +646,7 @@ def run_tests():
     print("4. Delete test:", delete_test_result)
     print("5. Sync upload test:", sync_upload_test_result)
     print("6. Sync download test:", sync_download_test_result)
+ #   print("7. Folder test:", folder_test_result)
 
 
 if __name__ == "__main__":

@@ -33,6 +33,7 @@ import concurrent.futures
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
+#import io
 import logging
 import os
 import time
@@ -69,7 +70,7 @@ class FolderSyncMode(Enum):
     Enum for folder synchronization modes.
     """
 
-    # We don't know if the destination file not present locally was deleted locally or not.
+    # We don't know if the destination file not present locally was deleted remotely or not.
     # This means we can't do "proper" sync, we just have different overwrite modes.
 
     REPLACE = "replace_older"  # replace older files, delete files not present in source
@@ -131,6 +132,22 @@ class FileMetadata:
         "contenttype": "content_type",  # ContentType -> content_type
         "storageclass": "storage_class",  # StorageClass -> storage_c
     }
+
+    @property
+    def is_folder(self) -> bool:
+        """
+        Determine if this object represents a folder.
+        
+        Returns:
+            True if the object appears to be a folder based on:
+            - Path ending with '/'
+            - Content-type being 'application/x-directory'
+        """
+        if self.key_path and self.key_path.endswith('/'):
+            return True
+        if self.content_type == "application/x-directory":
+            return True
+        return False
 
     @classmethod
     def from_dict(
@@ -321,7 +338,7 @@ class FilesClient:
             return result
         else:
             self.logger.error(f"Failed to list directory {path}: {response.status_code}")
-            response.raise_for_status()
+            # response.raise_for_status()  # C
             return {}
 
     def _parse_list_response(self, content: bytes) -> list[dict[str, any]]:
@@ -350,6 +367,75 @@ class FilesClient:
         except Exception:
             # If there was an error getting metadata, the file probably doesn't exist
             return False
+
+    """
+    Folder creation is yet supported by back end well.
+    
+    def create_folder(self, path: str) -> bool:
+        "
+        Create a folder in the remote storage.        
+        In case of S3, should create a zero-byte object with a trailing slash and special
+        content type to represent a folder in object storage.        
+        Args:
+            path: Remote path where to create the folder. Must end with '/'            
+        Returns:
+            True if folder creation was successful, False otherwise
+        "
+        if not path.endswith('/'):
+            error_msg = f"Folder path must end with '/': {path}"
+            self.logger.error(error_msg)
+            raise ValueError(error_msg)
+            
+        remote_path = self._extract_path_from_url(path)
+        
+        try:
+            # Create an empty bytes buffer as a file-like object
+            empty_buffer = io.BytesIO(b"")
+            
+            # Create a File object with the empty buffer
+            empty_file = File(
+                payload=empty_buffer,
+                file_name="",
+                #mime_type="application/x-directory"
+                mime_type = "application/octet-stream"
+            )
+            
+            # Create an empty object with folder content type
+            response = put_object.sync_detailed(
+                org_friendly_id=self.organization_id,
+                file_path=remote_path,
+                client=self.client,
+                # content_type="application/x-directory",  # Set in File object instead
+                body=PutObjectBody(file=empty_file)
+            )
+            
+            if response.status_code == 200:
+                return True
+            else:
+                self.logger.error(f"Failed to create folder {path}: Status code {response.status_code}")
+                return False
+        except Exception as e:
+            self.logger.error(f"Failed to create folder {path}: {e}")
+            return False
+            
+    def delete_folder(self, path: str) -> bool:
+        "
+        Delete a folder from remote storage. This is not recursive and will only 
+        delete the folder itself, not its contents.        
+        Args:
+            path: Path to the folder. Must end with '/'            
+        Returns:
+            True if deletion was successful, False otherwise
+            ValueError: If path does not end with '/'
+        "
+        if not path.endswith('/'):
+            error_msg = f"Folder path must end with '/': {path}"
+            self.logger.error(error_msg)
+            raise ValueError(error_msg)
+            
+        # Use the existing delete_file method as the operation is the same
+        return self._delete_single_file(path)[0]
+    """
 
     def upload_file(self, src: str, dest: str) -> bool:
         """
@@ -706,7 +792,7 @@ class FilesClient:
         """
         Get metadata about a file or directory.
         Args:
-            path: Path in the format files:///path
+            path: Path on the remote server
         Returns:
             FileMetadata object containing the metadata
         """
