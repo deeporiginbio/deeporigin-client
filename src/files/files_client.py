@@ -88,7 +88,7 @@ class FolderSyncMode(Enum):
 class FileMetadata:
     """
     Structured representation of file metadata, similar to S3 metadata.
-    
+
     This class provides a typed interface to file metadata while maintaining
     compatibility with dictionary-based access.
     """
@@ -100,10 +100,10 @@ class FileMetadata:
     size: int | None = None  # Size of file/object in bytes
     storage_class: str | None = None
     content_type: str | None = None
-    
+
     # Store the original dictionary for access to all fields
     raw_dict: dict[str, any] = field(default_factory=dict)
-    
+
     # Mapping between S3/HTTP header names and class attribute names - shared across instances
     # Note: Metadata and list dictionary return different fields, so we have two mappings.
     # For our request content-length is size, but technically may be size of HTTP instead
@@ -151,21 +151,21 @@ class FileMetadata:
         mapping: dict[str, str] = METADATA_HEAD_FIELD_MAPPING,
     ) -> "FileMetadata":
         """
-        Create a FileMetadata instance from a dictionary.        
+        Create a FileMetadata instance from a dictionary.
         Args:
-            data: Dictionary containing metadata fields            
+            data: Dictionary containing metadata fields
         Returns:
             FileMetadata instance with fields populated from the dictionary
         """
         instance = cls()
         instance.raw_dict = data  # Store reference, no need to copy
-        
+
         # Process each key in the input dictionary, setting matching attributes
         for key, value in data.items():
-            key_lower = key.lower()            
+            key_lower = key.lower()
             attr_name = mapping.get(key_lower, key)
-            
-            if hasattr(instance, attr_name):            
+
+            if hasattr(instance, attr_name):
                 if attr_name == "size":
                     try:
                         value = int(value)
@@ -176,7 +176,7 @@ class FileMetadata:
         if key_path:
             instance.key_path = key_path
         return instance
-    
+
     def to_updated_dict(
         self, *, mapping: dict[str, str] = METADATA_HEAD_FIELD_MAPPING
     ) -> dict[str, any]:
@@ -185,9 +185,9 @@ class FileMetadata:
         Maintains original key capitalization.
         Returns:
             Updated copy of the original metadata dictionary
-        """        
+        """
         result = self.raw_dict.copy()
-        
+
         # This assumes _FIELD_MAPPING includes all needed attributes.
         # For each _FIELD_MAPPING entry, if the attribute exists assign it as string.
         # TBD -- may result in repeated keys if there is repeated field mapping
@@ -196,7 +196,7 @@ class FileMetadata:
             if hasattr(self, attr_name) and getattr(self, attr_name) is not None:
                 result[header_key] = str(getattr(self, attr_name))
         return result
-    
+
     def get_last_modified_timestamp(self) -> float | None:
         """
         Get the last_modified field as a timestamp.
@@ -223,7 +223,7 @@ class FilesClient:
 
     # FilesClient instance attributes
     base_url: str
-    organization_id: str   
+    organization_id: str
     client: SchemaApiHttpxClient
     # Logger used for client logging. Re-assign if you need to override.
     # We'll generally log errors if expected i/o fails, warnings on retries
@@ -255,7 +255,7 @@ class FilesClient:
         self.logger = logging.getLogger(__name__)
 
         self.io_max_retries = 3
-        self.io_retry_delay = 0.5
+        self.io_retry_delay = 0.5  # retry after this many seconds
 
         self.progress_callback_create_func = None
         if _is_notebook():
@@ -276,17 +276,18 @@ class FilesClient:
         # TBD: Do we want to still check null token and maybe throw exception?
         #      self.client = AuthenticatedClient(
         #     base_url=self.base_url, token=token, verify_ssl=verify_ssl
-        #)
+        # )
 
         schema_path = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), "file_service/gen_file_openapi.yaml"
-            )
+            os.path.dirname(os.path.abspath(__file__)),
+            "file_service/gen_file_openapi.yaml",
+        )
         # Initialize the simple API client
         self.client = SchemaApiHttpxClient(
             base_url=self.base_url,
             token=token,
             verify_ssl=verify_ssl,
-            schema_path=schema_path
+            schema_path=schema_path,
         )
 
     def _extract_path_from_url(self, url: str) -> str:
@@ -321,7 +322,7 @@ class FilesClient:
         call_args = genapi._get_get_object_kwargs(
             orgFriendlyId=self.organization_id,
             filePath=remote_path,
-            list_type=list_type
+            list_type=list_type,
         )
         response = self.client.httpx_request_and_process(call_args)
 
@@ -622,20 +623,19 @@ class FilesClient:
 
         for attempt in range(self.io_max_retries):
             try:
-
                 with open(src, "rb") as f:
                     file_obj = FilePayload(
                         payload=f,
                         file_name=os.path.basename(src),
                         mime_type="application/octet-stream",
-                    )                    
+                    )
                     # format of expected dictonary from file_obj is
                     # {"file": (file_name, file_content, mime_type) }
 
                     call_args = genapi._get_put_object_kwargs(
                         orgFriendlyId=self.organization_id,
                         filePath=remote_path,
-                        file=file_obj
+                        file=file_obj,
                     )
                     response = self.client.httpx_request_and_process(call_args)
 
@@ -691,10 +691,9 @@ class FilesClient:
                 # TBD: The get_object API will need to be called differently for file download
                 # vs. directory listing. This implementation assumes that omitting list_type
                 # will result in a file download.
-                
+
                 call_args = genapi._get_get_object_kwargs(
-                    orgFriendlyId=self.organization_id,
-                    filePath=remote_path
+                    orgFriendlyId=self.organization_id, filePath=remote_path
                 )
                 response = self.client.httpx_request_and_process(call_args)
                 # list_type=0.0  - wasn't working # Assuming 0.0 means download file
@@ -723,7 +722,9 @@ class FilesClient:
                             continue
 
                     # For other status codes, don't retry
-                    last_error = f"Download failed with status code: {response.status_code}"
+                    last_error = (
+                        f"Download failed with status code: {response.status_code}"
+                    )
                     break
 
             except (ConnectionError, TimeoutError) as e:
@@ -753,10 +754,9 @@ class FilesClient:
         for attempt in range(self.io_max_retries):
             try:
                 call_args = genapi._get_delete_object_kwargs(
-                    orgFriendlyId=self.organization_id,
-                    filePath=remote_path
+                    orgFriendlyId=self.organization_id, filePath=remote_path
                 )
-                response = self.client.httpx_request_and_process(call_args)                
+                response = self.client.httpx_request_and_process(call_args)
 
                 # Successful deletion (200 OK or 204 No Content)
                 # Also treat 404 Not Found as success (idempotent delete)
@@ -809,8 +809,7 @@ class FilesClient:
         remote_path = self._extract_path_from_url(path)
 
         call_args = genapi._get_head_object_kwargs(
-            orgFriendlyId=self.organization_id,
-            filePath=remote_path
+            orgFriendlyId=self.organization_id, filePath=remote_path
         )
         response = self.client.httpx_request_and_process(call_args)
 
@@ -1070,7 +1069,7 @@ class FilesClient:
             True if the service is healthy, False otherwise
         """
         try:
-            response = self.client.httpx_request_and_process(genapi._get_check_kwargs()) 
+            response = self.client.httpx_request_and_process(genapi._get_check_kwargs())
 
             # Check if the response indicates the service is healthy
             return response.status_code == 200 and response.parsed_json is not None
@@ -1092,9 +1091,9 @@ class FilesClient:
             call_args = genapi._get_get_object_kwargs(
                 orgFriendlyId=org_friendly_id,
                 filePath="",
-                list_type=2   # Default list type
+                list_type=2,  # Default list type
             )
-            response = self.client.httpx_request_and_process(call_args)            
+            response = self.client.httpx_request_and_process(call_args)
 
             # If we get a 200 or 404, authentication is working
             # 404 would mean the path doesn't exist, but auth is still valid
