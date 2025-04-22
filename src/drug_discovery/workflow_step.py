@@ -19,7 +19,7 @@ class WorkflowStep:
     """
     _fuse_jobs: bool = False
     parent = None
-    jobs: list[Job] = None
+    jobs: list[Job] | None = None
 
     def __init__(self, parent):
         self.parent = parent
