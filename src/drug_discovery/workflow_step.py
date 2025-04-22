@@ -88,6 +88,7 @@ class WorkflowStep:
 
         else:
             for job in self.jobs:
+                job.sync()
                 job.show()
 
     @beartype
