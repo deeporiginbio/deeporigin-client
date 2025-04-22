@@ -1,8 +1,9 @@
 """A client library for accessing File Service"""
 
-from .client import AuthenticatedClient, Client
+from .schema_api_httpx_client import SchemaApiHttpxClient, FilePayload
 
 __all__ = (
-    "AuthenticatedClient",
-    "Client",
+    "SchemaApiHttpxClient",
+    "FilePayload",
+    "genapi",
 )

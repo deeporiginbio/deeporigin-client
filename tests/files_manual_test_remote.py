@@ -40,7 +40,7 @@ SYNC_SUBFOLDER = os.path.join(SYNC_SOURCE_DIR, "subfolder")
 SYNC_DOWNLOAD_DIR = os.path.join(TEST_ROOT_DIR, "sync_download")
 
 # Remote path prefix (where files will be stored in remote service)
-#REMOTE_PREFIX = "files:///test_files". Prefix not used any more.
+# REMOTE_PREFIX = "files:///test_files". Prefix not used any more.
 REMOTE_PREFIX = "test_files"
 FILE_PREFIX = "td_"  # Prefix for test data files
 
@@ -143,7 +143,7 @@ def print_remote_files(client, remote_path):
         files = client.list_folder(remote_path)
         if files and len(files) > 0:
             print(f"  Found {len(files)} files/directories:")
-            for key_path, file_metadata in files.items():
+            for _, file_metadata in files.items():
                 # Extract relevant information from FileMetadata object
                 name = file_metadata.key_path or "Unknown"
                 size = file_metadata.size or "Unknown"
@@ -386,13 +386,14 @@ def run_tests():
     try:
         start_time = time.time()
         success, file_statuses = client.sync_folder_up(
-            SYNC_SOURCE_DIR, remote_path = sync_remote_path,
-            progress_callback = create_files_tqdm_callback("Uploading folder")
+            SYNC_SOURCE_DIR,
+            remote_path=sync_remote_path,
+            progress_callback=create_files_tqdm_callback("Uploading folder"),
         )
         end_time = time.time()
         elapsed_time = end_time - start_time
         print(f"  Sync upload completed in {elapsed_time:.2f} seconds")
-        
+
         if success:
             print("  Sync upload successful")
             sync_upload_success = True
@@ -414,7 +415,7 @@ def run_tests():
     except Exception as e:
         print(f"  Sync upload failed with error: {e}")
         sync_upload_success = False
-        
+
     # === Test 5B: Test folder creation and deletion ===
 
     """
@@ -493,13 +494,14 @@ def run_tests():
         try:
             start_time = time.time()
             success, file_statuses = client.sync_folder_down(
-                remote_path = sync_remote_path, local_path = SYNC_DOWNLOAD_DIR,
-                progress_callback = create_files_tqdm_callback("Downloading folder")
+                remote_path=sync_remote_path,
+                local_path=SYNC_DOWNLOAD_DIR,
+                progress_callback=create_files_tqdm_callback("Downloading folder"),
             )
             end_time = time.time()
             elapsed_time = end_time - start_time
             print(f"  Sync download completed in {elapsed_time:.2f} seconds")
-            
+
             if success:
                 print("  Sync download successful")
 
@@ -586,7 +588,7 @@ def run_tests():
     delete_test_result = "FAILED"
     sync_upload_test_result = "FAILED"
     sync_download_test_result = "FAILED"
-    folder_test_result = "FAILED"
+    # folder_test_result = "FAILED"
 
     # Only mark as PASSED if we have evidence of success
     if upload_success:
@@ -618,9 +620,9 @@ def run_tests():
         # Only check this if sync upload succeeded
         if verification_success:
             sync_download_test_result = "PASSED"
-            
-#   if folder_test_success:
-#       folder_test_result = "PASSED"
+
+    #   if folder_test_success:
+    #       folder_test_result = "PASSED"
 
     # Clean up any existing test data
     if (
@@ -630,7 +632,7 @@ def run_tests():
         and delete_test_result == "PASSED"
         and sync_upload_test_result == "PASSED"
         and sync_download_test_result == "PASSED"
-#        and folder_test_result == "PASSED"
+        #        and folder_test_result == "PASSED"
     ):
         if os.path.exists(TEST_ROOT_DIR):
             print_step(f"Removing existing {TEST_ROOT_DIR} directory")
@@ -646,7 +648,9 @@ def run_tests():
     print("4. Delete test:", delete_test_result)
     print("5. Sync upload test:", sync_upload_test_result)
     print("6. Sync download test:", sync_download_test_result)
- #   print("7. Folder test:", folder_test_result)
+
+
+#   print("7. Folder test:", folder_test_result)
 
 
 if __name__ == "__main__":
