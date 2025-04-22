@@ -28,6 +28,10 @@ class WorkflowStep:
     def show_jobs(self, summary: Optional[bool] = None):
         """Show the jobs for this workflow step."""
 
+        if self.jobs is None:
+            print("No jobs to show")
+            return
+
         if len(self.jobs) > 5 and summary is None:
             summary = True
         else:
