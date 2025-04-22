@@ -65,7 +65,7 @@ class ABFE(WorkflowStep):
 
         df = self.get_results()
 
-        if len(df) == 0:
+        if df is None or len(df) == 0:
             return
 
         # convert SMILES to aligned images
@@ -136,6 +136,9 @@ class ABFE(WorkflowStep):
         if len(ligand_ids) == 0:
             print("All requested ligands have already been run.")
             return
+
+        if self.jobs is None:
+            self.jobs = []
 
         for ligand_id in ligand_ids:
             job_id = utils._start_tool_run(

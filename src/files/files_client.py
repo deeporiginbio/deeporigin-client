@@ -43,8 +43,9 @@ from .file_service.api.default import (
     get_object,
     head_object,
     put_object,
-    # sync_objects,
 )
+
+# sync_objects,
 from .file_service.models.put_object_body import PutObjectBody
 from .file_service.types import File
 
