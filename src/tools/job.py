@@ -94,9 +94,19 @@ class Job:
         env = Environment(loader=FileSystemLoader(str(template_dir)))
         template = env.get_template("job.html")
 
+        try:
+            status_html = self._viz_func(self)
+        except Exception:
+            status_html = "No visualization function provided."
+
+        try:
+            card_title = self._name_func(self)
+        except Exception:
+            card_title = "No name function provided."
+
         # Prepare template variables
         template_vars = {
-            "status_html": self._viz_func(self),
+            "status_html": status_html,
             "last_updated": time.strftime("%Y-%m-%d %H:%M:%S"),
             "outputs_json": json.dumps(
                 [attribute.userOutputs for attribute in self._attributes], indent=2
@@ -107,7 +117,7 @@ class Job:
             "job_ids": self._ids,
             "execution_ids": self._execution_ids,
             "statuses": self._status,
-            "card_title": self._name_func(self),
+            "card_title": card_title,
             "unique_id": str(uuid.uuid4()),
         }
 
@@ -217,17 +227,8 @@ class Job:
         Returns:
             HTML string representing the job object.
         """
-        if self._viz_func is not None:
-            return self._render_job_view()
-        else:
-            return f"""
-            <div style="border: 1px solid #ccc; padding: 10px; border-radius: 5px;">
-                <h3>Job: {self.name}</h3>
-                <p>Number of IDs: {len(self._ids)}</p>
-                <p>Status: {self._status}</p>
-                <p>Progress Reports: {self._progress_reports}</p>
-            </div>
-            """
+
+        return self._render_job_view()
 
     def cancel(self):
         """Cancel all jobs being tracked by this instance.

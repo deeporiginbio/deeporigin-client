@@ -389,7 +389,7 @@ class Complex:
             )
         )
 
-        df = df[self._hash == df[utils.COL_COMPLEX_HASH]]
+        df = df[df[utils.COL_PROTEIN] == self.protein._do_id]
 
         if ligand_ids is not None:
             df = df[df[utils.COL_LIGAND1].isin(ligand_ids)]

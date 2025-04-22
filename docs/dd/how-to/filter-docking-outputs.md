@@ -30,34 +30,16 @@ The filtered dataframe now only has ligands that matches the required criterion.
 
 
 
-## Filter SDF by SMILES strings
+## Filter Ligands by SMILES strings
 
 We can create a new SDF file with only these ligands using:
 
 ```python
-from deeporigin.drug_discovery import chemistry
+from deeporigin.drug_discovery import Ligand
 
-chemistry.filter_sdf_by_smiles(
-    input_sdf_file="poses.sdf",
-    output_sdf_file="filtered_ligands.sdf",
-    keep_only_smiles=df["SMILES"],
-)
+ligands = Ligand.from_sdf("..path/to/poses.sdf") # from docking 
+
+smiles_strings = df["SMILES"]
+
+ligands = [ligand for ligand in ligands if ligand.properties["SMILES"] in smiles_strings]
 ```
-
-We can visualize these ligands using:
-
-```python
-from deeporigin.drug_discovery import chemistry
-
-chemistry.show_molecules_in_sdf_file("filtered_ligands.sdf")
-```
-
-A visualization similar to the following will be shown:
-
-<iframe 
-    src="./brd-ligands.html" 
-    width="100%" 
-    height="650" 
-    style="border:none;"
-    title="Ligands visualization"
-></iframe>
