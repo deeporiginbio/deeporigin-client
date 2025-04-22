@@ -65,7 +65,7 @@ class ABFE(WorkflowStep):
 
         df = self.get_results()
 
-        if len(df) == 0:
+        if df is None or len(df) == 0:
             return
 
         # convert SMILES to aligned images
@@ -137,6 +137,9 @@ class ABFE(WorkflowStep):
             print("All requested ligands have already been run.")
             return
 
+        if self.jobs is None:
+            self.jobs = []
+
         for ligand_id in ligand_ids:
             job_id = utils._start_tool_run(
                 protein_id=self.parent.protein._do_id,
@@ -152,19 +155,18 @@ class ABFE(WorkflowStep):
             job._viz_func = self._render_progress
             job._name_func = self._name_job
 
+            job.sync()
+
             self.jobs.append(job)
 
-    @beartype
-    def show_trajectory(
-        self,
-        ligand_id: str,
-        step: Literal["md", "binding"],
-    ):
-        """Show the system trajectory FEP run.
+    def download_data_dir(self, ligand_id: str) -> str:
+        """Download the data directory for a given ligand ID.
 
         Args:
-            ligand_id (str): The ID of the ligand to show the trajectory for.
-            step (Literal["md", "abfe"]): The step to show the trajectory for.
+            ligand_id (str): The ID of the ligand to download the data directory for.
+
+        Returns:
+            str: The path to the data directory.
         """
 
         valid_ids = [ligand._do_id for ligand in self.parent.ligands]
@@ -198,17 +200,55 @@ class ABFE(WorkflowStep):
             with zipfile.ZipFile(file_path, "r") as zip_ref:
                 zip_ref.extractall(dir_path)
 
+        return dir_path
+
+    @beartype
+    def show_trajectory(
+        self,
+        *,
+        ligand_id: str,
+        step: Literal["md", "binding"],
+        window: int = 1,
+    ):
+        """Show the system trajectory FEP run.
+
+        Args:
+            ligand_id (str): The ID of the ligand to show the trajectory for.
+            step (Literal["md", "abfe"]): The step to show the trajectory for.
+            window (int, optional): The window number to show the trajectory for. Defaults to 1.
+        """
+
+        dir_path = self.download_data_dir(ligand_id)
+
         pdb_file = dir_path / "execution/protein/ligand/systems/complex/complex.pdb"
 
         if step == "binding":
+            # Check for valid windows
+            binding_path = dir_path / "execution/protein/ligand/binding/binding"
+            if not binding_path.exists():
+                raise DeepOriginException("Binding directory not found")
+
+            # Get all window directories
+            window_dirs = [
+                d
+                for d in binding_path.iterdir()
+                if d.is_dir() and d.name.startswith("window_")
+            ]
+            valid_windows = [int(d.name.split("_")[1]) for d in window_dirs]
+
+            if window not in valid_windows:
+                raise DeepOriginException(
+                    f"Invalid window number: {window}. Valid windows are: {sorted(valid_windows)}"
+                )
+
             xtc_file = (
                 dir_path
-                / "execution/protein/ligand/binding/binding/window_1/Prod_1/_allatom_trajectory_40ps.xtc"
+                / f"execution/protein/ligand/binding/binding/window_{window}/Prod_1/_allatom_trajectory_40ps.xtc"
             )
         else:
             xtc_file = (
                 dir_path
-                / "execution/protein/ligand/simple_md/md/prod/_allatom_trajectory_40ps.xtc"
+                / "execution/protein/ligand/simple_md/simple_md/prod/_allatom_trajectory_40ps.xtc"
             )
 
         from deeporigin_molstar.src.viewers import ProteinViewer
@@ -238,42 +278,47 @@ class ABFE(WorkflowStep):
         if len(job._progress_reports) == 0:
             return {step: "NotStarted" for step in steps}
 
-        data = job._progress_reports[0]
+        try:
+            data = job._progress_reports[0]
 
-        if data is None:
-            progress = {step: "NotStarted" for step in steps}
-            progress["init"] = "Running"
-            return progress
-        else:
-            data = json.loads(data)
-
-        status_value = job._status[0]
-
-        # If the overall status is Succeeded, return a dictionary with every key set to "Succeeded".
-        if status_value == "Succeeded":
-            return {step: "Succeeded" for step in steps}
-
-        current_step = data["run_name"]
-
-        # Validate the input step
-        if current_step not in steps:
-            raise ValueError(
-                f"Invalid process step provided: {current_step}. "
-                f"Valid steps are: {', '.join(steps)}."
-            )
-
-        progress = {}
-        for step in steps:
-            if step == current_step:
-                progress[step] = "Running"
-                # Once we hit the current step, stop processing further steps.
-                break
+            if data is None:
+                progress = {step: "NotStarted" for step in steps}
+                progress["init"] = "Running"
+                return progress
             else:
-                progress[step] = "Succeeded"
+                data = json.loads(data)
 
-        # if the job failed, mark the step that is running as failed
-        if job._status[0] == "Failed":
-            progress[current_step] = "Failed"
+            status_value = job._status[0]
+
+            # If the overall status is Succeeded, return a dictionary with every key set to "Succeeded".
+            if status_value == "Succeeded":
+                return {step: "Succeeded" for step in steps}
+
+            current_step = data["run_name"]
+
+            # Validate the input step
+            if current_step not in steps:
+                raise ValueError(
+                    f"Invalid process step provided: {current_step}. "
+                    f"Valid steps are: {', '.join(steps)}."
+                )
+
+            progress = {}
+            for step in steps:
+                if step == current_step:
+                    progress[step] = "Running"
+                    # Once we hit the current step, stop processing further steps.
+                    break
+                else:
+                    progress[step] = "Succeeded"
+
+            # if the job failed, mark the step that is running as failed
+            if job._status[0] == "Failed":
+                progress[current_step] = "Failed"
+
+        except Exception:
+            progress = {step: "Indeterminate" for step in steps}
+            progress["init"] = "Indeterminate"
 
         return progress
 
