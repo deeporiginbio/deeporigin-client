@@ -11,7 +11,6 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
-from deeporigin.data_hub import api
 from deeporigin.drug_discovery import chemistry as chem
 from deeporigin.drug_discovery import utils
 from deeporigin.drug_discovery.structures.ligand import ligands_to_dataframe
@@ -19,8 +18,6 @@ from deeporigin.drug_discovery.structures.pocket import Pocket
 from deeporigin.drug_discovery.workflow_step import WorkflowStep
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.tools.job import Job
-from deeporigin.tools.utils import query_run_statuses
-from deeporigin.utils.core import hash_strings
 
 Number = float | int
 
@@ -179,22 +176,58 @@ class Docking(WorkflowStep):
             box_size = [box_size, box_size, box_size]
             pocket_center = pocket.get_center().tolist()
 
-        df = pd.DataFrame(
-            api.get_dataframe(
-                utils.DB_DOCKING,
-                return_type="dict",
-                use_file_names=False,
-            )
+        smiles_strings = [ligand.smiles for ligand in self.parent.ligands]
+
+        print(f"Docking {len(smiles_strings)} ligands...")
+
+        filter = {
+            "tool": {
+                "toolManifest": {
+                    "key": "deeporigin.bulk-docking",
+                },
+            }
+        }
+        from deeporigin.platform import tools
+
+        response = tools.get_tool_executions(
+            org_friendly_id="tools-test",
+            filter=filter,
+            page_size=10000,
+        )
+        jobs = response["data"]
+        # remove jobs that are failed or cancelled
+        jobs = [
+            job for job in jobs if job.attributes.status not in ["Failed", "Cancelled"]
+        ]
+
+        # remove jobs that have no metadata
+        jobs = [job for job in jobs if job.attributes.metadata is not None]
+
+        # remove jobs that have no metadata about protein id
+        jobs = [job for job in jobs if "protein_id" in job.attributes.metadata.keys()]
+
+        # remove jobs that don't match this protein
+        jobs = [
+            job
+            for job in jobs
+            if job.attributes.metadata.protein_id != self.parent.protein._do_id
+        ]
+
+        # TODO remove jobs based on box size and pocket center
+
+        all_smiles = []
+        for job in jobs:
+            this_smiles = job.attributes.userInputs.smiles_list
+            all_smiles.extend(this_smiles)
+
+        smiles_strings = set(smiles_strings) - set(all_smiles)
+        smiles_strings = list(smiles_strings)
+
+        print(
+            f"Docking {len(smiles_strings)} ligands, after filtering out already docked ligands..."
         )
 
-        df = df[self.parent._hash == df[utils.COL_COMPLEX_HASH]]
-
-        # remove failed runs
-        statuses = query_run_statuses(df["JobID"].tolist())
-        df["Status"] = df["JobID"].replace(statuses)
-        df = df["Failed" != df["Status"]]
-
-        smiles_strings = [ligand.smiles for ligand in self.parent.ligands]
+        # TODO -- make a new list of smiles_list where we remove already docked ligands
 
         chunks = list(more_itertools.chunked(smiles_strings, batch_size))
         job_ids = []
@@ -205,12 +238,6 @@ class Docking(WorkflowStep):
                 pocket_center=list(pocket_center),
                 smiles_list=chunk,
             )
-
-            smiles_hash = hash_strings(params["smiles_list"])
-
-            if smiles_hash in df[utils.COL_SMILES_HASH].tolist():
-                print("Skipping this tranche because this has already been run...")
-                return None
 
             return utils._start_tool_run(
                 params=params,

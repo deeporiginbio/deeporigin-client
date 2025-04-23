@@ -5,11 +5,11 @@ The ABFE object instantiated here is contained in the Complex class is meant to 
 import json
 import os
 import pathlib
-from typing import Literal, Optional
 import zipfile
+from typing import Literal, Optional
 
-from beartype import beartype
 import pandas as pd
+from beartype import beartype
 
 from deeporigin.data_hub import api
 from deeporigin.drug_discovery import chemistry as chem
