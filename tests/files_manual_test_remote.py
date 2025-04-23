@@ -19,16 +19,13 @@ and recreated to ensure a clean test environment.
 
 import hashlib
 import os
-from pathlib import Path
 import random
 import shutil
 import string
 import sys
-import tempfile
 import time
-from typing import Any, Dict, List
 
-from deeporigin.files import FilesClient
+from deeporigin.files import FilesClient, create_files_tqdm_callback
 
 # ==== Configuration ====
 # Define the Base URL or AUTH_TOKEN to override default URL and token the file service API
@@ -43,7 +40,8 @@ SYNC_SUBFOLDER = os.path.join(SYNC_SOURCE_DIR, "subfolder")
 SYNC_DOWNLOAD_DIR = os.path.join(TEST_ROOT_DIR, "sync_download")
 
 # Remote path prefix (where files will be stored in remote service)
-REMOTE_PREFIX = "files:///test_files"
+# REMOTE_PREFIX = "files:///test_files". Prefix not used any more.
+REMOTE_PREFIX = "test_files"
 FILE_PREFIX = "td_"  # Prefix for test data files
 
 # Number of files to create
@@ -142,16 +140,14 @@ def print_remote_files(client, remote_path):
     print_step(f"Listing files at {remote_path}")
 
     try:
-        files = client.list_dir(remote_path)
+        files = client.list_folder(remote_path)
         if files and len(files) > 0:
             print(f"  Found {len(files)} files/directories:")
-            for file_info in files:
-                # Extract relevant information from file_info
-                # Adjust these fields based on the actual structure returned by list_dir
-                name = file_info.get("Key", "Unknown")
-                size = file_info.get("Size", "Unknown")
-                # last_modified = file_info.get("LastModified", "Unknown")
-                file_type = "Directory" if file_info.get("is_dir", False) else "File"
+            for _, file_metadata in files.items():
+                # Extract relevant information from FileMetadata object
+                name = file_metadata.key_path or "Unknown"
+                size = file_metadata.size or "Unknown"
+                file_type = "Directory" if name.endswith("/") else "File"
 
                 print(f"  - {name} ({file_type}, {size} bytes)")
         else:
@@ -169,7 +165,7 @@ def run_tests():
     base_url = globals().get("API_BASE_URL")  # return none if not defined
     try:
         client = FilesClient(base_url, token=globals().get("AUTH_TOKEN"))
-        base_url = client.get_base_url()
+        base_url = client.base_url
 
         if not client.check_health():
             print("❌ File service health check failed")
@@ -240,9 +236,10 @@ def run_tests():
         print_step(f"Uploading {local_path} to {remote_path}")
 
         try:
-            success = client.upload_file(
-                src=local_path, dest=remote_path, overwrite=True
-            )
+            success = client.upload_file(src=local_path, dest=remote_path)
+            metadata = client.get_metadata(remote_path)
+            # print(f"  Metadata: {metadata}")
+
             if success:
                 print("  Upload successful")
                 file_info["uploaded"] = True
@@ -272,23 +269,20 @@ def run_tests():
             try:
                 metadata = client.get_metadata(remote_path)
                 if metadata:
-                    print(f"  Metadata retrieved: {metadata}")
+                    # Print the metadata using both object attributes and raw dictionary
+                    print(
+                        f"  Metadata as object: KeyPath={metadata.key_path}, Size={metadata.size}"
+                    )
+                    #  print(f"  Raw metadata dictionary: {metadata.get_dict()}")
 
-                    # Try to extract file size from metadata
-                    # This depends on the actual API response format
-                    file_size = None
-                    if "content-length" in metadata:
-                        file_size = int(metadata["content-length"])
-                    elif "Content-Length" in metadata:
-                        file_size = int(metadata["Content-Length"])
-
-                    if file_size is not None:
-                        if file_size == expected_size:
-                            print(f"  Size matches: {file_size} bytes")
+                    # Verify file size
+                    if metadata.size is not None:
+                        if metadata.size == expected_size:
+                            print(f"  Size matches: {metadata.size} bytes")
                             file_info["size_verified"] = True
                         else:
                             print(
-                                f"  Size mismatch: expected {expected_size}, got {file_size}"
+                                f"  Size mismatch: expected {expected_size}, got {metadata.size}"
                             )
                             file_info["size_verified"] = False
                     else:
@@ -363,7 +357,7 @@ def run_tests():
                 file_to_delete["deleted"] = True
 
                 # Verify deletion by trying to get metadata
-                print_step(f"Verifying deletion by checking metadata")
+                print_step("Verifying deletion by checking metadata")
                 try:
                     metadata = client.get_metadata(remote_path)
                     if metadata:
@@ -390,10 +384,24 @@ def run_tests():
     print_step(f"Syncing {SYNC_SOURCE_DIR} to {sync_remote_path}")
 
     try:
-        success = client.sync_dir(src=SYNC_SOURCE_DIR, dst=sync_remote_path)
+        start_time = time.time()
+        success, file_statuses = client.sync_folder_up(
+            SYNC_SOURCE_DIR,
+            remote_path=sync_remote_path,
+            progress_callback=create_files_tqdm_callback("Uploading folder"),
+        )
+        end_time = time.time()
+        elapsed_time = end_time - start_time
+        print(f"  Sync upload completed in {elapsed_time:.2f} seconds")
+
         if success:
             print("  Sync upload successful")
             sync_upload_success = True
+
+            # Print file statuses
+            print_step("File operation statuses:")
+            for file_path, status in file_statuses.items():
+                print(f"  {file_path}: {status}")
 
             # List remote files after successful sync
             print_remote_files(client, sync_remote_path)
@@ -408,6 +416,70 @@ def run_tests():
         print(f"  Sync upload failed with error: {e}")
         sync_upload_success = False
 
+    # === Test 5B: Test folder creation and deletion ===
+
+    """
+    print_header("Test 5B: Test folder creation and deletion")
+    
+    folder_test_success = True
+    test_folders = [
+        f"{REMOTE_PREFIX}/test_folder/",
+        f"{REMOTE_PREFIX}/test_folder/subfolder1/",
+        f"{REMOTE_PREFIX}/test_folder/subfolder1/subfolder2/"
+    ]
+    
+    # Create folders
+    print_step("Creating test folders")
+    for folder_path in test_folders:
+        try:
+            print(f"  Creating folder: {folder_path}")
+            success = client.create_folder(folder_path)
+            if success:
+                print(f"  ✅ Folder created successfully: {folder_path}")
+                
+                # Verify folder exists using metadata
+                metadata = client.get_metadata(folder_path)
+                if metadata and metadata.is_folder:
+                    print(f"  ✅ Folder verified via metadata: {folder_path}")
+                    print(f"  Content-type: {metadata.content_type}")
+                else:
+                    print(f"  ❌ Folder verification failed: {folder_path}")
+                    folder_test_success = False
+            else:
+                print(f"  ❌ Failed to create folder: {folder_path}")
+                folder_test_success = False
+        except Exception as e:
+            print(f"  ❌ Error creating folder {folder_path}: {e}")
+            folder_test_success = False
+    
+    # List the main test folder to see contents
+    print_step(f"Listing folder: {REMOTE_PREFIX}/test_folder/")
+    print_remote_files(client, f"{REMOTE_PREFIX}/test_folder/")
+    
+    # Delete folders in reverse order (deepest first)
+    print_step("Deleting test folders")
+    for folder_path in reversed(test_folders):
+        try:
+            print(f"  Deleting folder: {folder_path}")
+            success = client.delete_folder(folder_path)
+            if success:
+                print(f"  ✅ Folder deleted successfully: {folder_path}")
+                
+                # Verify folder no longer exists
+                metadata = client.get_metadata(folder_path)
+                if metadata is None:
+                    print(f"  ✅ Folder deletion verified: {folder_path}")
+                else:
+                    print(f"  ❌ Folder still exists after deletion: {folder_path}")
+                    folder_test_success = False
+            else:
+                print(f"  ❌ Failed to delete folder: {folder_path}")
+                folder_test_success = False
+        except Exception as e:
+            print(f"  ❌ Error deleting folder {folder_path}: {e}")
+            folder_test_success = False
+    """
+
     # === Test 6: Test sync_dir (download) ===
     print_header("Test 6: Test sync_dir (download)")
 
@@ -420,9 +492,23 @@ def run_tests():
         print_step(f"Syncing {sync_remote_path} to {SYNC_DOWNLOAD_DIR}")
 
         try:
-            success = client.sync_dir(src=sync_remote_path, dst=SYNC_DOWNLOAD_DIR)
+            start_time = time.time()
+            success, file_statuses = client.sync_folder_down(
+                remote_path=sync_remote_path,
+                local_path=SYNC_DOWNLOAD_DIR,
+                progress_callback=create_files_tqdm_callback("Downloading folder"),
+            )
+            end_time = time.time()
+            elapsed_time = end_time - start_time
+            print(f"  Sync download completed in {elapsed_time:.2f} seconds")
+
             if success:
                 print("  Sync download successful")
+
+                # Print file statuses
+                print_step("File operation statuses:")
+                for file_path, status in file_statuses.items():
+                    print(f"  {file_path}: {status}")
 
                 # Verify content integrity for a sample of files
                 print_step("Verifying content integrity of synced files")
@@ -502,6 +588,7 @@ def run_tests():
     delete_test_result = "FAILED"
     sync_upload_test_result = "FAILED"
     sync_download_test_result = "FAILED"
+    # folder_test_result = "FAILED"
 
     # Only mark as PASSED if we have evidence of success
     if upload_success:
@@ -534,6 +621,9 @@ def run_tests():
         if verification_success:
             sync_download_test_result = "PASSED"
 
+    #   if folder_test_success:
+    #       folder_test_result = "PASSED"
+
     # Clean up any existing test data
     if (
         upload_test_result == "PASSED"
@@ -542,6 +632,7 @@ def run_tests():
         and delete_test_result == "PASSED"
         and sync_upload_test_result == "PASSED"
         and sync_download_test_result == "PASSED"
+        #        and folder_test_result == "PASSED"
     ):
         if os.path.exists(TEST_ROOT_DIR):
             print_step(f"Removing existing {TEST_ROOT_DIR} directory")
@@ -557,6 +648,9 @@ def run_tests():
     print("4. Delete test:", delete_test_result)
     print("5. Sync upload test:", sync_upload_test_result)
     print("6. Sync download test:", sync_download_test_result)
+
+
+#   print("7. Folder test:", folder_test_result)
 
 
 if __name__ == "__main__":
