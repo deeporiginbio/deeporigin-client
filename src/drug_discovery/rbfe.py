@@ -45,6 +45,23 @@ class RBFE(WorkflowStep):
 
         return df
 
+    def _connect(self):
+        """connect to datahub and fetch Job IDs for this protein and ligand"""
+        
+        # fetch from ABFE first
+        df = pd.DataFrame(
+            api.get_dataframe(
+                "RBFE",
+                return_type="dict",
+            )
+        )
+        df = df[df["Protein"] == self.parent.protein._do_id]
+        ligand_ids = [ligand._do_id for ligand in self.parent.ligands]
+        # Filter rows where both Ligand1 and Ligand2 exist in ligand_ids
+        df = df[df["Ligand1"].isin(ligand_ids) & df["Ligand2"].isin(ligand_ids)]
+        job_ids = df[utils.COL_JOBID].tolist()
+        self._make_jobs_from_ids(job_ids)
+
     def show_results(self):
         """Show RBFE results in a dataframe.
 

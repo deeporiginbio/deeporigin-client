@@ -285,38 +285,11 @@ class Complex:
         else:
             self.protein._do_id = matching_indices[0]
 
-        # fetch all relevant jobIDs
-        # fetch from ABFE first
-        df = pd.DataFrame(
-            api.get_dataframe(
-                "ABFE",
-                return_type="dict",
-            )
-        )
-        df = df[df["Protein"] == self.protein._do_id]
-        ligand_ids = [ligand._do_id for ligand in self.ligands]
-        df = df[df["Ligand1"].isin(ligand_ids)]
-        job_ids = df[utils.COL_JOBID].tolist()
-        self.abfe._make_jobs_from_ids(job_ids)
 
         for tool in list(get_args(utils.VALID_TOOLS)):
-            if tool == "ABFE":
-                continue
 
-            # TODO remove this and have tool sepecific code here
-
-            df = pd.DataFrame(
-                api.get_dataframe(
-                    tool,
-                    return_type="dict",
-                )
-            )
-            df = df[df["ComplexHash"] == self._hash]
-            job_ids = df[utils.COL_JOBID].tolist()
-
-            # now that we have job IDs, construct Job object from them
             tool_instance = getattr(self, tool.lower())
-            tool_instance._make_jobs_from_ids(job_ids)
+            tool_instance._connect()
 
     def _repr_pretty_(self, p, cycle):
         """pretty print a Docking object"""

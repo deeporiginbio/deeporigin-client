@@ -128,6 +128,73 @@ class Docking(WorkflowStep):
 
         chem.merge_sdf_files(files, output_sdf_file)
 
+    def _connect(self):
+        """fetch job IDs for this protein from DB"""
+        
+        jobs = self._get_jobs()
+        job_ids = [job.id for job in jobs]
+        self._make_jobs_from_ids(job_ids)
+
+    def _get_jobs(self, *, pocket_center=None, box_size=None,)->list:
+        """get all job IDs for this protein"""
+
+        filter = {
+            "tool": {
+                "toolManifest": {
+                    "key": "deeporigin.bulk-docking",
+                },
+            }
+        }
+        from deeporigin.platform import tools
+        from deeporigin.config import get_value
+
+
+        response = tools.get_tool_executions(
+            org_friendly_id=get_value()["organization_id"],
+            filter=filter,
+            page_size=10000,
+        )
+        jobs = response["data"]
+        # remove jobs that are failed or cancelled
+        jobs = [
+            job for job in jobs if job.attributes.status not in ["Failed", "Cancelled"]
+        ]
+
+        # remove jobs that have no metadata
+        jobs = [job for job in jobs if job.attributes.metadata is not None]
+
+        # remove jobs that have no metadata about protein id
+        jobs = [job for job in jobs if "protein_id" in job.attributes.metadata.keys()]
+
+        # remove jobs that don't match this protein
+        jobs = [
+            job
+            for job in jobs
+            if job.attributes.metadata.protein_id == self.parent.protein._do_id
+        ]
+
+        if pocket_center is not None:
+            import numpy as np
+            jobs = [
+                job
+                for job in jobs
+                if bool(
+                    np.all(np.isclose(pocket_center, job.attributes.userInputs.pocket_center))
+                )
+            ]
+
+        if box_size is not None:
+
+            jobs = [
+                job
+                for job in jobs
+                if bool(np.all(np.isclose(box_size, job.attributes.userInputs.box_size)))
+            ]
+
+        return jobs
+
+
+
     @beartype
     def run(
         self,
@@ -180,54 +247,27 @@ class Docking(WorkflowStep):
 
         print(f"Docking {len(smiles_strings)} ligands...")
 
-        filter = {
-            "tool": {
-                "toolManifest": {
-                    "key": "deeporigin.bulk-docking",
-                },
-            }
-        }
-        from deeporigin.platform import tools
+    
+        jobs = self._get_jobs(pocket_center=pocket_center, box_size=box_size)
 
-        response = tools.get_tool_executions(
-            org_friendly_id="tools-test",
-            filter=filter,
-            page_size=10000,
-        )
-        jobs = response["data"]
-        # remove jobs that are failed or cancelled
-        jobs = [
-            job for job in jobs if job.attributes.status not in ["Failed", "Cancelled"]
-        ]
-
-        # remove jobs that have no metadata
-        jobs = [job for job in jobs if job.attributes.metadata is not None]
-
-        # remove jobs that have no metadata about protein id
-        jobs = [job for job in jobs if "protein_id" in job.attributes.metadata.keys()]
-
-        # remove jobs that don't match this protein
-        jobs = [
-            job
-            for job in jobs
-            if job.attributes.metadata.protein_id != self.parent.protein._do_id
-        ]
-
-        # TODO remove jobs based on box size and pocket center
-
-        all_smiles = []
+        already_docked_ligands = []
         for job in jobs:
             this_smiles = job.attributes.userInputs.smiles_list
-            all_smiles.extend(this_smiles)
+            already_docked_ligands.extend(this_smiles)
 
-        smiles_strings = set(smiles_strings) - set(all_smiles)
+        
+
+        smiles_strings = set(smiles_strings) - set(already_docked_ligands)
         smiles_strings = list(smiles_strings)
 
+        
         print(
             f"Docking {len(smiles_strings)} ligands, after filtering out already docked ligands..."
         )
 
-        # TODO -- make a new list of smiles_list where we remove already docked ligands
+        if len(smiles_strings) == 0:
+            print("No new ligands to dock")
+            return
 
         chunks = list(more_itertools.chunked(smiles_strings, batch_size))
         job_ids = []
