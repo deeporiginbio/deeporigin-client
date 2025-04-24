@@ -18,6 +18,7 @@ CACHE_DIR = os.path.expanduser("~/.deeporigin/molprops")
 # Ensure cache directory exists
 os.makedirs(CACHE_DIR, exist_ok=True)
 
+
 @beartype
 def molprops(
     smiles_string: str,
@@ -37,7 +38,7 @@ def molprops(
 
     # Create hash of inputs
     hasher = hashlib.sha256()
-    hasher.update(smiles_string.encode('utf-8'))
+    hasher.update(smiles_string.encode("utf-8"))
     cache_hash = hasher.hexdigest()
     response_file = str(Path(CACHE_DIR) / f"{cache_hash}.json")
 
