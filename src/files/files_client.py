@@ -648,7 +648,7 @@ class FilesClient:
                     500 <= response.status_code < 600
                 ):
                     if attempt < self.io_max_retries - 1:
-                        last_error = f"Attempt {attempt+1} failed with status {response.status_code}"
+                        last_error = f"Attempt {attempt + 1} failed with status {response.status_code}"
                         self.logger.warning(
                             f"{last_error}, retrying {src} upload in {self.io_retry_delay}s..."
                         )
@@ -662,7 +662,7 @@ class FilesClient:
             except (ConnectionError, TimeoutError) as e:
                 # Retry on connection errors
                 if attempt < self.io_max_retries - 1:
-                    last_error = f"Connection error on attempt {attempt+1}: {str(e)}"
+                    last_error = f"Connection error on attempt {attempt + 1}: {str(e)}"
                     self.logger.warning(
                         f"{last_error}, retrying {src} upload in {self.io_retry_delay}s"
                     )
@@ -714,7 +714,7 @@ class FilesClient:
                         500 <= response.status_code < 600
                     ):
                         if attempt < self.io_max_retries - 1:
-                            last_error = f"Attempt {attempt+1} failed with status {response.status_code}"
+                            last_error = f"Attempt {attempt + 1} failed with status {response.status_code}"
                             self.logger.warning(
                                 f"{last_error}, retrying {src} download in {self.io_retry_delay}s..."
                             )
@@ -730,7 +730,7 @@ class FilesClient:
             except (ConnectionError, TimeoutError) as e:
                 # Retry on connection errors
                 if attempt < self.io_max_retries - 1:
-                    last_error = f"Connection error on attempt {attempt+1}: {str(e)}"
+                    last_error = f"Connection error on attempt {attempt + 1}: {str(e)}"
                     self.logger.warning(
                         f"{last_error}, retrying {src} download in {self.io_retry_delay}s"
                     )
@@ -768,7 +768,7 @@ class FilesClient:
                     500 <= response.status_code < 600
                 ):
                     if attempt < self.io_max_retries - 1:
-                        last_error = f"Attempt {attempt+1} failed with status {response.status_code}"
+                        last_error = f"Attempt {attempt + 1} failed with status {response.status_code}"
                         self.logger.warning(
                             f"{last_error}, retrying {path} deletion in {self.io_retry_delay}s..."
                         )
@@ -781,7 +781,7 @@ class FilesClient:
             except (ConnectionError, TimeoutError) as e:
                 # Retry on connection errors
                 if attempt < self.io_max_retries - 1:
-                    last_error = f"Connection error on attempt {attempt+1}: {str(e)}"
+                    last_error = f"Connection error on attempt {attempt + 1}: {str(e)}"
                     self.logger.warning(
                         f"{last_error}, retrying {path} deletion in {self.io_retry_delay}s"
                     )
