@@ -200,3 +200,50 @@ A visualization such as this will be shown:
 If a ligand is not backed by a SDF file, a 2D visualization will be shown:
 
 ![](../../images/ligand.png)
+
+## Predicting ADMET Properties
+
+You can predict ADMET (Absorption, Distribution, Metabolism, Excretion, and Toxicity) properties for a ligand using the `admet_properties` method:
+
+```python
+# Predict ADMET properties
+properties = ligand.admet_properties()
+```
+
+The method returns a dictionary containing various ADMET-related predictions:
+
+```python
+{
+    'smiles': 'Cn1c(=O)n(Cc2ccccc2)c(=O)c2c1nc(SCCO)n2Cc1ccccc1',
+    'properties': {
+        'logS': {'value': -4.004},  # Aqueous solubility
+        'logP': 3.686,             # Partition coefficient
+        'logD': 2.528,             # Distribution coefficient
+        'hERG': {'probability': 0.264},  # hERG inhibition risk
+        'ames': {'probability': 0.213}, # Ames mutagenicity
+        'cyp': {                                # Cytochrome P450 inhibition
+            'probabilities': {
+                'cyp1a2': 0.134,
+                'cyp2c9': 0.744,
+                'cyp2c19': 0.853,
+                'cyp2d6': 0.0252,
+                'cyp3a4': 0.4718
+            }
+        },
+        'pains': {                              # PAINS (Pan Assay Interference Compounds)
+            'has_pains': None,
+            'pains_fragments': []
+        }
+    }
+}
+```
+
+The predicted properties are automatically stored in the ligand's properties dictionary and can be accessed later using the `get_property` method:
+
+```python
+# Access a specific property
+logP = ligand.get_property('logP')
+```
+
+!!! note "Property Storage"
+    All predicted properties are automatically stored in the ligand's properties dictionary and can be accessed at any time using the `get_property` method.
