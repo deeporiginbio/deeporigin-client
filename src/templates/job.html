@@ -161,6 +161,8 @@
                                     <th>jobID</th>
                                     <th>executionID</th>
                                     <th>Status</th>
+                                    <th>Started At</th>
+                                    <th>Running Time</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -169,6 +171,8 @@
                                     <td>{{ job_ids[i] }}</td>
                                     <td>{{ execution_ids[i] }}</td>
                                     <td>{{ statuses[i] }}</td>
+                                    <td>{{ started_at[i] }}</td>
+                                    <td>{{ running_time[i] }}</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>

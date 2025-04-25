@@ -2,17 +2,21 @@
 
 import asyncio
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
 import json
 from pathlib import Path
 import time
 from typing import Any, Callable, Optional
 import uuid
 
+from dateutil import parser
+import humanize
 from IPython.display import HTML, display, update_display
 from jinja2 import Environment, FileSystemLoader
 import nest_asyncio
 
 from deeporigin.tools import utils
+from deeporigin.utils.core import elapsed_minutes
 
 # Enable nested event loops for Jupyter
 nest_asyncio.apply()
@@ -83,6 +87,21 @@ class Job:
         self._attributes = [result["attributes"] for result in results]
         self._metadata = [result["attributes"]["metadata"] for result in results]
 
+    def _get_running_time(self) -> list:
+        """Get the running time of the job.
+
+        Returns:
+            The running time of the job in minutes.
+        """
+        running_time = []
+        for item in self._attributes:
+            if item.completedAt is None or item.startedAt is None:
+                running_time.append(0)
+            else:
+                running_time.append(elapsed_minutes(item.startedAt, item.completedAt))
+
+        return running_time
+
     def _render_job_view(self):
         """Display the current job status and progress reports.
 
@@ -104,6 +123,16 @@ class Job:
         except Exception:
             card_title = "No name function provided."
 
+        started_at = []
+        for item in self._attributes:
+            dt = parser.isoparse(item.startedAt).astimezone(timezone.utc)
+
+            # Compare to now (also in UTC)
+            now = datetime.now(timezone.utc)
+            started_at.append(humanize.naturaltime(now - dt))
+
+        running_time = self._get_running_time()
+
         # Prepare template variables
         template_vars = {
             "status_html": status_html,
@@ -117,6 +146,8 @@ class Job:
             "job_ids": self._ids,
             "execution_ids": self._execution_ids,
             "statuses": self._status,
+            "started_at": started_at,
+            "running_time": running_time,
             "card_title": card_title,
             "unique_id": str(uuid.uuid4()),
         }

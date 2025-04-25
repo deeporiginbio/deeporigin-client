@@ -427,7 +427,9 @@ class Complex:
             ligand2_ids,
             strict=False,
         ):
-            file_loc = os.path.join(DATA_DIRS[tool], file_id.replace("_file:", ""))
+            file_loc = os.path.join(
+                utils.DATA_DIRS[tool], file_id.replace("_file:", "")
+            )
             df = pd.read_csv(file_loc)
 
             # drop some columns

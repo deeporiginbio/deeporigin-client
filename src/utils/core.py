@@ -1,7 +1,7 @@
 """this module contains some core utility functions that in turn do not depend on anything else in this library"""
 
 import base64
-from datetime import datetime
+from datetime import datetime, timezone
 import hashlib
 import json
 import os
@@ -28,6 +28,59 @@ class PrettyDict(Box):
     def _repr_html_(self):
         """pretty print a dict"""
         self.__repr__()
+
+
+def fix_embedded_newlines_in_csv(path: Union[str, Path]) -> bool:
+    """
+    Detects literal '\\n' sequences in the CSV at `path` and replaces them
+    with real newlines, rewriting the file in-place.
+
+    Returns:
+        True if the file was modified (i.e. a '\\n' was found and fixed),
+        False if no literal '\\n' was present.
+    """
+    p = Path(path)
+    text = p.read_text(encoding="utf-8")
+
+    # If there are no literal "\n" sequences, nothing to do
+    if r"\n" not in text:
+        return False
+
+    # Replace all literal "\n" with actual newlines
+    fixed = text.replace(r"\n", "\n")
+    p.write_text(fixed, encoding="utf-8")
+    return True
+
+
+def elapsed_minutes(
+    start: Union[str, datetime],
+    end: Union[str, datetime],
+) -> int:
+    """
+    Compute the number of minutes elapsed between two timestamps,
+    rounding to the nearest whole minute.
+
+    Parameters:
+        start: ISO-8601 UTC string (e.g. "2025-04-16T18:03:16.154Z")
+               or a timezone-aware datetime.
+        end:   Same format as start.
+
+    Returns:
+        Elapsed time in minutes (int), rounded to the nearest minute.
+    """
+
+    def to_dt(ts):
+        if isinstance(ts, datetime):
+            return ts
+        # parse "YYYY-MM-DDTHH:MM:SS.sssZ"
+        dt = datetime.strptime(ts, "%Y-%m-%dT%H:%M:%S.%fZ")
+        return dt.replace(tzinfo=timezone.utc)
+
+    dt_start = to_dt(start)
+    dt_end = to_dt(end)
+    seconds_elapsed = (dt_end - dt_start).total_seconds()
+    minutes = seconds_elapsed / 60
+    return int(round(minutes))
 
 
 @beartype
