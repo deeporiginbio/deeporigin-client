@@ -131,18 +131,6 @@ def ensure_file_extension(
     return resulting_paths
 
 
-# For backward compatibility
-def ensure_sdf_extension(file_paths: list[Union[str, Path]]) -> list[Path]:
-    """
-    Rename each file in file_paths so that it ends with '.sdf',
-    and return the list of resulting file paths. Files already
-    ending in '.sdf' (case-insensitive) are left untouched.
-
-    Idempotent: running it again makes no further changes.
-    """
-    return ensure_file_extension(file_paths, ".sdf")
-
-
 def set_key_to_value(
     obj: dict,
     target_key: str,
