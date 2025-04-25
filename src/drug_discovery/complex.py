@@ -400,14 +400,14 @@ class Complex:
         df = df.dropna(subset=[utils.COL_CSV_OUTPUT])
         file_ids = list(df[utils.COL_CSV_OUTPUT])
 
-        existing_files = os.listdir(DATA_DIRS[tool])
+        existing_files = os.listdir(utils.DATA_DIRS[tool])
         existing_files = ["_file:" + file for file in existing_files]
         missing_files = list(set(file_ids) - set(existing_files))
         if len(missing_files) > 0:
             api.download_files(
                 file_ids=missing_files,
                 use_file_names=False,
-                save_to_dir=DATA_DIRS[tool],
+                save_to_dir=utils.DATA_DIRS[tool],
             )
 
         if utils.COL_LIGAND1 in df.columns:

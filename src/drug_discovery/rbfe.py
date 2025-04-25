@@ -47,7 +47,7 @@ class RBFE(WorkflowStep):
 
     def _connect(self):
         """connect to datahub and fetch Job IDs for this protein and ligand"""
-        
+
         # fetch from ABFE first
         df = pd.DataFrame(
             api.get_dataframe(
