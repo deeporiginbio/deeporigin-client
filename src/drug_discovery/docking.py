@@ -78,8 +78,8 @@ class Docking(WorkflowStep):
 
         df = self.get_results()
 
-        if len(df) == 0:
-            print("No results found")
+        if (df is None) or (len(df) == 0):
+            # no results available yet
             return
 
         from IPython.display import HTML, display
@@ -101,6 +101,10 @@ class Docking(WorkflowStep):
 
         file_paths = self.get_poses()
 
+        if file_paths is None:
+            # no results available yet
+            return
+
         from deeporigin_molstar.src.viewers import DockingViewer
 
         docking_viewer = DockingViewer()
@@ -114,7 +118,11 @@ class Docking(WorkflowStep):
         JupyterViewer.visualize(html_content)
 
     @beartype
-    def _get_result_files(self, column_name: str, file_extension: str) -> list[str]:
+    def _get_result_files(
+        self,
+        column_name: str,
+        file_extension: str,
+    ) -> list[str] | None:
         """Helper function to get result files of a specific type.
 
         Args:
@@ -124,7 +132,7 @@ class Docking(WorkflowStep):
         Returns:
             List of file paths to the result files
         """
-        jobs = self._get_jobs()
+        jobs = self._get_jobs(only_with_status=["Succeeded"])
         row_ids = [job.attributes.userOutputs.results_sdf.rowId for job in jobs]
 
         df = pd.DataFrame(
@@ -136,6 +144,11 @@ class Docking(WorkflowStep):
         )
 
         df = df[df["ID"].isin(row_ids)]
+
+        if len(df) == 0:
+            print("No results available yet")
+            return None
+
         file_ids = df[column_name].tolist()
 
         existing_files = os.listdir(utils.DATA_DIRS["Docking"])
@@ -143,6 +156,7 @@ class Docking(WorkflowStep):
             "_file:" + file.replace(file_extension, "") for file in existing_files
         ]
         missing_files = list(set(file_ids) - set(existing_files))
+
         if len(missing_files) > 0:
             api.download_files(
                 file_ids=missing_files,
@@ -162,10 +176,14 @@ class Docking(WorkflowStep):
         return file_paths
 
     @beartype
-    def get_results(self) -> pd.DataFrame:
+    def get_results(self) -> pd.DataFrame | None:
         """return a list of paths to CSV files that contain the results from docking"""
 
         file_paths = self._get_result_files("OutputFile", ".csv")
+
+        if file_paths is None:
+            # no results, nothing to do
+            return None
 
         for file in file_paths:
             from deeporigin.utils.core import fix_embedded_newlines_in_csv
@@ -181,7 +199,7 @@ class Docking(WorkflowStep):
         return df
 
     @beartype
-    def get_poses(self) -> list[str]:
+    def get_poses(self) -> list[str] | None:
         """return a list of paths to SDF files that contain the poses of all ligands after docking"""
         return self._get_result_files("ResultFile", ".sdf")
 
