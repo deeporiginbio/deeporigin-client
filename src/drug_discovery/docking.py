@@ -68,6 +68,7 @@ class Docking(WorkflowStep):
         return render_progress_bar(
             completed=total_docked,
             total=total_ligands,
+            failed=total_failed,
             title="Docking Progress",
             body_text=f"Average speed: {speed:.2f} dockings/minute",
         )
@@ -203,7 +204,7 @@ class Docking(WorkflowStep):
         if only_with_status is None:
             only_with_status = ["Succeeded", "Running", "Queued", "Failed"]
 
-        filter = {
+        _filter = {
             "status": {"$in": only_with_status},
             "metadata": {
                 "$exists": True,
@@ -220,7 +221,7 @@ class Docking(WorkflowStep):
 
         response = tools.get_tool_executions(
             org_friendly_id=get_value()["organization_id"],
-            filter=filter,
+            filter=_filter,
             page_size=10000,
         )
         jobs = response["data"]
