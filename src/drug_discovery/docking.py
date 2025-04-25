@@ -41,7 +41,7 @@ class Docking(WorkflowStep):
         for inputs in job._inputs:
             unique_smiles.update(inputs["smiles_list"])
         num_ligands = len(unique_smiles)
-        return f"Protein: <code>{job._metadata[0]['protein_id']}</code> to {num_ligands} ligands."
+        return f"Docking <code>{job._metadata[0]['protein_id']}</code> to {num_ligands} ligands."
 
     @classmethod
     @beartype
@@ -61,7 +61,7 @@ class Docking(WorkflowStep):
             total_failed += item.count("ligand failed")
 
         total_running_time = sum(job._get_running_time())
-        speed = total_docked / total_running_time
+        speed = total_docked / total_running_time if total_running_time > 0 else 0
 
         from deeporigin.utils.notebook import render_progress_bar
 
@@ -375,7 +375,7 @@ class Docking(WorkflowStep):
             for future in tqdm(
                 concurrent.futures.as_completed(future_to_chunk),
                 total=len(chunks),
-                desc="Running docking jobs",
+                desc="Starting docking jobs",
             ):
                 job_id = future.result()
                 if job_id is not None:
