@@ -110,7 +110,15 @@ class Job:
         """
         # Get the template directory
         template_dir = Path(__file__).parent.parent / "templates"
-        env = Environment(loader=FileSystemLoader(str(template_dir)))
+        # Create Jinja2 environment with auto-escaping disabled
+        # Note: Auto-escaping is disabled because the template needs to render HTML content
+        # from _viz_func and properly formatted JSON data. The |safe filter is used
+        # only for trusted content (JSON data and HTML from _viz_func).
+        # All other template variables are properly escaped by the template itself.
+        env = Environment(
+            loader=FileSystemLoader(str(template_dir)),
+            autoescape=False,  # Disabled for proper HTML and JSON rendering
+        )
         template = env.get_template("job.html")
 
         try:

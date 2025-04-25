@@ -6,5 +6,9 @@
     },
     "[python]": {
         "editor.defaultFormatter": "charliermarsh.ruff"
+    },
+    "sonarlint.connectedMode.project": {
+        "connectionId": "formiclabs",
+        "projectKey": "formiclabs_deeporigin-client"
     }
 } 
