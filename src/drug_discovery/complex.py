@@ -2,7 +2,6 @@
 
 import concurrent.futures
 from dataclasses import dataclass, field
-import json
 import os
 from typing import Optional, get_args
 
@@ -16,25 +15,8 @@ from deeporigin.drug_discovery.abfe import ABFE
 from deeporigin.drug_discovery.docking import Docking
 from deeporigin.drug_discovery.rbfe import RBFE
 from deeporigin.drug_discovery.structures import Ligand, Protein
-from deeporigin.tools.utils import _ensure_columns, _ensure_database, query_run_statuses
+from deeporigin.tools.utils import _ensure_columns, _ensure_database
 from deeporigin.utils.core import PrettyDict, hash_file, hash_strings
-
-DATA_DIRS = dict()
-
-DATA_DIRS[utils.DB_ABFE] = os.path.join(
-    os.path.expanduser("~"), ".deeporigin", utils.DB_ABFE
-)
-DATA_DIRS[utils.DB_RBFE] = os.path.join(
-    os.path.expanduser("~"), ".deeporigin", utils.DB_RBFE
-)
-DATA_DIRS[utils.DB_DOCKING] = os.path.join(
-    os.path.expanduser("~"), ".deeporigin", utils.DB_DOCKING
-)
-
-
-os.makedirs(DATA_DIRS[utils.DB_ABFE], exist_ok=True)
-os.makedirs(DATA_DIRS[utils.DB_RBFE], exist_ok=True)
-os.makedirs(DATA_DIRS[utils.DB_DOCKING], exist_ok=True)
 
 
 @beartype
@@ -285,9 +267,7 @@ class Complex:
         else:
             self.protein._do_id = matching_indices[0]
 
-
         for tool in list(get_args(utils.VALID_TOOLS)):
-
             tool_instance = getattr(self, tool.lower())
             tool_instance._connect()
 
@@ -375,7 +355,7 @@ class Complex:
 
         file_ids = list(df[utils.COL_RESULT])
 
-        existing_files = os.listdir(DATA_DIRS[tool])
+        existing_files = os.listdir(utils.DATA_DIRS[tool])
         existing_files = ["_file:" + file for file in existing_files]
         missing_files = list(set(file_ids) - set(existing_files))
 
@@ -384,12 +364,12 @@ class Complex:
             api.download_files(
                 file_ids=missing_files,
                 use_file_names=False,
-                save_to_dir=DATA_DIRS[tool],
+                save_to_dir=utils.DATA_DIRS[tool],
             )
             print("Done.")
 
         return [
-            os.path.join(DATA_DIRS[tool], file_id.replace("_file:", ""))
+            os.path.join(utils.DATA_DIRS[tool], file_id.replace("_file:", ""))
             for file_id in file_ids
         ]
 

@@ -2,15 +2,17 @@
 
 import concurrent.futures
 import math
+import os
 from typing import Optional
 
 from beartype import beartype
-from deeporigin_molstar import DockingViewer, JupyterViewer
+from deeporigin_molstar import JupyterViewer
 import more_itertools
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
+from deeporigin.data_hub import api
 from deeporigin.drug_discovery import chemistry as chem
 from deeporigin.drug_discovery import utils
 from deeporigin.drug_discovery.structures.ligand import ligands_to_dataframe
@@ -18,6 +20,7 @@ from deeporigin.drug_discovery.structures.pocket import Pocket
 from deeporigin.drug_discovery.workflow_step import WorkflowStep
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.tools.job import Job
+from deeporigin.utils.core import ensure_file_extension
 
 Number = float | int
 
@@ -35,8 +38,11 @@ class Docking(WorkflowStep):
     def _name_job(self, job: Job) -> str:
         """Generate a name for a job."""
 
-        num_ligands = sum(len(inputs["smiles_list"]) for inputs in job._inputs)
-        return f"Docking protein: <code>{job._metadata[0]['protein_id']}</code> to {num_ligands} ligands."
+        unique_smiles = set()
+        for inputs in job._inputs:
+            unique_smiles.update(inputs["smiles_list"])
+        num_ligands = len(unique_smiles)
+        return f"Protein: <code>{job._metadata[0]['protein_id']}</code> to {num_ligands} ligands."
 
     def get_results(self) -> pd.DataFrame:
         """Get docking results from Deep Origin"""
@@ -100,54 +106,94 @@ class Docking(WorkflowStep):
     def show_poses(self):
         """show docked ligands with protein in 3D"""
 
-        files = self.parent.get_result_files_for(tool="Docking")
+        file_paths = self.get_poses()
 
-        sdf_file = chem.merge_sdf_files(files)
+        from deeporigin_molstar.src.viewers import DockingViewer
 
-        # use the Deep Origin Docking Viewer
-        # to view the docking results
         docking_viewer = DockingViewer()
         html_content = docking_viewer.render_with_seperate_crystal(
-            protein_data=str(self.parent.protein.file),
+            protein_data=str(self.parent.protein.file_path),
             protein_format="pdb",
-            ligands_data=[sdf_file],
+            ligands_data=file_paths,
             ligand_format="sdf",
+            # crystal_data={"raw": "./examples/brd/brd-7.sdf", "format": "sdf"},
+            paginate=True,
         )
-
         JupyterViewer.visualize(html_content)
 
-    def get_poses(self, output_sdf_file: str) -> None:
-        """generate a single SDF file containing all the poses of all ligands docked to the protein
+    @beartype
+    def get_poses(self) -> list[str]:
+        """return a list of paths to SDF files that contain the poses of all ligands after docking"""
 
-        Args:
-            output_sdf_file (str): path to output SDF file. All poses will be written to a SDF file in this location.
+        jobs = self._get_jobs()
 
-        """
+        row_ids = [job.attributes.userOutputs.results_sdf.rowId for job in jobs]
 
-        files = self.parent.get_result_files_for(tool="Docking")
+        df = pd.DataFrame(
+            api.get_dataframe(
+                "Docking",
+                return_type="dict",
+                use_file_names=False,
+            )
+        )
 
-        chem.merge_sdf_files(files, output_sdf_file)
+        df = df[df["ID"].isin(row_ids)]
+        file_ids = df["ResultFile"].tolist()
+
+        existing_files = os.listdir(utils.DATA_DIRS["Docking"])
+        existing_files = [
+            "_file:" + file.replace(".sdf", "") for file in existing_files
+        ]
+        missing_files = list(set(file_ids) - set(existing_files))
+        if len(missing_files) > 0:
+            api.download_files(
+                file_ids=missing_files,
+                use_file_names=False,
+                save_to_dir=utils.DATA_DIRS["Docking"],
+            )
+
+        file_paths = [
+            os.path.join(utils.DATA_DIRS["Docking"], file_id.replace("_file:", ""))
+            for file_id in file_ids
+        ]
+
+        file_paths = ensure_file_extension(file_paths=file_paths, extension=".sdf")
+
+        return file_paths
 
     def _connect(self):
         """fetch job IDs for this protein from DB"""
-        
+
         jobs = self._get_jobs()
         job_ids = [job.id for job in jobs]
         self._make_jobs_from_ids(job_ids)
 
-    def _get_jobs(self, *, pocket_center=None, box_size=None,)->list:
+    def _get_jobs(
+        self,
+        *,
+        pocket_center=None,
+        box_size=None,
+        only_with_status: Optional[list[str]] = None,
+    ) -> list:
         """get all job IDs for this protein"""
 
+        if only_with_status is None:
+            only_with_status = ["Succeeded", "Running"]
+
         filter = {
+            "status": {"$in": only_with_status},
+            "metadata": {
+                "$exists": True,
+                "$ne": None,
+            },
             "tool": {
                 "toolManifest": {
                     "key": "deeporigin.bulk-docking",
                 },
-            }
+            },
         }
-        from deeporigin.platform import tools
         from deeporigin.config import get_value
-
+        from deeporigin.platform import tools
 
         response = tools.get_tool_executions(
             org_friendly_id=get_value()["organization_id"],
@@ -155,13 +201,6 @@ class Docking(WorkflowStep):
             page_size=10000,
         )
         jobs = response["data"]
-        # remove jobs that are failed or cancelled
-        jobs = [
-            job for job in jobs if job.attributes.status not in ["Failed", "Cancelled"]
-        ]
-
-        # remove jobs that have no metadata
-        jobs = [job for job in jobs if job.attributes.metadata is not None]
 
         # remove jobs that have no metadata about protein id
         jobs = [job for job in jobs if "protein_id" in job.attributes.metadata.keys()]
@@ -175,25 +214,43 @@ class Docking(WorkflowStep):
 
         if pocket_center is not None:
             import numpy as np
+
             jobs = [
                 job
                 for job in jobs
                 if bool(
-                    np.all(np.isclose(pocket_center, job.attributes.userInputs.pocket_center))
+                    np.all(
+                        np.isclose(
+                            pocket_center, job.attributes.userInputs.pocket_center
+                        )
+                    )
                 )
             ]
 
         if box_size is not None:
-
             jobs = [
                 job
                 for job in jobs
-                if bool(np.all(np.isclose(box_size, job.attributes.userInputs.box_size)))
+                if bool(
+                    np.all(np.isclose(box_size, job.attributes.userInputs.box_size))
+                )
             ]
 
+        # only keep jobs where at least one ligand in that job matches what we have in the current complex
+        relevant_job_ids = []
+        smiles_strings = [ligand.smiles for ligand in self.parent.ligands]
+
+        for job in jobs:
+            this_smiles = job.attributes.userInputs.smiles_list
+
+            for smiles in this_smiles:
+                if smiles in smiles_strings:
+                    relevant_job_ids.append(job.id)
+                    break
+
+        jobs = [job for job in jobs if job.id in relevant_job_ids]
+
         return jobs
-
-
 
     @beartype
     def run(
@@ -247,7 +304,6 @@ class Docking(WorkflowStep):
 
         print(f"Docking {len(smiles_strings)} ligands...")
 
-    
         jobs = self._get_jobs(pocket_center=pocket_center, box_size=box_size)
 
         already_docked_ligands = []
@@ -255,12 +311,9 @@ class Docking(WorkflowStep):
             this_smiles = job.attributes.userInputs.smiles_list
             already_docked_ligands.extend(this_smiles)
 
-        
-
         smiles_strings = set(smiles_strings) - set(already_docked_ligands)
         smiles_strings = list(smiles_strings)
 
-        
         print(
             f"Docking {len(smiles_strings)} ligands, after filtering out already docked ligands..."
         )

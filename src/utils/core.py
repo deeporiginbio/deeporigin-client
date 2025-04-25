@@ -30,6 +30,66 @@ class PrettyDict(Box):
         self.__repr__()
 
 
+@beartype
+def ensure_file_extension(
+    *,
+    file_paths: list[Union[str, Path]],
+    extension: str,
+) -> list[str]:
+    """
+    Rename each file in file_paths so that it ends with the specified extension,
+    and return the list of resulting file paths. Files already
+    ending with the specified extension (case-insensitive) are left untouched.
+
+    Args:
+        file_paths (List[Union[str, Path]]): List of file paths to process
+        extension (str): The desired file extension (with or without leading dot)
+
+    Returns:
+        List[Path]: List of resulting file paths
+
+    Idempotent: running it again makes no further changes.
+    """
+    # Ensure extension starts with a dot
+    if not extension.startswith("."):
+        extension = f".{extension}"
+
+    resulting_paths = []
+
+    for fp in file_paths:
+        p = Path(fp)
+
+        # Already has the desired extension? leave as is
+        if p.suffix.lower() == extension.lower():
+            resulting_paths.append(str(p))
+            continue
+
+        new_path = p.with_suffix(extension)
+
+        # If the file with new extension already exists, skip renaming—but still return new_path
+        if new_path.exists():
+            resulting_paths.append(str(new_path))
+            continue
+
+        # Otherwise rename and return the new path
+        os.rename(p, new_path)
+        resulting_paths.append(str(new_path))
+
+    return resulting_paths
+
+
+# For backward compatibility
+def ensure_sdf_extension(file_paths: list[Union[str, Path]]) -> list[Path]:
+    """
+    Rename each file in file_paths so that it ends with '.sdf',
+    and return the list of resulting file paths. Files already
+    ending in '.sdf' (case-insensitive) are left untouched.
+
+    Idempotent: running it again makes no further changes.
+    """
+    return ensure_file_extension(file_paths, ".sdf")
+
+
 def set_key_to_value(
     obj: dict,
     target_key: str,
