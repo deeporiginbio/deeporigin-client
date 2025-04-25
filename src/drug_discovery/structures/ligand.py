@@ -835,17 +835,18 @@ class Ligand:
             str: A string containing the predicted ADMET properties.
         """
 
-        raise NotImplementedError("ADMET properties prediction not implemented yet.")
-        # try:
-        #     props = predict_properties(smiles=self.mol.smiles)[0]
-        #     for key, value in props.items():
-        #         if key == "smiles":
-        #             continue
-        #         self.set_property(key, value)
+        from deeporigin.functions.molprops import molprops
 
-        #     return props
-        # except Exception as e:
-        #     raise ValueError(f"Failed to predict ADMET properties: {str(e)}")
+        try:
+            props = molprops(self.mol.smiles)
+            for key, value in props.items():
+                if key == "smiles":
+                    continue
+                self.set_property(key, value)
+
+            return props
+        except Exception as e:
+            raise ValueError(f"Failed to predict ADMET properties: {str(e)}") from e
 
     def protonate(self, pH: float = 7.4, filter_percentage: float = 1):
         """

@@ -1,3 +1,13 @@
-from .files_client import FilesClient
+from .files_client import (
+    FileMetadata,
+    FilesClient,
+    FolderSyncMode,
+    create_files_tqdm_callback,
+)
 
-__all__ = ["FilesClient"]
+__all__ = [
+    "FilesClient",
+    "FileMetadata",
+    "FolderSyncMode",
+    "create_files_tqdm_callback",
+]

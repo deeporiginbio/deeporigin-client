@@ -10,7 +10,7 @@ import zipfile
 
 from beartype import beartype
 import pandas as pd
-
+from deeporigin.tools.utils import get_statuses_and_progress
 from deeporigin.data_hub import api
 from deeporigin.drug_discovery import chemistry as chem
 from deeporigin.drug_discovery import utils
@@ -129,6 +129,17 @@ class ABFE(WorkflowStep):
         df = api.get_dataframe(utils.DB_ABFE)
         df = df[df[utils.COL_PROTEIN] == self.parent.protein._do_id]
         df = df[(df[utils.COL_LIGAND1].isin(ligand_ids))]
+
+        # remove runs that have failed or cancelled
+        job_ids = list(df["JobID"])
+
+        data = get_statuses_and_progress(job_ids)
+
+        bad_job_ids = [
+            item["job_id"] for item in data if item["status"] in ["Failed", "Cancelled"]
+        ]
+
+        df = df[~df["JobID"].isin(bad_job_ids)]
 
         already_run_ligands = set(df[utils.COL_LIGAND1])
         ligand_ids = set(ligand_ids) - already_run_ligands
