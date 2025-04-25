@@ -1,8 +1,10 @@
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://cdn.jsdelivr.net; style-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; script-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'">
     <title>Bootstrap 5 Card with Tabs</title>
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -91,10 +93,6 @@
             padding: 0 1.25rem;
             margin-bottom: 0;
         }
-
-        .card-title {
-            margin-bottom: 0.5rem;
-        }
     </style>
 </head>
 
@@ -161,6 +159,8 @@
                                     <th>jobID</th>
                                     <th>executionID</th>
                                     <th>Status</th>
+                                    <th>Started At</th>
+                                    <th>Running Time</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -169,6 +169,8 @@
                                     <td>{{ job_ids[i] }}</td>
                                     <td>{{ execution_ids[i] }}</td>
                                     <td>{{ statuses[i] }}</td>
+                                    <td>{{ started_at[i] }}</td>
+                                    <td>{{ running_time[i] }}</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -202,9 +204,8 @@
             <div class="card-footer d-flex justify-content-between align-items-center">
                 <span
                     class="badge {% if status == 'Running' %}bg-primary{% elif status == 'Failed' %}bg-danger{% elif status == 'Cancelled' %}bg-dark{% elif status == 'Succeeded' %}bg-success{% endif %}">{{
-                    status }}</span>
-                <span id="last-updated" class="text-muted" style="font-size: 0.9rem;">Last updated: {{ last_updated
-                    }}</span>
+                    status|e }}</span>
+                <span id="last-updated" class="text-muted" style="font-size: 0.9rem;">Last updated: {{ last_updated|e }}</span>
             </div>
         </div>
     </div>

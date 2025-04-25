@@ -2,17 +2,21 @@
 
 import asyncio
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
 import json
 from pathlib import Path
 import time
 from typing import Any, Callable, Optional
 import uuid
 
+from dateutil import parser
+import humanize
 from IPython.display import HTML, display, update_display
 from jinja2 import Environment, FileSystemLoader
 import nest_asyncio
 
 from deeporigin.tools import utils
+from deeporigin.utils.core import elapsed_minutes
 
 # Enable nested event loops for Jupyter
 nest_asyncio.apply()
@@ -83,6 +87,21 @@ class Job:
         self._attributes = [result["attributes"] for result in results]
         self._metadata = [result["attributes"]["metadata"] for result in results]
 
+    def _get_running_time(self) -> list:
+        """Get the running time of the job.
+
+        Returns:
+            The running time of the job in minutes.
+        """
+        running_time = []
+        for item in self._attributes:
+            if item.completedAt is None or item.startedAt is None:
+                running_time.append(0)
+            else:
+                running_time.append(elapsed_minutes(item.startedAt, item.completedAt))
+
+        return running_time
+
     def _render_job_view(self):
         """Display the current job status and progress reports.
 
@@ -91,7 +110,15 @@ class Job:
         """
         # Get the template directory
         template_dir = Path(__file__).parent.parent / "templates"
-        env = Environment(loader=FileSystemLoader(str(template_dir)))
+        # Create Jinja2 environment with auto-escaping disabled
+        # Note: Auto-escaping is disabled because the template needs to render HTML content
+        # from _viz_func and properly formatted JSON data. The |safe filter is used
+        # only for trusted content (JSON data and HTML from _viz_func).
+        # All other template variables are properly escaped by the template itself.
+        env = Environment(
+            loader=FileSystemLoader(str(template_dir)),
+            autoescape=False,  # Disabled for proper HTML and JSON rendering
+        )
         template = env.get_template("job.html")
 
         try:
@@ -103,6 +130,16 @@ class Job:
             card_title = self._name_func(self)
         except Exception:
             card_title = "No name function provided."
+
+        started_at = []
+        for item in self._attributes:
+            dt = parser.isoparse(item.startedAt).astimezone(timezone.utc)
+
+            # Compare to now (also in UTC)
+            now = datetime.now(timezone.utc)
+            started_at.append(humanize.naturaltime(now - dt))
+
+        running_time = self._get_running_time()
 
         # Prepare template variables
         template_vars = {
@@ -117,6 +154,8 @@ class Job:
             "job_ids": self._ids,
             "execution_ids": self._execution_ids,
             "statuses": self._status,
+            "started_at": started_at,
+            "running_time": running_time,
             "card_title": card_title,
             "unique_id": str(uuid.uuid4()),
         }

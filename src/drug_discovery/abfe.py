@@ -342,6 +342,22 @@ class ABFE(WorkflowStep):
         except Exception:
             return "ABFE run"
 
+    def _connect(self):
+        """connect to datahub and fetch Job IDs for this protein and ligand"""
+
+        # fetch from ABFE first
+        df = pd.DataFrame(
+            api.get_dataframe(
+                "ABFE",
+                return_type="dict",
+            )
+        )
+        df = df[df["Protein"] == self.parent.protein._do_id]
+        ligand_ids = [ligand._do_id for ligand in self.parent.ligands]
+        df = df[df["Ligand1"].isin(ligand_ids)]
+        job_ids = df[utils.COL_JOBID].tolist()
+        self._make_jobs_from_ids(job_ids)
+
     @classmethod
     @beartype
     def _render_progress(cls, job: Job) -> str:
