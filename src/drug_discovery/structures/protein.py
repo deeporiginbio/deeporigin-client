@@ -496,23 +496,20 @@ class Protein:
                 ~self.structure.hetero | hetatm_indices_to_keep
             ]
 
+    @beartype
     def remove_resnames(
-        self, exclude_resnames: Optional[list[str]] = None
-    ) -> "Protein":
+        self,
+        exclude_resnames: Optional[list[str]] = None,
+    ) -> None:
         """
-        Remove specific residue names from the protein structure.
+        Remove specific residue names from the protein structure in place.
 
         Args:
             exclude_resnames (Optional[list[str]]): List of residue names to exclude.
         """
         if exclude_resnames is not None:
             b_resn = np.isin(self.structure.res_name, exclude_resnames)
-            filtered_structure = self.structure[~b_resn]
-        else:
-            filtered_structure = self.structure.copy()
-        return self._create_new_protein_with_structure(
-            filtered_structure, suffix="_resnames_removed"
-        )
+            self.structure = self.structure[~b_resn]
 
     def remove_water(self) -> None:
         """
