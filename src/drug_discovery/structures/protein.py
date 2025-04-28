@@ -444,11 +444,12 @@ class Protein:
 
         return Pocket.from_pocket_finder_results(results_dir)
 
+    @beartype
     def remove_hetatm(
         self,
         keep_resnames: Optional[list[str]] = None,
         remove_metals: Optional[list[str]] = None,
-    ):
+    ) -> None:
         """
         Remove HETATM records from the protein structure, with options to retain specified residues or exclude certain metals.
 
@@ -513,22 +514,16 @@ class Protein:
             filtered_structure, suffix="_resnames_removed"
         )
 
-    def remove_water(self) -> "Protein":
+    def remove_water(self) -> None:
         """
-        Remove water molecules and return a new Protein object with the modified structure.
-
-        Returns:
-        - Protein: A new Protein object without water molecules.
+        Remove water molecules from the protein structure in place.
 
         Example:
         ```python
-        protein_no_water = protein.remove_water()
+        protein.remove_water()
         ```
         """
-        filtered_structure = self.structure[~filter_solvent(self.structure)]
-        return self._create_new_protein_with_structure(
-            filtered_structure, suffix="_no_water"
-        )
+        self.structure = self.structure[~filter_solvent(self.structure)]
 
     def extract_metals_and_cofactors(self) -> Tuple[list[str], list[str]]:
         """
