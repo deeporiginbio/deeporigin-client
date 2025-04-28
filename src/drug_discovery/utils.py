@@ -2,6 +2,7 @@
 
 import importlib.resources
 import json
+import os
 from typing import Any, Literal, Optional
 
 from beartype import beartype
@@ -30,6 +31,18 @@ COL_RESULT = "ResultFile"
 COL_SMILES_HASH = "SMILESHash"
 COL_COMPLEX_HASH = "ComplexHash"
 COL_STEP = "Step"
+
+
+DATA_DIRS = dict()
+
+DATA_DIRS[DB_ABFE] = os.path.join(os.path.expanduser("~"), ".deeporigin", DB_ABFE)
+DATA_DIRS[DB_RBFE] = os.path.join(os.path.expanduser("~"), ".deeporigin", DB_RBFE)
+DATA_DIRS[DB_DOCKING] = os.path.join(os.path.expanduser("~"), ".deeporigin", DB_DOCKING)
+
+
+os.makedirs(DATA_DIRS[DB_ABFE], exist_ok=True)
+os.makedirs(DATA_DIRS[DB_RBFE], exist_ok=True)
+os.makedirs(DATA_DIRS[DB_DOCKING], exist_ok=True)
 
 
 @beartype

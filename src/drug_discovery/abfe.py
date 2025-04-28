@@ -10,7 +10,7 @@ import zipfile
 
 from beartype import beartype
 import pandas as pd
-
+from deeporigin.tools.utils import get_statuses_and_progress
 from deeporigin.data_hub import api
 from deeporigin.drug_discovery import chemistry as chem
 from deeporigin.drug_discovery import utils
@@ -129,6 +129,17 @@ class ABFE(WorkflowStep):
         df = api.get_dataframe(utils.DB_ABFE)
         df = df[df[utils.COL_PROTEIN] == self.parent.protein._do_id]
         df = df[(df[utils.COL_LIGAND1].isin(ligand_ids))]
+
+        # remove runs that have failed or cancelled
+        job_ids = list(df["JobID"])
+
+        data = get_statuses_and_progress(job_ids)
+
+        bad_job_ids = [
+            item["job_id"] for item in data if item["status"] in ["Failed", "Cancelled"]
+        ]
+
+        df = df[~df["JobID"].isin(bad_job_ids)]
 
         already_run_ligands = set(df[utils.COL_LIGAND1])
         ligand_ids = set(ligand_ids) - already_run_ligands
@@ -330,6 +341,22 @@ class ABFE(WorkflowStep):
             return f"ABFE run using <code>{job._metadata[0]['protein_id']}</code> and <code>{job._metadata[0]['ligand1_id']}</code>"
         except Exception:
             return "ABFE run"
+
+    def _connect(self):
+        """connect to datahub and fetch Job IDs for this protein and ligand"""
+
+        # fetch from ABFE first
+        df = pd.DataFrame(
+            api.get_dataframe(
+                "ABFE",
+                return_type="dict",
+            )
+        )
+        df = df[df["Protein"] == self.parent.protein._do_id]
+        ligand_ids = [ligand._do_id for ligand in self.parent.ligands]
+        df = df[df["Ligand1"].isin(ligand_ids)]
+        job_ids = df[utils.COL_JOBID].tolist()
+        self._make_jobs_from_ids(job_ids)
 
     @classmethod
     @beartype

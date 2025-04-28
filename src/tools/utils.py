@@ -25,10 +25,10 @@ NON_TERMINAL_STATES = {"Created", "Queued", "Running"}
 
 @beartype
 def get_status_and_progress(execution_id: str) -> dict:
-    """Determine the status of a run, identified by execution_id ID
+    """Determine the status of a run, identified by job ID
 
     Args:
-        execution_id (str): execution_id ID
+        execution_id (str): execution_id
 
 
     """
@@ -39,6 +39,7 @@ def get_status_and_progress(execution_id: str) -> dict:
     )
 
     return dict(
+        job_id=execution_id,
         status=data.attributes.status,
         progress=data.attributes.progressReport,
         execution_id=data.attributes.executionId,  # confusingly, this is not the execution_id coming in

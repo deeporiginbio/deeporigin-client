@@ -33,6 +33,7 @@ def render_progress_bar(
     total: int,
     failed: int = 0,
     title: str = "Progress Report",
+    body_text: str = "",
 ) -> str:
     """
     Displays a Bootstrap progress bar in a Jupyter Notebook with a title and external text.
@@ -67,8 +68,10 @@ def render_progress_bar(
     progress_html = f"""
     
     
-    <h2>{title}</h2>
+    <h3>{title}</h3>
+    <p style="color: #666; margin: 10px 0;">{body_text}</p>
     {text_html}
+    
     <div class="progress" style="height: 20px;">
       <div class="progress-bar bg-success" role="progressbar" style="width: {passed_pct:.1f}%"
            aria-valuenow="{passed}" aria-valuemin="0" aria-valuemax="{total}"></div>
