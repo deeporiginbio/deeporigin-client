@@ -11,7 +11,14 @@ from deeporigin.drug_discovery import Complex
 sim = Complex.from_dir("/path/to/folder/")
 sim.connect()
 ```
+
+Here, ABFE requires that the `Complex` object have an already preppared protein (PDB), and the associated ligands (SDF) are in a docked pose.  
+
+!!! WARNING
+    The `Complex.from_dir()` function only accepts 1 PDB file per directory. This function will throw a warning if it finds more than 1 PDB file per directory. 
+
 For more details on how to get started, see [:material-page-previous: Getting Started ](./getting-started.md).
+
 
 
 
@@ -31,15 +38,6 @@ sim.abfe.run_end_to_end(ligand_ids=["Ligands-1"]) # for example
 
 This queues up a task on Deep Origin. When it completes, outputs will be written to the appropriate column in this database. 
 
-You will see a message printed to screen similar to:
-
-
-
-!!! success "Expected output" 
-    ```bash
-    🧬 Job started with ID: 20f05e96, execution ID: x9rl5eghrpqwyiciehc3e
-    ```
-
 
 ### Multiple ligands
 
@@ -58,6 +56,24 @@ sim.abfe.run_end_to_end()
 
 Each ligand will be run in parallel on a separate instance. 
 
+
+
+
+## Job Tracking 
+
+Once a job has been submitted, you can track the its status using our built in job tracking:
+
+```python
+
+sim.abfe.show_jobs()
+
+```
+
+
+!!! success "Expected output" 
+    ![ABFE Job Trakcing](../../images/tools/ABFE_Status_Report.png)
+
+Here, the specific stage of the calculation is reported, with the most up-to-date logging information available in the `Raw Progress Reports` tab.
 
 ## Parameters
 
