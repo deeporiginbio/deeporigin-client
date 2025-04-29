@@ -14,6 +14,7 @@ import humanize
 from IPython.display import HTML, display, update_display
 from jinja2 import Environment, FileSystemLoader
 import nest_asyncio
+import pandas as pd
 
 from deeporigin.tools import utils
 from deeporigin.utils.core import elapsed_minutes
@@ -279,3 +280,116 @@ class Job:
             The result of the cancellation operation from utils.cancel_runs.
         """
         utils.cancel_runs(self._ids)
+
+
+def get_dataframe() -> pd.DataFrame:
+    """Get a dataframe of the job statuses and progress reports.
+
+    Returns:
+        A dataframe of the job statuses and progress reports.
+    """
+    from deeporigin.config import get_value
+    from deeporigin.platform import tools
+
+    org_id = get_value()["organization_id"]
+
+    response = tools.get_tool_executions(
+        org_friendly_id=org_id,
+        page_size=10000,
+    )
+    jobs = response["data"]
+
+    from deeporigin.platform import organizations
+
+    users = organizations.get_organization_users(org_friendly_id=org_id)
+
+    # Create a mapping of user IDs to user names
+    user_id_to_name = {user["id"]: user["attributes"]["name"] for user in users}
+
+    def find_boolean_value(d, key):
+        """Recursively search for a key in a nested dictionary and return its value as boolean."""
+        if isinstance(d, dict):
+            if key in d:
+                return d[key] == 1
+            for v in d.values():
+                result = find_boolean_value(v, key)
+                if result is not None:
+                    return result
+        elif isinstance(d, list):
+            for item in d:
+                result = find_boolean_value(item, key)
+                if result is not None:
+                    return result
+        return False
+
+    # Initialize lists to store data
+    data = {
+        "id": [],
+        "createdAt": [],
+        "executionId": [],
+        "completedAt": [],
+        "startedAt": [],
+        "protein_id": [],
+        "status": [],
+        "tool_key": [],
+        "tool_version": [],
+        "user_name": [],
+        "thread_pinning": [],
+        "test_run": [],
+        "run_duration_minutes": [],
+        "n_ligands": [],
+    }
+
+    for job in jobs:
+        attributes = job["attributes"]
+
+        # Add basic fields
+        data["id"].append(job["id"])
+        data["createdAt"].append(attributes["createdAt"])
+        data["executionId"].append(attributes["executionId"])
+        data["completedAt"].append(attributes["completedAt"])
+        data["startedAt"].append(attributes["startedAt"])
+        data["status"].append(attributes["status"])
+        data["tool_key"].append(attributes["tool"]["key"])
+        data["tool_version"].append(attributes["tool"]["version"])
+        data["user_name"].append(
+            user_id_to_name.get(attributes["user"]["id"], "Unknown")
+        )
+
+        # Check for thread_pinning and test_run in userInputs
+        user_inputs = attributes.get("userInputs", {})
+        data["thread_pinning"].append(find_boolean_value(user_inputs, "thread_pinning"))
+        data["test_run"].append(find_boolean_value(user_inputs, "test_run"))
+
+        if "smiles_list" in user_inputs:
+            data["n_ligands"].append(len(user_inputs["smiles_list"]))
+        else:
+            data["n_ligands"].append(1)
+
+        # Handle protein_id (may not exist or metadata may be None)
+        metadata = attributes.get("metadata")
+        this_protein_id = metadata.get("protein_id") if metadata else None
+
+        if this_protein_id is None:
+            this_protein_id = attributes["userInputs"]["protein"]["rowId"]
+
+        data["protein_id"].append(this_protein_id)
+
+        # Calculate run duration in minutes and round to nearest integer
+        if attributes["completedAt"] and attributes["startedAt"]:
+            start = parser.isoparse(attributes["startedAt"])
+            end = parser.isoparse(attributes["completedAt"])
+            duration = round((end - start).total_seconds() / 60)
+            data["run_duration_minutes"].append(duration)
+        else:
+            data["run_duration_minutes"].append(None)
+
+    # Create DataFrame
+    df = pd.DataFrame(data)
+
+    # Convert datetime columns
+    datetime_cols = ["createdAt", "completedAt", "startedAt"]
+    for col in datetime_cols:
+        df[col] = pd.to_datetime(df[col])
+
+    return df
