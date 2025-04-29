@@ -85,8 +85,6 @@ If we want to cancel a job, first gran the `jobID` from the `Details` tab of the
 In the above case, the `jobID` is `4d3536b3-6401-4cb5-ae5b-768daf099d40`. Next, we can cancel that job via:
 
 
-
-
 ```python
 from deeporigin.tools import utils 
 
