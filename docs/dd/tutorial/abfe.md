@@ -59,7 +59,7 @@ Each ligand will be run in parallel on a separate instance.
 
 
 
-## Job Tracking 
+## Job Control 
 
 Once a job has been submitted, you can track the its status using our built in job tracking:
 
@@ -71,9 +71,29 @@ sim.abfe.show_jobs()
 
 
 !!! success "Expected output" 
-    ![ABFE Job Trakcing](../../images/tools/ABFE_Status_Report.png)
+    ![ABFE Job Tracking](../../images/tools/ABFE_Status_Report.png)
 
 Here, the specific stage of the calculation is reported, with the most up-to-date logging information available in the `Raw Progress Reports` tab.
+
+
+
+If we want to cancel a job, first gran the `jobID` from the `Details` tab of the Job Control panel:
+
+!!! success "Expected output" 
+    ![ABFE Job ID](../../images/tools/ABFE_jobID.png)
+
+In the above case, the `jobID` is `4d3536b3-6401-4cb5-ae5b-768daf099d40`. Next, we can cancel that job via:
+
+
+
+
+```python
+from deeporigin.tools import utils 
+
+utils.cancel_runs(['4d3536b3-6401-4cb5-ae5b-768daf099d40'])
+```
+
+Note that this function accepts a list of `jobID`. 
 
 ## Parameters
 
