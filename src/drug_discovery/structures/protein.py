@@ -444,11 +444,12 @@ class Protein:
 
         return Pocket.from_pocket_finder_results(results_dir)
 
+    @beartype
     def remove_hetatm(
         self,
         keep_resnames: Optional[list[str]] = None,
         remove_metals: Optional[list[str]] = None,
-    ):
+    ) -> None:
         """
         Remove HETATM records from the protein structure, with options to retain specified residues or exclude certain metals.
 
@@ -495,40 +496,31 @@ class Protein:
                 ~self.structure.hetero | hetatm_indices_to_keep
             ]
 
+    @beartype
     def remove_resnames(
-        self, exclude_resnames: Optional[list[str]] = None
-    ) -> "Protein":
+        self,
+        exclude_resnames: Optional[list[str]] = None,
+    ) -> None:
         """
-        Remove specific residue names from the protein structure.
+        Remove specific residue names from the protein structure in place.
 
         Args:
             exclude_resnames (Optional[list[str]]): List of residue names to exclude.
         """
         if exclude_resnames is not None:
             b_resn = np.isin(self.structure.res_name, exclude_resnames)
-            filtered_structure = self.structure[~b_resn]
-        else:
-            filtered_structure = self.structure.copy()
-        return self._create_new_protein_with_structure(
-            filtered_structure, suffix="_resnames_removed"
-        )
+            self.structure = self.structure[~b_resn]
 
-    def remove_water(self) -> "Protein":
+    def remove_water(self) -> None:
         """
-        Remove water molecules and return a new Protein object with the modified structure.
-
-        Returns:
-        - Protein: A new Protein object without water molecules.
+        Remove water molecules from the protein structure in place.
 
         Example:
         ```python
-        protein_no_water = protein.remove_water()
+        protein.remove_water()
         ```
         """
-        filtered_structure = self.structure[~filter_solvent(self.structure)]
-        return self._create_new_protein_with_structure(
-            filtered_structure, suffix="_no_water"
-        )
+        self.structure = self.structure[~filter_solvent(self.structure)]
 
     def extract_metals_and_cofactors(self) -> Tuple[list[str], list[str]]:
         """
