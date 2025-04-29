@@ -123,6 +123,7 @@ exclude = [
     "variables",
     "conftest.py",
     "src/files",
+    "notebooks/*",
 ]
 ignore-init-method = true
 ignore-init-module = true
