@@ -45,7 +45,7 @@ def _(Protein):
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(r"""We can use the `show` method of the Protein class to visualize its 3D stucture""")
+    mo.md(r"""We can use the `show` method of the Protein class to visualize its 3D structure""")
     return
 
 
