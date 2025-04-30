@@ -65,17 +65,16 @@ def _():
     df_proteins = api.get_dataframe("Proteins")
     df_proteins = df_proteins.drop(columns=["Validation Status"])
     mapper = df_proteins.to_dict()["Protein"]
-    # original dict → data
+    # Transform the mapper dictionary:
+    # 1. Remove ".pdb" from string values.
+    # 2. Remove "protein" from string values.
+    # 3. Split string values at the first underscore and keep the first part.
     mapper = {
-        k: (v.replace(".pdb", "") if isinstance(v, str) else v) for k, v in mapper.items()
-    }
-    mapper = {
-        k: (v.replace("protein", "") if isinstance(v, str) else v)
+        k: (
+            v.replace(".pdb", "").replace("protein", "").split("_", 1)[0]
+            if isinstance(v, str) else v
+        )
         for k, v in mapper.items()
-    }
-    # original dict → data
-    mapper = {
-        k: (v.split("_", 1)[0] if isinstance(v, str) else v) for k, v in mapper.items()
     }
     return (mapper,)
 
