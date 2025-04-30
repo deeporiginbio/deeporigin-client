@@ -19,7 +19,52 @@ app._unparsable_cell(
 @app.cell
 def _():
     from deeporigin.drug_discovery import Complex, EXAMPLE_DATA_DIR, Protein, Ligand
-    return Complex, EXAMPLE_DATA_DIR
+    return Complex, EXAMPLE_DATA_DIR, Protein
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(
+        """
+        ## Making a Protein
+
+        We can construct Proteins using a number of ways. Proteins can be pulled directly from the PDB by specifying a PDB ID. 
+
+        Here, we pull a conotoxin. Displaying the object shows a helpful widget with information about the protein
+        """
+    )
+    return
+
+
+@app.cell
+def _(Protein):
+    conotoxin = Protein.from_pdb_id("2JUQ")
+    conotoxin
+    return (conotoxin,)
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""We can use the `show` method of the Protein class to visualize its 3D stucture""")
+    return
+
+
+@app.cell
+def _(conotoxin):
+    conotoxin.show()
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+        ## Making a protein from a file
+
+        Now we demonstrate how we can construct a Protein object from a PDB file that is stored locally
+        """
+    )
+    return
 
 
 @app.cell
@@ -33,6 +78,18 @@ def _(sim):
     protein = sim.protein
     protein.show()
     return (protein,)
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(
+        r"""
+        ## Operations on proteins
+
+        The `Protein` class has several operations. For example, we can remove all waters from the protein
+        """
+    )
+    return
 
 
 @app.cell
@@ -58,7 +115,7 @@ def _(protein):
 @app.cell
 def _():
     import marimo as mo
-    return
+    return (mo,)
 
 
 if __name__ == "__main__":

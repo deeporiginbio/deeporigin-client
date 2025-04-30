@@ -282,12 +282,35 @@ class Job:
         utils.cancel_runs(self._ids)
 
 
-def get_dataframe() -> pd.DataFrame:
+def get_dataframe(
+    *,
+    tool_key: Optional[str] = None,
+    only_with_status: Optional[list[str]] = None,
+) -> pd.DataFrame:
     """Get a dataframe of the job statuses and progress reports.
 
     Returns:
         A dataframe of the job statuses and progress reports.
     """
+
+    if only_with_status is None:
+        only_with_status = ["Succeeded", "Running", "Queued", "Failed"]
+
+    _filter = {
+        "status": {"$in": only_with_status},
+        "metadata": {
+            "$exists": True,
+            "$ne": None,
+        },
+    }
+
+    if tool_key is not None:
+        _filter["tool"] = {
+            "toolManifest": {
+                "key": tool_key,
+            },
+        }
+
     from deeporigin.config import get_value
     from deeporigin.platform import tools
 
@@ -295,6 +318,7 @@ def get_dataframe() -> pd.DataFrame:
 
     response = tools.get_tool_executions(
         org_friendly_id=org_id,
+        filter=_filter,
         page_size=10000,
     )
     jobs = response["data"]
@@ -390,6 +414,11 @@ def get_dataframe() -> pd.DataFrame:
     # Convert datetime columns
     datetime_cols = ["createdAt", "completedAt", "startedAt"]
     for col in datetime_cols:
-        df[col] = pd.to_datetime(df[col])
+        df[col] = (
+            pd.to_datetime(df[col], errors="coerce", utc=True)  # parse → tz-aware
+            .dt.tz_localize(None)  # drop the UTC tz-info
+            .astype("datetime64[us]")  # truncate to microseconds
+            # or .dt.floor("us") / .dt.round("us")  if you prefer
+        )
 
     return df
