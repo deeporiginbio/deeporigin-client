@@ -40,7 +40,7 @@ chain_a = protein.select_chain('A')
 protein_no_water = protein.remove_water()
 
 # Visualize the protein structure
-protein.visualize()
+protein.show()
 ```
 """
 
