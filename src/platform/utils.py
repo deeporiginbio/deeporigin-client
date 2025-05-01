@@ -85,16 +85,17 @@ def _get_api_client(
     Returns:
         configured client
 
-    Raises:
-        ValueError: if sdk_name is not 'platform' or 'files'
     """
+
+    if sdk_name == "platform":
+        sdk = do_sdk_platform
+    else:
+        sdk = do_sdk_files
 
     if configure:
         if sdk_name == "platform":
-            sdk = do_sdk_platform
             host = urljoin(get_value()["api_endpoint"], "/api")
         elif sdk_name == "files":
-            sdk = do_sdk_files
             host = urljoin(get_value()["api_endpoint"], "/file-api")
 
         configuration = sdk.Configuration(
