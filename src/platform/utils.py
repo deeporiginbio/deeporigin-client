@@ -16,7 +16,7 @@ from deeporigin.utils.core import _get_method
 
 
 @beartype
-def add_functions_to_module(
+def _add_functions_to_module(
     module,
     api_name: str,
     sdk_name: str = "platform",
