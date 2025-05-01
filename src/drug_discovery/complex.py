@@ -15,6 +15,7 @@ from deeporigin.drug_discovery.abfe import ABFE
 from deeporigin.drug_discovery.docking import Docking
 from deeporigin.drug_discovery.rbfe import RBFE
 from deeporigin.drug_discovery.structures import Ligand, Protein
+from deeporigin.platform import files_api
 from deeporigin.tools.utils import _ensure_columns, _ensure_database
 from deeporigin.utils.core import PrettyDict, hash_file, hash_strings
 
@@ -225,48 +226,26 @@ class Complex:
 
         Before running any tool, it is required to call this method."""
 
-        if self._db is None:
-            self._db = _ensure_dbs()
+        # get a list of all files in the entities directory
+        remote_files = files_api.get_object(file_path="entities/", recursive=True)
+        remote_files = [file["Key"] for file in remote_files]
 
-        # ensure that ligands are uploaded
-        df = api.get_dataframe(utils.DB_LIGANDS)
+        files_to_upload = {}
+
+        protein_path = "entities/proteins/" + os.path.basename(self.protein.file_path)
+        if protein_path not in remote_files:
+            files_to_upload[self.protein.file_path] = protein_path
 
         for ligand in self.ligands:
-            if ligand.file_path is None:
-                # no ligand file, we only have a SMILES string. this means that there is no need to upload or otherwise manage this ligand
+            ligand_path = "entities/ligands/" + os.path.basename(ligand.file_path)
+            if ligand_path not in remote_files:
+                files_to_upload[ligand.file_path] = ligand_path
 
-                continue
+        files_api.upload_files(files=files_to_upload)
 
-            ligand_file = os.path.basename(ligand.file_path)
-            matching_indices = df.index[df[utils.COL_LIGAND] == ligand_file].tolist()
-            if len(matching_indices) == 0:
-                print(f"Uploading {ligand.file_path}...")
-                response = api.upload_file_to_new_database_row(
-                    database_id=utils.DB_LIGANDS,
-                    column_id=utils.COL_LIGAND,
-                    file_path=str(ligand.file_path),
-                )
+        return
 
-                ligand._do_id = response.rows[0].hid
-            else:
-                ligand._do_id = matching_indices[0]
-
-        # ensure that protein is uploaded
-        df = api.get_dataframe(utils.DB_PROTEINS)
-        protein_file = os.path.basename(self.protein.file_path)
-        matching_indices = df.index[df[utils.COL_PROTEIN] == protein_file].tolist()
-        if len(matching_indices) == 0:
-            print(f"Uploading {self.protein.file_path}...")
-            response = api.upload_file_to_new_database_row(
-                database_id=utils.DB_PROTEINS,
-                column_id=utils.COL_PROTEIN,
-                file_path=str(self.protein.file_path),
-            )
-
-            self.protein._do_id = response.rows[0].hid
-        else:
-            self.protein._do_id = matching_indices[0]
-
+        # TODO -- this needs to be refactored to use the new files api
         for tool in list(get_args(utils.VALID_TOOLS)):
             tool_instance = getattr(self, tool.lower())
             tool_instance._connect()
