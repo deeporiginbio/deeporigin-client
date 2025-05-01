@@ -5,6 +5,9 @@ from urllib.parse import urljoin
 
 from beartype import beartype
 from box import Box
+
+# Import SDKs at module level
+import do_sdk_files
 import do_sdk_platform
 
 from deeporigin.auth import get_tokens
@@ -16,6 +19,7 @@ from deeporigin.utils.core import _get_method
 def add_functions_to_module(
     module,
     api_name: str,
+    sdk_name: str = "platform",
 ) -> list:
     """utility function to dynamically add functions to a module
 
@@ -31,6 +35,7 @@ def add_functions_to_module(
     methods = _get_client_methods(
         _get_api_client(
             api_name=api_name,
+            sdk_name=sdk_name,
             configure=False,
         )
     )
@@ -55,6 +60,7 @@ def add_functions_to_module(
             _create_function(
                 method_path=method,
                 api_name=api_name,
+                sdk_name=sdk_name,
             ),
         )
 
@@ -62,29 +68,47 @@ def add_functions_to_module(
 
 
 @beartype
-def _get_api_client(*, api_name: str, configure: bool = True):
+def _get_api_client(
+    *,
+    sdk_name: str,
+    api_name: str,
+    configure: bool = True,
+):
     """return a configured client for the API we want to access
 
     Args:
+        sdk_name (str): name of the SDK to use ('platform' or 'files')
         api_name (str): name of the API
+        configure (bool): whether to configure the client with authentication
 
     Returns:
         configured client
+
+    Raises:
+        ValueError: if sdk_name is not 'platform' or 'files'
     """
+    if sdk_name == "platform":
+        sdk = do_sdk_platform
+        host = urljoin(get_value()["api_endpoint"], "/api")
+    elif sdk_name == "files":
+        sdk = do_sdk_files
+        host = urljoin(get_value()["api_endpoint"], "/file-api")
+    else:
+        raise ValueError(
+            f"Invalid sdk_name: {sdk_name}. Must be either 'platform' or 'files'"
+        )
 
     if configure:
-        from do_sdk_platform.configuration import Configuration
-
-        configuration = Configuration(
-            host=urljoin(get_value()["api_endpoint"], "/api"),
+        configuration = sdk.Configuration(
+            host=host,
             access_token=get_tokens()["access"],
         )
 
-        client = do_sdk_platform.ApiClient(configuration=configuration)
+        client = sdk.ApiClient(configuration=configuration)
     else:
-        client = do_sdk_platform.ApiClient()
+        client = sdk.ApiClient()
 
-    api_class = getattr(do_sdk_platform, api_name)
+    api_class = getattr(sdk, api_name)
     client = api_class(api_client=client)
     return client
 
@@ -105,7 +129,12 @@ def _get_client_methods(client) -> set:
     return methods
 
 
-def _create_function(*, method_path: str, api_name: str):
+def _create_function(
+    *,
+    method_path: str,
+    api_name: str,
+    sdk_name: str,
+):
     """utility function the dynamically creates functions
     that wrap low-level functions in the DeepOrigin data API"""
 
@@ -117,6 +146,7 @@ def _create_function(*, method_path: str, api_name: str):
     client = _get_api_client(
         configure=False,
         api_name=api_name,
+        sdk_name=sdk_name,
     )
 
     method = _get_method(client, method_path)
@@ -131,8 +161,15 @@ def _create_function(*, method_path: str, api_name: str):
         """dynamic function that wraps low-level functions in the DeepOrigin platform API"""
 
         if client is None:
-            client = _get_api_client(api_name=api_name)
+            client = _get_api_client(
+                api_name=api_name,
+                sdk_name=sdk_name,
+            )
         method = _get_method(client, method_path)
+
+        # Insert org_friendly_id if not present in kwargs
+        if "org_friendly_id" not in kwargs:
+            kwargs["org_friendly_id"] = get_value()["organization_id"]
 
         # call the low level API method
         response = method(**kwargs)
