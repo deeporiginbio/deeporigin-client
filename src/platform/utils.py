@@ -166,8 +166,13 @@ def _create_function(
             )
         method = _get_method(client, method_path)
 
-        # Insert org_friendly_id if not present in kwargs
-        if "org_friendly_id" not in kwargs:
+        # Insert org_friendly_id if not present in kwargs, and
+        # if it's required by the method
+        method_sig = inspect.signature(method)
+        if (
+            "org_friendly_id" not in kwargs
+            and "org_friendly_id" in method_sig.parameters
+        ):
             kwargs["org_friendly_id"] = get_value()["organization_id"]
 
         # call the low level API method

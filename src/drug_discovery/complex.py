@@ -1,9 +1,8 @@
 """Module to support Drug Discovery workflows using Deep Origin"""
 
-import concurrent.futures
 from dataclasses import dataclass, field
 import os
-from typing import Optional, get_args
+from typing import Optional
 
 from beartype import beartype
 import pandas as pd
@@ -16,94 +15,6 @@ from deeporigin.drug_discovery.docking import Docking
 from deeporigin.drug_discovery.rbfe import RBFE
 from deeporigin.drug_discovery.structures import Ligand, Protein
 from deeporigin.platform import files_api
-from deeporigin.tools.utils import _ensure_columns, _ensure_database
-from deeporigin.utils.core import PrettyDict, hash_file, hash_strings
-
-
-@beartype
-def _ensure_dbs() -> dict:
-    """Ensure that there are databases for FEP on the data hub.
-
-    Ensures the following DBs:
-      - ligand (list of ligand files)
-      - protein (list of protein files)
-      - ABFE (ligand, protein, step, job_id, output, results, delta_g)
-      - RBFE (ligand1, ligand2, protein, step, job_id, output, results, delta_g)
-      - docking (protein, job_id, smiles_hash, complex_hash, output, results)
-    """
-    databases = PrettyDict()
-
-    # Define a helper function to process a single database
-    def process_db(db_key: str, db_name, required_columns: list) -> tuple[str, object]:
-        """ensure that a db exists, and ensure that columns exist"""
-
-        db = _ensure_database(db_name)
-        db = _ensure_columns(database=db, required_columns=required_columns)
-
-        return db_key, db
-
-    # Mapping each database key to its parameters (name and required columns)
-    tasks = {
-        "ligands": (
-            utils.DB_LIGANDS,
-            [dict(name=utils.COL_LIGAND, type="file")],
-        ),
-        "proteins": (
-            utils.DB_PROTEINS,
-            [dict(name=utils.COL_PROTEIN, type="file")],
-        ),
-        "abfe": (
-            utils.DB_ABFE,
-            [
-                dict(name=utils.COL_PROTEIN, type="text"),
-                dict(name=utils.COL_LIGAND1, type="text"),
-                dict(name=utils.COL_COMPLEX_HASH, type="text"),
-                dict(name=utils.COL_STEP, type="text"),
-                dict(name=utils.COL_JOBID, type="text"),
-                dict(name=utils.COL_CSV_OUTPUT, type="file"),
-                dict(name=utils.COL_RESULT, type="file"),
-                dict(name=utils.COL_DELTA_G, type="float"),
-            ],
-        ),
-        "rbfe": (
-            utils.DB_RBFE,
-            [
-                dict(name=utils.COL_PROTEIN, type="text"),
-                dict(name=utils.COL_LIGAND1, type="text"),
-                dict(name=utils.COL_LIGAND2, type="text"),
-                dict(name=utils.COL_COMPLEX_HASH, type="text"),
-                dict(name=utils.COL_STEP, type="text"),
-                dict(name=utils.COL_JOBID, type="text"),
-                dict(name=utils.COL_CSV_OUTPUT, type="file"),
-                dict(name=utils.COL_RESULT, type="file"),
-                dict(name=utils.COL_DELTA_DELTA_G, type="float"),
-            ],
-        ),
-        "docking": (
-            utils.DB_DOCKING,
-            [
-                dict(name=utils.COL_PROTEIN, type="text"),
-                dict(name=utils.COL_JOBID, type="text"),
-                dict(name=utils.COL_SMILES_HASH, type="text"),
-                dict(name=utils.COL_COMPLEX_HASH, type="text"),
-                dict(name=utils.COL_CSV_OUTPUT, type="file"),
-                dict(name=utils.COL_RESULT, type="file"),
-            ],
-        ),
-    }
-
-    # Use a ThreadPoolExecutor for I/O-bound network calls
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        future_to_key = {
-            executor.submit(process_db, key, db_name, req_cols): key
-            for key, (db_name, req_cols) in tasks.items()
-        }
-
-        for future in concurrent.futures.as_completed(future_to_key):
-            key, db = future.result()
-            databases[key] = db
-
-    return databases
 
 
 @dataclass
@@ -130,8 +41,6 @@ class Complex:
         """Initialize a Complex with either ligands or _ligands parameter"""
         self._ligands = ligands if ligands is not None else []
         self.protein = protein
-        self._db = None
-        self._hash = None
 
         self.__post_init__()
 
@@ -144,15 +53,6 @@ class Complex:
         self.abfe = ABFE(parent=self)
         self.rbfe = RBFE(parent=self)
 
-        # Initialize the _hash
-        self._compute_hash()
-
-    def _compute_hash(self):
-        """Compute and update the hash based on protein and ligands"""
-        protein_hash = hash_file(self.protein.file_path)
-        ligands_hash = hash_strings([ligand.smiles for ligand in self.ligands])
-        self._hash = hash_strings([protein_hash, ligands_hash])
-
     @property
     def ligands(self) -> list[Ligand]:
         """Get the current ligands"""
@@ -160,9 +60,8 @@ class Complex:
 
     @ligands.setter
     def ligands(self, new_ligands: list[Ligand]):
-        """Set new ligands and recompute the hash"""
+        """Set new ligands"""
         self._ligands = new_ligands
-        self._compute_hash()
 
     @classmethod
     def from_dir(cls, directory: str) -> "Complex":
@@ -221,10 +120,10 @@ class Complex:
 
         return instance
 
-    def connect(self) -> None:
-        """Connect instance of Complex to the databases on Deep Origin. This method uploads ligand and protein files if needed, and retrieves job IDs of tasks for all tools, if they exist.
+    def _sync_protein_and_ligands(self) -> None:
+        """Ensure that the protein and ligands are uploaded to Deep Origin
 
-        Before running any tool, it is required to call this method."""
+        Internal method. Do not use."""
 
         # get a list of all files in the entities directory
         remote_files = files_api.get_object(file_path="entities/", recursive=True)
@@ -234,21 +133,14 @@ class Complex:
 
         protein_path = "entities/proteins/" + os.path.basename(self.protein.file_path)
         if protein_path not in remote_files:
-            files_to_upload[self.protein.file_path] = protein_path
+            files_to_upload[str(self.protein.file_path)] = protein_path
 
         for ligand in self.ligands:
             ligand_path = "entities/ligands/" + os.path.basename(ligand.file_path)
             if ligand_path not in remote_files:
-                files_to_upload[ligand.file_path] = ligand_path
+                files_to_upload[str(ligand.file_path)] = ligand_path
 
         files_api.upload_files(files=files_to_upload)
-
-        return
-
-        # TODO -- this needs to be refactored to use the new files api
-        for tool in list(get_args(utils.VALID_TOOLS)):
-            tool_instance = getattr(self, tool.lower())
-            tool_instance._connect()
 
     def _repr_pretty_(self, p, cycle):
         """pretty print a Docking object"""
@@ -295,7 +187,7 @@ class Complex:
     def get_result_files_for(
         self,
         *,
-        tool: utils.VALID_TOOLS,
+        tool,
         ligand_ids: Optional[list[str]] = None,
     ):
         """Retrieve result files for a specific computational tool used with this complex.
@@ -352,7 +244,7 @@ class Complex:
             for file_id in file_ids
         ]
 
-    def get_csv_results_for(self, tool: utils.VALID_TOOLS):
+    def get_csv_results_for(self, tool):
         """Generic method to get CSV results for a particular tool and combine them as need be
 
         Args:

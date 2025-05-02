@@ -12,20 +12,12 @@ from importlib.resources import path
 
 import nest_asyncio  # we need this for asyncio  # noqa: F401
 
+from deeporigin.drug_discovery.complex import Complex
+
 from . import chemistry
 from .structures import Ligand, Pocket, Protein
 
 __all__ = ["chemistry", "Complex", "Protein", "Ligand", "Pocket"]
-
-
-# Lazy imports for better performance
-def __getattr__(name):
-    if name == "Complex":
-        from deeporigin.drug_discovery.complex import Complex
-
-        return Complex
-
-    raise AttributeError(f"module {__name__} has no attribute {name}")
 
 
 with path("deeporigin.data.brd", "brd.pdb") as file_path:

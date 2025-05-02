@@ -286,6 +286,8 @@ def get_dataframe(
     *,
     tool_key: Optional[str] = None,
     only_with_status: Optional[list[str]] = None,
+    include_metadata: bool = False,
+    resolve_user_names: bool = False,
 ) -> pd.DataFrame:
     """Get a dataframe of the job statuses and progress reports.
 
@@ -312,23 +314,22 @@ def get_dataframe(
         }
 
     from deeporigin.config import get_value
-    from deeporigin.platform import tools
+    from deeporigin.platform import organizations_api, tools_api
 
     org_id = get_value()["organization_id"]
 
-    response = tools.get_tool_executions(
+    response = tools_api.get_tool_executions(
         org_friendly_id=org_id,
         filter=_filter,
         page_size=10000,
     )
     jobs = response["data"]
 
-    from deeporigin.platform import organizations
+    if resolve_user_names:
+        users = organizations_api.get_organization_users(org_friendly_id=org_id)
 
-    users = organizations.get_organization_users(org_friendly_id=org_id)
-
-    # Create a mapping of user IDs to user names
-    user_id_to_name = {user["id"]: user["attributes"]["name"] for user in users}
+        # Create a mapping of user IDs to user names
+        user_id_to_name = {user["id"]: user["attributes"]["name"] for user in users}
 
     def find_boolean_value(d, key):
         """Recursively search for a key in a nested dictionary and return its value as boolean."""
@@ -364,6 +365,9 @@ def get_dataframe(
         "n_ligands": [],
     }
 
+    if include_metadata:
+        data["metadata"] = []
+
     for job in jobs:
         attributes = job["attributes"]
 
@@ -376,9 +380,13 @@ def get_dataframe(
         data["status"].append(attributes["status"])
         data["tool_key"].append(attributes["tool"]["key"])
         data["tool_version"].append(attributes["tool"]["version"])
-        data["user_name"].append(
-            user_id_to_name.get(attributes["user"]["id"], "Unknown")
-        )
+
+        if resolve_user_names:
+            data["user_name"].append(
+                user_id_to_name.get(attributes["user"]["id"], "Unknown")
+            )
+        else:
+            data["user_name"].append(attributes["user"]["id"])
 
         # Check for thread_pinning and test_run in userInputs
         user_inputs = attributes.get("userInputs", {})
@@ -408,6 +416,9 @@ def get_dataframe(
         else:
             data["run_duration_minutes"].append(None)
 
+        if include_metadata:
+            data["metadata"].append(metadata)
+
     # Create DataFrame
     df = pd.DataFrame(data)
 
@@ -418,7 +429,6 @@ def get_dataframe(
             pd.to_datetime(df[col], errors="coerce", utc=True)  # parse → tz-aware
             .dt.tz_localize(None)  # drop the UTC tz-info
             .astype("datetime64[us]")  # truncate to microseconds
-            # or .dt.floor("us") / .dt.round("us")  if you prefer
         )
 
     return df
