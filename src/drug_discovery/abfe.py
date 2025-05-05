@@ -12,13 +12,13 @@ from beartype import beartype
 import pandas as pd
 
 from deeporigin.data_hub import api
-from deeporigin.drug_discovery import chemistry as chem
 from deeporigin.drug_discovery import utils
 from deeporigin.drug_discovery.structures.ligand import ligands_to_dataframe
 from deeporigin.drug_discovery.workflow_step import WorkflowStep
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.tools.job import Job
 from deeporigin.tools.utils import get_statuses_and_progress
+from deeporigin.utils.notebook import _in_marimo
 
 
 class ABFE(WorkflowStep):
@@ -69,11 +69,10 @@ class ABFE(WorkflowStep):
         if df is None or len(df) == 0:
             return
 
-        # convert SMILES to aligned images
-        smiles_list = list(df["SMILES"])
-        df.drop("SMILES", axis=1, inplace=True)
+        from rdkit.Chem import PandasTools
 
-        df["Structure"] = chem.smiles_list_to_base64_png_list(smiles_list)
+        PandasTools.AddMoleculeColumnToFrame(df, smilesCol="SMILES", molCol="Structure")
+        PandasTools.RenderImagesInAllDataFrames()
 
         # show structure first
         new_order = ["Structure"] + [col for col in df.columns if col != "Structure"]
@@ -81,10 +80,13 @@ class ABFE(WorkflowStep):
         # re‑index your DataFrame
         df = df[new_order]
 
-        # Use escape=False to allow the <img> tags to render as images
-        from IPython.display import HTML, display
+        if _in_marimo():
+            import marimo as mo
 
-        display(HTML(df.to_html(escape=False)))
+            return mo.plain(df)
+
+        else:
+            return df
 
     @beartype
     def run_end_to_end(
