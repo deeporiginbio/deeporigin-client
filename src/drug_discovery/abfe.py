@@ -89,6 +89,11 @@ class ABFE(WorkflowStep):
 
         display(HTML(df.to_html(escape=False)))
 
+    def set_test_run(self, value: int = 1):
+        """set test_run paramemter in abfe parameters"""
+
+        utils._set_test_run(self._params.end_to_end, value)
+
     @beartype
     def run_end_to_end(
         self,

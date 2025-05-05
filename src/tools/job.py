@@ -16,7 +16,7 @@ from jinja2 import Environment, FileSystemLoader
 import nest_asyncio
 import pandas as pd
 
-from deeporigin.tools import utils
+from deeporigin.platform import tools_api
 from deeporigin.utils.core import elapsed_minutes
 
 # Enable nested event loops for Jupyter
@@ -79,7 +79,7 @@ class Job:
         """
 
         # use
-        results = utils.get_statuses_and_progress(self._ids)
+        results = tools_api.get_statuses_and_progress(self._ids)
 
         self._status = [result["status"] for result in results]
         self._progress_reports = [result["progress"] for result in results]
@@ -279,7 +279,7 @@ class Job:
         Returns:
             The result of the cancellation operation from utils.cancel_runs.
         """
-        utils.cancel_runs(self._ids)
+        tools_api.cancel_runs(self._ids)
 
 
 def get_dataframe(
@@ -314,7 +314,7 @@ def get_dataframe(
         }
 
     from deeporigin.config import get_value
-    from deeporigin.platform import organizations_api, tools_api
+    from deeporigin.platform import organizations_api
 
     org_id = get_value()["organization_id"]
 

@@ -3,6 +3,7 @@
 from beartype import beartype
 
 from deeporigin.data_hub import api
+from deeporigin.tools import utils
 
 
 @beartype
@@ -44,7 +45,7 @@ def draco(
 
     db = api.describe_database(database_id=database_id)
 
-    return _process_job(
+    return utils._process_job(
         cols=db.cols,
         inputs=inputs,
         outputs=outputs,

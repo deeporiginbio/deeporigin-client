@@ -8,7 +8,7 @@ from typing import Any, Optional
 from beartype import beartype
 
 from deeporigin.drug_discovery.constants import tool_mapper, valid_tools
-from deeporigin.tools import utils
+from deeporigin.platform import tools_api
 from deeporigin.utils.core import PrettyDict
 
 DATA_DIRS = dict()
@@ -113,9 +113,11 @@ def _start_tool_run(
         }
 
     if is_test_run(params):
-        print("⚠️ Warning: test_run=1 in these parameters. Results may not be accurate.")
+        print(
+            "⚠️ Warning: test_run=1 in these parameters. Results will not be accurate."
+        )
 
-    job_id = utils._process_job(
+    job_id = tools_api._process_job(
         inputs=params,
         outputs=outputs,
         tool_key=tool_mapper[tool],
@@ -140,3 +142,18 @@ def is_test_run(data: Any) -> bool:
             if is_test_run(item):
                 return True
     return False
+
+
+@beartype
+def _set_test_run(data, value: int = 1) -> None:
+    """recursively iterate over a dict and set test_run=1 for all keys"""
+
+    if isinstance(data, dict):
+        for key, val in data.items():
+            if key == "test_run":
+                data[key] = value
+            else:
+                _set_test_run(val, value)
+    elif isinstance(data, list):
+        for item in data:
+            _set_test_run(item, value)
