@@ -36,6 +36,18 @@ def _(sim):
 
 
 @app.cell
+def _(sim):
+    jobs = sim.abfe.jobs
+    return (jobs,)
+
+
+@app.cell
+def _(jobs):
+    jobs[1]
+    return
+
+
+@app.cell
 def _():
     import marimo as mo
     return

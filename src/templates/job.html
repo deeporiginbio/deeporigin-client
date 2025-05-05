@@ -4,136 +4,65 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://cdn.jsdelivr.net; style-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; script-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'">
-    <title>Bootstrap 5 Card with Tabs</title>
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self' https://cdn.jsdelivr.net; style-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; script-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'">
+    <title>{{ card_title }}</title>
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         /* Custom style for JSON blocks */
-        pre {
-            background-color: #f8f9fa;
-            padding: 1rem;
+        pre,
+        .monospace-block {
+            background: #f8f9fa;
             border: 1px solid #e3e3e3;
             border-radius: 0.25rem;
+            padding: 1rem;
+            font-family: monospace;
+            white-space: pre-wrap;
         }
 
-        /* Fix card title size */
-        .card-title {
-            font-size: 1.5rem;
-            font-weight: 500;
-            margin-bottom: 1rem;
-        }
-
-        /* Fix tab styling */
-        .nav-tabs {
-            border-bottom: none;
-            list-style: none;
-            padding-left: 0;
-            position: relative;
-        }
-
-        .nav-tabs::after {
-            content: '';
-            position: absolute;
-            bottom: -1rem;
-            left: 0;
-            right: 0;
-        }
-
-        .nav-tabs .nav-item {
-            margin-bottom: -10px;
-            display: inline-block;
-            list-style: none;
-        }
-
-        .nav-tabs .nav-link {
-            border: 1px solid transparent;
-            border-top-left-radius: 0.25rem;
-            border-top-right-radius: 0.25rem;
-            padding: 0.5rem 1rem;
-            color: #495057;
-            text-decoration: none;
-        }
-
-        .nav-tabs .nav-link.active {
-            color: #495057;
-            background-color: #fff;
-            border-color: #dee2e6 #dee2e6 #fff;
-            margin-bottom: -10px;
-        }
-
-        /* Fix tab content alignment */
-        .tab-content {
-            padding-top: 0;
-            border-top: none;
-            margin-top: -1px;
-        }
-
-        .card-body {
-            padding: 0;
-            margin: 0;
-        }
-
-        .tab-pane {
-            padding: 1.25rem;
-            margin-top: -1px;
-        }
-
-        /* Remove dots between tabs */
-        .nav-tabs .nav-item+.nav-item {
-            margin-left: 0.5rem;
-        }
-
-        /* Ensure proper spacing in card */
         .card {
             margin-bottom: 1rem;
-        }
-
-        .card-header {
-            padding: 0 1.25rem;
-            margin-bottom: 0;
         }
     </style>
 </head>
 
 <body>
     <!-- Full-width, left-aligned card using container-fluid -->
-    <div class="container-fluid px-0">
+    <div class="container-fluid py-3">
         <div class="card w-100">
-            <!-- Card Header with Title and Tabs -->
             <div class="card-header">
-                <!-- Added extra margin below the title -->
                 <h2 class="card-title mb-3">{{ card_title }}</h2>
-                <ul class="nav nav-tabs card-header-tabs" id="myTab-{{ unique_id }}" role="tablist">
-                    <li class="nav-item">
+                <ul class="nav nav-tabs card-header-tabs" id="jobTabs-{{ unique_id }}" role="tablist">
+                    <li class="nav-item" role="presentation">
                         <button class="nav-link active" id="status-tab-{{ unique_id }}" data-bs-toggle="tab"
                             data-bs-target="#status-{{ unique_id }}" type="button" role="tab"
                             aria-controls="status-{{ unique_id }}" aria-selected="true">
                             Status
                         </button>
                     </li>
-                    <li class="nav-item">
+                    <li class="nav-item" role="presentation">
                         <button class="nav-link" id="details-tab-{{ unique_id }}" data-bs-toggle="tab"
                             data-bs-target="#details-{{ unique_id }}" type="button" role="tab"
                             aria-controls="details-{{ unique_id }}" aria-selected="false">
                             Details
                         </button>
                     </li>
-                    <li class="nav-item">
+                    <li class="nav-item" role="presentation">
                         <button class="nav-link" id="inputs-tab-{{ unique_id }}" data-bs-toggle="tab"
                             data-bs-target="#inputs-{{ unique_id }}" type="button" role="tab"
                             aria-controls="inputs-{{ unique_id }}" aria-selected="false">
                             Inputs
                         </button>
                     </li>
-                    <li class="nav-item">
+                    <li class="nav-item" role="presentation">
                         <button class="nav-link" id="outputs-tab-{{ unique_id }}" data-bs-toggle="tab"
                             data-bs-target="#outputs-{{ unique_id }}" type="button" role="tab"
                             aria-controls="outputs-{{ unique_id }}" aria-selected="false">
                             Outputs
                         </button>
                     </li>
-                    <li class="nav-item">
+                    <li class="nav-item" role="presentation">
                         <button class="nav-link" id="raw-progress-tab-{{ unique_id }}" data-bs-toggle="tab"
                             data-bs-target="#raw-progress-{{ unique_id }}" type="button" role="tab"
                             aria-controls="raw-progress-{{ unique_id }}" aria-selected="false">
@@ -144,7 +73,7 @@
             </div>
             <!-- Card Body with Tab Content -->
             <div class="card-body">
-                <div class="tab-content" id="myTabContent-{{ unique_id }}">
+                <div class="tab-content" id="jobTabsContent-{{ unique_id }}">
                     <!-- Status Tab -->
                     <div class="tab-pane fade show active" id="status-{{ unique_id }}" role="tabpanel"
                         aria-labelledby="status-tab-{{ unique_id }}">
@@ -179,24 +108,17 @@
                     <!-- Inputs Tab with JSON (no extra text or collapsible behavior) -->
                     <div class="tab-pane fade" id="inputs-{{ unique_id }}" role="tabpanel"
                         aria-labelledby="inputs-tab-{{ unique_id }}">
-                        <pre>
-{{ inputs_json|safe }}
-            </pre>
+                        <pre>{{ inputs_json|safe }}</pre>
                     </div>
                     <!-- Outputs Tab with JSON (no extra text or collapsible behavior) -->
                     <div class="tab-pane fade" id="outputs-{{ unique_id }}" role="tabpanel"
                         aria-labelledby="outputs-tab-{{ unique_id }}">
-                        <pre>
-{{ outputs_json|safe }}
-            </pre>
+                        <pre>{{ outputs_json|safe }}</pre>
                     </div>
                     <!-- Raw Progress Reports Tab -->
                     <div class="tab-pane fade" id="raw-progress-{{ unique_id }}" role="tabpanel"
                         aria-labelledby="raw-progress-tab-{{ unique_id }}">
-                        <div
-                            style="white-space: pre-wrap; font-family: monospace; background-color: #f8f9fa; padding: 1rem; border: 1px solid #e3e3e3; border-radius: 0.25rem;">
-                            {{ raw_progress_json|safe }}
-                        </div>
+                        <div class="monospace-block">{{ raw_progress_json|safe }}</div>
                     </div>
                 </div>
             </div>
@@ -205,7 +127,8 @@
                 <span
                     class="badge {% if status == 'Running' %}bg-primary{% elif status == 'Failed' %}bg-danger{% elif status == 'Cancelled' %}bg-dark{% elif status == 'Succeeded' %}bg-success{% endif %}">{{
                     status|e }}</span>
-                <span id="last-updated" class="text-muted" style="font-size: 0.9rem;">Last updated: {{ last_updated|e }}</span>
+                <span id="last-updated" class="text-muted" style="font-size: 0.9rem;">Last updated: {{ last_updated|e
+                    }}</span>
             </div>
         </div>
     </div>
