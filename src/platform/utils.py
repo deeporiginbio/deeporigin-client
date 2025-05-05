@@ -188,14 +188,20 @@ def _create_function(
         if not isinstance(response, dict):
             response = response.json()
 
-        if "data" in response.keys():
-            response = response["data"]
-            if isinstance(response, list):
-                response = [Box(item) for item in response]
+        if isinstance(response, bool):
+            return response
+
+        elif isinstance(response, dict):
+            if "data" in response.keys():
+                response = response["data"]
+                if isinstance(response, list):
+                    response = [Box(item) for item in response]
+                else:
+                    response = Box(response)
             else:
                 response = Box(response)
         else:
-            response = Box(response)
+            raise NotImplementedError(f"Unexpected response type: {type(response)}")
 
         return response
 
