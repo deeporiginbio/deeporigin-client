@@ -70,7 +70,6 @@ from tqdm import tqdm
 from deeporigin.drug_discovery.structures.internal_structures import (
     Molecule,
     mol_from_block,
-    mol_from_file,
     mol_from_smiles,
 )
 from deeporigin.drug_discovery.utilities.visualize import jupyter_visualization
@@ -260,7 +259,7 @@ class Ligand:
     def from_identifier(
         cls,
         identifier: str,
-        name: str = "",
+        name: Optional[str] = None,
         save_to_file: bool = False,
         **kwargs: Any,
     ) -> "Ligand":
@@ -298,6 +297,9 @@ class Ligand:
             raise DeepOriginException(
                 f"Could not resolve chemical identifier '{identifier}': {str(e)}"
             ) from e
+
+        if name is None:
+            name = identifier
 
         return cls(
             mol=mol,
@@ -838,10 +840,8 @@ class Ligand:
         from deeporigin.functions.molprops import molprops
 
         try:
-            props = molprops(self.mol.smiles)
+            props = molprops(self.mol.smiles)["properties"]
             for key, value in props.items():
-                if key == "smiles":
-                    continue
                 self.set_property(key, value)
 
             return props

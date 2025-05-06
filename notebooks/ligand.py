@@ -40,9 +40,9 @@ def _(mo):
 
 @app.cell
 def _(Ligand):
-    ligand = Ligand.from_identifier("paracetamol")
+    ligand = Ligand.from_identifier("ATP")
     ligand.show()
-    return
+    return (ligand,)
 
 
 @app.cell(hide_code=True)
@@ -55,11 +55,10 @@ def _(mo):
 def _(Ligand):
     pcm = Ligand.from_smiles("CC(=O)Nc1ccc(O)cc1")
     pcm.show()
-
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     mo.md(
         r"""
@@ -73,47 +72,42 @@ def _(mo):
 
 @app.cell
 def _(EXAMPLE_DATA_DIR, Ligand):
-    brd2 = Ligand.from_sdf(EXAMPLE_DATA_DIR/ "brd-2.sdf")
+    brd2 = Ligand.from_sdf(EXAMPLE_DATA_DIR / "brd-2.sdf")
     brd2.show()
     return
-
-
-@app.cell
-def _(sim):
-    protein = sim.protein
-    protein.show()
-    return (protein,)
 
 
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(
-        r"""
-        ## Operations on proteins
+        """
+        ## Ligand operations
 
-        The `Protein` class has several operations. For example, we can remove all waters from the protein
+        The Ligand class offers many functions. For example, we can use the DO Molecular property predictor to predict ADMET properties:
         """
     )
     return
 
 
 @app.cell
-def _(sim):
-    sim.protein.remove_water()
-    sim.protein.show()
+def _(ligand):
+    ligand.admet_properties()
     return
 
 
-@app.cell
-def _(protein):
-    # Remove water molecules (HOH) and ions (NA, CL)
-    protein.remove_resnames(exclude_resnames=["HOH", "NA", "CL"])
-    return
+app._unparsable_cell(
+    r"""
+    We can inspect the ligand's properties, such as SMILES string:
+
+
+    """,
+    column=None, disabled=False, hide_code=True, name="_"
+)
 
 
 @app.cell
-def _(protein):
-    protein.show()
+def _(ligand):
+    ligand.properties
     return
 
 
