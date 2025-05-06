@@ -82,6 +82,7 @@ target/
 
 # notebooks
 *__marimo__/*
+notebooks/__marimo__/*
 .ipynb_checkpoints
 
 # IPython
