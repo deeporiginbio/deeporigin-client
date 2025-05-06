@@ -11,16 +11,12 @@ import zipfile
 from beartype import beartype
 import pandas as pd
 
-from deeporigin.data_hub import api
 from deeporigin.drug_discovery import utils
 from deeporigin.drug_discovery.constants import tool_mapper
 from deeporigin.drug_discovery.structures.ligand import Ligand, ligands_to_dataframe
 from deeporigin.drug_discovery.workflow_step import WorkflowStep
-from deeporigin.exceptions import DeepOriginException0
 from deeporigin.tools.job import Job, get_dataframe
-from deeporigin.tools.utils import get_statuses_and_progress
-from deeporigin.utils.notebook import _in_marimo
-
+from deeporigin.utils.notebook import get_notebook_environment
 
 
 class ABFE(WorkflowStep):
@@ -29,7 +25,7 @@ class ABFE(WorkflowStep):
     Objects instantiated here are meant to be used within the Complex class."""
 
     """tool version to use for ABFE"""
-    tool_version = "0.2.4-directory-rc"
+    tool_version = "0.2.6"
     _tool_key = "deeporigin.abfe-end-to-end"  # Tool key for ABFE jobs
 
     def __init__(self, parent):
@@ -86,7 +82,7 @@ class ABFE(WorkflowStep):
         # re‑index your DataFrame
         df = df[new_order]
 
-        if _in_marimo():
+        if get_notebook_environment() == "marimo":
             import marimo as mo
 
             return mo.plain(df)
@@ -152,8 +148,8 @@ class ABFE(WorkflowStep):
             ligand_path = "entities/ligands/" + os.path.basename(ligand_name)
 
             metadata = dict(
-                protein_file=protein_path,
-                ligand_file=ligand_path,
+                protein_file=os.path.basename(protein_path),
+                ligand_file=os.path.basename(ligand_path),
             )
 
             job_id = utils._start_tool_run(
@@ -342,25 +338,9 @@ class ABFE(WorkflowStep):
     def _name_job(cls, job: Job) -> str:
         """utility function to name a job using inputs to that job"""
         try:
-            return f"ABFE run using <code>{job._metadata[0]['protein_id']}</code> and <code>{job._metadata[0]['ligand1_id']}</code>"
+            return f"ABFE run using <code>{job._metadata[0]['protein_file']}</code> and <code>{job._metadata[0]['ligand_file']}</code>"
         except Exception:
             return "ABFE run"
-
-    def _connect(self):
-        """connect to datahub and fetch Job IDs for this protein and ligand"""
-
-        # fetch from ABFE first
-        df = pd.DataFrame(
-            api.get_dataframe(
-                "ABFE",
-                return_type="dict",
-            )
-        )
-        df = df[df["Protein"] == self.parent.protein._do_id]
-        ligand_ids = [ligand._do_id for ligand in self.parent.ligands]
-        df = df[df["Ligand1"].isin(ligand_ids)]
-        job_ids = df[utils.COL_JOBID].tolist()
-        self._make_jobs_from_ids(job_ids)
 
     @classmethod
     @beartype
@@ -378,7 +358,7 @@ class ABFE(WorkflowStep):
 
         # Define the fixed nodes in the diagram.
         nodes = [
-            "init",
+            "init(Init)",
             "complex(Complex Prep)",
             "ligand(Ligand Prep)",
             "solvation(Solvation FEP)",

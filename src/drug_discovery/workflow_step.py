@@ -87,8 +87,3 @@ class WorkflowStep:
     def _name_job(self, job: Job) -> str:
         """Generate a name for a job. To be implemented by subclasses."""
         raise NotImplementedError
-
-    @beartype
-    def _connect(self):
-        """connect to deep origin API and perform any other setup necessary. This is meant to be implemented in the subclass"""
-        raise NotImplementedError

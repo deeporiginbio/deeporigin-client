@@ -59,8 +59,6 @@ def _start_tool_run(
     else:
         raise NotImplementedError("Tools other than ABFE are not implemented yet")
 
-    rdsfdsfsd
-
     # a protein is needed for ABFE, RBFE, and docking
     params["protein"] = {
         "$provider": "ufa",

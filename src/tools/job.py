@@ -120,7 +120,13 @@ class Job:
             loader=FileSystemLoader(str(template_dir)),
             autoescape=False,  # Disabled for proper HTML and JSON rendering
         )
-        template = env.get_template("job.html")
+
+        from deeporigin.utils.notebook import get_notebook_environment
+
+        if get_notebook_environment() == "marimo":
+            template = env.get_template("job.html")
+        else:
+            template = env.get_template("job_jupyter.html")
 
         try:
             status_html = self._viz_func(self)
