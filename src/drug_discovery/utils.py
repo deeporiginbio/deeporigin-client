@@ -48,10 +48,18 @@ def _start_tool_run(
 
     if tool == "ABFE":
         output_dir_path = (
-            "tool-runs/" + tool + "/" + protein_path + "/" + ligand1_path + "/"
+            "tool-runs/"
+            + tool
+            + "/"
+            + os.path.basename(protein_path)
+            + "/"
+            + os.path.basename(ligand1_path)
+            + "/"
         )
     else:
         raise NotImplementedError("Tools other than ABFE are not implemented yet")
+
+    rdsfdsfsd
 
     # a protein is needed for ABFE, RBFE, and docking
     params["protein"] = {
