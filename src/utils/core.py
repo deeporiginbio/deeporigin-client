@@ -468,8 +468,7 @@ def _ensure_do_folder() -> Path:
     else:
         deeporigin_path = Path.home() / ".deeporigin"
 
-    if not deeporigin_path.exists():
-        deeporigin_path.mkdir(parents=True)
+    deeporigin_path.mkdir(parents=True, exist_ok=True)
 
     return deeporigin_path
 
