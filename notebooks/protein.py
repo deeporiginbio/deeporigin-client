@@ -6,14 +6,16 @@ __generated_with = "0.13.2"
 app = marimo.App(width="medium")
 
 
-app._unparsable_cell(
-    r"""
-    # Protein
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(
+        """
+        # Working with proteins
 
-    This notebook shows you how to use the Protein class in the Deep Origin Drug Discovery toolbox
-    """,
-    column=None, disabled=False, hide_code=True, name="_"
-)
+        This notebook shows you how to use the Protein class in the Deep Origin Drug Discovery toolbox
+        """
+    )
+    return
 
 
 @app.cell

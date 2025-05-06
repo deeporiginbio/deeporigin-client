@@ -124,8 +124,10 @@ class Job:
 
         try:
             status_html = self._viz_func(self)
-        except Exception:
-            status_html = "No visualization function provided."
+        except Exception as e:
+            status_html = (
+                f"No visualization function provided, or there was an error. Error: {e}"
+            )
 
         try:
             card_title = self._name_func(self)
@@ -403,7 +405,10 @@ def get_dataframe(
         this_protein_id = metadata.get("protein_id") if metadata else None
 
         if this_protein_id is None:
-            this_protein_id = attributes["userInputs"]["protein"]["rowId"]
+            try:
+                this_protein_id = attributes["userInputs"]["protein"]["rowId"]
+            except Exception:
+                this_protein_id = "No ID"
 
         data["protein_id"].append(this_protein_id)
 
