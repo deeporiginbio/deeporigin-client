@@ -155,6 +155,7 @@ class AwsProfile(Variable):
                     "To update its value, rerun with the `overwrite` option."
                 ),
                 DeepOriginWarning,
+                stacklevel=2,
             )
 
     def uninstall(
@@ -272,6 +273,7 @@ class AwsProfile(Variable):
                     "To update its value, rerun with the `overwrite` option."
                 ),
                 DeepOriginWarning,
+                stacklevel=2,
             )
 
         return uninstalled

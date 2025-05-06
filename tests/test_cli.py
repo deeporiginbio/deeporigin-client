@@ -1,11 +1,12 @@
+from contextlib import redirect_stderr, redirect_stdout
 import io
 import sys
 import unittest
 import unittest.mock
 import warnings
-from contextlib import redirect_stderr, redirect_stdout
 
 import pytest
+
 from deeporigin import __version__, cli
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.warnings import DeepOriginWarning

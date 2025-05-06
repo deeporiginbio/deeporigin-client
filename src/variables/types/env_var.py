@@ -7,6 +7,7 @@ import warnings
 
 import dotenv
 import pydantic
+
 from deeporigin.utils.core import _ensure_do_folder, expand_user
 
 from ...warnings import DeepOriginWarning
@@ -96,6 +97,7 @@ class EnvironmentVariable(Variable):
                     "To update its value, rerun with the `overwrite` option."
                 ),
                 DeepOriginWarning,
+                stacklevel=2,
             )
 
     def uninstall(
@@ -170,6 +172,7 @@ class EnvironmentVariable(Variable):
                     "To update its value, rerun with the `overwrite` option."
                 ),
                 DeepOriginWarning,
+                stacklevel=2,
             )
 
         return uninstalled

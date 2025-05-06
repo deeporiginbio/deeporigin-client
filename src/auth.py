@@ -5,10 +5,14 @@ import functools
 import json
 import os
 import time
+from typing import Optional
 from urllib.parse import urljoin
 
-import requests
 from beartype import beartype
+import jwt
+from jwt.algorithms import RSAAlgorithm
+import requests
+
 from deeporigin.config import get_value as get_config
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.utils.core import _get_api_tokens_filepath, read_cached_tokens
@@ -29,10 +33,9 @@ def tokens_exist() -> bool:
     return os.path.isfile(_get_api_tokens_filepath())
 
 
-@functools.cache
 def get_tokens(
     *,
-    refresh: bool = True,
+    refresh: bool = False,
 ) -> dict:
     """Get access token for accessing the Deep Origin API
 
@@ -42,15 +45,12 @@ def get_tokens(
     If an access token exists in the ENV, then it is used before
     anything else. If not, then tokens file is
     checked for access tokens, and used if they exist.
-    On first use (within a Python session), tokens are
-    refreshed if refresh_tokens is `True`. On subsequent uses,
-    tokens are not refreshed even if refresh_tokens is `True`.
 
     Args:
-        refresh: whether to refresh the token (default: `True`)
+        refresh: whether to refresh the token (default: `False`)
 
     Returns:
-        :obj:`tuple`: API access and refresh tokens
+        API access and refresh tokens
     """
 
     if "DEEP_ORIGIN_ACCESS_TOKEN" in os.environ:
@@ -70,6 +70,11 @@ def get_tokens(
         # no tokens on disk. have to sign into the platform to get tokens
         tokens = authenticate()
 
+    # check if the access token is expired
+    if is_token_expired(decode_access_token(tokens["access"])):
+        tokens["access"] = refresh_tokens(tokens["refresh"])
+        cache_tokens(tokens)
+
     return tokens
 
 
@@ -87,7 +92,7 @@ def cache_tokens(tokens: dict) -> None:
         json.dump(tokens, file)
 
 
-def remove_cached_tokens():
+def remove_cached_tokens() -> None:
     """Remove cached API tokens"""
 
     if os.path.isfile(_get_api_tokens_filepath()):
@@ -162,14 +167,15 @@ def authenticate() -> dict:
     return tokens
 
 
+@beartype
 def refresh_tokens(api_refresh_token: str) -> str:
     """Refresh the access token for the Deep Origin OS
 
     Args:
-        api_refresh_token (:obj:`str`): API refresh token
+        api_refresh_token: API refresh token
 
     Returns:
-        :obj:`str`: new API access token
+        new API access token
     """
     config = get_config()
 
@@ -186,3 +192,64 @@ def refresh_tokens(api_refresh_token: str) -> str:
     api_access_token = response_json["access_token"]
 
     return api_access_token
+
+
+@beartype
+def is_token_expired(token: dict) -> bool:
+    """
+    Check if the JWT token is expired. The token is expected to have an 'exp' field as a Unix timestamp. This dict can be obtained from the `decode_access_token` function.
+
+    Args:
+        token (dict): The JWT token with an 'exp' field as a Unix timestamp.
+
+    Returns:
+        bool: True if the token is expired, False otherwise.
+    """
+    # Get the expiration time from the token, defaulting to 0 if not found.
+    exp_time = token.get("exp", 0)
+    current_time = time.time()  # Get current time in seconds since the epoch.
+
+    # If current time is greater than the expiration time, it's expired.
+    return current_time > exp_time
+
+
+@functools.cache
+@beartype
+def get_public_keys() -> list[dict]:
+    """get public keys from public endpoint"""
+
+    jwks_url = urljoin(get_config()["auth_domain"], ".well-known/jwks.json")
+    data = requests.get(jwks_url).json()
+    return data["keys"]
+
+
+@beartype
+def decode_access_token(token: Optional[str] = None) -> dict:
+    """decode access token into human readable data"""
+
+    if token is None:
+        tokens = get_tokens()
+        token = tokens["access"]
+
+    # Get the JWT header to extract the Key ID
+    unverified_header = jwt.get_unverified_header(token)
+    kid = unverified_header["kid"]
+
+    # Get the public key using the Key ID
+    public_keys = get_public_keys()
+    for key in public_keys:
+        if key["kid"] == kid:
+            public_key = RSAAlgorithm.from_jwk(key)
+            break
+        raise DeepOriginException(f"Key ID {kid} not found in JWKS.")
+
+    # Decode the JWT using the public key
+    return jwt.decode(
+        token,
+        public_key,
+        algorithms=["RS256"],
+        options={
+            "verify_aud": False,  # matches what platform does
+            "verify_exp": False,  # we want to decode this no matter what, because we'll check the expiration in the caller
+        },
+    )

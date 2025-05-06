@@ -5,6 +5,7 @@ import typing
 import warnings
 
 import pydantic
+
 from deeporigin.utils.core import expand_user
 
 from ...warnings import DeepOriginWarning
@@ -120,6 +121,7 @@ class File(Variable):
                     "To update its value, rerun with the `overwrite` option."
                 ),
                 DeepOriginWarning,
+                stacklevel=2,
             )
 
     def uninstall(
@@ -185,6 +187,7 @@ class File(Variable):
                         "To update its value, rerun with the `overwrite` option."
                     ),
                     DeepOriginWarning,
+                    stacklevel=2,
                 )
 
         return uninstalled

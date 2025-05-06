@@ -2,9 +2,11 @@
 
 import importlib.resources
 import json
-from typing import Literal, Optional
+import os
+from typing import Any, Literal, Optional
 
 from beartype import beartype
+
 from deeporigin.data_hub import api
 from deeporigin.utils.core import PrettyDict, hash_strings
 
@@ -29,6 +31,18 @@ COL_RESULT = "ResultFile"
 COL_SMILES_HASH = "SMILESHash"
 COL_COMPLEX_HASH = "ComplexHash"
 COL_STEP = "Step"
+
+
+DATA_DIRS = dict()
+
+DATA_DIRS[DB_ABFE] = os.path.join(os.path.expanduser("~"), ".deeporigin", DB_ABFE)
+DATA_DIRS[DB_RBFE] = os.path.join(os.path.expanduser("~"), ".deeporigin", DB_RBFE)
+DATA_DIRS[DB_DOCKING] = os.path.join(os.path.expanduser("~"), ".deeporigin", DB_DOCKING)
+
+
+os.makedirs(DATA_DIRS[DB_ABFE], exist_ok=True)
+os.makedirs(DATA_DIRS[DB_RBFE], exist_ok=True)
+os.makedirs(DATA_DIRS[DB_DOCKING], exist_ok=True)
 
 
 @beartype
@@ -69,9 +83,9 @@ def _start_tool_run(
 
     # tool key mapper
     tool_key_mapper = dict(
-        ABFE="deeporigin.abfe-end-to-end",
+        ABFE="deeporigin.abfe-end-to-end/0.2.5",
         RBFE="deeporigin.rbfe-end-to-end",
-        Docking="deeporigin.bulk-docking",
+        Docking="deeporigin.bulk-docking/0.3.0",
     )
 
     from deeporigin.tools import run
@@ -148,11 +162,22 @@ def _start_tool_run(
             },
         }
 
+    if is_test_run(params):
+        print("⚠️ Warning: test_run=1 in these parameters. Results may not be accurate.")
+
+    metadata = dict(
+        protein_id=protein_id,
+        complex_hash=complex_hash,
+        ligand1_id=ligand1_id,
+        ligand2_id=ligand2_id,
+    )
+
     job_id = run._process_job(
         inputs=params,
         outputs=outputs,
         tool_key=tool_key_mapper[tool],
         cols=database_columns,
+        metadata=metadata,
     )
 
     # write job ID
@@ -217,3 +242,20 @@ def _start_tool_run(
         )
 
     return job_id
+
+
+@beartype
+def is_test_run(data: Any) -> bool:
+    """check if test_run=1 in a dict"""
+
+    if isinstance(data, dict):
+        if data.get("test_run") == 1:
+            return True
+        for value in data.values():
+            if is_test_run(value):
+                return True
+    elif isinstance(data, list):
+        for item in data:
+            if is_test_run(item):
+                return True
+    return False

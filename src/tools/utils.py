@@ -1,16 +1,18 @@
 """This module contains utility functions used by tool execution. In general, you will not need to use many of these functions directly."""
 
 import concurrent.futures
+from concurrent.futures import ThreadPoolExecutor
 import functools
 import json
 import os
 import time
-from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Optional
 
 from beartype import beartype
 from box import Box
+
 from deeporigin.config import get_value
+from deeporigin.data_hub import api
 from deeporigin.platform import clusters, tools
 from deeporigin.platform.tools import execute_tool
 from deeporigin.utils.core import _ensure_do_folder
@@ -19,6 +21,89 @@ JOBS_CACHE_DIR = _ensure_do_folder() / "jobs"
 
 TERMINAL_STATES = {"Succeeded", "Failed"}
 NON_TERMINAL_STATES = {"Created", "Queued", "Running"}
+
+
+@beartype
+def get_status_and_progress(execution_id: str) -> dict:
+    """Determine the status of a run, identified by job ID
+
+    Args:
+        execution_id (str): execution_id
+
+
+    """
+
+    data = tools.get_tool_execution(
+        org_friendly_id=get_value()["organization_id"],
+        execution_id=execution_id,
+    )
+
+    return dict(
+        job_id=execution_id,
+        status=data.attributes.status,
+        progress=data.attributes.progressReport,
+        execution_id=data.attributes.executionId,  # confusingly, this is not the execution_id coming in
+        inputs=data.attributes.userInputs,
+        attributes=data.attributes,
+    )
+
+
+@beartype
+def get_statuses_and_progress(job_ids: list[str]) -> list:
+    """get statuses and progress reports for multiple jobs in parallel
+
+    Args:
+        job_ids (list[str]): list of job IDs
+
+    """
+    results = []
+
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        # Submit all jobs and create a mapping from future to job_id
+        future_to_job_id = {
+            executor.submit(get_status_and_progress, job_id): job_id
+            for job_id in job_ids
+        }
+
+        # As each future completes, store the result in the status dictionary
+        for future in concurrent.futures.as_completed(future_to_job_id):
+            try:
+                results.append(future.result())
+            except Exception:
+                pass
+
+    return results
+
+
+@beartype
+def cancel_runs(job_ids: list[str]) -> None:
+    """Cancel multiple jobs in parallel.
+
+    Args:
+        job_ids: List of job IDs to cancel.
+    """
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        futures = [executor.submit(cancel_run, job_id) for job_id in job_ids]
+        concurrent.futures.wait(futures)
+
+
+@beartype
+def cancel_run(execution_id: str) -> None:
+    """cancel a run
+
+    Args:
+        execution_id (str): execution ID
+    """
+
+    data = get_status_and_progress(execution_id)
+    if data["status"] in ["Cancelled", "Failed", "Succeeded"]:
+        return
+
+    tools.action_tool_execution(
+        org_friendly_id=get_value()["organization_id"],
+        execution_id=execution_id,
+        action="cancel",
+    )
 
 
 @beartype
@@ -61,20 +146,9 @@ def query_run_status(execution_id: str) -> str:
     """
 
     data = tools.get_tool_execution(
-        org_friendly_id=get_value()["organization_id"], execution_id=execution_id
+        org_friendly_id=get_value()["organization_id"],
+        execution_id=execution_id,
     )
-
-    # Define the cache directory and file path
-
-    if not JOBS_CACHE_DIR.exists():
-        JOBS_CACHE_DIR.mkdir(parents=True)
-    cache_file = os.path.join(JOBS_CACHE_DIR, f"{execution_id}.json")
-
-    # Ensure the cache directory exists
-    os.makedirs(JOBS_CACHE_DIR, exist_ok=True)
-
-    with open(cache_file, "w") as file:
-        json.dump(data, file, indent=4)
 
     return data.attributes.status
 
@@ -227,6 +301,7 @@ def make_payload(
     outputs: dict,
     cluster_id: Optional[str] = None,
     cols: Optional[list] = None,
+    metadata: Optional[dict] = None,
 ) -> dict:
     """helper function to create payload for tool execution. This helper function is used by all wrapper functions in the run module to create the payload.
 
@@ -235,6 +310,7 @@ def make_payload(
         outputs (dict): outputs
         cluster_id (Optional[str], optional): cluster ID. Defaults to None. If not provided, the default cluster (us-west-2) is used.
         cols: (Optional[list], optional): list of columns. Defaults to None. If provided, column names (in inputs or outputs) are converted to column IDs.
+        metadata: (Optional[dict], optional): metadata to be added to the payload. Defaults to None.
 
     Returns:
         dict: correctly formatted payload, ready to be passed to execute_tool
@@ -247,6 +323,7 @@ def make_payload(
         inputs=inputs,
         outputs=outputs,
         clusterId=cluster_id,
+        metadata=metadata,
     )
 
     if cols:
@@ -269,7 +346,7 @@ def add_provider_if_databaseid_found(data):
             data["$provider"] = "datahub-cell"
 
         # Recursively check all values that are dicts or lists
-        for key, value in data.items():
+        for _, value in data.items():
             if isinstance(value, dict):
                 add_provider_if_databaseid_found(value)
             elif isinstance(value, list):
@@ -395,3 +472,57 @@ def read_jobs() -> list:
         print(f"Directory {JOBS_CACHE_DIR} does not exist.")
 
     return jobs
+
+
+@beartype
+def _ensure_database(name: str) -> dict:
+    """ensure that a database exists with the given name. If it doesn't exist, create it"""
+
+    databases = api.list_rows(row_type="database")
+
+    database = [db for db in databases if db["hid"] == name]
+
+    if len(database) == 0:
+        # make a new DB
+        print(f"🧬 Creating a database called {name}...")
+        api.create_database(
+            hid=name,
+            hid_prefix=name,
+            name=name,
+        )
+
+    database = api.describe_database(database_id=name)
+    return database
+
+
+@beartype
+def _ensure_columns(
+    *,
+    database: dict,
+    required_columns: list[dict],
+):
+    """ensure that columns exist with the given names (and types). If they don't exist, create them"""
+
+    existing_column_names = []
+    if "cols" in list(database.keys()):
+        existing_column_names = [col["name"] for col in database.cols]
+
+    # check if we need to make columns
+    for item in required_columns:
+        column_name = item["name"]
+        column_type = item["type"]
+
+        if column_name in existing_column_names:
+            continue
+        print(f"🧬 Making column named: {column_name} in {database.hid}")
+
+        api.add_database_column(
+            cardinality="one",
+            database_id=database.hid,
+            name=column_name,
+            required=False,
+            type=column_type,
+        )
+
+    database = api.describe_database(database_id=database.id)
+    return database

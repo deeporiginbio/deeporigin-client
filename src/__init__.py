@@ -1,7 +1,7 @@
 import os
 import pathlib
-import subprocess
 from pathlib import Path
+import subprocess
 
 __all__ = ["__version__", "DataFrame"]
 

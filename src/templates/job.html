@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self' https://cdn.jsdelivr.net; style-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; script-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'">
+    <title>{{ card_title }}</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Custom style for JSON blocks */
+        pre,
+        .monospace-block {
+            background: #f8f9fa;
+            border: 1px solid #e3e3e3;
+            border-radius: 0.25rem;
+            padding: 1rem;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+
+        .card {
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Full-width, left-aligned card using container-fluid -->
+    <div class="container-fluid py-3">
+        <div class="card w-100">
+            <div class="card-header">
+                <h2 class="card-title mb-3">{{ card_title }}</h2>
+                <ul class="nav nav-tabs card-header-tabs" id="jobTabs-{{ unique_id }}" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="status-tab-{{ unique_id }}" data-bs-toggle="tab"
+                            data-bs-target="#status-{{ unique_id }}" type="button" role="tab"
+                            aria-controls="status-{{ unique_id }}" aria-selected="true">
+                            Status
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="details-tab-{{ unique_id }}" data-bs-toggle="tab"
+                            data-bs-target="#details-{{ unique_id }}" type="button" role="tab"
+                            aria-controls="details-{{ unique_id }}" aria-selected="false">
+                            Details
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="inputs-tab-{{ unique_id }}" data-bs-toggle="tab"
+                            data-bs-target="#inputs-{{ unique_id }}" type="button" role="tab"
+                            aria-controls="inputs-{{ unique_id }}" aria-selected="false">
+                            Inputs
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="outputs-tab-{{ unique_id }}" data-bs-toggle="tab"
+                            data-bs-target="#outputs-{{ unique_id }}" type="button" role="tab"
+                            aria-controls="outputs-{{ unique_id }}" aria-selected="false">
+                            Outputs
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="raw-progress-tab-{{ unique_id }}" data-bs-toggle="tab"
+                            data-bs-target="#raw-progress-{{ unique_id }}" type="button" role="tab"
+                            aria-controls="raw-progress-{{ unique_id }}" aria-selected="false">
+                            Raw Progress Reports
+                        </button>
+                    </li>
+                </ul>
+            </div>
+            <!-- Card Body with Tab Content -->
+            <div class="card-body">
+                <div class="tab-content" id="jobTabsContent-{{ unique_id }}">
+                    <!-- Status Tab -->
+                    <div class="tab-pane fade show active" id="status-{{ unique_id }}" role="tabpanel"
+                        aria-labelledby="status-tab-{{ unique_id }}">
+                        {{ status_html|safe }}
+                    </div>
+                    <!-- Details Tab with Table -->
+                    <div class="tab-pane fade" id="details-{{ unique_id }}" role="tabpanel"
+                        aria-labelledby="details-tab-{{ unique_id }}">
+                        <table class="table table-bordered table-striped mb-0">
+                            <thead>
+                                <tr>
+                                    <th>jobID</th>
+                                    <th>executionID</th>
+                                    <th>Status</th>
+                                    <th>Started At</th>
+                                    <th>Running Time</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for i in range(job_ids|length) %}
+                                <tr>
+                                    <td>{{ job_ids[i] }}</td>
+                                    <td>{{ execution_ids[i] }}</td>
+                                    <td>{{ statuses[i] }}</td>
+                                    <td>{{ started_at[i] }}</td>
+                                    <td>{{ running_time[i] }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- Inputs Tab with JSON (no extra text or collapsible behavior) -->
+                    <div class="tab-pane fade" id="inputs-{{ unique_id }}" role="tabpanel"
+                        aria-labelledby="inputs-tab-{{ unique_id }}">
+                        <pre>{{ inputs_json|safe }}</pre>
+                    </div>
+                    <!-- Outputs Tab with JSON (no extra text or collapsible behavior) -->
+                    <div class="tab-pane fade" id="outputs-{{ unique_id }}" role="tabpanel"
+                        aria-labelledby="outputs-tab-{{ unique_id }}">
+                        <pre>{{ outputs_json|safe }}</pre>
+                    </div>
+                    <!-- Raw Progress Reports Tab -->
+                    <div class="tab-pane fade" id="raw-progress-{{ unique_id }}" role="tabpanel"
+                        aria-labelledby="raw-progress-tab-{{ unique_id }}">
+                        <div class="monospace-block">{{ raw_progress_json|safe }}</div>
+                    </div>
+                </div>
+            </div>
+            <!-- Card Footer with a Badge and Last Updated Timestamp -->
+            <div class="card-footer d-flex justify-content-between align-items-center">
+                <span
+                    class="badge {% if status == 'Running' %}bg-primary{% elif status == 'Failed' %}bg-danger{% elif status == 'Cancelled' %}bg-dark{% elif status == 'Succeeded' %}bg-success{% endif %}">{{
+                    status|e }}</span>
+                <span id="last-updated" class="text-muted" style="font-size: 0.9rem;">Last updated: {{ last_updated|e
+                    }}</span>
+            </div>
+        </div>
+    </div>
+    <!-- Bootstrap 5 JS Bundle (includes Popper) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

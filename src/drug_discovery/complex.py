@@ -1,39 +1,22 @@
 """Module to support Drug Discovery workflows using Deep Origin"""
 
 import concurrent.futures
-import json
-import os
 from dataclasses import dataclass, field
+import os
 from typing import Optional, get_args
 
-import pandas as pd
 from beartype import beartype
+import pandas as pd
+
 from deeporigin.data_hub import api
 from deeporigin.drug_discovery import chemistry as chem
 from deeporigin.drug_discovery import utils
 from deeporigin.drug_discovery.abfe import ABFE
 from deeporigin.drug_discovery.docking import Docking
 from deeporigin.drug_discovery.rbfe import RBFE
-from deeporigin.tools.toolkit import _ensure_columns, _ensure_database
-from deeporigin.tools.utils import query_run_statuses
+from deeporigin.drug_discovery.structures import Ligand, Protein
+from deeporigin.tools.utils import _ensure_columns, _ensure_database
 from deeporigin.utils.core import PrettyDict, hash_file, hash_strings
-
-DATA_DIRS = dict()
-
-DATA_DIRS[utils.DB_ABFE] = os.path.join(
-    os.path.expanduser("~"), ".deeporigin", utils.DB_ABFE
-)
-DATA_DIRS[utils.DB_RBFE] = os.path.join(
-    os.path.expanduser("~"), ".deeporigin", utils.DB_RBFE
-)
-DATA_DIRS[utils.DB_DOCKING] = os.path.join(
-    os.path.expanduser("~"), ".deeporigin", utils.DB_DOCKING
-)
-
-
-os.makedirs(DATA_DIRS[utils.DB_ABFE], exist_ok=True)
-os.makedirs(DATA_DIRS[utils.DB_RBFE], exist_ok=True)
-os.makedirs(DATA_DIRS[utils.DB_DOCKING], exist_ok=True)
 
 
 @beartype
@@ -126,8 +109,9 @@ def _ensure_dbs() -> dict:
 class Complex:
     """class to represent a set of a protein and 1 or many ligands"""
 
-    ligands: list[chem.Ligand]
-    protein: chem.Protein
+    # Using a private attribute for ligands with the property decorator below
+    protein: Protein
+    _ligands: list[Ligand] = field(default_factory=list, repr=False)
 
     # these params are not user facing
     _db: Optional[dict] = None
@@ -135,14 +119,20 @@ class Complex:
     """stores a hash of all ligands and the protein. This will be computed post initialization"""
     _hash: Optional[str] = None
 
-    """stores job ids for all jobs, organized by tool. """
-    _job_ids: dict = field(
-        default_factory=lambda: {
-            utils.DB_DOCKING: [],
-            utils.DB_ABFE: [],
-            utils.DB_RBFE: [],
-        }
-    )
+    def __init__(
+        self,
+        protein: Protein,
+        *,
+        ligands: list[Ligand] | None = None,
+        **kwargs,
+    ):
+        """Initialize a Complex with either ligands or _ligands parameter"""
+        self._ligands = ligands if ligands is not None else []
+        self.protein = protein
+        self._db = None
+        self._hash = None
+
+        self.__post_init__()
 
     def __post_init__(self):
         """various post init tasks"""
@@ -153,24 +143,44 @@ class Complex:
         self.abfe = ABFE(parent=self)
         self.rbfe = RBFE(parent=self)
 
-        # hash protein and ligands
-        protein_hash = hash_file(self.protein.file)
-        ligands_hash = hash_strings([ligand.smiles_string for ligand in self.ligands])
+        # Initialize the _hash
+        self._compute_hash()
+
+    def _compute_hash(self):
+        """Compute and update the hash based on protein and ligands"""
+        protein_hash = hash_file(self.protein.file_path)
+        ligands_hash = hash_strings([ligand.smiles for ligand in self.ligands])
         self._hash = hash_strings([protein_hash, ligands_hash])
+
+    @property
+    def ligands(self) -> list[Ligand]:
+        """Get the current ligands"""
+        return self._ligands
+
+    @ligands.setter
+    def ligands(self, new_ligands: list[Ligand]):
+        """Set new ligands and recompute the hash"""
+        self._ligands = new_ligands
+        self._compute_hash()
 
     @classmethod
     def from_dir(cls, directory: str) -> "Complex":
-        """initialize an FEP class given some files in a directory
+        """Initialize a Complex from a directory containing protein and ligand files.
 
         Args:
-            directory (str): directory containing ligand and protein files.
+            directory (str): Directory containing ligand and protein files.
 
-        Protein file should be in PDB format. Ligand files should be in SDF format. Each SDF file should contain a single molecule. If your SDF files contain more than one molecule, use `deeporigin.chemistry.split_sdf_file` to split them into separate files.
+        The directory should contain:
+        - Exactly one PDB file for the protein
+        - One or more SDF files for the ligands. Each SDF file can contain one or more molecules.
 
+        Returns:
+            Complex: A new Complex instance initialized from the files in the directory.
 
+        Raises:
+            ValueError: If no PDB file is found or if multiple PDB files are found.
         """
-
-        # figure out all the SDF files
+        # Find all SDF files in the directory
         sdf_files = sorted(
             [
                 os.path.join(directory, f)
@@ -178,20 +188,17 @@ class Complex:
                 if f.lower().endswith(".sdf")
             ]
         )
-        mols = []
-        for sdf_file in sdf_files:
-            mols_from_this_sdf_file = chem.read_molecules_in_sdf_file(sdf_file)
-            if len(mols_from_this_sdf_file) == 1:
-                # there's only one molecule in thie SDF file, so we should track the file it came from.
-                mols_from_this_sdf_file[0]["file"] = sdf_file
 
-            mols.extend(mols_from_this_sdf_file)
-
+        # Load all ligands from SDF files
         ligands = []
+        for sdf_file in sdf_files:
+            result = Ligand.from_sdf(sdf_file)
+            if isinstance(result, list):
+                ligands.extend(result)
+            else:
+                ligands.append(result)
 
-        for mol in mols:
-            ligands.append(chem.Ligand(**mol))
-
+        # Find PDB file
         pdb_files = [
             os.path.join(directory, f)
             for f in os.listdir(directory)
@@ -203,12 +210,12 @@ class Complex:
                 f"Expected exactly one PDB file in the directory, but found {len(pdb_files)}."
             )
         protein_file = pdb_files[0]
-        protein = chem.Protein(protein_file)
+        protein = Protein.from_file(protein_file)
 
         # Create the Complex instance
         instance = cls(
-            ligands=ligands,
             protein=protein,
+            ligands=ligands,
         )
 
         return instance
@@ -225,19 +232,19 @@ class Complex:
         df = api.get_dataframe(utils.DB_LIGANDS)
 
         for ligand in self.ligands:
-            if ligand.file is None:
+            if ligand.file_path is None:
                 # no ligand file, we only have a SMILES string. this means that there is no need to upload or otherwise manage this ligand
 
                 continue
 
-            ligand_file = os.path.basename(ligand.file)
+            ligand_file = os.path.basename(ligand.file_path)
             matching_indices = df.index[df[utils.COL_LIGAND] == ligand_file].tolist()
             if len(matching_indices) == 0:
-                print(f"Uploading {ligand.file}...")
+                print(f"Uploading {ligand.file_path}...")
                 response = api.upload_file_to_new_database_row(
                     database_id=utils.DB_LIGANDS,
                     column_id=utils.COL_LIGAND,
-                    file_path=str(ligand.file),
+                    file_path=str(ligand.file_path),
                 )
 
                 ligand._do_id = response.rows[0].hid
@@ -246,48 +253,23 @@ class Complex:
 
         # ensure that protein is uploaded
         df = api.get_dataframe(utils.DB_PROTEINS)
-        protein_file = os.path.basename(self.protein.file)
+        protein_file = os.path.basename(self.protein.file_path)
         matching_indices = df.index[df[utils.COL_PROTEIN] == protein_file].tolist()
         if len(matching_indices) == 0:
-            print(f"Uploading {self.protein.file}...")
+            print(f"Uploading {self.protein.file_path}...")
             response = api.upload_file_to_new_database_row(
                 database_id=utils.DB_PROTEINS,
                 column_id=utils.COL_PROTEIN,
-                file_path=str(self.protein.file),
+                file_path=str(self.protein.file_path),
             )
 
             self.protein._do_id = response.rows[0].hid
         else:
             self.protein._do_id = matching_indices[0]
 
-        # fetch all relevant jobIDs
-        # TODO -- parallelize this
         for tool in list(get_args(utils.VALID_TOOLS)):
-            df = pd.DataFrame(
-                api.get_dataframe(
-                    tool,
-                    return_type="dict",
-                )
-            )
-            df = df[df["ComplexHash"] == self._hash]
-            self._job_ids[tool] = df[utils.COL_JOBID].tolist()
-
-    @beartype
-    def get_status_for(self, tool: utils.VALID_TOOLS) -> dict:
-        """Return status for jobs corresponding to a particular tool
-
-        Args:
-            tool: one of "Docking", "ABFE", "RBFE"
-        """
-        return query_run_statuses(self._job_ids[tool])
-
-    def get_status(self):
-        """Returns status for all runs for all tools"""
-
-        data = dict()
-        for tool in list(get_args(utils.VALID_TOOLS)):
-            data[tool] = self.get_status_for(tool)
-        print(json.dumps(data, indent=2))
+            tool_instance = getattr(self, tool.lower())
+            tool_instance._connect()
 
     def _repr_pretty_(self, p, cycle):
         """pretty print a Docking object"""
@@ -301,20 +283,55 @@ class Complex:
             p.text(f" with {len(self.ligands)} ligands")
             p.text(")")
 
-    def show_ligands(self, view="2d"):
-        """Show all ligands in complex object in a table, rendering ligands as 2D structures"""
-
-        if view == "3d":
-            files = [ligand.file for ligand in self.ligands]
-            chem.show_molecules_in_sdf_files(files)
-        else:
-            chem.show_ligands(self.ligands)
-
-    def get_result_files_for(self, tool: utils.VALID_TOOLS):
-        """Generic method to get output results for a particular tool and combine them as need be
+    @beartype
+    def show_ligands(self, *, view: str = "2d", limit: Optional[int] = None):
+        """Display ligands in the complex object.
 
         Args:
-            tool: One of "Docking", "ABFE", "RBFE"
+            view: Visualization type, either "2d" (default) or "3d".
+                 - "2d": Shows ligands in a table with 2D structure renderings
+                 - "3d": Shows 3D molecular structures using SDF files
+            limit: Optional; maximum number of ligands to display.
+                  If None, all ligands will be shown.
+        """
+
+        if view == "3d":
+            files = [ligand.file_path for ligand in self.ligands]
+
+            if limit is not None:
+                files = files[:limit]
+
+            chem.show_molecules_in_sdf_files(files)
+        else:
+            from deeporigin.drug_discovery.structures.ligand import (
+                show_ligands as _show_ligands,
+            )
+
+            if limit is not None:
+                return _show_ligands(self.ligands[:limit])
+            else:
+                return _show_ligands(self.ligands)
+
+    @beartype
+    def get_result_files_for(
+        self,
+        *,
+        tool: utils.VALID_TOOLS,
+        ligand_ids: Optional[list[str]] = None,
+    ):
+        """Retrieve result files for a specific computational tool used with this complex.
+
+        This method fetches data from the specified tool's database, filters for results
+        associated with this complex, downloads any missing result files to the local
+        storage directory, and returns paths to all result files.
+
+        Args:
+            tool: One of "Docking", "ABFE", "RBFE" - specifies which computational
+                 method's results to retrieve
+            ligand_ids: Optional; list of ligand IDs to filter results. If None,
+                       results for all ligands in the complex will be retrieved.
+
+
         """
 
         df = pd.DataFrame(
@@ -325,7 +342,10 @@ class Complex:
             )
         )
 
-        df = df[self._hash == df[utils.COL_COMPLEX_HASH]]
+        df = df[df[utils.COL_PROTEIN] == self.protein._do_id]
+
+        if ligand_ids is not None:
+            df = df[df[utils.COL_LIGAND1].isin(ligand_ids)]
 
         # this makes sure that we only retain rows
         # where there is a valid output being generated
@@ -335,7 +355,7 @@ class Complex:
 
         file_ids = list(df[utils.COL_RESULT])
 
-        existing_files = os.listdir(DATA_DIRS[tool])
+        existing_files = os.listdir(utils.DATA_DIRS[tool])
         existing_files = ["_file:" + file for file in existing_files]
         missing_files = list(set(file_ids) - set(existing_files))
 
@@ -344,12 +364,12 @@ class Complex:
             api.download_files(
                 file_ids=missing_files,
                 use_file_names=False,
-                save_to_dir=DATA_DIRS[tool],
+                save_to_dir=utils.DATA_DIRS[tool],
             )
             print("Done.")
 
         return [
-            os.path.join(DATA_DIRS[tool], file_id.replace("_file:", ""))
+            os.path.join(utils.DATA_DIRS[tool], file_id.replace("_file:", ""))
             for file_id in file_ids
         ]
 
@@ -368,7 +388,10 @@ class Complex:
             )
         )
 
-        df = df[self._hash == df[utils.COL_COMPLEX_HASH]]
+        ligand_ids = [ligand._do_id for ligand in self.ligands]
+
+        df = df[df[utils.COL_PROTEIN] == self.protein._do_id]
+        df = df[(df[utils.COL_LIGAND1].isin(ligand_ids))]
 
         # this makes sure that we only retain rows
         # where there is a valid output being generated
@@ -377,14 +400,14 @@ class Complex:
         df = df.dropna(subset=[utils.COL_CSV_OUTPUT])
         file_ids = list(df[utils.COL_CSV_OUTPUT])
 
-        existing_files = os.listdir(DATA_DIRS[tool])
+        existing_files = os.listdir(utils.DATA_DIRS[tool])
         existing_files = ["_file:" + file for file in existing_files]
         missing_files = list(set(file_ids) - set(existing_files))
         if len(missing_files) > 0:
             api.download_files(
                 file_ids=missing_files,
                 use_file_names=False,
-                save_to_dir=DATA_DIRS[tool],
+                save_to_dir=utils.DATA_DIRS[tool],
             )
 
         if utils.COL_LIGAND1 in df.columns:
@@ -398,8 +421,15 @@ class Complex:
             ligand2_ids = [None for _ in file_ids]
 
         all_dfs = []
-        for file_id, ligand1_id, ligand2_id in zip(file_ids, ligand1_ids, ligand2_ids):
-            file_loc = os.path.join(DATA_DIRS[tool], file_id.replace("_file:", ""))
+        for file_id, ligand1_id, ligand2_id in zip(
+            file_ids,
+            ligand1_ids,
+            ligand2_ids,
+            strict=False,
+        ):
+            file_loc = os.path.join(
+                utils.DATA_DIRS[tool], file_id.replace("_file:", "")
+            )
             df = pd.read_csv(file_loc)
 
             # drop some columns
@@ -412,9 +442,7 @@ class Complex:
                     errors="ignore",
                 )
 
-            smiles_mapping = {
-                ligand._do_id: ligand.smiles_string for ligand in self.ligands
-            }
+            smiles_mapping = {ligand._do_id: ligand.smiles for ligand in self.ligands}
 
             if tool == "RBFE":
                 df["Ligand1"] = ligand1_id
@@ -423,9 +451,9 @@ class Complex:
                 df["SMILES1"] = df[utils.COL_LIGAND1].map(smiles_mapping)
                 df["SMILES2"] = df[utils.COL_LIGAND2].map(smiles_mapping)
             elif tool == "ABFE":
-                df["Ligand"] = ligand1_id
+                df["Ligand1"] = ligand1_id
 
-                df["SMILES"] = df["Ligand"].map(smiles_mapping)
+                df["SMILES"] = df["Ligand1"].map(smiles_mapping)
 
             all_dfs.append(df)
 

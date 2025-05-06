@@ -6,20 +6,21 @@ with these functions via api.py
 
 import inspect
 import json
-import sys
 from pathlib import Path
+import sys
 
 from beartype import beartype
 from box import Box
-from deeporigin import auth
-from deeporigin.exceptions import DeepOriginException
-from deeporigin.utils.core import PersistentDict, _get_method, _redact_responses
 from deeporigin_data import (
     AuthenticationError,
     ConflictError,
     DeeporiginData,
     NotFoundError,
 )
+
+from deeporigin import auth
+from deeporigin.exceptions import DeepOriginException
+from deeporigin.utils.core import PersistentDict, _get_method, _redact_responses
 
 # this list specifies methods in the low level API that should
 # not be automatically wrapped
@@ -68,7 +69,7 @@ def _get_client_methods() -> set:
 def _get_default_client(
     *,
     client=None,
-    refresh: bool = True,
+    refresh: bool = False,
     use_async: bool = False,
 ):
     """Internal function to instantiate client
@@ -89,6 +90,7 @@ def _get_default_client(
         access_token = tokens["access"]
 
         import httpx
+
         from deeporigin.config import get_value
 
         value = get_value()
@@ -147,6 +149,11 @@ def _create_function(method_path):
             response = method(**kwargs)
         except AuthenticationError as error:
             if "expired token" in error.message:
+                # TODO: this is a hack to refresh the token
+                # This can likely be safely removed, and I do not think
+                # this code block is ever reached, because the client
+                # is configured to refresh the token when it expires.
+
                 print("⚠️ Token expired. Refreshing credentials...")
                 tokens = auth.read_cached_tokens()
                 tokens["access"] = auth.refresh_tokens(tokens["refresh"])
@@ -174,14 +181,14 @@ def _create_function(method_path):
                 message,
                 fix="The resource could not be found. Please check the ID and organization.",
                 title="Deep Origin error: [Resource not found]",
-            )
+            ) from error
         except ConflictError as error:
             message = error.body["errors"][0]["title"]
             raise DeepOriginException(
                 message,
                 fix="The name you are trying to use cannot be used because it is already in use. Please try another name.",
                 title="Deep Origin error: [Name conflicts]",
-            )
+            ) from error
 
         if not isinstance(response, dict):
             if "json" in response.headers["content-type"]:

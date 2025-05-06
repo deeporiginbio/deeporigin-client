@@ -1,6 +1,5 @@
 """module to make plots from a Deep Origin dataframe"""
 
-import pandas as pd
 from beartype import beartype
 from beartype.typing import Optional
 from bokeh.io import show
@@ -17,6 +16,8 @@ from bokeh.models import (
 )
 from bokeh.palettes import Category10
 from bokeh.plotting import figure
+import pandas as pd
+
 from deeporigin.data_hub.dataframe import DataFrame
 from deeporigin.exceptions import DeepOriginException
 
@@ -87,7 +88,9 @@ def scatter(
         cat10_colors[1] = cat10_colors[3][:1]
         cat10_colors[2] = cat10_colors[3][:2]
         cat10_colors = cat10_colors[len(labels)]
-        color_map = {label: color for label, color in zip(labels, cat10_colors)}
+        color_map = {
+            label: color for label, color in zip(labels, cat10_colors, strict=False)
+        }
         color_map[default_label] = default_color
 
         legend_labels = [

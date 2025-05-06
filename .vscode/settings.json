@@ -1,0 +1,14 @@
+{
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+        "source.fixAll": "explicit",
+        "source.organizeImports": "explicit"
+    },
+    "[python]": {
+        "editor.defaultFormatter": "charliermarsh.ruff"
+    },
+    "sonarlint.connectedMode.project": {
+        "connectionId": "formiclabs",
+        "projectKey": "formiclabs_deeporigin-client"
+    }
+} 

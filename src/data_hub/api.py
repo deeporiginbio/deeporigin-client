@@ -8,13 +8,14 @@ from typing import Any, Optional, Union
 from urllib.parse import urlparse, urlunparse
 
 from beartype import beartype
+from tqdm import tqdm
+
 from deeporigin.data_hub import _api
 from deeporigin.data_hub._api import *  # noqa: F403
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.platform.api import get_user_name
 from deeporigin.utils import constants, network
 from deeporigin.utils.core import find_last_updated_row, sha256_checksum
-from tqdm import tqdm
 
 network.check_for_updates()
 
@@ -629,7 +630,7 @@ def set_data_in_cells(
             "row": {},
             "rowId": row_id,
         }
-        for (row_id, validated_value) in zip(row_ids, validated_values)
+        for (row_id, validated_value) in zip(row_ids, validated_values, strict=False)
     ]
 
     # we cannot write more than a 1000 rows at once.
@@ -760,10 +761,10 @@ def _validate_value_for_column(*, column: dict, value: Any):
         else:
             try:
                 validated_value = int(value)
-            except ValueError:
+            except ValueError as e:
                 raise DeepOriginException(
                     message=f"{value} is not valid for cell {column['name']} of type integer. The value must be an integer."
-                )
+                ) from e
 
     elif column["type"] == "float":
         from pandas._libs.missing import NAType
@@ -773,10 +774,10 @@ def _validate_value_for_column(*, column: dict, value: Any):
         else:
             try:
                 validated_value = float(value)
-            except ValueError:
+            except ValueError as e:
                 raise DeepOriginException(
                     message=f"{value} is not valid for cell {column['name']} of type float. The value must be a float."
-                )
+                ) from e
 
     elif column["type"] == "boolean":
         if isinstance(value, bool) or value is None:
@@ -1217,7 +1218,7 @@ def download_files(
 
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = []
-        for file_id, save_path in zip(file_ids, save_paths):
+        for file_id, save_path in zip(file_ids, save_paths, strict=False):
             futures.append(
                 executor.submit(
                     lambda file_id, save_path: network.download_sync(

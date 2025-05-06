@@ -2,25 +2,35 @@
 
 The RBFE object instantiated here is contained in the Complex class is meant to be used within that class."""
 
-import pandas as pd
 from beartype import beartype
+import pandas as pd
+
 from deeporigin.data_hub import api
 from deeporigin.drug_discovery import chemistry as chem
 from deeporigin.drug_discovery import utils
+from deeporigin.drug_discovery.workflow_step import WorkflowStep
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.utils.core import PrettyDict
 
 
-class RBFE:
+class RBFE(WorkflowStep):
     """class to handle RBFE-related tasks within the Complex class.
 
     Objects instantiated here are meant to be used within the Complex class."""
 
     def __init__(self, parent):
-        self.parent = parent
+        super().__init__(parent)
         self._params = PrettyDict()
-
         self._params.end_to_end = utils._load_params("rbfe_end_to_end")
+
+    def _render_progress(self, job) -> str:
+        """Render progress visualization for a job."""
+        # TODO: Implement RBFE-specific progress visualization
+        return "RBFE Progress Visualization"
+
+    def _name_job(self, job) -> str:
+        """Generate a name for a job."""
+        return f"RBFE run using <code>{job._metadata[0]['protein_id']}</code>, <code>{job._metadata[0]['ligand1_id']}</code>, and <code>{job._metadata[0]['ligand2_id']}</code>"
 
     def get_results(self):
         """Fetch RBFE results and return in a dataframe.
@@ -34,6 +44,23 @@ class RBFE:
             return pd.DataFrame()
 
         return df
+
+    def _connect(self):
+        """connect to datahub and fetch Job IDs for this protein and ligand"""
+
+        # fetch from ABFE first
+        df = pd.DataFrame(
+            api.get_dataframe(
+                "RBFE",
+                return_type="dict",
+            )
+        )
+        df = df[df["Protein"] == self.parent.protein._do_id]
+        ligand_ids = [ligand._do_id for ligand in self.parent.ligands]
+        # Filter rows where both Ligand1 and Ligand2 exist in ligand_ids
+        df = df[df["Ligand1"].isin(ligand_ids) & df["Ligand2"].isin(ligand_ids)]
+        job_ids = df[utils.COL_JOBID].tolist()
+        self._make_jobs_from_ids(job_ids)
 
     def show_results(self):
         """Show RBFE results in a dataframe.
@@ -127,4 +154,4 @@ class RBFE:
             complex_hash=self.parent._hash,
         )
 
-        self.parent._job_ids[utils.DB_RBFE].append(job_id)
+        self._job_ids.append(job_id)

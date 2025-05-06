@@ -2,14 +2,14 @@
 
 import uuid
 
+from box import BoxList
 import numpy as np
 import pandas as pd
 import pytest
-from box import BoxList
+
 from deeporigin.data_hub import api
 from deeporigin.data_hub.dataframe import DataFrame
 from deeporigin.exceptions import DeepOriginException
-
 from tests.utils import clean_up_test_objects
 
 TEST_PREFIX = "tc-"

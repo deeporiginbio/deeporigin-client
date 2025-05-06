@@ -1,0 +1,104 @@
+
+query mergedQuery($id: String!) {
+  entry(entry_id: $id) {
+    rcsb_id
+    struct {
+      title
+    }
+    exptl {
+      method
+    }
+    refine {
+      ls_d_res_high
+      ls_R_factor_R_work
+      ls_R_factor_R_free
+    }
+    rcsb_primary_citation {
+      pdbx_database_id_DOI
+    }
+    struct_keywords {
+      pdbx_keywords
+    }
+    rcsb_accession_info {
+      deposit_date
+      initial_release_date
+    }
+    pubmed {
+      rcsb_pubmed_abstract_text
+    }
+    polymer_entities {
+      entity_poly {
+        rcsb_sample_sequence_length
+        rcsb_mutation_count
+        pdbx_seq_one_letter_code_can
+      }
+      rcsb_polymer_entity {
+        pdbx_description
+      }
+      rcsb_polymer_entity_container_identifiers {
+        asym_ids
+      }
+      uniprots {
+        rcsb_id
+        rcsb_uniprot_protein {
+          source_organism {
+            scientific_name
+          }
+        }
+      }
+      entity_poly {
+        rcsb_sample_sequence_length
+        rcsb_mutation_count
+      }
+      rcsb_entity_source_organism {
+        scientific_name
+      }
+    }
+    nonpolymer_entities {
+      nonpolymer_entity_instances{
+        rcsb_nonpolymer_entity_instance_container_identifiers {
+          auth_asym_id
+          asym_id
+        }
+      }
+      nonpolymer_comp {
+        rcsb_chem_comp_descriptor {
+          InChIKey
+        }
+        chem_comp {
+          id
+          name
+          formula
+        }
+      }
+    }
+    rcsb_binding_affinity {
+      comp_id
+      type
+      value
+      unit
+      link
+    }
+    assemblies {
+      rcsb_struct_symmetry {
+        kind
+        type
+        symbol
+        oligomeric_state
+      }
+      rcsb_assembly_info {
+        modeled_polymer_monomer_count
+      }
+    }
+    citation {
+      year
+      title
+      page_last
+      page_first
+      pdbx_database_id_DOI
+      rcsb_authors
+      rcsb_journal_abbrev
+      journal_volume
+    }
+  }
+}

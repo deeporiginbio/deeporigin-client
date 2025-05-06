@@ -4,6 +4,7 @@ from urllib.parse import urljoin
 
 from beartype import beartype
 from beartype.typing import TypeVar
+
 from deeporigin.config import get_value
 from deeporigin.utils.constants import ObjectType
 

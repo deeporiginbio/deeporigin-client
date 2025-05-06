@@ -1,13 +1,11 @@
 """This module contains functions to start runs of various first-party tools on the Deep Origin platform"""
 
-import json
-import os
 from typing import Optional
 
 from beartype import beartype
+
 from deeporigin.data_hub import api
 from deeporigin.tools.utils import make_payload, run_tool
-from deeporigin.utils.core import _ensure_do_folder
 
 
 @beartype
@@ -308,6 +306,7 @@ def _process_job(
     outputs: dict,
     tool_key: str,
     cols,
+    metadata: Optional[dict] = None,
 ) -> str:
     """helper function that uses inputs and outputs to construct a payload and run a tool"""
 
@@ -315,27 +314,13 @@ def _process_job(
         outputs=outputs,
         inputs=inputs,
         cols=cols,
+        metadata=metadata,
     )
 
     response = run_tool(
         data=payload,
         tool_key=tool_key,
     )
-
-    execution_id = response.attributes.executionId
     job_id = response.id
 
-    # Define the cache directory and file path
-    cache_dir = _ensure_do_folder() / "jobs"
-    if not cache_dir.exists():
-        cache_dir.mkdir(parents=True)
-    cache_file = os.path.join(cache_dir, f"{job_id}.json")
-
-    # Ensure the cache directory exists
-    os.makedirs(cache_dir, exist_ok=True)
-
-    with open(cache_file, "w") as file:
-        json.dump(response, file, indent=4)
-
-    print(f"🧬 Job started with ID: {job_id}, execution ID: {execution_id}")
     return job_id
