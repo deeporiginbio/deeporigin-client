@@ -31,6 +31,12 @@ def _(Complex, EXAMPLE_DATA_DIR):
 
 @app.cell
 def _(sim):
+    sim.show_ligands()
+    return
+
+
+@app.cell
+def _(sim):
     sim.abfe.show_results()
     return
 

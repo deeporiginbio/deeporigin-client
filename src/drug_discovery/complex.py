@@ -308,9 +308,9 @@ class Complex:
             )
 
             if limit is not None:
-                _show_ligands(self.ligands[:limit])
+                return _show_ligands(self.ligands[:limit])
             else:
-                _show_ligands(self.ligands)
+                return _show_ligands(self.ligands)
 
     @beartype
     def get_result_files_for(

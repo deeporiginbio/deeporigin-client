@@ -957,7 +957,6 @@ def ligands_to_dataframe(ligands: list[Ligand]):
     return df
 
 
-@beartype
 def show_ligands(ligands: list[Ligand]):
     """show ligands in the FEP object in a dataframe. This function visualizes the ligands using core-aligned 2D visualizations.
 
@@ -968,13 +967,23 @@ def show_ligands(ligands: list[Ligand]):
 
     df = ligands_to_dataframe(ligands)
 
-    # convert SMILES to aligned images
-    from deeporigin.drug_discovery import chemistry
+    from rdkit.Chem import PandasTools
 
-    images = chemistry.smiles_list_to_base64_png_list(df["Ligand"].tolist())
-    df["Ligand"] = images
+    PandasTools.AddMoleculeColumnToFrame(df, smilesCol="Ligand", molCol="Structure")
+    PandasTools.RenderImagesInAllDataFrames()
 
-    # Use escape=False to allow the <img> tags to render as images
-    from IPython.display import HTML, display
+    # show structure first
+    new_order = ["Structure"] + [col for col in df.columns if col != "Structure"]
 
-    display(HTML(df.to_html(escape=False)))
+    # re‑index your DataFrame
+    df = df[new_order]
+
+    from deeporigin.utils.notebook import _in_marimo
+
+    if _in_marimo():
+        import marimo as mo
+
+        return mo.plain(df)
+
+    else:
+        return df
