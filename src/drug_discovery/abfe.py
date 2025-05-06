@@ -26,6 +26,8 @@ class ABFE(WorkflowStep):
 
     Objects instantiated here are meant to be used within the Complex class."""
 
+    _tool_key = "deeporigin.abfe-end-to-end"  # Tool key for ABFE jobs
+
     def __init__(self, parent):
         super().__init__(parent)
 

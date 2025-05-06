@@ -969,11 +969,11 @@ def show_ligands(ligands: list[Ligand]):
 
     from rdkit.Chem import PandasTools
 
-    PandasTools.AddMoleculeColumnToFrame(df, smilesCol="Ligand", molCol="Structure")
+    PandasTools.AddMoleculeColumnToFrame(df, smilesCol="Ligand", molCol="Ligand")
     PandasTools.RenderImagesInAllDataFrames()
 
     # show structure first
-    new_order = ["Structure"] + [col for col in df.columns if col != "Structure"]
+    new_order = ["Ligand"] + [col for col in df.columns if col != "Ligand"]
 
     # re‑index your DataFrame
     df = df[new_order]

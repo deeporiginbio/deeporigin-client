@@ -5,25 +5,29 @@ import marimo
 __generated_with = "0.13.2"
 app = marimo.App(width="medium")
 
+with app.setup:
+    import marimo as mo
+    from deeporigin.drug_discovery import Complex, EXAMPLE_DATA_DIR, Protein, Ligand
 
-app._unparsable_cell(
-    r"""
-    # ABFE on Deep Origin
 
-    This notebook demonstrates how one runs ABFE on Deep Origin
-    """,
-    name="_"
-)
+@app.cell(hide_code=True)
+def _():
+    mo.md(
+        """
+        # ABFE on Deep Origin
+
+        This notebook demonstrates how one runs ABFE on Deep Origin
+
+        ## Initialization 
+
+        We first create a Complex from a protein and a set of ligands 
+        """
+    )
+    return
 
 
 @app.cell
 def _():
-    from deeporigin.drug_discovery import Complex, EXAMPLE_DATA_DIR, Protein, Ligand
-    return Complex, EXAMPLE_DATA_DIR
-
-
-@app.cell
-def _(Complex, EXAMPLE_DATA_DIR):
     sim = Complex.from_dir(EXAMPLE_DATA_DIR)
     sim.connect()
     return (sim,)
@@ -35,27 +39,111 @@ def _(sim):
     return
 
 
+@app.cell(hide_code=True)
+def _():
+    mo.md(
+        """
+        ## Job control
+
+        In this section we show how we can
+
+        - start a job
+        - view status of a job
+        - cancel a job
+
+
+        ### Starting a ABFE run
+        """
+    )
+    return
+
+
+@app.cell
+def _(sim):
+    sim.abfe.run_end_to_end(ligand_ids=["Ligands-1"])
+    return
+
+
+@app.cell(hide_code=True)
+def _():
+    mo.md("""
+    ### Inspecting a single run
+
+    In this section we show how we can use the Job class to inspect a single run\""")
+    """)
+    return
+
+
+@app.cell
+def _(sim):
+    job = sim.abfe.jobs[0]
+    job
+    return
+
+
+@app.cell(hide_code=True)
+def _():
+    mo.md("""
+    ### Cancelling a job
+
+    In this section we cancel the job we just started
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _():
+    mo.md(
+        """
+        ## Viewing results
+
+        Here we view results from previous (completed) runs
+        """
+    )
+    return
+
+
 @app.cell
 def _(sim):
     sim.abfe.show_results()
     return
 
 
+@app.cell(hide_code=True)
+def _():
+    mo.md(
+        """
+        ## Viewing all jobs
+
+        In this section we dig deeper into viewing jobs.
+        """
+    )
+    return
+
+
 @app.cell
 def _(sim):
-    jobs = sim.abfe.jobs
-    return (jobs,)
+    df = sim.abfe.show_jobs(summary=True)
+    df
+    return
 
 
-@app.cell
-def _(jobs):
-    jobs[1]
+@app.cell(hide_code=True)
+def _():
+    mo.md(
+        """
+        ## Viewing all jobs in an org
+
+        We can view all jobs in an org, so we can filter post-hoc by user, tool, status, etc
+        """
+    )
     return
 
 
 @app.cell
 def _():
-    import marimo as mo
+    from deeporigin.tools.job import get_dataframe
+    get_dataframe()
     return
 
 
