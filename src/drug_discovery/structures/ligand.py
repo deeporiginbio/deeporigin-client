@@ -70,7 +70,6 @@ from tqdm import tqdm
 from deeporigin.drug_discovery.structures.internal_structures import (
     Molecule,
     mol_from_block,
-    mol_from_file,
     mol_from_smiles,
 )
 from deeporigin.drug_discovery.utilities.visualize import jupyter_visualization
@@ -260,7 +259,7 @@ class Ligand:
     def from_identifier(
         cls,
         identifier: str,
-        name: str = "",
+        name: Optional[str] = None,
         save_to_file: bool = False,
         **kwargs: Any,
     ) -> "Ligand":
@@ -298,6 +297,9 @@ class Ligand:
             raise DeepOriginException(
                 f"Could not resolve chemical identifier '{identifier}': {str(e)}"
             ) from e
+
+        if name is None:
+            name = identifier
 
         return cls(
             mol=mol,
@@ -838,10 +840,8 @@ class Ligand:
         from deeporigin.functions.molprops import molprops
 
         try:
-            props = molprops(self.mol.smiles)
+            props = molprops(self.mol.smiles)["properties"]
             for key, value in props.items():
-                if key == "smiles":
-                    continue
                 self.set_property(key, value)
 
             return props
@@ -957,7 +957,6 @@ def ligands_to_dataframe(ligands: list[Ligand]):
     return df
 
 
-@beartype
 def show_ligands(ligands: list[Ligand]):
     """show ligands in the FEP object in a dataframe. This function visualizes the ligands using core-aligned 2D visualizations.
 
@@ -968,13 +967,23 @@ def show_ligands(ligands: list[Ligand]):
 
     df = ligands_to_dataframe(ligands)
 
-    # convert SMILES to aligned images
-    from deeporigin.drug_discovery import chemistry
+    from rdkit.Chem import PandasTools
 
-    images = chemistry.smiles_list_to_base64_png_list(df["Ligand"].tolist())
-    df["Ligand"] = images
+    PandasTools.AddMoleculeColumnToFrame(df, smilesCol="Ligand", molCol="Ligand")
+    PandasTools.RenderImagesInAllDataFrames()
 
-    # Use escape=False to allow the <img> tags to render as images
-    from IPython.display import HTML, display
+    # show structure first
+    new_order = ["Ligand"] + [col for col in df.columns if col != "Ligand"]
 
-    display(HTML(df.to_html(escape=False)))
+    # re‑index your DataFrame
+    df = df[new_order]
+
+    from deeporigin.utils.notebook import _in_marimo
+
+    if _in_marimo():
+        import marimo as mo
+
+        return mo.plain(df)
+
+    else:
+        return df

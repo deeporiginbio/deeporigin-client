@@ -80,7 +80,9 @@ docs/_build/
 # PyBuilder
 target/
 
-# Jupyter Notebook
+# notebooks
+*__marimo__/*
+notebooks/__marimo__/*
 .ipynb_checkpoints
 
 # IPython

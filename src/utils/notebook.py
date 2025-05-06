@@ -124,3 +124,17 @@ def render_mermaid(diagram_code: str) -> None:
     # Check if mermaid is defined; if not, load it.
     # This snippet checks if window.mermaid exists, and if not, loads the script.
     display(HTML(mermaid_to_html(diagram_code)))
+
+
+@beartype
+def _in_marimo() -> bool:
+    """
+    Check if the code is running in Marimo.
+    """
+
+    try:
+        import marimo as mo
+
+        return mo.running_in_notebook()
+    except ImportError:
+        return False
