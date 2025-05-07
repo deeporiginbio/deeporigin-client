@@ -297,14 +297,14 @@ class FilesClient:
         return url
 
     def list_folder(
-        self, path: str, flag: str | None = None
+        self, path: str, recursive: bool = False
     ) -> dict[str, FileMetadata]:
         """
         List files and folders at the specified path. Returned dictionary keys will have
         the full remote path, so the resulting path key can be used directly for download, etc.
         Args:
             path: Remote path where to list files from
-            flag: Optional "recursive" flag. TBD: Currently always recursive?
+            flag: Optional "recursive" flag. If specified will include sub-folder content.
         Returns:
             Dictionary mapping file paths to FileMetadata objects, maintaining the order
             from the underlying list response. Key string will include the argument
@@ -312,17 +312,11 @@ class FilesClient:
         """
         remote_path = self._extract_path_from_url(path)
 
-        if flag == "recursive":
-            raise ValueError("list_folder recursive flag not implemented")
-
-        # The list_type parameter seems to be required in the API
-        # We'll map the flag to an appropriate value
-        list_type = 2  # Default value
-
         call_args = genapi._get_get_object_kwargs(
             orgFriendlyId=self.organization_id,
             filePath=remote_path,
-            list_type=list_type,
+            list_type = 2,            
+            recursive = "true" if recursive == True else None,
         )
         response = self.client.httpx_request_and_process(call_args)
 
@@ -335,7 +329,8 @@ class FilesClient:
 
             # Create a dictionary with key_path as keys, maintaining order
             result = {}
-            for file_data in raw_files:
+            raw_files_data = raw_files["data"]
+            for file_data in raw_files_data:
                 metadata = FileMetadata.from_dict(
                     file_data, mapping=FileMetadata.METADATA_LIST_FIELD_MAPPING
                 )
@@ -377,11 +372,8 @@ class FilesClient:
             # If there was an error getting metadata, the file probably doesn't exist
             return False
 
-        """
-    Folder creation is yet supported by back end well.
-
     def create_folder(self, path: str) -> bool:
-        "
+        """
         Create a folder in the remote storage.        
         In case of S3, should create a zero-byte object with a trailing slash and special
         content type to represent a folder in object storage.        
@@ -389,7 +381,7 @@ class FilesClient:
             path: Remote path where to create the folder. Must end with '/'            
         Returns:
             True if folder creation was successful, False otherwise
-        "
+        """
         if not path.endswith('/'):
             error_msg = f"Folder path must end with '/': {path}"
             self.logger.error(error_msg)
@@ -398,25 +390,13 @@ class FilesClient:
         remote_path = self._extract_path_from_url(path)
         
         try:
-            # Create an empty bytes buffer as a file-like object
-            empty_buffer = io.BytesIO(b"")
-            
-            # Create a File object with the empty buffer
-            empty_file = File(
-                payload=empty_buffer,
-                file_name="",
-                #mime_type="application/x-directory"
-                mime_type = "application/octet-stream"
-            )
-            
-            # Create an empty object with folder content type
-            response = put_object.sync_detailed(
-                org_friendly_id=self.organization_id,
-                file_path=remote_path,
-                client=self.client,
-                # content_type="application/x-directory",  # Set in File object instead
-                body=PutObjectBody(file=empty_file)
-            )
+            #TBD: ideally mime-type created would be "application/x-directory"
+            call_args = genapi._get_put_object_kwargs(
+                        orgFriendlyId=self.organization_id,
+                        filePath=remote_path,
+                        #file=file_obj,
+                    )
+            response = self.client.httpx_request_and_process(call_args)
             
             if response.status_code == 200:
                 return True
@@ -428,7 +408,7 @@ class FilesClient:
             return False
             
     def delete_folder(self, path: str) -> bool:
-        "
+        """
         Delete a folder from remote storage. This is not recursive and will only 
         delete the folder itself, not its contents.        
         Args:
@@ -436,7 +416,7 @@ class FilesClient:
         Returns:
             True if deletion was successful, False otherwise
             ValueError: If path does not end with '/'
-        "
+        """
         if not path.endswith('/'):
             error_msg = f"Folder path must end with '/': {path}"
             self.logger.error(error_msg)
@@ -444,7 +424,7 @@ class FilesClient:
             
         # Use the existing delete_file method as the operation is the same
         return self._delete_single_file(path)[0]
-    """
+
 
     def upload_file(self, src: str, dest: str) -> bool:
         """
@@ -845,7 +825,7 @@ class FilesClient:
         """
         # Get list of remote files with metadata
         # todo: add/figure out recursive flag
-        remote_files_dict = self.list_folder(remote_path)
+        remote_files_dict = self.list_folder(remote_path, recursive=True)
 
         # Extract the base remote path without the prefix for path comparisons
         base_remote_path = self._extract_path_from_url(remote_path)
