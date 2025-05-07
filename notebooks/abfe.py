@@ -14,13 +14,19 @@ with app.setup:
 def _():
     mo.md(
         """
+        /// attention | Work in progress
+
+        Functionality shown here is under active development. 
+        ///
+
+
         # ABFE on Deep Origin
 
         This notebook demonstrates how one runs ABFE on Deep Origin
 
         ## Initialization 
 
-        We first create a Complex from a protein and a set of ligands 
+        We first create a Complex from a protein and a set of ligands
         """
     )
     return
@@ -66,11 +72,13 @@ def _(sim):
 
 @app.cell(hide_code=True)
 def _():
-    mo.md("""
-    ### Inspecting a single run
+    mo.md(
+        """
+        ### Inspecting a single run
 
-    In this section we show how we can use the Job class to inspect a single run\""")
-    """)
+        In this section we show how we can use the Job class to inspect a single run
+        """
+    )
     return
 
 
@@ -78,16 +86,24 @@ def _():
 def _(sim):
     job = sim.abfe.jobs[0]
     job
-    return
+    return (job,)
 
 
 @app.cell(hide_code=True)
 def _():
-    mo.md("""
-    ### Cancelling a job
+    mo.md(
+        """
+        ### Cancelling a job
 
-    In this section we cancel the job we just started
-    """)
+        In this section we cancel the job we just started
+        """
+    )
+    return
+
+
+@app.cell
+def _(job):
+    job.cancel()
     return
 
 

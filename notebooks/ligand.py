@@ -5,11 +5,21 @@ import marimo
 __generated_with = "0.13.2"
 app = marimo.App(width="medium")
 
+with app.setup:
+    import marimo as mo
+    from deeporigin.drug_discovery import EXAMPLE_DATA_DIR, Ligand
+
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(
         """
+        /// attention | Work in progress
+
+        Functionality shown here is under active development. 
+        ///
+
+
         # Working with ligands
 
         This notebook shows you how to use the Ligand class in the Deep Origin Drug Discovery toolbox
@@ -18,14 +28,8 @@ def _(mo):
     return
 
 
-@app.cell
-def _():
-    from deeporigin.drug_discovery import EXAMPLE_DATA_DIR, Ligand
-    return EXAMPLE_DATA_DIR, Ligand
-
-
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(
         """
         ## Making a Ligand
@@ -39,27 +43,27 @@ def _(mo):
 
 
 @app.cell
-def _(Ligand):
+def _():
     ligand = Ligand.from_identifier("ATP")
     ligand.show()
     return (ligand,)
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""### from SMILES Strings""")
     return
 
 
 @app.cell
-def _(Ligand):
+def _():
     pcm = Ligand.from_smiles("CC(=O)Nc1ccc(O)cc1")
     pcm.show()
     return
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(
         r"""
         ### From a file
@@ -71,20 +75,19 @@ def _(mo):
 
 
 @app.cell
-def _(EXAMPLE_DATA_DIR, Ligand):
+def _():
     brd2 = Ligand.from_sdf(EXAMPLE_DATA_DIR / "brd-2.sdf")
     brd2.show()
     return
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(
-        """
-        ## Ligand operations
+    """
+    ## Ligand operations
 
-        The Ligand class offers many functions. For example, we can use the DO Molecular property predictor to predict ADMET properties:
-        """
+    The Ligand class offers many functions. For example, we can use the DO Molecular property predictor to predict ADMET properties:"""
     )
     return
 
@@ -95,26 +98,21 @@ def _(ligand):
     return
 
 
-app._unparsable_cell(
-    r"""
-    We can inspect the ligand's properties, such as SMILES string:
+@app.cell(hide_code=True)
+def _():
+    mo.md(
+    """We can inspect the ligand's properties, such as SMILES string:
 
+    """
 
-    """,
-    column=None, disabled=False, hide_code=True, name="_"
-)
+    )
+    return
 
 
 @app.cell
 def _(ligand):
     ligand.properties
     return
-
-
-@app.cell
-def _():
-    import marimo as mo
-    return (mo,)
 
 
 if __name__ == "__main__":
