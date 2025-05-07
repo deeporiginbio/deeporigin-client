@@ -5,11 +5,19 @@ import marimo
 __generated_with = "0.13.2"
 app = marimo.App(width="medium")
 
+with app.setup:
+    import marimo as mo
+
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(
         """
+        /// attention | Work in progress
+
+        Functionality shown here is under active development. 
+        ///
+
         # Working with proteins
 
         This notebook shows you how to use the Protein class in the Deep Origin Drug Discovery toolbox
@@ -25,7 +33,7 @@ def _():
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(
         """
         ## Making a Protein
@@ -46,7 +54,7 @@ def _(Protein):
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""We can use the `show` method of the Protein class to visualize its 3D structure""")
     return
 
@@ -57,8 +65,8 @@ def _(conotoxin):
     return
 
 
-@app.cell
-def _(mo):
+@app.cell(hide_code=True)
+def _():
     mo.md(
         r"""
         ## Making a protein from a file
@@ -83,7 +91,7 @@ def _(sim):
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(
         r"""
         ## Operations on proteins
@@ -112,12 +120,6 @@ def _(protein):
 def _(protein):
     protein.show()
     return
-
-
-@app.cell
-def _():
-    import marimo as mo
-    return (mo,)
 
 
 if __name__ == "__main__":
