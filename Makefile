@@ -14,6 +14,7 @@ responses="pass"
 
 
 test: 
+	ruff check .
 	ruff check --select I --fix
 ifeq ($(client), "mock")
 	$(eval n_workers=1)
