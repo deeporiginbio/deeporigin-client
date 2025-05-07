@@ -419,16 +419,15 @@ def run_tests():
 
     # === Test 5B: Test folder creation and deletion ===
 
-    
     print_header("Test 5B: Test folder creation and deletion")
-    
+
     folder_test_success = True
     test_folders = [
         f"{REMOTE_PREFIX}/test_folder/",
         f"{REMOTE_PREFIX}/test_folder/subfolder1/",
-        f"{REMOTE_PREFIX}/test_folder/subfolder1/subfolder2/"
+        f"{REMOTE_PREFIX}/test_folder/subfolder1/subfolder2/",
     ]
-    
+
     # Create folders
     print_step("Creating test folders")
     for folder_path in test_folders:
@@ -437,7 +436,7 @@ def run_tests():
             success = client.create_folder(folder_path)
             if success:
                 print(f"  ✅ Folder created successfully: {folder_path}")
-                
+
                 # Verify folder exists using metadata
                 metadata = client.get_metadata(folder_path)
                 if metadata and metadata.is_folder:
@@ -452,11 +451,11 @@ def run_tests():
         except Exception as e:
             print(f"  ❌ Error creating folder {folder_path}: {e}")
             folder_test_success = False
-    
+
     # List the main test folder to see contents
     print_step(f"Listing folder: {REMOTE_PREFIX}/test_folder/")
     print_remote_files(client, f"{REMOTE_PREFIX}/test_folder/")
-    
+
     # Delete folders in reverse order (deepest first)
     print_step("Deleting test folders")
     for folder_path in reversed(test_folders):
@@ -465,7 +464,7 @@ def run_tests():
             success = client.delete_folder(folder_path)
             if success:
                 print(f"  ✅ Folder deleted successfully: {folder_path}")
-                
+
                 # Verify folder no longer exists
                 metadata = client.get_metadata(folder_path)
                 if metadata is None:
@@ -479,7 +478,6 @@ def run_tests():
         except Exception as e:
             print(f"  ❌ Error deleting folder {folder_path}: {e}")
             folder_test_success = False
-    
 
     # === Test 6: Test sync_dir (download) ===
     print_header("Test 6: Test sync_dir (download)")
