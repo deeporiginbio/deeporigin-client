@@ -1,5 +1,4 @@
 import os
-from pathlib import Path
 
 from deeporigin.drug_discovery import EXAMPLE_DATA_DIR, Complex, Ligand, Protein
 
@@ -58,43 +57,3 @@ def test_construct_complex():
         assert isinstance(ligand, Ligand)
         assert ligand.smiles is not None
         assert ligand.name is not None
-
-    # Verify we can still compute the hash
-    assert complex_obj._hash is not None
-
-
-def test_hash_changes_with_ligands():
-    """Test that the Complex hash changes when ligands are modified"""
-    # Create initial complex with protein only
-    pdb_path = os.path.join(EXAMPLE_DATA_DIR, "brd.pdb")
-    protein = Protein.from_file(pdb_path)
-    complex_obj = Complex(protein=protein, ligands=[])
-
-    # Store initial hash
-    initial_hash = complex_obj._hash
-    previous_hash = initial_hash
-
-    # Add ligands one by one and verify hash changes each time
-    sdf_files = sorted([f for f in os.listdir(EXAMPLE_DATA_DIR) if f.endswith(".sdf")])
-    for sdf_file in sdf_files[:3]:  # Test with first 3 ligands
-        sdf_path = os.path.join(EXAMPLE_DATA_DIR, sdf_file)
-        new_ligand = Ligand.from_sdf(sdf_path)
-        if isinstance(new_ligand, list):
-            new_ligands = new_ligand
-        else:
-            new_ligands = [new_ligand]
-
-        # Add new ligands to existing ones
-        complex_obj.ligands = complex_obj.ligands + new_ligands
-
-        # Verify hash has changed
-        current_hash = complex_obj._hash
-        assert current_hash != previous_hash, (
-            f"Hash didn't change after adding {sdf_file}"
-        )
-        previous_hash = current_hash
-
-    # Verify final hash is different from initial
-    assert complex_obj._hash != initial_hash, (
-        "Final hash should be different from initial hash"
-    )

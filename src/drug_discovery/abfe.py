@@ -11,14 +11,13 @@ import zipfile
 from beartype import beartype
 import pandas as pd
 
-from deeporigin.data_hub import api
 from deeporigin.drug_discovery import utils
-from deeporigin.drug_discovery.structures.ligand import ligands_to_dataframe
+from deeporigin.drug_discovery.constants import tool_mapper
+from deeporigin.drug_discovery.structures.ligand import Ligand, ligands_to_dataframe
 from deeporigin.drug_discovery.workflow_step import WorkflowStep
 from deeporigin.exceptions import DeepOriginException
-from deeporigin.tools.job import Job
-from deeporigin.tools.utils import get_statuses_and_progress
-from deeporigin.utils.notebook import _in_marimo
+from deeporigin.tools.job import Job, get_dataframe
+from deeporigin.utils.notebook import get_notebook_environment
 
 
 class ABFE(WorkflowStep):
@@ -26,6 +25,8 @@ class ABFE(WorkflowStep):
 
     Objects instantiated here are meant to be used within the Complex class."""
 
+    """tool version to use for ABFE"""
+    tool_version = "0.2.6"
     _tool_key = "deeporigin.abfe-end-to-end"  # Tool key for ABFE jobs
 
     def __init__(self, parent):
@@ -82,7 +83,7 @@ class ABFE(WorkflowStep):
         # re‑index your DataFrame
         df = df[new_order]
 
-        if _in_marimo():
+        if get_notebook_environment() == "marimo":
             import marimo as mo
 
             return mo.plain(df)
@@ -90,80 +91,75 @@ class ABFE(WorkflowStep):
         else:
             return df
 
+    def set_test_run(self, value: int = 1):
+        """set test_run paramemter in abfe parameters"""
+
+        utils._set_test_run(self._params.end_to_end, value)
+
     @beartype
     def run_end_to_end(
         self,
         *,
-        ligand_ids: Optional[list[str]] = None,
+        ligands: Optional[list[Ligand]] = None,
     ):
         """Method to run an end-to-end ABFE run.
 
         Args:
             ligand_ids (Optional[str], optional): List of ligand IDs to run. Defaults to None. When None, all ligands in the object will be run. To view a list of valid ligand IDs, use the `.show_ligands()` method"""
 
-        if ligand_ids is None:
-            ligand_ids = [ligand._do_id for ligand in self.parent.ligands]
+        if ligands is None:
+            ligands = self.parent.ligands
 
-        # check that protein ID is valid
-        if self.parent.protein._do_id is None:
-            raise DeepOriginException(
-                "Protein has not been uploaded yet. Use .connect() first."
-            )
+        ligand_names = [os.path.basename(ligand.file_path) for ligand in ligands]
 
-        # check that ligand IDs are valid
-        valid_ligand_ids = [ligand._do_id for ligand in self.parent.ligands]
+        # TODO -- loop over all ligands
 
-        if None in valid_ligand_ids:
-            raise DeepOriginException(
-                "Some ligands have not been uploaded yet. Use .connect() first."
-            )
-
-        if not set(ligand_ids).issubset(valid_ligand_ids):
-            raise DeepOriginException(
-                f"Some ligand IDs re not valid. Valid ligand IDs are: {valid_ligand_ids}"
-            )
-
-        database_columns = (
-            self.parent._db.ligands.cols
-            + self.parent._db.proteins.cols
-            + self.parent._db.abfe.cols
+        df = get_dataframe(
+            tool_key=tool_mapper["ABFE"],
+            only_with_status=["Succeeded", "Running", "Queued"],
+            include_metadata=True,
+            resolve_user_names=False,
         )
 
-        # only run on ligands that have not been run yet
-        # first check that there are no existing runs
-        df = api.get_dataframe(utils.DB_ABFE)
-        df = df[df[utils.COL_PROTEIN] == self.parent.protein._do_id]
-        df = df[(df[utils.COL_LIGAND1].isin(ligand_ids))]
-
-        # remove runs that have failed or cancelled
-        job_ids = list(df["JobID"])
-
-        data = get_statuses_and_progress(job_ids)
-
-        bad_job_ids = [
-            item["job_id"] for item in data if item["status"] in ["Failed", "Cancelled"]
+        # filter to find relevant jobs
+        df = df[
+            df["metadata"].apply(
+                lambda d: isinstance(d, dict) and d.get("ligand_file") in ligand_names
+            )
         ]
 
-        df = df[~df["JobID"].isin(bad_job_ids)]
+        # TODO -- use this info to determine whether to run new jobs or not
 
-        already_run_ligands = set(df[utils.COL_LIGAND1])
-        ligand_ids = set(ligand_ids) - already_run_ligands
+        ligands_to_run = ligand_names
 
-        if len(ligand_ids) == 0:
+        self.parent._sync_protein_and_ligands()
+
+        protein_path = "entities/proteins/" + os.path.basename(
+            self.parent.protein.file_path
+        )
+
+        if len(ligands_to_run) == 0:
             print("All requested ligands have already been run.")
             return
 
         if self.jobs is None:
             self.jobs = []
 
-        for ligand_id in ligand_ids:
+        for ligand_name in ligands_to_run:
+            ligand_path = "entities/ligands/" + os.path.basename(ligand_name)
+
+            metadata = dict(
+                protein_file=os.path.basename(protein_path),
+                ligand_file=os.path.basename(ligand_path),
+            )
+
             job_id = utils._start_tool_run(
-                protein_id=self.parent.protein._do_id,
-                ligand1_id=ligand_id,
-                database_columns=database_columns,
+                metadata=metadata,
+                ligand1_path=ligand_path,
+                protein_path=protein_path,
                 params=self._params.end_to_end,
-                tool=utils.DB_ABFE,
-                complex_hash=self.parent._hash,
+                tool="ABFE",
+                tool_version=self.tool_version,
             )
 
             job = Job.from_ids([job_id])
@@ -343,25 +339,9 @@ class ABFE(WorkflowStep):
     def _name_job(cls, job: Job) -> str:
         """utility function to name a job using inputs to that job"""
         try:
-            return f"ABFE run using <code>{job._metadata[0]['protein_id']}</code> and <code>{job._metadata[0]['ligand1_id']}</code>"
+            return f"ABFE run using <code>{job._metadata[0]['protein_file']}</code> and <code>{job._metadata[0]['ligand_file']}</code>"
         except Exception:
             return "ABFE run"
-
-    def _connect(self):
-        """connect to datahub and fetch Job IDs for this protein and ligand"""
-
-        # fetch from ABFE first
-        df = pd.DataFrame(
-            api.get_dataframe(
-                "ABFE",
-                return_type="dict",
-            )
-        )
-        df = df[df["Protein"] == self.parent.protein._do_id]
-        ligand_ids = [ligand._do_id for ligand in self.parent.ligands]
-        df = df[df["Ligand1"].isin(ligand_ids)]
-        job_ids = df[utils.COL_JOBID].tolist()
-        self._make_jobs_from_ids(job_ids)
 
     @classmethod
     @beartype
@@ -379,7 +359,7 @@ class ABFE(WorkflowStep):
 
         # Define the fixed nodes in the diagram.
         nodes = [
-            "init",
+            "init(Init)",
             "complex(Complex Prep)",
             "ligand(Ligand Prep)",
             "solvation(Solvation FEP)",

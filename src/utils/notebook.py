@@ -127,14 +127,28 @@ def render_mermaid(diagram_code: str) -> None:
 
 
 @beartype
-def _in_marimo() -> bool:
+def get_notebook_environment() -> str:
     """
-    Check if the code is running in Marimo.
-    """
+    Determine the notebook environment type.
 
+    Returns:
+        str: One of 'marimo', 'jupyter', or 'other' indicating the current environment.
+    """
+    # First check for Marimo
     try:
         import marimo as mo
 
-        return mo.running_in_notebook()
+        if mo.running_in_notebook():
+            return "marimo"
     except ImportError:
-        return False
+        pass
+
+    # Then check for Jupyter
+    try:
+        shell = get_ipython().__class__.__name__
+        if shell == "ZMQInteractiveShell":
+            return "jupyter"
+    except NameError:
+        pass
+
+    return "other"

@@ -8,7 +8,6 @@ import re
 from typing import Optional, Tuple
 
 from beartype import beartype
-import pandas as pd
 from rdkit import Chem
 
 from deeporigin.exceptions import DeepOriginException
