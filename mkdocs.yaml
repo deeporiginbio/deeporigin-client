@@ -64,6 +64,8 @@ nav:
     - docking: dd/ref/docking.md
     - abfe: dd/ref/abfe.md
     - rbfe: dd/ref/rbfe.md
+  - Notebooks:
+    - Docking: notebooks/docking.html
 - Platform: 
   - platform/index.md
   - How to:
