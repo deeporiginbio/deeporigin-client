@@ -1,8 +1,6 @@
-
-
 import marimo
 
-__generated_with = "0.13.2"
+__generated_with = "0.13.6"
 app = marimo.App(width="medium")
 
 with app.setup:
@@ -14,16 +12,16 @@ with app.setup:
 def _():
     mo.md(
         """
-        /// attention | Work in progress
+    /// attention | Work in progress
 
-        Functionality shown here is under active development. 
-        ///
+    Functionality shown here is under active development. 
+    ///
 
 
-        # Working with ligands
+    # Working with ligands
 
-        This notebook shows you how to use the Ligand class in the Deep Origin Drug Discovery toolbox
-        """
+    This notebook shows you how to use the Ligand class in the Deep Origin Drug Discovery toolbox
+    """
     )
     return
 
@@ -32,12 +30,12 @@ def _():
 def _():
     mo.md(
         """
-        ## Making a Ligand
+    ## Making a Ligand
 
-        ### From an identifier
+    ### From an identifier
 
-        We can make Ligands using an identifier. Molecules are pulled from PubChem using [pubchempy](https://github.com/mcs07/PubChemPy)
-        """
+    We can make Ligands using an identifier. Molecules are pulled from PubChem using [pubchempy](https://github.com/mcs07/PubChemPy)
+    """
     )
     return
 
@@ -66,10 +64,10 @@ def _():
 def _():
     mo.md(
         r"""
-        ### From a file
+    ### From a file
 
-        We can make Ligands from a SDF file
-        """
+    We can make Ligands from a SDF file
+    """
     )
     return
 
@@ -84,10 +82,11 @@ def _():
 @app.cell(hide_code=True)
 def _():
     mo.md(
-    """
+        """
     ## Ligand operations
 
-    The Ligand class offers many functions. For example, we can use the DO Molecular property predictor to predict ADMET properties:"""
+    The Ligand class offers many functions. For example, we can use the DO Molecular property predictor to predict ADMET properties:
+    """
     )
     return
 
@@ -100,12 +99,7 @@ def _(ligand):
 
 @app.cell(hide_code=True)
 def _():
-    mo.md(
-    """We can inspect the ligand's properties, such as SMILES string:
-
-    """
-
-    )
+    mo.md("""We can inspect the ligand's properties, such as SMILES string:""")
     return
 
 
