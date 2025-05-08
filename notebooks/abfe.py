@@ -1,8 +1,6 @@
-
-
 import marimo
 
-__generated_with = "0.13.2"
+__generated_with = "0.13.6"
 app = marimo.App(width="medium")
 
 with app.setup:
@@ -14,20 +12,20 @@ with app.setup:
 def _():
     mo.md(
         """
-        /// attention | Work in progress
+    /// attention | Work in progress
 
-        Functionality shown here is under active development. 
-        ///
+    Functionality shown here is under active development. 
+    ///
 
 
-        # ABFE on Deep Origin
+    # ABFE on Deep Origin
 
-        This notebook demonstrates how one runs ABFE on Deep Origin
+    This notebook demonstrates how one runs ABFE on Deep Origin
 
-        ## Initialization 
+    ## Initialization 
 
-        We first create a Complex from a protein and a set of ligands
-        """
+    We first create a Complex from a protein and a set of ligands
+    """
     )
     return
 
@@ -49,24 +47,24 @@ def _(sim):
 def _():
     mo.md(
         """
-        ## Job control
+    ## Job control
 
-        In this section we show how we can
+    In this section we show how we can
 
-        - start a job
-        - view status of a job
-        - cancel a job
+    - start a job
+    - view status of a job
+    - cancel a job
 
 
-        ### Starting a ABFE run
-        """
+    ### Starting a ABFE run
+    """
     )
     return
 
 
 @app.cell
-def _(sim):
-    sim.abfe.run_end_to_end(ligand_ids=["Ligands-1"])
+def _():
+    # sim.abfe.run_end_to_end(ligand_ids=["Ligands-1"])
     return
 
 
@@ -74,10 +72,10 @@ def _(sim):
 def _():
     mo.md(
         """
-        ### Inspecting a single run
+    ### Inspecting a single run
 
-        In this section we show how we can use the Job class to inspect a single run
-        """
+    In this section we show how we can use the Job class to inspect a the run we just started:
+    """
     )
     return
 
@@ -86,24 +84,24 @@ def _():
 def _(sim):
     job = sim.abfe.jobs[0]
     job
-    return (job,)
+    return
 
 
 @app.cell(hide_code=True)
 def _():
     mo.md(
         """
-        ### Cancelling a job
+    ### Cancelling a job
 
-        In this section we cancel the job we just started
-        """
+    In this section we cancel the job we just started
+    """
     )
     return
 
 
 @app.cell
-def _(job):
-    job.cancel()
+def _():
+    # job.cancel()
     return
 
 
@@ -111,10 +109,10 @@ def _(job):
 def _():
     mo.md(
         """
-        ## Viewing results
+    ## Viewing results
 
-        Here we view results from previous (completed) runs
-        """
+    Here we view results from previous (completed) runs
+    """
     )
     return
 
@@ -129,10 +127,10 @@ def _(sim):
 def _():
     mo.md(
         """
-        ## Viewing all jobs
+    ## Viewing all jobs
 
-        In this section we dig deeper into viewing jobs.
-        """
+    In this section we dig deeper into viewing jobs.
+    """
     )
     return
 
@@ -148,10 +146,10 @@ def _(sim):
 def _():
     mo.md(
         """
-        ## Viewing all jobs in an org
+    ## Viewing all jobs in an org
 
-        We can view all jobs in an org, so we can filter post-hoc by user, tool, status, etc
-        """
+    We can view all jobs in an org, so we can filter post-hoc by user, tool, status, etc
+    """
     )
     return
 

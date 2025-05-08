@@ -1,8 +1,6 @@
-
-
 import marimo
 
-__generated_with = "0.13.2"
+__generated_with = "0.13.6"
 app = marimo.App(width="medium")
 
 with app.setup:
@@ -14,19 +12,20 @@ with app.setup:
 def _():
     mo.md(
         """
-
     /// attention | Work in progress
 
     Functionality shown here is under active development. 
     ///
 
-    
+
     # Docking using Deep Origin
 
     In this notebook we demonstrate how we can work with Proteins and Ligands to dock a Ligand to a Protein using the Deep Origin API.
 
-        First, we construct a Protein object by specifying a PDB ID:
-        """
+    ## The `Protein` Class
+
+    First, we can construct a protein object by specifying a PDB ID. We can inspect the protein by printing it:
+    """
     )
     return
 
@@ -34,20 +33,34 @@ def _():
 @app.cell
 def _():
     protein = Protein.from_pdb_id("1EBY")
-    protein.show()
+    protein
     return (protein,)
+
+
+app._unparsable_cell(
+    r"""
+    ### Visualizing the Protein
+
+    We can visualize the 3D structure of the protein using the `show` method:
+    """,
+    column=None, disabled=False, hide_code=True, name="_"
+)
+
+
+@app.cell
+def _(protein):
+    protein.show()
+    return
 
 
 @app.cell(hide_code=True)
 def _():
     mo.md(
-    """
-
-    ## Basic Protein Prep
+        """
+    ### Basic Protein Prep
 
     We notice that there are several heteratoms in the protein. We can remove them using the `remove_hetatm` method. This removes the waters and the ligand that is part of the structure we obtained from PDB:
     """
-    
     )
     return
 
@@ -62,11 +75,17 @@ def _(protein):
 @app.cell(hide_code=True)
 def _():
     mo.md(
-    """
-    ## Finding pockets
+        """
+    ### Finding pockets
 
-    We can now find pockets using the Pocket Finder tool"""
+    We can now find pockets using the Pocket Finder tool. 
+
+    /// admonition | Fast running tool
+
+    This functionality uses the Deep Origin pocket finder tool. Fast running tools (functions) have near instant start up times and respond to requests over HTTP.
     
+    ///
+    """
     )
     return
 
@@ -78,12 +97,12 @@ def _(protein):
     return pocket, pockets
 
 
-@app.cell(hide_code=True)
-def _():
-    mo.md(text=
-         """
-         We can inspect properties of the pocket by simply calling the pocket object:""")
-    return
+app._unparsable_cell(
+    r"""
+    We can inspect properties of the pocket by simply calling the pocket object:
+    """,
+    column=None, disabled=False, hide_code=True, name="_"
+)
 
 
 @app.cell
@@ -94,10 +113,13 @@ def _(pocket):
 
 @app.cell(hide_code=True)
 def _():
-    mo.md("""
-    ## Visualizing pocket
+    mo.md(
+        """
+    ### Visualizing pocket
 
-    We can visualize the pocket in the protein using the `show` method of the Protein class:""")
+    We can visualize the pocket in the protein using the `show` method of the Protein class:
+    """
+    )
     return
 
 
@@ -113,7 +135,8 @@ def _():
         """
     ## Ligand to dock
 
-    Here we construct the Ligand object to dock to this protein from a SMILES string:"""
+    Here we construct the Ligand object to dock to this protein from a SMILES string. We can view the structure of the ligand using the `show` method:
+    """
     )
     return
 
@@ -128,13 +151,42 @@ def _():
 @app.cell(hide_code=True)
 def _():
     mo.md(
+        """
+    ### Ligand ADMET properties
 
+    We can use the Deep Origin `molprops` tool to compute ADMET properties of the Ligand
+
+    /// admonition | Fast running tool
+
+    This functionality uses the Deep Origin `molprops` tool. Fast running tools (functions) have near instant start up times and respond to requests over HTTP.
+    
+    ///
     """
+    )
+    return
 
+
+@app.cell
+def _(ligand):
+    ligand.admet_properties()
+    return
+
+
+@app.cell(hide_code=True)
+def _():
+    mo.md(
+        """
     ## Docking
 
-    We can now dock the ligand to the protein using the `dock` method of the Protein class. This will return a SDF file with the poses of the ligand in the protein. We can visualize these poses using the `show` method of the Protein class:
+    We can now dock the ligand to the protein using the `dock` method of the Protein class. This will return a SDF file with the poses of the ligand in the protein. 
 
+    /// admonition | Fast running tool
+
+    This functionality uses the Deep Origin Docking tool. Fast running tools (functions) have near instant start up times and respond to requests over HTTP.
+    
+    ///
+
+    We can visualize these poses using the `show` method of the Protein class:
     """
     )
     return
@@ -144,10 +196,19 @@ def _():
 def _(ligand, pocket, protein):
     poses_sdf = protein.dock(ligand=ligand,pocket=pocket)
     protein.show(sdf_file=poses_sdf)
+    return (poses_sdf,)
+
+
+@app.cell
+def _(poses_sdf):
+    from deeporigin.drug_discovery.structures.ligand import ligands_to_dataframe
+
+    df = ligands_to_dataframe(Ligand.from_sdf(poses_sdf))
+    df.loc[:,["POSE SCORE", "Binding Energy"]]
     return
 
 
-@app.cell(hide_code=True)
+@app.cell
 def _():
     return
 
