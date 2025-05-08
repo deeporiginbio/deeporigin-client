@@ -577,6 +577,8 @@
       
         
       
+        
+      
     
     
     
@@ -817,6 +819,15 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#job-control" class="md-nav__link">
+    <span class="md-ellipsis">
+      Job Control
+    </span>
+  </a>
   
 </li>
       
@@ -1379,6 +1390,87 @@
   
   <span class="md-ellipsis">
     rbfe
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_4" id="__nav_2_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Notebooks
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            Notebooks
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../notebooks/docking.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Docking
     
   </span>
   
@@ -2974,6 +3066,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#job-control" class="md-nav__link">
+    <span class="md-ellipsis">
+      Job Control
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#parameters" class="md-nav__link">
     <span class="md-ellipsis">
       Parameters
@@ -3071,23 +3172,22 @@
 <p>This document describes how to run a <a href="https://en.wikipedia.org/wiki/Free-energy_perturbation">ABFE <span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M3.75 2h3.5a.75.75 0 0 1 0 1.5h-3.5a.25.25 0 0 0-.25.25v8.5c0 .138.112.25.25.25h8.5a.25.25 0 0 0 .25-.25v-3.5a.75.75 0 0 1 1.5 0v3.5A1.75 1.75 0 0 1 12.25 14h-8.5A1.75 1.75 0 0 1 2 12.25v-8.5C2 2.784 2.784 2 3.75 2m6.854-1h4.146a.25.25 0 0 1 .25.25v4.146a.25.25 0 0 1-.427.177L13.03 4.03 9.28 7.78a.75.75 0 0 1-1.042-.018.75.75 0 0 1-.018-1.042l3.75-3.75-1.543-1.543A.25.25 0 0 1 10.604 1"/></svg></span></a> simulation using Deep Origin tools. </p>
 <h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h2>
 <p>We assume that we have an initialized and configured <code>Complex</code> object:</p>
-<p><div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin.drug_discovery</span><span class="w"> </span><span class="kn">import</span> <span class="n">Complex</span>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin.drug_discovery</span><span class="w"> </span><span class="kn">import</span> <span class="n">Complex</span>
 <span class="n">sim</span> <span class="o">=</span> <span class="n">Complex</span><span class="o">.</span><span class="n">from_dir</span><span class="p">(</span><span class="s2">&quot;/path/to/folder/&quot;</span><span class="p">)</span>
 <span class="n">sim</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
 </code></pre></div>
-For more details on how to get started, see <a href="getting-started.html"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 21h15a2 2 0 0 0 2-2v-6h-4v2l-4-3 4-3v2h4V5a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2m0-6h4v2H4zm0-4h7v2H4zm0-4h7v2H4zm17 4h3v2h-3z"/></svg></span> Getting Started </a>.</p>
+<p>Here, ABFE requires that the <code>Complex</code> object have an already preppared protein (PDB), and the associated ligands (SDF) are in a docked pose.  </p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The <code>Complex.from_dir()</code> function only accepts 1 PDB file per directory. This function will throw a warning if it finds more than 1 PDB file per directory. </p>
+</div>
+<p>For more details on how to get started, see <a href="getting-started.html"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 21h15a2 2 0 0 0 2-2v-6h-4v2l-4-3 4-3v2h4V5a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2m0-6h4v2H4zm0-4h7v2H4zm0-4h7v2H4zm17 4h3v2h-3z"/></svg></span> Getting Started </a>.</p>
 <h2 id="starting-an-abfe-run">Starting an ABFE run<a class="headerlink" href="#starting-an-abfe-run" title="Permanent link">&para;</a></h2>
 <h3 id="single-ligand">Single ligand<a class="headerlink" href="#single-ligand" title="Permanent link">&para;</a></h3>
 <p>To run an end-to-end ABFE workflow on a single ligand, we use:</p>
 <div class="language-python highlight"><pre><span></span><code><span class="n">sim</span><span class="o">.</span><span class="n">abfe</span><span class="o">.</span><span class="n">run_end_to_end</span><span class="p">(</span><span class="n">ligand_ids</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Ligands-1&quot;</span><span class="p">])</span> <span class="c1"># for example</span>
 </code></pre></div>
 <p>This queues up a task on Deep Origin. When it completes, outputs will be written to the appropriate column in this database. </p>
-<p>You will see a message printed to screen similar to:</p>
-<div class="admonition success">
-<p class="admonition-title">Expected output</p>
-<div class="language-bash highlight"><pre><span></span><code>🧬<span class="w"> </span>Job<span class="w"> </span>started<span class="w"> </span>with<span class="w"> </span>ID:<span class="w"> </span>20f05e96,<span class="w"> </span>execution<span class="w"> </span>ID:<span class="w"> </span>x9rl5eghrpqwyiciehc3e
-</code></pre></div>
-</div>
 <h3 id="multiple-ligands">Multiple ligands<a class="headerlink" href="#multiple-ligands" title="Permanent link">&para;</a></h3>
 <p>To run an end-to-end ABFE workflow on multiple ligands, we use:</p>
 <div class="language-python highlight"><pre><span></span><code><span class="n">sim</span><span class="o">.</span><span class="n">abfe</span><span class="o">.</span><span class="n">run_end_to_end</span><span class="p">(</span><span class="n">ligand_ids</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Ligands-1&quot;</span><span class="p">,</span> <span class="s2">&quot;Ligands-2&quot;</span><span class="p">])</span> 
@@ -3096,6 +3196,26 @@ For more details on how to get started, see <a href="getting-started.html"><span
 <div class="language-python highlight"><pre><span></span><code><span class="n">sim</span><span class="o">.</span><span class="n">abfe</span><span class="o">.</span><span class="n">run_end_to_end</span><span class="p">()</span> 
 </code></pre></div>
 <p>Each ligand will be run in parallel on a separate instance. </p>
+<h2 id="job-control">Job Control<a class="headerlink" href="#job-control" title="Permanent link">&para;</a></h2>
+<p>Once a job has been submitted, you can track the its status using our built in job tracking:</p>
+<div class="language-python highlight"><pre><span></span><code><span class="n">sim</span><span class="o">.</span><span class="n">abfe</span><span class="o">.</span><span class="n">show_jobs</span><span class="p">()</span>
+</code></pre></div>
+<div class="admonition success">
+<p class="admonition-title">Expected output</p>
+<p><img alt="ABFE Job Tracking" src="../../images/tools/ABFE_Status_Report.png" /></p>
+</div>
+<p>Here, the specific stage of the calculation is reported, with the most up-to-date logging information available in the <code>Raw Progress Reports</code> tab.</p>
+<p>If we want to cancel a job, first gran the <code>jobID</code> from the <code>Details</code> tab of the Job Control panel:</p>
+<div class="admonition success">
+<p class="admonition-title">Expected output</p>
+<p><img alt="ABFE Job ID" src="../../images/tools/ABFE_jobID.png" /></p>
+</div>
+<p>In the above case, the <code>jobID</code> is <code>4d3536b3-6401-4cb5-ae5b-768daf099d40</code>. Next, we can cancel that job via:</p>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">utils</span> 
+
+<span class="n">utils</span><span class="o">.</span><span class="n">cancel_runs</span><span class="p">([</span><span class="s1">&#39;4d3536b3-6401-4cb5-ae5b-768daf099d40&#39;</span><span class="p">])</span>
+</code></pre></div>
+<p>Note that this function accepts a list of <code>jobID</code>. </p>
 <h2 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h2>
 <h3 id="viewing-parameters">Viewing parameters<a class="headerlink" href="#viewing-parameters" title="Permanent link">&para;</a></h3>
 <p>The end to end ABFE tool has a number of user-accessible parameters. To view all parameters, use:</p>
