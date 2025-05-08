@@ -29,6 +29,31 @@ def camel_to_snake(name: str) -> str:
     return re.sub("([a-z0-9])([A-Z])", r"\1_\2", name).lower()
 
 
+# Track generated function names to handle duplicates
+_generated_function_names = {}
+
+
+def get_unique_function_name(operation_id: str, path: str) -> str:
+    """Generate a unique function name for an operation"""
+    # Convert operation_id to snake case
+    base_name = camel_to_snake(operation_id)
+    full_name = f"_get_{base_name}_kwargs"
+    
+    # Get the path prefix and convert to valid Python identifier
+    path_prefix = path.split("/")[1]  # e.g., "file-api/shared-data" -> "file-api"
+    path_prefix = path_prefix.replace("-", "_")  # Convert hyphens to underscores
+    
+    # Check if this function name has been used before
+    if full_name in _generated_function_names:
+        # Append the path prefix to make it unique
+        unique_name = f"_get_{base_name}_{path_prefix}_kwargs"
+        _generated_function_names[unique_name] = True
+        return unique_name
+    else:
+        _generated_function_names[full_name] = True
+        return full_name
+
+
 def format_path_as_name(path: str, method: str) -> str:
     """Convert path and method to function name"""
     # Replace path params like {org_id} with "by_org_id"
@@ -38,9 +63,7 @@ def format_path_as_name(path: str, method: str) -> str:
     path = path.replace("/", "_").replace("-", "_")
 
     # Remove leading and trailing underscores
-    path = path.strip("_")
-
-    return f"{method}_{path}"
+    return path.strip("_")
 
 
 def sanitize_param_name(name: str) -> str:
@@ -50,6 +73,10 @@ def sanitize_param_name(name: str) -> str:
 
 def generate_api_file(schema_path: str, output_path: str) -> None:
     """Generate API client file from OpenAPI schema"""
+    # Reset the function name tracking
+    global _generated_function_names
+    _generated_function_names = {}
+
     # Load OpenAPI schema
     with open(schema_path, "r") as f:
         schema = yaml.safe_load(f)
@@ -74,7 +101,8 @@ def generate_api_file(schema_path: str, output_path: str) -> None:
             operation_id = operation.get(
                 "operationId", format_path_as_name(path, method)
             )
-            function_name = f"_get_{camel_to_snake(operation_id)}_kwargs"
+            # Get unique function name
+            function_name = get_unique_function_name(operation_id, path)
 
             # Get parameters from the operation
             parameters = operation.get("parameters", [])
