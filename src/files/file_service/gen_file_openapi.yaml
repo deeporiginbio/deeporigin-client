@@ -1,53 +1,107 @@
-
-# This is the OpenAPI specification for the File Service API
-# Had to make fixes to the original generated file to get it to auto-generate correct stubs
-# from this by openapi-python-client.
-# Changes:
-# - Changed the path of get/put/delete to /file-api/{orgFriendlyId}/{filePath}
-# to that it actually passes and argument.
-# - Changed upload to use multipart/form-data instead of application/json
-# - Made list-type as optional, or else server returns JSON instead of file content
+# This is the OpenAPI specification for the File Service API copied here
 openapi: 3.0.0
 paths:
-  /file-api/signedUrl/download/{orgFriendlyId}/*:
-    get:
-      operationId: getSignedUrlDownload
+  /file-api/shared-data/{filePath}:
+    head:
+      operationId: headSharedObject
       parameters:
-        - name: orgFriendlyId
-          required: true
-          in: path
-          schema:
-            type: string
-      responses:
-        "200":
-          description: ""
-  /file-api/signedUrl/upload/{orgFriendlyId}/*:
-    get:
-      operationId: getSignedUrlUpload
-      parameters:
-        - name: orgFriendlyId
-          required: true
-          in: path
-          schema:
-            type: string
-      responses:
-        "200":
-          description: ""
-  /file-api/{orgFriendlyId}/{filePath}:
-    put:
-      operationId: putObject
-      parameters:
-        - name: orgFriendlyId
-          required: true
-          in: path
-          schema:
-            type: string
         - name: filePath
           required: true
           in: path
+          description: The path to the file (can include subdirectories)
           schema:
             type: string
+      responses:
+        "200":
+          description: ""
+      tags:
+        - Shared Data
+    get:
+      operationId: getDoObject
+      parameters:
+        - name: filePath
+          required: true
+          in: path
           description: The path to the file (can include subdirectories)
+          schema:
+            type: string
+        - name: last-count
+          required: false
+          in: query
+          description: last-count is used to get the last count of objects in the bucket.
+            This is used for pagination of the list results.
+          schema:
+            type: string
+        - name: continuation-token
+          required: false
+          in: query
+          description: ContinuationToken indicates to that the list is being continued on
+            this bucket with a token. ContinuationToken is obfuscated and is not
+            a real key. You can use this ContinuationToken for pagination of the
+            list results.
+          schema:
+            type: string
+        - name: delimiter
+          required: false
+          in: query
+          description: Delimiter is used to group the results by a common prefix. For
+            example, if you set the delimiter to "/", the results will be
+            grouped by the first part of the path before the "/".
+          schema:
+            type: string
+        - name: recursive
+          required: false
+          in: query
+          description: if the list should be recursive, default is false and will only
+            return the folders/file within the path
+          schema:
+            type: boolean
+        - name: max-keys
+          required: false
+          in: query
+          description: max number of keys to return, cannot be more than 1000
+          schema:
+            type: number
+        - name: list-type
+          required: false
+          in: query
+          description: list objects within path (set to 2)
+          schema:
+            type: number
+        - name: prefix
+          required: false
+          in: query
+          description: path the the url
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+      tags:
+        - Shared Data
+    delete:
+      operationId: deleteSharedObject
+      parameters:
+        - name: filePath
+          required: true
+          in: path
+          description: The path to the file (can include subdirectories)
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+      tags:
+        - Shared Data
+    put:
+      operationId: putSharedObject
+      parameters:
+        - name: filePath
+          required: true
+          in: path
+          description: The path to the file (can include subdirectories)
+          schema:
+            type: string
       requestBody:
         required: true
         content:
@@ -61,197 +115,309 @@ paths:
                   description: The file to upload
       responses:
         "200":
-          description: "File uploaded successfully"
+          description: File uploaded successfully
+      tags:
+        - Shared Data
+  /file-api/do-data/{filePath}:
+    head:
+      operationId: headDoObject
+      parameters:
+        - name: filePath
+          required: true
+          in: path
+          description: The path to the file (can include subdirectories)
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+      tags:
+        - Do Data
+    get:
+      operationId: getDoObject
+      parameters:
+        - name: filePath
+          required: true
+          in: path
+          description: The path to the file (can include subdirectories)
+          schema:
+            type: string
+        - name: last-count
+          required: false
+          in: query
+          description: last-count is used to get the last count of objects in the bucket.
+            This is used for pagination of the list results.
+          schema:
+            type: string
+        - name: continuation-token
+          required: false
+          in: query
+          description: ContinuationToken indicates to that the list is being continued on
+            this bucket with a token. ContinuationToken is obfuscated and is not
+            a real key. You can use this ContinuationToken for pagination of the
+            list results.
+          schema:
+            type: string
+        - name: delimiter
+          required: false
+          in: query
+          description: Delimiter is used to group the results by a common prefix. For
+            example, if you set the delimiter to "/", the results will be
+            grouped by the first part of the path before the "/".
+          schema:
+            type: string
+        - name: recursive
+          required: false
+          in: query
+          description: if the list should be recursive, default is false and will only
+            return the folders/file within the path
+          schema:
+            type: boolean
+        - name: max-keys
+          required: false
+          in: query
+          description: max number of keys to return, cannot be more than 1000
+          schema:
+            type: number
+        - name: list-type
+          required: false
+          in: query
+          description: list objects within path (set to 2)
+          schema:
+            type: number
+        - name: prefix
+          required: false
+          in: query
+          description: path the the url
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+      tags:
+        - Do Data
+    delete:
+      operationId: deleteDoObject
+      parameters:
+        - name: filePath
+          required: true
+          in: path
+          description: The path to the file (can include subdirectories)
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+      tags:
+        - Do Data
+    put:
+      operationId: putDoObject
+      parameters:
+        - name: filePath
+          required: true
+          in: path
+          description: The path to the file (can include subdirectories)
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: The file to upload
+      responses:
+        "200":
+          description: File uploaded successfully
+      tags:
+        - Do Data
+  /file-api/signedUrl/download/{orgFriendlyId}/{filePath}:
+    get:
+      operationId: getSignedUrlDownload
+      parameters:
+        - name: orgFriendlyId
+          required: true
+          in: path
+          description: The org key
+          schema:
+            type: string
+        - name: filePath
+          required: true
+          in: path
+          description: The path to the file (can include subdirectories)
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+      tags:
+        - Files
+  /file-api/signedUrl/upload/{orgFriendlyId}/{filePath}:
+    get:
+      operationId: getSignedUrlUpload
+      parameters:
+        - name: orgFriendlyId
+          required: true
+          in: path
+          description: The org key
+          schema:
+            type: string
+        - name: filePath
+          required: true
+          in: path
+          description: The path to the file (can include subdirectories)
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+      tags:
+        - Files
+  /file-api/{orgFriendlyId}/{filePath}:
+    put:
+      operationId: putObject
+      parameters:
+        - name: orgFriendlyId
+          required: true
+          in: path
+          description: The org key
+          schema:
+            type: string
+        - name: filePath
+          required: true
+          in: path
+          description: The path to the file (can include subdirectories)
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: The file to upload
+      responses:
+        "200":
+          description: File uploaded successfully
+      tags:
+        - Files
     head:
       operationId: headObject
       parameters:
         - name: orgFriendlyId
           required: true
           in: path
+          description: The org key
           schema:
             type: string
         - name: filePath
           required: true
           in: path
+          description: The path to the file (can include subdirectories)
           schema:
             type: string
-          description: The path to the file (can include subdirectories)
       responses:
         "200":
           description: ""
+      tags:
+        - Files
     get:
       operationId: getObject
       parameters:
         - name: orgFriendlyId
           required: true
           in: path
+          description: The org key
           schema:
             type: string
         - name: filePath
           required: true
           in: path
+          description: The path to the file (can include subdirectories)
           schema:
             type: string
-          description: The path to the file (can include subdirectories)
+        - name: last-count
+          required: false
+          in: query
+          description: last-count is used to get the last count of objects in the bucket.
+            This is used for pagination of the list results.
+          schema:
+            type: string
+        - name: continuation-token
+          required: false
+          in: query
+          description: ContinuationToken indicates to that the list is being continued on
+            this bucket with a token. ContinuationToken is obfuscated and is not
+            a real key. You can use this ContinuationToken for pagination of the
+            list results.
+          schema:
+            type: string
+        - name: delimiter
+          required: false
+          in: query
+          description: Delimiter is used to group the results by a common prefix. For
+            example, if you set the delimiter to "/", the results will be
+            grouped by the first part of the path before the "/".
+          schema:
+            type: string
+        - name: recursive
+          required: false
+          in: query
+          description: if the list should be recursive, default is false and will only
+            return the folders/file within the path
+          schema:
+            type: boolean
+        - name: max-keys
+          required: false
+          in: query
+          description: max number of keys to return, cannot be more than 1000
+          schema:
+            type: number
         - name: list-type
           required: false
           in: query
+          description: list objects within path (set to 2)
           schema:
             type: number
+        - name: prefix
+          required: false
+          in: query
+          description: path the the url
+          schema:
+            type: string
       responses:
         "200":
           description: ""
+      tags:
+        - Files
     delete:
       operationId: deleteObject
       parameters:
         - name: orgFriendlyId
           required: true
           in: path
+          description: The org key
           schema:
             type: string
         - name: filePath
           required: true
           in: path
+          description: The path to the file (can include subdirectories)
           schema:
             type: string
-          description: The path to the file (can include subdirectories)
       responses:
         "200":
           description: ""
-    post:
-      operationId: syncObjects
-      parameters:
-        - name: orgFriendlyId
-          required: true
-          in: path
-          schema:
-            type: string
-        - name: filePath
-          required: true
-          in: path
-          schema:
-            type: string
-          description: The path to the file (can include subdirectories)
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/SyncFileSchemaDto"
-      responses:
-        "201":
-          description: ""
-  /file-api/health:
-    get:
-      operationId: check
-      parameters: []
-      responses:
-        "200":
-          description: The Health Check is successful
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    example: ok
-                  info:
-                    type: object
-                    example:
-                      database:
-                        status: up
-                    additionalProperties:
-                      type: object
-                      required:
-                        - status
-                      properties:
-                        status:
-                          type: string
-                      additionalProperties: true
-                    nullable: true
-                  error:
-                    type: object
-                    example: {}
-                    additionalProperties:
-                      type: object
-                      required:
-                        - status
-                      properties:
-                        status:
-                          type: string
-                      additionalProperties: true
-                    nullable: true
-                  details:
-                    type: object
-                    example:
-                      database:
-                        status: up
-                    additionalProperties:
-                      type: object
-                      required:
-                        - status
-                      properties:
-                        status:
-                          type: string
-                      additionalProperties: true
-        "503":
-          description: The Health Check is not successful
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    example: error
-                  info:
-                    type: object
-                    example:
-                      database:
-                        status: up
-                    additionalProperties:
-                      type: object
-                      required:
-                        - status
-                      properties:
-                        status:
-                          type: string
-                      additionalProperties: true
-                    nullable: true
-                  error:
-                    type: object
-                    example:
-                      redis:
-                        status: down
-                        message: Could not connect
-                    additionalProperties:
-                      type: object
-                      required:
-                        - status
-                      properties:
-                        status:
-                          type: string
-                      additionalProperties: true
-                    nullable: true
-                  details:
-                    type: object
-                    example:
-                      database:
-                        status: up
-                      redis:
-                        status: down
-                        message: Could not connect
-                    additionalProperties:
-                      type: object
-                      required:
-                        - status
-                      properties:
-                        status:
-                          type: string
-                      additionalProperties: true
       tags:
-        - health
+        - Files
 info:
   title: File Service
   description: ""
@@ -270,32 +436,4 @@ components:
       in: header
       name: Authorization
       description: API Key Authentication
-  schemas:
-    SyncFileSchemaDto:
-      type: object
-      properties:
-        provider:
-          type: string
-          enum:
-            - S3
-          x-enumNames:
-            - S3
-        credentials:
-          type: object
-          properties:
-            region:
-              type: string
-            secretKey:
-              type: string
-            accessKey:
-              type: string
-          required:
-            - region
-            - secretKey
-            - accessKey
-        path:
-          type: string
-      required:
-        - provider
-        - credentials
-        - path
+  schemas: {}
