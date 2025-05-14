@@ -34,7 +34,6 @@ dependencies = [
     "cryptography",
     "python-box",
     "do-sdk-platform==3.2.0",
-    "do-sdk-files==1.0.1",
     "urllib3>=2.0.0",
     "more-itertools",
     "nest_asyncio",
