@@ -411,10 +411,11 @@ def get_dataframe(
         this_protein_id = metadata.get("protein_id") if metadata else None
 
         if this_protein_id is None:
-            try:
-                this_protein_id = attributes["userInputs"]["protein"]["rowId"]
-            except Exception:
-                this_protein_id = "No ID"
+            this_protein_id = (
+                attributes.get("userInputs", {}).get("protein", {}).get("rowId")
+                or attributes.get("userInputs", {}).get("protein", {}).get("key")
+                or "No ID"
+            )
 
         data["protein_id"].append(this_protein_id)
 
