@@ -163,3 +163,22 @@ def _set_test_run(data, value: int = 1) -> None:
     elif isinstance(data, list):
         for item in data:
             _set_test_run(item, value)
+
+
+def find_files_on_ufa(
+    *,
+    tool: str,
+    protein: str,
+    ligand: Optional[str] = None,
+):
+    from deeporigin.files import FilesClient
+
+    client = FilesClient()
+    if ligand is not None:
+        search_str = f"tool-runs/{tool}/{protein}/{ligand}/"
+    else:
+        search_str = f"tool-runs/{tool}/{protein}/"
+    files = client.list_folder(search_str, recursive=True)
+    files = list(files.keys())
+
+    return files

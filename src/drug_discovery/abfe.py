@@ -46,6 +46,11 @@ class ABFE(WorkflowStep):
         files = client.list_folder(search_str, recursive=True)
         files = list(files.keys())
 
+        files = utils.find_files_on_ufa(
+            tool="ABFE",
+            protein=self.parent.protein.file_path.name,
+        )
+
         results_files = [file for file in files if file.endswith("/results.csv")]
 
         # Construct src_to_dest mapping for download_files
