@@ -16,8 +16,11 @@ from deeporigin.drug_discovery.constants import tool_mapper
 from deeporigin.drug_discovery.structures.ligand import Ligand, ligands_to_dataframe
 from deeporigin.drug_discovery.workflow_step import WorkflowStep
 from deeporigin.exceptions import DeepOriginException
+from deeporigin.files import FilesClient
 from deeporigin.tools.job import Job, get_dataframe
 from deeporigin.utils.notebook import get_notebook_environment
+
+client = FilesClient()
 
 
 class ABFE(WorkflowStep):
@@ -39,23 +42,42 @@ class ABFE(WorkflowStep):
 
         This method returns a dataframe showing the results of ABFE runs associated with this simulation session. The ligand file name and ΔG are shown, together with user-supplied properties"""
 
-        df1 = self.parent.get_csv_results_for(utils.DB_ABFE)
+        search_str = "tool-runs/ABFE/" + self.parent.protein.file_path.name
+        files = client.list_folder(search_str, recursive=True)
+        files = list(files.keys())
 
-        if len(df1) == 0:
-            print("No ABFE results to display.")
-            return
+        results_files = [file for file in files if file.endswith("/results.csv")]
 
-        df1["ID"] = df1["Ligand1"]
-        df1.drop(columns=["Ligand1", "SMILES"], inplace=True)
+        # Construct src_to_dest mapping for download_files
+        home_dir = os.path.expanduser("~")
+        src_to_dest = {}
+        for remote_path in results_files:
+            local_path = os.path.join(home_dir, ".deeporigin", remote_path)
+            os.makedirs(os.path.dirname(local_path), exist_ok=True)
+            src_to_dest[remote_path] = local_path
+
+        client.download_files(src_to_dest)
+
+        # read all the CSV files using pandas and
+        # set Ligand1 column to ligand name (parent dir of results.csv)
+        dfs = []
+        for file in results_files:
+            df = pd.read_csv(src_to_dest[file])
+            ligand_name = os.path.basename(os.path.dirname(file))
+            df["File"] = ligand_name
+            dfs.append(df)
+        df1 = pd.concat(dfs)
+
+        df1.drop(columns=["Ligand1", "Ligand2"], inplace=True)
 
         df2 = ligands_to_dataframe(self.parent.ligands)
         df2["SMILES"] = df2["Ligand"]
-        df2.drop(columns=["Ligand"], inplace=True)
+        df2.drop(columns=["Ligand", "ID", "initial_smiles"], inplace=True)
 
         df = pd.merge(
             df1,
             df2,
-            on="ID",
+            on="File",
             how="inner",
             validate="one_to_one",
         )
