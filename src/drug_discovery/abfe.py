@@ -15,12 +15,11 @@ from deeporigin.drug_discovery.constants import tool_mapper
 from deeporigin.drug_discovery.structures.ligand import Ligand, ligands_to_dataframe
 from deeporigin.drug_discovery.workflow_step import WorkflowStep
 from deeporigin.exceptions import DeepOriginException
-from deeporigin.files import FilesClient
 from deeporigin.platform import files_api
 from deeporigin.tools.job import Job, get_dataframe
 from deeporigin.utils.notebook import get_notebook_environment
 
-client = FilesClient()
+LOCAL_BASE = Path.home() / ".deeporigin"
 
 
 class ABFE(WorkflowStep):
@@ -42,10 +41,6 @@ class ABFE(WorkflowStep):
 
         This method returns a dataframe showing the results of ABFE runs associated with this simulation session. The ligand file name and ΔG are shown, together with user-supplied properties"""
 
-        search_str = "tool-runs/ABFE/" + self.parent.protein.file_path.name
-        files = client.list_folder(search_str, recursive=True)
-        files = list(files.keys())
-
         files = utils.find_files_on_ufa(
             tool="ABFE",
             protein=self.parent.protein.file_path.name,
@@ -53,21 +48,13 @@ class ABFE(WorkflowStep):
 
         results_files = [file for file in files if file.endswith("/results.csv")]
 
-        # Construct src_to_dest mapping for download_files
-        home_dir = os.path.expanduser("~")
-        src_to_dest = {}
-        for remote_path in results_files:
-            local_path = os.path.join(home_dir, ".deeporigin", remote_path)
-            os.makedirs(os.path.dirname(local_path), exist_ok=True)
-            src_to_dest[remote_path] = local_path
-
-        client.download_files(src_to_dest)
+        files_api.download_files(results_files)
 
         # read all the CSV files using pandas and
         # set Ligand1 column to ligand name (parent dir of results.csv)
         dfs = []
         for file in results_files:
-            df = pd.read_csv(src_to_dest[file])
+            df = pd.read_csv(LOCAL_BASE / file)
             ligand_name = os.path.basename(os.path.dirname(file))
             df["File"] = ligand_name
             dfs.append(df)
@@ -86,6 +73,11 @@ class ABFE(WorkflowStep):
             how="inner",
             validate="one_to_one",
         )
+
+        # rename the File column to Ligand
+        df.rename(columns={"File": "Ligand"}, inplace=True)
+
+        df["Protein"] = self.parent.protein.file_path.name
 
         return df
 
@@ -224,8 +216,6 @@ class ABFE(WorkflowStep):
             f"tool-runs/ABFE/{self.parent.protein.file_path.name}/{Path(ligand.file_path).name}"
         )
 
-        local_base = Path.home() / ".deeporigin"
-
         remote_pdb_file = (
             remote_base / "output/protein/ligand/systems/complex/complex.pdb"
         )
@@ -278,10 +268,10 @@ class ABFE(WorkflowStep):
         from deeporigin_molstar.src.viewers import ProteinViewer
 
         protein_viewer = ProteinViewer(
-            data=str(local_base / remote_pdb_file), format="pdb"
+            data=str(LOCAL_BASE / remote_pdb_file), format="pdb"
         )
         html_content = protein_viewer.render_trajectory(
-            str(local_base / remote_xtc_file)
+            str(LOCAL_BASE / remote_xtc_file)
         )
 
         from deeporigin_molstar import JupyterViewer

@@ -165,12 +165,29 @@ def _set_test_run(data, value: int = 1) -> None:
             _set_test_run(item, value)
 
 
+@beartype
 def find_files_on_ufa(
     *,
     tool: str,
     protein: str,
     ligand: Optional[str] = None,
-):
+) -> list:
+    """
+    Find files on the UFA (Unified File API) storage for a given tool run.
+
+    This function searches for files associated with a specific tool, protein, and optionally ligand
+    in the UFA storage system. It constructs the appropriate search path based on the provided arguments
+    and returns a list of file paths found under that directory.
+
+    Args:
+        tool (str): The name of the tool (e.g., 'ABFE', 'RBFE', etc.).
+        protein (str): The protein identifier or filename used in the tool run.
+        ligand (Optional[str]): The ligand identifier or filename used in the tool run. If not provided,
+            the search will be performed at the protein level only.
+
+    Returns:
+        List[str]: A list of file paths found in the specified UFA directory.
+    """
     from deeporigin.files import FilesClient
 
     client = FilesClient()
