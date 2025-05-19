@@ -2,8 +2,10 @@
 
 import concurrent.futures
 import functools
+from functools import wraps
+import inspect
 import sys
-from typing import Optional
+from typing import Any, Callable, Optional
 
 from beartype import beartype
 
@@ -338,3 +340,106 @@ def _process_job(
     job_id = response.id
 
     return job_id
+
+
+def generate_tool_function(schema: dict) -> Callable:
+    """utility function that generates a function that can be used to run a too, from schema
+
+    Example usage:
+
+        data = tools_api.get_tool(tool_key="deeporigin.bulk-docking")
+        data = data[0].to_dict()
+        docking_func = generate_tool_function(data)
+        docking_func(
+            protein_path="path/to/protein.pdb",
+            ligand_path="path/to/ligand.sdf",
+            ...
+        )
+
+    """
+    tool_key = schema["key"]
+
+    inputs_schema = schema["inputs"]
+    outputs_schema = schema["outputs"]
+
+    required_inputs = inputs_schema.get("required", [])
+    required_outputs = outputs_schema.get("required", [])
+
+    input_props = inputs_schema["properties"]
+
+    # --- Construct argument specification
+    parameters = []
+
+    for name in required_inputs:
+        prop = input_props[name]
+        annotation = (
+            str
+            if prop.get("format") == "file"
+            else (
+                list[float]
+                if prop.get("type") == "array" and prop["items"]["type"] == "number"
+                else (
+                    list[str]
+                    if prop.get("type") == "array" and prop["items"]["type"] == "string"
+                    else Any
+                )
+            )
+        )
+        parameters.append(
+            inspect.Parameter(
+                name, inspect.Parameter.POSITIONAL_OR_KEYWORD, annotation=annotation
+            )
+        )
+
+    for name in required_outputs:
+        parameters.append(
+            inspect.Parameter(
+                name, inspect.Parameter.POSITIONAL_OR_KEYWORD, annotation=str
+            )
+        )
+
+    parameters.append(
+        inspect.Parameter(
+            "metadata",
+            inspect.Parameter.KEYWORD_ONLY,
+            default=None,
+            annotation=dict[str, Any] | None,
+        )
+    )
+
+    sig = inspect.Signature(parameters)
+
+    @wraps(lambda *args, **kwargs: None)
+    def generated_function(*args, **kwargs):
+        bound = sig.bind(*args, **kwargs)
+        bound.apply_defaults()
+        arguments = bound.arguments
+
+        inputs = {}
+        for name in required_inputs:
+            val = arguments[name]
+            if input_props[name].get("format") == "file":
+                inputs[name] = {"$provider": "ufa", "key": val}
+            else:
+                inputs[name] = val
+
+        outputs = {
+            name: {"$provider": "ufa", "key": arguments[name]}
+            for name in required_outputs
+        }
+
+        metadata = arguments.get("metadata")
+
+        return tools_api._process_job(
+            inputs=inputs,
+            outputs=outputs,
+            tool_key=tool_key,
+            metadata=metadata,
+        )
+
+    # Sanitize function name to be a valid Python identifier
+    func_name = tool_key.replace(".", "_").replace("-", "_")
+    generated_function.__name__ = func_name
+    generated_function.__signature__ = sig
+
+    return generated_function
