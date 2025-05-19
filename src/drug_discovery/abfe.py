@@ -4,9 +4,8 @@ The ABFE object instantiated here is contained in the Complex class is meant to 
 
 import json
 import os
-import pathlib
+from pathlib import Path
 from typing import Literal, Optional
-import zipfile
 
 from beartype import beartype
 import pandas as pd
@@ -17,6 +16,7 @@ from deeporigin.drug_discovery.structures.ligand import Ligand, ligands_to_dataf
 from deeporigin.drug_discovery.workflow_step import WorkflowStep
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.files import FilesClient
+from deeporigin.platform import files_api
 from deeporigin.tools.job import Job, get_dataframe
 from deeporigin.utils.notebook import get_notebook_environment
 
@@ -198,54 +198,11 @@ class ABFE(WorkflowStep):
 
             self.jobs.append(job)
 
-    def download_data_dir(self, ligand_id: str) -> str:
-        """Download the data directory for a given ligand ID.
-
-        Args:
-            ligand_id (str): The ID of the ligand to download the data directory for.
-
-        Returns:
-            str: The path to the data directory.
-        """
-
-        valid_ids = [ligand._do_id for ligand in self.parent.ligands]
-
-        if None in valid_ids:
-            self.parent.connect()
-
-            valid_ids = [ligand._do_id for ligand in self.parent.ligands]
-
-        if ligand_id not in valid_ids:
-            raise DeepOriginException(
-                f"Ligand ID {ligand_id} not found in the list of ligands. Should be one of {valid_ids}"
-            )
-
-        # get the files for the run
-        files = self.parent.get_result_files_for(tool="ABFE", ligand_ids=[ligand_id])
-
-        file = files[0]
-
-        # Get the file path and create directory path with same name
-        file_path = pathlib.Path(file)
-        dir_name = f"{file_path.stem}-execution"
-        dir_path = file_path.parent / dir_name
-
-        # Check if directory already exists
-        if not os.path.exists(dir_path):
-            os.makedirs(dir_path, exist_ok=True)
-
-            # Unzip the file into the directory
-            print(f"Extracting trajectory files to {dir_path}...")
-            with zipfile.ZipFile(file_path, "r") as zip_ref:
-                zip_ref.extractall(dir_path)
-
-        return dir_path
-
     @beartype
     def show_trajectory(
         self,
         *,
-        ligand_id: str,
+        ligand: Ligand,
         step: Literal["md", "binding"],
         window: int = 1,
     ):
@@ -257,43 +214,69 @@ class ABFE(WorkflowStep):
             window (int, optional): The window number to show the trajectory for. Defaults to 1.
         """
 
-        dir_path = self.download_data_dir(ligand_id)
+        remote_base = Path(
+            f"tool-runs/ABFE/{self.parent.protein.file_path.name}/{Path(ligand.file_path).name}"
+        )
 
-        pdb_file = dir_path / "execution/protein/ligand/systems/complex/complex.pdb"
+        local_base = Path.home() / ".deeporigin"
+
+        remote_pdb_file = (
+            remote_base / "output/protein/ligand/systems/complex/complex.pdb"
+        )
+        files_to_download = [remote_pdb_file]
 
         if step == "binding":
             # Check for valid windows
-            binding_path = dir_path / "execution/protein/ligand/binding/binding"
-            if not binding_path.exists():
-                raise DeepOriginException("Binding directory not found")
 
-            # Get all window directories
-            window_dirs = [
-                d
-                for d in binding_path.iterdir()
-                if d.is_dir() and d.name.startswith("window_")
+            # figure out valid windows
+            files = utils.find_files_on_ufa(
+                tool="ABFE",
+                protein=self.parent.protein.file_path.name,
+                ligand=Path(ligand.file_path).name,
+            )
+            xtc_files = [
+                file
+                for file in files
+                if file.endswith("Prod_1/_allatom_trajectory_40ps.xtc")
+                and "binding/binding" in file
             ]
-            valid_windows = [int(d.name.split("_")[1]) for d in window_dirs]
+
+            import re
+
+            valid_windows = [
+                int(re.search(r"window_(\d+)", path).group(1)) for path in xtc_files
+            ]
+
+            print(valid_windows)
 
             if window not in valid_windows:
                 raise DeepOriginException(
                     f"Invalid window number: {window}. Valid windows are: {sorted(valid_windows)}"
                 )
 
-            xtc_file = (
-                dir_path
-                / f"execution/protein/ligand/binding/binding/window_{window}/Prod_1/_allatom_trajectory_40ps.xtc"
+            remote_xtc_file = (
+                remote_base
+                / f"output/protein/ligand/binding/binding/window_{window}/Prod_1/_allatom_trajectory_40ps.xtc"
             )
+
         else:
-            xtc_file = (
-                dir_path
-                / "execution/protein/ligand/simple_md/simple_md/prod/_allatom_trajectory_40ps.xtc"
+            remote_xtc_file = (
+                remote_base
+                / "output/protein/ligand/simple_md/simple_md/prod/_allatom_trajectory_40ps.xtc"
             )
+
+        files_to_download.append(remote_xtc_file)
+
+        files_api.download_files(files_to_download)
 
         from deeporigin_molstar.src.viewers import ProteinViewer
 
-        protein_viewer = ProteinViewer(data=str(pdb_file), format="pdb")
-        html_content = protein_viewer.render_trajectory(str(xtc_file))
+        protein_viewer = ProteinViewer(
+            data=str(local_base / remote_pdb_file), format="pdb"
+        )
+        html_content = protein_viewer.render_trajectory(
+            str(local_base / remote_xtc_file)
+        )
 
         from deeporigin_molstar import JupyterViewer
 
