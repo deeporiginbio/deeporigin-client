@@ -5,11 +5,9 @@ The RBFE object instantiated here is contained in the Complex class is meant to 
 from beartype import beartype
 import pandas as pd
 
-from deeporigin.data_hub import api
 from deeporigin.drug_discovery import chemistry as chem
 from deeporigin.drug_discovery import utils
 from deeporigin.drug_discovery.workflow_step import WorkflowStep
-from deeporigin.exceptions import DeepOriginException
 from deeporigin.utils.core import PrettyDict
 
 
@@ -44,23 +42,6 @@ class RBFE(WorkflowStep):
             return pd.DataFrame()
 
         return df
-
-    def _connect(self):
-        """connect to datahub and fetch Job IDs for this protein and ligand"""
-
-        # fetch from ABFE first
-        df = pd.DataFrame(
-            api.get_dataframe(
-                "RBFE",
-                return_type="dict",
-            )
-        )
-        df = df[df["Protein"] == self.parent.protein._do_id]
-        ligand_ids = [ligand._do_id for ligand in self.parent.ligands]
-        # Filter rows where both Ligand1 and Ligand2 exist in ligand_ids
-        df = df[df["Ligand1"].isin(ligand_ids) & df["Ligand2"].isin(ligand_ids)]
-        job_ids = df[utils.COL_JOBID].tolist()
-        self._make_jobs_from_ids(job_ids)
 
     def show_results(self):
         """Show RBFE results in a dataframe.
@@ -102,56 +83,4 @@ class RBFE(WorkflowStep):
 
         """
 
-        if ligand1_id is None or ligand2_id is None:
-            raise DeepOriginException(
-                "Both ligand1_id and ligand2_id must be specified."
-            )
-
-        if ligand1_id == ligand2_id:
-            raise DeepOriginException("ligand1_id and ligand2_id cannot be the same.")
-
-        # check that protein ID is valid
-        if self.parent.protein._do_id is None:
-            raise DeepOriginException(
-                "Protein has not been uploaded yet. Use .connect() first."
-            )
-
-        # check that ligand IDs are valid
-        valid_ligand_ids = [ligand._do_id for ligand in self.parent.ligands]
-
-        if None in valid_ligand_ids:
-            raise DeepOriginException(
-                "Some ligands have not been uploaded yet. Use .connect() first."
-            )
-
-        if ligand1_id not in valid_ligand_ids or ligand2_id not in valid_ligand_ids:
-            raise DeepOriginException(
-                f"Some ligand IDs re not valid. Valid ligand IDs are: {valid_ligand_ids}"
-            )
-
-        database_columns = (
-            self.parent._db.ligands.cols
-            + self.parent._db.proteins.cols
-            + self.parent._db.rbfe.cols
-        )
-
-        # only run on ligands that have not been run yet
-        # first check that there are no existing runs
-        df = api.get_dataframe(utils.DB_RBFE)
-        df = df[df[utils.COL_PROTEIN] == self.parent.protein._do_id]
-        df = df[
-            (df[utils.COL_LIGAND1] == ligand1_id)
-            & (df[utils.COL_LIGAND2] == ligand2_id)
-        ]
-
-        job_id = utils._start_tool_run(
-            protein_id=self.parent.protein._do_id,
-            ligand1_id=ligand1_id,
-            ligand2_id=ligand2_id,
-            database_columns=database_columns,
-            params=self._params.end_to_end,
-            tool=utils.DB_RBFE,
-            complex_hash=self.parent._hash,
-        )
-
-        self._job_ids.append(job_id)
+        raise NotImplementedError("RBFE is not implemented yet.")

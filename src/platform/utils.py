@@ -8,7 +8,6 @@ from beartype import beartype
 from box import Box
 
 # Import SDKs at module level
-import do_sdk_files
 import do_sdk_platform
 
 from deeporigin.auth import get_tokens
@@ -90,8 +89,8 @@ def _get_api_client(
     if sdk_name == "platform":
         sdk = do_sdk_platform
     else:
-        sdk = do_sdk_files
-
+        # sdk = do_sdk_files
+        raise NotImplementedError("Files API is not implemented yet.")
     if configure:
         if sdk_name == "platform":
             host = urljoin(get_value()["api_endpoint"], "/api")
@@ -166,8 +165,13 @@ def _create_function(
             )
         method = _get_method(client, method_path)
 
-        # Insert org_friendly_id if not present in kwargs
-        if "org_friendly_id" not in kwargs:
+        # Insert org_friendly_id if not present in kwargs, and
+        # if it's required by the method
+        method_sig = inspect.signature(method)
+        if (
+            "org_friendly_id" not in kwargs
+            and "org_friendly_id" in method_sig.parameters
+        ):
             kwargs["org_friendly_id"] = get_value()["organization_id"]
 
         # call the low level API method
@@ -183,14 +187,20 @@ def _create_function(
         if not isinstance(response, dict):
             response = response.json()
 
-        if "data" in response.keys():
-            response = response["data"]
-            if isinstance(response, list):
-                response = [Box(item) for item in response]
+        if isinstance(response, bool):
+            return response
+
+        elif isinstance(response, dict):
+            if "data" in response.keys():
+                response = response["data"]
+                if isinstance(response, list):
+                    response = [Box(item) for item in response]
+                else:
+                    response = Box(response)
             else:
                 response = Box(response)
         else:
-            response = Box(response)
+            raise NotImplementedError(f"Unexpected response type: {type(response)}")
 
         return response
 

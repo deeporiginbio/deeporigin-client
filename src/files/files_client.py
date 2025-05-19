@@ -321,7 +321,7 @@ class FilesClient:
                 orgFriendlyId=self.organization_id,
                 filePath=remote_path,
                 list_type=2,
-                recursive="true" if recursive == True else None,
+                recursive="true" if recursive else None,
                 continuation_token=continuation_token,
             )
             response = self.client.httpx_request_and_process(call_args)

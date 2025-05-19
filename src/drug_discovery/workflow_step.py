@@ -25,6 +25,25 @@ class WorkflowStep:
         self.parent = parent
         self._params = PrettyDict()
 
+    def get_jobs(self):
+        """Get the jobs for this workflow step."""
+        df = get_dataframe()
+        df = df[df["tool_key"].str.contains(self._tool_key)]
+
+        df = df[df["protein_id"].str.contains(self.parent.protein.file_path.name)]
+
+        if self._fuse_jobs:
+            self.jobs = [Job.from_ids(list(map(str, df["id"].tolist())))]
+        else:
+            self.jobs = [Job.from_ids([str(row["id"])]) for _, row in df.iterrows()]
+
+        for job in self.jobs:
+            job._viz_func = self._render_progress
+            job._name_func = self._name_job
+            job.sync()
+
+        return df
+
     def show_jobs(self, summary: Optional[bool] = None):
         """Show the jobs for this workflow step."""
 
@@ -39,12 +58,7 @@ class WorkflowStep:
                 summary = False
 
         if summary:
-            df = get_dataframe()
-            df = df[df["tool_key"].str.contains(self._tool_key)]
-
-            # filter by protein
-            df = df[df["protein_id"] == self.parent.protein._do_id]
-            return df
+            return self.get_jobs()
         else:
             for job in self.jobs:
                 job.sync()
@@ -86,9 +100,4 @@ class WorkflowStep:
     @beartype
     def _name_job(self, job: Job) -> str:
         """Generate a name for a job. To be implemented by subclasses."""
-        raise NotImplementedError
-
-    @beartype
-    def _connect(self):
-        """connect to deep origin API and perform any other setup necessary. This is meant to be implemented in the subclass"""
         raise NotImplementedError

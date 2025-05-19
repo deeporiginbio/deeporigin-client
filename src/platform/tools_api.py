@@ -1,23 +1,21 @@
-"""This module contains utility functions used by tool execution. In general, you will not need to use many of these functions directly."""
+"""bridge module to interact with the platform tools api"""
 
 import concurrent.futures
-from concurrent.futures import ThreadPoolExecutor
 import functools
-import json
-import os
-import time
-from typing import Any, Optional
+import sys
+from typing import Optional
 
 from beartype import beartype
-from box import Box
 
 from deeporigin.config import get_value
-from deeporigin.data_hub import api
-from deeporigin.platform import clusters, tools
-from deeporigin.platform.tools import execute_tool
-from deeporigin.utils.core import _ensure_do_folder
+from deeporigin.platform import clusters_api, tools_api
+from deeporigin.platform.utils import _add_functions_to_module
 
-JOBS_CACHE_DIR = _ensure_do_folder() / "jobs"
+__all__ = _add_functions_to_module(
+    module=sys.modules[__name__],
+    api_name="ToolsApi",
+)
+
 
 TERMINAL_STATES = {"Succeeded", "Failed"}
 NON_TERMINAL_STATES = {"Created", "Queued", "Running"}
@@ -33,8 +31,7 @@ def get_status_and_progress(execution_id: str) -> dict:
 
     """
 
-    data = tools.get_tool_execution(
-        org_friendly_id=get_value()["organization_id"],
+    data = tools_api.get_tool_execution(
         execution_id=execution_id,
     )
 
@@ -99,8 +96,7 @@ def cancel_run(execution_id: str) -> None:
     if data["status"] in ["Cancelled", "Failed", "Succeeded"]:
         return
 
-    tools.action_tool_execution(
-        org_friendly_id=get_value()["organization_id"],
+    tools_api.action_tool_execution(
         execution_id=execution_id,
         action="cancel",
     )
@@ -145,84 +141,9 @@ def query_run_status(execution_id: str) -> str:
 
     """
 
-    data = tools.get_tool_execution(
-        org_friendly_id=get_value()["organization_id"],
-        execution_id=execution_id,
-    )
+    data = tools_api.get_tool_execution(execution_id=execution_id)
 
     return data.attributes.status
-
-
-@beartype
-def wait_for_job(
-    execution_id: str,
-    *,
-    poll_interval: int = 4,
-) -> None:
-    """Repeatedly poll Deep Origin for the job status, till the status is "Succeeded" or "Failed (a terminal state)
-
-    This function is useful for blocking execution of your code till a specific task is complete.
-
-    Args:
-        execution_id (str): execution_id ID. This is typically printed to screen and returned when a job is initialized.
-        poll_interval (int, optional): number of seconds to wait between polling. Defaults to 4.
-
-    """
-
-    status = "Running"
-    txt_length = 0
-    bs = "".join(["\b" for _ in range(txt_length)])
-    while not (status == "Succeeded" or status == "Failed"):
-        print(bs, end="", flush=True)
-        status = query_run_status(execution_id)
-        txt_length = len(status)
-        print(status, end="", flush=True)
-        time.sleep(poll_interval)
-        bs = "".join(["\b" for _ in range(txt_length)])
-
-
-@beartype
-def wait_for_jobs(
-    refresh_time: int = 3,
-    hide_succeeded: bool = True,
-) -> Any:
-    """Wait for all jobs started via this client to complete
-
-    Args:
-        refresh_time (int, optional): number of seconds to wait between polling. Defaults to 3.
-        hide_succeeded (bool, optional): whether to hide jobs that have already completed. Defaults to True.
-
-    Note that this function signature is explicitly not annotated with a return type to avoid importing pandas outside this function
-
-    Returns:
-        pd.DataFrame: dataframe of all jobs.
-
-    """
-    df = get_job_dataframe(update=True)
-
-    if hide_succeeded:
-        df = df[df["Status"] != "Succeeded"]
-
-    from IPython.display import clear_output, display
-
-    try:
-        while len(set(df["Status"]).difference(TERMINAL_STATES)) != 0:
-            df = get_job_dataframe(update=True)
-
-            if hide_succeeded:
-                df = df[df["Status"] != "Succeeded"]
-
-            display(df)
-            time.sleep(refresh_time)
-
-            clear_output(wait=True)
-
-    except KeyboardInterrupt:
-        return
-
-    print("✔️ All jobs completed")
-    df = get_job_dataframe()
-    return df
 
 
 @beartype
@@ -259,7 +180,7 @@ def _get_cluster_id() -> str:
 
     this defaults to pulling us-west-2"""
 
-    available_clusters = clusters.list_clusters(
+    available_clusters = clusters_api.list_clusters(
         org_friendly_id=get_value()["organization_id"]
     )
 
@@ -287,9 +208,8 @@ def run_tool(
     if "clusterId" not in data.keys():
         data["clusterId"] = _get_cluster_id()
 
-    return execute_tool(
+    return tools_api.execute_tool(
         tool_key=tool_key,
-        org_friendly_id=get_value()["organization_id"],
         execute_tool_dto=data,
     )
 
@@ -313,7 +233,7 @@ def make_payload(
         metadata: (Optional[dict], optional): metadata to be added to the payload. Defaults to None.
 
     Returns:
-        dict: correctly formatted payload, ready to be passed to execute_tool
+        dict: correctly formatted payload, ready to be passed to run_tool
     """
 
     if cluster_id is None:
@@ -394,135 +314,27 @@ def _column_name_to_column_id(
 
 
 @beartype
-def get_job_dataframe(update: bool = False) -> Any:
-    """returns a dataframe of all jobs and statuses, reading from local cache
-
-    Args:
-        update (bool, optional): Whether to check for updates on non-terminal jobs. Defaults to False.
-
-    Note that this function is deliberately not annotated with an output type because pandas is imported internally to this funciton.
-
-    Returns:
-        pd.DataFrame: A dataframe containing job information"""
-    jobs = tools.get_tool_executions(
-        page=1,
-        page_size=100,
-        org_friendly_id="likely-aardvark-ewo",
-        filter={},
-        order="executionId",
-    )
-
-    if update:
-        _update_all_jobs(jobs)
-
-    import pandas as pd
-
-    df = pd.DataFrame(
-        {
-            "Job ID": [job.id for job in jobs],
-            "Execution ID": [job.attributes.executionId for job in jobs],
-            "Status": [job.attributes.status for job in jobs],
-            "Tool": [job.attributes.tool for job in jobs],
-        }
-    )
-    return df
-
-
-@beartype
-def _update_all_jobs(jobs: list) -> None:
-    """Update all job response files with the latest status, in parallel.
-
-    This is an internal function. Do not use.
-    """
-
-    def should_update(job):
-        return job.attributes.status in NON_TERMINAL_STATES
-
-    with ThreadPoolExecutor() as executor:
-        futures = [
-            executor.submit(query_run_status, job.id)
-            for job in jobs
-            if should_update(job)
-        ]
-
-        for future in futures:
-            try:
-                future.result()
-            except Exception as e:
-                print(f"An error occurred: {e}")
-
-
-@beartype
-def read_jobs() -> list:
-    """read jobs from files in the jobs cache directory"""
-
-    jobs = []
-
-    if os.path.exists(JOBS_CACHE_DIR):
-        for file_name in os.listdir(JOBS_CACHE_DIR):
-            if file_name.endswith(".json"):
-                file_path = os.path.join(JOBS_CACHE_DIR, file_name)
-                try:
-                    with open(file_path, "r") as f:
-                        job_data = json.load(f)
-                        jobs.append(Box(job_data))
-                except Exception as e:
-                    print(f"Failed to load {file_path}: {e}")
-    else:
-        print(f"Directory {JOBS_CACHE_DIR} does not exist.")
-
-    return jobs
-
-
-@beartype
-def _ensure_database(name: str) -> dict:
-    """ensure that a database exists with the given name. If it doesn't exist, create it"""
-
-    databases = api.list_rows(row_type="database")
-
-    database = [db for db in databases if db["hid"] == name]
-
-    if len(database) == 0:
-        # make a new DB
-        print(f"🧬 Creating a database called {name}...")
-        api.create_database(
-            hid=name,
-            hid_prefix=name,
-            name=name,
-        )
-
-    database = api.describe_database(database_id=name)
-    return database
-
-
-@beartype
-def _ensure_columns(
+def _process_job(
     *,
-    database: dict,
-    required_columns: list[dict],
-):
-    """ensure that columns exist with the given names (and types). If they don't exist, create them"""
+    inputs: dict,
+    outputs: dict,
+    tool_key: str,
+    cols: Optional[list] = None,
+    metadata: Optional[dict] = None,
+) -> str:
+    """helper function that uses inputs and outputs to construct a payload and run a tool"""
 
-    existing_column_names = []
-    if "cols" in list(database.keys()):
-        existing_column_names = [col["name"] for col in database.cols]
+    payload = make_payload(
+        outputs=outputs,
+        inputs=inputs,
+        cols=cols,
+        metadata=metadata,
+    )
 
-    # check if we need to make columns
-    for item in required_columns:
-        column_name = item["name"]
-        column_type = item["type"]
+    response = run_tool(
+        data=payload,
+        tool_key=tool_key,
+    )
+    job_id = response.id
 
-        if column_name in existing_column_names:
-            continue
-        print(f"🧬 Making column named: {column_name} in {database.hid}")
-
-        api.add_database_column(
-            cardinality="one",
-            database_id=database.hid,
-            name=column_name,
-            required=False,
-            type=column_type,
-        )
-
-    database = api.describe_database(database_id=database.id)
-    return database
+    return job_id

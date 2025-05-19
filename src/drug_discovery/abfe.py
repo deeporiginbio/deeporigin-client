@@ -4,21 +4,22 @@ The ABFE object instantiated here is contained in the Complex class is meant to 
 
 import json
 import os
-import pathlib
+from pathlib import Path
 from typing import Literal, Optional
-import zipfile
 
 from beartype import beartype
 import pandas as pd
 
-from deeporigin.data_hub import api
 from deeporigin.drug_discovery import utils
-from deeporigin.drug_discovery.structures.ligand import ligands_to_dataframe
+from deeporigin.drug_discovery.constants import tool_mapper
+from deeporigin.drug_discovery.structures.ligand import Ligand, ligands_to_dataframe
 from deeporigin.drug_discovery.workflow_step import WorkflowStep
 from deeporigin.exceptions import DeepOriginException
-from deeporigin.tools.job import Job
-from deeporigin.tools.utils import get_statuses_and_progress
-from deeporigin.utils.notebook import _in_marimo
+from deeporigin.platform import files_api
+from deeporigin.tools.job import Job, get_dataframe
+from deeporigin.utils.notebook import get_notebook_environment
+
+LOCAL_BASE = Path.home() / ".deeporigin"
 
 
 class ABFE(WorkflowStep):
@@ -26,6 +27,8 @@ class ABFE(WorkflowStep):
 
     Objects instantiated here are meant to be used within the Complex class."""
 
+    """tool version to use for ABFE"""
+    tool_version = "0.2.6"
     _tool_key = "deeporigin.abfe-end-to-end"  # Tool key for ABFE jobs
 
     def __init__(self, parent):
@@ -38,26 +41,43 @@ class ABFE(WorkflowStep):
 
         This method returns a dataframe showing the results of ABFE runs associated with this simulation session. The ligand file name and ΔG are shown, together with user-supplied properties"""
 
-        df1 = self.parent.get_csv_results_for(utils.DB_ABFE)
+        files = utils.find_files_on_ufa(
+            tool="ABFE",
+            protein=self.parent.protein.file_path.name,
+        )
 
-        if len(df1) == 0:
-            print("No ABFE results to display.")
-            return
+        results_files = [file for file in files if file.endswith("/results.csv")]
 
-        df1["ID"] = df1["Ligand1"]
-        df1.drop(columns=["Ligand1", "SMILES"], inplace=True)
+        files_api.download_files(results_files)
+
+        # read all the CSV files using pandas and
+        # set Ligand1 column to ligand name (parent dir of results.csv)
+        dfs = []
+        for file in results_files:
+            df = pd.read_csv(LOCAL_BASE / file)
+            ligand_name = os.path.basename(os.path.dirname(file))
+            df["File"] = ligand_name
+            dfs.append(df)
+        df1 = pd.concat(dfs)
+
+        df1.drop(columns=["Ligand1", "Ligand2"], inplace=True)
 
         df2 = ligands_to_dataframe(self.parent.ligands)
         df2["SMILES"] = df2["Ligand"]
-        df2.drop(columns=["Ligand"], inplace=True)
+        df2.drop(columns=["Ligand", "initial_smiles"], inplace=True)
 
         df = pd.merge(
             df1,
             df2,
-            on="ID",
+            on="File",
             how="inner",
             validate="one_to_one",
         )
+
+        # rename the File column to Ligand
+        df.rename(columns={"File": "Ligand"}, inplace=True)
+
+        df["Protein"] = self.parent.protein.file_path.name
 
         return df
 
@@ -82,7 +102,7 @@ class ABFE(WorkflowStep):
         # re‑index your DataFrame
         df = df[new_order]
 
-        if _in_marimo():
+        if get_notebook_environment() == "marimo":
             import marimo as mo
 
             return mo.plain(df)
@@ -90,80 +110,81 @@ class ABFE(WorkflowStep):
         else:
             return df
 
+    def set_test_run(self, value: int = 1):
+        """set test_run paramemter in abfe parameters"""
+
+        utils._set_test_run(self._params.end_to_end, value)
+
     @beartype
     def run_end_to_end(
         self,
         *,
-        ligand_ids: Optional[list[str]] = None,
+        ligands: Optional[list[Ligand]] = None,
+        re_run: bool = False,
     ):
         """Method to run an end-to-end ABFE run.
 
         Args:
-            ligand_ids (Optional[str], optional): List of ligand IDs to run. Defaults to None. When None, all ligands in the object will be run. To view a list of valid ligand IDs, use the `.show_ligands()` method"""
+            ligands: List of ligand to run. Defaults to None. When None, all ligands in the object will be run. To view a list of valid ligands, use the `.show_ligands()` method"""
 
-        if ligand_ids is None:
-            ligand_ids = [ligand._do_id for ligand in self.parent.ligands]
+        if ligands is None:
+            ligands = self.parent.ligands
 
-        # check that protein ID is valid
-        if self.parent.protein._do_id is None:
-            raise DeepOriginException(
-                "Protein has not been uploaded yet. Use .connect() first."
-            )
+        ligand_names = [os.path.basename(ligand.file_path) for ligand in ligands]
 
-        # check that ligand IDs are valid
-        valid_ligand_ids = [ligand._do_id for ligand in self.parent.ligands]
-
-        if None in valid_ligand_ids:
-            raise DeepOriginException(
-                "Some ligands have not been uploaded yet. Use .connect() first."
-            )
-
-        if not set(ligand_ids).issubset(valid_ligand_ids):
-            raise DeepOriginException(
-                f"Some ligand IDs re not valid. Valid ligand IDs are: {valid_ligand_ids}"
-            )
-
-        database_columns = (
-            self.parent._db.ligands.cols
-            + self.parent._db.proteins.cols
-            + self.parent._db.abfe.cols
+        df = get_dataframe(
+            tool_key=tool_mapper["ABFE"],
+            only_with_status=["Succeeded", "Running", "Queued"],
+            include_metadata=True,
+            resolve_user_names=False,
         )
 
-        # only run on ligands that have not been run yet
-        # first check that there are no existing runs
-        df = api.get_dataframe(utils.DB_ABFE)
-        df = df[df[utils.COL_PROTEIN] == self.parent.protein._do_id]
-        df = df[(df[utils.COL_LIGAND1].isin(ligand_ids))]
-
-        # remove runs that have failed or cancelled
-        job_ids = list(df["JobID"])
-
-        data = get_statuses_and_progress(job_ids)
-
-        bad_job_ids = [
-            item["job_id"] for item in data if item["status"] in ["Failed", "Cancelled"]
+        # filter to find relevant jobs
+        df = df[
+            df["metadata"].apply(
+                lambda d: isinstance(d, dict) and d.get("ligand_file") in ligand_names
+            )
         ]
 
-        df = df[~df["JobID"].isin(bad_job_ids)]
+        # get a list of ligands that have already been run
+        ligands_already_run = list(
+            df["metadata"].apply(lambda d: isinstance(d, dict) and d.get("ligand_file"))
+        )
 
-        already_run_ligands = set(df[utils.COL_LIGAND1])
-        ligand_ids = set(ligand_ids) - already_run_ligands
+        ligands_to_run = [
+            ligand for ligand in ligand_names if ligand not in ligands_already_run
+        ]
 
-        if len(ligand_ids) == 0:
-            print("All requested ligands have already been run.")
+        self.parent._sync_protein_and_ligands()
+
+        protein_path = "entities/proteins/" + os.path.basename(
+            self.parent.protein.file_path
+        )
+
+        if len(ligands_to_run) == 0 and not re_run:
+            print(
+                "All requested ligands have already been run. To re-run, set re_run=True"
+            )
             return
 
         if self.jobs is None:
             self.jobs = []
 
-        for ligand_id in ligand_ids:
+        for ligand_name in ligands_to_run:
+            ligand_path = "entities/ligands/" + os.path.basename(ligand_name)
+
+            metadata = dict(
+                protein_file=os.path.basename(protein_path),
+                ligand_file=os.path.basename(ligand_path),
+            )
+
             job_id = utils._start_tool_run(
-                protein_id=self.parent.protein._do_id,
-                ligand1_id=ligand_id,
-                database_columns=database_columns,
+                metadata=metadata,
+                ligand1_path=ligand_path,
+                protein_path=protein_path,
                 params=self._params.end_to_end,
-                tool=utils.DB_ABFE,
-                complex_hash=self.parent._hash,
+                tool="ABFE",
+                tool_version=self.tool_version,
             )
 
             job = Job.from_ids([job_id])
@@ -175,102 +196,83 @@ class ABFE(WorkflowStep):
 
             self.jobs.append(job)
 
-    def download_data_dir(self, ligand_id: str) -> str:
-        """Download the data directory for a given ligand ID.
-
-        Args:
-            ligand_id (str): The ID of the ligand to download the data directory for.
-
-        Returns:
-            str: The path to the data directory.
-        """
-
-        valid_ids = [ligand._do_id for ligand in self.parent.ligands]
-
-        if None in valid_ids:
-            self.parent.connect()
-
-            valid_ids = [ligand._do_id for ligand in self.parent.ligands]
-
-        if ligand_id not in valid_ids:
-            raise DeepOriginException(
-                f"Ligand ID {ligand_id} not found in the list of ligands. Should be one of {valid_ids}"
-            )
-
-        # get the files for the run
-        files = self.parent.get_result_files_for(tool="ABFE", ligand_ids=[ligand_id])
-
-        file = files[0]
-
-        # Get the file path and create directory path with same name
-        file_path = pathlib.Path(file)
-        dir_name = f"{file_path.stem}-execution"
-        dir_path = file_path.parent / dir_name
-
-        # Check if directory already exists
-        if not os.path.exists(dir_path):
-            os.makedirs(dir_path, exist_ok=True)
-
-            # Unzip the file into the directory
-            print(f"Extracting trajectory files to {dir_path}...")
-            with zipfile.ZipFile(file_path, "r") as zip_ref:
-                zip_ref.extractall(dir_path)
-
-        return dir_path
-
     @beartype
     def show_trajectory(
         self,
         *,
-        ligand_id: str,
+        ligand: Ligand,
         step: Literal["md", "binding"],
         window: int = 1,
     ):
         """Show the system trajectory FEP run.
 
         Args:
-            ligand_id (str): The ID of the ligand to show the trajectory for.
+            ligand: The ligand to show the trajectory for.
             step (Literal["md", "abfe"]): The step to show the trajectory for.
             window (int, optional): The window number to show the trajectory for. Defaults to 1.
         """
 
-        dir_path = self.download_data_dir(ligand_id)
+        remote_base = Path(
+            f"tool-runs/ABFE/{self.parent.protein.file_path.name}/{Path(ligand.file_path).name}"
+        )
 
-        pdb_file = dir_path / "execution/protein/ligand/systems/complex/complex.pdb"
+        remote_pdb_file = (
+            remote_base / "output/protein/ligand/systems/complex/complex.pdb"
+        )
+        files_to_download = [remote_pdb_file]
 
         if step == "binding":
             # Check for valid windows
-            binding_path = dir_path / "execution/protein/ligand/binding/binding"
-            if not binding_path.exists():
-                raise DeepOriginException("Binding directory not found")
 
-            # Get all window directories
-            window_dirs = [
-                d
-                for d in binding_path.iterdir()
-                if d.is_dir() and d.name.startswith("window_")
+            # figure out valid windows
+            files = utils.find_files_on_ufa(
+                tool="ABFE",
+                protein=self.parent.protein.file_path.name,
+                ligand=Path(ligand.file_path).name,
+            )
+            xtc_files = [
+                file
+                for file in files
+                if file.endswith("Prod_1/_allatom_trajectory_40ps.xtc")
+                and "binding/binding" in file
             ]
-            valid_windows = [int(d.name.split("_")[1]) for d in window_dirs]
+
+            import re
+
+            valid_windows = [
+                int(re.search(r"window_(\d+)", path).group(1)) for path in xtc_files
+            ]
+
+            print(valid_windows)
 
             if window not in valid_windows:
                 raise DeepOriginException(
                     f"Invalid window number: {window}. Valid windows are: {sorted(valid_windows)}"
                 )
 
-            xtc_file = (
-                dir_path
-                / f"execution/protein/ligand/binding/binding/window_{window}/Prod_1/_allatom_trajectory_40ps.xtc"
+            remote_xtc_file = (
+                remote_base
+                / f"output/protein/ligand/binding/binding/window_{window}/Prod_1/_allatom_trajectory_40ps.xtc"
             )
+
         else:
-            xtc_file = (
-                dir_path
-                / "execution/protein/ligand/simple_md/simple_md/prod/_allatom_trajectory_40ps.xtc"
+            remote_xtc_file = (
+                remote_base
+                / "output/protein/ligand/simple_md/simple_md/prod/_allatom_trajectory_40ps.xtc"
             )
+
+        files_to_download.append(remote_xtc_file)
+
+        files_api.download_files(files_to_download)
 
         from deeporigin_molstar.src.viewers import ProteinViewer
 
-        protein_viewer = ProteinViewer(data=str(pdb_file), format="pdb")
-        html_content = protein_viewer.render_trajectory(str(xtc_file))
+        protein_viewer = ProteinViewer(
+            data=str(LOCAL_BASE / remote_pdb_file), format="pdb"
+        )
+        html_content = protein_viewer.render_trajectory(
+            str(LOCAL_BASE / remote_xtc_file)
+        )
 
         from deeporigin_molstar import JupyterViewer
 
@@ -303,6 +305,9 @@ class ABFE(WorkflowStep):
                 return progress
             else:
                 data = json.loads(data)
+
+            if "cmd" in data and data["cmd"] == "FEP Results":
+                return {step: "Succeeded" for step in steps}
 
             status_value = job._status[0]
 
@@ -343,25 +348,9 @@ class ABFE(WorkflowStep):
     def _name_job(cls, job: Job) -> str:
         """utility function to name a job using inputs to that job"""
         try:
-            return f"ABFE run using <code>{job._metadata[0]['protein_id']}</code> and <code>{job._metadata[0]['ligand1_id']}</code>"
+            return f"ABFE run using <code>{job._metadata[0]['protein_file']}</code> and <code>{job._metadata[0]['ligand_file']}</code>"
         except Exception:
             return "ABFE run"
-
-    def _connect(self):
-        """connect to datahub and fetch Job IDs for this protein and ligand"""
-
-        # fetch from ABFE first
-        df = pd.DataFrame(
-            api.get_dataframe(
-                "ABFE",
-                return_type="dict",
-            )
-        )
-        df = df[df["Protein"] == self.parent.protein._do_id]
-        ligand_ids = [ligand._do_id for ligand in self.parent.ligands]
-        df = df[df["Ligand1"].isin(ligand_ids)]
-        job_ids = df[utils.COL_JOBID].tolist()
-        self._make_jobs_from_ids(job_ids)
 
     @classmethod
     @beartype
@@ -379,7 +368,7 @@ class ABFE(WorkflowStep):
 
         # Define the fixed nodes in the diagram.
         nodes = [
-            "init",
+            "init(Init)",
             "complex(Complex Prep)",
             "ligand(Ligand Prep)",
             "solvation(Solvation FEP)",

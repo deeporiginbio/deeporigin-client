@@ -131,7 +131,6 @@ class Ligand:
     xref_protein_chain_id: str | None = None
     save_to_file: bool = False
     properties: dict = field(default_factory=dict)
-    _do_id: str | None = None
     mol: Molecule | None = None
 
     # Additional attributes that are initialized in __post_init__
@@ -933,7 +932,6 @@ def ligands_to_dataframe(ligands: list[Ligand]):
     import pandas as pd
 
     smiles_list = [ligand.smiles for ligand in ligands]
-    id_list = [ligand._do_id for ligand in ligands]
     file_list = [
         os.path.basename(ligand.file_path) if ligand.file_path is not None else None
         for ligand in ligands
@@ -941,7 +939,6 @@ def ligands_to_dataframe(ligands: list[Ligand]):
 
     data = {
         "Ligand": smiles_list,
-        "ID": id_list,
         "File": file_list,
     }
 
