@@ -247,13 +247,6 @@ class Docking(WorkflowStep):
         # remove jobs that have no metadata about protein id
         jobs = [job for job in jobs if "protein_id" in job.attributes.metadata.keys()]
 
-        # remove jobs that don't match this protein
-        jobs = [
-            job
-            for job in jobs
-            if job.attributes.metadata.protein_id == self.parent.protein._do_id
-        ]
-
         if pocket_center is not None:
             import numpy as np
 
@@ -314,11 +307,6 @@ class Docking(WorkflowStep):
 
         """
 
-        if self.parent.protein._do_id is None:
-            raise DeepOriginException(
-                "Protein must be uploaded to Deep Origin before docking."
-            )
-
         if batch_size is None and n_workers is None:
             raise DeepOriginException(
                 "Either batch_size or n_workers must be specified."
@@ -377,7 +365,6 @@ class Docking(WorkflowStep):
 
             return utils._start_tool_run(
                 params=params,
-                protein_id=self.parent.protein._do_id,
                 database_columns=self.parent._db.proteins.cols
                 + self.parent._db.docking.cols,
                 complex_hash=self.parent._hash,

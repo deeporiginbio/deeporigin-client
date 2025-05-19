@@ -88,7 +88,6 @@ sim.ligands
     [Ligand(
       file: '/Users/deeporigin/brd-2.sdf'
        smiles_string: '[H]C1=C([H])C(...'
-       _do_id: 'Ligands-1'
        properties: {'r_exp_dg': '-9.59'}
     ),...]
     ```

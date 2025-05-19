@@ -84,7 +84,6 @@ class Protein:
     atom_types: Optional[np.ndarray] = None
     block_type: str = "pdb"
     block_content: Optional[str] = None
-    _do_id: str | None = None
 
     @classmethod
     def from_pdb_id(cls, pdb_id: str, struct_ind: int = 0) -> "Protein":
