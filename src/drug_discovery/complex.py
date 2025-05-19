@@ -11,9 +11,6 @@ from deeporigin.drug_discovery.abfe import ABFE
 from deeporigin.drug_discovery.docking import Docking
 from deeporigin.drug_discovery.rbfe import RBFE
 from deeporigin.drug_discovery.structures import Ligand, Protein
-from deeporigin.files import FilesClient
-
-files_client = FilesClient()
 
 
 @dataclass
@@ -125,6 +122,9 @@ class Complex:
         Internal method. Do not use."""
 
         # get a list of all files in the entities directory
+        from deeporigin.files import FilesClient
+
+        files_client = FilesClient()
         remote_files = files_client.list_folder("entities", recursive=True)
         remote_files = list(remote_files.keys())
 
