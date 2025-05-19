@@ -128,6 +128,7 @@ class ABFE(WorkflowStep):
         self,
         *,
         ligands: Optional[list[Ligand]] = None,
+        re_run: bool = False,
     ):
         """Method to run an end-to-end ABFE run.
 
@@ -138,8 +139,6 @@ class ABFE(WorkflowStep):
             ligands = self.parent.ligands
 
         ligand_names = [os.path.basename(ligand.file_path) for ligand in ligands]
-
-        # TODO -- loop over all ligands
 
         df = get_dataframe(
             tool_key=tool_mapper["ABFE"],
@@ -155,9 +154,14 @@ class ABFE(WorkflowStep):
             )
         ]
 
-        # TODO -- use this info to determine whether to run new jobs or not
+        # get a list of ligands that have already been run
+        ligands_already_run = list(
+            df["metadata"].apply(lambda d: isinstance(d, dict) and d.get("ligand_file"))
+        )
 
-        ligands_to_run = ligand_names
+        ligands_to_run = [
+            ligand for ligand in ligand_names if ligand not in ligands_already_run
+        ]
 
         self.parent._sync_protein_and_ligands()
 
@@ -165,8 +169,10 @@ class ABFE(WorkflowStep):
             self.parent.protein.file_path
         )
 
-        if len(ligands_to_run) == 0:
-            print("All requested ligands have already been run.")
+        if len(ligands_to_run) == 0 and not re_run:
+            print(
+                "All requested ligands have already been run. To re-run, set re_run=True"
+            )
             return
 
         if self.jobs is None:
@@ -309,6 +315,9 @@ class ABFE(WorkflowStep):
                 return progress
             else:
                 data = json.loads(data)
+
+            if "cmd" in data and data["cmd"] == "FEP Results":
+                return {step: "Succeeded" for step in steps}
 
             status_value = job._status[0]
 
