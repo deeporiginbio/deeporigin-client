@@ -64,7 +64,7 @@ class ABFE(WorkflowStep):
 
         df2 = ligands_to_dataframe(self.parent.ligands)
         df2["SMILES"] = df2["Ligand"]
-        df2.drop(columns=["Ligand", "ID", "initial_smiles"], inplace=True)
+        df2.drop(columns=["Ligand", "initial_smiles"], inplace=True)
 
         df = pd.merge(
             df1,

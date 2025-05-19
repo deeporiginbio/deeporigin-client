@@ -5,7 +5,8 @@ app = marimo.App(width="medium")
 
 with app.setup:
     import marimo as mo
-    from deeporigin.drug_discovery import Complex, EXAMPLE_DATA_DIR, Protein, Ligand
+
+    from deeporigin.drug_discovery import EXAMPLE_DATA_DIR, Complex
 
 
 @app.cell(hide_code=True)
@@ -157,6 +158,7 @@ def _():
 @app.cell
 def _():
     from deeporigin.tools.job import get_dataframe
+
     get_dataframe()
     return
 
