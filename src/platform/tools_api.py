@@ -342,14 +342,12 @@ def _process_job(
     return job_id
 
 
-def generate_tool_function(schema: dict) -> Callable:
+def generate_tool_function(*, tool_key: str, tool_version: str) -> Callable:
     """utility function that generates a function that can be used to run a too, from schema
 
     Example usage:
 
-        data = tools_api.get_tool(tool_key="deeporigin.bulk-docking")
-        data = data[0].to_dict()
-        docking_func = generate_tool_function(data)
+        docking_func = tools_api.generate_tool_function(tool_key="deeporigin.bulk-docking", tool_version="0.3.0")
         docking_func(
             protein_path="path/to/protein.pdb",
             ligand_path="path/to/ligand.sdf",
@@ -357,7 +355,20 @@ def generate_tool_function(schema: dict) -> Callable:
         )
 
     """
-    tool_key = schema["key"]
+
+    data = tools_api.get_tool(tool_key=tool_key)
+    data = [item for item in data if item.version == tool_version]
+
+    if len(data) == 0:
+        raise ValueError(
+            f"No tool found for tool_key={tool_key} and tool_version={tool_version}"
+        )
+    elif len(data) > 1:
+        raise ValueError(
+            f"Multiple tools found for tool_key={tool_key} and tool_version={tool_version}"
+        )
+
+    schema = data[0]
 
     inputs_schema = schema["inputs"]
     outputs_schema = schema["outputs"]
