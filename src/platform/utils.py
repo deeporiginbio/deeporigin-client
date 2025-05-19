@@ -8,7 +8,6 @@ from beartype import beartype
 from box import Box
 
 # Import SDKs at module level
-import do_sdk_files
 import do_sdk_platform
 
 from deeporigin.auth import get_tokens
@@ -90,8 +89,8 @@ def _get_api_client(
     if sdk_name == "platform":
         sdk = do_sdk_platform
     else:
-        sdk = do_sdk_files
-
+        # sdk = do_sdk_files
+        raise NotImplementedError("Files API is not implemented yet.")
     if configure:
         if sdk_name == "platform":
             host = urljoin(get_value()["api_endpoint"], "/api")
