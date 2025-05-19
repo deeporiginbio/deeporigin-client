@@ -36,7 +36,7 @@ class ABFE(WorkflowStep):
 
         self._params.end_to_end = utils._load_params("abfe_end_to_end")
 
-    def get_results(self) -> pd.DataFrame:
+    def get_results(self) -> pd.DataFrame | None:
         """get ABFE results and return in a dataframe.
 
         This method returns a dataframe showing the results of ABFE runs associated with this simulation session. The ligand file name and ΔG are shown, together with user-supplied properties"""
@@ -47,6 +47,10 @@ class ABFE(WorkflowStep):
         )
 
         results_files = [file for file in files if file.endswith("/results.csv")]
+
+        if len(results_files) == 0:
+            print("No ABFE results found for this protein.")
+            return None
 
         files_api.download_files(results_files)
 
