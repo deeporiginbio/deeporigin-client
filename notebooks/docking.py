@@ -37,14 +37,14 @@ def _():
     return (protein,)
 
 
-app._unparsable_cell(
-    r"""
+@app.cell(hide_code=True)
+def _():
+    mo.md("""
     ### Visualizing the Protein
 
     We can visualize the 3D structure of the protein using the `show` method:
-    """,
-    column=None, disabled=False, hide_code=True, name="_"
-)
+    """)
+    return
 
 
 @app.cell
@@ -83,7 +83,7 @@ def _():
     /// admonition | Fast running tool
 
     This functionality uses the Deep Origin pocket finder tool. Fast running tools (functions) have near instant start up times and respond to requests over HTTP.
-    
+
     ///
     """
     )
@@ -97,12 +97,10 @@ def _(protein):
     return pocket, pockets
 
 
-app._unparsable_cell(
-    r"""
-    We can inspect properties of the pocket by simply calling the pocket object:
-    """,
-    column=None, disabled=False, hide_code=True, name="_"
-)
+@app.cell(hide_code=True)
+def _():
+    mo.md("""We can inspect properties of the pocket by simply calling the pocket object:""")
+    return
 
 
 @app.cell
@@ -159,7 +157,7 @@ def _():
     /// admonition | Fast running tool
 
     This functionality uses the Deep Origin `molprops` tool. Fast running tools (functions) have near instant start up times and respond to requests over HTTP.
-    
+
     ///
     """
     )
@@ -183,7 +181,7 @@ def _():
     /// admonition | Fast running tool
 
     This functionality uses the Deep Origin Docking tool. Fast running tools (functions) have near instant start up times and respond to requests over HTTP.
-    
+
     ///
 
     We can visualize these poses using the `show` method of the Protein class:
@@ -205,11 +203,6 @@ def _(poses_sdf):
 
     df = ligands_to_dataframe(Ligand.from_sdf(poses_sdf))
     df.loc[:,["POSE SCORE", "Binding Energy"]]
-    return
-
-
-@app.cell
-def _():
     return
 
 

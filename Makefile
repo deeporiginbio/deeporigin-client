@@ -76,3 +76,10 @@ test-github:
 test-github-live:
 	python3 -m coverage run -m pytest --ignore=tests/test_config.py --ignore=tests/test_context.py --client default -n "auto" --dist loadfile
 
+
+notebooks-html:
+	@echo "Making marimo notebooks..."
+	@source $(CURDIR)/venv/bin/activate && \
+	rm -f docs/notebooks/*.html && \
+	marimo export html notebooks/docking.py -o docs/notebooks/docking.html && \
+	deactivate
