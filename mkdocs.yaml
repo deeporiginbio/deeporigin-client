@@ -108,7 +108,6 @@ nav:
     - Draco: tools/draco.md
   - Reference:
     - Running tools: tools/ref/run.md
-    - Utils: tools/ref/utils.md
 - Changelog: changelog.md
 - Support: https://www.support.deeporigin.com/servicedesk/customer/portals
 

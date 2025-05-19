@@ -125,7 +125,7 @@ class ABFE(WorkflowStep):
         """Method to run an end-to-end ABFE run.
 
         Args:
-            ligand_ids (Optional[str], optional): List of ligand IDs to run. Defaults to None. When None, all ligands in the object will be run. To view a list of valid ligand IDs, use the `.show_ligands()` method"""
+            ligands: List of ligand to run. Defaults to None. When None, all ligands in the object will be run. To view a list of valid ligands, use the `.show_ligands()` method"""
 
         if ligands is None:
             ligands = self.parent.ligands
@@ -207,7 +207,7 @@ class ABFE(WorkflowStep):
         """Show the system trajectory FEP run.
 
         Args:
-            ligand_id (str): The ID of the ligand to show the trajectory for.
+            ligand: The ligand to show the trajectory for.
             step (Literal["md", "abfe"]): The step to show the trajectory for.
             window (int, optional): The window number to show the trajectory for. Defaults to 1.
         """
