@@ -5,7 +5,7 @@ import hashlib
 import os
 from pathlib import Path
 import re
-from typing import Optional, Tuple
+from typing import Optional
 
 from beartype import beartype
 from rdkit import Chem
@@ -242,7 +242,7 @@ def split_sdf_file(
 def smiles_list_to_base64_png_list(
     smiles_list: list[str],
     *,
-    size: Tuple[int, int] = (300, 100),
+    size: tuple[int, int] = (300, 100),
     scale_factor: int = 2,
     reference_smiles: Optional[str] = None,
 ) -> list[str]:
