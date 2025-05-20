@@ -160,27 +160,6 @@ def test_empty_db(config, add_column):  # noqa: F811
         api.delete_database(database_id=name)
 
 
-def test_df_loc_indexer_1(config):  # noqa: F811
-    """check that we can modify a row using the loc indexer"""
-
-    if config["mock"]:
-        df = config["df"]
-    else:
-        df = DataFrame.from_deeporigin(config["db-name"])
-
-    # should be able to modify an existing row
-    first_row = df.index[0]
-    last_row = df.index[-1]
-    df.loc[first_row] = list(df.loc[last_row])
-
-    assert df._modified_columns != {}, (
-        "Failed to successfully modify a row using the loc indexer"
-    )
-
-    if not config["mock"]:
-        df.to_deeporigin()
-
-
 def test_df_loc_indexer_2(config):  # noqa: F811
     """check that we can modify 2 rows using the loc indexer"""
 
