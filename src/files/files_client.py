@@ -471,7 +471,10 @@ class FilesClient:
             progress_callback = self.progress_callback_create_func("Uploading")
 
         return self._process_files_in_parallel(
-            src_to_dest, self._upload_single_file, "Upload", progress_callback
+            src_to_dest,
+            self._upload_single_file,
+            "Upload",
+            progress_callback,
         )
 
     def download_files(
