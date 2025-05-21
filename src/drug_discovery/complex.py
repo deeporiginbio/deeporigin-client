@@ -5,12 +5,14 @@ import os
 from typing import Optional
 
 from beartype import beartype
+import do_sdk_platform
 
 from deeporigin.drug_discovery import chemistry as chem
 from deeporigin.drug_discovery.abfe import ABFE
 from deeporigin.drug_discovery.docking import Docking
 from deeporigin.drug_discovery.rbfe import RBFE
 from deeporigin.drug_discovery.structures import Ligand, Protein
+from deeporigin.files import FilesClient
 
 
 @dataclass
@@ -23,9 +25,11 @@ class Complex:
 
     # optionally, provide clients that can be used
     # to interact with the platform
-    _files_client = None
-    _tools_client = None
-    _organizations_client = None
+    _files_client: Optional[FilesClient] = None
+    _tools_client: Optional[do_sdk_platform.api.tools_api.ToolsApi] = None
+    _organizations_client: Optional[
+        do_sdk_platform.api.organizations_api.OrganizationsApi
+    ] = None
 
     def __init__(
         self,

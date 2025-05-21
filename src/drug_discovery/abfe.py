@@ -44,6 +44,7 @@ class ABFE(WorkflowStep):
         files = utils.find_files_on_ufa(
             tool="ABFE",
             protein=self.parent.protein.file_path.name,
+            client=self.parent._files_client,
         )
 
         results_files = [file for file in files if file.endswith("/results.csv")]
@@ -235,6 +236,7 @@ class ABFE(WorkflowStep):
                 tool="ABFE",
                 protein=self.parent.protein.file_path.name,
                 ligand=Path(ligand.file_path).name,
+                client=self.parent._files_client,
             )
             xtc_files = [
                 file

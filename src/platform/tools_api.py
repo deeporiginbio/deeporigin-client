@@ -5,7 +5,7 @@ import functools
 from functools import wraps
 import inspect
 import sys
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Literal, Optional
 
 from beartype import beartype
 import pandas as pd
@@ -19,8 +19,11 @@ __all__ = _add_functions_to_module(
 )
 
 
-TERMINAL_STATES = {"Succeeded", "Failed"}
+TERMINAL_STATES = {"Succeeded", "Failed", "Cancelled"}
 NON_TERMINAL_STATES = {"Created", "Queued", "Running"}
+
+# possible providers for files that work with the tools API
+PROVIDER = Literal["ufa", "s3"]
 
 
 @beartype
