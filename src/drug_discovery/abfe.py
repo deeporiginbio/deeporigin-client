@@ -138,7 +138,7 @@ class ABFE(WorkflowStep):
 
         df = get_dataframe(
             tool_key=tool_mapper["ABFE"],
-            only_with_status=["Succeeded", "Running", "Queued"],
+            only_with_status=["Succeeded", "Running", "Queued", "Created"],
             include_metadata=True,
             resolve_user_names=False,
         )
@@ -167,7 +167,7 @@ class ABFE(WorkflowStep):
 
         if len(ligands_to_run) == 0 and not re_run:
             print(
-                "All requested ligands have already been run. To re-run, set re_run=True"
+                "All requested ligands have already been run, or are queued to run. To re-run, set re_run=True"
             )
             return
 
