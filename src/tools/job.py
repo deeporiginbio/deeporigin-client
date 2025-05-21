@@ -309,7 +309,7 @@ def get_dataframe(
     """
 
     if only_with_status is None:
-        only_with_status = ["Succeeded", "Running", "Queued", "Failed"]
+        only_with_status = ["Succeeded", "Running", "Queued", "Failed", "Created"]
 
     _filter = {
         "status": {"$in": only_with_status},
