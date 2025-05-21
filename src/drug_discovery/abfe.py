@@ -191,8 +191,6 @@ class ABFE(WorkflowStep):
                 tool_version=self.tool_version,
             )
 
-            print(job_id)
-
             job = Job.from_ids([job_id])
 
             job._viz_func = self._render_progress

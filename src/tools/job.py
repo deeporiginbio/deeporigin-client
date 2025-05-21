@@ -70,6 +70,18 @@ class Job:
         """
         return cls(name="job", _ids=ids)
 
+    @classmethod
+    def from_id(cls, id: str) -> "Job":
+        """Create a Job instance from a single ID.
+
+        Args:
+            id: Job ID to track.
+
+        Returns:
+            A new Job instance with the given ID.
+        """
+        return cls(name="job", _ids=[id])
+
     def sync(self):
         """Synchronize the job status and progress reports.
 
