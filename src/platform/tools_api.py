@@ -8,6 +8,7 @@ import sys
 from typing import Any, Callable, Optional
 
 from beartype import beartype
+import pandas as pd
 
 from deeporigin.config import get_value
 from deeporigin.platform import clusters_api, tools_api
@@ -75,15 +76,28 @@ def get_statuses_and_progress(job_ids: list[str]) -> list:
 
 
 @beartype
-def cancel_runs(job_ids: list[str]) -> None:
+def cancel_runs(
+    job_ids: list[str] | pd.core.series.Series | pd.core.frame.DataFrame,
+) -> None:
     """Cancel multiple jobs in parallel.
 
     Args:
         job_ids: List of job IDs to cancel.
     """
+
+    if isinstance(job_ids, pd.core.series.Series):
+        job_ids = job_ids.tolist()
+    elif isinstance(job_ids, pd.core.frame.DataFrame):
+        job_ids = job_ids["id"].tolist()
+
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = [executor.submit(cancel_run, job_id) for job_id in job_ids]
         concurrent.futures.wait(futures)
+        # Raise the first exception encountered
+        for future in futures:
+            exc = future.exception()
+            if exc is not None:
+                raise exc
 
 
 @beartype
