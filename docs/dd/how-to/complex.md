@@ -30,18 +30,18 @@ You can modify a Complex object by adding or replacing ligands. The Complex's ha
 
 ```python
 # Create a complex with just the protein
-complex = Complex(protein=protein, ligands=[])
+sim = Complex(protein=protein, ligands=[])
 
 # Add a single ligand
 new_ligand = Ligand.from_sdf("ligand.sdf")
-complex.ligands = complex.ligands + [new_ligand]
+sim.ligands = sim.ligands + [new_ligand]
 
 # Add multiple ligands
 more_ligands = Ligand.from_sdf("multiple_ligands.sdf")  # Returns a list if file contains multiple molecules
-complex.ligands = complex.ligands + more_ligands
+sim.ligands = sim.ligands + more_ligands
 
 # Replace all ligands
-complex.ligands = [new_ligand]  # Replace with a single ligand
+sim.ligands = [new_ligand]  # Replace with a single ligand
 ```
 
 ??? tip "Constructing Ligands"
@@ -49,3 +49,48 @@ complex.ligands = [new_ligand]  # Replace with a single ligand
 
 ??? tip "Constructing the Protein"
     To see how to construct the Protein, see [this](./proteins.md)
+
+## Preparing a complex
+
+To prepare a protein-ligand complex for simulation or further analysis, use the `Complex.prepare()` method. This method runs system preparation on a given ligand in the context of the complex's protein, handling tasks such as protonation, water retention, and box padding.
+
+### Usage
+
+```python
+sim.prepare(ligand)
+```
+
+Typically, you would call this method using a ligand in the complex:
+
+```python
+sim.prepare(sim.ligands[0])
+```
+
+### Arguments
+
+- `ligand` (`Ligand`): The ligand to prepare. This should be an instance of the `Ligand` class associated with your complex.
+- `padding` (`float`, optional): Padding (in angstroms) to add around the system. Default is `1.0`.
+- `keep_waters` (`bool`, optional): Whether to keep water molecules in the prepared system. Default is `False`.
+- `is_lig_protonated` (`bool`, optional): Whether the ligand is already protonated. Default is `True`.
+- `is_protein_protonated` (`bool`, optional): Whether the protein is already protonated. Default is `True`.
+
+You can override any of these defaults as needed:
+
+```python
+sim.prepare(
+    ligand,
+    padding=2.0,
+    keep_waters=True,
+    is_lig_protonated=False,
+    is_protein_protonated=False,
+)
+```
+
+### What happens during preparation?
+
+- The method calls the system preparation backend, which processes the protein and ligand files.
+- The prepared complex is saved to a cache for efficiency.
+- The resulting structure can be visualized or used for downstream workflows.
+
+After preparation, the prepared complex structure will be shown automatically.
+
