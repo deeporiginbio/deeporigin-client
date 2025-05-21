@@ -116,6 +116,39 @@ class Complex:
 
         return instance
 
+    def prepare(
+        self,
+        ligand: Ligand,
+        *,
+        padding: float = 1.0,
+        keep_waters: bool = False,
+        is_lig_protonated: bool = True,
+        is_protein_protonated: bool = True,
+    ) -> None:
+        """run system prepartion on the Complex
+
+        Args:
+            ligand (Ligand): The ligand to prepare.
+            padding (float, optional): Padding to add around the system. Defaults to 1.0.
+            keep_waters (bool, optional): Whether to keep water molecules. Defaults to False.
+            is_lig_protonated (bool, optional): Whether the ligand is already protonated. Defaults to True.
+            is_protein_protonated (bool, optional): Whether the protein is already protonated. Defaults to True.
+        """
+        from deeporigin.functions.sysprep import sysprep
+
+        # run sysprep on the ligand
+        complex_path = sysprep(
+            protein_path=self.protein.file_path,
+            ligand_path=ligand.file_path,
+            padding=padding,
+            keep_waters=keep_waters,
+            is_lig_protonated=is_lig_protonated,
+            is_protein_protonated=is_protein_protonated,
+        )
+
+        # show it
+        Protein.from_file(complex_path).show()
+
     def _sync_protein_and_ligands(self) -> None:
         """Ensure that the protein and ligands are uploaded to Deep Origin
 
