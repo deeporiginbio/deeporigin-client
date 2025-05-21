@@ -142,6 +142,9 @@ class Job:
 
         started_at = []
         for item in self._attributes:
+            if item.startedAt is None:
+                started_at.append(None)
+                continue
             dt = parser.isoparse(item.startedAt).astimezone(timezone.utc)
 
             # Compare to now (also in UTC)
@@ -178,6 +181,8 @@ class Job:
             template_vars["status"] = "Cancelled"
         elif all(status == "Succeeded" for status in self._status):
             template_vars["status"] = "Succeeded"
+        elif all(status == "Created" for status in self._status):
+            template_vars["status"] = "Created"
         else:
             template_vars["status"] = "Running"
 
