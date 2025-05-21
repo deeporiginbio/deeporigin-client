@@ -1,4 +1,4 @@
-"""this module contains the function to run system preparation on a protein-ligand complex"""
+"""This module contains the function to run system preparation on a protein-ligand complex."""
 
 import base64
 import hashlib
