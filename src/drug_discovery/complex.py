@@ -116,6 +116,7 @@ class Complex:
 
         return instance
 
+    @beartype
     def prepare(
         self,
         ligand: Ligand,
