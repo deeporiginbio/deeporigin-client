@@ -52,7 +52,7 @@ class ABFE(WorkflowStep):
             print("No ABFE results found for this protein.")
             return None
 
-        files_api.download_files(results_files)
+        files_api.download_files(results_files, client=self.parent._files_client)
 
         # read all the CSV files using pandas and
         # set Ligand1 column to ligand name (parent dir of results.csv)
@@ -141,6 +141,7 @@ class ABFE(WorkflowStep):
             only_with_status=["Succeeded", "Running", "Queued", "Created"],
             include_metadata=True,
             resolve_user_names=False,
+            client=self.parent._tools_client,
         )
 
         # filter to find relevant jobs
@@ -189,6 +190,7 @@ class ABFE(WorkflowStep):
                 params=self._params.end_to_end,
                 tool="ABFE",
                 tool_version=self.tool_version,
+                tools_client=self.parent._tools_client,
             )
 
             job = Job.from_ids([job_id])
@@ -267,7 +269,7 @@ class ABFE(WorkflowStep):
 
         files_to_download.append(remote_xtc_file)
 
-        files_api.download_files(files_to_download)
+        files_api.download_files(files_to_download, client=self.parent._files_client)
 
         from deeporigin_molstar.src.viewers import ProteinViewer
 

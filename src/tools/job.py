@@ -58,6 +58,9 @@ class Job:
     _execution_ids: list = field(default_factory=list)
     _metadata: list = field(default_factory=list)
 
+    # clients
+    _tools_client = None
+
     @classmethod
     def from_ids(cls, ids: list[str]) -> "Job":
         """Create a Job instance from a list of IDs.
@@ -91,7 +94,10 @@ class Job:
         """
 
         # use
-        results = tools_api.get_statuses_and_progress(self._ids)
+        results = tools_api.get_statuses_and_progress(
+            self._ids,
+            client=self._tools_client,
+        )
 
         self._status = [result["status"] for result in results]
         self._progress_reports = [result["progress"] for result in results]
@@ -304,7 +310,7 @@ class Job:
         Returns:
             The result of the cancellation operation from utils.cancel_runs.
         """
-        tools_api.cancel_runs(self._ids)
+        tools_api.cancel_runs(self._ids, client=self._tools_client)
 
 
 def get_dataframe(
@@ -313,6 +319,9 @@ def get_dataframe(
     only_with_status: Optional[list[str]] = None,
     include_metadata: bool = False,
     resolve_user_names: bool = False,
+    tools_client=None,
+    org_client=None,
+    org_friendly_id: Optional[str] = None,
 ) -> pd.DataFrame:
     """Get a dataframe of the job statuses and progress reports.
 
@@ -338,20 +347,26 @@ def get_dataframe(
             },
         }
 
-    from deeporigin.config import get_value
-    from deeporigin.platform import organizations_api
+    if org_friendly_id is None:
+        from deeporigin.config import get_value
 
-    org_id = get_value()["organization_id"]
+        org_friendly_id = get_value()["organization_id"]
 
     response = tools_api.get_tool_executions(
-        org_friendly_id=org_id,
+        org_friendly_id=org_friendly_id,
         filter=_filter,
         page_size=10000,
+        client=tools_client,
     )
     jobs = response["data"]
 
     if resolve_user_names:
-        users = organizations_api.get_organization_users(org_friendly_id=org_id)
+        from deeporigin.platform import organizations_api
+
+        users = organizations_api.get_organization_users(
+            org_friendly_id=org_friendly_id,
+            client=org_client,
+        )
 
         # Create a mapping of user IDs to user names
         user_id_to_name = {user["id"]: user["attributes"]["name"] for user in users}

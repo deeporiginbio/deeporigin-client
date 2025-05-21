@@ -10,7 +10,6 @@ from typing import Any, Callable, Optional
 from beartype import beartype
 import pandas as pd
 
-from deeporigin.config import get_value
 from deeporigin.platform import clusters_api, tools_api
 from deeporigin.platform.utils import _add_functions_to_module
 
@@ -25,7 +24,7 @@ NON_TERMINAL_STATES = {"Created", "Queued", "Running"}
 
 
 @beartype
-def get_status_and_progress(execution_id: str) -> dict:
+def get_status_and_progress(execution_id: str, *, client=None) -> dict:
     """Determine the status of a run, identified by job ID
 
     Args:
@@ -36,6 +35,7 @@ def get_status_and_progress(execution_id: str) -> dict:
 
     data = tools_api.get_tool_execution(
         execution_id=execution_id,
+        client=client,
     )
 
     return dict(
@@ -49,7 +49,7 @@ def get_status_and_progress(execution_id: str) -> dict:
 
 
 @beartype
-def get_statuses_and_progress(job_ids: list[str]) -> list:
+def get_statuses_and_progress(job_ids: list[str], *, client=None) -> list:
     """get statuses and progress reports for multiple jobs in parallel
 
     Args:
@@ -61,7 +61,7 @@ def get_statuses_and_progress(job_ids: list[str]) -> list:
     with concurrent.futures.ThreadPoolExecutor() as executor:
         # Submit all jobs and create a mapping from future to job_id
         future_to_job_id = {
-            executor.submit(get_status_and_progress, job_id): job_id
+            executor.submit(get_status_and_progress, job_id, client=client): job_id
             for job_id in job_ids
         }
 
@@ -78,6 +78,8 @@ def get_statuses_and_progress(job_ids: list[str]) -> list:
 @beartype
 def cancel_runs(
     job_ids: list[str] | pd.core.series.Series | pd.core.frame.DataFrame,
+    *,
+    client=None,
 ) -> None:
     """Cancel multiple jobs in parallel.
 
@@ -91,7 +93,9 @@ def cancel_runs(
         job_ids = job_ids["id"].tolist()
 
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = [executor.submit(cancel_run, job_id) for job_id in job_ids]
+        futures = [
+            executor.submit(cancel_run, job_id, client=client) for job_id in job_ids
+        ]
         concurrent.futures.wait(futures)
         # Raise the first exception encountered
         for future in futures:
@@ -101,25 +105,30 @@ def cancel_runs(
 
 
 @beartype
-def cancel_run(execution_id: str) -> None:
+def cancel_run(
+    execution_id: str,
+    *,
+    client=None,
+) -> None:
     """cancel a run
 
     Args:
         execution_id (str): execution ID
     """
 
-    data = get_status_and_progress(execution_id)
+    data = get_status_and_progress(execution_id, client=client)
     if data["status"] in ["Cancelled", "Failed", "Succeeded"]:
         return
 
     tools_api.action_tool_execution(
         execution_id=execution_id,
         action="cancel",
+        client=client,
     )
 
 
 @beartype
-def query_run_statuses(job_ids: list[str]) -> dict:
+def query_run_statuses(job_ids: list[str], *, client=None) -> dict:
     """get statuses for multiple jobs in parallel
 
     Args:
@@ -131,7 +140,8 @@ def query_run_statuses(job_ids: list[str]) -> dict:
     with concurrent.futures.ThreadPoolExecutor() as executor:
         # Submit all jobs and create a mapping from future to job_id
         future_to_job_id = {
-            executor.submit(query_run_status, job_id): job_id for job_id in job_ids
+            executor.submit(query_run_status, job_id, client=client): job_id
+            for job_id in job_ids
         }
 
         # As each future completes, store the result in the status dictionary
@@ -146,7 +156,7 @@ def query_run_statuses(job_ids: list[str]) -> dict:
 
 
 @beartype
-def query_run_status(execution_id: str) -> str:
+def query_run_status(execution_id: str, *, client=None) -> str:
     """Determine the status of a run, identified by execution_id ID
 
     Args:
@@ -157,7 +167,7 @@ def query_run_status(execution_id: str) -> str:
 
     """
 
-    data = tools_api.get_tool_execution(execution_id=execution_id)
+    data = tools_api.get_tool_execution(execution_id=execution_id, client=client)
 
     return data.attributes.status
 
@@ -191,13 +201,13 @@ def _resolve_column_name(column_name: str, cols: list) -> str:
 
 @functools.cache
 @beartype
-def _get_cluster_id() -> str:
+def _get_cluster_id(*, client=None) -> str:
     """gets a valid cluster ID to run tools on
 
     this defaults to pulling us-west-2"""
 
     available_clusters = clusters_api.list_clusters(
-        org_friendly_id=get_value()["organization_id"]
+        client=client,
     )
 
     cluster = [
@@ -215,6 +225,7 @@ def run_tool(
     *,
     data: dict,
     tool_key: str,
+    client=None,
 ):
     """run any tool using provided data transfer object (DTO)
 
@@ -227,6 +238,7 @@ def run_tool(
     return tools_api.execute_tool(
         tool_key=tool_key,
         execute_tool_dto=data,
+        client=client,
     )
 
 
@@ -238,6 +250,7 @@ def make_payload(
     cluster_id: Optional[str] = None,
     cols: Optional[list] = None,
     metadata: Optional[dict] = None,
+    client=None,
 ) -> dict:
     """helper function to create payload for tool execution. This helper function is used by all wrapper functions in the run module to create the payload.
 
@@ -253,7 +266,7 @@ def make_payload(
     """
 
     if cluster_id is None:
-        cluster_id = _get_cluster_id()
+        cluster_id = _get_cluster_id(client=client)
 
     payload = dict(
         inputs=inputs,
@@ -337,6 +350,7 @@ def _process_job(
     tool_key: str,
     cols: Optional[list] = None,
     metadata: Optional[dict] = None,
+    client=None,
 ) -> str:
     """helper function that uses inputs and outputs to construct a payload and run a tool"""
 
@@ -345,11 +359,13 @@ def _process_job(
         inputs=inputs,
         cols=cols,
         metadata=metadata,
+        client=client,
     )
 
     response = run_tool(
         data=payload,
         tool_key=tool_key,
+        client=client,
     )
     job_id = response.id
 
@@ -431,6 +447,14 @@ def generate_tool_function(*, tool_key: str, tool_version: str) -> Callable:
             annotation=dict[str, Any] | None,
         )
     )
+    parameters.append(
+        inspect.Parameter(
+            "client",
+            inspect.Parameter.KEYWORD_ONLY,
+            default=None,
+            annotation=Any,
+        )
+    )
 
     sig = inspect.Signature(parameters)
 
@@ -454,12 +478,14 @@ def generate_tool_function(*, tool_key: str, tool_version: str) -> Callable:
         }
 
         metadata = arguments.get("metadata")
+        client = arguments.get("client")
 
         return tools_api._process_job(
             inputs=inputs,
             outputs=outputs,
             tool_key=tool_key,
             metadata=metadata,
+            client=client,
         )
 
     # Sanitize function name to be a valid Python identifier

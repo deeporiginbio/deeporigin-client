@@ -21,11 +21,11 @@ class Complex:
     protein: Protein
     _ligands: list[Ligand] = field(default_factory=list, repr=False)
 
-    # these params are not user facing
-    _db: Optional[dict] = None
-
-    """stores a hash of all ligands and the protein. This will be computed post initialization"""
-    _hash: Optional[str] = None
+    # optionally, provide clients that can be used
+    # to interact with the platform
+    _files_client = None
+    _tools_client = None
+    _organizations_client = None
 
     def __init__(
         self,
@@ -158,7 +158,11 @@ class Complex:
         # get a list of all files in the entities directory
         from deeporigin.files import FilesClient
 
-        files_client = FilesClient()
+        if self._files_client is None:
+            files_client = FilesClient()
+        else:
+            files_client = self._files_client
+
         remote_files = files_client.list_folder("entities", recursive=True)
         remote_files = list(remote_files.keys())
 
@@ -173,7 +177,7 @@ class Complex:
             if ligand_path not in remote_files:
                 files_to_upload[str(ligand.file_path)] = ligand_path
 
-        files_client.upload_files(files_to_upload)
+        files_client.upload_files(files_to_upload, client=self._files_client)
 
     def _repr_pretty_(self, p, cycle):
         """pretty print a Docking object"""

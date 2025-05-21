@@ -36,6 +36,7 @@ def _start_tool_run(
     ligand2_path: Optional[str] = None,
     tool: valid_tools,
     tool_version: str,
+    tools_client=None,
 ) -> str:
     """starts a single run of ABFE end to end and logs it in the ABFE database. Internal function. Do not use.
 
@@ -128,6 +129,7 @@ def _start_tool_run(
         outputs=outputs,
         tool_key=tool_mapper[tool],
         metadata=metadata,
+        client=tools_client,
     )
 
     return job_id
@@ -171,6 +173,7 @@ def find_files_on_ufa(
     tool: str,
     protein: str,
     ligand: Optional[str] = None,
+    files_client=None,
 ) -> list:
     """
     Find files on the UFA (Unified File API) storage for a given tool run.
@@ -188,9 +191,14 @@ def find_files_on_ufa(
     Returns:
         List[str]: A list of file paths found in the specified UFA directory.
     """
-    from deeporigin.files import FilesClient
 
-    client = FilesClient()
+    if files_client is None:
+        from deeporigin.files import FilesClient
+
+        client = FilesClient()
+    else:
+        client = files_client
+
     if ligand is not None:
         search_str = f"tool-runs/{tool}/{protein}/{ligand}/"
     else:
