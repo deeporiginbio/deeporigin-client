@@ -27,7 +27,12 @@ PROVIDER = Literal["ufa", "s3"]
 
 
 @beartype
-def get_status_and_progress(execution_id: str, *, client=None) -> dict:
+def get_status_and_progress(
+    execution_id: str,
+    *,
+    client=None,
+    org_friendly_id: Optional[str] = None,
+) -> dict:
     """Determine the status of a run, identified by job ID
 
     Args:
@@ -38,6 +43,7 @@ def get_status_and_progress(execution_id: str, *, client=None) -> dict:
 
     data = tools_api.get_tool_execution(
         execution_id=execution_id,
+        org_friendly_id=org_friendly_id,
         client=client,
     )
 
@@ -52,7 +58,12 @@ def get_status_and_progress(execution_id: str, *, client=None) -> dict:
 
 
 @beartype
-def get_statuses_and_progress(job_ids: list[str], *, client=None) -> list:
+def get_statuses_and_progress(
+    job_ids: list[str],
+    *,
+    client=None,
+    org_friendly_id: Optional[str] = None,
+) -> list:
     """get statuses and progress reports for multiple jobs in parallel
 
     Args:
@@ -60,20 +71,33 @@ def get_statuses_and_progress(job_ids: list[str], *, client=None) -> list:
 
     """
     results = []
+    errors = []
 
     with concurrent.futures.ThreadPoolExecutor() as executor:
         # Submit all jobs and create a mapping from future to job_id
         future_to_job_id = {
-            executor.submit(get_status_and_progress, job_id, client=client): job_id
+            executor.submit(
+                get_status_and_progress,
+                job_id,
+                client=client,
+                org_friendly_id=org_friendly_id,
+            ): job_id
             for job_id in job_ids
         }
 
         # As each future completes, store the result in the status dictionary
         for future in concurrent.futures.as_completed(future_to_job_id):
+            job_id = future_to_job_id[future]
             try:
                 results.append(future.result())
-            except Exception:
-                pass
+            except Exception as e:
+                errors.append((job_id, e))
+
+    if errors:
+        error_msgs = "\n".join([f"Job {jid}: {str(err)}" for jid, err in errors])
+        raise RuntimeError(
+            f"Some jobs failed in get_status_and_progress:\n{error_msgs}"
+        )
 
     return results
 
@@ -83,6 +107,7 @@ def cancel_runs(
     job_ids: list[str] | pd.core.series.Series | pd.core.frame.DataFrame,
     *,
     client=None,
+    org_friendly_id: Optional[str] = None,
 ) -> None:
     """Cancel multiple jobs in parallel.
 
@@ -97,7 +122,13 @@ def cancel_runs(
 
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = [
-            executor.submit(cancel_run, job_id, client=client) for job_id in job_ids
+            executor.submit(
+                cancel_run,
+                job_id,
+                client=client,
+                org_friendly_id=org_friendly_id,
+            )
+            for job_id in job_ids
         ]
         concurrent.futures.wait(futures)
         # Raise the first exception encountered
@@ -112,6 +143,7 @@ def cancel_run(
     execution_id: str,
     *,
     client=None,
+    org_friendly_id: Optional[str] = None,
 ) -> None:
     """cancel a run
 
@@ -119,7 +151,11 @@ def cancel_run(
         execution_id (str): execution ID
     """
 
-    data = get_status_and_progress(execution_id, client=client)
+    data = get_status_and_progress(
+        execution_id,
+        client=client,
+        org_friendly_id=org_friendly_id,
+    )
     if data["status"] in ["Cancelled", "Failed", "Succeeded"]:
         return
 
@@ -127,11 +163,17 @@ def cancel_run(
         execution_id=execution_id,
         action="cancel",
         client=client,
+        org_friendly_id=org_friendly_id,
     )
 
 
 @beartype
-def query_run_statuses(job_ids: list[str], *, client=None) -> dict:
+def query_run_statuses(
+    job_ids: list[str],
+    *,
+    client=None,
+    org_friendly_id: Optional[str] = None,
+) -> dict:
     """get statuses for multiple jobs in parallel
 
     Args:
@@ -143,7 +185,12 @@ def query_run_statuses(job_ids: list[str], *, client=None) -> dict:
     with concurrent.futures.ThreadPoolExecutor() as executor:
         # Submit all jobs and create a mapping from future to job_id
         future_to_job_id = {
-            executor.submit(query_run_status, job_id, client=client): job_id
+            executor.submit(
+                query_run_status,
+                job_id,
+                client=client,
+                org_friendly_id=org_friendly_id,
+            ): job_id
             for job_id in job_ids
         }
 
@@ -159,7 +206,12 @@ def query_run_statuses(job_ids: list[str], *, client=None) -> dict:
 
 
 @beartype
-def query_run_status(execution_id: str, *, client=None) -> str:
+def query_run_status(
+    execution_id: str,
+    *,
+    client=None,
+    org_friendly_id: Optional[str] = None,
+) -> str:
     """Determine the status of a run, identified by execution_id ID
 
     Args:
@@ -170,7 +222,11 @@ def query_run_status(execution_id: str, *, client=None) -> str:
 
     """
 
-    data = tools_api.get_tool_execution(execution_id=execution_id, client=client)
+    data = tools_api.get_tool_execution(
+        execution_id=execution_id,
+        client=client,
+        org_friendly_id=org_friendly_id,
+    )
 
     return data.attributes.status
 
@@ -229,6 +285,7 @@ def run_tool(
     data: dict,
     tool_key: str,
     client=None,
+    org_friendly_id: Optional[str] = None,
 ):
     """run any tool using provided data transfer object (DTO)
 
@@ -242,6 +299,7 @@ def run_tool(
         tool_key=tool_key,
         execute_tool_dto=data,
         client=client,
+        org_friendly_id=org_friendly_id,
     )
 
 
@@ -354,6 +412,7 @@ def _process_job(
     cols: Optional[list] = None,
     metadata: Optional[dict] = None,
     client=None,
+    org_friendly_id: Optional[str] = None,
 ) -> str:
     """helper function that uses inputs and outputs to construct a payload and run a tool"""
 
@@ -369,13 +428,19 @@ def _process_job(
         data=payload,
         tool_key=tool_key,
         client=client,
+        org_friendly_id=org_friendly_id,
     )
     job_id = response.id
 
     return job_id
 
 
-def generate_tool_function(*, tool_key: str, tool_version: str) -> Callable:
+def generate_tool_function(
+    *,
+    tool_key: str,
+    tool_version: str,
+    org_friendly_id: Optional[str] = None,
+) -> Callable:
     """utility function that generates a function that can be used to run a too, from schema
 
     Example usage:
@@ -489,6 +554,7 @@ def generate_tool_function(*, tool_key: str, tool_version: str) -> Callable:
             tool_key=tool_key,
             metadata=metadata,
             client=client,
+            org_friendly_id=org_friendly_id,
         )
 
     # Sanitize function name to be a valid Python identifier

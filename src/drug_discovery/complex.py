@@ -23,24 +23,56 @@ class Complex:
     protein: Protein
     _ligands: list[Ligand] = field(default_factory=list, repr=False)
 
-    # optionally, provide clients that can be used
-    # to interact with the platform
+    # don't set these directly. they are set in the constructor, if needed
     _files_client: Optional[FilesClient] = None
     _tools_client: Optional[do_sdk_platform.api.tools_api.ToolsApi] = None
     _organizations_client: Optional[
         do_sdk_platform.api.organizations_api.OrganizationsApi
     ] = None
 
+    _organization_id: Optional[str] = None
+
     def __init__(
         self,
         protein: Protein,
         *,
         ligands: list[Ligand] | None = None,
-        **kwargs,
+        organization_id: Optional[str] = None,
+        token: Optional[str] = None,
+        base_url: Optional[str] = None,
     ):
         """Initialize a Complex with either ligands or _ligands parameter"""
         self._ligands = ligands if ligands is not None else []
         self.protein = protein
+
+        if token is not None and base_url is not None and organization_id is not None:
+            # we are being passed a token, base_url, and organization_id
+            # this allows us to create clients for platform and files API,
+            # and these clients will be used for all the operations in the Complex
+
+            from deeporigin.platform.utils import _get_api_client
+
+            self._files_client = FilesClient(
+                token=token,
+                base_url=base_url,
+                organization_id=organization_id,
+            )
+
+            api_endpoint = base_url + "/api/"
+
+            self._tools_client = _get_api_client(
+                api_name="ToolsApi",
+                token=token,
+                api_endpoint=api_endpoint,
+            )
+
+            self._organizations_client = _get_api_client(
+                api_name="OrganizationsApi",
+                token=token,
+                api_endpoint=api_endpoint,
+            )
+
+            self._organization_id = organization_id
 
         self.__post_init__()
 
@@ -64,7 +96,14 @@ class Complex:
         self._ligands = new_ligands
 
     @classmethod
-    def from_dir(cls, directory: str) -> "Complex":
+    def from_dir(
+        cls,
+        directory: str,
+        *,
+        organization_id: Optional[str] = None,
+        token: Optional[str] = None,
+        base_url: Optional[str] = None,
+    ) -> "Complex":
         """Initialize a Complex from a directory containing protein and ligand files.
 
         Args:
@@ -116,6 +155,9 @@ class Complex:
         instance = cls(
             protein=protein,
             ligands=ligands,
+            organization_id=organization_id,
+            token=token,
+            base_url=base_url,
         )
 
         return instance

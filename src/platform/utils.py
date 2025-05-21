@@ -159,9 +159,8 @@ def _create_function(
         # Insert org_friendly_id if not present in kwargs, and
         # if it's required by the method
         method_sig = inspect.signature(method)
-        if (
-            "org_friendly_id" not in kwargs
-            and "org_friendly_id" in method_sig.parameters
+        if "org_friendly_id" in method_sig.parameters and (
+            kwargs.get("org_friendly_id") is None
         ):
             kwargs["org_friendly_id"] = get_value()["organization_id"]
 

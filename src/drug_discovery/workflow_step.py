@@ -27,15 +27,34 @@ class WorkflowStep:
 
     def get_jobs(self):
         """Get the jobs for this workflow step."""
-        df = get_dataframe()
+        df = get_dataframe(
+            tools_client=self.parent._tools_client,
+            org_client=self.parent._organizations_client,
+            org_friendly_id=self.parent._organization_id,
+        )
         df = df[df["tool_key"].str.contains(self._tool_key)]
 
         df = df[df["protein_id"].str.contains(self.parent.protein.file_path.name)]
 
+        job_ids = df["id"].tolist()
+
         if self._fuse_jobs:
-            self.jobs = [Job.from_ids(list(map(str, df["id"].tolist())))]
+            self.jobs = [
+                Job.from_ids(
+                    job_ids,
+                    _tools_client=self.parent._tools_client,
+                    _organization_id=self.parent._organization_id,
+                )
+            ]
         else:
-            self.jobs = [Job.from_ids([str(row["id"])]) for _, row in df.iterrows()]
+            self.jobs = [
+                Job.from_ids(
+                    [job_id],
+                    _tools_client=self.parent._tools_client,
+                    _organization_id=self.parent._organization_id,
+                )
+                for job_id in job_ids
+            ]
 
         for job in self.jobs:
             job._viz_func = self._render_progress

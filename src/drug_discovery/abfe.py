@@ -142,7 +142,9 @@ class ABFE(WorkflowStep):
             only_with_status=["Succeeded", "Running", "Queued", "Created"],
             include_metadata=True,
             resolve_user_names=False,
-            client=self.parent._tools_client,
+            tools_client=self.parent._tools_client,
+            org_client=self.parent._organizations_client,
+            org_friendly_id=self.parent.organization_id,
         )
 
         # filter to find relevant jobs

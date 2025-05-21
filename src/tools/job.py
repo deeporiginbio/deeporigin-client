@@ -59,10 +59,17 @@ class Job:
     _metadata: list = field(default_factory=list)
 
     # clients
-    _tools_client = None
+    _tools_client: Any = None
+    _organization_id: Optional[str] = None
 
     @classmethod
-    def from_ids(cls, ids: list[str]) -> "Job":
+    def from_ids(
+        cls,
+        ids: list[str],
+        *,
+        _tools_client=None,
+        _organization_id: Optional[str] = None,
+    ) -> "Job":
         """Create a Job instance from a list of IDs.
 
         Args:
@@ -71,10 +78,21 @@ class Job:
         Returns:
             A new Job instance with the given IDs.
         """
-        return cls(name="job", _ids=ids)
+        return cls(
+            name="job",
+            _ids=ids,
+            _tools_client=_tools_client,
+            _organization_id=_organization_id,
+        )
 
     @classmethod
-    def from_id(cls, id: str) -> "Job":
+    def from_id(
+        cls,
+        id: str,
+        *,
+        _tools_client=None,
+        _organization_id: Optional[str] = None,
+    ) -> "Job":
         """Create a Job instance from a single ID.
 
         Args:
@@ -83,7 +101,12 @@ class Job:
         Returns:
             A new Job instance with the given ID.
         """
-        return cls(name="job", _ids=[id])
+        return cls(
+            name="job",
+            _ids=[id],
+            _tools_client=_tools_client,
+            _organization_id=_organization_id,
+        )
 
     def sync(self):
         """Synchronize the job status and progress reports.
@@ -97,6 +120,7 @@ class Job:
         results = tools_api.get_statuses_and_progress(
             self._ids,
             client=self._tools_client,
+            org_friendly_id=self._organization_id,
         )
 
         self._status = [result["status"] for result in results]
