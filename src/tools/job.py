@@ -114,11 +114,12 @@ class Job:
 
         # get the org_friendly_id from the platform clients if it's not None
         org_friendly_id = getattr(self._platform_clients, "org_friendly_id", None)
+        tools_client = getattr(self._platform_clients, "ToolsApi", None)
 
         # use
         results = tools_api.get_statuses_and_progress(
             self._ids,
-            client=self._platform_clients.ToolsApi,
+            client=tools_client,
             org_friendly_id=org_friendly_id,
         )
 
@@ -308,7 +309,7 @@ class Job:
         or can be called manually to stop monitoring.
         """
         if self._task is not None:
-            self._task.cancel()
+            self._task.cancel()  # note that this is not job.cancel() -- we're cancelling the asyncio task
             self._task = None
 
     def _repr_html_(self) -> str:
@@ -333,10 +334,14 @@ class Job:
         Returns:
             The result of the cancellation operation from utils.cancel_runs.
         """
+
+        org_friendly_id = getattr(self._platform_clients, "org_friendly_id", None)
+        tools_client = getattr(self._platform_clients, "ToolsApi", None)
+
         tools_api.cancel_runs(
             self._ids,
-            client=self._tools_client,
-            org_friendly_id=self.org_friendly_id,
+            client=tools_client,
+            org_friendly_id=org_friendly_id,
         )
 
 

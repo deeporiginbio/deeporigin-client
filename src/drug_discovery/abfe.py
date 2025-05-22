@@ -53,9 +53,11 @@ class ABFE(WorkflowStep):
             print("No ABFE results found for this protein.")
             return None
 
+        files_client = getattr(self.parent._platform_clients, "FilesApi", None)
+
         files_api.download_files(
             results_files,
-            client=self.parent._files_client,
+            client=files_client,
         )
 
         # read all the CSV files using pandas and
@@ -145,9 +147,7 @@ class ABFE(WorkflowStep):
             only_with_status=["Succeeded", "Running", "Queued", "Created"],
             include_metadata=True,
             resolve_user_names=False,
-            tools_client=self.parent._tools_client,
-            org_client=self.parent._organizations_client,
-            org_friendly_id=self.parent.org_friendly_id,
+            _platform_clients=self.parent._platform_clients,
         )
 
         # filter to find relevant jobs
@@ -196,8 +196,7 @@ class ABFE(WorkflowStep):
                 params=self._params.end_to_end,
                 tool="ABFE",
                 tool_version=self.tool_version,
-                tools_client=self.parent._tools_client,
-                org_friendly_id=self.parent.org_friendly_id,
+                _platform_clients=self.parent._platform_clients,
             )
 
             job = Job.from_ids([job_id])
@@ -234,6 +233,8 @@ class ABFE(WorkflowStep):
         )
         files_to_download = [remote_pdb_file]
 
+        files_client = getattr(self.parent._platform_clients, "FilesApi", None)
+
         if step == "binding":
             # Check for valid windows
 
@@ -242,7 +243,7 @@ class ABFE(WorkflowStep):
                 tool="ABFE",
                 protein=self.parent.protein.file_path.name,
                 ligand=Path(ligand.file_path).name,
-                client=self.parent._files_client,
+                client=files_client,
             )
             xtc_files = [
                 file
@@ -277,7 +278,7 @@ class ABFE(WorkflowStep):
 
         files_to_download.append(remote_xtc_file)
 
-        files_api.download_files(files_to_download, client=self.parent._files_client)
+        files_api.download_files(files_to_download, client=files_client)
 
         from deeporigin_molstar.src.viewers import ProteinViewer
 

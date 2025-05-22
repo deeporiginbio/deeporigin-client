@@ -127,6 +127,8 @@ def _start_tool_run(
             "⚠️ Warning: test_run=1 in these parameters. Results will not be accurate."
         )
 
+    tools_client = getattr(_platform_clients, "ToolsApi", None)
+
     if _platform_clients is None:
         from deeporigin.config import get_value
 
@@ -139,7 +141,7 @@ def _start_tool_run(
         outputs=outputs,
         tool_key=tool_mapper[tool],
         metadata=metadata,
-        client=_platform_clients.ToolsApi,
+        client=tools_client,
         org_friendly_id=org_friendly_id,
     )
 
