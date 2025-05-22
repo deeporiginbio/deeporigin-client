@@ -30,14 +30,14 @@ class Complex:
         do_sdk_platform.api.organizations_api.OrganizationsApi
     ] = None
 
-    _organization_id: Optional[str] = None
+    org_friendly_id: Optional[str] = None
 
     def __init__(
         self,
         protein: Protein,
         *,
         ligands: list[Ligand] | None = None,
-        organization_id: Optional[str] = None,
+        org_friendly_id: Optional[str] = None,
         token: Optional[str] = None,
         base_url: Optional[str] = None,
     ):
@@ -45,7 +45,7 @@ class Complex:
         self._ligands = ligands if ligands is not None else []
         self.protein = protein
 
-        if token is not None and base_url is not None and organization_id is not None:
+        if token is not None and base_url is not None and org_friendly_id is not None:
             # we are being passed a token, base_url, and organization_id
             # this allows us to create clients for platform and files API,
             # and these clients will be used for all the operations in the Complex
@@ -55,7 +55,7 @@ class Complex:
             self._files_client = FilesClient(
                 token=token,
                 base_url=base_url,
-                organization_id=organization_id,
+                organization_id=org_friendly_id,
             )
 
             api_endpoint = base_url + "/api/"
@@ -72,7 +72,7 @@ class Complex:
                 api_endpoint=api_endpoint,
             )
 
-            self._organization_id = organization_id
+            self.org_friendly_id = org_friendly_id
 
         self.__post_init__()
 
@@ -100,7 +100,7 @@ class Complex:
         cls,
         directory: str,
         *,
-        organization_id: Optional[str] = None,
+        org_friendly_id: Optional[str] = None,
         token: Optional[str] = None,
         base_url: Optional[str] = None,
     ) -> "Complex":
@@ -155,7 +155,7 @@ class Complex:
         instance = cls(
             protein=protein,
             ligands=ligands,
-            organization_id=organization_id,
+            org_friendly_id=org_friendly_id,
             token=token,
             base_url=base_url,
         )

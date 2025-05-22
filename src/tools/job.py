@@ -60,7 +60,7 @@ class Job:
 
     # clients
     _tools_client: Any = None
-    _organization_id: Optional[str] = None
+    org_friendly_id: Optional[str] = None
 
     @classmethod
     def from_ids(
@@ -68,7 +68,7 @@ class Job:
         ids: list[str],
         *,
         _tools_client=None,
-        _organization_id: Optional[str] = None,
+        org_friendly_id: Optional[str] = None,
     ) -> "Job":
         """Create a Job instance from a list of IDs.
 
@@ -82,7 +82,7 @@ class Job:
             name="job",
             _ids=ids,
             _tools_client=_tools_client,
-            _organization_id=_organization_id,
+            org_friendly_id=org_friendly_id,
         )
 
     @classmethod
@@ -91,7 +91,7 @@ class Job:
         id: str,
         *,
         _tools_client=None,
-        _organization_id: Optional[str] = None,
+        org_friendly_id: Optional[str] = None,
     ) -> "Job":
         """Create a Job instance from a single ID.
 
@@ -105,7 +105,7 @@ class Job:
             name="job",
             _ids=[id],
             _tools_client=_tools_client,
-            _organization_id=_organization_id,
+            org_friendly_id=org_friendly_id,
         )
 
     def sync(self):
@@ -120,7 +120,7 @@ class Job:
         results = tools_api.get_statuses_and_progress(
             self._ids,
             client=self._tools_client,
-            org_friendly_id=self._organization_id,
+            org_friendly_id=self.org_friendly_id,
         )
 
         self._status = [result["status"] for result in results]
@@ -334,7 +334,11 @@ class Job:
         Returns:
             The result of the cancellation operation from utils.cancel_runs.
         """
-        tools_api.cancel_runs(self._ids, client=self._tools_client)
+        tools_api.cancel_runs(
+            self._ids,
+            client=self._tools_client,
+            org_friendly_id=self.org_friendly_id,
+        )
 
 
 def get_dataframe(

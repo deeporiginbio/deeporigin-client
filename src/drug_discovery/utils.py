@@ -38,6 +38,7 @@ def _start_tool_run(
     tool_version: str,
     tools_client=None,
     provider: tools_api.PROVIDER = "ufa",
+    org_friendly_id: Optional[str] = None,
 ) -> str:
     """starts a single run of ABFE end to end and logs it in the ABFE database. Internal function. Do not use.
 
@@ -125,12 +126,18 @@ def _start_tool_run(
             "⚠️ Warning: test_run=1 in these parameters. Results will not be accurate."
         )
 
+    if organization_id is None:
+        from deeporigin.config import get_value
+
+        organization_id = get_value()["organization_id"]
+
     job_id = tools_api._process_job(
         inputs=params,
         outputs=outputs,
         tool_key=tool_mapper[tool],
         metadata=metadata,
         client=tools_client,
+        org_friendly_id=org_friendly_id,
     )
 
     return job_id

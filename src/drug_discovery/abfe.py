@@ -53,7 +53,10 @@ class ABFE(WorkflowStep):
             print("No ABFE results found for this protein.")
             return None
 
-        files_api.download_files(results_files, client=self.parent._files_client)
+        files_api.download_files(
+            results_files,
+            client=self.parent._files_client,
+        )
 
         # read all the CSV files using pandas and
         # set Ligand1 column to ligand name (parent dir of results.csv)
@@ -144,7 +147,7 @@ class ABFE(WorkflowStep):
             resolve_user_names=False,
             tools_client=self.parent._tools_client,
             org_client=self.parent._organizations_client,
-            org_friendly_id=self.parent.organization_id,
+            org_friendly_id=self.parent.org_friendly_id,
         )
 
         # filter to find relevant jobs
@@ -194,6 +197,7 @@ class ABFE(WorkflowStep):
                 tool="ABFE",
                 tool_version=self.tool_version,
                 tools_client=self.parent._tools_client,
+                org_friendly_id=self.parent.org_friendly_id,
             )
 
             job = Job.from_ids([job_id])

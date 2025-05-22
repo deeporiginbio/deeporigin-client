@@ -30,7 +30,7 @@ class WorkflowStep:
         df = get_dataframe(
             tools_client=self.parent._tools_client,
             org_client=self.parent._organizations_client,
-            org_friendly_id=self.parent._organization_id,
+            org_friendly_id=self.parent.org_friendly_id,
         )
         df = df[df["tool_key"].str.contains(self._tool_key)]
 
@@ -43,7 +43,7 @@ class WorkflowStep:
                 Job.from_ids(
                     job_ids,
                     _tools_client=self.parent._tools_client,
-                    _organization_id=self.parent._organization_id,
+                    org_friendly_id=self.parent.org_friendly_id,
                 )
             ]
         else:
@@ -51,7 +51,7 @@ class WorkflowStep:
                 Job.from_ids(
                     [job_id],
                     _tools_client=self.parent._tools_client,
-                    _organization_id=self.parent._organization_id,
+                    org_friendly_id=self.parent.org_friendly_id,
                 )
                 for job_id in job_ids
             ]
