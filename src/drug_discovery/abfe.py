@@ -131,7 +131,7 @@ class ABFE(WorkflowStep):
         *,
         ligands: Optional[list[Ligand]] = None,
         re_run: bool = False,
-    ):
+    ) -> list[Job] | None:
         """Method to run an end-to-end ABFE run.
 
         Args:
@@ -186,6 +186,8 @@ class ABFE(WorkflowStep):
         if self.jobs is None:
             self.jobs = []
 
+        jobs_for_this_run = []
+
         for ligand_name in ligands_to_run:
             ligand_path = "entities/ligands/" + os.path.basename(ligand_name)
 
@@ -212,6 +214,9 @@ class ABFE(WorkflowStep):
             job.sync()
 
             self.jobs.append(job)
+            jobs_for_this_run.append(job)
+
+        return jobs_for_this_run
 
     @beartype
     def show_trajectory(
