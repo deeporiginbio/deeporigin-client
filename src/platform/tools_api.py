@@ -9,7 +9,7 @@ from typing import Any, Callable, Literal, Optional
 from beartype import beartype
 import pandas as pd
 
-from deeporigin.platform import clusters_api, tools_api
+from deeporigin.platform import clusters_api
 from deeporigin.platform.utils import _add_functions_to_module
 
 __all__ = _add_functions_to_module(
@@ -40,7 +40,7 @@ def get_status_and_progress(
 
     """
 
-    data = tools_api.get_tool_execution(
+    data = get_tool_execution(  # noqa: F821
         execution_id=execution_id,
         org_friendly_id=org_friendly_id,
         client=client,
@@ -158,7 +158,7 @@ def cancel_run(
     if data["status"] in ["Cancelled", "Failed", "Succeeded"]:
         return
 
-    tools_api.action_tool_execution(
+    action_tool_execution(  # noqa: F821
         execution_id=execution_id,
         action="cancel",
         client=client,
@@ -221,7 +221,7 @@ def query_run_status(
 
     """
 
-    data = tools_api.get_tool_execution(
+    data = get_tool_execution(  # noqa: F821
         execution_id=execution_id,
         client=client,
         org_friendly_id=org_friendly_id,
@@ -277,7 +277,7 @@ def run_tool(
             org_friendly_id=org_friendly_id,
         )
 
-    return tools_api.execute_tool(
+    return execute_tool(  # noqa: F821
         tool_key=tool_key,
         execute_tool_dto=data,
         client=client,
@@ -432,7 +432,7 @@ def generate_tool_function(
 
     """
 
-    data = tools_api.get_tool(tool_key=tool_key)
+    data = get_tool(tool_key=tool_key)  # noqa: F821
     data = [item for item in data if item.version == tool_version]
 
     if len(data) == 0:
@@ -526,7 +526,7 @@ def generate_tool_function(
         metadata = arguments.get("metadata")
         client = arguments.get("client")
 
-        return tools_api._process_job(
+        return _process_job(
             inputs=inputs,
             outputs=outputs,
             tool_key=tool_key,

@@ -6,7 +6,6 @@ from typing import Optional
 
 from beartype import beartype
 
-from deeporigin.platform import clusters_api
 from deeporigin.platform.utils import _add_functions_to_module
 
 __all__ = _add_functions_to_module(
@@ -26,7 +25,7 @@ def _get_cluster_id(
 
     this defaults to pulling us-west-2"""
 
-    available_clusters = clusters_api.list_clusters(
+    available_clusters = list_clusters(  # noqa: F821
         client=client,
         org_friendly_id=org_friendly_id,
     )

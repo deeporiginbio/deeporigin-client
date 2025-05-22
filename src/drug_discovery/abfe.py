@@ -327,6 +327,11 @@ class ABFE(WorkflowStep):
             if "cmd" in data and data["cmd"] == "FEP Results":
                 return {step: "Succeeded" for step in steps}
 
+            if "status" in data and data["status"] == "Initiating":
+                progress = {step: "NotStarted" for step in steps}
+                progress["init"] = "Running"
+                return progress
+
             status_value = job._status[0]
 
             # If the overall status is Succeeded, return a dictionary with every key set to "Succeeded".
