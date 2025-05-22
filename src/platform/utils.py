@@ -65,52 +65,6 @@ class PlatformClients:
 
 
 @beartype
-def _get_all_clients(
-    *,
-    token: str,
-    base_url: str,
-    org_friendly_id: str,
-) -> dict:
-    """
-    Given a token, base_url, and org_friendly_id, return a dictionary of clients for all APIs on the platform.
-
-    This function creates and returns a dictionary where the keys are the names of API client classes (e.g., 'FilesApi', 'ToolsApi', etc.)
-    and the values are instantiated client objects for each API, configured with the provided authentication token, base URL, and organization ID.
-
-    Args:
-        token (str): The authentication token to use for all API clients.
-        base_url (str): The base URL of the DeepOrigin platform (e.g., 'https://os.deeporigin.io').
-        org_friendly_id (str): The organization-friendly ID to use for API requests.
-
-    Returns:
-        dict: A dictionary mapping API client class names to their instantiated client objects, ready for use.
-    """
-
-    from deeporigin.files import FilesClient
-
-    clients = dict()
-
-    clients["FilesApi"] = FilesClient(
-        token=token,
-        base_url=base_url,
-        organization_id=org_friendly_id,
-    )
-
-    api_endpoint = base_url + "/api/"
-
-    apis = [attr for attr in do_sdk_platform.__dir__() if attr.endswith("Api")]
-
-    for api in apis:
-        clients[api] = _get_api_client(
-            api_name=api,
-            token=token,
-            api_endpoint=api_endpoint,
-        )
-
-    return clients
-
-
-@beartype
 def _add_functions_to_module(
     module,
     api_name: str,
