@@ -41,10 +41,12 @@ class ABFE(WorkflowStep):
 
         This method returns a dataframe showing the results of ABFE runs associated with this simulation session. The ligand file name and ΔG are shown, together with user-supplied properties"""
 
+        files_client = getattr(self.parent._platform_clients, "FilesApi", None)
+
         files = utils.find_files_on_ufa(
             tool="ABFE",
             protein=self.parent.protein.file_path.name,
-            client=self.parent._files_client,
+            client=files_client,
         )
 
         results_files = [file for file in files if file.endswith("/results.csv")]
@@ -52,8 +54,6 @@ class ABFE(WorkflowStep):
         if len(results_files) == 0:
             print("No ABFE results found for this protein.")
             return None
-
-        files_client = getattr(self.parent._platform_clients, "FilesApi", None)
 
         files_api.download_files(
             results_files,
