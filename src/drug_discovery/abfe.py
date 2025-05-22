@@ -162,9 +162,14 @@ class ABFE(WorkflowStep):
             df["metadata"].apply(lambda d: isinstance(d, dict) and d.get("ligand_file"))
         )
 
-        ligands_to_run = [
-            ligand for ligand in ligand_names if ligand not in ligands_already_run
-        ]
+        if re_run:
+            # need to re-run, so don't remove already run ligands
+            ligands_to_run = ligand_names
+        else:
+            # no re-run, remove already run ligands
+            ligands_to_run = [
+                ligand for ligand in ligand_names if ligand not in ligands_already_run
+            ]
 
         self.parent._sync_protein_and_ligands()
 
@@ -199,7 +204,7 @@ class ABFE(WorkflowStep):
                 _platform_clients=self.parent._platform_clients,
             )
 
-            job = Job.from_ids([job_id])
+            job = Job.from_id(job_id, _platform_clients=self.parent._platform_clients)
 
             job._viz_func = self._render_progress
             job._name_func = self._name_job
@@ -257,8 +262,6 @@ class ABFE(WorkflowStep):
             valid_windows = [
                 int(re.search(r"window_(\d+)", path).group(1)) for path in xtc_files
             ]
-
-            print(valid_windows)
 
             if window not in valid_windows:
                 raise DeepOriginException(

@@ -164,10 +164,10 @@ class Complex:
 
         # get a list of all files in the entities directory
 
-        if self._files_client is None:
+        if self._platform_clients is None:
             files_client = FilesClient()
         else:
-            files_client = self._platform_clients["FilesApi"]
+            files_client = self._platform_clients.FilesApi
 
         remote_files = files_client.list_folder("entities", recursive=True)
         remote_files = list(remote_files.keys())
@@ -183,7 +183,7 @@ class Complex:
             if ligand_path not in remote_files:
                 files_to_upload[str(ligand.file_path)] = ligand_path
 
-        files_client.upload_files(files_to_upload, client=self._files_client)
+        files_client.upload_files(files_to_upload)
 
     def _repr_pretty_(self, p, cycle):
         """pretty print a Docking object"""

@@ -128,6 +128,7 @@ def _start_tool_run(
         )
 
     tools_client = getattr(_platform_clients, "ToolsApi", None)
+    clusters_client = getattr(_platform_clients, "ClustersApi", None)
 
     if _platform_clients is None:
         from deeporigin.config import get_value
@@ -143,7 +144,10 @@ def _start_tool_run(
         metadata=metadata,
         client=tools_client,
         org_friendly_id=org_friendly_id,
+        clusters_client=clusters_client,
     )
+
+    print(f"Job started with Job ID: {job_id}")
 
     return job_id
 

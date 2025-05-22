@@ -88,7 +88,7 @@ class Job:
         cls,
         id: str,
         *,
-        _platform_clients=None,
+        _platform_clients: Optional[PlatformClients] = None,
     ) -> "Job":
         """Create a Job instance from a single ID.
 
