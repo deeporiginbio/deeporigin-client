@@ -56,3 +56,15 @@ def test_list_folder(config):  # noqa: F811
     assert set(data.keys()) == set(src_to_dest.values()), (
         "Failed to list files correctly"
     )
+
+
+def test_upload_files_missing_local_files(config):  # noqa: F811
+    files_client = FilesClient()
+
+    # Use a nonexistent file path
+    missing_file = "/tmp/this_file_does_not_exist_123456789.txt"
+    src_to_dest = {missing_file: "test-upload/missing.txt"}
+    with pytest.raises(FileNotFoundError) as excinfo:
+        files_client.upload_files(src_to_dest)
+
+    assert missing_file in str(excinfo.value)
