@@ -28,9 +28,7 @@ class WorkflowStep:
     def get_jobs(self):
         """Get the jobs for this workflow step."""
         df = get_dataframe(
-            tools_client=self.parent._tools_client,
-            org_client=self.parent._organizations_client,
-            org_friendly_id=self.parent.org_friendly_id,
+            _platform_clients=self.parent._platform_clients,
         )
         df = df[df["tool_key"].str.contains(self._tool_key)]
 
@@ -42,16 +40,14 @@ class WorkflowStep:
             self.jobs = [
                 Job.from_ids(
                     job_ids,
-                    _tools_client=self.parent._tools_client,
-                    org_friendly_id=self.parent.org_friendly_id,
+                    _platform_clients=self.parent._platform_clients,
                 )
             ]
         else:
             self.jobs = [
                 Job.from_ids(
                     [job_id],
-                    _tools_client=self.parent._tools_client,
-                    org_friendly_id=self.parent.org_friendly_id,
+                    _platform_clients=self.parent._platform_clients,
                 )
                 for job_id in job_ids
             ]

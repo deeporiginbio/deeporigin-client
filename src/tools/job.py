@@ -17,6 +17,7 @@ import nest_asyncio
 import pandas as pd
 
 from deeporigin.platform import tools_api
+from deeporigin.platform.utils import PlatformClients
 from deeporigin.utils.core import elapsed_minutes
 
 # Enable nested event loops for Jupyter
@@ -59,16 +60,14 @@ class Job:
     _metadata: list = field(default_factory=list)
 
     # clients
-    _tools_client: Any = None
-    org_friendly_id: Optional[str] = None
+    _platform_clients: Optional[PlatformClients] = None
 
     @classmethod
     def from_ids(
         cls,
         ids: list[str],
         *,
-        _tools_client=None,
-        org_friendly_id: Optional[str] = None,
+        _platform_clients: Optional[PlatformClients] = None,
     ) -> "Job":
         """Create a Job instance from a list of IDs.
 
@@ -81,8 +80,7 @@ class Job:
         return cls(
             name="job",
             _ids=ids,
-            _tools_client=_tools_client,
-            org_friendly_id=org_friendly_id,
+            _platform_clients=_platform_clients,
         )
 
     @classmethod
@@ -90,8 +88,7 @@ class Job:
         cls,
         id: str,
         *,
-        _tools_client=None,
-        org_friendly_id: Optional[str] = None,
+        _platform_clients=None,
     ) -> "Job":
         """Create a Job instance from a single ID.
 
@@ -104,8 +101,7 @@ class Job:
         return cls(
             name="job",
             _ids=[id],
-            _tools_client=_tools_client,
-            org_friendly_id=org_friendly_id,
+            _platform_clients=_platform_clients,
         )
 
     def sync(self):
@@ -116,11 +112,14 @@ class Job:
         reached a terminal state (Succeeded or Failed).
         """
 
+        # get the org_friendly_id from the platform clients if it's not None
+        org_friendly_id = getattr(self._platform_clients, "org_friendly_id", None)
+
         # use
         results = tools_api.get_statuses_and_progress(
             self._ids,
-            client=self._tools_client,
-            org_friendly_id=self.org_friendly_id,
+            client=self._platform_clients.ToolsApi,
+            org_friendly_id=org_friendly_id,
         )
 
         self._status = [result["status"] for result in results]
@@ -347,9 +346,7 @@ def get_dataframe(
     only_with_status: Optional[list[str]] = None,
     include_metadata: bool = False,
     resolve_user_names: bool = False,
-    tools_client=None,
-    org_client=None,
-    org_friendly_id: Optional[str] = None,
+    _platform_clients: Optional[PlatformClients] = None,
 ) -> pd.DataFrame:
     """Get a dataframe of the job statuses and progress reports.
 
@@ -375,16 +372,18 @@ def get_dataframe(
             },
         }
 
-    if org_friendly_id is None:
+    if _platform_clients is None:
         from deeporigin.config import get_value
 
         org_friendly_id = get_value()["organization_id"]
+    else:
+        org_friendly_id = _platform_clients.org_friendly_id
 
     response = tools_api.get_tool_executions(
         org_friendly_id=org_friendly_id,
         filter=_filter,
         page_size=10000,
-        client=tools_client,
+        client=_platform_clients.ToolsApi,
     )
     jobs = response["data"]
 
@@ -393,7 +392,7 @@ def get_dataframe(
 
         users = organizations_api.get_organization_users(
             org_friendly_id=org_friendly_id,
-            client=org_client,
+            client=_platform_clients.OrganizationsApi,
         )
 
         # Create a mapping of user IDs to user names

@@ -8,7 +8,9 @@ from typing import Any, Optional
 from beartype import beartype
 
 from deeporigin.drug_discovery.constants import tool_mapper, valid_tools
+from deeporigin.files import FilesClient
 from deeporigin.platform import tools_api
+from deeporigin.platform.utils import PlatformClients
 from deeporigin.utils.core import PrettyDict
 
 DATA_DIRS = dict()
@@ -36,9 +38,8 @@ def _start_tool_run(
     ligand2_path: Optional[str] = None,
     tool: valid_tools,
     tool_version: str,
-    tools_client=None,
     provider: tools_api.PROVIDER = "ufa",
-    org_friendly_id: Optional[str] = None,
+    _platform_clients: Optional[PlatformClients] = None,
 ) -> str:
     """starts a single run of ABFE end to end and logs it in the ABFE database. Internal function. Do not use.
 
@@ -126,17 +127,19 @@ def _start_tool_run(
             "⚠️ Warning: test_run=1 in these parameters. Results will not be accurate."
         )
 
-    if organization_id is None:
+    if _platform_clients is None:
         from deeporigin.config import get_value
 
-        organization_id = get_value()["organization_id"]
+        org_friendly_id = get_value()["organization_id"]
+    else:
+        org_friendly_id = _platform_clients.org_friendly_id
 
     job_id = tools_api._process_job(
         inputs=params,
         outputs=outputs,
         tool_key=tool_mapper[tool],
         metadata=metadata,
-        client=tools_client,
+        client=_platform_clients.ToolsApi,
         org_friendly_id=org_friendly_id,
     )
 
@@ -181,7 +184,7 @@ def find_files_on_ufa(
     tool: str,
     protein: str,
     ligand: Optional[str] = None,
-    client=None,
+    client: Optional[FilesClient] = None,
 ) -> list:
     """
     Find files on the UFA (Unified File API) storage for a given tool run.

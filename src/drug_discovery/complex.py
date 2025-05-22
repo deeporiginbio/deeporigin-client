@@ -5,7 +5,6 @@ import os
 from typing import Optional
 
 from beartype import beartype
-import do_sdk_platform
 
 from deeporigin.drug_discovery import chemistry as chem
 from deeporigin.drug_discovery.abfe import ABFE
@@ -13,6 +12,7 @@ from deeporigin.drug_discovery.docking import Docking
 from deeporigin.drug_discovery.rbfe import RBFE
 from deeporigin.drug_discovery.structures import Ligand, Protein
 from deeporigin.files import FilesClient
+from deeporigin.platform.utils import PlatformClients
 
 
 @dataclass
@@ -23,56 +23,21 @@ class Complex:
     protein: Protein
     _ligands: list[Ligand] = field(default_factory=list, repr=False)
 
-    # don't set these directly. they are set in the constructor, if needed
-    _files_client: Optional[FilesClient] = None
-    _tools_client: Optional[do_sdk_platform.api.tools_api.ToolsApi] = None
-    _organizations_client: Optional[
-        do_sdk_platform.api.organizations_api.OrganizationsApi
-    ] = None
+    _platform_clients: Optional[PlatformClients] = None
 
-    org_friendly_id: Optional[str] = None
-
+    @beartype
     def __init__(
         self,
         protein: Protein,
         *,
         ligands: list[Ligand] | None = None,
-        org_friendly_id: Optional[str] = None,
-        token: Optional[str] = None,
-        base_url: Optional[str] = None,
+        _platform_clients: Optional[PlatformClients] = None,
     ):
         """Initialize a Complex with either ligands or _ligands parameter"""
         self._ligands = ligands if ligands is not None else []
         self.protein = protein
 
-        if token is not None and base_url is not None and org_friendly_id is not None:
-            # we are being passed a token, base_url, and organization_id
-            # this allows us to create clients for platform and files API,
-            # and these clients will be used for all the operations in the Complex
-
-            from deeporigin.platform.utils import _get_api_client
-
-            self._files_client = FilesClient(
-                token=token,
-                base_url=base_url,
-                organization_id=org_friendly_id,
-            )
-
-            api_endpoint = base_url + "/api/"
-
-            self._tools_client = _get_api_client(
-                api_name="ToolsApi",
-                token=token,
-                api_endpoint=api_endpoint,
-            )
-
-            self._organizations_client = _get_api_client(
-                api_name="OrganizationsApi",
-                token=token,
-                api_endpoint=api_endpoint,
-            )
-
-            self.org_friendly_id = org_friendly_id
+        self._platform_clients = _platform_clients
 
         self.__post_init__()
 
@@ -100,9 +65,7 @@ class Complex:
         cls,
         directory: str,
         *,
-        org_friendly_id: Optional[str] = None,
-        token: Optional[str] = None,
-        base_url: Optional[str] = None,
+        _platform_clients: Optional[PlatformClients] = None,
     ) -> "Complex":
         """Initialize a Complex from a directory containing protein and ligand files.
 
@@ -155,9 +118,7 @@ class Complex:
         instance = cls(
             protein=protein,
             ligands=ligands,
-            org_friendly_id=org_friendly_id,
-            token=token,
-            base_url=base_url,
+            _platform_clients=_platform_clients,
         )
 
         return instance
@@ -202,12 +163,11 @@ class Complex:
         Internal method. Do not use."""
 
         # get a list of all files in the entities directory
-        from deeporigin.files import FilesClient
 
         if self._files_client is None:
             files_client = FilesClient()
         else:
-            files_client = self._files_client
+            files_client = self._platform_clients["FilesApi"]
 
         remote_files = files_client.list_folder("entities", recursive=True)
         remote_files = list(remote_files.keys())
