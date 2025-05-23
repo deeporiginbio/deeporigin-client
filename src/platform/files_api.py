@@ -5,10 +5,11 @@ import os
 from deeporigin.files import FilesClient
 
 
-def download_files(files: list[str]):
+def download_files(files: list[str], *, client=None):
     """download files from UFA, if needed, and save to ~/.deeporigin/"""
 
-    client = FilesClient()
+    if client is None:
+        client = FilesClient()
 
     # Construct src_to_dest mapping for download_files
     home_dir = os.path.expanduser("~")
