@@ -1082,10 +1082,9 @@ class FilesClient:
         """
         try:
             # Try to list objects in a default location
-            org_friendly_id = "default"
 
             call_args = genapi._get_get_object_kwargs(
-                orgFriendlyId=org_friendly_id,
+                orgFriendlyId=self.organization_id,
                 filePath="",
                 list_type=2,  # Default list type
             )
