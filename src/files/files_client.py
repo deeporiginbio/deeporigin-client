@@ -467,6 +467,13 @@ class FilesClient:
                 - Boolean indicating if all uploads were successful
                 - Dictionary mapping source paths to status ("OK" or error message)
         """
+
+        missing_files = [src for src in src_to_dest.keys() if not os.path.exists(src)]
+        if missing_files:
+            raise FileNotFoundError(
+                f"The following files were not found: {', '.join(missing_files)}"
+            )
+
         if progress_callback is None and self.progress_callback_create_func:
             progress_callback = self.progress_callback_create_func("Uploading")
 
