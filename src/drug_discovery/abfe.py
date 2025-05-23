@@ -41,9 +41,12 @@ class ABFE(WorkflowStep):
 
         This method returns a dataframe showing the results of ABFE runs associated with this simulation session. The ligand file name and ΔG are shown, together with user-supplied properties"""
 
+        files_client = getattr(self.parent._platform_clients, "FilesApi", None)
+
         files = utils.find_files_on_ufa(
             tool="ABFE",
             protein=self.parent.protein.file_path.name,
+            client=files_client,
         )
 
         results_files = [file for file in files if file.endswith("/results.csv")]
@@ -52,7 +55,10 @@ class ABFE(WorkflowStep):
             print("No ABFE results found for this protein.")
             return None
 
-        files_api.download_files(results_files)
+        files_api.download_files(
+            results_files,
+            client=files_client,
+        )
 
         # read all the CSV files using pandas and
         # set Ligand1 column to ligand name (parent dir of results.csv)
@@ -125,7 +131,7 @@ class ABFE(WorkflowStep):
         *,
         ligands: Optional[list[Ligand]] = None,
         re_run: bool = False,
-    ):
+    ) -> list[Job] | None:
         """Method to run an end-to-end ABFE run.
 
         Args:
@@ -141,6 +147,7 @@ class ABFE(WorkflowStep):
             only_with_status=["Succeeded", "Running", "Queued", "Created"],
             include_metadata=True,
             resolve_user_names=False,
+            _platform_clients=self.parent._platform_clients,
         )
 
         # filter to find relevant jobs
@@ -155,9 +162,14 @@ class ABFE(WorkflowStep):
             df["metadata"].apply(lambda d: isinstance(d, dict) and d.get("ligand_file"))
         )
 
-        ligands_to_run = [
-            ligand for ligand in ligand_names if ligand not in ligands_already_run
-        ]
+        if re_run:
+            # need to re-run, so don't remove already run ligands
+            ligands_to_run = ligand_names
+        else:
+            # no re-run, remove already run ligands
+            ligands_to_run = [
+                ligand for ligand in ligand_names if ligand not in ligands_already_run
+            ]
 
         self.parent._sync_protein_and_ligands()
 
@@ -174,6 +186,8 @@ class ABFE(WorkflowStep):
         if self.jobs is None:
             self.jobs = []
 
+        jobs_for_this_run = []
+
         for ligand_name in ligands_to_run:
             ligand_path = "entities/ligands/" + os.path.basename(ligand_name)
 
@@ -189,9 +203,10 @@ class ABFE(WorkflowStep):
                 params=self._params.end_to_end,
                 tool="ABFE",
                 tool_version=self.tool_version,
+                _platform_clients=self.parent._platform_clients,
             )
 
-            job = Job.from_ids([job_id])
+            job = Job.from_id(job_id, _platform_clients=self.parent._platform_clients)
 
             job._viz_func = self._render_progress
             job._name_func = self._name_job
@@ -199,6 +214,9 @@ class ABFE(WorkflowStep):
             job.sync()
 
             self.jobs.append(job)
+            jobs_for_this_run.append(job)
+
+        return jobs_for_this_run
 
     @beartype
     def show_trajectory(
@@ -225,6 +243,8 @@ class ABFE(WorkflowStep):
         )
         files_to_download = [remote_pdb_file]
 
+        files_client = getattr(self.parent._platform_clients, "FilesApi", None)
+
         if step == "binding":
             # Check for valid windows
 
@@ -233,6 +253,7 @@ class ABFE(WorkflowStep):
                 tool="ABFE",
                 protein=self.parent.protein.file_path.name,
                 ligand=Path(ligand.file_path).name,
+                client=files_client,
             )
             xtc_files = [
                 file
@@ -246,8 +267,6 @@ class ABFE(WorkflowStep):
             valid_windows = [
                 int(re.search(r"window_(\d+)", path).group(1)) for path in xtc_files
             ]
-
-            print(valid_windows)
 
             if window not in valid_windows:
                 raise DeepOriginException(
@@ -267,7 +286,7 @@ class ABFE(WorkflowStep):
 
         files_to_download.append(remote_xtc_file)
 
-        files_api.download_files(files_to_download)
+        files_api.download_files(files_to_download, client=files_client)
 
         from deeporigin_molstar.src.viewers import ProteinViewer
 
@@ -312,6 +331,11 @@ class ABFE(WorkflowStep):
 
             if "cmd" in data and data["cmd"] == "FEP Results":
                 return {step: "Succeeded" for step in steps}
+
+            if "status" in data and data["status"] == "Initiating":
+                progress = {step: "NotStarted" for step in steps}
+                progress["init"] = "Running"
+                return progress
 
             status_value = job._status[0]
 

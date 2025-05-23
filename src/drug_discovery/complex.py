@@ -11,6 +11,8 @@ from deeporigin.drug_discovery.abfe import ABFE
 from deeporigin.drug_discovery.docking import Docking
 from deeporigin.drug_discovery.rbfe import RBFE
 from deeporigin.drug_discovery.structures import Ligand, Protein
+from deeporigin.files import FilesClient
+from deeporigin.platform.utils import PlatformClients
 
 
 @dataclass
@@ -21,22 +23,21 @@ class Complex:
     protein: Protein
     _ligands: list[Ligand] = field(default_factory=list, repr=False)
 
-    # these params are not user facing
-    _db: Optional[dict] = None
+    _platform_clients: Optional[PlatformClients] = None
 
-    """stores a hash of all ligands and the protein. This will be computed post initialization"""
-    _hash: Optional[str] = None
-
+    @beartype
     def __init__(
         self,
         protein: Protein,
         *,
         ligands: list[Ligand] | None = None,
-        **kwargs,
+        _platform_clients: Optional[PlatformClients] = None,
     ):
         """Initialize a Complex with either ligands or _ligands parameter"""
         self._ligands = ligands if ligands is not None else []
         self.protein = protein
+
+        self._platform_clients = _platform_clients
 
         self.__post_init__()
 
@@ -60,7 +61,12 @@ class Complex:
         self._ligands = new_ligands
 
     @classmethod
-    def from_dir(cls, directory: str) -> "Complex":
+    def from_dir(
+        cls,
+        directory: str,
+        *,
+        _platform_clients: Optional[PlatformClients] = None,
+    ) -> "Complex":
         """Initialize a Complex from a directory containing protein and ligand files.
 
         Args:
@@ -112,6 +118,7 @@ class Complex:
         instance = cls(
             protein=protein,
             ligands=ligands,
+            _platform_clients=_platform_clients,
         )
 
         return instance
@@ -156,9 +163,12 @@ class Complex:
         Internal method. Do not use."""
 
         # get a list of all files in the entities directory
-        from deeporigin.files import FilesClient
 
-        files_client = FilesClient()
+        if self._platform_clients is None:
+            files_client = FilesClient()
+        else:
+            files_client = self._platform_clients.FilesApi
+
         remote_files = files_client.list_folder("entities", recursive=True)
         remote_files = list(remote_files.keys())
 

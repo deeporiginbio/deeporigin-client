@@ -8,7 +8,9 @@ from typing import Any, Optional
 from beartype import beartype
 
 from deeporigin.drug_discovery.constants import tool_mapper, valid_tools
+from deeporigin.files import FilesClient
 from deeporigin.platform import tools_api
+from deeporigin.platform.utils import PlatformClients
 from deeporigin.utils.core import PrettyDict
 
 DATA_DIRS = dict()
@@ -36,6 +38,8 @@ def _start_tool_run(
     ligand2_path: Optional[str] = None,
     tool: valid_tools,
     tool_version: str,
+    provider: tools_api.PROVIDER = "ufa",
+    _platform_clients: Optional[PlatformClients] = None,
 ) -> str:
     """starts a single run of ABFE end to end and logs it in the ABFE database. Internal function. Do not use.
 
@@ -61,24 +65,24 @@ def _start_tool_run(
 
     # a protein is needed for ABFE, RBFE, and docking
     params["protein"] = {
-        "$provider": "ufa",
+        "$provider": provider,
         "key": protein_path,
     }
 
     # input ligand files
     if tool == "RBFE":
         params["ligand1"] = {
-            "$provider": "ufa",
+            "$provider": provider,
             "key": ligand1_path,
         }
 
         params["ligand2"] = {
-            "$provider": "ufa",
+            "$provider": provider,
             "key": ligand2_path,
         }
     elif tool == "ABFE":
         params["ligand"] = {
-            "$provider": "ufa",
+            "$provider": provider,
             "key": ligand1_path,
         }
 
@@ -86,22 +90,22 @@ def _start_tool_run(
     if tool == "RBFE":
         outputs = {
             "output_file": {
-                "$provider": "ufa",
+                "$provider": provider,
                 "key": output_dir_path + "output/",
             },
             "rbfe_results_summary": {
-                "$provider": "ufa",
+                "$provider": provider,
                 "key": output_dir_path + "results.csv",
             },
         }
     elif tool == "ABFE":
         outputs = {
             "output_file": {
-                "$provider": "ufa",
+                "$provider": provider,
                 "key": output_dir_path + "output/",
             },
             "abfe_results_summary": {
-                "$provider": "ufa",
+                "$provider": provider,
                 "key": output_dir_path + "results.csv",
             },
         }
@@ -109,11 +113,11 @@ def _start_tool_run(
         raise NotImplementedError("Docking is not implemented yet")
         outputs = {
             "data_file": {
-                "$provider": "ufa",
+                "$provider": provider,
                 "key": output_dir_path,
             },
             "results_sdf": {
-                "$provider": "ufa",
+                "$provider": provider,
                 "key": "mason/inputs/message_file.txt",
             },
         }
@@ -123,12 +127,27 @@ def _start_tool_run(
             "⚠️ Warning: test_run=1 in these parameters. Results will not be accurate."
         )
 
+    tools_client = getattr(_platform_clients, "ToolsApi", None)
+    clusters_client = getattr(_platform_clients, "ClustersApi", None)
+
+    if _platform_clients is None:
+        from deeporigin.config import get_value
+
+        org_friendly_id = get_value()["organization_id"]
+    else:
+        org_friendly_id = _platform_clients.org_friendly_id
+
     job_id = tools_api._process_job(
         inputs=params,
         outputs=outputs,
         tool_key=tool_mapper[tool],
         metadata=metadata,
+        client=tools_client,
+        org_friendly_id=org_friendly_id,
+        clusters_client=clusters_client,
     )
+
+    print(f"Job started with Job ID: {job_id}")
 
     return job_id
 
@@ -171,6 +190,7 @@ def find_files_on_ufa(
     tool: str,
     protein: str,
     ligand: Optional[str] = None,
+    client: Optional[FilesClient] = None,
 ) -> list:
     """
     Find files on the UFA (Unified File API) storage for a given tool run.
@@ -188,9 +208,12 @@ def find_files_on_ufa(
     Returns:
         List[str]: A list of file paths found in the specified UFA directory.
     """
-    from deeporigin.files import FilesClient
 
-    client = FilesClient()
+    if client is None:
+        from deeporigin.files import FilesClient
+
+        client = FilesClient()
+
     if ligand is not None:
         search_str = f"tool-runs/{tool}/{protein}/{ligand}/"
     else:
