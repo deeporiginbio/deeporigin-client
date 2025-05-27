@@ -67,12 +67,13 @@ from deeporigin.drug_discovery.external_tools.utils import (
 )
 from deeporigin.functions.pocket_finder import find_pockets
 
+from .entity import Entity
 from .ligand import Ligand
 from .pocket import Pocket
 
 
 @dataclass
-class Protein:
+class Protein(Entity):
     """A class representing a protein structure with various manipulation and analysis capabilities."""
 
     # Core attributes
@@ -84,6 +85,8 @@ class Protein:
     atom_types: Optional[np.ndarray] = None
     block_type: str = "pdb"
     block_content: Optional[str] = None
+
+    _remote_path_base = "entities/proteins/"
 
     @classmethod
     def from_pdb_id(cls, pdb_id: str, struct_ind: int = 0) -> "Protein":
