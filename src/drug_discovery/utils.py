@@ -40,17 +40,34 @@ def _start_tool_run(
     tool_version: str,
     provider: tools_api.PROVIDER = "ufa",
     _platform_clients: Optional[PlatformClients] = None,
+    _output_dir_path: Optional[str] = None,
 ) -> str:
-    """starts a single run of ABFE end to end and logs it in the ABFE database. Internal function. Do not use.
+    """
+    Starts a single run of an end-to-end tool (such as ABFE) and logs it in the ABFE database.
+
+    This is an internal function that prepares input and output file parameters, sets up the job metadata,
+    and submits the job to the platform's tools API. Only ABFE is currently supported.
 
     Args:
-        protein_id (str): protein ID
-        ligand_id (str): ligand ID
-        params (dict): parameters for the ABFE end-to-end job
+        params (dict): Parameters for the tool run, including input and configuration options.
+        metadata (dict): Metadata to be logged with the job.
+        protein_path (str): Remote path to the protein file to be used in the run.
+        ligand1_path (str): Remnote path to the first ligand file.
+        ligand2_path (Optional[str]): Remote path to the second ligand file (required for RBFE).
+        tool (valid_tools): The tool to run (e.g., 'ABFE', 'RBFE').
+        tool_version (str): Version of the tool to use.
+        provider (tools_api.PROVIDER, optional): File provider for input/output files. Defaults to 'ufa'.
+        _platform_clients (Optional[PlatformClients]): Platform client objects for API access.
+        _output_dir_path (Optional[str]): Custom output directory path (on remote storage). If None, a default is constructed.
 
+    Returns:
+        str: The job ID of the started tool run.
+
+    Raises:
+        NotImplementedError: If a tool other than ABFE is specified.
     """
 
-    if tool == "ABFE":
+    if tool == "ABFE" and _output_dir_path is None:
         output_dir_path = (
             "tool-runs/"
             + tool
