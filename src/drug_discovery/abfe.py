@@ -140,7 +140,9 @@ class ABFE(WorkflowStep):
         if ligands is None:
             ligands = self.parent.ligands
 
-        ligand_names = [os.path.basename(ligand.file_path) for ligand in ligands]
+        self.parent._sync_protein_and_ligands()
+
+        ligand_names = [os.path.basename(ligand._remote_path) for ligand in ligands]
 
         df = get_dataframe(
             tool_key=tool_mapper["ABFE"],
@@ -158,9 +160,14 @@ class ABFE(WorkflowStep):
         ]
 
         # get a list of ligands that have already been run
-        ligands_already_run = list(
-            df["metadata"].apply(lambda d: isinstance(d, dict) and d.get("ligand_file"))
-        )
+        if len(df) > 0:
+            ligands_already_run = list(
+                df["metadata"].apply(
+                    lambda d: isinstance(d, dict) and d.get("ligand_file")
+                )
+            )
+        else:
+            ligands_already_run = []
 
         if re_run:
             # need to re-run, so don't remove already run ligands
@@ -170,12 +177,6 @@ class ABFE(WorkflowStep):
             ligands_to_run = [
                 ligand for ligand in ligand_names if ligand not in ligands_already_run
             ]
-
-        self.parent._sync_protein_and_ligands()
-
-        protein_path = "entities/proteins/" + os.path.basename(
-            self.parent.protein.file_path
-        )
 
         if len(ligands_to_run) == 0 and not re_run:
             print(
@@ -188,18 +189,16 @@ class ABFE(WorkflowStep):
 
         jobs_for_this_run = []
 
-        for ligand_name in ligands_to_run:
-            ligand_path = "entities/ligands/" + os.path.basename(ligand_name)
-
+        for ligand_path in ligands_to_run:
             metadata = dict(
-                protein_file=os.path.basename(protein_path),
+                protein_file=os.path.basename(self.parent.protein._remote_path),
                 ligand_file=os.path.basename(ligand_path),
             )
 
             job_id = utils._start_tool_run(
                 metadata=metadata,
                 ligand1_path=ligand_path,
-                protein_path=protein_path,
+                protein_path=self.parent.protein._remote_path,
                 params=self._params.end_to_end,
                 tool="ABFE",
                 tool_version=self.tool_version,
