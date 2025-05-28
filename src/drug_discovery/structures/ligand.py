@@ -75,9 +75,11 @@ from deeporigin.drug_discovery.structures.internal_structures import (
 from deeporigin.drug_discovery.utilities.visualize import jupyter_visualization
 from deeporigin.exceptions import DeepOriginException
 
+from .entity import Entity
+
 
 @dataclass
-class Ligand:
+class Ligand(Entity):
     """A class representing a ligand molecule in drug discovery workflows.
     The Ligand class provides functionality to create, manipulate, and analyze small molecules
     (ligands) in computational drug discovery. It supports various input formats and provides
@@ -137,6 +139,8 @@ class Ligand:
     protonated_smiles: str | None = field(init=False, default=None)
     hac: int = field(init=False, default=0)
     available_for_docking: bool = field(init=False, default=True)
+
+    _remote_path_base = "entities/ligands/"
 
     @classmethod
     @beartype

@@ -59,6 +59,9 @@ def test_list_folder(config):  # noqa: F811
 
 
 def test_upload_files_missing_local_files(config):  # noqa: F811
+    if config["mock"]:
+        pytest.skip("test skipped with mock client")
+
     files_client = FilesClient()
 
     # Use a nonexistent file path

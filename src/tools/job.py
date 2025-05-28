@@ -384,20 +384,24 @@ def get_dataframe(
     else:
         org_friendly_id = _platform_clients.org_friendly_id
 
+    tools_client = getattr(_platform_clients, "ToolsApi", None)
+
     response = tools_api.get_tool_executions(
         org_friendly_id=org_friendly_id,
         filter=_filter,
         page_size=10000,
-        client=_platform_clients.ToolsApi,
+        client=tools_client,
     )
     jobs = response["data"]
 
     if resolve_user_names:
         from deeporigin.platform import organizations_api
 
+        orgs_client = getattr(_platform_clients, "OrganizationsApi", None)
+
         users = organizations_api.get_organization_users(
             org_friendly_id=org_friendly_id,
-            client=_platform_clients.OrganizationsApi,
+            client=orgs_client,
         )
 
         # Create a mapping of user IDs to user names

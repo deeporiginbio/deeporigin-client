@@ -162,25 +162,34 @@ class Complex:
 
         Internal method. Do not use."""
 
-        # get a list of all files in the entities directory
+        # the reason we are uploading here manually, isntead of using ligand.upload()
+        # and protein.upload() is so that we can make one call to upload_files, instead
+        # of several
 
         if self._platform_clients is None:
             files_client = FilesClient()
         else:
             files_client = self._platform_clients.FilesApi
 
+        # get a list of all files in the entities directory
         remote_files = files_client.list_folder("entities", recursive=True)
         remote_files = list(remote_files.keys())
 
         files_to_upload = {}
 
-        protein_path = "entities/proteins/" + os.path.basename(self.protein.file_path)
-        if protein_path not in remote_files:
+        protein_path = self.protein._remote_path_base + os.path.basename(
+            self.protein.file_path
+        )
+        if protein_path in remote_files:
+            self.protein._remote_path = protein_path
+        else:
             files_to_upload[str(self.protein.file_path)] = protein_path
 
         for ligand in self.ligands:
-            ligand_path = "entities/ligands/" + os.path.basename(ligand.file_path)
-            if ligand_path not in remote_files:
+            ligand_path = ligand._remote_path_base + os.path.basename(ligand.file_path)
+            if ligand_path in remote_files:
+                ligand._remote_path = ligand_path
+            else:
                 files_to_upload[str(ligand.file_path)] = ligand_path
 
         files_client.upload_files(files_to_upload)
