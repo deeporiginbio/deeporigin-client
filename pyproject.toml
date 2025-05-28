@@ -66,7 +66,7 @@ tools = [
 ]
 
 [tool.setuptools]
-package-dir = { "deeporigin" = "src" }
+package-dir = { "" = "src" }
 include-package-data = true
 
 [tool.setuptools.dynamic]
