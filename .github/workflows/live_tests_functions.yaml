@@ -9,7 +9,7 @@ on:
     - cron: "0 6 * * *"
 
 jobs:
-  test-live-instance:
+  test-functions-on-production:
     runs-on: ubuntu-latest
     env:
       # Secrets for API and organization
