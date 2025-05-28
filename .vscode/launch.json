@@ -2,12 +2,17 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: Debug Current File (WSL)",
+            "name": "Python: Debug Current File",
             "type": "python",
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
-            "justMyCode": true
+            "justMyCode": true,
+            "python": "${workspaceFolder}/venv/bin/python",
+            "env": {
+                "VIRTUAL_ENV": "${workspaceFolder}/venv",
+                "PATH": "${workspaceFolder}/venv/bin:${env:PATH}"
+            }
         }
     ]
 }
