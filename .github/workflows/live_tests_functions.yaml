@@ -49,4 +49,4 @@ jobs:
           python -c "from deeporigin import auth; auth.get_tokens(refresh=True)"
 
       - name: Run tests against a live instance
-        run: make test client=default chosen_tests="functions"
+        run: python3 -m pytest  --client default -k functions
