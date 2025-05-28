@@ -46,5 +46,5 @@ def test_docking(config):  # noqa: F811
     poses_sdf = protein.dock(ligand=ligand, pocket=pocket)
 
     assert isinstance(poses_sdf, str), (
-        "Expected a string to be returned by dock function"
+        "Expected a string to be returned by dock functionpdock"
     )

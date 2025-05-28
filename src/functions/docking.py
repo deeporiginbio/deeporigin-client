@@ -116,6 +116,7 @@ def dock(
         response = response.json()
 
         # Write SDF file to cache
+        Path(sdf_file).parent.mkdir(parents=True, exist_ok=True)
         with open(sdf_file, "w") as file:
             for solution in response[0]["solutions"]:
                 file.write(solution["output_sdf_content"])
