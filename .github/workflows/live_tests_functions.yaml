@@ -9,7 +9,7 @@ on:
     - cron: "0 6 * * *"
 
 jobs:
-  test-live-instance:
+  test-functions-on-production:
     runs-on: ubuntu-latest
     env:
       # Secrets for API and organization
@@ -49,4 +49,4 @@ jobs:
           python -c "from deeporigin import auth; auth.get_tokens(refresh=True)"
 
       - name: Run tests against a live instance
-        run: make test client=default chosen_tests="functions"
+        run: python3 -m pytest  --client default -k functions
