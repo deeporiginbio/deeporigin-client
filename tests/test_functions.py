@@ -19,3 +19,32 @@ def test_molprops(config):  # noqa: F811
     assert "logP" in props, "Expected logP to be in the properties"
     assert "logD" in props, "Expected logD to be in the properties"
     assert "logS" in props, "Expected logS to be in the properties"
+
+
+def test_pocket_finder(config):  # noqa: F811
+    if config["mock"]:
+        pytest.skip("test skipped with mock client")
+    from deeporigin.drug_discovery import Protein
+
+    protein = Protein.from_pdb_id("1EBY")
+    pockets = protein.find_pockets(pocket_count=1)
+
+    assert len(pockets) == 1, "Incorrect number of pockets"
+
+
+def test_docking(config):  # noqa: F811
+    if config["mock"]:
+        pytest.skip("test skipped with mock client")
+    from deeporigin.drug_discovery import Ligand, Protein
+
+    protein = Protein.from_pdb_id("1EBY")
+    pockets = protein.find_pockets(pocket_count=1)
+    pocket = pockets[0]
+
+    ligand = Ligand.from_smiles("CN(C)C(=O)c1cccc(-c2cn(C)c(=O)c3[nH]ccc23)c1")
+
+    poses_sdf = protein.dock(ligand=ligand, pocket=pocket)
+
+    assert isinstance(poses_sdf, str), (
+        "Expected a string to be returned by dock functionpdock"
+    )

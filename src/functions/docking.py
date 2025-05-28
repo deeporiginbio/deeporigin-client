@@ -12,7 +12,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Optional
 
 from beartype import beartype
 import requests
@@ -30,8 +30,8 @@ def dock(
     protein: Protein,
     smiles_string: Optional[str] = None,
     ligand: Optional[Ligand] = None,
-    box_size: Tuple[float, float, float] = (20.0, 20.0, 20.0),
-    pocket_center: Optional[Tuple[int, int, int]] = None,
+    box_size: tuple[float, float, float] = (20.0, 20.0, 20.0),
+    pocket_center: Optional[tuple[int, int, int]] = None,
     pocket: Optional[Pocket] = None,
 ) -> str:
     """
@@ -116,6 +116,7 @@ def dock(
         response = response.json()
 
         # Write SDF file to cache
+        Path(sdf_file).parent.mkdir(parents=True, exist_ok=True)
         with open(sdf_file, "w") as file:
             for solution in response[0]["solutions"]:
                 file.write(solution["output_sdf_content"])
