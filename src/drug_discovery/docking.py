@@ -3,6 +3,7 @@
 import concurrent.futures
 import math
 import os
+from pathlib import Path
 from typing import Optional
 
 from beartype import beartype
@@ -12,22 +13,27 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
-from deeporigin.data_hub import api
 from deeporigin.drug_discovery import chemistry as chem
 from deeporigin.drug_discovery import utils
+from deeporigin.drug_discovery.constants import tool_mapper
 from deeporigin.drug_discovery.structures.pocket import Pocket
 from deeporigin.drug_discovery.workflow_step import WorkflowStep
 from deeporigin.exceptions import DeepOriginException
-from deeporigin.tools.job import Job
-from deeporigin.utils.core import ensure_file_extension
+from deeporigin.platform import tools_api
+from deeporigin.tools.job import Job, get_dataframe
 
 Number = float | int
+LOCAL_BASE = Path.home() / ".deeporigin"
 
 
 class Docking(WorkflowStep):
     """class to handle Docking-related tasks within the Complex class.
 
     Objects instantiated here are meant to be used within the Complex class."""
+
+    """tool version to use for Docking"""
+    tool_version = "0.4.0"
+    _tool_key = "deeporigin.bulk-docking"  # Tool key for Docking jobs
 
     def __init__(self, parent):
         super().__init__(parent)
@@ -132,48 +138,7 @@ class Docking(WorkflowStep):
         Returns:
             List of file paths to the result files
         """
-        jobs = self._get_jobs(only_with_status=["Succeeded"])
-        row_ids = [job.attributes.userOutputs.results_sdf.rowId for job in jobs]
-
-        df = pd.DataFrame(
-            api.get_dataframe(
-                "Docking",
-                return_type="dict",
-                use_file_names=False,
-            )
-        )
-
-        df = df[df["ID"].isin(row_ids)]
-
-        if len(df) == 0:
-            print("No results available yet")
-            return None
-
-        file_ids = df[column_name].tolist()
-
-        existing_files = os.listdir(utils.DATA_DIRS["Docking"])
-        existing_files = [
-            "_file:" + file.replace(file_extension, "") for file in existing_files
-        ]
-        missing_files = list(set(file_ids) - set(existing_files))
-
-        if len(missing_files) > 0:
-            api.download_files(
-                file_ids=missing_files,
-                use_file_names=False,
-                save_to_dir=utils.DATA_DIRS["Docking"],
-            )
-
-        file_paths = [
-            os.path.join(utils.DATA_DIRS["Docking"], file_id.replace("_file:", ""))
-            for file_id in file_ids
-        ]
-
-        file_paths = ensure_file_extension(
-            file_paths=file_paths, extension=file_extension
-        )
-
-        return file_paths
+        raise NotImplementedError("Not implemented yet")
 
     @beartype
     def get_results(self) -> pd.DataFrame | None:
@@ -219,33 +184,13 @@ class Docking(WorkflowStep):
     ) -> list:
         """get all job IDs for this protein"""
 
-        if only_with_status is None:
-            only_with_status = ["Succeeded", "Running", "Queued", "Failed"]
-
-        _filter = {
-            "status": {"$in": only_with_status},
-            "metadata": {
-                "$exists": True,
-                "$ne": None,
-            },
-            "tool": {
-                "toolManifest": {
-                    "key": "deeporigin.bulk-docking",
-                },
-            },
-        }
-        from deeporigin.config import get_value
-        from deeporigin.platform import tools
-
-        response = tools.get_tool_executions(
-            org_friendly_id=get_value()["organization_id"],
-            filter=_filter,
-            page_size=10000,
+        df = get_dataframe(
+            tool_key=tool_mapper["Docking"],
+            only_with_status=tools_api.NON_FAILED_STATES,
+            include_metadata=True,
+            resolve_user_names=False,
+            _platform_clients=self.parent._platform_clients,
         )
-        jobs = response["data"]
-
-        # remove jobs that have no metadata about protein id
-        jobs = [job for job in jobs if "protein_id" in job.attributes.metadata.keys()]
 
         if pocket_center is not None:
             import numpy as np
@@ -296,6 +241,8 @@ class Docking(WorkflowStep):
         pocket_center: Optional[tuple[Number, Number, Number]] = None,
         batch_size: Optional[int] = 32,
         n_workers: Optional[int] = None,
+        _output_dir_path: Optional[str] = None,
+        use_parallel: bool = True,
     ):
         """Run bulk docking on Deep Origin. Ligands will be split into batches based on the batch_size argument, and will run in parallel on Deep Origin clusters.
 
@@ -304,8 +251,10 @@ class Docking(WorkflowStep):
             pocket_center (tuple[float, float, float]): pocket center
             batch_size (int, optional): batch size. Defaults to 30.
             n_workers (int, optional): number of workers. Defaults to None.
-
+            use_parallel (bool, optional): whether to run jobs in parallel. Defaults to True.
         """
+
+        self.parent._sync_protein_and_ligands()
 
         if batch_size is None and n_workers is None:
             raise DeepOriginException(
@@ -334,15 +283,17 @@ class Docking(WorkflowStep):
 
         print(f"Docking {len(smiles_strings)} ligands...")
 
-        jobs = self._get_jobs(pocket_center=pocket_center, box_size=box_size)
+        # TODO --  fix this
 
-        already_docked_ligands = []
-        for job in jobs:
-            this_smiles = job.attributes.userInputs.smiles_list
-            already_docked_ligands.extend(this_smiles)
+        # jobs = self._get_jobs(pocket_center=pocket_center, box_size=box_size)
 
-        smiles_strings = set(smiles_strings) - set(already_docked_ligands)
-        smiles_strings = list(smiles_strings)
+        # already_docked_ligands = []
+        # for job in jobs:
+        #     this_smiles = job.attributes.userInputs.smiles_list
+        #     already_docked_ligands.extend(this_smiles)
+
+        # smiles_strings = set(smiles_strings) - set(already_docked_ligands)
+        # smiles_strings = list(smiles_strings)
 
         print(
             f"Docking {len(smiles_strings)} ligands, after filtering out already docked ligands..."
@@ -352,9 +303,14 @@ class Docking(WorkflowStep):
             print("No new ligands to dock")
             return
 
+        metadata = dict(
+            protein_file=os.path.basename(str(self.parent.protein._remote_path)),
+        )
+
+        job_ids = []
         chunks = list(more_itertools.chunked(smiles_strings, batch_size))
-        jobs = self._get_jobs()
-        job_ids = [job.id for job in jobs]
+        # jobs = self._get_jobs()
+        # job_ids = [job.id for job in jobs]
 
         def process_chunk(chunk):
             params = dict(
@@ -365,25 +321,33 @@ class Docking(WorkflowStep):
 
             return utils._start_tool_run(
                 params=params,
-                database_columns=self.parent._db.proteins.cols
-                + self.parent._db.docking.cols,
-                complex_hash=self.parent._hash,
+                metadata=metadata,
+                protein_path=self.parent.protein._remote_path,
                 tool="Docking",
+                tool_version=self.tool_version,
+                _platform_clients=self.parent._platform_clients,
+                _output_dir_path=_output_dir_path,
             )
 
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            # Submit all chunks to the executor
-            future_to_chunk = {
-                executor.submit(process_chunk, chunk): chunk for chunk in chunks
-            }
+        if use_parallel:
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                # Submit all chunks to the executor
+                future_to_chunk = {
+                    executor.submit(process_chunk, chunk): chunk for chunk in chunks
+                }
 
-            # Process results with progress bar
-            for future in tqdm(
-                concurrent.futures.as_completed(future_to_chunk),
-                total=len(chunks),
-                desc="Starting docking jobs",
-            ):
-                job_id = future.result()
+                # Process results with progress bar
+                for future in tqdm(
+                    concurrent.futures.as_completed(future_to_chunk),
+                    total=len(chunks),
+                    desc="Starting docking jobs",
+                ):
+                    job_id = future.result()
+                    if job_id is not None:
+                        job_ids.append(job_id)
+        else:
+            for chunk in tqdm(chunks, total=len(chunks), desc="Starting docking jobs"):
+                job_id = process_chunk(chunk)
                 if job_id is not None:
                     job_ids.append(job_id)
 
