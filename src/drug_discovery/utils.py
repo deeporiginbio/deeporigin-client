@@ -67,22 +67,19 @@ def _start_tool_run(
         NotImplementedError: If a tool other than ABFE is specified.
     """
 
-    if tool == "ABFE" and _output_dir_path is None:
-        output_dir_path = (
-            "tool-runs/"
-            + tool
-            + "/"
-            + os.path.basename(protein_path)
-            + "/"
-            + os.path.basename(ligand1_path)
-            + "/"
-        )
-    elif tool == "Docking" and _output_dir_path is None:
-        output_dir_path = (
-            "tool-runs/" + tool + "/" + os.path.basename(protein_path) + "/"
-        )
-    else:
-        raise NotImplementedError("Tools other than ABFE are not implemented yet")
+    if _output_dir_path is None:
+        if tool == "ABFE":
+            _output_dir_path = (
+                "tool-runs/"
+                + tool
+                + "/"
+                + os.path.basename(protein_path)
+                + "/"
+                + os.path.basename(ligand1_path)
+                + "/"
+            )
+        else:
+            raise NotImplementedError("Tools other than ABFE are not implemented yet")
 
     # a protein is needed for ABFE, RBFE, and docking
     params["protein"] = {
@@ -112,33 +109,33 @@ def _start_tool_run(
         outputs = {
             "output_file": {
                 "$provider": provider,
-                "key": output_dir_path + "output/",
+                "key": _output_dir_path + "output/",
             },
             "rbfe_results_summary": {
                 "$provider": provider,
-                "key": output_dir_path + "results.csv",
+                "key": _output_dir_path + "results.csv",
             },
         }
     elif tool == "ABFE":
         outputs = {
             "output_file": {
                 "$provider": provider,
-                "key": output_dir_path + "output/",
+                "key": _output_dir_path + "output/",
             },
             "abfe_results_summary": {
                 "$provider": provider,
-                "key": output_dir_path + "results.csv",
+                "key": _output_dir_path + "results.csv",
             },
         }
     elif tool == "Docking":
         outputs = {
             "data_file": {
                 "$provider": provider,
-                "key": output_dir_path + "results.csv",
+                "key": _output_dir_path + "results.csv",
             },
             "results_sdf": {
                 "$provider": provider,
-                "key": output_dir_path + "results.sdf",
+                "key": _output_dir_path + "results.sdf",
             },
         }
 

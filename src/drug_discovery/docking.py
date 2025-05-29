@@ -1,6 +1,7 @@
 """This module encapsulates methods to run docking and show docking results on Deep Origin"""
 
 import concurrent.futures
+import hashlib
 import math
 import os
 from pathlib import Path
@@ -144,7 +145,7 @@ class Docking(WorkflowStep):
         raise NotImplementedError("Not implemented yet")
 
     @beartype
-    def get_results(self) -> pd.DataFrame | None:
+    def get_results(self, *, file_type: str = "csv") -> pd.DataFrame | None | list[str]:
         """return a list of paths to CSV files that contain the results from docking"""
 
         files_client = getattr(self.parent._platform_clients, "FilesApi", None)
@@ -155,7 +156,12 @@ class Docking(WorkflowStep):
             client=files_client,
         )
 
-        results_files = [file for file in files if file.endswith("/results.csv")]
+        if file_type == "csv":
+            results_files = [file for file in files if file.endswith("/results.csv")]
+        elif file_type == "sdf":
+            results_files = [file for file in files if file.endswith("/results.sdf")]
+        else:
+            raise ValueError(f"Invalid file type: {file_type}")
 
         if len(results_files) == 0:
             print("No Docking results found for this protein.")
@@ -168,19 +174,25 @@ class Docking(WorkflowStep):
 
         all_df = []
 
-        for file in results_files:
-            home_dir = os.path.expanduser("~")
+        home_dir = os.path.expanduser("~")
 
-            local_path = os.path.join(home_dir, ".deeporigin", file)
-            from deeporigin.utils.core import fix_embedded_newlines_in_csv
+        local_paths = [
+            os.path.join(home_dir, ".deeporigin", file) for file in results_files
+        ]
 
-            fix_embedded_newlines_in_csv(local_path)
+        if file_type == "csv":
+            for local_path in local_paths:
+                from deeporigin.utils.core import fix_embedded_newlines_in_csv
 
-            df = pd.read_csv(local_path)
-            all_df.append(df)
+                fix_embedded_newlines_in_csv(local_path)
 
-        df = pd.concat(all_df)
-        return df
+                df = pd.read_csv(local_path)
+                all_df.append(df)
+
+            df = pd.concat(all_df)
+            return df
+        else:
+            return local_paths
 
     @beartype
     def _get_jobs(
@@ -249,11 +261,14 @@ class Docking(WorkflowStep):
             use_parallel (bool, optional): whether to run jobs in parallel. Defaults to True.
         """
 
+        protein_basename = os.path.basename(self.parent.protein.file_path)
+
+        if _output_dir_path is None:
+            _output_dir_path = "tool-runs/Docking/" + protein_basename + "/"
+
         self.parent._sync_protein_and_ligands()
 
-        metadata = dict(
-            protein_file=os.path.basename(str(self.parent.protein._remote_path)),
-        )
+        metadata = dict(protein_file=protein_basename)
 
         if batch_size is None and n_workers is None:
             raise DeepOriginException(
@@ -306,6 +321,11 @@ class Docking(WorkflowStep):
                 smiles_list=chunk,
             )
 
+            # Create a stable hash for the chunk
+            chunk_str = ",".join(chunk)
+            chunk_hash = hashlib.md5(chunk_str.encode("utf-8")).hexdigest()
+            this_output_dir_path = os.path.join(_output_dir_path, chunk_hash) + "/"
+
             return utils._start_tool_run(
                 params=params,
                 metadata=metadata,
@@ -313,7 +333,7 @@ class Docking(WorkflowStep):
                 tool="Docking",
                 tool_version=self.tool_version,
                 _platform_clients=self.parent._platform_clients,
-                _output_dir_path=_output_dir_path,
+                _output_dir_path=this_output_dir_path,
             )
 
         if len(smiles_strings) > 0:
