@@ -168,13 +168,6 @@ class Docking(WorkflowStep):
         """return a list of paths to SDF files that contain the poses of all ligands after docking"""
         return self._get_result_files("ResultFile", ".sdf")
 
-    def _connect(self):
-        """fetch job IDs for this protein from DB"""
-
-        jobs = self._get_jobs()
-        job_ids = [job.id for job in jobs]
-        self._make_jobs_from_ids(job_ids)
-
     def _get_jobs(
         self,
         *,
@@ -188,49 +181,36 @@ class Docking(WorkflowStep):
             tool_key=tool_mapper["Docking"],
             only_with_status=tools_api.NON_FAILED_STATES,
             include_metadata=True,
-            resolve_user_names=False,
-            _platform_clients=self.parent._platform_clients,
+            include_inputs=True,
+            include_outputs=True,
         )
 
         if pocket_center is not None:
-            import numpy as np
-
-            jobs = [
-                job
-                for job in jobs
-                if bool(
-                    np.all(
-                        np.isclose(
-                            pocket_center, job.attributes.userInputs.pocket_center
-                        )
-                    )
-                )
-            ]
+            # Filter df rows where pocket_center matches row["user_inputs"]["pocket_center"]
+            mask = df["user_inputs"].apply(
+                lambda x: bool(np.all(np.isclose(pocket_center, x["pocket_center"])))
+            )
+            df = df[mask]
 
         if box_size is not None:
-            jobs = [
-                job
-                for job in jobs
-                if bool(
-                    np.all(np.isclose(box_size, job.attributes.userInputs.box_size))
-                )
-            ]
+            # Filter df rows where box_size matches row["user_inputs"]["box_size"]
+            mask = df["user_inputs"].apply(
+                lambda x: bool(np.all(np.isclose(box_size, x["box_size"])))
+            )
+            df = df[mask]
+
+        # filter to only keep jobs that match this protein.
+        protein_basename = os.path.basename(self.parent.protein.file_path)
+        mask = df["metadata"].apply(lambda x: x["protein_file"] == protein_basename)
+        df = df[mask]
 
         # only keep jobs where at least one ligand in that job matches what we have in the current complex
-        relevant_job_ids = []
         smiles_strings = [ligand.smiles for ligand in self.parent.ligands]
-
-        for job in jobs:
-            this_smiles = job.attributes.userInputs.smiles_list
-
-            for smiles in this_smiles:
-                if smiles in smiles_strings:
-                    relevant_job_ids.append(job.id)
-                    break
-
-        jobs = [job for job in jobs if job.id in relevant_job_ids]
-
-        return jobs
+        mask = df["user_inputs"].apply(
+            lambda x: any(s in smiles_strings for s in x["smiles_list"])
+        )
+        df = df[mask]
+        return df
 
     @beartype
     def run(

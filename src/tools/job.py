@@ -9,6 +9,7 @@ import time
 from typing import Any, Callable, Optional
 import uuid
 
+from beartype import beartype
 from dateutil import parser
 import humanize
 from IPython.display import HTML, display, update_display
@@ -345,11 +346,14 @@ class Job:
         )
 
 
+@beartype
 def get_dataframe(
     *,
     tool_key: Optional[str] = None,
-    only_with_status: Optional[list[str]] = None,
+    only_with_status: Optional[list[str] | set[str]] = None,
     include_metadata: bool = False,
+    include_inputs: bool = False,
+    include_outputs: bool = False,
     resolve_user_names: bool = False,
     _platform_clients: Optional[PlatformClients] = None,
 ) -> pd.DataFrame:
@@ -361,6 +365,9 @@ def get_dataframe(
 
     if only_with_status is None:
         only_with_status = ["Succeeded", "Running", "Queued", "Failed", "Created"]
+
+    if isinstance(only_with_status, set):
+        only_with_status = list(only_with_status)
 
     _filter = {
         "status": {"$in": only_with_status},
@@ -444,6 +451,12 @@ def get_dataframe(
     if include_metadata:
         data["metadata"] = []
 
+    if include_inputs:
+        data["user_inputs"] = []
+
+    if include_outputs:
+        data["user_outputs"] = []
+
     for job in jobs:
         attributes = job["attributes"]
 
@@ -468,6 +481,9 @@ def get_dataframe(
         user_inputs = attributes.get("userInputs", {})
         data["thread_pinning"].append(find_boolean_value(user_inputs, "thread_pinning"))
         data["test_run"].append(find_boolean_value(user_inputs, "test_run"))
+
+        if include_inputs:
+            data["user_inputs"].append(user_inputs)
 
         if "smiles_list" in user_inputs:
             data["n_ligands"].append(len(user_inputs["smiles_list"]))
@@ -498,6 +514,9 @@ def get_dataframe(
 
         if include_metadata:
             data["metadata"].append(metadata)
+
+        if include_outputs:
+            data["user_outputs"].append(attributes.get("userOutputs", {}))
 
     # Create DataFrame
     df = pd.DataFrame(data)
