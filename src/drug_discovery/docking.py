@@ -109,7 +109,7 @@ class Docking(WorkflowStep):
     def show_poses(self):
         """show docked ligands with protein in 3D"""
 
-        file_paths = self.get_poses()
+        file_paths = self.get_results(file_type="sdf")
 
         if file_paths is None:
             # no results available yet
