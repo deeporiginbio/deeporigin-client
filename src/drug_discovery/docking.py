@@ -47,7 +47,10 @@ class Docking(WorkflowStep):
         for inputs in job._inputs:
             unique_smiles.update(inputs["smiles_list"])
         num_ligands = len(unique_smiles)
-        return f"Docking <code>{job._metadata[0]['protein_file']}</code> to {num_ligands} ligands."
+
+        protein_file = os.path.basename(job._inputs[0]["protein"]["key"])
+
+        return f"Docking <code>{protein_file}</code> to {num_ligands} ligands."
 
     @classmethod
     @beartype
@@ -246,11 +249,11 @@ class Docking(WorkflowStep):
             use_parallel (bool, optional): whether to run jobs in parallel. Defaults to True.
         """
 
+        self.parent._sync_protein_and_ligands()
+
         metadata = dict(
             protein_file=os.path.basename(str(self.parent.protein._remote_path)),
         )
-
-        self.parent._sync_protein_and_ligands()
 
         if batch_size is None and n_workers is None:
             raise DeepOriginException(
