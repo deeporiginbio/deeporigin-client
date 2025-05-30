@@ -34,10 +34,10 @@ def _start_tool_run(
     params: dict,
     metadata: dict,
     protein_path: str,
-    ligand1_path: str,
-    ligand2_path: Optional[str] = None,
     tool: valid_tools,
     tool_version: str,
+    ligand1_path: Optional[str] = None,
+    ligand2_path: Optional[str] = None,
     provider: tools_api.PROVIDER = "ufa",
     _platform_clients: Optional[PlatformClients] = None,
     _output_dir_path: Optional[str] = None,
@@ -67,18 +67,19 @@ def _start_tool_run(
         NotImplementedError: If a tool other than ABFE is specified.
     """
 
-    if tool == "ABFE" and _output_dir_path is None:
-        output_dir_path = (
-            "tool-runs/"
-            + tool
-            + "/"
-            + os.path.basename(protein_path)
-            + "/"
-            + os.path.basename(ligand1_path)
-            + "/"
-        )
-    else:
-        raise NotImplementedError("Tools other than ABFE are not implemented yet")
+    if _output_dir_path is None:
+        if tool == "ABFE":
+            _output_dir_path = (
+                "tool-runs/"
+                + tool
+                + "/"
+                + os.path.basename(protein_path)
+                + "/"
+                + os.path.basename(ligand1_path)
+                + "/"
+            )
+        else:
+            raise NotImplementedError("Tools other than ABFE are not implemented yet")
 
     # a protein is needed for ABFE, RBFE, and docking
     params["protein"] = {
@@ -108,34 +109,33 @@ def _start_tool_run(
         outputs = {
             "output_file": {
                 "$provider": provider,
-                "key": output_dir_path + "output/",
+                "key": _output_dir_path + "output/",
             },
             "rbfe_results_summary": {
                 "$provider": provider,
-                "key": output_dir_path + "results.csv",
+                "key": _output_dir_path + "results.csv",
             },
         }
     elif tool == "ABFE":
         outputs = {
             "output_file": {
                 "$provider": provider,
-                "key": output_dir_path + "output/",
+                "key": _output_dir_path + "output/",
             },
             "abfe_results_summary": {
                 "$provider": provider,
-                "key": output_dir_path + "results.csv",
+                "key": _output_dir_path + "results.csv",
             },
         }
     elif tool == "Docking":
-        raise NotImplementedError("Docking is not implemented yet")
         outputs = {
             "data_file": {
                 "$provider": provider,
-                "key": output_dir_path,
+                "key": _output_dir_path + "results.csv",
             },
             "results_sdf": {
                 "$provider": provider,
-                "key": "mason/inputs/message_file.txt",
+                "key": _output_dir_path + "results.sdf",
             },
         }
 

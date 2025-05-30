@@ -21,6 +21,8 @@ __all__ = _add_functions_to_module(
 TERMINAL_STATES = {"Succeeded", "Failed", "Cancelled"}
 NON_TERMINAL_STATES = {"Created", "Queued", "Running"}
 
+NON_FAILED_STATES = {"Succeeded", "Running", "Queued", "Created"}
+
 # possible providers for files that work with the tools API
 PROVIDER = Literal["ufa", "s3"]
 
