@@ -52,7 +52,7 @@ def count_atoms_in_pdb_file(pdb_file_path: str | Path) -> int:
     parser = PDBParser(QUIET=True)
     structure = parser.get_structure("complex", str(pdb_file_path))
 
-    return sum(1 for atom in structure.get_atoms())
+    return sum(1 for _ in structure.get_atoms())
 
 
 @beartype
