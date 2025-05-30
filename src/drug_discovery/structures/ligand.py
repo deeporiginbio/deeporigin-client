@@ -53,7 +53,6 @@ print(ligand)
 ligand.visualize()
 """
 
-# from deeporigin.drug_discovery.utilities.props import predict_properties, protonate
 from dataclasses import dataclass, field
 import os
 from pathlib import Path
@@ -979,9 +978,9 @@ def show_ligands(ligands: list[Ligand]):
     # re‑index your DataFrame
     df = df[new_order]
 
-    from deeporigin.utils.notebook import _in_marimo
+    from deeporigin.utils.notebook import get_notebook_environment
 
-    if _in_marimo():
+    if get_notebook_environment() == "marimo":
         import marimo as mo
 
         return mo.plain(df)

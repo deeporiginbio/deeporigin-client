@@ -28,7 +28,7 @@ class ABFE(WorkflowStep):
     Objects instantiated here are meant to be used within the Complex class."""
 
     """tool version to use for ABFE"""
-    tool_version = "0.2.6"
+    tool_version = "0.2.7"
     _tool_key = "deeporigin.abfe-end-to-end"  # Tool key for ABFE jobs
 
     _max_atom_count: int = 100_000
