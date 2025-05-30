@@ -46,6 +46,26 @@ def _(sim):
 @app.cell(hide_code=True)
 def _():
     mo.md(
+        r"""
+    ## System preparation
+
+    Before we start a ABFE run, we can prepare the system using `sim.prepare`. Doing so shows a preview of the prepared system. 
+
+
+    """
+    )
+    return
+
+
+@app.cell
+def _(sim):
+    sim.prepare(ligand=sim.ligands[0])
+    return
+
+
+@app.cell(hide_code=True)
+def _():
+    mo.md(
         """
     ## Job control
 
@@ -63,9 +83,11 @@ def _():
 
 
 @app.cell
-def _():
-    # sim.abfe.run_end_to_end(ligand_ids=["Ligands-1"])
-    return
+def _(sim):
+    sim.abfe.set_test_run()
+    jobs = sim.abfe.run_end_to_end(ligands=[sim.ligands[0]])
+    this_job = jobs[0]
+    return (this_job,)
 
 
 @app.cell(hide_code=True)
@@ -81,9 +103,8 @@ def _():
 
 
 @app.cell
-def _(sim):
-    job = sim.abfe.jobs[0]
-    job
+def _(this_job):
+    this_job
     return
 
 
@@ -100,8 +121,8 @@ def _():
 
 
 @app.cell
-def _():
-    # job.cancel()
+def _(this_job):
+    this_job.cancel()
     return
 
 
