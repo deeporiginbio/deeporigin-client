@@ -54,8 +54,8 @@ def test_sysprep(config):  # noqa: F811
     if config["mock"]:
         pytest.skip("test skipped with mock client")
 
+    from deeporigin.drug_discovery import EXAMPLE_DATA_DIR, Complex
     from deeporigin.functions.sysprep import sysprep
-    from deeporigin.drug_discovery import Complex, EXAMPLE_DATA_DIR,
 
     sim = Complex.from_dir(EXAMPLE_DATA_DIR)
 
