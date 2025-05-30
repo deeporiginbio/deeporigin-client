@@ -34,7 +34,6 @@ def _():
 @app.cell
 def _():
     sim = Complex.from_dir(EXAMPLE_DATA_DIR)
-    sim.connect()
     return (sim,)
 
 
