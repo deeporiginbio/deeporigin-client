@@ -46,7 +46,7 @@ def test_docking(config):  # noqa: F811
     poses_sdf = protein.dock(ligand=ligand, pocket=pocket)
 
     assert isinstance(poses_sdf, str), (
-        "Expected a string to be returned by dock functionpdock"
+        "Expected a string to be returned by dock function"
     )
 
 
@@ -59,6 +59,7 @@ def test_sysprep(config):  # noqa: F811
 
     sim = Complex.from_dir(EXAMPLE_DATA_DIR)
 
+    # this is chosen to be one where it takes >1 min
     sysprep(
         protein_path=sim.protein.file_path,
         ligand_path=sim.ligands[3].file_path,
