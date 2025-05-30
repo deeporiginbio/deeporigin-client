@@ -133,7 +133,7 @@ class Complex:
         is_lig_protonated: bool = True,
         is_protein_protonated: bool = True,
     ) -> None:
-        """run system prepartion on the Complex
+        """run system prepartion on the protein and one ligand from the Complex
 
         Args:
             ligand (Ligand): The ligand to prepare.
