@@ -8,8 +8,7 @@ from pathlib import Path
 from beartype import beartype
 import requests
 
-# URL = "http://pocketfinder.default.jobs.edge.deeporigin.io/find_pockets"
-URL = "http://localhost:8080/sysprep"
+URL = "http://sysprep.default.jobs.edge.deeporigin.io/sysprep"
 CACHE_DIR = os.path.expanduser("~/.deeporigin/sysprep")
 
 

@@ -31,6 +31,8 @@ class ABFE(WorkflowStep):
     tool_version = "0.2.6"
     _tool_key = "deeporigin.abfe-end-to-end"  # Tool key for ABFE jobs
 
+    _max_atom_count: int = 100_000
+
     def __init__(self, parent):
         super().__init__(parent)
 
@@ -140,6 +142,26 @@ class ABFE(WorkflowStep):
 
         if ligands is None:
             ligands = self.parent.ligands
+
+        # check that there is a prepared system for each ligand
+        for ligand in ligands:
+            if ligand.name not in self.parent._prepared_systems:
+                raise ValueError(
+                    f"Complex with Ligand {ligand.name} is not prepared. Please prepare the system using the `prepare` method of Complex."
+                )
+
+        # check that for every prepared system, the number of atoms is less than the max atom count
+        for ligand_name, prepared_system in self.parent._prepared_systems.items():
+            from deeporigin.drug_discovery.external_tools.utils import (
+                count_atoms_in_pdb_file,
+            )
+
+            num_atoms = count_atoms_in_pdb_file(prepared_system)
+
+            if num_atoms > self._max_atom_count:
+                raise ValueError(
+                    f"System with {ligand_name} has too many atoms. It has {num_atoms} atoms, but the maximum allowed is {self._max_atom_count}."
+                )
 
         self.parent._sync_protein_and_ligands()
 

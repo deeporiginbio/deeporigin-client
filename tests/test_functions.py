@@ -46,5 +46,22 @@ def test_docking(config):  # noqa: F811
     poses_sdf = protein.dock(ligand=ligand, pocket=pocket)
 
     assert isinstance(poses_sdf, str), (
-        "Expected a string to be returned by dock functionpdock"
+        "Expected a string to be returned by dock function"
+    )
+
+
+def test_sysprep(config):  # noqa: F811
+    if config["mock"]:
+        pytest.skip("test skipped with mock client")
+
+    from deeporigin.drug_discovery import EXAMPLE_DATA_DIR, Complex
+    from deeporigin.functions.sysprep import sysprep
+
+    sim = Complex.from_dir(EXAMPLE_DATA_DIR)
+
+    # this is chosen to be one where it takes >1 min
+    sysprep(
+        protein_path=sim.protein.file_path,
+        ligand_path=sim.ligands[3].file_path,
+        is_lig_protonated=True,
     )
