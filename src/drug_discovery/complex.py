@@ -19,17 +19,18 @@ from deeporigin.platform.utils import PlatformClients
 class Complex:
     """class to represent a set of a protein and 1 or many ligands"""
 
-    # Using a private attribute for ligands with the property decorator below
     protein: Protein
-    _ligands: list[Ligand] = field(default_factory=list, repr=False)
 
+    # Using a private attribute for ligands with the property decorator below
+    _ligands: list[Ligand] = field(default_factory=list, repr=False)
     _platform_clients: Optional[PlatformClients] = None
+    _prepared_systems: dict[str, str] = field(default_factory=dict, repr=False)
 
     @beartype
     def __init__(
         self,
-        protein: Protein,
         *,
+        protein: Protein,
         ligands: list[Ligand] | None = None,
         _platform_clients: Optional[PlatformClients] = None,
     ):
@@ -49,6 +50,8 @@ class Complex:
         self.docking = Docking(parent=self)
         self.abfe = ABFE(parent=self)
         self.rbfe = RBFE(parent=self)
+
+        self._prepared_systems = {}
 
     @property
     def ligands(self) -> list[Ligand]:
@@ -133,7 +136,7 @@ class Complex:
         is_lig_protonated: bool = True,
         is_protein_protonated: bool = True,
     ) -> None:
-        """run system prepartion on the Complex
+        """run system preparation on the protein and one ligand from the Complex
 
         Args:
             ligand (Ligand): The ligand to prepare.
@@ -144,6 +147,11 @@ class Complex:
         """
         from deeporigin.functions.sysprep import sysprep
 
+        if ligand.file_path is None:
+            raise ValueError(
+                "This ligand is not backed by a file. System preparation cannot proceed."
+            )
+
         # run sysprep on the ligand
         complex_path = sysprep(
             protein_path=self.protein.file_path,
@@ -153,6 +161,9 @@ class Complex:
             is_lig_protonated=is_lig_protonated,
             is_protein_protonated=is_protein_protonated,
         )
+
+        # set this complex path as the prepared system
+        self._prepared_systems[ligand.name] = complex_path
 
         # show it
         Protein.from_file(complex_path).show()
