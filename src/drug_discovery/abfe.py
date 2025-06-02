@@ -128,6 +128,45 @@ class ABFE(WorkflowStep):
         utils._set_test_run(self._params.end_to_end, value)
 
     @beartype
+    def _get_ligands_to_run(self, ligand_names, re_run: bool):
+        """Helper method to determine which ligands need to be run based on already run jobs and re_run flag."""
+
+        df = get_dataframe(
+            tool_key=tool_mapper["ABFE"],
+            only_with_status=["Succeeded", "Running", "Queued", "Created"],
+            include_metadata=True,
+            resolve_user_names=False,
+            _platform_clients=self.parent._platform_clients,
+        )
+
+        # filter to find relevant jobs
+        df = df[
+            df["metadata"].apply(
+                lambda d: isinstance(d, dict) and d.get("ligand_file") in ligand_names
+            )
+        ]
+
+        # get a list of ligands that have already been run
+        if len(df) > 0:
+            ligands_already_run = list(
+                df["metadata"].apply(
+                    lambda d: isinstance(d, dict) and d.get("ligand_file")
+                )
+            )
+        else:
+            ligands_already_run = []
+
+        if re_run:
+            # need to re-run, so don't remove already run ligands
+            ligands_to_run = ligand_names
+        else:
+            # no re-run, remove already run ligands
+            ligands_to_run = [
+                ligand for ligand in ligand_names if ligand not in ligands_already_run
+            ]
+        return ligands_to_run
+
+    @beartype
     def run_end_to_end(
         self,
         *,
@@ -167,39 +206,7 @@ class ABFE(WorkflowStep):
 
         ligand_names = [os.path.basename(ligand._remote_path) for ligand in ligands]
 
-        df = get_dataframe(
-            tool_key=tool_mapper["ABFE"],
-            only_with_status=["Succeeded", "Running", "Queued", "Created"],
-            include_metadata=True,
-            resolve_user_names=False,
-            _platform_clients=self.parent._platform_clients,
-        )
-
-        # filter to find relevant jobs
-        df = df[
-            df["metadata"].apply(
-                lambda d: isinstance(d, dict) and d.get("ligand_file") in ligand_names
-            )
-        ]
-
-        # get a list of ligands that have already been run
-        if len(df) > 0:
-            ligands_already_run = list(
-                df["metadata"].apply(
-                    lambda d: isinstance(d, dict) and d.get("ligand_file")
-                )
-            )
-        else:
-            ligands_already_run = []
-
-        if re_run:
-            # need to re-run, so don't remove already run ligands
-            ligands_to_run = ligand_names
-        else:
-            # no re-run, remove already run ligands
-            ligands_to_run = [
-                ligand for ligand in ligand_names if ligand not in ligands_already_run
-            ]
+        ligands_to_run = self._get_ligands_to_run(ligand_names, re_run)
 
         if len(ligands_to_run) == 0 and not re_run:
             print(

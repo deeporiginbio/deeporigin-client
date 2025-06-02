@@ -308,6 +308,8 @@ def _process_job(
         metadata=metadata,
     )
 
+    print(payload)
+
     response = run_tool(
         data=payload,
         tool_key=tool_key,
