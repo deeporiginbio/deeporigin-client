@@ -6,3 +6,4 @@ include src/json/*.json
 include src/data/brd/*.sdf
 include src/data/brd/*.pdb
 include src/templates/*.html
+include src/files/file_service/gen_file_openapi.yaml 
