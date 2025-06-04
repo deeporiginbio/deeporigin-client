@@ -39,11 +39,11 @@ class RBFE(WorkflowStep):
     def _render_progress(self, job) -> str:
         """Render progress visualization for a job."""
         # TODO: Implement RBFE-specific progress visualization
-        return "RBFE Progress Visualization"
+        return "[WIP] RBFE Progress Visualization"
 
     def _name_job(self, job) -> str:
         """Generate a name for a job."""
-        return f"RBFE run using <code>{job._metadata[0]['proteprotein_filein_id']}</code>, <code>{job._metadata[0]['ligand1_file']}</code>, and <code>{job._metadata[0]['ligand2_file']}</code>"
+        return f"RBFE run using <code>{job._metadata[0]['protein_file']}</code>, <code>{job._metadata[0]['ligand1_file']}</code>, and <code>{job._metadata[0]['ligand2_file']}</code>"
 
     def get_results(self) -> pd.DataFrame | None:
         """get ABFE results and return in a dataframe.
