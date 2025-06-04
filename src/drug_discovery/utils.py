@@ -13,6 +13,9 @@ from deeporigin.platform import tools_api
 from deeporigin.platform.utils import PlatformClients
 from deeporigin.utils.core import PrettyDict
 
+PROVIDER_KEY = "$provider"
+RESULTS_CSV = "results.csv"
+
 DATA_DIRS = dict()
 
 for tool in tool_mapper.keys():
@@ -78,29 +81,43 @@ def _start_tool_run(
                 + os.path.basename(ligand1_path)
                 + "/"
             )
+        elif tool == "RBFE":
+            _output_dir_path = (
+                "tool-runs/"
+                + tool
+                + "/"
+                + os.path.basename(protein_path)
+                + "/"
+                + os.path.basename(ligand1_path)
+                + "/"
+                + os.path.basename(ligand2_path)
+                + "/"
+            )
         else:
-            raise NotImplementedError("Tools other than ABFE are not implemented yet")
+            raise NotImplementedError(
+                "Tools other than ABFE and RBFE are not implemented yet"
+            )
 
     # a protein is needed for ABFE, RBFE, and docking
     params["protein"] = {
-        "$provider": provider,
+        PROVIDER_KEY: provider,
         "key": protein_path,
     }
 
     # input ligand files
     if tool == "RBFE":
         params["ligand1"] = {
-            "$provider": provider,
+            PROVIDER_KEY: provider,
             "key": ligand1_path,
         }
 
         params["ligand2"] = {
-            "$provider": provider,
+            PROVIDER_KEY: provider,
             "key": ligand2_path,
         }
     elif tool == "ABFE":
         params["ligand"] = {
-            "$provider": provider,
+            PROVIDER_KEY: provider,
             "key": ligand1_path,
         }
 
@@ -108,33 +125,33 @@ def _start_tool_run(
     if tool == "RBFE":
         outputs = {
             "output_file": {
-                "$provider": provider,
+                PROVIDER_KEY: provider,
                 "key": _output_dir_path + "output/",
             },
             "rbfe_results_summary": {
-                "$provider": provider,
-                "key": _output_dir_path + "results.csv",
+                PROVIDER_KEY: provider,
+                "key": _output_dir_path + RESULTS_CSV,
             },
         }
     elif tool == "ABFE":
         outputs = {
             "output_file": {
-                "$provider": provider,
+                PROVIDER_KEY: provider,
                 "key": _output_dir_path + "output/",
             },
             "abfe_results_summary": {
-                "$provider": provider,
-                "key": _output_dir_path + "results.csv",
+                PROVIDER_KEY: provider,
+                "key": _output_dir_path + RESULTS_CSV,
             },
         }
     elif tool == "Docking":
         outputs = {
             "data_file": {
-                "$provider": provider,
-                "key": _output_dir_path + "results.csv",
+                PROVIDER_KEY: provider,
+                "key": _output_dir_path + RESULTS_CSV,
             },
             "results_sdf": {
-                "$provider": provider,
+                PROVIDER_KEY: provider,
                 "key": _output_dir_path + "results.sdf",
             },
         }
