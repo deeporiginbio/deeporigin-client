@@ -82,7 +82,7 @@ class RBFE(WorkflowStep):
         ligand2: Ligand,
         re_run: bool = False,
         _output_dir_path: Optional[str] = None,
-    ) -> list[Job] | None:
+    ) -> Job | None:
         """Method to run an end-to-end RBFE run.
 
         Args:
