@@ -7,13 +7,15 @@ from pathlib import Path
 from typing import Optional
 
 from beartype import beartype
+import pandas as pd
 
-from deeporigin.drug_discovery import chemistry as chem
 from deeporigin.drug_discovery import utils
-from deeporigin.drug_discovery.structures.ligand import Ligand
+from deeporigin.drug_discovery.structures.ligand import Ligand, ligands_to_dataframe
 from deeporigin.drug_discovery.workflow_step import WorkflowStep
+from deeporigin.platform import files_api
 from deeporigin.tools.job import Job
 from deeporigin.utils.core import PrettyDict
+from deeporigin.utils.notebook import get_notebook_environment
 
 LOCAL_BASE = Path.home() / ".deeporigin"
 
@@ -43,36 +45,102 @@ class RBFE(WorkflowStep):
         """Generate a name for a job."""
         return f"RBFE run using <code>{job._metadata[0]['proteprotein_filein_id']}</code>, <code>{job._metadata[0]['ligand1_file']}</code>, and <code>{job._metadata[0]['ligand2_file']}</code>"
 
-    def get_results(self):
-        """Fetch RBFE results and return in a dataframe.
+    def get_results(self) -> pd.DataFrame | None:
+        """get ABFE results and return in a dataframe.
 
-        This method returns a dataframe showing the results of RBFE runs associated with this simulation session. The ligand file name, SMILES string and ΔΔG are shown."""
+        This method returns a dataframe showing the results of ABFE runs associated with this simulation session. The ligand file name and ΔG are shown, together with user-supplied properties"""
 
-        raise NotImplementedError("RBFE is not implemented yet.")
+        files_client = getattr(self.parent._platform_clients, "FilesApi", None)
+
+        files = utils.find_files_on_ufa(
+            tool="RBFE",
+            protein=self.parent.protein.file_path.name,
+            client=files_client,
+        )
+
+        results_files = [file for file in files if file.endswith("/results.csv")]
+
+        if len(results_files) == 0:
+            print("No RBFE results found for this protein.")
+            return None
+
+        files_api.download_files(
+            results_files,
+            client=files_client,
+        )
+
+        # read all the CSV files using pandas and
+        # set Ligand1 column to ligand name (parent dir of results.csv)
+        dfs = []
+        for file in results_files:
+            df = pd.read_csv(LOCAL_BASE / file)
+
+            protein_name = file.split("/")[2]
+            ligand1_name = file.split("/")[3]
+            ligand2_name = file.split("/")[4]
+            df["Protein"] = protein_name
+            df["Ligand1"] = ligand1_name
+            df["Ligand2"] = ligand2_name
+            dfs.append(df)
+        df1 = pd.concat(dfs)
+
+        df2 = ligands_to_dataframe(self.parent.ligands)
+
+        # Merge to get SMILES1
+        df1 = df1.merge(
+            df2[["File", "initial_smiles"]],
+            left_on="Ligand1",
+            right_on="File",
+            how="left",
+        )
+        df1.rename(columns={"initial_smiles": "SMILES1"}, inplace=True)
+        df1.drop("File", axis=1, inplace=True)
+
+        # Merge to get SMILES2
+        df1 = df1.merge(
+            df2[["File", "initial_smiles"]],
+            left_on="Ligand2",
+            right_on="File",
+            how="left",
+        )
+        df1.rename(columns={"initial_smiles": "SMILES2"}, inplace=True)
+        df1.drop("File", axis=1, inplace=True)
+
+        return df1
 
     def show_results(self):
-        """Show RBFE results in a dataframe.
+        """Show ABFE results in a dataframe.
 
-        This method returns a dataframe showing the results of RBFE runs associated with this simulation session. The ligand file name, 2-D structure, and ΔΔG are shown."""
+        This method returns a dataframe showing the results of ABFE runs associated with this simulation session. The ligand file name, 2-D structure, and ΔG are shown."""
 
         df = self.get_results()
 
-        if len(df) == 0:
+        if df is None or len(df) == 0:
             return
 
-        # convert SMILES to aligned images
-        smiles1_list = list(df["SMILES1"])
-        smiles2_list = list(df["SMILES2"])
-        df.drop("SMILES1", axis=1, inplace=True)
-        df.drop("SMILES2", axis=1, inplace=True)
+        from rdkit.Chem import PandasTools
 
-        df["Structure1"] = chem.smiles_list_to_base64_png_list(smiles1_list)
-        df["Structure2"] = chem.smiles_list_to_base64_png_list(smiles2_list)
+        PandasTools.AddMoleculeColumnToFrame(
+            df, smilesCol="SMILES1", molCol="Structure1"
+        )
+        PandasTools.AddMoleculeColumnToFrame(
+            df, smilesCol="SMILES2", molCol="Structure2"
+        )
+        PandasTools.RenderImagesInAllDataFrames()
 
-        # Use escape=False to allow the <img> tags to render as images
-        from IPython.display import HTML, display
+        # show structure first
+        new_order = ["Structure2"] + [col for col in df.columns if col != "Structure2"]
+        df = df[new_order]
+        new_order = ["Structure1"] + [col for col in df.columns if col != "Structure1"]
+        df = df[new_order]
 
-        display(HTML(df.to_html(escape=False)))
+        if get_notebook_environment() == "marimo":
+            import marimo as mo
+
+            return mo.plain(df)
+
+        else:
+            return df
 
     @beartype
     def run_ligand_pair(
