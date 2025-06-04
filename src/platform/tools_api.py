@@ -308,7 +308,9 @@ def _process_job(
         metadata=metadata,
     )
 
-    print(payload)
+    import json
+
+    print(json.dumps(payload, indent=2))
 
     response = run_tool(
         data=payload,

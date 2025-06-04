@@ -1,7 +1,6 @@
 {
     "complex_prep": {
         "sysprep_params": {
-            "pdb_id": null,
             "is_protein_protonated": false,
             "do_loop_modelling": false,
             "force_field": "ff14SB",
@@ -25,7 +24,6 @@
     "binding": {
         "test_run": 0,
         "thread_pinning": 1,
-        "atom_mapping_paths": null,
         "atom_mapping_threshold": 0.01,
         "softcore_alpha": 0.5,
         "annihilate": true,
@@ -129,7 +127,6 @@
     "solvation": {
         "test_run": 0,
         "thread_pinning": 1,
-        "atom_mapping_paths": null,
         "atom_mapping_threshold": 0.01,
         "softcore_alpha": 0.5,
         "annihilate": true,
