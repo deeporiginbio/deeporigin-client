@@ -147,9 +147,11 @@ class ABFE(WorkflowStep):
         # Build set of ligand names that have already been run
         if len(df) > 0:
             ligands_already_run = set(
-                df["metadata"].apply(
-                    lambda d: isinstance(d, dict) and d.get("ligand_file")
+                ligand_file
+                for ligand_file in df["metadata"].apply(
+                    lambda d: d.get("ligand_file") if isinstance(d, dict) else None
                 )
+                if isinstance(ligand_file, str) and ligand_file
             )
         else:
             ligands_already_run = set()
