@@ -128,7 +128,12 @@ class ABFE(WorkflowStep):
         utils._set_test_run(self._params.end_to_end, value)
 
     @beartype
-    def _get_ligands_to_run(self, ligand_names, re_run: bool):
+    def _get_ligands_to_run(
+        self,
+        *,
+        ligands: list[Ligand],
+        re_run: bool,
+    ) -> list[Ligand]:
         """Helper method to determine which ligands need to be run based on already run jobs and re_run flag."""
 
         df = get_dataframe(
@@ -139,30 +144,25 @@ class ABFE(WorkflowStep):
             _platform_clients=self.parent._platform_clients,
         )
 
-        # filter to find relevant jobs
-        df = df[
-            df["metadata"].apply(
-                lambda d: isinstance(d, dict) and d.get("ligand_file") in ligand_names
-            )
-        ]
-
-        # get a list of ligands that have already been run
+        # Build set of ligand names that have already been run
         if len(df) > 0:
-            ligands_already_run = list(
+            ligands_already_run = set(
                 df["metadata"].apply(
                     lambda d: isinstance(d, dict) and d.get("ligand_file")
                 )
             )
         else:
-            ligands_already_run = []
+            ligands_already_run = set()
 
         if re_run:
             # need to re-run, so don't remove already run ligands
-            ligands_to_run = ligand_names
+            ligands_to_run = ligands
         else:
             # no re-run, remove already run ligands
             ligands_to_run = [
-                ligand for ligand in ligand_names if ligand not in ligands_already_run
+                ligand
+                for ligand in ligands
+                if os.path.basename(ligand._remote_path) not in ligands_already_run
             ]
         return ligands_to_run
 
@@ -204,11 +204,9 @@ class ABFE(WorkflowStep):
 
         self.parent._sync_protein_and_ligands()
 
-        ligand_names = [os.path.basename(ligand._remote_path) for ligand in ligands]
+        ligands_to_run = self._get_ligands_to_run(ligands=ligands, re_run=re_run)
 
-        ligands_to_run = self._get_ligands_to_run(ligand_names, re_run)
-
-        if len(ligands_to_run) == 0 and not re_run:
+        if len(ligands_to_run) == 0:
             print(
                 "All requested ligands have already been run, or are queued to run. To re-run, set re_run=True"
             )
@@ -219,15 +217,15 @@ class ABFE(WorkflowStep):
 
         jobs_for_this_run = []
 
-        for ligand_path in ligands_to_run:
+        for ligand in ligands_to_run:
             metadata = dict(
                 protein_file=os.path.basename(self.parent.protein._remote_path),
-                ligand_file=os.path.basename(ligand_path),
+                ligand_file=os.path.basename(ligand._remote_path),
             )
 
             job_id = utils._start_tool_run(
                 metadata=metadata,
-                ligand1_path=ligand_path,
+                ligand1_path=ligand._remote_path,
                 protein_path=self.parent.protein._remote_path,
                 params=self._params.end_to_end,
                 tool="ABFE",
