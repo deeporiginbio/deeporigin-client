@@ -232,7 +232,7 @@ class Complex:
                   If None, all ligands will be shown.
         """
 
-        if view == "3d":
+        if view.lower() == "3d":
             files = [ligand.file_path for ligand in self.ligands]
 
             if limit is not None:

@@ -113,7 +113,7 @@ sim.show_ligands()
 We can also view a table of 3D structures as follows:
 
 ```python
-sim.show_ligands("3D")
+sim.show_ligands(view="3d")
 ```
 
 
@@ -125,21 +125,6 @@ sim.show_ligands("3D")
     title="Protein visualization"
 ></iframe>
 
-
-
-
-## Initialization
-
-Notice that the ID column in the Ligands table shows `None` for every ligand. This means that we haven't uploaded Ligand SDF files to Deep Origin yet. We can do using the `connect` method:
-
-```python
-sim.connect()
-```
-
-Using `sim.show_ligands()`, we see that the ID column is now assigned:
-
-!!! success "Expected output"
-    ![](../../images/tools/ligands-id.png)
 
 
 That's it! We are now ready to perform [:material-page-next: docking](./docking.md), [:material-page-next: ABFE](./abfe.md), and [:material-page-next: RBFE](./rbfe.md).

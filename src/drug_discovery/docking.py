@@ -228,15 +228,18 @@ class Docking(WorkflowStep):
 
         # filter to only keep jobs that match this protein.
         protein_basename = os.path.basename(self.parent.protein.file_path)
-        mask = df["metadata"].apply(lambda x: x["protein_file"] == protein_basename)
-        df = df[mask]
 
-        # only keep jobs where at least one ligand in that job matches what we have in the current complex
-        smiles_strings = [ligand.smiles for ligand in self.parent.ligands]
-        mask = df["user_inputs"].apply(
-            lambda x: any(s in smiles_strings for s in x["smiles_list"])
-        )
-        df = df[mask]
+        if "metadata" in df.columns:
+            mask = df["metadata"].apply(lambda x: x["protein_file"] == protein_basename)
+            df = df[mask]
+
+        if "user_inputs" in df.columns:
+            # only keep jobs where at least one ligand in that job matches what we have in the current complex
+            smiles_strings = [ligand.smiles for ligand in self.parent.ligands]
+            mask = df["user_inputs"].apply(
+                lambda x: any(s in smiles_strings for s in x["smiles_list"])
+            )
+            df = df[mask]
         return df
 
     @beartype
@@ -311,7 +314,11 @@ class Docking(WorkflowStep):
             f"Docking {len(smiles_strings)} ligands, after filtering out already docked ligands..."
         )
 
-        job_ids = df["id"].tolist()
+        if "id" in df.columns:
+            job_ids = df["id"].tolist()
+        else:
+            job_ids = []
+
         chunks = list(more_itertools.chunked(smiles_strings, batch_size))
 
         def process_chunk(chunk):
