@@ -7,4 +7,6 @@ include src/data/brd/*.sdf
 include src/data/brd/*.pdb
 include src/templates/*.html
 include src/files/file_service/gen_file_openapi.yaml 
-include *.gql
+include src/drug_discovery/external_tools/assets/protein_info.gql
+include src/drug_discovery/external_tools/assets/molecule_smiles.gql
+include src/drug_discovery/external_tools/assets/protein_base_info.gql
