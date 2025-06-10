@@ -1260,15 +1260,6 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#src.drug_discovery.complex.Complex.connect" class="md-nav__link">
-    <span class="md-ellipsis">
-      connect
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#src.drug_discovery.complex.Complex.from_dir" class="md-nav__link">
     <span class="md-ellipsis">
       from_dir
@@ -1278,18 +1269,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#src.drug_discovery.complex.Complex.get_csv_results_for" class="md-nav__link">
+  <a href="#src.drug_discovery.complex.Complex.prepare" class="md-nav__link">
     <span class="md-ellipsis">
-      get_csv_results_for
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#src.drug_discovery.complex.Complex.get_result_files_for" class="md-nav__link">
-    <span class="md-ellipsis">
-      get_result_files_for
+      prepare
     </span>
   </a>
   
@@ -2849,8 +2831,6 @@
       
         
       
-        
-      
     
     
     
@@ -2900,29 +2880,6 @@
   
   <span class="md-ellipsis">
     Running tools
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../tools/ref/utils.html" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Utils
     
   </span>
   
@@ -3084,15 +3041,6 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#src.drug_discovery.complex.Complex.connect" class="md-nav__link">
-    <span class="md-ellipsis">
-      connect
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#src.drug_discovery.complex.Complex.from_dir" class="md-nav__link">
     <span class="md-ellipsis">
       from_dir
@@ -3102,18 +3050,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#src.drug_discovery.complex.Complex.get_csv_results_for" class="md-nav__link">
+  <a href="#src.drug_discovery.complex.Complex.prepare" class="md-nav__link">
     <span class="md-ellipsis">
-      get_csv_results_for
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#src.drug_discovery.complex.Complex.get_result_files_for" class="md-nav__link">
-    <span class="md-ellipsis">
-      get_result_files_for
+      prepare
     </span>
   </a>
   
@@ -3280,27 +3219,6 @@
 <div class="doc doc-object doc-function">
 
 
-<h5 id="src.drug_discovery.complex.Complex.connect" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">connect</span>
-
-
-<a href="#src.drug_discovery.complex.Complex.connect" class="headerlink" title="Permanent link">&para;</a></h5>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">connect</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span>
-</code></pre></div>
-
-    <div class="doc doc-contents ">
-
-        <p>Connect instance of Complex to the databases on Deep Origin. This method uploads ligand and protein files if needed, and retrieves job IDs of tasks for all tools, if they exist.</p>
-<p>Before running any tool, it is required to call this method.</p>
-
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
 <h5 id="src.drug_discovery.complex.Complex.from_dir" class="doc doc-heading">
 <code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">from_dir</span>
 
@@ -3310,7 +3228,11 @@
   </span>
 
 <a href="#src.drug_discovery.complex.Complex.from_dir" class="headerlink" title="Permanent link">&para;</a></h5>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">from_dir</span><span class="p">(</span><span class="n">directory</span><span class="p">:</span> <span class="n"><span title="str">str</span></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-internal" href="#src.drug_discovery.complex.Complex">Complex</a></span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">from_dir</span><span class="p">(</span>
+    <span class="n">directory</span><span class="p">:</span> <span class="n"><span title="str">str</span></span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">_platform_clients</span><span class="p">:</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n"><span title="deeporigin.platform.utils.PlatformClients">PlatformClients</span></span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><a class="autorefs autorefs-internal" href="#src.drug_discovery.complex.Complex">Complex</a></span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -3405,75 +3327,24 @@
 <div class="doc doc-object doc-function">
 
 
-<h5 id="src.drug_discovery.complex.Complex.get_csv_results_for" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">get_csv_results_for</span>
+<h5 id="src.drug_discovery.complex.Complex.prepare" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">prepare</span>
 
 
-<a href="#src.drug_discovery.complex.Complex.get_csv_results_for" class="headerlink" title="Permanent link">&para;</a></h5>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">get_csv_results_for</span><span class="p">(</span><span class="n">tool</span><span class="p">:</span> <span class="n"><span title="deeporigin.drug_discovery.utils.VALID_TOOLS">VALID_TOOLS</span></span><span class="p">)</span>
-</code></pre></div>
-
-    <div class="doc doc-contents ">
-
-        <p>Generic method to get CSV results for a particular tool and combine them as need be</p>
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>tool</code>
-            </td>
-            <td>
-                  <code><span title="deeporigin.drug_discovery.utils.VALID_TOOLS">VALID_TOOLS</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>One of "Docking", "ABFE", "RBFE"</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h5 id="src.drug_discovery.complex.Complex.get_result_files_for" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">get_result_files_for</span>
-
-
-<a href="#src.drug_discovery.complex.Complex.get_result_files_for" class="headerlink" title="Permanent link">&para;</a></h5>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">get_result_files_for</span><span class="p">(</span>
+<a href="#src.drug_discovery.complex.Complex.prepare" class="headerlink" title="Permanent link">&para;</a></h5>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">prepare</span><span class="p">(</span>
+    <span class="n">ligand</span><span class="p">:</span> <span class="n"><span title="deeporigin.drug_discovery.structures.Ligand">Ligand</span></span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">tool</span><span class="p">:</span> <span class="n"><span title="deeporigin.drug_discovery.utils.VALID_TOOLS">VALID_TOOLS</span></span><span class="p">,</span>
-    <span class="n">ligand_ids</span><span class="p">:</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n"><span title="list">list</span></span><span class="p">[</span><span class="n"><span title="str">str</span></span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
-<span class="p">)</span>
+    <span class="n">padding</span><span class="p">:</span> <span class="n"><span title="float">float</span></span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">keep_waters</span><span class="p">:</span> <span class="n"><span title="bool">bool</span></span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">is_lig_protonated</span><span class="p">:</span> <span class="n"><span title="bool">bool</span></span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">is_protein_protonated</span><span class="p">:</span> <span class="n"><span title="bool">bool</span></span> <span class="o">=</span> <span class="kc">True</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
-        <p>Retrieve result files for a specific computational tool used with this complex.</p>
-<p>This method fetches data from the specified tool's database, filters for results
-associated with this complex, downloads any missing result files to the local
-storage directory, and returns paths to all result files.</p>
+        <p>run system preparation on the protein and one ligand from the Complex</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -3489,15 +3360,14 @@ storage directory, and returns paths to all result files.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                <code>tool</code>
+                <code>ligand</code>
             </td>
             <td>
-                  <code><span title="deeporigin.drug_discovery.utils.VALID_TOOLS">VALID_TOOLS</span></code>
+                  <code><span title="deeporigin.drug_discovery.structures.Ligand">Ligand</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>One of "Docking", "ABFE", "RBFE" - specifies which computational
- method's results to retrieve</p>
+                <p>The ligand to prepare.</p>
               </div>
             </td>
             <td>
@@ -3506,19 +3376,66 @@ storage directory, and returns paths to all result files.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>ligand_ids</code>
+                <code>padding</code>
             </td>
             <td>
-                  <code><span title="typing.Optional">Optional</span>[<span title="list">list</span>[<span title="str">str</span>]]</code>
+                  <code><span title="float">float</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Optional; list of ligand IDs to filter results. If None,
-       results for all ligands in the complex will be retrieved.</p>
+                <p>Padding to add around the system. Defaults to 1.0.</p>
               </div>
             </td>
             <td>
-                  <code>None</code>
+                  <code>1.0</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>keep_waters</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Whether to keep water molecules. Defaults to False.</p>
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>is_lig_protonated</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Whether the ligand is already protonated. Defaults to True.</p>
+              </div>
+            </td>
+            <td>
+                  <code>True</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>is_protein_protonated</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Whether the protein is already protonated. Defaults to True.</p>
+              </div>
+            </td>
+            <td>
+                  <code>True</code>
             </td>
           </tr>
       </tbody>

@@ -812,15 +812,6 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#initialization" class="md-nav__link">
-    <span class="md-ellipsis">
-      Initialization
-    </span>
-  </a>
-  
-</li>
-      
     </ul>
   
 </nav>
@@ -2813,8 +2804,6 @@
       
         
       
-        
-      
     
     
     
@@ -2864,29 +2853,6 @@
   
   <span class="md-ellipsis">
     Running tools
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../tools/ref/utils.html" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Utils
     
   </span>
   
@@ -3062,15 +3028,6 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#initialization" class="md-nav__link">
-    <span class="md-ellipsis">
-      Initialization
-    </span>
-  </a>
-  
-</li>
-      
     </ul>
   
 </nav>
@@ -3148,7 +3105,6 @@
 <div class="language-python highlight"><pre><span></span><code><span class="p">[</span><span class="n">Ligand</span><span class="p">(</span>
   <span class="n">file</span><span class="p">:</span> <span class="s1">&#39;/Users/deeporigin/brd-2.sdf&#39;</span>
    <span class="n">smiles_string</span><span class="p">:</span> <span class="s1">&#39;[H]C1=C([H])C(...&#39;</span>
-   <span class="n">_do_id</span><span class="p">:</span> <span class="s1">&#39;Ligands-1&#39;</span>
    <span class="n">properties</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;r_exp_dg&#39;</span><span class="p">:</span> <span class="s1">&#39;-9.59&#39;</span><span class="p">}</span>
 <span class="p">),</span><span class="o">...</span><span class="p">]</span>
 </code></pre></div>
@@ -3167,7 +3123,7 @@
 </div>
 <h3 id="viewing-ligands-3d-structures">Viewing Ligands (3D structures)<a class="headerlink" href="#viewing-ligands-3d-structures" title="Permanent link">&para;</a></h3>
 <p>We can also view a table of 3D structures as follows:</p>
-<div class="language-python highlight"><pre><span></span><code><span class="n">sim</span><span class="o">.</span><span class="n">show_ligands</span><span class="p">(</span><span class="s2">&quot;3D&quot;</span><span class="p">)</span>
+<div class="language-python highlight"><pre><span></span><code><span class="n">sim</span><span class="o">.</span><span class="n">show_ligands</span><span class="p">(</span><span class="n">view</span><span class="o">=</span><span class="s2">&quot;3d&quot;</span><span class="p">)</span>
 </code></pre></div>
 <iframe 
     src="../how-to/brd-ligands.html" 
@@ -3177,15 +3133,6 @@
     title="Protein visualization"
 ></iframe>
 
-<h2 id="initialization">Initialization<a class="headerlink" href="#initialization" title="Permanent link">&para;</a></h2>
-<p>Notice that the ID column in the Ligands table shows <code>None</code> for every ligand. This means that we haven't uploaded Ligand SDF files to Deep Origin yet. We can do using the <code>connect</code> method:</p>
-<div class="language-python highlight"><pre><span></span><code><span class="n">sim</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
-</code></pre></div>
-<p>Using <code>sim.show_ligands()</code>, we see that the ID column is now assigned:</p>
-<div class="admonition success">
-<p class="admonition-title">Expected output</p>
-<p><img alt="" src="../../images/tools/ligands-id.png" /></p>
-</div>
 <p>That's it! We are now ready to perform <a href="docking.html"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 3H5a2 2 0 0 0-2 2v6h4V9l4 3-4 3v-2H3v6a2 2 0 0 0 2 2h15a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2m-3 14h-4v-2h4zm3-4h-7v-2h7zm0-4h-7V7h7zM3 13H0v-2h3z"/></svg></span> docking</a>, <a href="abfe.html"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 3H5a2 2 0 0 0-2 2v6h4V9l4 3-4 3v-2H3v6a2 2 0 0 0 2 2h15a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2m-3 14h-4v-2h4zm3-4h-7v-2h7zm0-4h-7V7h7zM3 13H0v-2h3z"/></svg></span> ABFE</a>, and <a href="rbfe.html"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 3H5a2 2 0 0 0-2 2v6h4V9l4 3-4 3v-2H3v6a2 2 0 0 0 2 2h15a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2m-3 14h-4v-2h4zm3-4h-7v-2h7zm0-4h-7V7h7zM3 13H0v-2h3z"/></svg></span> RBFE</a>.</p>
 
 

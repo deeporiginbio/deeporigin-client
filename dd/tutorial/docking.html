@@ -767,11 +767,53 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#find-pockets" class="md-nav__link">
+    <span class="md-ellipsis">
+      Find pockets
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#starting-a-docking-run" class="md-nav__link">
     <span class="md-ellipsis">
       Starting a docking run
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Starting a docking run">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#using-pocket" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using pocket
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-residue-id" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using residue ID
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-pocket-center-and-box-size" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using pocket center and box size
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -2804,8 +2846,6 @@
       
         
       
-        
-      
     
     
     
@@ -2855,29 +2895,6 @@
   
   <span class="md-ellipsis">
     Running tools
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../tools/ref/utils.html" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Utils
     
   </span>
   
@@ -2985,11 +3002,53 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#find-pockets" class="md-nav__link">
+    <span class="md-ellipsis">
+      Find pockets
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#starting-a-docking-run" class="md-nav__link">
     <span class="md-ellipsis">
       Starting a docking run
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Starting a docking run">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#using-pocket" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using pocket
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-residue-id" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using residue ID
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-pocket-center-and-box-size" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using pocket center and box size
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -3076,14 +3135,40 @@
 <p>This document describes how to <a href="https://en.wikipedia.org/wiki/Docking_(molecular)">dock <span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M3.75 2h3.5a.75.75 0 0 1 0 1.5h-3.5a.25.25 0 0 0-.25.25v8.5c0 .138.112.25.25.25h8.5a.25.25 0 0 0 .25-.25v-3.5a.75.75 0 0 1 1.5 0v3.5A1.75 1.75 0 0 1 12.25 14h-8.5A1.75 1.75 0 0 1 2 12.25v-8.5C2 2.784 2.784 2 3.75 2m6.854-1h4.146a.25.25 0 0 1 .25.25v4.146a.25.25 0 0 1-.427.177L13.03 4.03 9.28 7.78a.75.75 0 0 1-1.042-.018.75.75 0 0 1-.018-1.042l3.75-3.75-1.543-1.543A.25.25 0 0 1 10.604 1"/></svg></span></a> a set of ligands to a protein  using Deep Origin tools. </p>
 <h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h2>
 <p>We assume that we have an initialized and configured <code>Complex</code> object:</p>
-<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin.drug_discovery</span><span class="w"> </span><span class="kn">import</span> <span class="n">Complex</span>
-<span class="n">sim</span> <span class="o">=</span> <span class="n">Complex</span><span class="o">.</span><span class="n">from_dir</span><span class="p">(</span><span class="s2">&quot;/path/to/folder/&quot;</span><span class="p">)</span>
-<span class="n">sim</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin.drug_discovery</span><span class="w"> </span><span class="kn">import</span> <span class="n">Complex</span><span class="p">,</span> <span class="n">EXAMPLE_DATA_DIR</span>
+<span class="n">sim</span> <span class="o">=</span> <span class="n">Complex</span><span class="o">.</span><span class="n">from_dir</span><span class="p">(</span><span class="n">EXAMPLE_DATA_DIR</span><span class="p">)</span> <span class="c1"># or replace with your folder</span>
 </code></pre></div>
 <p>For more details on how to get started, see <a href="getting-started.html"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 21h15a2 2 0 0 0 2-2v-6h-4v2l-4-3 4-3v2h4V5a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2m0-6h4v2H4zm0-4h7v2H4zm0-4h7v2H4zm17 4h3v2h-3z"/></svg></span> Getting Started </a>.</p>
+<h2 id="find-pockets">Find pockets<a class="headerlink" href="#find-pockets" title="Permanent link">&para;</a></h2>
+<p>First we find pockets in the protein using:</p>
+<div class="language-py highlight"><pre><span></span><code><span class="n">pockets</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">protein</span><span class="o">.</span><span class="n">find_pockets</span><span class="p">(</span><span class="n">pocket_count</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</code></pre></div>
+<p>We can visualize the pocket using:</p>
+<div class="language-py highlight"><pre><span></span><code><span class="n">sim</span><span class="o">.</span><span class="n">protein</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">pockets</span><span class="o">=</span><span class="n">pockets</span><span class="p">)</span>
+</code></pre></div>
+<p>You should see something along the lines of:</p>
+<iframe 
+    src="./pockets.html" 
+    width="100%" 
+    height="650" 
+    style="border:none;"
+    title="Protein visualization"
+></iframe>
+
 <h2 id="starting-a-docking-run">Starting a docking run<a class="headerlink" href="#starting-a-docking-run" title="Permanent link">&para;</a></h2>
+<h3 id="using-pocket">Using pocket<a class="headerlink" href="#using-pocket" title="Permanent link">&para;</a></h3>
+<p>To dock all ligands in the complex to the protein, using the pocket we found, we can do:</p>
+<div class="language-py highlight"><pre><span></span><code><span class="n">pocket</span> <span class="o">=</span> <span class="n">pockets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="c1"># or choose as needed</span>
+<span class="n">sim</span><span class="o">.</span><span class="n">docking</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">pocket</span><span class="o">=</span><span class="n">pocket</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="using-residue-id">Using residue ID<a class="headerlink" href="#using-residue-id" title="Permanent link">&para;</a></h3>
+<div class="admonition info">
+<p class="admonition-title">Coming Soon</p>
+<p>Ability to dock ligands using a residue ID is coming soon.</p>
+</div>
+<h3 id="using-pocket-center-and-box-size">Using pocket center and box size<a class="headerlink" href="#using-pocket-center-and-box-size" title="Permanent link">&para;</a></h3>
 <p>To dock all ligands to the protein, parallelizing and batching across all ligands, we do the following:</p>
-<div class="language-python highlight"><pre><span></span><code><span class="n">sim</span><span class="o">.</span><span class="n">docking</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+<div class="language-python highlight"><pre><span></span><code><span class="n">job</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">docking</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
     <span class="n">box_size</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">),</span>      <span class="c1"># match to your protein</span>
     <span class="n">pocket_center</span><span class="o">=</span><span class="p">(</span><span class="mi">13</span><span class="p">,</span> <span class="o">-</span><span class="mi">6</span><span class="p">,</span> <span class="mi">22</span><span class="p">),</span> <span class="c1"># match to your protein</span>
 <span class="p">)</span>
@@ -3094,33 +3179,27 @@
 <p>This can be controlled in two ways. First, you can control the batch size using the <code>batch_size</code> parameter.</p>
 <div class="language-python highlight"><pre><span></span><code><span class="n">sim</span><span class="o">.</span><span class="n">dock</span><span class="p">(</span>
     <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
-    <span class="n">box_size</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">),</span>      <span class="c1"># note: tuple  </span>
-    <span class="n">pocket_center</span><span class="o">=</span><span class="p">(</span><span class="mi">13</span><span class="p">,</span> <span class="o">-</span><span class="mi">6</span><span class="p">,</span> <span class="mi">22</span><span class="p">),</span> <span class="c1"># note: tuple  </span>
+    <span class="o">...</span> 
 <span class="p">)</span>
 </code></pre></div>
 <p>You can also specify the number of workers using:</p>
 <div class="language-python highlight"><pre><span></span><code><span class="n">sim</span><span class="o">.</span><span class="n">dock</span><span class="p">(</span>
     <span class="n">n_workers</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-    <span class="n">box_size</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">),</span>      <span class="c1"># note: tuple  </span>
-    <span class="n">pocket_center</span><span class="o">=</span><span class="p">(</span><span class="mi">13</span><span class="p">,</span> <span class="o">-</span><span class="mi">6</span><span class="p">,</span> <span class="mi">22</span><span class="p">),</span> <span class="c1"># note: tuple  </span>
+    <span class="o">...</span>
 <span class="p">)</span>
 </code></pre></div>
 <p>You can specify either the number of workers or the batch size, but not both. </p>
 </details>
 <p>This queues up tasks on Deep Origin. When it completes, the results of docking can be viewed.</p>
 <h2 id="viewing-status-of-docking">Viewing status of docking<a class="headerlink" href="#viewing-status-of-docking" title="Permanent link">&para;</a></h2>
-<p>The status of docking runs can be viewed using:</p>
-<div class="language-python highlight"><pre><span></span><code><span class="n">sim</span><span class="o">.</span><span class="n">get_status_for</span><span class="p">(</span><span class="s2">&quot;Docking&quot;</span><span class="p">)</span>
+<p>A job object is returned from <code>docking.run</code>. This job object can be inspected to show the status of the job when created. </p>
+<p>The job object can also be used monitor a job as it completes:</p>
+<div class="language-py highlight"><pre><span></span><code><span class="n">job</span><span class="o">.</span><span class="n">watch</span><span class="p">()</span>
 </code></pre></div>
-<div class="admonition success">
-<p class="admonition-title">Expected output</p>
-<p>A typical output can look like:</p>
-<div class="language-python highlight"><pre><span></span><code><span class="p">{</span><span class="s1">&#39;ccdb9ba9-b3d2-4083-bb4c-7c7249f7dbc2&#39;</span><span class="p">:</span> <span class="s1">&#39;Succeeded&#39;</span><span class="p">,</span>
- <span class="s1">&#39;17a0b478-c11d-48a9-9bce-2e0272b804fb&#39;</span><span class="p">:</span> <span class="s1">&#39;Running&#39;</span><span class="p">,</span>
- <span class="s1">&#39;08342c26-b773-4423-91c3-3fcbe4955778&#39;</span><span class="p">:</span> <span class="s1">&#39;Running&#39;</span><span class="p">}</span>
+<p>Doing so creates a widget that automatically updates and monitors a job as long as its running. </p>
+<p>To stop watching a job, do:</p>
+<div class="language-py highlight"><pre><span></span><code><span class="n">job</span><span class="o">.</span><span class="n">stop_watching</span><span class="p">()</span>
 </code></pre></div>
-<p>The keys are IDs of the jobs running on Deep Origin. You may see different numbers of jobs based on your <code>batch_size</code> parameter and the number of ligands in your dataset.</p>
-</div>
 <h2 id="results">Results<a class="headerlink" href="#results" title="Permanent link">&para;</a></h2>
 <h3 id="viewing-results">Viewing results<a class="headerlink" href="#viewing-results" title="Permanent link">&para;</a></h3>
 <p>After completion of docking, we can view results using:</p>

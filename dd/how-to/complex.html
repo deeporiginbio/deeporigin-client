@@ -921,6 +921,48 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#preparing-a-complex" class="md-nav__link">
+    <span class="md-ellipsis">
+      Preparing a complex
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Preparing a complex">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Usage
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arguments" class="md-nav__link">
+    <span class="md-ellipsis">
+      Arguments
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-happens-during-preparation" class="md-nav__link">
+    <span class="md-ellipsis">
+      What happens during preparation?
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2749,8 +2791,6 @@
       
         
       
-        
-      
     
     
     
@@ -2800,29 +2840,6 @@
   
   <span class="md-ellipsis">
     Running tools
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../tools/ref/utils.html" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Utils
     
   </span>
   
@@ -2945,6 +2962,48 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#preparing-a-complex" class="md-nav__link">
+    <span class="md-ellipsis">
+      Preparing a complex
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Preparing a complex">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Usage
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arguments" class="md-nav__link">
+    <span class="md-ellipsis">
+      Arguments
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-happens-during-preparation" class="md-nav__link">
+    <span class="md-ellipsis">
+      What happens during preparation?
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2987,18 +3046,18 @@
 <h2 id="modifying-a-complex">Modifying a Complex<a class="headerlink" href="#modifying-a-complex" title="Permanent link">&para;</a></h2>
 <p>You can modify a Complex object by adding or replacing ligands. The Complex's hash will automatically update when ligands are modified.</p>
 <div class="language-python highlight"><pre><span></span><code><span class="c1"># Create a complex with just the protein</span>
-<span class="nb">complex</span> <span class="o">=</span> <span class="n">Complex</span><span class="p">(</span><span class="n">protein</span><span class="o">=</span><span class="n">protein</span><span class="p">,</span> <span class="n">ligands</span><span class="o">=</span><span class="p">[])</span>
+<span class="n">sim</span> <span class="o">=</span> <span class="n">Complex</span><span class="p">(</span><span class="n">protein</span><span class="o">=</span><span class="n">protein</span><span class="p">,</span> <span class="n">ligands</span><span class="o">=</span><span class="p">[])</span>
 
 <span class="c1"># Add a single ligand</span>
 <span class="n">new_ligand</span> <span class="o">=</span> <span class="n">Ligand</span><span class="o">.</span><span class="n">from_sdf</span><span class="p">(</span><span class="s2">&quot;ligand.sdf&quot;</span><span class="p">)</span>
-<span class="nb">complex</span><span class="o">.</span><span class="n">ligands</span> <span class="o">=</span> <span class="nb">complex</span><span class="o">.</span><span class="n">ligands</span> <span class="o">+</span> <span class="p">[</span><span class="n">new_ligand</span><span class="p">]</span>
+<span class="n">sim</span><span class="o">.</span><span class="n">ligands</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">ligands</span> <span class="o">+</span> <span class="p">[</span><span class="n">new_ligand</span><span class="p">]</span>
 
 <span class="c1"># Add multiple ligands</span>
 <span class="n">more_ligands</span> <span class="o">=</span> <span class="n">Ligand</span><span class="o">.</span><span class="n">from_sdf</span><span class="p">(</span><span class="s2">&quot;multiple_ligands.sdf&quot;</span><span class="p">)</span>  <span class="c1"># Returns a list if file contains multiple molecules</span>
-<span class="nb">complex</span><span class="o">.</span><span class="n">ligands</span> <span class="o">=</span> <span class="nb">complex</span><span class="o">.</span><span class="n">ligands</span> <span class="o">+</span> <span class="n">more_ligands</span>
+<span class="n">sim</span><span class="o">.</span><span class="n">ligands</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">ligands</span> <span class="o">+</span> <span class="n">more_ligands</span>
 
 <span class="c1"># Replace all ligands</span>
-<span class="nb">complex</span><span class="o">.</span><span class="n">ligands</span> <span class="o">=</span> <span class="p">[</span><span class="n">new_ligand</span><span class="p">]</span>  <span class="c1"># Replace with a single ligand</span>
+<span class="n">sim</span><span class="o">.</span><span class="n">ligands</span> <span class="o">=</span> <span class="p">[</span><span class="n">new_ligand</span><span class="p">]</span>  <span class="c1"># Replace with a single ligand</span>
 </code></pre></div>
 <details class="tip">
 <summary>Constructing Ligands</summary>
@@ -3008,6 +3067,38 @@
 <summary>Constructing the Protein</summary>
 <p>To see how to construct the Protein, see <a href="proteins.html">this</a></p>
 </details>
+<h2 id="preparing-a-complex">Preparing a complex<a class="headerlink" href="#preparing-a-complex" title="Permanent link">&para;</a></h2>
+<p>To prepare a protein-ligand complex for simulation or further analysis, use the <code>Complex.prepare()</code> method. This method runs system preparation on a given ligand in the context of the complex's protein, handling tasks such as protonation, water retention, and box padding.</p>
+<h3 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span class="n">sim</span><span class="o">.</span><span class="n">prepare</span><span class="p">(</span><span class="n">ligand</span><span class="p">)</span>
+</code></pre></div>
+<p>Typically, you would call this method using a ligand in the complex:</p>
+<div class="language-python highlight"><pre><span></span><code><span class="n">sim</span><span class="o">.</span><span class="n">prepare</span><span class="p">(</span><span class="n">sim</span><span class="o">.</span><span class="n">ligands</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+</code></pre></div>
+<h3 id="arguments">Arguments<a class="headerlink" href="#arguments" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>ligand</code> (<code>Ligand</code>): The ligand to prepare. This should be an instance of the <code>Ligand</code> class associated with your complex.</li>
+<li><code>padding</code> (<code>float</code>, optional): Padding (in angstroms) to add around the system. Default is <code>1.0</code>.</li>
+<li><code>keep_waters</code> (<code>bool</code>, optional): Whether to keep water molecules in the prepared system. Default is <code>False</code>.</li>
+<li><code>is_lig_protonated</code> (<code>bool</code>, optional): Whether the ligand is already protonated. Default is <code>True</code>.</li>
+<li><code>is_protein_protonated</code> (<code>bool</code>, optional): Whether the protein is already protonated. Default is <code>True</code>.</li>
+</ul>
+<p>You can override any of these defaults as needed:</p>
+<div class="language-python highlight"><pre><span></span><code><span class="n">sim</span><span class="o">.</span><span class="n">prepare</span><span class="p">(</span>
+    <span class="n">ligand</span><span class="p">,</span>
+    <span class="n">padding</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span>
+    <span class="n">keep_waters</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">is_lig_protonated</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">is_protein_protonated</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div>
+<h3 id="what-happens-during-preparation">What happens during preparation?<a class="headerlink" href="#what-happens-during-preparation" title="Permanent link">&para;</a></h3>
+<ul>
+<li>The method calls the system preparation backend, which processes the protein and ligand files.</li>
+<li>The prepared complex is saved to a cache for efficiency.</li>
+<li>The resulting structure can be visualized or used for downstream workflows.</li>
+</ul>
+<p>After preparation, the prepared complex structure will be shown automatically.</p>
 
 
 
