@@ -472,18 +472,6 @@ class Ligand(Entity):
         if self.smiles is None:
             self.smiles = self.mol.smiles
 
-        if self.smiles is not None:
-            self.mol = mol_from_smiles(self.smiles)
-            self.block_type = "mol"
-            self.block_content = self.mol.molblock()
-        else:
-            raise ValueError("No valid source provided for ligand initialization.")
-
-        if self.mol is None:
-            raise ValueError("Failed to create molecule.")
-
-        self.smiles = self.mol.smiles
-
         self.name = self.mol.name if self.mol.name else self.name or "Unknown_Ligand"
         directory = Path(self._get_directory())
         if self.name == "Unknown_Ligand":
