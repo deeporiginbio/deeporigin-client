@@ -481,8 +481,8 @@ class Ligand(Entity):
         self.hac = self.mol.m.GetNumHeavyAtoms()
         if self.hac < 5:
             print("Warning: Ligand has less than 5 heavy atoms.")
-
         file_props = self.mol.m.GetPropsAsDict()
+
         for key, value in file_props.items():
             self.properties[key] = value
 
@@ -770,6 +770,17 @@ class Ligand(Entity):
             return cls.visualize_ligands_from_sdf(current_file)
         except Exception as e:
             raise ValueError(f"Visualization failed: {str(e)}") from e
+
+    def minimize(self):
+        """embed and optimize ligand in 3d space"""
+
+        from rdkit.Chem.AllChem import EmbedMolecule, UFFOptimizeMolecule
+
+        # Embed the molecules into 3d space
+        EmbedMolecule(self.mol.m)
+        UFFOptimizeMolecule(self.mol.m, maxIters=5000)
+
+        return self
 
     def _repr_html_(self) -> str:
         """
