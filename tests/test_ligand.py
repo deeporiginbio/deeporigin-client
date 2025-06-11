@@ -110,12 +110,12 @@ def test_ligand_from_identifier():
             "expected_atoms": 27,  # Heavy atoms only
         },
         {
-            "identifier": "oxotremorine",  # Muscarinic acetylcholine receptor agonist
+            "identifier": "Oxotremorine",  # Muscarinic acetylcholine receptor agonist
             "name": "Oxotremorine",
             "expected_atoms": 15,  # Heavy atoms only
         },
         {
-            "identifier": "serotonin",  # 5-hydroxytryptamine (5-HT)
+            "identifier": "Serotonin",  # 5-hydroxytryptamine (5-HT)
             "name": "Serotonin",
             "expected_atoms": 13,  # Heavy atoms only (N,C,C,c,c,n,c,c,c,c,O,c,c)
         },
