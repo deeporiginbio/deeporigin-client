@@ -189,7 +189,7 @@ class Docking(WorkflowStep):
                 df = pd.read_csv(local_path)
                 all_df.append(df)
 
-            df = pd.concat(all_df)
+            df = pd.concat(all_df, ignore_index=True)
             return df
         else:
             return local_paths
