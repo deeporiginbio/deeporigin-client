@@ -11,10 +11,9 @@ The [`Ligand` class](../ref/chemistry.md#src.chemistry.Ligand) is the primary wa
 A ligand can be constructed from a file:
 
 ```python
-from deeporigin.chemistry import Ligand
-from deeporigin import drug_discovery as dd
+from deeporigin.drug_discovery import Ligand, EXAMPLE_DATA_DIR
 
-ligand = Ligand(dd.EXAMPLE_DATA_DIR / "brd-2.sdf")
+ligand = Ligand.from_sdf(EXAMPLE_DATA_DIR / "brd-2.sdf")
 ```
 
 ### From a SMILES string
@@ -22,7 +21,8 @@ ligand = Ligand(dd.EXAMPLE_DATA_DIR / "brd-2.sdf")
 A ligand can be constructed from a SMILES string, which is a compact way to represent molecular structures:
 
 ```python
-from deeporigin.chemistry import Ligand
+from deeporigin.drug_discovery import Ligand
+
 
 # Basic usage with just a SMILES string
 ligand = Ligand.from_smiles(smiles="CCO")  # Ethanol
@@ -36,6 +36,7 @@ ligand = Ligand.from_smiles(
 ```
 
 The `from_smiles` constructor:
+
 - Takes a SMILES string as input
 - Optionally accepts a name for the ligand
 - Optionally accepts a `save_to_file` parameter to control file persistence
@@ -45,47 +46,13 @@ The `from_smiles` constructor:
 !!! note "SMILES Validation"
     The constructor will raise an exception if the provided SMILES string is invalid or cannot be parsed into a valid molecule.
 
-### From an SDF File
-
-You can create one or more ligands from an SDF (Structure Data File) file. This is particularly useful when working with molecular structures that include 3D coordinates and properties:
-
-```python
-from deeporigin.chemistry import Ligand
-
-# Create a single ligand from an SDF file containing one molecule
-ligand = Ligand.from_sdf("molecule.sdf")
-
-# Create multiple ligands from an SDF file containing multiple molecules
-ligands = Ligand.from_sdf("molecules.sdf")
-
-# With additional parameters
-ligand = Ligand.from_sdf(
-    "molecule.sdf",
-    sanitize=True,    # Optional: whether to sanitize the molecule (default: True)
-    removeHs=False    # Optional: whether to remove hydrogen atoms (default: False)
-)
-```
-
-The `from_sdf` constructor:
-- Accepts a path to an SDF file
-- Automatically handles both single-molecule and multi-molecule SDF files
-- Returns a single `Ligand` instance for single-molecule files
-- Returns a list of `Ligand` instances for multi-molecule files
-- Preserves molecular properties stored in the SDF file
-- Optionally allows control over molecule sanitization and hydrogen removal
-
-!!! note "SDF File Handling"
-    - The constructor will raise a `FileNotFoundError` if the specified file does not exist
-    - It will raise a `ValueError` if the file cannot be parsed correctly
-    - For multi-molecule files, any molecules that fail to parse will be skipped with a warning
-    - The source file path is not stored in the resulting `Ligand` instances
 
 ### From a Chemical Identifier
 
 You can create a ligand from common chemical identifiers (like PubChem names, common names, or drug names). This is particularly useful when working with well-known biochemical molecules:
 
 ```python
-from deeporigin.chemistry import Ligand
+from deeporigin.drug_discovery import Ligand
 
 # Create ligands from common biochemical names
 atp = Ligand.from_identifier(
@@ -100,6 +67,7 @@ serotonin = Ligand.from_identifier(
 ```
 
 The `from_identifier` constructor:
+
 - Accepts common chemical names and identifiers
 - Automatically resolves the identifier to a molecular structure
 - Creates a 3D conformation of the molecule
@@ -117,7 +85,7 @@ The `from_identifier` constructor:
 If you're working with RDKit molecules directly, you can create a Ligand from an RDKit Mol object:
 
 ```python
-from deeporigin.chemistry import Ligand
+from deeporigin.drug_discovery import Ligand
 from rdkit import Chem
 
 # Create an RDKit molecule
@@ -148,8 +116,8 @@ This approach is ideal for processing large datasets of molecules where each row
 
 For the simplest case, just specify the file path and which column contains the SMILES strings:
 
-```python
-from deeporigin.chemistry import Ligand
+```python notest
+from deeporigin.drug_discovery import Ligand
 
 # Basic usage - just extracting SMILES from a column
 ligands = Ligand.from_csv(
@@ -159,6 +127,7 @@ ligands = Ligand.from_csv(
 ```
 
 The method will:
+
 - Read the CSV file using pandas
 - Extract SMILES strings from the specified column
 - Create a Ligand instance for each valid SMILES
@@ -178,6 +147,10 @@ The method will:
 A ligand object can be visualized using `show`:
 
 ```python
+from deeporigin.drug_discovery import Ligand
+
+ligand = Ligand.from_identifier("serotonin")
+
 ligand.show()
 ```
 
@@ -205,7 +178,7 @@ If a ligand is not backed by a SDF file, a 2D visualization will be shown:
 
 You can predict ADMET (Absorption, Distribution, Metabolism, Excretion, and Toxicity) properties for a ligand using the `admet_properties` method:
 
-```python
+```python notest
 # Predict ADMET properties
 properties = ligand.admet_properties()
 ```
@@ -240,7 +213,7 @@ The method returns a dictionary containing various ADMET-related predictions:
 
 The predicted properties are automatically stored in the ligand's properties dictionary and can be accessed later using the `get_property` method:
 
-```python
+```python notest
 # Access a specific property
 logP = ligand.get_property('logP')
 ```
