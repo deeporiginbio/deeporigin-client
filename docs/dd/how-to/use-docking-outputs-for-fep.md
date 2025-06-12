@@ -12,7 +12,7 @@ We assume that you have
 
 Docking generates a single SDF file with all the ligands in it. FEP tools (ABFE and RBFE) require SDF files with individual molecules in their own SDF file. To get here, we use a utility function as follows:
 
-```python
+```python notest
 from deeporigin.drug_discovery import chemistry
 
 sdf_files = chemistry.split_sdf_file(
@@ -25,7 +25,7 @@ sdf_files = chemistry.split_sdf_file(
 We can use this to generate a new list of Ligands and modify the `Complex`
 
 
-```python
+```python notest
 from deeporigin.drug_discovery import Ligand
 
 sim.ligands = [Ligand(file) for file in files]

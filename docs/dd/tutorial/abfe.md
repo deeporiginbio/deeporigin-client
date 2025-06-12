@@ -7,12 +7,11 @@ This document describes how to run a [ABFE :octicons-link-external-16:](https://
 We assume that we have an initialized and configured `Complex` object:
 
 ```python
-from deeporigin.drug_discovery import Complex
-sim = Complex.from_dir("/path/to/folder/")
-sim.connect()
+from deeporigin.drug_discovery import Complex, EXAMPLE_DATA_DIR
+sim = Complex.from_dir(EXAMPLE_DATA_DIR)
 ```
 
-Here, ABFE requires that the `Complex` object have an already preppared protein (PDB), and the associated ligands (SDF) are in a docked pose.  
+Here, ABFE requires that the `Complex` object have an already prepared protein (PDB), and the associated ligands (SDF) are in a docked pose.  
 
 !!! WARNING
     The `Complex.from_dir()` function only accepts 1 PDB file per directory. This function will throw a warning if it finds more than 1 PDB file per directory. 
@@ -20,20 +19,16 @@ Here, ABFE requires that the `Complex` object have an already preppared protein 
 For more details on how to get started, see [:material-page-previous: Getting Started ](./getting-started.md).
 
 
-
-
-
 ## Starting an ABFE run
-
-
 
 ### Single ligand
 
 To run an end-to-end ABFE workflow on a single ligand, we use:
 
 
-```python
-sim.abfe.run_end_to_end(ligand_ids=["Ligands-1"]) # for example
+```{.python notest}
+jobs = sim.abfe.run_end_to_end(ligands=[sim.ligand[0]]) # for example
+job = jobs[0]
 ```
 
 This queues up a task on Deep Origin. When it completes, outputs will be written to the appropriate column in this database. 
@@ -43,55 +38,61 @@ This queues up a task on Deep Origin. When it completes, outputs will be written
 
 To run an end-to-end ABFE workflow on multiple ligands, we use:
 
-```python
-sim.abfe.run_end_to_end(ligand_ids=["Ligands-1", "Ligands-2"]) 
+```{.python notest}
+job = sim.abfe.run_end_to_end(ligands=[sim.ligands[0],sim.ligand[1]]) 
 ```
 
 Omitting the ligand IDs will run ABFE on all ligands in the `Complex` object.
 
 
-```python
-sim.abfe.run_end_to_end() 
+```{.python notest}
+jobs = sim.abfe.run_end_to_end() 
 ```
 
 Each ligand will be run in parallel on a separate instance. 
 
 
 
-
 ## Job Control 
 
-Once a job has been submitted, you can track the its status using our built in job tracking:
+### Visualize Job
 
-```python
+Once a job has been submitted, you can track its status by inspecting the Job object:
 
-sim.abfe.show_jobs()
+```{.python notest} 
+job # returned from abfe.run_end_to_end()
 
 ```
-
+This shows a Job widget with information about the job, such as:
 
 !!! success "Expected output" 
     ![ABFE Job Tracking](../../images/tools/ABFE_Status_Report.png)
 
-Here, the specific stage of the calculation is reported, with the most up-to-date logging information available in the `Raw Progress Reports` tab.
+### Watch jobs
 
+To monitor the status of this job, use:
 
+```{.python notest} 
+job.watch() # returned from abfe.run_end_to_end()
+```
+This makes the widget auto-update, and monitor the status of the job till it reaches a terminal state (Cancelled, Succeeded, or Failed). 
 
-If we want to cancel a job, first gran the `jobID` from the `Details` tab of the Job Control panel:
+### Stop watching jobs
 
-!!! success "Expected output" 
-    ![ABFE Job ID](../../images/tools/ABFE_jobID.png)
+To manually stop watching a job, do:
 
-In the above case, the `jobID` is `4d3536b3-6401-4cb5-ae5b-768daf099d40`. Next, we can cancel that job via:
-
-
-```python
-from deeporigin.tools import utils 
-
-utils.cancel_runs(['4d3536b3-6401-4cb5-ae5b-768daf099d40'])
+```{.python notest} 
+job.stop_watching() # returned from abfe.run_end_to_end()
 ```
 
-Note that this function accepts a list of `jobID`. 
+### Cancel jobs
+
+To cancel a job, use:
+
+
+```{.python notest} 
+job.cancel() # returned from abfe.run_end_to_end()
+```
 
 ## Parameters
 
@@ -100,6 +101,9 @@ Note that this function accepts a list of `jobID`.
 The end to end ABFE tool has a number of user-accessible parameters. To view all parameters, use:
 
 ```python
+from deeporigin.drug_discovery import Complex, EXAMPLE_DATA_DIR
+sim = Complex.from_dir(EXAMPLE_DATA_DIR)
+
 sim.abfe._params.end_to_end
 ```
 ??? success "Expected output" 
@@ -338,19 +342,25 @@ sim.abfe._params.end_to_end
 Any of these parameters are modifiable using dot notation. For example, to change the number of steps in the MD step, we can use:
 
 ```python
+from deeporigin.drug_discovery import Complex, EXAMPLE_DATA_DIR
+sim = Complex.from_dir(EXAMPLE_DATA_DIR)
+
 sim.abfe._params.end_to_end.md.steps = 500000
 ```
 
 ### Using `test_run`
 
-The test run parameter can be used to run ABFE for a short number of steps, to verify that all steps execute quickly. This should not be used to run production simulations.
+The test run parameter can be used to run ABFE for a short number of steps, to verify that all steps execute without consuming too many CPU cycles. This should not be used to run production simulations.
 
 To set the test run parameter to 1, we can use:
 
 
 ```python
-from deeporigin.utils.core import set_key_to_value
-set_key_to_value(sim.abfe._params.end_to_end, "test_run", 1)
+
+from deeporigin.drug_discovery import Complex, EXAMPLE_DATA_DIR
+sim = Complex.from_dir(EXAMPLE_DATA_DIR)
+
+sim.abfe.set_test_run(1)
 ```
 
 
@@ -361,7 +371,7 @@ set_key_to_value(sim.abfe._params.end_to_end, "test_run", 1)
 
 After initiating a run, we can view results using:
 
-```python
+```{.python notest}
 sim.abfe.show_results()
 ```  
 
@@ -377,7 +387,7 @@ This shows a table similar to:
 
 These results can be exported for analysis using:
 
-```python
+```{.python notest}
 df = sim.abfe.get_results()
 df
 ```

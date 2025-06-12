@@ -8,6 +8,10 @@ This document describes how to visualuze proteins and ligands constructed using 
 A protein object can be visualized using `show`:
 
 ```python
+from deeporigin.drug_discovery import Protein
+
+protein = Protein.from_pdb_id("1EBY")
+
 protein.show()
 ```
 
@@ -40,7 +44,11 @@ The [`Ligand` class](../ref/chemistry.md#src.chemistry.Ligand) is the primary wa
 A ligand object can be visualized using `show`:
 
 ```python
-ligand.show()
+from deeporigin.drug_discovery import Ligand
+
+serotonin = Ligand.from_identifier("serotonin")
+
+serotonin.show()
 ```
 
 If a ligand is backed by a SDF file, a 3D visualization will be shown, similar to:
@@ -69,8 +77,8 @@ If a ligand is not backed by a SDF file, a 2D visualization will be shown:
 Molecules in SDF files can be visualized the `show_molecules_in_sdf_file` function as follows:
 
 
-```python
-from deeporigin.chemistry import show_molecules_in_sdf_file
+```python notest
+from deeporigin.drug_discovery.chemistry import show_molecules_in_sdf_file
 show_molecules_in_sdf_file("path/to/file.sdf")
 ```
 
