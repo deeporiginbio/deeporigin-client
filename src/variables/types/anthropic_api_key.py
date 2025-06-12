@@ -12,7 +12,6 @@ class AnthropicApiKey(SecretEnvironmentVariableValue):
         platform_id = "Anthropic API key"
 
     @classmethod
-    @property
     def KEY(cls) -> str:
         return "ANTHROPIC_API_KEY"
 

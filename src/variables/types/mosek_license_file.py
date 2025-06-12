@@ -10,6 +10,5 @@ class MosekLicenseFile(SecretFileValue):
         platform_id = "Mosek license file"
 
     @classmethod
-    @property
     def FILENAME(cls) -> str:
         return "~/mosek/mosek.lic"

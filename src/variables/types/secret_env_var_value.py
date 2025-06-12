@@ -16,7 +16,6 @@ class SecretEnvironmentVariableValue(Variable):
     """A value of an environment variable"""
 
     @classmethod
-    @property
     @abc.abstractmethod
     def KEY(self) -> str:
         pass  # pragma: no cover

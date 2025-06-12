@@ -16,7 +16,6 @@ class SecretFileValue(Variable):
     """A value of a file"""
 
     @classmethod
-    @property
     @abc.abstractmethod
     def FILENAME(self) -> str:
         pass  # pragma: no cover

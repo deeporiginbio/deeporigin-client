@@ -12,7 +12,6 @@ class OpenAiApiKey(SecretEnvironmentVariableValue):
         platform_id = "Open AI API key"
 
     @classmethod
-    @property
     def KEY(cls) -> str:
         return "OPENAI_API_KEY"
 

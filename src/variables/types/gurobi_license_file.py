@@ -10,6 +10,5 @@ class GurobiLicenseFile(SecretFileValue):
         platform_id = "Gurobi license file"
 
     @classmethod
-    @property
     def FILENAME(cls) -> str:
         return "~/gurobi.lic"

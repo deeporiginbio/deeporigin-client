@@ -16,12 +16,10 @@ class XpressLicenseFile(SecretFileValue):
         platform_id = "XPRESS license file"
 
     @classmethod
-    @property
     def FILENAME(cls) -> str:
         return "~/xpauth.xpr"
 
     @classmethod
-    @property
     def KEY(cls) -> str:
         return "XPAUTH_PATH"
 
