@@ -24,7 +24,10 @@ A `Complex` object can be also be constructed using `Protein` and `Ligand` objec
 ```python
 from deeporigin.drug_discovery import Complex, EXAMPLE_DATA_DIR, Protein, Ligand
 
-sim = Complex(protein=protein, ligands=ligands)
+protein = Protein.from_file(EXAMPLE_DATA_DIR / "brd.pdb")
+ligand = Ligand.from_sdf(EXAMPLE_DATA_DIR / "brd-2.sdf")
+
+sim = Complex(protein=protein, ligands=[ligand])
 ```
 
 ## Modifying a Complex
