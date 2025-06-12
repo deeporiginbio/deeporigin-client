@@ -46,7 +46,7 @@ dynamic = ["version"]
 
 [project.optional-dependencies]
 lint = ["ruff"]
-test = ["pytest", "parameterized", "coverage", "interrogate", "pytest-xdist"]
+test = ["pytest", "parameterized", "coverage", "interrogate", "pytest-xdist","pytest-markdown-docs"]
 dev = ["ipykernel", "jupyter-black"]
 docs = [
     "mkdocs",

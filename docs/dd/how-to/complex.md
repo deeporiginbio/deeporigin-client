@@ -1,11 +1,14 @@
 This document describes how to create a `Complex` object, that can be used to run Docking, ABFE and RBFE. 
 
-## From a directory 
+
+## Creating a Complex
+
+### From a directory 
 
 ```python
-from deeporigin.drug_discovery import Complex
-
 # here, we're using the example data directory
+from deeporigin.drug_discovery import Complex, EXAMPLE_DATA_DIR
+
 sim = Complex.from_dir(EXAMPLE_DATA_DIR)
 ```
 
@@ -19,7 +22,7 @@ The directory should contain:
 A `Complex` object can be also be constructed using `Protein` and `Ligand` objects. 
 
 ```python
-from deeporigin.drug_discovery import Complex
+from deeporigin.drug_discovery import Complex, EXAMPLE_DATA_DIR, Protein, Ligand
 
 sim = Complex(protein=protein, ligands=ligands)
 ```
