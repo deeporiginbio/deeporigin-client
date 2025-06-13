@@ -994,9 +994,27 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#fetch-combined-sdf" class="md-nav__link">
+    <span class="md-ellipsis">
+      Fetch combined SDF
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#filter-results" class="md-nav__link">
     <span class="md-ellipsis">
       Filter results
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#filter-ligands-by-smiles-strings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Filter Ligands by SMILES strings
     </span>
   </a>
   
@@ -2534,9 +2552,27 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#fetch-combined-sdf" class="md-nav__link">
+    <span class="md-ellipsis">
+      Fetch combined SDF
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#filter-results" class="md-nav__link">
     <span class="md-ellipsis">
       Filter results
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#filter-ligands-by-smiles-strings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Filter Ligands by SMILES strings
     </span>
   </a>
   
@@ -2568,36 +2604,27 @@
 Following convention, we assume that the <code>Complex</code> object is called <code>sim</code>.</p>
 <h2 id="fetch-docking-results">Fetch Docking results<a class="headerlink" href="#fetch-docking-results" title="Permanent link">&para;</a></h2>
 <p>First, we get the results of Docking in a pandas DataFrame using:</p>
-<p>```python notest
-df = sim.docking.get_results()
-<div class="language-text highlight"><pre><span></span><code>## Fetch combined SDF
-
-We can generate a single SDF file with all the poses using:
-
-```python notest
-sim.docking.get_poses(&quot;poses.sdf&quot;)
-</code></pre></div></p>
+<div class="language-python highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">docking</span><span class="o">.</span><span class="n">get_results</span><span class="p">()</span>
+</code></pre></div>
+<h2 id="fetch-combined-sdf">Fetch combined SDF<a class="headerlink" href="#fetch-combined-sdf" title="Permanent link">&para;</a></h2>
+<p>We can generate a single SDF file with all the poses using:</p>
+<div class="language-python highlight"><pre><span></span><code><span class="n">sim</span><span class="o">.</span><span class="n">docking</span><span class="o">.</span><span class="n">get_poses</span><span class="p">(</span><span class="s2">&quot;poses.sdf&quot;</span><span class="p">)</span>
+</code></pre></div>
 <h2 id="filter-results">Filter results<a class="headerlink" href="#filter-results" title="Permanent link">&para;</a></h2>
 <p>We can now filter this dataframe using any criteria we want. For example, we can only retain ligands that have a <code>pose_score</code> greater than <code>0.9</code> using:</p>
-<p>```python notest
-df = df[df["pose_score"] &gt; 0.9]
-<div class="language-text highlight"><pre><span></span><code>The filtered dataframe now only has ligands that matches the required criterion. 
+<div class="language-python highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;pose_score&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mf">0.9</span><span class="p">]</span>
+</code></pre></div>
+<p>The filtered dataframe now only has ligands that matches the required criterion. </p>
+<h2 id="filter-ligands-by-smiles-strings">Filter Ligands by SMILES strings<a class="headerlink" href="#filter-ligands-by-smiles-strings" title="Permanent link">&para;</a></h2>
+<p>We can create a new SDF file with only these ligands using:</p>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin.drug_discovery</span><span class="w"> </span><span class="kn">import</span> <span class="n">Ligand</span>
 
+<span class="n">ligands</span> <span class="o">=</span> <span class="n">Ligand</span><span class="o">.</span><span class="n">from_sdf</span><span class="p">(</span><span class="s2">&quot;..path/to/poses.sdf&quot;</span><span class="p">)</span> <span class="c1"># from docking </span>
 
+<span class="n">smiles_strings</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;SMILES&quot;</span><span class="p">]</span>
 
-## Filter Ligands by SMILES strings
-
-We can create a new SDF file with only these ligands using:
-
-```python notest
-from deeporigin.drug_discovery import Ligand
-
-ligands = Ligand.from_sdf(&quot;..path/to/poses.sdf&quot;) # from docking 
-
-smiles_strings = df[&quot;SMILES&quot;]
-
-ligands = [ligand for ligand in ligands if ligand.properties[&quot;SMILES&quot;] in smiles_strings]
-</code></pre></div></p>
+<span class="n">ligands</span> <span class="o">=</span> <span class="p">[</span><span class="n">ligand</span> <span class="k">for</span> <span class="n">ligand</span> <span class="ow">in</span> <span class="n">ligands</span> <span class="k">if</span> <span class="n">ligand</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="s2">&quot;SMILES&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="n">smiles_strings</span><span class="p">]</span>
+</code></pre></div>
 
 
 

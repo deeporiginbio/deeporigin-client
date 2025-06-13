@@ -2573,21 +2573,18 @@
 </ol>
 <h2 id="split-docking-outputs-sdf-file">Split Docking outputs SDF file<a class="headerlink" href="#split-docking-outputs-sdf-file" title="Permanent link">&para;</a></h2>
 <p>Docking generates a single SDF file with all the ligands in it. FEP tools (ABFE and RBFE) require SDF files with individual molecules in their own SDF file. To get here, we use a utility function as follows:</p>
-<p>```python notest
-from deeporigin.drug_discovery import chemistry</p>
-<p>sdf_files = chemistry.split_sdf_file(
-    input_sdf_path="filtered_ligands.sdf", 
-)
-<div class="language-text highlight"><pre><span></span><code>`sdf_files` contains a list of paths to the generated SDF files. 
+<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin.drug_discovery</span><span class="w"> </span><span class="kn">import</span> <span class="n">chemistry</span>
 
-We can use this to generate a new list of Ligands and modify the `Complex`
+<span class="n">sdf_files</span> <span class="o">=</span> <span class="n">chemistry</span><span class="o">.</span><span class="n">split_sdf_file</span><span class="p">(</span>
+    <span class="n">input_sdf_path</span><span class="o">=</span><span class="s2">&quot;filtered_ligands.sdf&quot;</span><span class="p">,</span> 
+<span class="p">)</span>
+</code></pre></div>
+<p><code>sdf_files</code> contains a list of paths to the generated SDF files. </p>
+<p>We can use this to generate a new list of Ligands and modify the <code>Complex</code></p>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin.drug_discovery</span><span class="w"> </span><span class="kn">import</span> <span class="n">Ligand</span>
 
-
-```python notest
-from deeporigin.drug_discovery import Ligand
-
-sim.ligands = [Ligand(file) for file in files]
-</code></pre></div></p>
+<span class="n">sim</span><span class="o">.</span><span class="n">ligands</span> <span class="o">=</span> <span class="p">[</span><span class="n">Ligand</span><span class="p">(</span><span class="n">file</span><span class="p">)</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">]</span>
+</code></pre></div>
 <p>This object can be used to run <a href="../tutorial/abfe.html"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 21h15a2 2 0 0 0 2-2v-6h-4v2l-4-3 4-3v2h4V5a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2m0-6h4v2H4zm0-4h7v2H4zm0-4h7v2H4zm17 4h3v2h-3z"/></svg></span> ABFE</a> or <a href="../tutorial/rbfe.html"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 21h15a2 2 0 0 0 2-2v-6h-4v2l-4-3 4-3v2h4V5a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2m0-6h4v2H4zm0-4h7v2H4zm0-4h7v2H4zm17 4h3v2h-3z"/></svg></span>RBFE</a>. </p>
 
 

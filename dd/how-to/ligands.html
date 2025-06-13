@@ -1023,42 +1023,18 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#basic-usage-just-extracting-smiles-from-a-column" class="md-nav__link">
+  <a href="#visualizing-a-ligand" class="md-nav__link">
     <span class="md-ellipsis">
-      Basic usage - just extracting SMILES from a column
+      Visualizing a ligand
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Basic usage - just extracting SMILES from a column">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
+</li>
+      
+        <li class="md-nav__item">
   <a href="#predicting-admet-properties" class="md-nav__link">
     <span class="md-ellipsis">
       Predicting ADMET Properties
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#predict-admet-properties" class="md-nav__link">
-    <span class="md-ellipsis">
-      Predict ADMET properties
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#access-a-specific-property" class="md-nav__link">
-    <span class="md-ellipsis">
-      Access a specific property
     </span>
   </a>
   
@@ -2717,42 +2693,18 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#basic-usage-just-extracting-smiles-from-a-column" class="md-nav__link">
+  <a href="#visualizing-a-ligand" class="md-nav__link">
     <span class="md-ellipsis">
-      Basic usage - just extracting SMILES from a column
+      Visualizing a ligand
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Basic usage - just extracting SMILES from a column">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
+</li>
+      
+        <li class="md-nav__item">
   <a href="#predicting-admet-properties" class="md-nav__link">
     <span class="md-ellipsis">
       Predicting ADMET Properties
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#predict-admet-properties" class="md-nav__link">
-    <span class="md-ellipsis">
-      Predict ADMET properties
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#access-a-specific-property" class="md-nav__link">
-    <span class="md-ellipsis">
-      Access a specific property
     </span>
   </a>
   
@@ -2776,6 +2728,8 @@
   
   
 
+
+  <h1>Work with ligands</h1>
 
 <p>This document describes how to work with ligands (molecules) and use them in Deep Origin tools. </p>
 <h2 id="the-ligand-class">The <code>Ligand</code> class<a class="headerlink" href="#the-ligand-class" title="Permanent link">&para;</a></h2>
@@ -2873,40 +2827,40 @@
 <p>This approach is ideal for processing large datasets of molecules where each row represents a different compound.</p>
 <h4 id="basic-usage">Basic Usage<a class="headerlink" href="#basic-usage" title="Permanent link">&para;</a></h4>
 <p>For the simplest case, just specify the file path and which column contains the SMILES strings:</p>
-<p>```python notest
-from deeporigin.drug_discovery import Ligand</p>
-<h1 id="basic-usage-just-extracting-smiles-from-a-column">Basic usage - just extracting SMILES from a column<a class="headerlink" href="#basic-usage-just-extracting-smiles-from-a-column" title="Permanent link">&para;</a></h1>
-<p>ligands = Ligand.from_csv(
-    file_path="molecules.csv",
-    smiles_column="SMILES"  # Optional, defaults to "smiles"
-)
-<div class="language-text highlight"><pre><span></span><code>The method will:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin.drug_discovery</span><span class="w"> </span><span class="kn">import</span> <span class="n">Ligand</span>
 
-- Read the CSV file using pandas
-- Extract SMILES strings from the specified column
-- Create a Ligand instance for each valid SMILES
-- Store all other columns as properties in each Ligand instance
-- Skip any rows with empty or invalid SMILES strings
+<span class="c1"># Basic usage - just extracting SMILES from a column</span>
+<span class="n">ligands</span> <span class="o">=</span> <span class="n">Ligand</span><span class="o">.</span><span class="n">from_csv</span><span class="p">(</span>
+    <span class="n">file_path</span><span class="o">=</span><span class="s2">&quot;molecules.csv&quot;</span><span class="p">,</span>
+    <span class="n">smiles_column</span><span class="o">=</span><span class="s2">&quot;SMILES&quot;</span>  <span class="c1"># Optional, defaults to &quot;smiles&quot;</span>
+<span class="p">)</span>
+</code></pre></div>
+<p>The method will:</p>
+<ul>
+<li>Read the CSV file using pandas</li>
+<li>Extract SMILES strings from the specified column</li>
+<li>Create a Ligand instance for each valid SMILES</li>
+<li>Store all other columns as properties in each Ligand instance</li>
+<li>Skip any rows with empty or invalid SMILES strings</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Error Handling</p>
+<p>The method will raise:
+- <code>FileNotFoundError</code> if the CSV file does not exist
+- <code>ValueError</code> if the specified SMILES column is not found in the CSV file</p>
+</div>
+<h2 id="visualizing-a-ligand">Visualizing a ligand<a class="headerlink" href="#visualizing-a-ligand" title="Permanent link">&para;</a></h2>
+<details class="warning">
+<summary>Browser support</summary>
+<p>These visualizations work best on Google Chrome. We are aware of issues on other browsers, especially Safari on macOS.</p>
+</details>
+<p>A ligand object can be visualized using <code>show</code>:</p>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin.drug_discovery</span><span class="w"> </span><span class="kn">import</span> <span class="n">Ligand</span>
 
-!!! note &quot;Error Handling&quot;
-    The method will raise:
-    - `FileNotFoundError` if the CSV file does not exist
-    - `ValueError` if the specified SMILES column is not found in the CSV file
+<span class="n">ligand</span> <span class="o">=</span> <span class="n">Ligand</span><span class="o">.</span><span class="n">from_identifier</span><span class="p">(</span><span class="s2">&quot;serotonin&quot;</span><span class="p">)</span>
 
-## Visualizing a ligand
-
-??? warning &quot;Browser support&quot;
-    These visualizations work best on Google Chrome. We are aware of issues on other browsers, especially Safari on macOS.
-
-A ligand object can be visualized using `show`:
-
-```python
-from deeporigin.drug_discovery import Ligand
-
-ligand = Ligand.from_identifier(&quot;serotonin&quot;)
-
-ligand.show()
-</code></pre></div></p>
+<span class="n">ligand</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
 <p>If a ligand is backed by a SDF file, a 3D visualization will be shown, similar to:</p>
 <p>A visualization such as this will be shown:</p>
 <iframe 
@@ -2925,41 +2879,38 @@ ligand.show()
 <p><img alt="" src="../../images/ligand.png" /></p>
 <h2 id="predicting-admet-properties">Predicting ADMET Properties<a class="headerlink" href="#predicting-admet-properties" title="Permanent link">&para;</a></h2>
 <p>You can predict ADMET (Absorption, Distribution, Metabolism, Excretion, and Toxicity) properties for a ligand using the <code>admet_properties</code> method:</p>
-<p>```python notest</p>
-<h1 id="predict-admet-properties">Predict ADMET properties<a class="headerlink" href="#predict-admet-properties" title="Permanent link">&para;</a></h1>
-<p>properties = ligand.admet_properties()
-<div class="language-text highlight"><pre><span></span><code>The method returns a dictionary containing various ADMET-related predictions:
-
-```python
-{
-    &#39;smiles&#39;: &#39;Cn1c(=O)n(Cc2ccccc2)c(=O)c2c1nc(SCCO)n2Cc1ccccc1&#39;,
-    &#39;properties&#39;: {
-        &#39;logS&#39;: {&#39;value&#39;: -4.004},  # Aqueous solubility
-        &#39;logP&#39;: 3.686,             # Partition coefficient
-        &#39;logD&#39;: 2.528,             # Distribution coefficient
-        &#39;hERG&#39;: {&#39;probability&#39;: 0.264},  # hERG inhibition risk
-        &#39;ames&#39;: {&#39;probability&#39;: 0.213}, # Ames mutagenicity
-        &#39;cyp&#39;: {                                # Cytochrome P450 inhibition
-            &#39;probabilities&#39;: {
-                &#39;cyp1a2&#39;: 0.134,
-                &#39;cyp2c9&#39;: 0.744,
-                &#39;cyp2c19&#39;: 0.853,
-                &#39;cyp2d6&#39;: 0.0252,
-                &#39;cyp3a4&#39;: 0.4718
-            }
-        },
-        &#39;pains&#39;: {                              # PAINS (Pan Assay Interference Compounds)
-            &#39;has_pains&#39;: None,
-            &#39;pains_fragments&#39;: []
-        }
-    }
-}
-</code></pre></div></p>
+<div class="language-python highlight"><pre><span></span><code><span class="c1"># Predict ADMET properties</span>
+<span class="n">properties</span> <span class="o">=</span> <span class="n">ligand</span><span class="o">.</span><span class="n">admet_properties</span><span class="p">()</span>
+</code></pre></div>
+<p>The method returns a dictionary containing various ADMET-related predictions:</p>
+<div class="language-python highlight"><pre><span></span><code><span class="p">{</span>
+    <span class="s1">&#39;smiles&#39;</span><span class="p">:</span> <span class="s1">&#39;Cn1c(=O)n(Cc2ccccc2)c(=O)c2c1nc(SCCO)n2Cc1ccccc1&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;properties&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;logS&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">4.004</span><span class="p">},</span>  <span class="c1"># Aqueous solubility</span>
+        <span class="s1">&#39;logP&#39;</span><span class="p">:</span> <span class="mf">3.686</span><span class="p">,</span>             <span class="c1"># Partition coefficient</span>
+        <span class="s1">&#39;logD&#39;</span><span class="p">:</span> <span class="mf">2.528</span><span class="p">,</span>             <span class="c1"># Distribution coefficient</span>
+        <span class="s1">&#39;hERG&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;probability&#39;</span><span class="p">:</span> <span class="mf">0.264</span><span class="p">},</span>  <span class="c1"># hERG inhibition risk</span>
+        <span class="s1">&#39;ames&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;probability&#39;</span><span class="p">:</span> <span class="mf">0.213</span><span class="p">},</span> <span class="c1"># Ames mutagenicity</span>
+        <span class="s1">&#39;cyp&#39;</span><span class="p">:</span> <span class="p">{</span>                                <span class="c1"># Cytochrome P450 inhibition</span>
+            <span class="s1">&#39;probabilities&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;cyp1a2&#39;</span><span class="p">:</span> <span class="mf">0.134</span><span class="p">,</span>
+                <span class="s1">&#39;cyp2c9&#39;</span><span class="p">:</span> <span class="mf">0.744</span><span class="p">,</span>
+                <span class="s1">&#39;cyp2c19&#39;</span><span class="p">:</span> <span class="mf">0.853</span><span class="p">,</span>
+                <span class="s1">&#39;cyp2d6&#39;</span><span class="p">:</span> <span class="mf">0.0252</span><span class="p">,</span>
+                <span class="s1">&#39;cyp3a4&#39;</span><span class="p">:</span> <span class="mf">0.4718</span>
+            <span class="p">}</span>
+        <span class="p">},</span>
+        <span class="s1">&#39;pains&#39;</span><span class="p">:</span> <span class="p">{</span>                              <span class="c1"># PAINS (Pan Assay Interference Compounds)</span>
+            <span class="s1">&#39;has_pains&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s1">&#39;pains_fragments&#39;</span><span class="p">:</span> <span class="p">[]</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
 <p>The predicted properties are automatically stored in the ligand's properties dictionary and can be accessed later using the <code>get_property</code> method:</p>
-<p>```python notest</p>
-<h1 id="access-a-specific-property">Access a specific property<a class="headerlink" href="#access-a-specific-property" title="Permanent link">&para;</a></h1>
-<p>logP = ligand.get_property('logP')
-```</p>
+<div class="language-python highlight"><pre><span></span><code><span class="c1"># Access a specific property</span>
+<span class="n">logP</span> <span class="o">=</span> <span class="n">ligand</span><span class="o">.</span><span class="n">get_property</span><span class="p">(</span><span class="s1">&#39;logP&#39;</span><span class="p">)</span>
+</code></pre></div>
 <div class="admonition note">
 <p class="admonition-title">Property Storage</p>
 <p>All predicted properties are automatically stored in the ligand's properties dictionary and can be accessed at any time using the <code>get_property</code> method.</p>

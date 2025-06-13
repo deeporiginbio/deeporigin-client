@@ -1027,25 +1027,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#select-a-single-chain" class="md-nav__link">
+  <a href="#best-practices" class="md-nav__link">
     <span class="md-ellipsis">
-      Select a single chain
+      Best Practices
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#select-multiple-chains" class="md-nav__link">
-    <span class="md-ellipsis">
-      Select multiple chains
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Select multiple chains">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
   <a href="#common-use-cases" class="md-nav__link">
     <span class="md-ellipsis">
       Common Use Cases
@@ -1064,25 +1054,14 @@
   
 </li>
         
-      </ul>
-    </nav>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#load-and-prepare-protein" class="md-nav__link">
+          <li class="md-nav__item">
+  <a href="#working-with-metalloproteins" class="md-nav__link">
     <span class="md-ellipsis">
-      Load and prepare protein
+      Working with Metalloproteins
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Load and prepare protein">
-      <ul class="md-nav__list">
+</li>
         
           <li class="md-nav__item">
   <a href="#multi-chain-protein-preparation" class="md-nav__link">
@@ -1095,15 +1074,6 @@
         
       </ul>
     </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#load-and-prepare-multi-chain-protein" class="md-nav__link">
-    <span class="md-ellipsis">
-      Load and prepare multi-chain protein
-    </span>
-  </a>
   
 </li>
       
@@ -2810,25 +2780,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#select-a-single-chain" class="md-nav__link">
+  <a href="#best-practices" class="md-nav__link">
     <span class="md-ellipsis">
-      Select a single chain
+      Best Practices
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#select-multiple-chains" class="md-nav__link">
-    <span class="md-ellipsis">
-      Select multiple chains
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Select multiple chains">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
   <a href="#common-use-cases" class="md-nav__link">
     <span class="md-ellipsis">
       Common Use Cases
@@ -2847,25 +2807,14 @@
   
 </li>
         
-      </ul>
-    </nav>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#load-and-prepare-protein" class="md-nav__link">
+          <li class="md-nav__item">
+  <a href="#working-with-metalloproteins" class="md-nav__link">
     <span class="md-ellipsis">
-      Load and prepare protein
+      Working with Metalloproteins
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Load and prepare protein">
-      <ul class="md-nav__list">
+</li>
         
           <li class="md-nav__item">
   <a href="#multi-chain-protein-preparation" class="md-nav__link">
@@ -2878,15 +2827,6 @@
         
       </ul>
     </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#load-and-prepare-multi-chain-protein" class="md-nav__link">
-    <span class="md-ellipsis">
-      Load and prepare multi-chain protein
-    </span>
-  </a>
   
 </li>
       
@@ -2908,6 +2848,8 @@
   
   
 
+
+  <h1>Work with Proteins</h1>
 
 <p>This document describes how to work with proteins and use them in Deep Origin tools. </p>
 <h2 id="the-protein-class">The <code>Protein</code> class<a class="headerlink" href="#the-protein-class" title="Permanent link">&para;</a></h2>
@@ -3006,46 +2948,43 @@
 </code></pre></div>
 <h3 id="chain-selection">Chain Selection<a class="headerlink" href="#chain-selection" title="Permanent link">&para;</a></h3>
 <p>You can select specific chains from the protein structure:</p>
-<p>```python notest</p>
-<h1 id="select-a-single-chain">Select a single chain<a class="headerlink" href="#select-a-single-chain" title="Permanent link">&para;</a></h1>
-<p>chain_a = protein.select_chain('A')</p>
-<h1 id="select-multiple-chains">Select multiple chains<a class="headerlink" href="#select-multiple-chains" title="Permanent link">&para;</a></h1>
-<p>chains_ab = protein.select_chains(['A', 'B'])
-<div class="language-text highlight"><pre><span></span><code>## Best Practices
+<div class="language-python highlight"><pre><span></span><code><span class="c1"># Select a single chain</span>
+<span class="n">chain_a</span> <span class="o">=</span> <span class="n">protein</span><span class="o">.</span><span class="n">select_chain</span><span class="p">(</span><span class="s1">&#39;A&#39;</span><span class="p">)</span>
 
-1. Always visualize the structure before and after preparation to ensure the desired changes were made
-2. When working with metalloproteins, use `remove_hetatm()` with appropriate `keep_resnames` or `remove_metals` parameters
-3. For multi-chain proteins, consider selecting specific chains before preparation
-4. Save the prepared structure using `to_pdb()` if you need to use it later:
-
-```python notest
-# Save the prepared structure
-protein.to_pdb(&quot;prepared_protein.pdb&quot;)
-</code></pre></div></p>
+<span class="c1"># Select multiple chains</span>
+<span class="n">chains_ab</span> <span class="o">=</span> <span class="n">protein</span><span class="o">.</span><span class="n">select_chains</span><span class="p">([</span><span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="s1">&#39;B&#39;</span><span class="p">])</span>
+</code></pre></div>
+<h2 id="best-practices">Best Practices<a class="headerlink" href="#best-practices" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Always visualize the structure before and after preparation to ensure the desired changes were made</li>
+<li>When working with metalloproteins, use <code>remove_hetatm()</code> with appropriate <code>keep_resnames</code> or <code>remove_metals</code> parameters</li>
+<li>For multi-chain proteins, consider selecting specific chains before preparation</li>
+<li>Save the prepared structure using <code>to_pdb()</code> if you need to use it later:</li>
+</ol>
+<div class="language-python highlight"><pre><span></span><code><span class="c1"># Save the prepared structure</span>
+<span class="n">protein</span><span class="o">.</span><span class="n">to_pdb</span><span class="p">(</span><span class="s2">&quot;prepared_protein.pdb&quot;</span><span class="p">)</span>
+</code></pre></div>
 <h2 id="common-use-cases">Common Use Cases<a class="headerlink" href="#common-use-cases" title="Permanent link">&para;</a></h2>
 <h3 id="preparing-a-protein-for-docking">Preparing a Protein for Docking<a class="headerlink" href="#preparing-a-protein-for-docking" title="Permanent link">&para;</a></h3>
-<p>```python notest</p>
-<h1 id="load-and-prepare-protein">Load and prepare protein<a class="headerlink" href="#load-and-prepare-protein" title="Permanent link">&para;</a></h1>
-<p>protein = Protein.from_pdb_id("1EBY")
-protein.remove_water()  # Remove water molecules
-protein.remove_hetatm(keep_resnames=['ZN'])  # Keep important cofactors
-protein.to_pdb("docking_ready.pdb")
-<div class="language-text highlight"><pre><span></span><code>### Working with Metalloproteins
-
-```python notest
-# Load and prepare metalloprotein
-protein = Protein.from_pdb_id(&quot;1XYZ&quot;)
-protein.remove_hetatm(remove_metals=[&#39;ZN&#39;, &#39;MG&#39;])  # Keep metal ions
-protein.show()
-</code></pre></div></p>
+<div class="language-python highlight"><pre><span></span><code><span class="c1"># Load and prepare protein</span>
+<span class="n">protein</span> <span class="o">=</span> <span class="n">Protein</span><span class="o">.</span><span class="n">from_pdb_id</span><span class="p">(</span><span class="s2">&quot;1EBY&quot;</span><span class="p">)</span>
+<span class="n">protein</span><span class="o">.</span><span class="n">remove_water</span><span class="p">()</span>  <span class="c1"># Remove water molecules</span>
+<span class="n">protein</span><span class="o">.</span><span class="n">remove_hetatm</span><span class="p">(</span><span class="n">keep_resnames</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;ZN&#39;</span><span class="p">])</span>  <span class="c1"># Keep important cofactors</span>
+<span class="n">protein</span><span class="o">.</span><span class="n">to_pdb</span><span class="p">(</span><span class="s2">&quot;docking_ready.pdb&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="working-with-metalloproteins">Working with Metalloproteins<a class="headerlink" href="#working-with-metalloproteins" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span class="c1"># Load and prepare metalloprotein</span>
+<span class="n">protein</span> <span class="o">=</span> <span class="n">Protein</span><span class="o">.</span><span class="n">from_pdb_id</span><span class="p">(</span><span class="s2">&quot;1XYZ&quot;</span><span class="p">)</span>
+<span class="n">protein</span><span class="o">.</span><span class="n">remove_hetatm</span><span class="p">(</span><span class="n">remove_metals</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;ZN&#39;</span><span class="p">,</span> <span class="s1">&#39;MG&#39;</span><span class="p">])</span>  <span class="c1"># Keep metal ions</span>
+<span class="n">protein</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
 <h3 id="multi-chain-protein-preparation">Multi-chain Protein Preparation<a class="headerlink" href="#multi-chain-protein-preparation" title="Permanent link">&para;</a></h3>
-<p>```python notest</p>
-<h1 id="load-and-prepare-multi-chain-protein">Load and prepare multi-chain protein<a class="headerlink" href="#load-and-prepare-multi-chain-protein" title="Permanent link">&para;</a></h1>
-<p>protein = Protein.from_pdb_id("1ABC")
-chains_ab = protein.select_chains(['A', 'B'])  # Select chains A and B
-chains_ab.remove_water()  # Remove water from selected chains
-chains_ab.show()
-```</p>
+<div class="language-python highlight"><pre><span></span><code><span class="c1"># Load and prepare multi-chain protein</span>
+<span class="n">protein</span> <span class="o">=</span> <span class="n">Protein</span><span class="o">.</span><span class="n">from_pdb_id</span><span class="p">(</span><span class="s2">&quot;1ABC&quot;</span><span class="p">)</span>
+<span class="n">chains_ab</span> <span class="o">=</span> <span class="n">protein</span><span class="o">.</span><span class="n">select_chains</span><span class="p">([</span><span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="s1">&#39;B&#39;</span><span class="p">])</span>  <span class="c1"># Select chains A and B</span>
+<span class="n">chains_ab</span><span class="o">.</span><span class="n">remove_water</span><span class="p">()</span>  <span class="c1"># Remove water from selected chains</span>
+<span class="n">chains_ab</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
 
 
 
