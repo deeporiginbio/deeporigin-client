@@ -213,10 +213,7 @@ class Pocket:
         Returns:
             Pocket: A new Pocket instance.
 
-        Example:
-            ```python
-            pocket = Pocket.from_block(pdb_content, block_type="pdb")
-            ```
+
         """
         if not block_type:
             raise ValueError(
@@ -239,10 +236,7 @@ class Pocket:
         Returns:
             Pocket: A new Pocket instance.
 
-        Example:
-            ```python
-            pocket = Pocket.from_file("pocket.pdb")
-            ```
+
         """
         file_path = Path(file_path).absolute()
         if not file_path.exists():
@@ -276,10 +270,7 @@ class Pocket:
         Returns:
             Pocket: A new Pocket instance.
 
-        Example:
-            ```python
-            pocket = Pocket.from_name("binding_site_1")
-            ```
+
         """
         pockets_dir = Path(cls.get_directory())
         matching_files = list(pockets_dir.glob(f"{name}.*"))
@@ -313,10 +304,6 @@ class Pocket:
         Returns:
             Pocket: A new Pocket instance.
 
-        Example:
-            ```python
-            pocket = Pocket.from_structure(atom_array, name="binding_site")
-            ```
         """
         pocket = cls(structure=structure, name=name, **kwargs)
         pocket._initialize_from_structure()
@@ -418,10 +405,6 @@ class Pocket:
         Parameters:
         - file_path (str): Path where the pocket structure will be written.
 
-        Example:
-        ```python
-        pocket.write_to_file('/path/to/output.pdb')
-        ```
         """
 
         def write_to_pdb_file(structure, output_path):

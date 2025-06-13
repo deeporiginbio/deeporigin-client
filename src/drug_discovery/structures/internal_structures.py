@@ -38,7 +38,7 @@ for data manipulation, Termcolor for colored terminal output, and integrates wit
 `deeporigin_molstar` package for visualization purposes.
 
 Usage Example:
-```python
+
 from molecule_module import Molecule, mol_from_smiles, mol_from_file
 
 # Initialize a Molecule instance from a SMILES string
@@ -60,7 +60,7 @@ molecule.assign_bond_order_from_smiles(smiles="CCO")
 
 # Visualize the molecule
 molecule.visualize()
-```
+
 """
 
 import base64

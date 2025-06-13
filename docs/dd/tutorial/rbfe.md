@@ -7,9 +7,9 @@ This document describes how to run a [RBFE :octicons-link-external-16:](https://
 We assume that we have an initialized and configured `Complex` object:
 
 ```python
-from deeporigin.drug_discovery import Complex
-sim = Complex.from_dir("/path/to/folder/")
-sim.connect()
+from deeporigin.drug_discovery import Complex, EXAMPLE_DATA_DIR
+
+sim = Complex.from_dir(EXAMPLE_DATA_DIR)
 ```
 For more details on how to get started, see [:material-page-previous: Getting Started ](./getting-started.md).
 
@@ -24,10 +24,10 @@ For more details on how to get started, see [:material-page-previous: Getting St
 To run an end-to-end RBFE workflow on a single pair of ligands, we use:
 
 
-```python
-sim.rbfe.run_end_to_end(
-    ligand1_id="Ligands-1",  # for example
-    ligand2_id="Ligands-2",
+```{.python notest}
+job = sim.rbfe.run_ligand_pair(
+    ligand1=sim.ligands[0],  # for example
+    ligand2=sim.ligands[1],
 )
 
 ```
@@ -56,6 +56,10 @@ You will see a message printed to screen similar to:
 The end to end RBFE tool has a number of user-accessible parameters. To view all parameters, use:
 
 ```python
+from deeporigin.drug_discovery import Complex, EXAMPLE_DATA_DIR
+
+sim = Complex.from_dir(EXAMPLE_DATA_DIR)
+
 sim.rbfe._params.end_to_end
 ```
 ??? success "Expected output" 
@@ -330,7 +334,11 @@ sim.rbfe._params.end_to_end
 Any of these parameters are modifiable using dot notation. For example, to change the number of steps in the RBFE step, we can use:
 
 ```python
-sim.rbfe._params.end_to_end.rbfe.steps = 500000
+from deeporigin.drug_discovery import Complex, EXAMPLE_DATA_DIR
+
+sim = Complex.from_dir(EXAMPLE_DATA_DIR)
+
+sim.rbfe._params.end_to_end.binding.steps = 500000
 ```
 
 
@@ -341,7 +349,7 @@ sim.rbfe._params.end_to_end.rbfe.steps = 500000
 
 After initiating a run, we can view results using:
 
-```python
+```{.python notest}
 sim.rbfe.show_results()
 ```  
 
@@ -357,7 +365,7 @@ This shows a table similar to:
 
 These results can be exported for analysis using:
 
-```python
+```{.python notest}
 df = sim.rbfe.get_results()
 df
 ```
