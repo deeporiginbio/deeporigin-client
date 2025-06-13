@@ -9,7 +9,7 @@ The following modules are available to interact with various APIs on the platfor
 
 API to interact with the clusters API. To list available methods in this module, use:
 
-```python
+```{.python notest}
 from deeporigin.platform import clusters_api
 clusters_api.__all__
 ```
@@ -18,7 +18,7 @@ clusters_api.__all__
 
 API to interact with the organizations API. To list available methods in this module, use:
 
-```python
+```{.python notest}
 from deeporigin.platform import organizations_api
 organizations_api.__all__
 ```
@@ -27,7 +27,7 @@ organizations_api.__all__
 
 API to interact with the tools API. To list available methods in this module, use:
 
-```python
+```{.python notest}
 from deeporigin.platform import tools_api
 tools_api.__all__
 ```
@@ -36,7 +36,7 @@ tools_api.__all__
 
 API to interact with the users API. To list available methods in this module, use:
 
-```python
+```{.python notest}
 from deeporigin.platform import users_api
 users_api.__all__
 ```
@@ -45,7 +45,7 @@ users_api.__all__
 
 API to interact with the volumes API. To list available methods in this module, use:
 
-```python
+```{.python notest}
 from deeporigin.platform import volumes_api
 volumes_api.__all__
 ```
@@ -54,7 +54,7 @@ volumes_api.__all__
 
 API to interact with the workstations API. To list available methods in this module, use:
 
-```python
+```{.python notest}
 from deeporigin.platform import workstations_api
 workstations_api.__all__
 ```
