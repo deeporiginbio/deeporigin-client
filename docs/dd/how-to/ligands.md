@@ -116,7 +116,7 @@ This approach is ideal for processing large datasets of molecules where each row
 
 For the simplest case, just specify the file path and which column contains the SMILES strings:
 
-```python notest
+```{.python notest}
 from deeporigin.drug_discovery import Ligand
 
 # Basic usage - just extracting SMILES from a column
@@ -178,7 +178,7 @@ If a ligand is not backed by a SDF file, a 2D visualization will be shown:
 
 You can predict ADMET (Absorption, Distribution, Metabolism, Excretion, and Toxicity) properties for a ligand using the `admet_properties` method:
 
-```python notest
+```{.python notest}
 # Predict ADMET properties
 properties = ligand.admet_properties()
 ```
@@ -213,7 +213,7 @@ The method returns a dictionary containing various ADMET-related predictions:
 
 The predicted properties are automatically stored in the ligand's properties dictionary and can be accessed later using the `get_property` method:
 
-```python notest
+```{.python notest}
 # Access a specific property
 logP = ligand.get_property('logP')
 ```
