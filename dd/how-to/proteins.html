@@ -16,7 +16,7 @@
         <link rel="prev" href="complex.html">
       
       
-        <link rel="next" href="prepare-protein.html">
+        <link rel="next" href="ligands.html">
       
       
       <link rel="icon" href="../../images/favicon.png">
@@ -24,7 +24,7 @@
     
     
       
-        <title>Work with proteins - Deep Origin Python client | Deep Origin</title>
+        <title>Work with Proteins - Deep Origin Python client | Deep Origin</title>
       
     
     
@@ -111,7 +111,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Work with proteins
+              Work with Proteins
             
           </span>
         </div>
@@ -799,8 +799,6 @@
       
         
       
-        
-      
     
     
     
@@ -852,7 +850,7 @@
   
   
   <span class="md-ellipsis">
-    Create a Complex
+    Work with a Complex
     
   </span>
   
@@ -882,7 +880,7 @@
   
   
   <span class="md-ellipsis">
-    Work with proteins
+    Work with Proteins
     
   </span>
   
@@ -895,7 +893,7 @@
   
   
   <span class="md-ellipsis">
-    Work with proteins
+    Work with Proteins
     
   </span>
   
@@ -969,13 +967,13 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#modifying-proteins" class="md-nav__link">
+  <a href="#modifying-and-preparing-a-protein" class="md-nav__link">
     <span class="md-ellipsis">
-      Modifying proteins
+      Modifying and preparing a protein
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Modifying proteins">
+    <nav class="md-nav" aria-label="Modifying and preparing a protein">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -1005,8 +1003,107 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#removing-specific-residues_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Removing Specific Residues
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#chain-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      Chain Selection
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#select-a-single-chain" class="md-nav__link">
+    <span class="md-ellipsis">
+      Select a single chain
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#select-multiple-chains" class="md-nav__link">
+    <span class="md-ellipsis">
+      Select multiple chains
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Select multiple chains">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#common-use-cases" class="md-nav__link">
+    <span class="md-ellipsis">
+      Common Use Cases
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Use Cases">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#preparing-a-protein-for-docking" class="md-nav__link">
+    <span class="md-ellipsis">
+      Preparing a Protein for Docking
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#load-and-prepare-protein" class="md-nav__link">
+    <span class="md-ellipsis">
+      Load and prepare protein
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Load and prepare protein">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#multi-chain-protein-preparation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Multi-chain Protein Preparation
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#load-and-prepare-multi-chain-protein" class="md-nav__link">
+    <span class="md-ellipsis">
+      Load and prepare multi-chain protein
+    </span>
+  </a>
   
 </li>
       
@@ -1014,29 +1111,6 @@
   
 </nav>
       
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="prepare-protein.html" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Prepare proteins
-    
-  </span>
-  
-
-      </a>
     </li>
   
 
@@ -2424,10 +2498,6 @@
       
         
       
-        
-      
-        
-      
     
     
     
@@ -2484,12 +2554,6 @@
       
         
       
-        
-      
-        
-      
-        
-      
     
     
     
@@ -2539,331 +2603,6 @@
   
   <span class="md-ellipsis">
     List tools
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../tools/how-to/run-tools.html" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Run tools
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../tools/how-to/check-status.html" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Check tool run status
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../tools/how-to/wait-for-run.html" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Wait for a tool run
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-    
-    
-    
-      
-      
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_3" >
-        
-          
-          <label class="md-nav__link" for="__nav_6_3" id="__nav_6_3_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    Available tools
-    
-  </span>
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_6_3">
-            <span class="md-nav__icon md-icon"></span>
-            Available tools
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../tools/vina.html" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Autodock Vina
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../tools/pdbfixer.html" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Receptor Prep (PDBFixer)
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../tools/ligand-prep-meeko.html" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Ligand Prep (Meeko)
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../tools/pdb-to-pdbqt.html" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    PDB to PDBQT
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../tools/draco.html" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Draco
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-      
-        
-      
-    
-    
-    
-      
-      
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_4" >
-        
-          
-          <label class="md-nav__link" for="__nav_6_4" id="__nav_6_4_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    Reference
-    
-  </span>
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_6_4">
-            <span class="md-nav__icon md-icon"></span>
-            Reference
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../tools/ref/run.html" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Running tools
     
   </span>
   
@@ -3011,13 +2750,13 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#modifying-proteins" class="md-nav__link">
+  <a href="#modifying-and-preparing-a-protein" class="md-nav__link">
     <span class="md-ellipsis">
-      Modifying proteins
+      Modifying and preparing a protein
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Modifying proteins">
+    <nav class="md-nav" aria-label="Modifying and preparing a protein">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -3047,8 +2786,107 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#removing-specific-residues_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Removing Specific Residues
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#chain-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      Chain Selection
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#select-a-single-chain" class="md-nav__link">
+    <span class="md-ellipsis">
+      Select a single chain
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#select-multiple-chains" class="md-nav__link">
+    <span class="md-ellipsis">
+      Select multiple chains
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Select multiple chains">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#common-use-cases" class="md-nav__link">
+    <span class="md-ellipsis">
+      Common Use Cases
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Use Cases">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#preparing-a-protein-for-docking" class="md-nav__link">
+    <span class="md-ellipsis">
+      Preparing a Protein for Docking
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#load-and-prepare-protein" class="md-nav__link">
+    <span class="md-ellipsis">
+      Load and prepare protein
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Load and prepare protein">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#multi-chain-protein-preparation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Multi-chain Protein Preparation
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#load-and-prepare-multi-chain-protein" class="md-nav__link">
+    <span class="md-ellipsis">
+      Load and prepare multi-chain protein
+    </span>
+  </a>
   
 </li>
       
@@ -3071,21 +2909,20 @@
   
 
 
-  <h1>Work with proteins</h1>
-
 <p>This document describes how to work with proteins and use them in Deep Origin tools. </p>
 <h2 id="the-protein-class">The <code>Protein</code> class<a class="headerlink" href="#the-protein-class" title="Permanent link">&para;</a></h2>
-<p>The <a href="../ref/chemistry.html#src.chemistry.Protein"><code>Protein</code> class</a> is the primary way to work with proteins in Deep Origin.</p>
+<p>The <a href="../ref/structures.html#src.drug_discovery.structures.Protein"><code>Protein</code> class</a>  is the primary way to work with proteins in Deep Origin.</p>
 <h2 id="constructing-a-protein">Constructing a protein<a class="headerlink" href="#constructing-a-protein" title="Permanent link">&para;</a></h2>
 <h3 id="from-a-file">From a file<a class="headerlink" href="#from-a-file" title="Permanent link">&para;</a></h3>
 <p>A protein can be constructed from a file:</p>
-<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin.chemistry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Protein</span>
-<span class="n">protein</span> <span class="o">=</span> <span class="n">Protein</span><span class="p">(</span><span class="s2">&quot;/path/to/pdb&quot;</span><span class="p">)</span>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin.drug_discovery</span><span class="w"> </span><span class="kn">import</span> <span class="n">Protein</span><span class="p">,</span> <span class="n">EXAMPLE_DATA_DIR</span>
+<span class="n">protein</span> <span class="o">=</span> <span class="n">Protein</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">EXAMPLE_DATA_DIR</span> <span class="o">/</span> <span class="s2">&quot;brd.pdb&quot;</span><span class="p">)</span>
 </code></pre></div>
 <h3 id="from-a-pdb-id">From a PDB ID<a class="headerlink" href="#from-a-pdb-id" title="Permanent link">&para;</a></h3>
 <p>A protein can also be constructed from a PDB ID:</p>
-<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin.chemistry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Protein</span>
-<span class="n">protein</span> <span class="o">=</span> <span class="n">Protein</span><span class="p">(</span><span class="n">pdb_id</span><span class="o">=</span><span class="s2">&quot;1EBY&quot;</span><span class="p">)</span>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin.drug_discovery</span><span class="w"> </span><span class="kn">import</span> <span class="n">Protein</span>
+
+<span class="n">protein</span> <span class="o">=</span> <span class="n">Protein</span><span class="o">.</span><span class="n">from_pdb_id</span><span class="p">(</span><span class="s2">&quot;1EBY&quot;</span><span class="p">)</span>
 </code></pre></div>
 <h2 id="visualizing-a-protein">Visualizing a protein<a class="headerlink" href="#visualizing-a-protein" title="Permanent link">&para;</a></h2>
 <details class="warning">
@@ -3093,7 +2930,10 @@
 <p>These visualizations work best on Google Chrome. We are aware of issues on other browsers, especially Safari on macOS.</p>
 </details>
 <p>A protein object can be visualized using <code>show</code>:</p>
-<div class="language-python highlight"><pre><span></span><code><span class="n">protein</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin.drug_discovery</span><span class="w"> </span><span class="kn">import</span> <span class="n">Protein</span>
+
+<span class="n">protein</span> <span class="o">=</span> <span class="n">Protein</span><span class="o">.</span><span class="n">from_pdb_id</span><span class="p">(</span><span class="s2">&quot;1EBY&quot;</span><span class="p">)</span>
+<span class="n">protein</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
 <p>A visualization such as this will be shown:</p>
 <iframe 
@@ -3108,10 +2948,14 @@
 <p class="admonition-title">Jupyter notebook required</p>
 <p>Visualizations such as these require this code to be run in a jupyter notebook. We recommend using <a href="../../install.html">these instructions</a> to install Jupyter.</p>
 </div>
-<h2 id="modifying-proteins">Modifying proteins<a class="headerlink" href="#modifying-proteins" title="Permanent link">&para;</a></h2>
+<h2 id="modifying-and-preparing-a-protein">Modifying and preparing a protein<a class="headerlink" href="#modifying-and-preparing-a-protein" title="Permanent link">&para;</a></h2>
 <h3 id="removing-specific-residues">Removing specific residues<a class="headerlink" href="#removing-specific-residues" title="Permanent link">&para;</a></h3>
 <p>You can remove specific residue names from a protein structure using the <code>remove_resnames</code> method:</p>
-<div class="language-python highlight"><pre><span></span><code><span class="c1"># Remove water molecules (HOH) and ions (NA, CL)</span>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin.drug_discovery</span><span class="w"> </span><span class="kn">import</span> <span class="n">Protein</span>
+
+<span class="n">protein</span> <span class="o">=</span> <span class="n">Protein</span><span class="o">.</span><span class="n">from_pdb_id</span><span class="p">(</span><span class="s2">&quot;1EBY&quot;</span><span class="p">)</span>
+
+<span class="c1"># Remove water molecules (HOH) and ions (NA, CL)</span>
 <span class="n">protein</span><span class="o">.</span><span class="n">remove_resnames</span><span class="p">(</span><span class="n">exclude_resnames</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;HOH&quot;</span><span class="p">,</span> <span class="s2">&quot;NA&quot;</span><span class="p">,</span> <span class="s2">&quot;CL&quot;</span><span class="p">])</span>
 </code></pre></div>
 <div class="admonition note">
@@ -3121,22 +2965,87 @@
 <p>This method modifies the protein structure in place by removing the specified residue names. If no residue names are provided, the protein structure remains unchanged.</p>
 <h3 id="removing-hetatm-records">Removing HETATM records<a class="headerlink" href="#removing-hetatm-records" title="Permanent link">&para;</a></h3>
 <p>You can remove HETATM records from the protein structure using the <code>remove_hetatm</code> method:</p>
-<div class="language-python highlight"><pre><span></span><code><span class="c1"># Remove all HETATM records except water and zinc</span>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin.drug_discovery</span><span class="w"> </span><span class="kn">import</span> <span class="n">Protein</span>
+
+<span class="n">protein</span> <span class="o">=</span> <span class="n">Protein</span><span class="o">.</span><span class="n">from_pdb_id</span><span class="p">(</span><span class="s2">&quot;1EBY&quot;</span><span class="p">)</span>
+
+<span class="c1"># Remove all HETATM records except water and zinc</span>
 <span class="n">protein</span><span class="o">.</span><span class="n">remove_hetatm</span><span class="p">(</span><span class="n">keep_resnames</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;HOH&quot;</span><span class="p">],</span> <span class="n">remove_metals</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;ZN&quot;</span><span class="p">])</span>
 </code></pre></div>
-<p>This method modifies the protein structure in place by removing HETATM records (heteroatoms) from the structure. You can:
-- Keep specific residues by providing their names in <code>keep_resnames</code>
-- Keep specific metals by providing their names in <code>remove_metals</code> (these metals will be excluded from removal)
-- If no arguments are provided, all HETATM records will be removed</p>
+<p>This method modifies the protein structure in place by removing HETATM records (heteroatoms) from the structure. You can:</p>
+<ul>
+<li>Keep specific residues by providing their names in <code>keep_resnames</code></li>
+<li>Keep specific metals by providing their names in <code>remove_metals</code> (these metals will be excluded from removal)</li>
+<li>If no arguments are provided, all HETATM records will be removed</li>
+</ul>
 <div class="admonition note">
 <p class="admonition-title">Metal names</p>
 <p>Metal names should be provided in uppercase (e.g., "ZN" for zinc, "FE" for iron).</p>
 </div>
 <h3 id="removing-water-molecules">Removing water molecules<a class="headerlink" href="#removing-water-molecules" title="Permanent link">&para;</a></h3>
 <p>You can remove all water molecules from a protein structure using the <code>remove_water</code> method:</p>
-<div class="language-python highlight"><pre><span></span><code><span class="n">protein</span><span class="o">.</span><span class="n">remove_water</span><span class="p">()</span>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin.drug_discovery</span><span class="w"> </span><span class="kn">import</span> <span class="n">Protein</span>
+
+<span class="n">protein</span> <span class="o">=</span> <span class="n">Protein</span><span class="o">.</span><span class="n">from_pdb_id</span><span class="p">(</span><span class="s2">&quot;1EBY&quot;</span><span class="p">)</span>
+
+<span class="n">protein</span><span class="o">.</span><span class="n">remove_water</span><span class="p">()</span>
 </code></pre></div>
 <p>This method modifies the protein structure in place by removing all water molecules (residue name "HOH"). Unlike <code>remove_resnames</code>, this method does not return a new protein structure but instead modifies the existing one.</p>
+<h3 id="removing-specific-residues_1">Removing Specific Residues<a class="headerlink" href="#removing-specific-residues_1" title="Permanent link">&para;</a></h3>
+<p>You can remove specific residue types while keeping others:</p>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin.drug_discovery</span><span class="w"> </span><span class="kn">import</span> <span class="n">Protein</span>
+
+<span class="n">protein</span> <span class="o">=</span> <span class="n">Protein</span><span class="o">.</span><span class="n">from_pdb_id</span><span class="p">(</span><span class="s2">&quot;1EBY&quot;</span><span class="p">)</span>
+
+
+<span class="c1"># Remove specific residue names</span>
+<span class="n">protein</span><span class="o">.</span><span class="n">remove_resnames</span><span class="p">(</span><span class="n">exclude_resnames</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;HOH&quot;</span><span class="p">,</span> <span class="s2">&quot;SO4&quot;</span><span class="p">])</span>
+
+<span class="c1"># Remove only water molecules</span>
+<span class="n">protein_no_water</span> <span class="o">=</span> <span class="n">protein</span><span class="o">.</span><span class="n">remove_water</span><span class="p">()</span>
+</code></pre></div>
+<h3 id="chain-selection">Chain Selection<a class="headerlink" href="#chain-selection" title="Permanent link">&para;</a></h3>
+<p>You can select specific chains from the protein structure:</p>
+<p>```python notest</p>
+<h1 id="select-a-single-chain">Select a single chain<a class="headerlink" href="#select-a-single-chain" title="Permanent link">&para;</a></h1>
+<p>chain_a = protein.select_chain('A')</p>
+<h1 id="select-multiple-chains">Select multiple chains<a class="headerlink" href="#select-multiple-chains" title="Permanent link">&para;</a></h1>
+<p>chains_ab = protein.select_chains(['A', 'B'])
+<div class="language-text highlight"><pre><span></span><code>## Best Practices
+
+1. Always visualize the structure before and after preparation to ensure the desired changes were made
+2. When working with metalloproteins, use `remove_hetatm()` with appropriate `keep_resnames` or `remove_metals` parameters
+3. For multi-chain proteins, consider selecting specific chains before preparation
+4. Save the prepared structure using `to_pdb()` if you need to use it later:
+
+```python notest
+# Save the prepared structure
+protein.to_pdb(&quot;prepared_protein.pdb&quot;)
+</code></pre></div></p>
+<h2 id="common-use-cases">Common Use Cases<a class="headerlink" href="#common-use-cases" title="Permanent link">&para;</a></h2>
+<h3 id="preparing-a-protein-for-docking">Preparing a Protein for Docking<a class="headerlink" href="#preparing-a-protein-for-docking" title="Permanent link">&para;</a></h3>
+<p>```python notest</p>
+<h1 id="load-and-prepare-protein">Load and prepare protein<a class="headerlink" href="#load-and-prepare-protein" title="Permanent link">&para;</a></h1>
+<p>protein = Protein.from_pdb_id("1EBY")
+protein.remove_water()  # Remove water molecules
+protein.remove_hetatm(keep_resnames=['ZN'])  # Keep important cofactors
+protein.to_pdb("docking_ready.pdb")
+<div class="language-text highlight"><pre><span></span><code>### Working with Metalloproteins
+
+```python notest
+# Load and prepare metalloprotein
+protein = Protein.from_pdb_id(&quot;1XYZ&quot;)
+protein.remove_hetatm(remove_metals=[&#39;ZN&#39;, &#39;MG&#39;])  # Keep metal ions
+protein.show()
+</code></pre></div></p>
+<h3 id="multi-chain-protein-preparation">Multi-chain Protein Preparation<a class="headerlink" href="#multi-chain-protein-preparation" title="Permanent link">&para;</a></h3>
+<p>```python notest</p>
+<h1 id="load-and-prepare-multi-chain-protein">Load and prepare multi-chain protein<a class="headerlink" href="#load-and-prepare-multi-chain-protein" title="Permanent link">&para;</a></h1>
+<p>protein = Protein.from_pdb_id("1ABC")
+chains_ab = protein.select_chains(['A', 'B'])  # Select chains A and B
+chains_ab.remove_water()  # Remove water from selected chains
+chains_ab.show()
+```</p>
 
 
 
@@ -3174,7 +3083,7 @@
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="complex.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Create a Complex">
+          <a href="complex.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Work with a Complex">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -3184,20 +3093,20 @@
                 Previous
               </span>
               <div class="md-ellipsis">
-                Create a Complex
+                Work with a Complex
               </div>
             </div>
           </a>
         
         
           
-          <a href="prepare-protein.html" class="md-footer__link md-footer__link--next" aria-label="Next: Prepare proteins">
+          <a href="ligands.html" class="md-footer__link md-footer__link--next" aria-label="Next: Work with ligands">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Prepare proteins
+                Work with ligands
               </div>
             </div>
             <div class="md-footer__button md-icon">
