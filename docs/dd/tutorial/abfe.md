@@ -8,13 +8,14 @@ We assume that we have an initialized and configured `Complex` object:
 
 ```python
 from deeporigin.drug_discovery import Complex, EXAMPLE_DATA_DIR
+
 sim = Complex.from_dir(EXAMPLE_DATA_DIR)
 ```
 
 Here, ABFE requires that the `Complex` object have an already prepared protein (PDB), and the associated ligands (SDF) are in a docked pose.  
 
 !!! WARNING
-    The `Complex.from_dir()` function only accepts 1 PDB file per directory. This function will throw a warning if it finds more than 1 PDB file per directory. 
+    The `Complex.from_dir()` function only accepts 1 PDB file per directory. This function will throw a error if it finds more than 1 PDB file per directory. 
 
 For more details on how to get started, see [:material-page-previous: Getting Started ](./getting-started.md).
 

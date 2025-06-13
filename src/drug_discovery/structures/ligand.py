@@ -149,7 +149,7 @@ class Ligand(Entity):
         name: str = "",
         save_to_file: bool = False,
         **kwargs: Any,
-    ) -> "Ligand":
+    ):
         """
         Create a Ligand instance from an RDKit Mol object.
 
@@ -326,7 +326,7 @@ class Ligand(Entity):
             file_path (str): The path to the SDF file.
 
         Returns:
-            list[Ligand]: A list of Ligand instances created from the SDF file.
+            either a list of ligands or a single ligand
 
         Raises:
             FileNotFoundError: If the file does not exist.

@@ -1,6 +1,5 @@
 """class to handle secret env variables"""
 
-import abc
 import os
 import typing
 
@@ -16,8 +15,9 @@ class SecretEnvironmentVariableValue(Variable):
     """A value of an environment variable"""
 
     @classmethod
-    @abc.abstractmethod
-    def KEY(self) -> str:
+    def KEY(cls) -> str:
+        """Key for the environment variable"""
+
         pass  # pragma: no cover
 
     value: str = pydantic.Field(default=None, min_length=0, validate_default=True)

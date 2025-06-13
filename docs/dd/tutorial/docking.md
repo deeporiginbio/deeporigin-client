@@ -4,10 +4,11 @@ This document describes how to [dock :octicons-link-external-16:](https://en.wik
 
 ## Prerequisites
 
-We assume that we have an initialized and configured `Complex` object:
+We assume that we have an initialized and configured a `Complex` object:
 
 ```python
 from deeporigin.drug_discovery import Complex, EXAMPLE_DATA_DIR
+
 sim = Complex.from_dir(EXAMPLE_DATA_DIR) # or replace with your folder
 ```
 

@@ -11,6 +11,7 @@ from deeporigin.drug_discovery.abfe import ABFE
 from deeporigin.drug_discovery.docking import Docking
 from deeporigin.drug_discovery.rbfe import RBFE
 from deeporigin.drug_discovery.structures import Ligand, Protein
+from deeporigin.exceptions import DeepOriginException
 from deeporigin.files import FilesClient
 from deeporigin.platform.utils import PlatformClients
 
@@ -111,9 +112,10 @@ class Complex:
         ]
 
         if len(pdb_files) != 1:
-            raise ValueError(
-                f"Expected exactly one PDB file in the directory, but found {len(pdb_files)}."
-            )
+            raise DeepOriginException(
+                f"Expected exactly one PDB file in the directory, but found {len(pdb_files)}: {pdb_files}",
+                title="Complex.from_dir expects a single PDB file",
+            ) from None
         protein_file = pdb_files[0]
         protein = Protein.from_file(protein_file)
 

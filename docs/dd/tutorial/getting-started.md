@@ -144,7 +144,7 @@ sim.show_ligands(view="3d")
     width="100%" 
     height="650" 
     style="border:none;"
-    title="Protein visualization"
+    title="Ligand visualization"
 ></iframe>
 
 
