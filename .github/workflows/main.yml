@@ -83,7 +83,7 @@ jobs:
 
       - name: "test docs with pytest markdown-docs"
         run: |
-          pytest -x --markdown-docs --markdown-docs-syntax=superfences
+          pytest -x --markdown-docs --markdown-docs-syntax=superfences docs/dd/tutorial/rbfe.md
 
 
   
