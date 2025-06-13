@@ -98,9 +98,6 @@ nav:
   - tools/index.md
   - How to:
     - List tools: tools/how-to/list-tools.md
-    - Run tools: tools/how-to/run-tools.md
-    - Check tool run status: tools/how-to/check-status.md
-    - Wait for a tool run: tools/how-to/wait-for-run.md
 - Changelog: changelog.md
 - Support: https://www.support.deeporigin.com/servicedesk/customer/portals
 

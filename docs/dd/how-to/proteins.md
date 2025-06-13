@@ -2,7 +2,7 @@ This document describes how to work with proteins and use them in Deep Origin to
 
 ## The `Protein` class
 
-The [`Protein` class](../ref/chemistry.md#src.chemistry.Protein) is the primary way to work with proteins in Deep Origin.
+The [`Protein` class](../ref/structures.md#src.drug_discovery.structures.Protein)  is the primary way to work with proteins in Deep Origin.
 
 ## Constructing a protein
 

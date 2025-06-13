@@ -1,4 +1,4 @@
-This document describes how to visualuze proteins and ligands constructed using the Protein and Ligand classes, and tools to visualize SDF files.
+This document describes how to visualize proteins and ligands constructed using the Protein and Ligand classes, and tools to visualize SDF files.
 
 ## Visualizing a protein
 
@@ -35,7 +35,7 @@ A visualization such as this will be shown:
 
 ### `Ligand` objects
 
-The [`Ligand` class](../ref/chemistry.md#src.chemistry.Ligand) is the primary way to work with ligands in Deep Origin.
+The [`Ligand` class](../ref/structures.md#src.drug_discovery.structures.Ligand)  is the primary way to work with ligands in Deep Origin.
 
 
 ??? warning "Browser support"
@@ -77,7 +77,7 @@ If a ligand is not backed by a SDF file, a 2D visualization will be shown:
 Molecules in SDF files can be visualized the `show_molecules_in_sdf_file` function as follows:
 
 
-```python notest
+```{.python notest}
 from deeporigin.drug_discovery.chemistry import show_molecules_in_sdf_file
 show_molecules_in_sdf_file("path/to/file.sdf")
 ```

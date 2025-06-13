@@ -2,7 +2,7 @@ This document describes how to work with ligands (molecules) and use them in Dee
 
 ## The `Ligand` class
 
-The [`Ligand` class](../ref/chemistry.md#src.chemistry.Ligand) is the primary way to work with ligands in Deep Origin.
+The [`Ligand` class](../ref/structures.md#src.drug_discovery.structures.Ligand) is the primary way to work with ligands in Deep Origin.
 
 ## Constructing a ligand
 
