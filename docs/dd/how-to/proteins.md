@@ -135,7 +135,7 @@ protein_no_water = protein.remove_water()
 
 You can select specific chains from the protein structure:
 
-```python notest
+```{.python notest}
 # Select a single chain
 chain_a = protein.select_chain('A')
 
@@ -150,7 +150,7 @@ chains_ab = protein.select_chains(['A', 'B'])
 3. For multi-chain proteins, consider selecting specific chains before preparation
 4. Save the prepared structure using `to_pdb()` if you need to use it later:
 
-```python notest
+```{.python notest}
 # Save the prepared structure
 protein.to_pdb("prepared_protein.pdb")
 ```
@@ -159,7 +159,7 @@ protein.to_pdb("prepared_protein.pdb")
 
 ### Preparing a Protein for Docking
 
-```python notest
+```{.python notest}
 # Load and prepare protein
 protein = Protein.from_pdb_id("1EBY")
 protein.remove_water()  # Remove water molecules
@@ -169,7 +169,7 @@ protein.to_pdb("docking_ready.pdb")
 
 ### Working with Metalloproteins
 
-```python notest
+```{.python notest}
 # Load and prepare metalloprotein
 protein = Protein.from_pdb_id("1XYZ")
 protein.remove_hetatm(remove_metals=['ZN', 'MG'])  # Keep metal ions
@@ -178,7 +178,7 @@ protein.show()
 
 ### Multi-chain Protein Preparation
 
-```python notest
+```{.python notest}
 # Load and prepare multi-chain protein
 protein = Protein.from_pdb_id("1ABC")
 chains_ab = protein.select_chains(['A', 'B'])  # Select chains A and B

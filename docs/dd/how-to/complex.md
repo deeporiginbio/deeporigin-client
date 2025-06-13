@@ -34,7 +34,7 @@ sim = Complex(protein=protein, ligands=[ligand])
 
 You can modify a Complex object by adding or replacing ligands. 
 
-```python notest
+```{.python notest}
 from deeporigin.drug_discovery import Complex, Protein, Ligand
 protein = Protein.from_file(EXAMPLE_DATA_DIR / "brd.pdb")
 ligand = Ligand.from_sdf(EXAMPLE_DATA_DIR / "brd-2.sdf")
@@ -66,13 +66,13 @@ To prepare a protein-ligand complex for simulation or further analysis, use the 
 
 ### Usage
 
-```python notest
+```{.python notest}
 sim.prepare(ligand)
 ```
 
 Typically, you would call this method using a ligand in the complex:
 
-```python notest
+```{.python notest}
 sim.prepare(sim.ligands[0])
 ```
 
@@ -86,7 +86,7 @@ sim.prepare(sim.ligands[0])
 
 You can override any of these defaults as needed:
 
-```python notest
+```{.python notest}
 sim.prepare(
     ligand,
     padding=2.0,
