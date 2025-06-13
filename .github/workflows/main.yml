@@ -81,13 +81,10 @@ jobs:
           pip install -e .[test,tools]
           make test-github 
 
-      - name: "test docs with pytest markdown-docs"
-        run: |
-          pytest -x --markdown-docs --markdown-docs-syntax=superfences docs/platform/ref/platform.md 
 
       - name: "test docs with pytest markdown-docs"
         run: |
-          pytest -x --markdown-docs --markdown-docs-syntax=superfences docs/tools/how-to/list-tools.md
+          pytest -x --markdown-docs --markdown-docs-syntax=superfences 
 
 
 
