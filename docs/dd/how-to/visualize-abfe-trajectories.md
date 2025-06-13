@@ -37,14 +37,14 @@ When you call `show_trajectory`, the following happens:
 
 ### Visualizing Molecular Dynamics Step
 
-```python notest
+```{.python notest}
 # Show the molecular dynamics trajectory
 sim.abfe.show_trajectory(ligands=sim.ligands[0], step="md")
 ```
 
 ### Visualizing Binding Step
 
-```python notest
+```{.python notest}
 # Show the binding trajectory for the default window (window 1)
 sim.abfe.show_trajectory(ligand_id="ligand1", step="binding")
 
