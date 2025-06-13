@@ -159,13 +159,6 @@ class Ligand(Entity):
             save_to_file (bool, optional): Whether to save the ligand to file. Defaults to False.
             **kwargs: Additional arguments to pass to the constructor
 
-        Returns:
-            Ligand: A new Ligand instance initialized from the RDKit molecule
-
-        Example:
-            >>> from rdkit import Chem
-            >>> mol = Chem.MolFromSmiles("CCO")
-            >>> ligand = Ligand.from_rdkit_mol(mol, name="Ethanol")
         """
         # Get name from properties if available
         if mol.HasProp("_Name"):
