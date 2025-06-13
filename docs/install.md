@@ -7,7 +7,12 @@ No installation needed!
 
 The Deep Origin CLI and Python client are installed on every [Deep Origin Workstation :octicons-link-external-16:](https://docs.deeporigin.io/docs/os/compute-hub/workstations).
 
-## Recommended installation
+## On your own computer
+
+### Recommended installation
+
+!!! tip "Recommended installation"
+    We recommend using the following script. A common source of errors in python packages is managing dependencies and conflicts with other packages, that is resolved using the method below. 
 
 This sections describes how to install the Deep Origin CLI and Python client on your computer using our recommendations. We recommend:
 
@@ -69,7 +74,7 @@ This sections describes how to install the Deep Origin CLI and Python client on 
     # run jupyter using this environment
     uv run --with jupyter jupyter lab
     ```
-## Upgrading to a new version
+### Upgrading to a new version
 
 If you followed the recommended installation steps, you can upgrade to the latest version of the Deep Origin Python client by running:
 

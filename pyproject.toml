@@ -46,7 +46,14 @@ dynamic = ["version"]
 
 [project.optional-dependencies]
 lint = ["ruff"]
-test = ["pytest", "parameterized", "coverage", "interrogate", "pytest-xdist"]
+test = [
+    "pytest",
+    "parameterized",
+    "coverage",
+    "interrogate",
+    "pytest-xdist",
+    "pytest-markdown-docs",
+]
 dev = ["ipykernel", "jupyter-black"]
 docs = [
     "mkdocs",
@@ -111,6 +118,9 @@ universal = true
 [tool.coverage.run]
 omit = ["src/data_hub/client.py", "tests/*.py"]
 
+
+[tool.pytest.ini_options]
+norecursedirs = ["notebooks"]
 
 [tool.interrogate]
 fail-under = 100

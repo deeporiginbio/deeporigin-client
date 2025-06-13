@@ -4,10 +4,11 @@ This document describes how to [dock :octicons-link-external-16:](https://en.wik
 
 ## Prerequisites
 
-We assume that we have an initialized and configured `Complex` object:
+We assume that we have an initialized and configured a `Complex` object:
 
 ```python
 from deeporigin.drug_discovery import Complex, EXAMPLE_DATA_DIR
+
 sim = Complex.from_dir(EXAMPLE_DATA_DIR) # or replace with your folder
 ```
 
@@ -18,13 +19,13 @@ For more details on how to get started, see [:material-page-previous: Getting St
 
 First we find pockets in the protein using:
 
-```py
+```{.python notest}
 pockets = sim.protein.find_pockets(pocket_count=1)
 ```
 
 We can visualize the pocket using:
 
-```py
+```{.python notest}
 sim.protein.show(pockets=pockets)
 ```
 
@@ -45,7 +46,7 @@ You should see something along the lines of:
 To dock all ligands in the complex to the protein, using the pocket we found, we can do:
 
 
-```py
+```{.python notest}
 pocket = pockets[0] # or choose as needed
 sim.docking.run(pocket=pocket)
 
@@ -62,7 +63,7 @@ sim.docking.run(pocket=pocket)
 To dock all ligands to the protein, parallelizing and batching across all ligands, we do the following:
 
 
-```python
+```{.python notest}
 job = sim.docking.run(
     box_size=(15, 15, 15),      # match to your protein
     pocket_center=(13, -6, 22), # match to your protein
@@ -75,7 +76,7 @@ job = sim.docking.run(
 
     This can be controlled in two ways. First, you can control the batch size using the `batch_size` parameter.
 
-    ```python
+    ```{.python notest}
     sim.dock(
         batch_size=32,
         ... 
@@ -84,7 +85,7 @@ job = sim.docking.run(
 
     You can also specify the number of workers using:
 
-    ```python
+    ```{.python notest}
     sim.dock(
         n_workers=2,
         ...
@@ -102,7 +103,7 @@ A job object is returned from `docking.run`. This job object can be inspected to
 
 The job object can also be used monitor a job as it completes:
 
-```py
+```{.python notest}
 job.watch()
 ```
 
@@ -110,7 +111,7 @@ Doing so creates a widget that automatically updates and monitors a job as long 
 
 To stop watching a job, do:
 
-```py
+```{.python notest}
 job.stop_watching()
 ```
 
@@ -120,7 +121,7 @@ job.stop_watching()
 
 After completion of docking, we can view results using:
 
-```python
+```{.python notest}
 sim.docking.show_results()
 ```  
 
@@ -132,7 +133,7 @@ This shows a table similar to:
 
 To view the docked poses of all ligands in the complex, use:
 
-```python
+```{.python notest}
 sim.docking.show_poses()
 ```
 
@@ -149,7 +150,7 @@ sim.docking.show_poses()
 
 To obtain the raw dataframe for further analysis, use:
 
-```python
+```{.python notest}
 df = sim.docking.get_results()
 ```
 
@@ -157,7 +158,7 @@ df = sim.docking.get_results()
 
 To export a SDF with docked poses, use:
 
-```python
+```{.python notest}
 sim.docking.get_poses("/path/to/output.sdf")
 ```
 

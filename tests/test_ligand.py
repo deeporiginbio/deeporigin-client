@@ -2,7 +2,6 @@ import os
 
 import pytest
 
-from deeporigin.drug_discovery import chemistry
 from deeporigin.drug_discovery.structures import Ligand
 from deeporigin.exceptions import DeepOriginException
 
@@ -15,12 +14,12 @@ base_path = os.path.join(os.path.dirname(__file__), "fixtures")
 def test_ligands_from_sdf_file():
     """test that we can make many ligands from a single SDF file with many molecules"""
 
-    mols = chemistry.read_molecules_in_sdf_file(
-        os.path.join(base_path, "ligands-brd-all.sdf")
-    )
+    ligands = Ligand.from_sdf(os.path.join(base_path, "ligands-brd-all.sdf"))
 
-    for mol in mols:
-        Ligand.from_smiles(mol["smiles"], properties=mol["properties"])
+    assert len(ligands) == 8, "Expected 8 ligands"
+
+    for ligand in ligands:
+        assert isinstance(ligand, Ligand), "Expected a Ligand object"
 
 
 def test_ligand_from_smiles():

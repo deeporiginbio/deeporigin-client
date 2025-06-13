@@ -4,7 +4,7 @@ This document describes how to add data to a Deep Origin Database.
 
 Consider the following dataframe constructed from a database using:
 
-```python
+```python notest
 from deeporigin.data_hub import api
 df = api.get_dataframe("xy")
 df
@@ -16,7 +16,7 @@ df
 
 To add new rows to the underlying database, use the `add_databse_rows` function:
 
-```python
+```python notest
 data = dict(X=[1, 2], Y=[2, 3])
 api.add_database_rows(database_id="xy", data=data)
 ```
@@ -30,14 +30,14 @@ api.add_database_rows(database_id="xy", data=data)
 
 Similarly, fragments of rows (subsets of columns) can be written to the database:
 
-```python
+```python notest
 data = dict(X=[10, 20]) # note Y is not specified
 api.add_database_rows(database_id="xy", data=data)
 ```
 
 `add_database_rows` returns a list of the row IDs created during this process, for example:
 
-```python
+```python notest
 ["row-1", "row-2"]
 ```
 

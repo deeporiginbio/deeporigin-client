@@ -7,14 +7,14 @@ Following convention, we assume that the `Complex` object is called `sim`.
 
 First, we get the results of Docking in a pandas DataFrame using:
 
-```python
+```python notest
 df = sim.docking.get_results()
 ```
 ## Fetch combined SDF
 
 We can generate a single SDF file with all the poses using:
 
-```python
+```python notest
 sim.docking.get_poses("poses.sdf")
 ```
 
@@ -22,7 +22,7 @@ sim.docking.get_poses("poses.sdf")
 
 We can now filter this dataframe using any criteria we want. For example, we can only retain ligands that have a `pose_score` greater than `0.9` using:
 
-```python
+```python notest
 df = df[df["pose_score"] > 0.9]
 ```
 
@@ -34,7 +34,7 @@ The filtered dataframe now only has ligands that matches the required criterion.
 
 We can create a new SDF file with only these ligands using:
 
-```python
+```python notest
 from deeporigin.drug_discovery import Ligand
 
 ligands = Ligand.from_sdf("..path/to/poses.sdf") # from docking 

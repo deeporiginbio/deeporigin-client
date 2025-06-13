@@ -16,9 +16,10 @@ class SecretFileValue(Variable):
     """A value of a file"""
 
     @classmethod
-    @property
     @abc.abstractmethod
-    def FILENAME(self) -> str:
+    def FILENAME(cls) -> str:
+        """Filename for the file"""
+
         pass  # pragma: no cover
 
     value: str = pydantic.Field(default=None, min_length=0, validate_default=True)

@@ -26,7 +26,7 @@ Dependencies:
 - External tools for enhanced functionality
 
 Usage Example:
-```python
+
 # Initialize with a PDB ID
 protein = Protein.from_pdb_id("1ABC")
 
@@ -41,7 +41,7 @@ protein_no_water = protein.remove_water()
 
 # Visualize the protein structure
 protein.show()
-```
+
 """
 
 from collections import defaultdict
@@ -380,10 +380,7 @@ class Protein(Entity):
         Raises:
         - ValueError: If the chain ID is not found.
 
-        Example:
-        ```python
-        chain_a = protein.select_chain('A')
-        ```
+
         """
         chain_records = self._filter_chain_records(chain_ids=[chain_id])
         if len(chain_records) > 0:
@@ -468,11 +465,7 @@ class Protein(Entity):
         - If `keep_resnames` is provided, those residues (along with any metals not excluded) will be retained even if they are HETATM records.
         - The method updates the current protein object in place.
 
-        Example:
-        ```python
-            protein = Protein(structure)
-            protein.remove_hetatm(keep_resnames=['HOH'], exclude_metals=['ZN'])
-        ```
+
         """
         metals = METALS
         if remove_metals:
@@ -517,10 +510,6 @@ class Protein(Entity):
         """
         Remove water molecules from the protein structure in place.
 
-        Example:
-        ```python
-        protein.remove_water()
-        ```
         """
         self.structure = self.structure[~filter_solvent(self.structure)]
 
@@ -699,10 +688,7 @@ class Protein(Entity):
         Args:
             file_path (str): Path where the PDB file will be written.
 
-        Example:
-        ```python
-        protein.to_pdb('/path/to/output.pdb')
-        ```
+
         """
         try:
             pdb_file = PDBFile()

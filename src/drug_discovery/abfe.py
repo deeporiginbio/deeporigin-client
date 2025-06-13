@@ -122,6 +122,7 @@ class ABFE(WorkflowStep):
         else:
             return df
 
+    @beartype
     def set_test_run(self, value: int = 1):
         """set test_run paramemter in abfe parameters"""
 

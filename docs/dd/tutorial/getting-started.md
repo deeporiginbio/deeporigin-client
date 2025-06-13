@@ -38,6 +38,8 @@ The core of the Drug Discovery toolbox is the `Complex` class, that acts as a co
 The `Complex` object can be created using:
 
 ```python
+from deeporigin.drug_discovery import Complex, EXAMPLE_DATA_DIR
+
 # here, we're using the example data directory
 sim = Complex.from_dir(EXAMPLE_DATA_DIR)
 ```
@@ -47,6 +49,10 @@ sim = Complex.from_dir(EXAMPLE_DATA_DIR)
 Inspecting the object shows that it contains a protein and 8 ligands:
 
 ```python
+from deeporigin.drug_discovery import Complex, EXAMPLE_DATA_DIR
+
+sim = Complex.from_dir(EXAMPLE_DATA_DIR)
+
 sim
 ```
 
@@ -61,6 +67,10 @@ sim
 The 3D structure of the protein can be viewed using the built-in `show` method in the `Protein` class:
 
 ```python
+from deeporigin.drug_discovery import Complex, EXAMPLE_DATA_DIR
+
+sim = Complex.from_dir(EXAMPLE_DATA_DIR)
+
 sim.protein.show()
 ```
 
@@ -80,6 +90,10 @@ This generates a 3D visualization of the protein, similar to:
 We can further inspect the ligands by inspecting the `ligands` attribute:
 
 ```python
+from deeporigin.drug_discovery import Complex, EXAMPLE_DATA_DIR
+
+sim = Complex.from_dir(EXAMPLE_DATA_DIR)
+
 sim.ligands
 ```
 
@@ -101,6 +115,10 @@ sim.ligands
 We can also view a table of 2D structures of the ligands, together with user-defined properties using the `show_ligands` method:
 
 ```python
+from deeporigin.drug_discovery import Complex, EXAMPLE_DATA_DIR
+
+sim = Complex.from_dir(EXAMPLE_DATA_DIR)
+
 sim.show_ligands()
 ```
 
@@ -113,6 +131,10 @@ sim.show_ligands()
 We can also view a table of 3D structures as follows:
 
 ```python
+from deeporigin.drug_discovery import Complex, EXAMPLE_DATA_DIR
+
+sim = Complex.from_dir(EXAMPLE_DATA_DIR)
+
 sim.show_ligands(view="3d")
 ```
 
@@ -122,7 +144,7 @@ sim.show_ligands(view="3d")
     width="100%" 
     height="650" 
     style="border:none;"
-    title="Protein visualization"
+    title="Ligand visualization"
 ></iframe>
 
 

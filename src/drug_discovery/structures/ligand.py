@@ -36,7 +36,7 @@ colored terminal output, Requests for API interactions, and integrates with the 
 deeporigin_molstar package for visualization purposes.
 
 Usage Example:
-```python
+
 # Initialize a Ligand instance from a SMILES string
 ligand = Ligand(smiles="CCO", name="Ethanol")
 
@@ -149,7 +149,7 @@ class Ligand(Entity):
         name: str = "",
         save_to_file: bool = False,
         **kwargs: Any,
-    ) -> "Ligand":
+    ):
         """
         Create a Ligand instance from an RDKit Mol object.
 
@@ -159,13 +159,6 @@ class Ligand(Entity):
             save_to_file (bool, optional): Whether to save the ligand to file. Defaults to False.
             **kwargs: Additional arguments to pass to the constructor
 
-        Returns:
-            Ligand: A new Ligand instance initialized from the RDKit molecule
-
-        Example:
-            >>> from rdkit import Chem
-            >>> mol = Chem.MolFromSmiles("CCO")
-            >>> ligand = Ligand.from_rdkit_mol(mol, name="Ethanol")
         """
         # Get name from properties if available
         if mol.HasProp("_Name"):
@@ -326,7 +319,7 @@ class Ligand(Entity):
             file_path (str): The path to the SDF file.
 
         Returns:
-            list[Ligand]: A list of Ligand instances created from the SDF file.
+            either a list of ligands or a single ligand
 
         Raises:
             FileNotFoundError: If the file does not exist.
@@ -506,10 +499,7 @@ class Ligand(Entity):
         - prop_name (str): Name of the property.
         - prop_value: Value of the property.
 
-        Example:
-        ```python
-        ligand.set_property("BindingAffinity", 5.6)
-        ```
+
         """
         self.properties[prop_name] = prop_value
         self.mol.m.SetProp(prop_name, str(prop_value))
@@ -524,10 +514,7 @@ class Ligand(Entity):
         Returns:
         - The value of the property if it exists, otherwise None.
 
-        Example:
-        ```python
-        binding_affinity = ligand.get_property("BindingAffinity")
-        ```
+
         """
         value = self.properties.get(prop_name)
         if value is not None:
@@ -551,10 +538,6 @@ class Ligand(Entity):
         - ValueError: If the file extension is unsupported.
         - Exception: If writing to the file fails.
 
-        Example:
-        ```python
-        ligand.write_to_file('/path/to/output.pdb')
-        ```
         """
         try:
             if output_format == "" and output_path == "":
@@ -629,11 +612,7 @@ class Ligand(Entity):
         - list: The center coordinates of the ligand.
         - None: If coordinates are not available.
 
-        Example:
-        ```python
-        center = ligand.get_center()
-        print(center)  # Output: [1.23, 4.56, 7.89]
-        ```
+
         """
         if self.coordinates is None:
             print("Warning: Coordinates are not available for this ligand.")
@@ -645,10 +624,6 @@ class Ligand(Entity):
         """
         Draw the ligand molecule.
 
-        Example:
-        ```python
-        ligand.draw()
-        ```
         """
         return self.mol.draw()
 
@@ -663,10 +638,7 @@ class Ligand(Entity):
         Raises:
         - Exception: If visualization fails.
 
-        Example:
-        ```python
-        ligand.show()
-        ```
+
         """
         try:
             temp_file = Path(tempfile.gettempdir()) / f"{self.name}_visualize.sdf"
