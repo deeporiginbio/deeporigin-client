@@ -206,7 +206,9 @@ class Ligand(Entity):
             # Create a Molecule object from the SMILES string
             mol = mol_from_smiles(smiles)
         except ValueError as e:
-            raise DeepOriginException(str(e)) from e
+            raise DeepOriginException(
+                f"Cannot create Ligand from SMILES string `{smiles}`: {str(e)}"
+            ) from None
 
         return cls(
             mol=mol,
@@ -291,7 +293,7 @@ class Ligand(Entity):
         except Exception as e:
             raise DeepOriginException(
                 f"Could not resolve chemical identifier '{identifier}': {str(e)}"
-            ) from e
+            ) from None
 
         if name is None:
             name = identifier

@@ -247,7 +247,7 @@ def get_variables_from_do_platform(
         msg = f"{len(invalid_variables)} variables are not valid.\n\n" + "\n\n".join(
             invalid_variables
         )
-        raise DeepOriginException(message=msg)
+        raise DeepOriginException(message=msg) from None
 
     # return variables
     return variables
@@ -272,7 +272,7 @@ def deserialize_variable(serialized: dict) -> Variable:
 
     raise DeepOriginException(
         message=f"{type} is not a valid type of variable or secret."
-    )
+    ) from None
 
 
 def is_variable_modified(variable: Variable) -> bool:
@@ -453,7 +453,7 @@ def enable_variable_auto_updating(
             ):
                 raise DeepOriginException(
                     message="Auto installation must be run from the Deep Origin CLI"
-                )
+                ) from None
 
         cli_command = [cli, "variables", "install"]
 

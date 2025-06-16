@@ -51,13 +51,15 @@ def dock(
         pocket_center = pocket.get_center().tolist()
 
     if pocket_center is None:
-        raise DeepOriginException("Pocket center is required")
+        raise DeepOriginException("Pocket center is required") from None
 
     if ligand is not None:
         smiles_string = ligand.smiles
 
     if smiles_string is None:
-        raise DeepOriginException("Either smiles_string or ligand must be provided")
+        raise DeepOriginException(
+            "Either smiles_string or ligand must be provided"
+        ) from None
 
     # Create hash of inputs
     hasher = hashlib.sha256()
