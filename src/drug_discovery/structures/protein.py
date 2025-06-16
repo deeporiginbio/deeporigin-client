@@ -395,7 +395,7 @@ class Protein(Entity):
     @beartype
     def find_pockets(
         self,
-        pocket_count: int = 5,
+        pocket_count: int = 1,
         pocket_min_size: int = 30,
     ) -> list[Pocket]:
         """Find potential binding pockets in the protein structure.
