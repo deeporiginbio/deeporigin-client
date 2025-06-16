@@ -53,7 +53,6 @@ import tempfile
 from typing import Optional, Tuple
 
 from beartype import beartype
-from biotite.database.rcsb import fetch
 from biotite.structure import filter_solvent
 from biotite.structure.geometry import centroid
 from biotite.structure.io.pdb import PDBFile
@@ -65,6 +64,7 @@ from deeporigin.drug_discovery.external_tools.utils import (
     generate_html_output,
     get_protein_info_dict,
 )
+from deeporigin.exceptions import DeepOriginException
 from deeporigin.functions.pocket_finder import find_pockets
 
 from .entity import Entity
@@ -105,7 +105,21 @@ class Protein(Entity):
             RuntimeError: If the download fails.
         """
         try:
-            file_path = Path(cls.download_protein_by_pdb_id(pdb_id)).absolute()
+            # Download logic (merged from download_protein_by_pdb_id)
+            from pathlib import Path
+
+            from biotite.database.rcsb import fetch
+
+            pdb_id_lower = pdb_id.lower()
+            # Get directory for storing protein files
+            home_dir = Path.home()
+            proteins_dir = home_dir / ".deeporigin" / "proteins"
+            proteins_dir.mkdir(parents=True, exist_ok=True)
+            file_path = proteins_dir / f"{pdb_id_lower}.pdb"
+            if not file_path.exists():
+                fetch(pdb_id_lower, "pdb", proteins_dir)
+
+            file_path = file_path.absolute()
             block_content = file_path.read_text()
             structure = cls.load_structure_from_block(block_content, "pdb")
             structure = cls.select_structure(structure, struct_ind)
@@ -120,9 +134,10 @@ class Protein(Entity):
                 block_content=block_content,
             )
         except Exception as e:
-            raise RuntimeError(
-                f"Failed to create Protein from PDB ID {pdb_id}: {str(e)}"
-            ) from e
+            raise DeepOriginException(
+                f"Failed to create Protein from PDB ID `{pdb_id}`: {str(e)}",
+                title="Failed to download protein from PDB",
+            ) from None
 
     @classmethod
     def from_file(cls, file_path: str, struct_ind: int = 0) -> "Protein":
@@ -184,33 +199,6 @@ class Protein(Entity):
                 f"Invalid structure index {index}. Total structures: {len(structure)}"
             )
         return structure[index]
-
-    @staticmethod
-    def download_protein_by_pdb_id(pdb_id: str, save_dir: str = "") -> str:
-        """Download a PDB structure by its PDB ID from RCSB."""
-        if save_dir == "":
-            save_dir = Protein.get_directory()
-
-        pdb_id = pdb_id.lower()
-        save_dir_path = Path(save_dir)
-        save_dir_path.mkdir(parents=True, exist_ok=True)
-
-        file_path = save_dir_path / f"{pdb_id}.pdb"
-        if not file_path.exists():
-            try:
-                fetch(pdb_id, "pdb", save_dir_path)
-            except Exception as e:
-                raise RuntimeError(f"Failed to download PDB {pdb_id}: {str(e)}") from e
-
-        return str(file_path)
-
-    @staticmethod
-    def get_directory() -> str:
-        """Get the directory for storing protein files."""
-        home_dir = Path.home()
-        proteins_dir = home_dir / ".deeporigin" / "proteins"
-        proteins_dir.mkdir(parents=True, exist_ok=True)
-        return str(proteins_dir)
 
     @beartype
     def dock(

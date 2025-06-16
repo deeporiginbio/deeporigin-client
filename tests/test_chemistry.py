@@ -54,13 +54,3 @@ def test_split_sdf_file(
     for sdf_file in sdf_files:
         n_mol = chemistry.count_molecules_in_sdf_file(sdf_file)
         assert n_mol == 1, "The SDF file contains more than one molecule."
-
-
-def test_download_protein():
-    pdb_id = "1EBY"
-
-    pdb_file = chemistry.download_protein(pdb_id)
-
-    assert os.path.exists(pdb_file), "The downloaded PDB file does not exist."
-
-    os.remove(pdb_file)
