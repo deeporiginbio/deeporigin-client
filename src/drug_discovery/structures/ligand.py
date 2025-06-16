@@ -57,7 +57,7 @@ from dataclasses import dataclass, field
 import os
 from pathlib import Path
 import tempfile
-from typing import Any, List, Optional, Union
+from typing import Any, List, Literal, Optional, Union
 
 from beartype import beartype
 from deeporigin_molstar import MoleculeViewer
@@ -529,12 +529,18 @@ class Ligand(Entity):
 
         return None
 
-    def write_to_file(self, output_path: str = "", output_format: str = ""):
+    @beartype
+    def write_to_file(
+        self,
+        output_path: Optional[str] = None,
+        output_format: Literal["mol", "sdf", "pdb"] = "sdf",
+    ):
         """
         Writes the ligand molecule to a file, including all properties.
 
         Parameters:
         - output_path (str): Path where the ligand will be written.
+        - output_format (Literal[".mol", ".sdf", ".pdb", "mol", "sdf", "pdb"]): Format to write the ligand in.
 
         Raises:
         - ValueError: If the file extension is unsupported.
@@ -542,27 +548,12 @@ class Ligand(Entity):
 
         """
         try:
-            if output_format == "" and output_path == "":
-                raise ValueError("Please provide either output_path or output_format.")
-
             if not output_path:
                 output_path = str(
                     Path(self._get_directory()) / f"{self.name}.{output_format}"
                 )
 
             path = Path(output_path)
-            extension = path.suffix.lower()
-            if not output_format:
-                output_format = extension
-
-            if output_format and output_format[0] != ".":
-                output_format = f".{output_format}"
-
-            if extension and extension != output_format:
-                print(
-                    "Warning: Output format does not match the file extension. Writing to provided output format."
-                )
-                extension = output_format
 
             if self.name is not None:
                 self.set_property("_Name", self.name)
@@ -572,14 +563,14 @@ class Ligand(Entity):
                 for prop_name, prop_value in self.properties.items():
                     self.set_property(prop_name, str(prop_value))
 
-            if extension == ".pdb":
+            if output_format == "pdb":
                 pdb_block = Chem.MolToPDBBlock(self.mol.m)
                 remark_lines = ""
                 for prop_name, prop_value in self.mol.m.GetPropsAsDict().items():
                     remark_lines += f"REMARK   {prop_name}: {prop_value}\n"
                 pdb_block_with_remarks = remark_lines + pdb_block
                 path.write_text(pdb_block_with_remarks)
-            elif extension == ".sdf":
+            elif output_format == "sdf":
                 with tempfile.NamedTemporaryFile(
                     mode="w+", suffix=".sdf", delete=False
                 ) as temp_file:
@@ -589,7 +580,7 @@ class Ligand(Entity):
                     temp_file.flush()
                     temp_file.seek(0)
                     path.write_text(temp_file.read())
-            elif extension == ".mol":
+            elif output_format == "mol":
                 mol_block = Chem.MolToMolBlock(self.mol.m)
                 prop_lines = ""
                 for prop_name, prop_value in self.mol.m.GetPropsAsDict().items():
@@ -597,14 +588,31 @@ class Ligand(Entity):
                 mol_block_with_props = mol_block + "\n" + prop_lines
                 path.write_text(mol_block_with_props)
             else:
-                raise ValueError(
-                    f"Unsupported file extension '{extension}'. Supported extensions are '.pdb', '.mol', '.sdf'."
-                )
+                raise DeepOriginException(
+                    f"Unsupported file extension '{output_format}'. Supported extensions are 'pdb', 'mol', 'sdf'."
+                ) from None
+
+            return output_path
 
         except Exception as e:
-            raise ValueError(
+            raise DeepOriginException(
                 f"Failed to write structure to file {output_path}: {str(e)}"
-            ) from e
+            ) from None
+
+    @beartype
+    def to_mol(self, output_path: Optional[str] = None) -> str | Path:
+        """Write the ligand to a MOL file."""
+        return self.write_to_file(output_path=output_path, output_format="mol")
+
+    @beartype
+    def to_sdf(self, output_path: Optional[str] = None) -> str | Path:
+        """Write the ligand to an SDF file."""
+        return self.write_to_file(output_path=output_path, output_format="sdf")
+
+    @beartype
+    def to_pdb(self, output_path: Optional[str] = None) -> str | Path:
+        """Write the ligand to a PDB file."""
+        return self.write_to_file(output_path=output_path, output_format="pdb")
 
     def get_center(self) -> Optional[list[float]]:
         """

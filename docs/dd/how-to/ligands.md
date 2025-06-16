@@ -220,3 +220,38 @@ logP = ligand.get_property('logP')
 
 !!! note "Property Storage"
     All predicted properties are automatically stored in the ligand's properties dictionary and can be accessed at any time using the `get_property` method.
+
+## Exporting ligands
+
+### To SDF files
+
+To write a ligand to a SDF file, use:
+
+```python
+from deeporigin.drug_discovery import Ligand
+
+ligand = Ligand.from_identifier("serotonin")
+ligand.to_sdf()
+```
+
+### To mol files
+
+To write a ligand to a mol file, use:
+
+```python
+from deeporigin.drug_discovery import Ligand
+
+ligand = Ligand.from_identifier("serotonin")
+ligand.to_mol()
+```
+
+### To PDB files
+
+To write a ligand to a PDB file, use:
+
+```python
+from deeporigin.drug_discovery import Ligand
+
+ligand = Ligand.from_identifier("serotonin")
+ligand.to_pdb()
+```
