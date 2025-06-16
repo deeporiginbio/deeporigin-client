@@ -150,15 +150,15 @@ class Complex:
         from deeporigin.functions.sysprep import sysprep
 
         if ligand.file_path is None:
-            raise ValueError(
-                "This ligand is not backed by a file. System preparation cannot proceed."
-            )
+            ligand_path = ligand.to_sdf()
+        else:
+            ligand_path = ligand.file_path
 
         # run sysprep on the ligand
         complex_path = sysprep(
             protein_path=self.protein.file_path,
-            ligand_path=ligand.file_path,
             padding=padding,
+            ligand_path=ligand_path,
             keep_waters=keep_waters,
             is_lig_protonated=is_lig_protonated,
             is_protein_protonated=is_protein_protonated,
@@ -175,7 +175,7 @@ class Complex:
 
         Internal method. Do not use."""
 
-        # the reason we are uploading here manually, isntead of using ligand.upload()
+        # the reason we are uploading here manually, instead of using ligand.upload()
         # and protein.upload() is so that we can make one call to upload_files, instead
         # of several
 
