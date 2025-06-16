@@ -51,7 +51,7 @@ def download_sync(
             raise DeepOriginException(
                 message=f"File could not be downloaded from {url}. The message is {response.text}",
                 title=f"Deep Origin Error: [{response.status_code}]",
-            )
+            ) from None
 
         with open(save_path, "wb") as file:
             for chunk in response.iter_content(chunk_size=8192):

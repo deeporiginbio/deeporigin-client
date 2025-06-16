@@ -302,7 +302,7 @@ class ABFE(WorkflowStep):
             if window not in valid_windows:
                 raise DeepOriginException(
                     f"Invalid window number: {window}. Valid windows are: {sorted(valid_windows)}"
-                )
+                ) from None
 
             remote_xtc_file = (
                 remote_base

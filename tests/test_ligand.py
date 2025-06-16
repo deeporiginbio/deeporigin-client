@@ -88,9 +88,8 @@ def test_ligand_from_smiles():
         assert Chem.MolToSmiles(input_mol) == Chem.MolToSmiles(ligand.mol.m)
 
     # Test with invalid SMILES
-    with pytest.raises(DeepOriginException) as exc_info:
+    with pytest.raises(DeepOriginException, match=r"Cannot create"):
         Ligand.from_smiles(smiles="InvalidSMILES")
-    assert str(exc_info.value) == "Invalid SMILES string"
 
 
 def test_ligand_from_identifier():

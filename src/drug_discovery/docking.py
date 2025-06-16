@@ -276,7 +276,7 @@ class Docking(WorkflowStep):
         if batch_size is None and n_workers is None:
             raise DeepOriginException(
                 "Either batch_size or n_workers must be specified."
-            )
+            ) from None
         elif batch_size is not None and n_workers is not None:
             print(
                 "Both batch_size and n_workers are specified. Using n_workers to determine batch_size..."
@@ -289,7 +289,7 @@ class Docking(WorkflowStep):
         if pocket is None and box_size is None and pocket_center is None:
             raise DeepOriginException(
                 "Specify a pocket, or a box size and pocket center."
-            )
+            ) from None
 
         if pocket is not None:
             box_size = float(2 * np.cbrt(pocket.props["volume"]))
