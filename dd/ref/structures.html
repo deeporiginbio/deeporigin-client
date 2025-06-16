@@ -1533,6 +1533,33 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#src.drug_discovery.structures.Ligand.to_mol" class="md-nav__link">
+    <span class="md-ellipsis">
+      to_mol
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.drug_discovery.structures.Ligand.to_pdb" class="md-nav__link">
+    <span class="md-ellipsis">
+      to_pdb
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.drug_discovery.structures.Ligand.to_sdf" class="md-nav__link">
+    <span class="md-ellipsis">
+      to_sdf
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#src.drug_discovery.structures.Ligand.update_coordinates" class="md-nav__link">
     <span class="md-ellipsis">
       update_coordinates
@@ -1965,15 +1992,6 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#src.drug_discovery.structures.Protein.download_protein_by_pdb_id" class="md-nav__link">
-    <span class="md-ellipsis">
-      download_protein_by_pdb_id
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#src.drug_discovery.structures.Protein.extract_metals_and_cofactors" class="md-nav__link">
     <span class="md-ellipsis">
       extract_metals_and_cofactors
@@ -2013,15 +2031,6 @@
   <a href="#src.drug_discovery.structures.Protein.get_center_by_residues" class="md-nav__link">
     <span class="md-ellipsis">
       get_center_by_residues
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#src.drug_discovery.structures.Protein.get_directory" class="md-nav__link">
-    <span class="md-ellipsis">
-      get_directory
     </span>
   </a>
   
@@ -3974,6 +3983,33 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#src.drug_discovery.structures.Ligand.to_mol" class="md-nav__link">
+    <span class="md-ellipsis">
+      to_mol
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.drug_discovery.structures.Ligand.to_pdb" class="md-nav__link">
+    <span class="md-ellipsis">
+      to_pdb
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.drug_discovery.structures.Ligand.to_sdf" class="md-nav__link">
+    <span class="md-ellipsis">
+      to_sdf
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#src.drug_discovery.structures.Ligand.update_coordinates" class="md-nav__link">
     <span class="md-ellipsis">
       update_coordinates
@@ -4406,15 +4442,6 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#src.drug_discovery.structures.Protein.download_protein_by_pdb_id" class="md-nav__link">
-    <span class="md-ellipsis">
-      download_protein_by_pdb_id
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#src.drug_discovery.structures.Protein.extract_metals_and_cofactors" class="md-nav__link">
     <span class="md-ellipsis">
       extract_metals_and_cofactors
@@ -4454,15 +4481,6 @@
   <a href="#src.drug_discovery.structures.Protein.get_center_by_residues" class="md-nav__link">
     <span class="md-ellipsis">
       get_center_by_residues
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#src.drug_discovery.structures.Protein.get_directory" class="md-nav__link">
-    <span class="md-ellipsis">
-      get_directory
     </span>
   </a>
   
@@ -6532,6 +6550,66 @@ CCO</p>
 <div class="doc doc-object doc-function">
 
 
+<h5 id="src.drug_discovery.structures.Ligand.to_mol" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">to_mol</span>
+
+
+<a href="#src.drug_discovery.structures.Ligand.to_mol" class="headerlink" title="Permanent link">&para;</a></h5>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">to_mol</span><span class="p">(</span><span class="n">output_path</span><span class="p">:</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n"><span title="str">str</span></span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><span title="str">str</span></span> <span class="o">|</span> <span class="n"><span title="pathlib.Path">Path</span></span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Write the ligand to a MOL file.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h5 id="src.drug_discovery.structures.Ligand.to_pdb" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">to_pdb</span>
+
+
+<a href="#src.drug_discovery.structures.Ligand.to_pdb" class="headerlink" title="Permanent link">&para;</a></h5>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">to_pdb</span><span class="p">(</span><span class="n">output_path</span><span class="p">:</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n"><span title="str">str</span></span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><span title="str">str</span></span> <span class="o">|</span> <span class="n"><span title="pathlib.Path">Path</span></span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Write the ligand to a PDB file.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h5 id="src.drug_discovery.structures.Ligand.to_sdf" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">to_sdf</span>
+
+
+<a href="#src.drug_discovery.structures.Ligand.to_sdf" class="headerlink" title="Permanent link">&para;</a></h5>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">to_sdf</span><span class="p">(</span><span class="n">output_path</span><span class="p">:</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n"><span title="str">str</span></span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><span title="str">str</span></span> <span class="o">|</span> <span class="n"><span title="pathlib.Path">Path</span></span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Write the ligand to an SDF file.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
 <h5 id="src.drug_discovery.structures.Ligand.update_coordinates" class="doc doc-heading">
 <code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">update_coordinates</span>
 
@@ -6754,7 +6832,8 @@ CCO</p>
 
 <a href="#src.drug_discovery.structures.Ligand.write_to_file" class="headerlink" title="Permanent link">&para;</a></h5>
 <div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">write_to_file</span><span class="p">(</span>
-    <span class="n">output_path</span><span class="p">:</span> <span class="n"><span title="str">str</span></span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">output_format</span><span class="p">:</span> <span class="n"><span title="str">str</span></span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">output_path</span><span class="p">:</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n"><span title="str">str</span></span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">output_format</span><span class="p">:</span> <span class="n"><span title="typing.Literal">Literal</span></span><span class="p">[</span><span class="s2">&quot;mol&quot;</span><span class="p">,</span> <span class="s2">&quot;sdf&quot;</span><span class="p">,</span> <span class="s2">&quot;pdb&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;sdf&quot;</span><span class="p">,</span>
 <span class="p">)</span>
 </code></pre></div>
 
@@ -6762,7 +6841,8 @@ CCO</p>
 
         <p>Writes the ligand molecule to a file, including all properties.</p>
 <p>Parameters:
-- output_path (str): Path where the ligand will be written.</p>
+- output_path (str): Path where the ligand will be written.
+- output_format (Literal[".mol", ".sdf", ".pdb", "mol", "sdf", "pdb"]): Format to write the ligand in.</p>
 <p>Raises:
 - ValueError: If the file extension is unsupported.
 - Exception: If writing to the file fails.</p>
@@ -8151,32 +8231,6 @@ should be docked.</p>
 <div class="doc doc-object doc-function">
 
 
-<h5 id="src.drug_discovery.structures.Protein.download_protein_by_pdb_id" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">download_protein_by_pdb_id</span>
-
-
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-staticmethod"><code>staticmethod</code></small>
-  </span>
-
-<a href="#src.drug_discovery.structures.Protein.download_protein_by_pdb_id" class="headerlink" title="Permanent link">&para;</a></h5>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">download_protein_by_pdb_id</span><span class="p">(</span>
-    <span class="n">pdb_id</span><span class="p">:</span> <span class="n"><span title="str">str</span></span><span class="p">,</span> <span class="n">save_dir</span><span class="p">:</span> <span class="n"><span title="str">str</span></span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><span title="str">str</span></span>
-</code></pre></div>
-
-    <div class="doc doc-contents ">
-
-        <p>Download a PDB structure by its PDB ID from RCSB.</p>
-
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
 <h5 id="src.drug_discovery.structures.Protein.extract_metals_and_cofactors" class="doc doc-heading">
 <code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">extract_metals_and_cofactors</span>
 
@@ -8228,7 +8282,7 @@ should be docked.</p>
 
 <a href="#src.drug_discovery.structures.Protein.find_pockets" class="headerlink" title="Permanent link">&para;</a></h5>
 <div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">find_pockets</span><span class="p">(</span>
-    <span class="n">pocket_count</span><span class="p">:</span> <span class="n"><span title="int">int</span></span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="n">pocket_min_size</span><span class="p">:</span> <span class="n"><span title="int">int</span></span> <span class="o">=</span> <span class="mi">30</span>
+    <span class="n">pocket_count</span><span class="p">:</span> <span class="n"><span title="int">int</span></span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">pocket_min_size</span><span class="p">:</span> <span class="n"><span title="int">int</span></span> <span class="o">=</span> <span class="mi">30</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><span title="list">list</span></span><span class="p">[</span><span class="n"><a class="autorefs autorefs-internal" href="#src.drug_discovery.structures.Pocket">Pocket</a></span><span class="p">]</span>
 </code></pre></div>
 
@@ -8265,7 +8319,7 @@ Defaults to 5.</p>
               </div>
             </td>
             <td>
-                  <code>5</code>
+                  <code>1</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -8637,30 +8691,6 @@ binding site in the protein. Each Pocket object contains:
           </tr>
       </tbody>
     </table>
-
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h5 id="src.drug_discovery.structures.Protein.get_directory" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">get_directory</span>
-
-
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-staticmethod"><code>staticmethod</code></small>
-  </span>
-
-<a href="#src.drug_discovery.structures.Protein.get_directory" class="headerlink" title="Permanent link">&para;</a></h5>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">get_directory</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n"><span title="str">str</span></span>
-</code></pre></div>
-
-    <div class="doc doc-contents ">
-
-        <p>Get the directory for storing protein files.</p>
 
 
     </div>

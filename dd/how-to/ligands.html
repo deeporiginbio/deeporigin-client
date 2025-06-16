@@ -1040,6 +1040,48 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#exporting-ligands" class="md-nav__link">
+    <span class="md-ellipsis">
+      Exporting ligands
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Exporting ligands">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#to-sdf-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      To SDF files
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#to-mol-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      To mol files
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#to-pdb-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      To PDB files
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2710,6 +2752,48 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#exporting-ligands" class="md-nav__link">
+    <span class="md-ellipsis">
+      Exporting ligands
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Exporting ligands">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#to-sdf-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      To SDF files
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#to-mol-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      To mol files
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#to-pdb-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      To PDB files
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2915,6 +2999,28 @@
 <p class="admonition-title">Property Storage</p>
 <p>All predicted properties are automatically stored in the ligand's properties dictionary and can be accessed at any time using the <code>get_property</code> method.</p>
 </div>
+<h2 id="exporting-ligands">Exporting ligands<a class="headerlink" href="#exporting-ligands" title="Permanent link">&para;</a></h2>
+<h3 id="to-sdf-files">To SDF files<a class="headerlink" href="#to-sdf-files" title="Permanent link">&para;</a></h3>
+<p>To write a ligand to a SDF file, use:</p>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin.drug_discovery</span><span class="w"> </span><span class="kn">import</span> <span class="n">Ligand</span>
+
+<span class="n">ligand</span> <span class="o">=</span> <span class="n">Ligand</span><span class="o">.</span><span class="n">from_identifier</span><span class="p">(</span><span class="s2">&quot;serotonin&quot;</span><span class="p">)</span>
+<span class="n">ligand</span><span class="o">.</span><span class="n">to_sdf</span><span class="p">()</span>
+</code></pre></div>
+<h3 id="to-mol-files">To mol files<a class="headerlink" href="#to-mol-files" title="Permanent link">&para;</a></h3>
+<p>To write a ligand to a mol file, use:</p>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin.drug_discovery</span><span class="w"> </span><span class="kn">import</span> <span class="n">Ligand</span>
+
+<span class="n">ligand</span> <span class="o">=</span> <span class="n">Ligand</span><span class="o">.</span><span class="n">from_identifier</span><span class="p">(</span><span class="s2">&quot;serotonin&quot;</span><span class="p">)</span>
+<span class="n">ligand</span><span class="o">.</span><span class="n">to_mol</span><span class="p">()</span>
+</code></pre></div>
+<h3 id="to-pdb-files">To PDB files<a class="headerlink" href="#to-pdb-files" title="Permanent link">&para;</a></h3>
+<p>To write a ligand to a PDB file, use:</p>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin.drug_discovery</span><span class="w"> </span><span class="kn">import</span> <span class="n">Ligand</span>
+
+<span class="n">ligand</span> <span class="o">=</span> <span class="n">Ligand</span><span class="o">.</span><span class="n">from_identifier</span><span class="p">(</span><span class="s2">&quot;serotonin&quot;</span><span class="p">)</span>
+<span class="n">ligand</span><span class="o">.</span><span class="n">to_pdb</span><span class="p">()</span>
+</code></pre></div>
 
 
 
