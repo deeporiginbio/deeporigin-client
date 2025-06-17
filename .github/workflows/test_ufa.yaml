@@ -49,4 +49,4 @@ jobs:
           uv run scripts/refresh_tokens.py
 
       - name: Run tests against a live instance
-        run: uv run pytest -s --client default -k test_files_client
+        run: uv run pytest  -s --log-cli-level=DEBUG --client default -k test_files_client
