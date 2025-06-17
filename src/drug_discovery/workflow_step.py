@@ -1,6 +1,7 @@
 """Base class for workflow steps like ABFE, RBFE, and Docking."""
 
 from beartype import beartype
+import pandas as pd
 
 from deeporigin.tools.job import Job, get_dataframe
 from deeporigin.utils.core import PrettyDict
@@ -23,7 +24,7 @@ class WorkflowStep:
         self.parent = parent
         self._params = PrettyDict()
 
-    def get_jobs_df(self):
+    def get_jobs_df(self) -> pd.DataFrame:
         """Get the jobs for this workflow step as a dataframe"""
         df = get_dataframe(
             _platform_clients=self.parent._platform_clients,
@@ -41,7 +42,7 @@ class WorkflowStep:
 
         return df
 
-    def get_jobs(self):
+    def get_jobs(self) -> None:
         """Get the jobs for this workflow step and save to self.jobs"""
         df = self.get_jobs_df()
 
@@ -67,8 +68,6 @@ class WorkflowStep:
             job._viz_func = self._render_progress
             job._name_func = self._name_job
             job.sync()
-
-        return df
 
     @beartype
     def _make_jobs_from_ids(self, job_ids: list[str]) -> None:

@@ -268,7 +268,7 @@ def render_smiles_in_dataframe(df: pd.DataFrame, smiles_col: str) -> pd.DataFram
     from rdkit.Chem import PandasTools
 
     # Replace None/NaN in the SMILES column with a placeholder
-    df[smiles_col] = df[smiles_col].fillna("*")
+    df[smiles_col] = df[smiles_col].fillna("")
 
     PandasTools.AddMoleculeColumnToFrame(df, smilesCol=smiles_col, molCol="Structure")
     PandasTools.RenderImagesInAllDataFrames()
