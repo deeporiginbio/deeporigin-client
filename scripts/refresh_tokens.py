@@ -1,5 +1,11 @@
 """small script to refresh tokens"""
 
-from deeporigin import auth
 
-auth.get_tokens(refresh=True)
+def main():
+    from deeporigin import auth
+
+    auth.get_tokens(refresh=True)
+
+
+if __name__ == "__main__":
+    main()
