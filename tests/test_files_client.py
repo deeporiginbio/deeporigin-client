@@ -19,6 +19,8 @@ def test_upload_and_download_files(config, tmp_path):  # noqa: F811
         for file in files
     }
 
+    print(src_to_dest)
+
     success, _ = files_client.upload_files(src_to_dest)
     assert success, "Failed to upload files"
 
