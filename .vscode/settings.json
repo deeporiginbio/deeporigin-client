@@ -10,5 +10,8 @@
     "sonarlint.connectedMode.project": {
         "connectionId": "formiclabs",
         "projectKey": "formiclabs_deeporigin-client"
-    }
-} 
+    },
+    "cSpell.words": [
+        "deeporigin"
+    ]
+}
