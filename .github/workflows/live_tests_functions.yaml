@@ -42,7 +42,7 @@ jobs:
         run: |
           pip install --upgrade pip
           pip install --upgrade setuptools
-          pip install -e .[test,tools]
+          pip install -e .[test]
 
       - name: Refresh API tokens using deeporigin.auth
         run: |
