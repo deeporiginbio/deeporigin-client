@@ -364,7 +364,14 @@ def get_dataframe(
     """
 
     if only_with_status is None:
-        only_with_status = ["Succeeded", "Running", "Queued", "Failed", "Created"]
+        only_with_status = [
+            "Succeeded",
+            "Running",
+            "Queued",
+            "Failed",
+            "Created",
+            "Cancelled",
+        ]
 
     if isinstance(only_with_status, set):
         only_with_status = list(only_with_status)
@@ -437,13 +444,10 @@ def get_dataframe(
         "executionId": [],
         "completedAt": [],
         "startedAt": [],
-        "protein_id": [],
         "status": [],
         "tool_key": [],
         "tool_version": [],
         "user_name": [],
-        "thread_pinning": [],
-        "test_run": [],
         "run_duration_minutes": [],
         "n_ligands": [],
     }
@@ -477,10 +481,7 @@ def get_dataframe(
         else:
             data["user_name"].append(attributes["user"]["id"])
 
-        # Check for thread_pinning and test_run in userInputs
         user_inputs = attributes.get("userInputs", {})
-        data["thread_pinning"].append(find_boolean_value(user_inputs, "thread_pinning"))
-        data["test_run"].append(find_boolean_value(user_inputs, "test_run"))
 
         if include_inputs:
             data["user_inputs"].append(user_inputs)
@@ -492,16 +493,6 @@ def get_dataframe(
 
         # Handle protein_id (may not exist or metadata may be None)
         metadata = attributes.get("metadata")
-        this_protein_id = metadata.get("protein_id") if metadata else None
-
-        if this_protein_id is None:
-            this_protein_id = (
-                attributes.get("userInputs", {}).get("protein", {}).get("rowId")
-                or attributes.get("userInputs", {}).get("protein", {}).get("key")
-                or "No ID"
-            )
-
-        data["protein_id"].append(this_protein_id)
 
         # Calculate run duration in minutes and round to nearest integer
         if attributes["completedAt"] and attributes["startedAt"]:
