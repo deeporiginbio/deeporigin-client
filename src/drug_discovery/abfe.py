@@ -111,7 +111,7 @@ class ABFE(WorkflowStep):
         # show structure first
         new_order = ["Structure"] + [col for col in df.columns if col != "Structure"]
 
-        # re‑index your DataFrame
+        # re‑index DataFrame
         df = df[new_order]
 
         if get_notebook_environment() == "marimo":
@@ -121,6 +121,35 @@ class ABFE(WorkflowStep):
 
         else:
             return df
+
+    def get_jobs(self):
+        """get jobs for this workflow step"""
+        df = super().get_jobs_df()
+
+        # make a new column called ligand_smiles using the metadata column
+        df["ligand_smiles"] = df["metadata"].apply(
+            lambda d: d.get("ligand_smiles") if isinstance(d, dict) else None
+        )
+
+        # make a new column called protein_file using the metadata column
+        df["protein_file"] = df["metadata"].apply(
+            lambda d: d.get("protein_file") if isinstance(d, dict) else None
+        )
+
+        # make a new column called ligand_file using the metadata column
+        df["ligand_file"] = df["metadata"].apply(
+            lambda d: d.get("ligand_file") if isinstance(d, dict) else None
+        )
+
+        df.drop(columns=["metadata"], inplace=True)
+
+        return df
+
+    def show_jobs(self):
+        """show jobs for this workflow step"""
+        df = self.get_jobs()
+
+        return utils.render_smiles_in_dataframe(df, smiles_col="ligand_smiles")
 
     @beartype
     def set_test_run(self, value: int = 1):
@@ -224,6 +253,7 @@ class ABFE(WorkflowStep):
             metadata = dict(
                 protein_file=os.path.basename(self.parent.protein._remote_path),
                 ligand_file=os.path.basename(ligand._remote_path),
+                ligand_smiles=ligand.smiles,
             )
 
             job_id = utils._start_tool_run(
