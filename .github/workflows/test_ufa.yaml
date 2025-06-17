@@ -23,6 +23,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Check API endpoint connectivity
+        run: curl -v $DEEP_ORIGIN_API_ENDPOINT || true
+
       - name: Install uv
         uses: astral-sh/setup-uv@v5
         with:
