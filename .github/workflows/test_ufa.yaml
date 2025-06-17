@@ -1,4 +1,4 @@
-name: Tests against a Live Instance
+name: Test UFA on production
 
 on:
   # Allow manual runs
@@ -6,10 +6,10 @@ on:
 
   # Run every day
   schedule:
-    - cron: "0 0 * * *"
+    - cron: "0 7 * * *"
 
 jobs:
-  test-live-instance:
+  test-functions-on-production:
     runs-on: ubuntu-latest
     env:
       # Secrets for API and organization
@@ -26,7 +26,7 @@ jobs:
       - name: Set up Python environment
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.13"
           cache: 'pip'
           cache-dependency-path: pyproject.toml
 
@@ -49,4 +49,4 @@ jobs:
           python -c "from deeporigin import auth; auth.get_tokens(refresh=True)"
 
       - name: Run tests against a live instance
-        run: make test-github-live
+        run: python3 -m pytest  --client default -k test_files_client
