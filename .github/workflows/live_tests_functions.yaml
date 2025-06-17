@@ -42,11 +42,11 @@ jobs:
         run: |
           pip install --upgrade pip
           pip install --upgrade setuptools
-          pip install -e .[test]
+          pip install -e .[test,tools]
 
       - name: Refresh API tokens using deeporigin.auth
         run: |
           python -c "from deeporigin import auth; auth.get_tokens(refresh=True)"
 
       - name: Run tests against a live instance
-        run: python3 -m pytest  --client default -k test_upload_and_download_files
+        run: python3 -m pytest  --client default -k functions
