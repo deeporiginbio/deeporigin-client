@@ -1,4 +1,4 @@
-name: Test DO functions on production
+name: Test DO Functions on production
 
 on:
   # Allow manual runs
@@ -23,12 +23,21 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Python environment
-        uses: actions/setup-python@v5
+      - name: Check API endpoint connectivity
+        run: curl -v $DEEP_ORIGIN_API_ENDPOINT || true
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
         with:
-          python-version: "3.13"
-          cache: 'pip'
-          cache-dependency-path: pyproject.toml
+          version: "0.7.13"
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install
+
+      - name: Install the project
+        run: uv sync --all-extras --dev
+
 
       - name: Create API Tokens File
         run: |
@@ -38,15 +47,9 @@ jobs:
             "access": "'$ACCESS_TOKEN'"
           }' > ~/.deeporigin/api_tokens
 
-      - name: Install dependencies
-        run: |
-          pip install --upgrade pip
-          pip install --upgrade setuptools
-          pip install -e .[test,tools]
-
       - name: Refresh API tokens using deeporigin.auth
         run: |
-          python -c "from deeporigin import auth; auth.get_tokens(refresh=True)"
+          uv run scripts/refresh_tokens.py
 
       - name: Run tests against a live instance
-        run: python3 -m pytest  --client default -k functions
+        run: uv run pytest  -s --log-cli-level=ERROR --client default -k functions
