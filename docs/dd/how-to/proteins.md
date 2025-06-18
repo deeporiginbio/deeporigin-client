@@ -27,7 +27,65 @@ protein = Protein.from_pdb_id("1EBY")
 ```
 
 
-## Visualizing a protein
+## Inspecting the Protein
+
+### PDB ID
+
+To view the PDB ID of a Protein (if it exists, use):
+
+```python
+protein = Protein.from_pdb_id("1EBY")
+protein.pdb_id
+```
+
+!!! success "Expected output"
+    ```
+    1EBY
+    ```
+
+### Getting the protein sequence
+
+You can retrieve the amino acid sequences of all polypeptide chains in a protein structure using the `sequence` property:
+
+```python
+from deeporigin.drug_discovery import Protein
+
+protein = Protein.from_pdb_id("1EBY")
+sequences = protein.sequence
+for seq in sequences:
+    print(seq)
+```
+
+This property returns a list of amino acid sequences (as Bio.Seq objects) for each polypeptide chain found in the structure. If the structure contains multiple chains, each chain's sequence is included as a separate entry in the list. This is useful for analyzing the primary structure of the protein or for downstream sequence-based analyses.
+
+!!! success "Expected output"
+    ```
+    PQITLWQRPLVTIKIGGQLKEALLDTGADDTVLEEMNLPGRWKPKMIGGIGGFIKVRQYDQILIEICGHKAIGTVLVGPTPVNIIGRNLLTQIGCTLNF
+    PQITLWQRPLVTIKIGGQLKEALLDTGADDTVLEEMNLPGRWKPKMIGGIGGFIKVRQYDQILIEICGHKAIGTVLVGPTPVNIIGRNLLTQIGCTLNF
+    ```
+
+### Finding missing residues
+
+You can identify missing residues (gaps) in the protein structure using the `find_missing_residues` method:
+
+```python
+from deeporigin.drug_discovery import Protein
+
+protein = Protein.from_pdb_id("5QSP")
+missing = protein.find_missing_residues()
+print(missing)
+```
+
+This method scans each chain in the protein and returns a dictionary where the keys are chain IDs and the values are lists of tuples, each representing a gap. Each tuple is of the form `(start_resseq, end_resseq)`, indicating that residues between `start_resseq` and `end_resseq` (exclusive) are missing from the structure.
+
+!!! success "Expected output"
+    ```python
+    {'A': [(511, 514), (547, 550), (679, 682), (841, 855)],
+     'B': [(509, 516), (546, 551), (679, 684), (840, 854)]}
+    ```
+    
+
+### Visualizing a protein
 
 ??? warning "Browser support"
     These visualizations work best on Google Chrome. We are aware of issues on other browsers, especially Safari on macOS.
@@ -142,6 +200,8 @@ chain_a = protein.select_chain('A')
 # Select multiple chains
 chains_ab = protein.select_chains(['A', 'B'])
 ```
+
+
 
 ## Best Practices
 
