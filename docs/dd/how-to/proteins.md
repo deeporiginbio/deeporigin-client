@@ -34,6 +34,8 @@ protein = Protein.from_pdb_id("1EBY")
 To view the PDB ID of a Protein (if it exists, use):
 
 ```python
+from deeporigin.drug_discovery import Protein
+
 protein = Protein.from_pdb_id("1EBY")
 protein.pdb_id
 ```
