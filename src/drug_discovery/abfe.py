@@ -28,8 +28,10 @@ class ABFE(WorkflowStep):
     Objects instantiated here are meant to be used within the Complex class."""
 
     """tool version to use for ABFE"""
-    tool_version = "0.2.6"
+    tool_version = "0.2.7"
     _tool_key = "deeporigin.abfe-end-to-end"  # Tool key for ABFE jobs
+
+    _max_atom_count: int = 100_000
 
     def __init__(self, parent):
         super().__init__(parent)
@@ -41,9 +43,12 @@ class ABFE(WorkflowStep):
 
         This method returns a dataframe showing the results of ABFE runs associated with this simulation session. The ligand file name and ΔG are shown, together with user-supplied properties"""
 
+        files_client = getattr(self.parent._platform_clients, "FilesApi", None)
+
         files = utils.find_files_on_ufa(
             tool="ABFE",
             protein=self.parent.protein.file_path.name,
+            client=files_client,
         )
 
         results_files = [file for file in files if file.endswith("/results.csv")]
@@ -52,7 +57,10 @@ class ABFE(WorkflowStep):
             print("No ABFE results found for this protein.")
             return None
 
-        files_api.download_files(results_files)
+        files_api.download_files(
+            results_files,
+            client=files_client,
+        )
 
         # read all the CSV files using pandas and
         # set Ligand1 column to ligand name (parent dir of results.csv)
@@ -103,7 +111,7 @@ class ABFE(WorkflowStep):
         # show structure first
         new_order = ["Structure"] + [col for col in df.columns if col != "Structure"]
 
-        # re‑index your DataFrame
+        # re‑index DataFrame
         df = df[new_order]
 
         if get_notebook_environment() == "marimo":
@@ -114,10 +122,81 @@ class ABFE(WorkflowStep):
         else:
             return df
 
+    def get_jobs(self):
+        """get jobs for this workflow step"""
+        df = super().get_jobs_df()
+
+        # make a new column called ligand_smiles using the metadata column
+        df["ligand_smiles"] = df["metadata"].apply(
+            lambda d: d.get("ligand_smiles") if isinstance(d, dict) else None
+        )
+
+        # make a new column called protein_file using the metadata column
+        df["protein_file"] = df["metadata"].apply(
+            lambda d: d.get("protein_file") if isinstance(d, dict) else None
+        )
+
+        # make a new column called ligand_file using the metadata column
+        df["ligand_file"] = df["metadata"].apply(
+            lambda d: d.get("ligand_file") if isinstance(d, dict) else None
+        )
+
+        df.drop(columns=["metadata"], inplace=True)
+
+        return df
+
+    def show_jobs(self):
+        """show jobs for this workflow step"""
+        df = self.get_jobs()
+
+        return utils.render_smiles_in_dataframe(df, smiles_col="ligand_smiles")
+
+    @beartype
     def set_test_run(self, value: int = 1):
         """set test_run paramemter in abfe parameters"""
 
         utils._set_test_run(self._params.end_to_end, value)
+
+    @beartype
+    def _get_ligands_to_run(
+        self,
+        *,
+        ligands: list[Ligand],
+        re_run: bool,
+    ) -> list[Ligand]:
+        """Helper method to determine which ligands need to be run based on already run jobs and re_run flag."""
+
+        df = get_dataframe(
+            tool_key=tool_mapper["ABFE"],
+            only_with_status=["Succeeded", "Running", "Queued", "Created"],
+            include_metadata=True,
+            resolve_user_names=False,
+            _platform_clients=self.parent._platform_clients,
+        )
+
+        # Build set of ligand names that have already been run
+        if len(df) > 0:
+            ligands_already_run = set(
+                ligand_file
+                for ligand_file in df["metadata"].apply(
+                    lambda d: d.get("ligand_file") if isinstance(d, dict) else None
+                )
+                if isinstance(ligand_file, str) and ligand_file
+            )
+        else:
+            ligands_already_run = set()
+
+        if re_run:
+            # need to re-run, so don't remove already run ligands
+            ligands_to_run = ligands
+        else:
+            # no re-run, remove already run ligands
+            ligands_to_run = [
+                ligand
+                for ligand in ligands
+                if os.path.basename(ligand._remote_path) not in ligands_already_run
+            ]
+        return ligands_to_run
 
     @beartype
     def run_end_to_end(
@@ -125,7 +204,8 @@ class ABFE(WorkflowStep):
         *,
         ligands: Optional[list[Ligand]] = None,
         re_run: bool = False,
-    ):
+        _output_dir_path: Optional[str] = None,
+    ) -> list[Job] | None:
         """Method to run an end-to-end ABFE run.
 
         Args:
@@ -134,38 +214,31 @@ class ABFE(WorkflowStep):
         if ligands is None:
             ligands = self.parent.ligands
 
-        ligand_names = [os.path.basename(ligand.file_path) for ligand in ligands]
+        # check that there is a prepared system for each ligand
+        for ligand in ligands:
+            if ligand.name not in self.parent._prepared_systems:
+                raise ValueError(
+                    f"Complex with Ligand {ligand.name} is not prepared. Please prepare the system using the `prepare` method of Complex."
+                )
 
-        df = get_dataframe(
-            tool_key=tool_mapper["ABFE"],
-            only_with_status=["Succeeded", "Running", "Queued", "Created"],
-            include_metadata=True,
-            resolve_user_names=False,
-        )
-
-        # filter to find relevant jobs
-        df = df[
-            df["metadata"].apply(
-                lambda d: isinstance(d, dict) and d.get("ligand_file") in ligand_names
+        # check that for every prepared system, the number of atoms is less than the max atom count
+        for ligand_name, prepared_system in self.parent._prepared_systems.items():
+            from deeporigin.drug_discovery.external_tools.utils import (
+                count_atoms_in_pdb_file,
             )
-        ]
 
-        # get a list of ligands that have already been run
-        ligands_already_run = list(
-            df["metadata"].apply(lambda d: isinstance(d, dict) and d.get("ligand_file"))
-        )
+            num_atoms = count_atoms_in_pdb_file(prepared_system)
 
-        ligands_to_run = [
-            ligand for ligand in ligand_names if ligand not in ligands_already_run
-        ]
+            if num_atoms > self._max_atom_count:
+                raise ValueError(
+                    f"System with {ligand_name} has too many atoms. It has {num_atoms} atoms, but the maximum allowed is {self._max_atom_count}."
+                )
 
         self.parent._sync_protein_and_ligands()
 
-        protein_path = "entities/proteins/" + os.path.basename(
-            self.parent.protein.file_path
-        )
+        ligands_to_run = self._get_ligands_to_run(ligands=ligands, re_run=re_run)
 
-        if len(ligands_to_run) == 0 and not re_run:
+        if len(ligands_to_run) == 0:
             print(
                 "All requested ligands have already been run, or are queued to run. To re-run, set re_run=True"
             )
@@ -174,24 +247,27 @@ class ABFE(WorkflowStep):
         if self.jobs is None:
             self.jobs = []
 
-        for ligand_name in ligands_to_run:
-            ligand_path = "entities/ligands/" + os.path.basename(ligand_name)
+        jobs_for_this_run = []
 
+        for ligand in ligands_to_run:
             metadata = dict(
-                protein_file=os.path.basename(protein_path),
-                ligand_file=os.path.basename(ligand_path),
+                protein_file=os.path.basename(self.parent.protein._remote_path),
+                ligand_file=os.path.basename(ligand._remote_path),
+                ligand_smiles=ligand.smiles,
             )
 
             job_id = utils._start_tool_run(
                 metadata=metadata,
-                ligand1_path=ligand_path,
-                protein_path=protein_path,
+                ligand1_path=ligand._remote_path,
+                protein_path=self.parent.protein._remote_path,
                 params=self._params.end_to_end,
                 tool="ABFE",
                 tool_version=self.tool_version,
+                _platform_clients=self.parent._platform_clients,
+                _output_dir_path=_output_dir_path,
             )
 
-            job = Job.from_ids([job_id])
+            job = Job.from_id(job_id, _platform_clients=self.parent._platform_clients)
 
             job._viz_func = self._render_progress
             job._name_func = self._name_job
@@ -199,6 +275,9 @@ class ABFE(WorkflowStep):
             job.sync()
 
             self.jobs.append(job)
+            jobs_for_this_run.append(job)
+
+        return jobs_for_this_run
 
     @beartype
     def show_trajectory(
@@ -225,6 +304,8 @@ class ABFE(WorkflowStep):
         )
         files_to_download = [remote_pdb_file]
 
+        files_client = getattr(self.parent._platform_clients, "FilesApi", None)
+
         if step == "binding":
             # Check for valid windows
 
@@ -233,6 +314,7 @@ class ABFE(WorkflowStep):
                 tool="ABFE",
                 protein=self.parent.protein.file_path.name,
                 ligand=Path(ligand.file_path).name,
+                client=files_client,
             )
             xtc_files = [
                 file
@@ -247,12 +329,10 @@ class ABFE(WorkflowStep):
                 int(re.search(r"window_(\d+)", path).group(1)) for path in xtc_files
             ]
 
-            print(valid_windows)
-
             if window not in valid_windows:
                 raise DeepOriginException(
                     f"Invalid window number: {window}. Valid windows are: {sorted(valid_windows)}"
-                )
+                ) from None
 
             remote_xtc_file = (
                 remote_base
@@ -267,7 +347,7 @@ class ABFE(WorkflowStep):
 
         files_to_download.append(remote_xtc_file)
 
-        files_api.download_files(files_to_download)
+        files_api.download_files(files_to_download, client=files_client)
 
         from deeporigin_molstar.src.viewers import ProteinViewer
 
@@ -312,6 +392,11 @@ class ABFE(WorkflowStep):
 
             if "cmd" in data and data["cmd"] == "FEP Results":
                 return {step: "Succeeded" for step in steps}
+
+            if "status" in data and data["status"] == "Initiating":
+                progress = {step: "NotStarted" for step in steps}
+                progress["init"] = "Running"
+                return progress
 
             status_value = job._status[0]
 

@@ -11,32 +11,35 @@ from deeporigin.drug_discovery.abfe import ABFE
 from deeporigin.drug_discovery.docking import Docking
 from deeporigin.drug_discovery.rbfe import RBFE
 from deeporigin.drug_discovery.structures import Ligand, Protein
+from deeporigin.exceptions import DeepOriginException
+from deeporigin.files import FilesClient
+from deeporigin.platform.utils import PlatformClients
 
 
 @dataclass
 class Complex:
     """class to represent a set of a protein and 1 or many ligands"""
 
-    # Using a private attribute for ligands with the property decorator below
     protein: Protein
+
+    # Using a private attribute for ligands with the property decorator below
     _ligands: list[Ligand] = field(default_factory=list, repr=False)
+    _platform_clients: Optional[PlatformClients] = None
+    _prepared_systems: dict[str, str] = field(default_factory=dict, repr=False)
 
-    # these params are not user facing
-    _db: Optional[dict] = None
-
-    """stores a hash of all ligands and the protein. This will be computed post initialization"""
-    _hash: Optional[str] = None
-
+    @beartype
     def __init__(
         self,
-        protein: Protein,
         *,
+        protein: Protein,
         ligands: list[Ligand] | None = None,
-        **kwargs,
+        _platform_clients: Optional[PlatformClients] = None,
     ):
         """Initialize a Complex with either ligands or _ligands parameter"""
         self._ligands = ligands if ligands is not None else []
         self.protein = protein
+
+        self._platform_clients = _platform_clients
 
         self.__post_init__()
 
@@ -49,6 +52,8 @@ class Complex:
         self.abfe = ABFE(parent=self)
         self.rbfe = RBFE(parent=self)
 
+        self._prepared_systems = {}
+
     @property
     def ligands(self) -> list[Ligand]:
         """Get the current ligands"""
@@ -60,7 +65,12 @@ class Complex:
         self._ligands = new_ligands
 
     @classmethod
-    def from_dir(cls, directory: str) -> "Complex":
+    def from_dir(
+        cls,
+        directory: str,
+        *,
+        _platform_clients: Optional[PlatformClients] = None,
+    ) -> "Complex":
         """Initialize a Complex from a directory containing protein and ligand files.
 
         Args:
@@ -102,9 +112,10 @@ class Complex:
         ]
 
         if len(pdb_files) != 1:
-            raise ValueError(
-                f"Expected exactly one PDB file in the directory, but found {len(pdb_files)}."
-            )
+            raise DeepOriginException(
+                f"Expected exactly one PDB file in the directory, but found {len(pdb_files)}: {pdb_files}",
+                title="Complex.from_dir expects a single PDB file",
+            ) from None
         protein_file = pdb_files[0]
         protein = Protein.from_file(protein_file)
 
@@ -112,6 +123,7 @@ class Complex:
         instance = cls(
             protein=protein,
             ligands=ligands,
+            _platform_clients=_platform_clients,
         )
 
         return instance
@@ -126,7 +138,7 @@ class Complex:
         is_lig_protonated: bool = True,
         is_protein_protonated: bool = True,
     ) -> None:
-        """run system prepartion on the Complex
+        """run system preparation on the protein and one ligand from the Complex
 
         Args:
             ligand (Ligand): The ligand to prepare.
@@ -137,15 +149,23 @@ class Complex:
         """
         from deeporigin.functions.sysprep import sysprep
 
+        if ligand.file_path is None:
+            ligand_path = ligand.to_sdf()
+        else:
+            ligand_path = ligand.file_path
+
         # run sysprep on the ligand
         complex_path = sysprep(
             protein_path=self.protein.file_path,
-            ligand_path=ligand.file_path,
             padding=padding,
+            ligand_path=ligand_path,
             keep_waters=keep_waters,
             is_lig_protonated=is_lig_protonated,
             is_protein_protonated=is_protein_protonated,
         )
+
+        # set this complex path as the prepared system
+        self._prepared_systems[ligand.name] = complex_path
 
         # show it
         Protein.from_file(complex_path).show()
@@ -155,22 +175,37 @@ class Complex:
 
         Internal method. Do not use."""
 
-        # get a list of all files in the entities directory
-        from deeporigin.files import FilesClient
+        # the reason we are uploading here manually, instead of using ligand.upload()
+        # and protein.upload() is so that we can make one call to upload_files, instead
+        # of several
 
-        files_client = FilesClient()
+        if self._platform_clients is None:
+            files_client = FilesClient()
+        else:
+            files_client = self._platform_clients.FilesApi
+
+        # get a list of all files in the entities directory
         remote_files = files_client.list_folder("entities", recursive=True)
         remote_files = list(remote_files.keys())
 
         files_to_upload = {}
 
-        protein_path = "entities/proteins/" + os.path.basename(self.protein.file_path)
-        if protein_path not in remote_files:
+        protein_path = self.protein._remote_path_base + os.path.basename(
+            self.protein.file_path
+        )
+        if protein_path in remote_files:
+            self.protein._remote_path = protein_path
+        else:
             files_to_upload[str(self.protein.file_path)] = protein_path
 
         for ligand in self.ligands:
-            ligand_path = "entities/ligands/" + os.path.basename(ligand.file_path)
-            if ligand_path not in remote_files:
+            if ligand.file_path is None:
+                # this ligand isn't being backed by a file, so we can't upload it
+                continue
+            ligand_path = ligand._remote_path_base + os.path.basename(ligand.file_path)
+            if ligand_path in remote_files:
+                ligand._remote_path = ligand_path
+            else:
                 files_to_upload[str(ligand.file_path)] = ligand_path
 
         files_client.upload_files(files_to_upload)
@@ -199,7 +234,7 @@ class Complex:
                   If None, all ligands will be shown.
         """
 
-        if view == "3d":
+        if view.lower() == "3d":
             files = [ligand.file_path for ligand in self.ligands]
 
             if limit is not None:

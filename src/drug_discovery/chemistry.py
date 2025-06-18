@@ -10,8 +10,6 @@ from typing import Optional
 from beartype import beartype
 from rdkit import Chem
 
-from deeporigin.exceptions import DeepOriginException
-
 
 @beartype
 def read_molecules_in_sdf_file(sdf_file: str | Path) -> list[dict]:
@@ -419,43 +417,6 @@ def sdf_to_smiles(sdf_file: str | Path) -> list[str]:
     smiles_list = sorted(set(smiles_list))
 
     return smiles_list
-
-
-@beartype
-def download_protein(
-    pdb_id: str,
-    save_dir: str = ".",
-) -> str:
-    """
-    Downloads a PDB structure by its PDB ID from RCSB and saves it to the specified directory.
-
-    Args:
-        pdb_id (str): PDB ID of the protein.
-        save_dir (str): Directory to save the downloaded PDB file.
-
-    Returns:
-        str: Path to the downloaded PDB file.
-
-    Raises:
-        Exception: If the download fails.
-    """
-
-    from biotite.database.rcsb import fetch
-
-    pdb_id = pdb_id.lower()
-    save_dir_path = Path(save_dir)
-    save_dir_path.mkdir(parents=True, exist_ok=True)
-
-    file_path = save_dir_path / f"{pdb_id}.pdb"
-    if not file_path.exists():
-        try:
-            fetch(pdb_id, "pdb", save_dir_path)
-        except Exception as e:
-            raise DeepOriginException(
-                f"Failed to download PDB {pdb_id}: {str(e)}"
-            ) from e
-
-    return str(file_path)
 
 
 @beartype

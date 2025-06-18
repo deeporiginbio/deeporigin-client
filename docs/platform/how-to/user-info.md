@@ -4,9 +4,9 @@
 
 To get information about the currently logged in user, including the user ID, use:
 
-```python
-from deeporigin.platform import users
-users.get_account()
+```{.python notest}
+from deeporigin.platform import users_api
+users_api.get_account()
 ```
 
 returns information about the current user. A typical response is:

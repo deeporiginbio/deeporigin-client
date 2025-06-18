@@ -9,11 +9,14 @@ class AnthropicApiKey(SecretEnvironmentVariableValue):
     """Anthropic API key"""
 
     class Meta:
+        """Meta class for AnthropicApiKey"""
+
         platform_id = "Anthropic API key"
 
     @classmethod
-    @property
     def KEY(cls) -> str:
+        """Anthropic API key"""
+
         return "ANTHROPIC_API_KEY"
 
     value: str = pydantic.Field(default=None, min_length=1, validate_default=True)

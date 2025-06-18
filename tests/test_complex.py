@@ -1,6 +1,35 @@
 import os
 
+import pytest
+
 from deeporigin.drug_discovery import EXAMPLE_DATA_DIR, Complex, Ligand, Protein
+from deeporigin.exceptions import DeepOriginException
+
+
+def test_from_dir_2_pdb():
+    """Test creating a Complex from a directory with 2 PDB files"""
+
+    # Find the original PDB file in EXAMPLE_DATA_DIR
+    pdb_files = [f for f in os.listdir(EXAMPLE_DATA_DIR) if f.endswith(".pdb")]
+
+    original_pdb = pdb_files[0]
+    original_pdb_path = os.path.join(EXAMPLE_DATA_DIR, original_pdb)
+    copy_pdb_path = os.path.join(EXAMPLE_DATA_DIR, "copy_" + original_pdb)
+
+    # Make a copy of the pdb file
+    import shutil
+
+    shutil.copyfile(original_pdb_path, copy_pdb_path)
+
+    try:
+        with pytest.raises(
+            DeepOriginException,
+            match="Expected exactly one PDB file in the directory, but found 2: ",
+        ):
+            Complex.from_dir(EXAMPLE_DATA_DIR)
+    finally:
+        # Clean up: delete the copy
+        os.remove(copy_pdb_path)
 
 
 def test_from_dir():

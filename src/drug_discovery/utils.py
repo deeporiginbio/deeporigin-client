@@ -6,10 +6,16 @@ import os
 from typing import Any, Optional
 
 from beartype import beartype
+import pandas as pd
 
 from deeporigin.drug_discovery.constants import tool_mapper, valid_tools
+from deeporigin.files import FilesClient
 from deeporigin.platform import tools_api
+from deeporigin.platform.utils import PlatformClients
 from deeporigin.utils.core import PrettyDict
+
+PROVIDER_KEY = "$provider"
+RESULTS_CSV = "results.csv"
 
 DATA_DIRS = dict()
 
@@ -32,53 +38,87 @@ def _start_tool_run(
     params: dict,
     metadata: dict,
     protein_path: str,
-    ligand1_path: str,
-    ligand2_path: Optional[str] = None,
     tool: valid_tools,
     tool_version: str,
+    ligand1_path: Optional[str] = None,
+    ligand2_path: Optional[str] = None,
+    provider: tools_api.PROVIDER = "ufa",
+    _platform_clients: Optional[PlatformClients] = None,
+    _output_dir_path: Optional[str] = None,
 ) -> str:
-    """starts a single run of ABFE end to end and logs it in the ABFE database. Internal function. Do not use.
+    """
+    Starts a single run of an end-to-end tool (such as ABFE) and logs it in the ABFE database.
+
+    This is an internal function that prepares input and output file parameters, sets up the job metadata,
+    and submits the job to the platform's tools API. Only ABFE is currently supported.
 
     Args:
-        protein_id (str): protein ID
-        ligand_id (str): ligand ID
-        params (dict): parameters for the ABFE end-to-end job
+        params (dict): Parameters for the tool run, including input and configuration options.
+        metadata (dict): Metadata to be logged with the job.
+        protein_path (str): Remote path to the protein file to be used in the run.
+        ligand1_path (str): Remnote path to the first ligand file.
+        ligand2_path (Optional[str]): Remote path to the second ligand file (required for RBFE).
+        tool (valid_tools): The tool to run (e.g., 'ABFE', 'RBFE').
+        tool_version (str): Version of the tool to use.
+        provider (tools_api.PROVIDER, optional): File provider for input/output files. Defaults to 'ufa'.
+        _platform_clients (Optional[PlatformClients]): Platform client objects for API access.
+        _output_dir_path (Optional[str]): Custom output directory path (on remote storage). If None, a default is constructed.
 
+    Returns:
+        str: The job ID of the started tool run.
+
+    Raises:
+        NotImplementedError: If a tool other than ABFE is specified.
     """
 
-    if tool == "ABFE":
-        output_dir_path = (
-            "tool-runs/"
-            + tool
-            + "/"
-            + os.path.basename(protein_path)
-            + "/"
-            + os.path.basename(ligand1_path)
-            + "/"
-        )
-    else:
-        raise NotImplementedError("Tools other than ABFE are not implemented yet")
+    if _output_dir_path is None:
+        if tool == "ABFE":
+            _output_dir_path = (
+                "tool-runs/"
+                + tool
+                + "/"
+                + os.path.basename(protein_path)
+                + "/"
+                + os.path.basename(ligand1_path)
+                + "/"
+            )
+        elif tool == "RBFE":
+            _output_dir_path = (
+                "tool-runs/"
+                + tool
+                + "/"
+                + os.path.basename(protein_path)
+                + "/"
+                + os.path.basename(ligand1_path)
+                + "/"
+                + os.path.basename(ligand2_path)
+                + "/"
+            )
+        else:
+            raise NotImplementedError(
+                "Tools other than ABFE and RBFE are not implemented yet"
+            )
 
     # a protein is needed for ABFE, RBFE, and docking
     params["protein"] = {
-        "$provider": "ufa",
+        PROVIDER_KEY: provider,
         "key": protein_path,
     }
 
     # input ligand files
     if tool == "RBFE":
         params["ligand1"] = {
-            "$provider": "ufa",
+            PROVIDER_KEY: provider,
             "key": ligand1_path,
         }
 
         params["ligand2"] = {
-            "$provider": "ufa",
+            PROVIDER_KEY: provider,
             "key": ligand2_path,
         }
     elif tool == "ABFE":
         params["ligand"] = {
-            "$provider": "ufa",
+            PROVIDER_KEY: provider,
             "key": ligand1_path,
         }
 
@@ -86,35 +126,34 @@ def _start_tool_run(
     if tool == "RBFE":
         outputs = {
             "output_file": {
-                "$provider": "ufa",
-                "key": output_dir_path + "output/",
+                PROVIDER_KEY: provider,
+                "key": _output_dir_path + "output/",
             },
             "rbfe_results_summary": {
-                "$provider": "ufa",
-                "key": output_dir_path + "results.csv",
+                PROVIDER_KEY: provider,
+                "key": _output_dir_path + RESULTS_CSV,
             },
         }
     elif tool == "ABFE":
         outputs = {
             "output_file": {
-                "$provider": "ufa",
-                "key": output_dir_path + "output/",
+                PROVIDER_KEY: provider,
+                "key": _output_dir_path + "output/",
             },
             "abfe_results_summary": {
-                "$provider": "ufa",
-                "key": output_dir_path + "results.csv",
+                PROVIDER_KEY: provider,
+                "key": _output_dir_path + RESULTS_CSV,
             },
         }
     elif tool == "Docking":
-        raise NotImplementedError("Docking is not implemented yet")
         outputs = {
             "data_file": {
-                "$provider": "ufa",
-                "key": output_dir_path,
+                PROVIDER_KEY: provider,
+                "key": _output_dir_path + RESULTS_CSV,
             },
             "results_sdf": {
-                "$provider": "ufa",
-                "key": "mason/inputs/message_file.txt",
+                PROVIDER_KEY: provider,
+                "key": _output_dir_path + "results.sdf",
             },
         }
 
@@ -123,12 +162,27 @@ def _start_tool_run(
             "⚠️ Warning: test_run=1 in these parameters. Results will not be accurate."
         )
 
+    tools_client = getattr(_platform_clients, "ToolsApi", None)
+    clusters_client = getattr(_platform_clients, "ClustersApi", None)
+
+    if _platform_clients is None:
+        from deeporigin.config import get_value
+
+        org_friendly_id = get_value()["organization_id"]
+    else:
+        org_friendly_id = _platform_clients.org_friendly_id
+
     job_id = tools_api._process_job(
         inputs=params,
         outputs=outputs,
         tool_key=tool_mapper[tool],
         metadata=metadata,
+        client=tools_client,
+        org_friendly_id=org_friendly_id,
+        clusters_client=clusters_client,
     )
+
+    print(f"Job started with Job ID: {job_id}")
 
     return job_id
 
@@ -171,6 +225,7 @@ def find_files_on_ufa(
     tool: str,
     protein: str,
     ligand: Optional[str] = None,
+    client: Optional[FilesClient] = None,
 ) -> list:
     """
     Find files on the UFA (Unified File API) storage for a given tool run.
@@ -188,9 +243,12 @@ def find_files_on_ufa(
     Returns:
         List[str]: A list of file paths found in the specified UFA directory.
     """
-    from deeporigin.files import FilesClient
 
-    client = FilesClient()
+    if client is None:
+        from deeporigin.files import FilesClient
+
+        client = FilesClient()
+
     if ligand is not None:
         search_str = f"tool-runs/{tool}/{protein}/{ligand}/"
     else:
@@ -199,3 +257,26 @@ def find_files_on_ufa(
     files = list(files.keys())
 
     return files
+
+
+def render_smiles_in_dataframe(df: pd.DataFrame, smiles_col: str) -> pd.DataFrame:
+    """use rdkit to render SMILES in a dataframe"""
+
+    if smiles_col not in df.columns:
+        raise ValueError(f"Column '{smiles_col}' not found in DataFrame.")
+
+    from rdkit.Chem import PandasTools
+
+    # Replace None/NaN in the SMILES column with a placeholder
+    df[smiles_col] = df[smiles_col].fillna("")
+
+    PandasTools.AddMoleculeColumnToFrame(df, smilesCol=smiles_col, molCol="Structure")
+    PandasTools.RenderImagesInAllDataFrames()
+
+    # show structure first
+    new_order = ["Structure"] + [col for col in df.columns if col != "Structure"]
+
+    # re‑index DataFrame
+    df = df[new_order]
+
+    return df

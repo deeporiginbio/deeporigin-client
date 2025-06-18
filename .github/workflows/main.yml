@@ -82,5 +82,11 @@ jobs:
           make test-github 
 
 
+      - name: "test docs with pytest markdown-docs"
+        run: |
+          pytest -x --markdown-docs --markdown-docs-syntax=superfences 
+
+
+
   
 

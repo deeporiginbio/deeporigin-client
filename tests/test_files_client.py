@@ -19,6 +19,8 @@ def test_upload_and_download_files(config, tmp_path):  # noqa: F811
         for file in files
     }
 
+    print(src_to_dest)
+
     success, _ = files_client.upload_files(src_to_dest)
     assert success, "Failed to upload files"
 
@@ -56,3 +58,16 @@ def test_list_folder(config):  # noqa: F811
     assert set(data.keys()) == set(src_to_dest.values()), (
         "Failed to list files correctly"
     )
+
+
+def test_upload_files_missing_local_files(config):  # noqa: F811
+    if config["mock"]:
+        pytest.skip("test skipped with mock client")
+
+    files_client = FilesClient()
+
+    # Use a nonexistent file path
+    missing_file = "/tmp/this_file_does_not_exist_123456789.txt"
+    src_to_dest = {missing_file: "test-upload/missing.txt"}
+    with pytest.raises(FileNotFoundError, match=missing_file):
+        files_client.upload_files(src_to_dest)

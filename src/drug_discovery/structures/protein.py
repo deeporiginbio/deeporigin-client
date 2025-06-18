@@ -26,7 +26,7 @@ Dependencies:
 - External tools for enhanced functionality
 
 Usage Example:
-```python
+
 # Initialize with a PDB ID
 protein = Protein.from_pdb_id("1ABC")
 
@@ -41,7 +41,7 @@ protein_no_water = protein.remove_water()
 
 # Visualize the protein structure
 protein.show()
-```
+
 """
 
 from collections import defaultdict
@@ -53,7 +53,6 @@ import tempfile
 from typing import Optional, Tuple
 
 from beartype import beartype
-from biotite.database.rcsb import fetch
 from biotite.structure import filter_solvent
 from biotite.structure.geometry import centroid
 from biotite.structure.io.pdb import PDBFile
@@ -65,14 +64,16 @@ from deeporigin.drug_discovery.external_tools.utils import (
     generate_html_output,
     get_protein_info_dict,
 )
+from deeporigin.exceptions import DeepOriginException
 from deeporigin.functions.pocket_finder import find_pockets
 
+from .entity import Entity
 from .ligand import Ligand
 from .pocket import Pocket
 
 
 @dataclass
-class Protein:
+class Protein(Entity):
     """A class representing a protein structure with various manipulation and analysis capabilities."""
 
     # Core attributes
@@ -84,6 +85,8 @@ class Protein:
     atom_types: Optional[np.ndarray] = None
     block_type: str = "pdb"
     block_content: Optional[str] = None
+
+    _remote_path_base = "entities/proteins/"
 
     @classmethod
     def from_pdb_id(cls, pdb_id: str, struct_ind: int = 0) -> "Protein":
@@ -102,7 +105,21 @@ class Protein:
             RuntimeError: If the download fails.
         """
         try:
-            file_path = Path(cls.download_protein_by_pdb_id(pdb_id)).absolute()
+            # Download logic (merged from download_protein_by_pdb_id)
+            from pathlib import Path
+
+            from biotite.database.rcsb import fetch
+
+            pdb_id_lower = pdb_id.lower()
+            # Get directory for storing protein files
+            home_dir = Path.home()
+            proteins_dir = home_dir / ".deeporigin" / "proteins"
+            proteins_dir.mkdir(parents=True, exist_ok=True)
+            file_path = proteins_dir / f"{pdb_id_lower}.pdb"
+            if not file_path.exists():
+                fetch(pdb_id_lower, "pdb", proteins_dir)
+
+            file_path = file_path.absolute()
             block_content = file_path.read_text()
             structure = cls.load_structure_from_block(block_content, "pdb")
             structure = cls.select_structure(structure, struct_ind)
@@ -117,9 +134,10 @@ class Protein:
                 block_content=block_content,
             )
         except Exception as e:
-            raise RuntimeError(
-                f"Failed to create Protein from PDB ID {pdb_id}: {str(e)}"
-            ) from e
+            raise DeepOriginException(
+                f"Failed to create Protein from PDB ID `{pdb_id}`: {str(e)}",
+                title="Failed to download protein from PDB",
+            ) from None
 
     @classmethod
     def from_file(cls, file_path: str, struct_ind: int = 0) -> "Protein":
@@ -182,32 +200,38 @@ class Protein:
             )
         return structure[index]
 
-    @staticmethod
-    def download_protein_by_pdb_id(pdb_id: str, save_dir: str = "") -> str:
-        """Download a PDB structure by its PDB ID from RCSB."""
-        if save_dir == "":
-            save_dir = Protein.get_directory()
+    @property
+    def sequence(self) -> list[str]:
+        """
+        Retrieve the amino acid sequences of all polypeptide chains in the protein structure.
 
-        pdb_id = pdb_id.lower()
-        save_dir_path = Path(save_dir)
-        save_dir_path.mkdir(parents=True, exist_ok=True)
+        This property parses the protein structure file using Bio.PDB and extracts the sequences
+        of all peptide chains present. Each sequence is returned as a Bio.Seq object, which can be
+        converted to a string if needed. The method is useful for analyzing the primary structure
+        of the protein or for downstream sequence-based analyses.
 
-        file_path = save_dir_path / f"{pdb_id}.pdb"
-        if not file_path.exists():
-            try:
-                fetch(pdb_id, "pdb", save_dir_path)
-            except Exception as e:
-                raise RuntimeError(f"Failed to download PDB {pdb_id}: {str(e)}") from e
+        Returns:
+            list[str]: A list of amino acid sequences (as Bio.Seq objects) for each polypeptide chain
+                found in the protein structure. If the structure contains multiple chains, each chain's
+                sequence is included as a separate entry in the list.
 
-        return str(file_path)
+        Example:
+            >>> protein = Protein.from_file("example.pdb")
+            >>> sequences = protein.sequence
+            >>> for seq in sequences:
+            ...     print(seq)
+        """
+        from Bio.PDB import PDBParser, PPBuilder
 
-    @staticmethod
-    def get_directory() -> str:
-        """Get the directory for storing protein files."""
-        home_dir = Path.home()
-        proteins_dir = home_dir / ".deeporigin" / "proteins"
-        proteins_dir.mkdir(parents=True, exist_ok=True)
-        return str(proteins_dir)
+        parser = PDBParser(QUIET=True)
+        structure = parser.get_structure("X", self.file_path)
+
+        ppb = PPBuilder()
+        sequences = []
+        for pp in ppb.build_peptides(structure):
+            sequences.append(pp.get_sequence())
+
+        return sequences
 
     @beartype
     def dock(
@@ -377,10 +401,7 @@ class Protein:
         Raises:
         - ValueError: If the chain ID is not found.
 
-        Example:
-        ```python
-        chain_a = protein.select_chain('A')
-        ```
+
         """
         chain_records = self._filter_chain_records(chain_ids=[chain_id])
         if len(chain_records) > 0:
@@ -407,7 +428,7 @@ class Protein:
     @beartype
     def find_pockets(
         self,
-        pocket_count: int = 5,
+        pocket_count: int = 1,
         pocket_min_size: int = 30,
     ) -> list[Pocket]:
         """Find potential binding pockets in the protein structure.
@@ -465,11 +486,7 @@ class Protein:
         - If `keep_resnames` is provided, those residues (along with any metals not excluded) will be retained even if they are HETATM records.
         - The method updates the current protein object in place.
 
-        Example:
-        ```python
-            protein = Protein(structure)
-            protein.remove_hetatm(keep_resnames=['HOH'], exclude_metals=['ZN'])
-        ```
+
         """
         metals = METALS
         if remove_metals:
@@ -514,12 +531,39 @@ class Protein:
         """
         Remove water molecules from the protein structure in place.
 
-        Example:
-        ```python
-        protein.remove_water()
-        ```
         """
         self.structure = self.structure[~filter_solvent(self.structure)]
+
+    def find_missing_residues(self) -> dict[str, list[tuple[int, int]]]:
+        """find missing residues in the protein structure"""
+
+        from Bio.PDB import PDBParser
+
+        parser = PDBParser(QUIET=True)
+        structure = parser.get_structure("protein", self.file_path)
+
+        missing = {}
+
+        for model in structure:
+            for chain in model:
+                chain_id = chain.id
+                last_resseq = None
+                gaps = []
+
+                residues = sorted(
+                    [res for res in chain.get_residues() if res.id[0] == " "],
+                    key=lambda r: r.id[1],
+                )
+                for res in residues:
+                    resseq = res.id[1]
+                    if last_resseq is not None and resseq > last_resseq + 1:
+                        gaps.append((last_resseq, resseq))
+                    last_resseq = resseq
+
+                if gaps:
+                    missing[chain_id] = gaps
+
+        return missing
 
     def extract_metals_and_cofactors(self) -> Tuple[list[str], list[str]]:
         """
@@ -696,10 +740,7 @@ class Protein:
         Args:
             file_path (str): Path where the PDB file will be written.
 
-        Example:
-        ```python
-        protein.to_pdb('/path/to/output.pdb')
-        ```
+
         """
         try:
             pdb_file = PDBFile()

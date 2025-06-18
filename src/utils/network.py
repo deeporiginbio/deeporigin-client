@@ -25,7 +25,10 @@ def check_for_updates():
     if not in_aws_lambda():
         try:
             latest_pypi_version = Version(_get_pypi_version())
-            if Version(__version__) < latest_pypi_version:
+            if (
+                Version(__version__) < latest_pypi_version
+                and __version__ != "0.0.0.dev0"
+            ):
                 print(
                     f"🎈 A new version of Deep Origin is available. You have version {__version__}. The latest version is {latest_pypi_version}. Please update to the newest version."
                 )
@@ -51,7 +54,7 @@ def download_sync(
             raise DeepOriginException(
                 message=f"File could not be downloaded from {url}. The message is {response.text}",
                 title=f"Deep Origin Error: [{response.status_code}]",
-            )
+            ) from None
 
         with open(save_path, "wb") as file:
             for chunk in response.iter_content(chunk_size=8192):
@@ -59,7 +62,7 @@ def download_sync(
                     file.write(chunk)
 
 
-def _get_pypi_version():
+def _get_pypi_version() -> str | None:
     """determines the latest version on PyPI"""
 
     response = requests.get("https://pypi.org/pypi/deeporigin/json")

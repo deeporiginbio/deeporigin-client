@@ -1,17 +1,15 @@
 """bridge module to interact with the platform tools api"""
 
 import concurrent.futures
-import functools
 from functools import wraps
 import inspect
 import sys
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Literal, Optional
 
 from beartype import beartype
 import pandas as pd
 
-from deeporigin.config import get_value
-from deeporigin.platform import clusters_api, tools_api
+from deeporigin.platform import clusters_api
 from deeporigin.platform.utils import _add_functions_to_module
 
 __all__ = _add_functions_to_module(
@@ -20,12 +18,22 @@ __all__ = _add_functions_to_module(
 )
 
 
-TERMINAL_STATES = {"Succeeded", "Failed"}
+TERMINAL_STATES = {"Succeeded", "Failed", "Cancelled"}
 NON_TERMINAL_STATES = {"Created", "Queued", "Running"}
+
+NON_FAILED_STATES = {"Succeeded", "Running", "Queued", "Created"}
+
+# possible providers for files that work with the tools API
+PROVIDER = Literal["ufa", "s3"]
 
 
 @beartype
-def get_status_and_progress(execution_id: str) -> dict:
+def get_status_and_progress(
+    execution_id: str,
+    *,
+    client=None,
+    org_friendly_id: Optional[str] = None,
+) -> dict:
     """Determine the status of a run, identified by job ID
 
     Args:
@@ -34,8 +42,10 @@ def get_status_and_progress(execution_id: str) -> dict:
 
     """
 
-    data = tools_api.get_tool_execution(
+    data = get_tool_execution(  # noqa: F821
         execution_id=execution_id,
+        org_friendly_id=org_friendly_id,
+        client=client,
     )
 
     return dict(
@@ -49,7 +59,12 @@ def get_status_and_progress(execution_id: str) -> dict:
 
 
 @beartype
-def get_statuses_and_progress(job_ids: list[str]) -> list:
+def get_statuses_and_progress(
+    job_ids: list[str],
+    *,
+    client=None,
+    org_friendly_id: Optional[str] = None,
+) -> list:
     """get statuses and progress reports for multiple jobs in parallel
 
     Args:
@@ -57,20 +72,33 @@ def get_statuses_and_progress(job_ids: list[str]) -> list:
 
     """
     results = []
+    errors = []
 
     with concurrent.futures.ThreadPoolExecutor() as executor:
         # Submit all jobs and create a mapping from future to job_id
         future_to_job_id = {
-            executor.submit(get_status_and_progress, job_id): job_id
+            executor.submit(
+                get_status_and_progress,
+                job_id,
+                client=client,
+                org_friendly_id=org_friendly_id,
+            ): job_id
             for job_id in job_ids
         }
 
         # As each future completes, store the result in the status dictionary
         for future in concurrent.futures.as_completed(future_to_job_id):
+            job_id = future_to_job_id[future]
             try:
                 results.append(future.result())
-            except Exception:
-                pass
+            except Exception as e:
+                errors.append((job_id, e))
+
+    if errors:
+        error_msgs = "\n".join([f"Job {jid}: {str(err)}" for jid, err in errors])
+        raise RuntimeError(
+            f"Some jobs failed in get_status_and_progress:\n{error_msgs}"
+        )
 
     return results
 
@@ -78,6 +106,9 @@ def get_statuses_and_progress(job_ids: list[str]) -> list:
 @beartype
 def cancel_runs(
     job_ids: list[str] | pd.core.series.Series | pd.core.frame.DataFrame,
+    *,
+    client=None,
+    org_friendly_id: Optional[str] = None,
 ) -> None:
     """Cancel multiple jobs in parallel.
 
@@ -91,7 +122,15 @@ def cancel_runs(
         job_ids = job_ids["id"].tolist()
 
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = [executor.submit(cancel_run, job_id) for job_id in job_ids]
+        futures = [
+            executor.submit(
+                cancel_run,
+                job_id,
+                client=client,
+                org_friendly_id=org_friendly_id,
+            )
+            for job_id in job_ids
+        ]
         concurrent.futures.wait(futures)
         # Raise the first exception encountered
         for future in futures:
@@ -101,25 +140,41 @@ def cancel_runs(
 
 
 @beartype
-def cancel_run(execution_id: str) -> None:
+def cancel_run(
+    execution_id: str,
+    *,
+    client=None,
+    org_friendly_id: Optional[str] = None,
+) -> None:
     """cancel a run
 
     Args:
         execution_id (str): execution ID
     """
 
-    data = get_status_and_progress(execution_id)
+    data = get_status_and_progress(
+        execution_id,
+        client=client,
+        org_friendly_id=org_friendly_id,
+    )
     if data["status"] in ["Cancelled", "Failed", "Succeeded"]:
         return
 
-    tools_api.action_tool_execution(
+    action_tool_execution(  # noqa: F821
         execution_id=execution_id,
         action="cancel",
+        client=client,
+        org_friendly_id=org_friendly_id,
     )
 
 
 @beartype
-def query_run_statuses(job_ids: list[str]) -> dict:
+def query_run_statuses(
+    job_ids: list[str],
+    *,
+    client=None,
+    org_friendly_id: Optional[str] = None,
+) -> dict:
     """get statuses for multiple jobs in parallel
 
     Args:
@@ -131,7 +186,13 @@ def query_run_statuses(job_ids: list[str]) -> dict:
     with concurrent.futures.ThreadPoolExecutor() as executor:
         # Submit all jobs and create a mapping from future to job_id
         future_to_job_id = {
-            executor.submit(query_run_status, job_id): job_id for job_id in job_ids
+            executor.submit(
+                query_run_status,
+                job_id,
+                client=client,
+                org_friendly_id=org_friendly_id,
+            ): job_id
+            for job_id in job_ids
         }
 
         # As each future completes, store the result in the status dictionary
@@ -146,7 +207,12 @@ def query_run_statuses(job_ids: list[str]) -> dict:
 
 
 @beartype
-def query_run_status(execution_id: str) -> str:
+def query_run_status(
+    execution_id: str,
+    *,
+    client=None,
+    org_friendly_id: Optional[str] = None,
+) -> str:
     """Determine the status of a run, identified by execution_id ID
 
     Args:
@@ -157,7 +223,11 @@ def query_run_status(execution_id: str) -> str:
 
     """
 
-    data = tools_api.get_tool_execution(execution_id=execution_id)
+    data = get_tool_execution(  # noqa: F821
+        execution_id=execution_id,
+        client=client,
+        org_friendly_id=org_friendly_id,
+    )
 
     return data.attributes.status
 
@@ -189,32 +259,14 @@ def _resolve_column_name(column_name: str, cols: list) -> str:
     return column_id
 
 
-@functools.cache
-@beartype
-def _get_cluster_id() -> str:
-    """gets a valid cluster ID to run tools on
-
-    this defaults to pulling us-west-2"""
-
-    available_clusters = clusters_api.list_clusters(
-        org_friendly_id=get_value()["organization_id"]
-    )
-
-    cluster = [
-        cluster
-        for cluster in available_clusters
-        if "us-west-2" in cluster.attributes.name
-    ]
-    cluster = cluster[0]
-    cluster_id = cluster.id
-    return cluster_id
-
-
 @beartype
 def run_tool(
     *,
     data: dict,
     tool_key: str,
+    client=None,
+    org_friendly_id: Optional[str] = None,
+    clusters_client=None,
 ):
     """run any tool using provided data transfer object (DTO)
 
@@ -222,12 +274,50 @@ def run_tool(
         data (dict): data transfer object. This is typically generated by the `make_payload` function."""
 
     if "clusterId" not in data.keys():
-        data["clusterId"] = _get_cluster_id()
+        data["clusterId"] = clusters_api._get_cluster_id(
+            client=clusters_client,
+            org_friendly_id=org_friendly_id,
+        )
 
-    return tools_api.execute_tool(
+    return execute_tool(  # noqa: F821
         tool_key=tool_key,
         execute_tool_dto=data,
+        client=client,
+        org_friendly_id=org_friendly_id,
     )
+
+
+@beartype
+def _process_job(
+    *,
+    inputs: dict,
+    outputs: dict,
+    tool_key: str,
+    cols: Optional[list] = None,
+    metadata: Optional[dict] = None,
+    client=None,  # this is the tools client
+    org_friendly_id: Optional[str] = None,
+    clusters_client=None,
+) -> str:
+    """helper function that uses inputs and outputs to construct a payload and run a tool"""
+
+    payload = make_payload(
+        outputs=outputs,
+        inputs=inputs,
+        cols=cols,
+        metadata=metadata,
+    )
+
+    response = run_tool(
+        data=payload,
+        tool_key=tool_key,
+        client=client,
+        org_friendly_id=org_friendly_id,
+        clusters_client=clusters_client,
+    )
+    job_id = response.id
+
+    return job_id
 
 
 @beartype
@@ -235,7 +325,6 @@ def make_payload(
     *,
     inputs: dict,
     outputs: dict,
-    cluster_id: Optional[str] = None,
     cols: Optional[list] = None,
     metadata: Optional[dict] = None,
 ) -> dict:
@@ -244,7 +333,6 @@ def make_payload(
     Args:
         inputs (dict): inputs
         outputs (dict): outputs
-        cluster_id (Optional[str], optional): cluster ID. Defaults to None. If not provided, the default cluster (us-west-2) is used.
         cols: (Optional[list], optional): list of columns. Defaults to None. If provided, column names (in inputs or outputs) are converted to column IDs.
         metadata: (Optional[dict], optional): metadata to be added to the payload. Defaults to None.
 
@@ -252,13 +340,11 @@ def make_payload(
         dict: correctly formatted payload, ready to be passed to run_tool
     """
 
-    if cluster_id is None:
-        cluster_id = _get_cluster_id()
-
+    # note that clusterId is not included here
+    # it need to be included for this payload to be valid
     payload = dict(
         inputs=inputs,
         outputs=outputs,
-        clusterId=cluster_id,
         metadata=metadata,
     )
 
@@ -329,34 +415,12 @@ def _column_name_to_column_id(
     return data
 
 
-@beartype
-def _process_job(
+def generate_tool_function(
     *,
-    inputs: dict,
-    outputs: dict,
     tool_key: str,
-    cols: Optional[list] = None,
-    metadata: Optional[dict] = None,
-) -> str:
-    """helper function that uses inputs and outputs to construct a payload and run a tool"""
-
-    payload = make_payload(
-        outputs=outputs,
-        inputs=inputs,
-        cols=cols,
-        metadata=metadata,
-    )
-
-    response = run_tool(
-        data=payload,
-        tool_key=tool_key,
-    )
-    job_id = response.id
-
-    return job_id
-
-
-def generate_tool_function(*, tool_key: str, tool_version: str) -> Callable:
+    tool_version: str,
+    org_friendly_id: Optional[str] = None,
+) -> Callable:
     """utility function that generates a function that can be used to run a too, from schema
 
     Example usage:
@@ -370,7 +434,7 @@ def generate_tool_function(*, tool_key: str, tool_version: str) -> Callable:
 
     """
 
-    data = tools_api.get_tool(tool_key=tool_key)
+    data = get_tool(tool_key=tool_key)  # noqa: F821
     data = [item for item in data if item.version == tool_version]
 
     if len(data) == 0:
@@ -431,6 +495,14 @@ def generate_tool_function(*, tool_key: str, tool_version: str) -> Callable:
             annotation=dict[str, Any] | None,
         )
     )
+    parameters.append(
+        inspect.Parameter(
+            "client",
+            inspect.Parameter.KEYWORD_ONLY,
+            default=None,
+            annotation=Any,
+        )
+    )
 
     sig = inspect.Signature(parameters)
 
@@ -454,12 +526,15 @@ def generate_tool_function(*, tool_key: str, tool_version: str) -> Callable:
         }
 
         metadata = arguments.get("metadata")
+        client = arguments.get("client")
 
-        return tools_api._process_job(
+        return _process_job(
             inputs=inputs,
             outputs=outputs,
             tool_key=tool_key,
             metadata=metadata,
+            client=client,
+            org_friendly_id=org_friendly_id,
         )
 
     # Sanitize function name to be a valid Python identifier

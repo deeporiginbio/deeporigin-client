@@ -36,7 +36,7 @@ colored terminal output, Requests for API interactions, and integrates with the 
 deeporigin_molstar package for visualization purposes.
 
 Usage Example:
-```python
+
 # Initialize a Ligand instance from a SMILES string
 ligand = Ligand(smiles="CCO", name="Ethanol")
 
@@ -53,12 +53,11 @@ print(ligand)
 ligand.visualize()
 """
 
-# from deeporigin.drug_discovery.utilities.props import predict_properties, protonate
 from dataclasses import dataclass, field
 import os
 from pathlib import Path
 import tempfile
-from typing import Any, List, Optional, Union
+from typing import Any, List, Literal, Optional, Union
 
 from beartype import beartype
 from deeporigin_molstar import MoleculeViewer
@@ -75,9 +74,11 @@ from deeporigin.drug_discovery.structures.internal_structures import (
 from deeporigin.drug_discovery.utilities.visualize import jupyter_visualization
 from deeporigin.exceptions import DeepOriginException
 
+from .entity import Entity
+
 
 @dataclass
-class Ligand:
+class Ligand(Entity):
     """A class representing a ligand molecule in drug discovery workflows.
     The Ligand class provides functionality to create, manipulate, and analyze small molecules
     (ligands) in computational drug discovery. It supports various input formats and provides
@@ -138,6 +139,8 @@ class Ligand:
     hac: int = field(init=False, default=0)
     available_for_docking: bool = field(init=False, default=True)
 
+    _remote_path_base = "entities/ligands/"
+
     @classmethod
     @beartype
     def from_rdkit_mol(
@@ -146,7 +149,7 @@ class Ligand:
         name: str = "",
         save_to_file: bool = False,
         **kwargs: Any,
-    ) -> "Ligand":
+    ):
         """
         Create a Ligand instance from an RDKit Mol object.
 
@@ -156,13 +159,6 @@ class Ligand:
             save_to_file (bool, optional): Whether to save the ligand to file. Defaults to False.
             **kwargs: Additional arguments to pass to the constructor
 
-        Returns:
-            Ligand: A new Ligand instance initialized from the RDKit molecule
-
-        Example:
-            >>> from rdkit import Chem
-            >>> mol = Chem.MolFromSmiles("CCO")
-            >>> ligand = Ligand.from_rdkit_mol(mol, name="Ethanol")
         """
         # Get name from properties if available
         if mol.HasProp("_Name"):
@@ -210,7 +206,9 @@ class Ligand:
             # Create a Molecule object from the SMILES string
             mol = mol_from_smiles(smiles)
         except ValueError as e:
-            raise DeepOriginException(str(e)) from e
+            raise DeepOriginException(
+                f"Cannot create Ligand from SMILES string `{smiles}`: {str(e)}"
+            ) from None
 
         return cls(
             mol=mol,
@@ -295,7 +293,7 @@ class Ligand:
         except Exception as e:
             raise DeepOriginException(
                 f"Could not resolve chemical identifier '{identifier}': {str(e)}"
-            ) from e
+            ) from None
 
         if name is None:
             name = identifier
@@ -323,7 +321,7 @@ class Ligand:
             file_path (str): The path to the SDF file.
 
         Returns:
-            list[Ligand]: A list of Ligand instances created from the SDF file.
+            either a list of ligands or a single ligand
 
         Raises:
             FileNotFoundError: If the file does not exist.
@@ -469,18 +467,6 @@ class Ligand:
         if self.smiles is None:
             self.smiles = self.mol.smiles
 
-        if self.smiles is not None:
-            self.mol = mol_from_smiles(self.smiles)
-            self.block_type = "mol"
-            self.block_content = self.mol.molblock()
-        else:
-            raise ValueError("No valid source provided for ligand initialization.")
-
-        if self.mol is None:
-            raise ValueError("Failed to create molecule.")
-
-        self.smiles = self.mol.smiles
-
         self.name = self.mol.name if self.mol.name else self.name or "Unknown_Ligand"
         directory = Path(self._get_directory())
         if self.name == "Unknown_Ligand":
@@ -490,8 +476,8 @@ class Ligand:
         self.hac = self.mol.m.GetNumHeavyAtoms()
         if self.hac < 5:
             print("Warning: Ligand has less than 5 heavy atoms.")
-
         file_props = self.mol.m.GetPropsAsDict()
+
         for key, value in file_props.items():
             self.properties[key] = value
 
@@ -515,10 +501,7 @@ class Ligand:
         - prop_name (str): Name of the property.
         - prop_value: Value of the property.
 
-        Example:
-        ```python
-        ligand.set_property("BindingAffinity", 5.6)
-        ```
+
         """
         self.properties[prop_name] = prop_value
         self.mol.m.SetProp(prop_name, str(prop_value))
@@ -533,10 +516,7 @@ class Ligand:
         Returns:
         - The value of the property if it exists, otherwise None.
 
-        Example:
-        ```python
-        binding_affinity = ligand.get_property("BindingAffinity")
-        ```
+
         """
         value = self.properties.get(prop_name)
         if value is not None:
@@ -549,44 +529,31 @@ class Ligand:
 
         return None
 
-    def write_to_file(self, output_path: str = "", output_format: str = ""):
+    @beartype
+    def write_to_file(
+        self,
+        output_path: Optional[str] = None,
+        output_format: Literal["mol", "sdf", "pdb"] = "sdf",
+    ):
         """
         Writes the ligand molecule to a file, including all properties.
 
         Parameters:
         - output_path (str): Path where the ligand will be written.
+        - output_format (Literal[".mol", ".sdf", ".pdb", "mol", "sdf", "pdb"]): Format to write the ligand in.
 
         Raises:
         - ValueError: If the file extension is unsupported.
         - Exception: If writing to the file fails.
 
-        Example:
-        ```python
-        ligand.write_to_file('/path/to/output.pdb')
-        ```
         """
         try:
-            if output_format == "" and output_path == "":
-                raise ValueError("Please provide either output_path or output_format.")
-
             if not output_path:
                 output_path = str(
                     Path(self._get_directory()) / f"{self.name}.{output_format}"
                 )
 
             path = Path(output_path)
-            extension = path.suffix.lower()
-            if not output_format:
-                output_format = extension
-
-            if output_format and output_format[0] != ".":
-                output_format = f".{output_format}"
-
-            if extension and extension != output_format:
-                print(
-                    "Warning: Output format does not match the file extension. Writing to provided output format."
-                )
-                extension = output_format
 
             if self.name is not None:
                 self.set_property("_Name", self.name)
@@ -596,14 +563,14 @@ class Ligand:
                 for prop_name, prop_value in self.properties.items():
                     self.set_property(prop_name, str(prop_value))
 
-            if extension == ".pdb":
+            if output_format == "pdb":
                 pdb_block = Chem.MolToPDBBlock(self.mol.m)
                 remark_lines = ""
                 for prop_name, prop_value in self.mol.m.GetPropsAsDict().items():
                     remark_lines += f"REMARK   {prop_name}: {prop_value}\n"
                 pdb_block_with_remarks = remark_lines + pdb_block
                 path.write_text(pdb_block_with_remarks)
-            elif extension == ".sdf":
+            elif output_format == "sdf":
                 with tempfile.NamedTemporaryFile(
                     mode="w+", suffix=".sdf", delete=False
                 ) as temp_file:
@@ -613,7 +580,7 @@ class Ligand:
                     temp_file.flush()
                     temp_file.seek(0)
                     path.write_text(temp_file.read())
-            elif extension == ".mol":
+            elif output_format == "mol":
                 mol_block = Chem.MolToMolBlock(self.mol.m)
                 prop_lines = ""
                 for prop_name, prop_value in self.mol.m.GetPropsAsDict().items():
@@ -621,14 +588,31 @@ class Ligand:
                 mol_block_with_props = mol_block + "\n" + prop_lines
                 path.write_text(mol_block_with_props)
             else:
-                raise ValueError(
-                    f"Unsupported file extension '{extension}'. Supported extensions are '.pdb', '.mol', '.sdf'."
-                )
+                raise DeepOriginException(
+                    f"Unsupported file extension '{output_format}'. Supported extensions are 'pdb', 'mol', 'sdf'."
+                ) from None
+
+            return output_path
 
         except Exception as e:
-            raise ValueError(
+            raise DeepOriginException(
                 f"Failed to write structure to file {output_path}: {str(e)}"
-            ) from e
+            ) from None
+
+    @beartype
+    def to_mol(self, output_path: Optional[str] = None) -> str | Path:
+        """Write the ligand to a MOL file."""
+        return self.write_to_file(output_path=output_path, output_format="mol")
+
+    @beartype
+    def to_sdf(self, output_path: Optional[str] = None) -> str | Path:
+        """Write the ligand to an SDF file."""
+        return self.write_to_file(output_path=output_path, output_format="sdf")
+
+    @beartype
+    def to_pdb(self, output_path: Optional[str] = None) -> str | Path:
+        """Write the ligand to a PDB file."""
+        return self.write_to_file(output_path=output_path, output_format="pdb")
 
     def get_center(self) -> Optional[list[float]]:
         """
@@ -638,11 +622,7 @@ class Ligand:
         - list: The center coordinates of the ligand.
         - None: If coordinates are not available.
 
-        Example:
-        ```python
-        center = ligand.get_center()
-        print(center)  # Output: [1.23, 4.56, 7.89]
-        ```
+
         """
         if self.coordinates is None:
             print("Warning: Coordinates are not available for this ligand.")
@@ -654,10 +634,6 @@ class Ligand:
         """
         Draw the ligand molecule.
 
-        Example:
-        ```python
-        ligand.draw()
-        ```
         """
         return self.mol.draw()
 
@@ -672,10 +648,7 @@ class Ligand:
         Raises:
         - Exception: If visualization fails.
 
-        Example:
-        ```python
-        ligand.show()
-        ```
+
         """
         try:
             temp_file = Path(tempfile.gettempdir()) / f"{self.name}_visualize.sdf"
@@ -779,6 +752,17 @@ class Ligand:
             return cls.visualize_ligands_from_sdf(current_file)
         except Exception as e:
             raise ValueError(f"Visualization failed: {str(e)}") from e
+
+    def minimize(self):
+        """embed and optimize ligand in 3d space"""
+
+        from rdkit.Chem.AllChem import EmbedMolecule, UFFOptimizeMolecule
+
+        # Embed the molecules into 3d space
+        EmbedMolecule(self.mol.m)
+        UFFOptimizeMolecule(self.mol.m, maxIters=5000)
+
+        return self
 
     def _repr_html_(self) -> str:
         """
@@ -975,9 +959,9 @@ def show_ligands(ligands: list[Ligand]):
     # re‑index your DataFrame
     df = df[new_order]
 
-    from deeporigin.utils.notebook import _in_marimo
+    from deeporigin.utils.notebook import get_notebook_environment
 
-    if _in_marimo():
+    if get_notebook_environment() == "marimo":
         import marimo as mo
 
         return mo.plain(df)

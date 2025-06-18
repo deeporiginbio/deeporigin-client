@@ -9,6 +9,7 @@ import time
 from typing import Any, Callable, Optional
 import uuid
 
+from beartype import beartype
 from dateutil import parser
 import humanize
 from IPython.display import HTML, display, update_display
@@ -17,6 +18,7 @@ import nest_asyncio
 import pandas as pd
 
 from deeporigin.platform import tools_api
+from deeporigin.platform.utils import PlatformClients
 from deeporigin.utils.core import elapsed_minutes
 
 # Enable nested event loops for Jupyter
@@ -58,8 +60,16 @@ class Job:
     _execution_ids: list = field(default_factory=list)
     _metadata: list = field(default_factory=list)
 
+    # clients
+    _platform_clients: Optional[PlatformClients] = None
+
     @classmethod
-    def from_ids(cls, ids: list[str]) -> "Job":
+    def from_ids(
+        cls,
+        ids: list[str],
+        *,
+        _platform_clients: Optional[PlatformClients] = None,
+    ) -> "Job":
         """Create a Job instance from a list of IDs.
 
         Args:
@@ -68,10 +78,19 @@ class Job:
         Returns:
             A new Job instance with the given IDs.
         """
-        return cls(name="job", _ids=ids)
+        return cls(
+            name="job",
+            _ids=ids,
+            _platform_clients=_platform_clients,
+        )
 
     @classmethod
-    def from_id(cls, id: str) -> "Job":
+    def from_id(
+        cls,
+        id: str,
+        *,
+        _platform_clients: Optional[PlatformClients] = None,
+    ) -> "Job":
         """Create a Job instance from a single ID.
 
         Args:
@@ -80,7 +99,11 @@ class Job:
         Returns:
             A new Job instance with the given ID.
         """
-        return cls(name="job", _ids=[id])
+        return cls(
+            name="job",
+            _ids=[id],
+            _platform_clients=_platform_clients,
+        )
 
     def sync(self):
         """Synchronize the job status and progress reports.
@@ -90,8 +113,16 @@ class Job:
         reached a terminal state (Succeeded or Failed).
         """
 
+        # get the org_friendly_id from the platform clients if it's not None
+        org_friendly_id = getattr(self._platform_clients, "org_friendly_id", None)
+        tools_client = getattr(self._platform_clients, "ToolsApi", None)
+
         # use
-        results = tools_api.get_statuses_and_progress(self._ids)
+        results = tools_api.get_statuses_and_progress(
+            self._ids,
+            client=tools_client,
+            org_friendly_id=org_friendly_id,
+        )
 
         self._status = [result["status"] for result in results]
         self._progress_reports = [result["progress"] for result in results]
@@ -279,7 +310,7 @@ class Job:
         or can be called manually to stop monitoring.
         """
         if self._task is not None:
-            self._task.cancel()
+            self._task.cancel()  # note that this is not job.cancel() -- we're cancelling the asyncio task
             self._task = None
 
     def _repr_html_(self) -> str:
@@ -304,15 +335,27 @@ class Job:
         Returns:
             The result of the cancellation operation from utils.cancel_runs.
         """
-        tools_api.cancel_runs(self._ids)
+
+        org_friendly_id = getattr(self._platform_clients, "org_friendly_id", None)
+        tools_client = getattr(self._platform_clients, "ToolsApi", None)
+
+        tools_api.cancel_runs(
+            self._ids,
+            client=tools_client,
+            org_friendly_id=org_friendly_id,
+        )
 
 
+@beartype
 def get_dataframe(
     *,
     tool_key: Optional[str] = None,
-    only_with_status: Optional[list[str]] = None,
+    only_with_status: Optional[list[str] | set[str]] = None,
     include_metadata: bool = False,
+    include_inputs: bool = False,
+    include_outputs: bool = False,
     resolve_user_names: bool = False,
+    _platform_clients: Optional[PlatformClients] = None,
 ) -> pd.DataFrame:
     """Get a dataframe of the job statuses and progress reports.
 
@@ -321,7 +364,17 @@ def get_dataframe(
     """
 
     if only_with_status is None:
-        only_with_status = ["Succeeded", "Running", "Queued", "Failed", "Created"]
+        only_with_status = [
+            "Succeeded",
+            "Running",
+            "Queued",
+            "Failed",
+            "Created",
+            "Cancelled",
+        ]
+
+    if isinstance(only_with_status, set):
+        only_with_status = list(only_with_status)
 
     _filter = {
         "status": {"$in": only_with_status},
@@ -338,20 +391,32 @@ def get_dataframe(
             },
         }
 
-    from deeporigin.config import get_value
-    from deeporigin.platform import organizations_api
+    if _platform_clients is None:
+        from deeporigin.config import get_value
 
-    org_id = get_value()["organization_id"]
+        org_friendly_id = get_value()["organization_id"]
+    else:
+        org_friendly_id = _platform_clients.org_friendly_id
+
+    tools_client = getattr(_platform_clients, "ToolsApi", None)
 
     response = tools_api.get_tool_executions(
-        org_friendly_id=org_id,
+        org_friendly_id=org_friendly_id,
         filter=_filter,
         page_size=10000,
+        client=tools_client,
     )
     jobs = response["data"]
 
     if resolve_user_names:
-        users = organizations_api.get_organization_users(org_friendly_id=org_id)
+        from deeporigin.platform import organizations_api
+
+        orgs_client = getattr(_platform_clients, "OrganizationsApi", None)
+
+        users = organizations_api.get_organization_users(
+            org_friendly_id=org_friendly_id,
+            client=orgs_client,
+        )
 
         # Create a mapping of user IDs to user names
         user_id_to_name = {user["id"]: user["attributes"]["name"] for user in users}
@@ -379,19 +444,22 @@ def get_dataframe(
         "executionId": [],
         "completedAt": [],
         "startedAt": [],
-        "protein_id": [],
         "status": [],
         "tool_key": [],
         "tool_version": [],
         "user_name": [],
-        "thread_pinning": [],
-        "test_run": [],
         "run_duration_minutes": [],
         "n_ligands": [],
     }
 
     if include_metadata:
         data["metadata"] = []
+
+    if include_inputs:
+        data["user_inputs"] = []
+
+    if include_outputs:
+        data["user_outputs"] = []
 
     for job in jobs:
         attributes = job["attributes"]
@@ -413,10 +481,10 @@ def get_dataframe(
         else:
             data["user_name"].append(attributes["user"]["id"])
 
-        # Check for thread_pinning and test_run in userInputs
         user_inputs = attributes.get("userInputs", {})
-        data["thread_pinning"].append(find_boolean_value(user_inputs, "thread_pinning"))
-        data["test_run"].append(find_boolean_value(user_inputs, "test_run"))
+
+        if include_inputs:
+            data["user_inputs"].append(user_inputs)
 
         if "smiles_list" in user_inputs:
             data["n_ligands"].append(len(user_inputs["smiles_list"]))
@@ -425,16 +493,6 @@ def get_dataframe(
 
         # Handle protein_id (may not exist or metadata may be None)
         metadata = attributes.get("metadata")
-        this_protein_id = metadata.get("protein_id") if metadata else None
-
-        if this_protein_id is None:
-            this_protein_id = (
-                attributes.get("userInputs", {}).get("protein", {}).get("rowId")
-                or attributes.get("userInputs", {}).get("protein", {}).get("key")
-                or "No ID"
-            )
-
-        data["protein_id"].append(this_protein_id)
 
         # Calculate run duration in minutes and round to nearest integer
         if attributes["completedAt"] and attributes["startedAt"]:
@@ -447,6 +505,9 @@ def get_dataframe(
 
         if include_metadata:
             data["metadata"].append(metadata)
+
+        if include_outputs:
+            data["user_outputs"].append(attributes.get("userOutputs", {}))
 
     # Create DataFrame
     df = pd.DataFrame(data)

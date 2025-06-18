@@ -2,7 +2,7 @@
 
 To list all workstations on Deep Origin, use:
 
-```python
+```{.python notest}
 from deeporigin.platform import api
 api.get_workstations()
 ```

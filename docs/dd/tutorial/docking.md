@@ -4,23 +4,67 @@ This document describes how to [dock :octicons-link-external-16:](https://en.wik
 
 ## Prerequisites
 
-We assume that we have an initialized and configured `Complex` object:
+We assume that we have an initialized and configured a `Complex` object:
 
 ```python
-from deeporigin.drug_discovery import Complex
-sim = Complex.from_dir("/path/to/folder/")
-sim.connect()
+from deeporigin.drug_discovery import Complex, EXAMPLE_DATA_DIR
+
+sim = Complex.from_dir(EXAMPLE_DATA_DIR) # or replace with your folder
 ```
 
 For more details on how to get started, see [:material-page-previous: Getting Started ](./getting-started.md).
 
+
+## Find pockets
+
+First we find pockets in the protein using:
+
+```{.python notest}
+pockets = sim.protein.find_pockets(pocket_count=1)
+```
+
+We can visualize the pocket using:
+
+```{.python notest}
+sim.protein.show(pockets=pockets)
+```
+
+You should see something along the lines of:
+
+<iframe 
+    src="./pockets.html" 
+    width="100%" 
+    height="650" 
+    style="border:none;"
+    title="Protein visualization"
+></iframe>
+
 ## Starting a docking run
+
+### Using pocket
+
+To dock all ligands in the complex to the protein, using the pocket we found, we can do:
+
+
+```{.python notest}
+pocket = pockets[0] # or choose as needed
+sim.docking.run(pocket=pocket)
+
+```
+
+### Using residue ID
+
+!!! info "Coming Soon"
+    Ability to dock ligands using a residue ID is coming soon.
+
+### Using pocket center and box size
+
 
 To dock all ligands to the protein, parallelizing and batching across all ligands, we do the following:
 
 
-```python
-sim.docking.run(
+```{.python notest}
+job = sim.docking.run(
     box_size=(15, 15, 15),      # match to your protein
     pocket_center=(13, -6, 22), # match to your protein
 )
@@ -32,21 +76,19 @@ sim.docking.run(
 
     This can be controlled in two ways. First, you can control the batch size using the `batch_size` parameter.
 
-    ```python
+    ```{.python notest}
     sim.dock(
         batch_size=32,
-        box_size=(15, 15, 15),      # note: tuple  
-        pocket_center=(13, -6, 22), # note: tuple  
+        ... 
     )
     ```
 
     You can also specify the number of workers using:
 
-    ```python
+    ```{.python notest}
     sim.dock(
         n_workers=2,
-        box_size=(15, 15, 15),      # note: tuple  
-        pocket_center=(13, -6, 22), # note: tuple  
+        ...
     )
     ```
 
@@ -57,24 +99,21 @@ This queues up tasks on Deep Origin. When it completes, the results of docking c
 
 ## Viewing status of docking
 
-The status of docking runs can be viewed using:
+A job object is returned from `docking.run`. This job object can be inspected to show the status of the job when created. 
 
-```python
-sim.get_status_for("Docking")
+The job object can also be used monitor a job as it completes:
+
+```{.python notest}
+job.watch()
 ```
 
-!!! success "Expected output"
+Doing so creates a widget that automatically updates and monitors a job as long as its running. 
 
-    A typical output can look like:
+To stop watching a job, do:
 
-
-    ```python
-    {'ccdb9ba9-b3d2-4083-bb4c-7c7249f7dbc2': 'Succeeded',
-     '17a0b478-c11d-48a9-9bce-2e0272b804fb': 'Running',
-     '08342c26-b773-4423-91c3-3fcbe4955778': 'Running'}
-    ```
-
-    The keys are IDs of the jobs running on Deep Origin. You may see different numbers of jobs based on your `batch_size` parameter and the number of ligands in your dataset.
+```{.python notest}
+job.stop_watching()
+```
 
 ## Results
 
@@ -82,7 +121,7 @@ sim.get_status_for("Docking")
 
 After completion of docking, we can view results using:
 
-```python
+```{.python notest}
 sim.docking.show_results()
 ```  
 
@@ -94,7 +133,7 @@ This shows a table similar to:
 
 To view the docked poses of all ligands in the complex, use:
 
-```python
+```{.python notest}
 sim.docking.show_poses()
 ```
 
@@ -111,7 +150,7 @@ sim.docking.show_poses()
 
 To obtain the raw dataframe for further analysis, use:
 
-```python
+```{.python notest}
 df = sim.docking.get_results()
 ```
 
@@ -119,7 +158,7 @@ df = sim.docking.get_results()
 
 To export a SDF with docked poses, use:
 
-```python
+```{.python notest}
 sim.docking.get_poses("/path/to/output.sdf")
 ```
 

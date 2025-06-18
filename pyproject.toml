@@ -46,7 +46,14 @@ dynamic = ["version"]
 
 [project.optional-dependencies]
 lint = ["ruff"]
-test = ["pytest", "parameterized", "coverage", "interrogate", "pytest-xdist"]
+test = [
+    "pytest",
+    "parameterized",
+    "coverage",
+    "interrogate",
+    "pytest-xdist",
+    "pytest-markdown-docs",
+]
 dev = ["ipykernel", "jupyter-black"]
 docs = [
     "mkdocs",
@@ -112,6 +119,9 @@ universal = true
 omit = ["src/data_hub/client.py", "tests/*.py"]
 
 
+[tool.pytest.ini_options]
+norecursedirs = ["notebooks"]
+
 [tool.interrogate]
 fail-under = 100
 # Skip files module coverage for now as it has lots of auto-gen code
@@ -124,6 +134,7 @@ exclude = [
     "conftest.py",
     "src/files",
     "notebooks/*",
+    "scripts/*",
 ]
 ignore-init-method = true
 ignore-init-module = true

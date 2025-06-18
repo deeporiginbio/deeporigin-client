@@ -14,14 +14,14 @@ This page describes how to a Deep Origin DataFrame, which are the primary object
 
 Create a DataFrame using:
 
-```python
+```python notest
 from deeporigin.data_hub.dataframe import DataFrame
 df = DataFrame.from_deeporigin("database-id")
 ```
 
 In a Jupyter Lab, you should be able to view the DataFrame using:
 
-```py
+```py notest
 df
 ```
 
@@ -42,7 +42,7 @@ which should show you something like this:
 !!! tip "Fetching only some rows"
     If you have a particularly large database, you may want to fetch only certain rows using a filter. For example, to fetch only rows where column `x` is greater than `42`:
 
-    ```python
+    ```python notest
     from deeporigin.data_hub import filters
     filter = filters.filter(
         column_id="x", # can be name or column
@@ -65,7 +65,7 @@ Because a Deep Origin DataFrame is a subclass of a pandas DataFrame, all pandas 
 
     To modify entire columns, use native pandas syntax:
 
-    ```python
+    ```python notest
     df["y^2"] = df["y"] ** 2
     ```
 
@@ -73,7 +73,7 @@ Because a Deep Origin DataFrame is a subclass of a pandas DataFrame, all pandas 
 
     To modify data in a single cell, use native pandas syntax (the at operator):
 
-    ```python
+    ```python notest
     df.at["sgs-1", "y"] = 10
     ```
 
@@ -100,7 +100,7 @@ In either case, when we view the DataFrame once more using `df`, we see the upda
 
 Local changes in the dataframe can be written back to Deep Origin using the `to_deeporigin` method:
 
-```python
+```python notest
 df.to_deeporigin()
 
 # ✔︎ Wrote 9 rows in y^2 to Deep Origin database.
@@ -125,7 +125,7 @@ All Deep Origin DataFrames have an attribute called `auto_sync` that determines 
 
 To enable automatic syncing, set the `auto_sync` attribute to `True`:
 
-```python
+```python notest
 df.auto_sync = True
 df
 ```
@@ -136,7 +136,7 @@ Note that the dataframe now displays a message indicating that local changes wil
 
 Making any change to the dataframe now triggers a write back to the Deep Origin database.
 
-```python
+```python notest
 df["y^2"] = df["y"] * 0.99
 df
 

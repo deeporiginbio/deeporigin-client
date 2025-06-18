@@ -34,7 +34,7 @@ def molprops(
     """
 
     if smiles_string is None:
-        raise DeepOriginException("smiles_string must be provided")
+        raise DeepOriginException("smiles_string must be provided") from None
 
     # Create hash of inputs
     hasher = hashlib.sha256()

@@ -49,9 +49,8 @@ nav:
     - ABFE: dd/tutorial/abfe.md
     - RBFE: dd/tutorial/rbfe.md
   - How To:
-    - Create a Complex: dd/how-to/complex.md
-    - Work with proteins: dd/how-to/proteins.md
-    - Prepare proteins: dd/how-to/prepare-protein.md
+    - Work with a Complex: dd/how-to/complex.md
+    - Work with Proteins: dd/how-to/proteins.md
     - Work with ligands: dd/how-to/ligands.md
     - Visualize proteins and ligands: dd/how-to/visualize.md
     - Filter outputs of Docking: dd/how-to/filter-docking-outputs.md
@@ -99,17 +98,6 @@ nav:
   - tools/index.md
   - How to:
     - List tools: tools/how-to/list-tools.md
-    - Run tools: tools/how-to/run-tools.md
-    - Check tool run status: tools/how-to/check-status.md
-    - Wait for a tool run: tools/how-to/wait-for-run.md
-  - Available tools:
-    - Autodock Vina: tools/vina.md
-    - Receptor Prep (PDBFixer): tools/pdbfixer.md
-    - Ligand Prep (Meeko): tools/ligand-prep-meeko.md
-    - PDB to PDBQT: tools/pdb-to-pdbqt.md
-    - Draco: tools/draco.md
-  - Reference:
-    - Running tools: tools/ref/run.md
 - Changelog: changelog.md
 - Support: https://www.support.deeporigin.com/servicedesk/customer/portals
 

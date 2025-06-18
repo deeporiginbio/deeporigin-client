@@ -2,7 +2,6 @@ import os
 
 import pytest
 
-from deeporigin.drug_discovery import chemistry
 from deeporigin.drug_discovery.structures import Ligand
 from deeporigin.exceptions import DeepOriginException
 
@@ -15,12 +14,12 @@ base_path = os.path.join(os.path.dirname(__file__), "fixtures")
 def test_ligands_from_sdf_file():
     """test that we can make many ligands from a single SDF file with many molecules"""
 
-    mols = chemistry.read_molecules_in_sdf_file(
-        os.path.join(base_path, "ligands-brd-all.sdf")
-    )
+    ligands = Ligand.from_sdf(os.path.join(base_path, "ligands-brd-all.sdf"))
 
-    for mol in mols:
-        Ligand.from_smiles(mol["smiles"], properties=mol["properties"])
+    assert len(ligands) == 8, "Expected 8 ligands"
+
+    for ligand in ligands:
+        assert isinstance(ligand, Ligand), "Expected a Ligand object"
 
 
 def test_ligand_from_smiles():
@@ -89,9 +88,8 @@ def test_ligand_from_smiles():
         assert Chem.MolToSmiles(input_mol) == Chem.MolToSmiles(ligand.mol.m)
 
     # Test with invalid SMILES
-    with pytest.raises(DeepOriginException) as exc_info:
+    with pytest.raises(DeepOriginException, match=r"Cannot create"):
         Ligand.from_smiles(smiles="InvalidSMILES")
-    assert str(exc_info.value) == "Invalid SMILES string"
 
 
 def test_ligand_from_identifier():
@@ -110,12 +108,12 @@ def test_ligand_from_identifier():
             "expected_atoms": 27,  # Heavy atoms only
         },
         {
-            "identifier": "oxotremorine",  # Muscarinic acetylcholine receptor agonist
+            "identifier": "Oxotremorine",  # Muscarinic acetylcholine receptor agonist
             "name": "Oxotremorine",
             "expected_atoms": 15,  # Heavy atoms only
         },
         {
-            "identifier": "serotonin",  # 5-hydroxytryptamine (5-HT)
+            "identifier": "Serotonin",  # 5-hydroxytryptamine (5-HT)
             "name": "Serotonin",
             "expected_atoms": 13,  # Heavy atoms only (N,C,C,c,c,n,c,c,c,c,O,c,c)
         },
