@@ -534,7 +534,7 @@ class Protein(Entity):
         """
         self.structure = self.structure[~filter_solvent(self.structure)]
 
-    def find_missing_residues(self) -> dict:
+    def find_missing_residues(self) -> dict[str, list[tuple[int, int]]]:
         """find missing residues in the protein structure"""
 
         from Bio.PDB import PDBParser
@@ -550,8 +550,11 @@ class Protein(Entity):
                 last_resseq = None
                 gaps = []
 
-                residues = [res for res in chain.get_residues() if res.id[0] == " "]
-                for _, res in enumerate(residues):
+                residues = sorted(
+                    [res for res in chain.get_residues() if res.id[0] == " "],
+                    key=lambda r: r.id[1],
+                )
+                for res in residues:
                     resseq = res.id[1]
                     if last_resseq is not None and resseq > last_resseq + 1:
                         gaps.append((last_resseq, resseq))
