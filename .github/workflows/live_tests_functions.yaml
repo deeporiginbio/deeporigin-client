@@ -8,6 +8,11 @@ on:
   schedule:
     - cron: "0 6 * * *"
 
+  # Run on changes to Python files in src/functions/
+  push:
+    paths:
+      - 'src/functions/**/*.py'
+
 jobs:
   test-functions-on-production:
     runs-on: ubuntu-latest
