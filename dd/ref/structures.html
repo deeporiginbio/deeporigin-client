@@ -1959,6 +1959,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#src.drug_discovery.structures.Protein.sequence" class="md-nav__link">
+    <span class="md-ellipsis">
+      sequence
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#src.drug_discovery.structures.Protein.structure" class="md-nav__link">
     <span class="md-ellipsis">
       structure
@@ -1995,6 +2004,15 @@
   <a href="#src.drug_discovery.structures.Protein.extract_metals_and_cofactors" class="md-nav__link">
     <span class="md-ellipsis">
       extract_metals_and_cofactors
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.drug_discovery.structures.Protein.find_missing_residues" class="md-nav__link">
+    <span class="md-ellipsis">
+      find_missing_residues
     </span>
   </a>
   
@@ -4409,6 +4427,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#src.drug_discovery.structures.Protein.sequence" class="md-nav__link">
+    <span class="md-ellipsis">
+      sequence
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#src.drug_discovery.structures.Protein.structure" class="md-nav__link">
     <span class="md-ellipsis">
       structure
@@ -4445,6 +4472,15 @@
   <a href="#src.drug_discovery.structures.Protein.extract_metals_and_cofactors" class="md-nav__link">
     <span class="md-ellipsis">
       extract_metals_and_cofactors
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.drug_discovery.structures.Protein.find_missing_residues" class="md-nav__link">
+    <span class="md-ellipsis">
+      find_missing_residues
     </span>
   </a>
   
@@ -8113,6 +8149,73 @@ with PDB files for each pocket and a CSV properties file.</p>
 
 
 
+<h5 id="src.drug_discovery.structures.Protein.sequence" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-attribute"></code>            <span class="doc doc-object-name doc-attribute-name">sequence</span>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+<a href="#src.drug_discovery.structures.Protein.sequence" class="headerlink" title="Permanent link">&para;</a></h5>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="n">sequence</span><span class="p">:</span> <span class="n"><span title="list">list</span></span><span class="p">[</span><span class="n"><span title="str">str</span></span><span class="p">]</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Retrieve the amino acid sequences of all polypeptide chains in the protein structure.</p>
+<p>This property parses the protein structure file using Bio.PDB and extracts the sequences
+of all peptide chains present. Each sequence is returned as a Bio.Seq object, which can be
+converted to a string if needed. The method is useful for analyzing the primary structure
+of the protein or for downstream sequence-based analyses.</p>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="list">list</span>[<span title="str">str</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>list[str]: A list of amino acid sequences (as Bio.Seq objects) for each polypeptide chain
+found in the protein structure. If the structure contains multiple chains, each chain's
+sequence is included as a separate entry in the list.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<details class="example" open>
+  <summary>Example</summary>
+  <blockquote>
+<blockquote>
+<blockquote>
+<p>protein = Protein.from_file("example.pdb")
+sequences = protein.sequence
+for seq in sequences:
+...     print(seq)</p>
+</blockquote>
+</blockquote>
+</blockquote>
+</details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
 <h5 id="src.drug_discovery.structures.Protein.structure" class="doc doc-heading">
 <code class="doc-symbol doc-symbol-heading doc-symbol-attribute"></code>            <span class="doc doc-object-name doc-attribute-name">structure</span>
 
@@ -8267,6 +8370,26 @@ should be docked.</p>
           </tr>
       </tbody>
     </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h5 id="src.drug_discovery.structures.Protein.find_missing_residues" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">find_missing_residues</span>
+
+
+<a href="#src.drug_discovery.structures.Protein.find_missing_residues" class="headerlink" title="Permanent link">&para;</a></h5>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">find_missing_residues</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n"><span title="dict">dict</span></span><span class="p">[</span><span class="n"><span title="str">str</span></span><span class="p">,</span> <span class="n"><span title="list">list</span></span><span class="p">[</span><span class="n"><span title="tuple">tuple</span></span><span class="p">[</span><span class="n"><span title="int">int</span></span><span class="p">,</span> <span class="n"><span title="int">int</span></span><span class="p">]]]</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>find missing residues in the protein structure</p>
 
 
     </div>

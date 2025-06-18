@@ -958,11 +958,53 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#inspecting-the-protein" class="md-nav__link">
+    <span class="md-ellipsis">
+      Inspecting the Protein
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Inspecting the Protein">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pdb-id" class="md-nav__link">
+    <span class="md-ellipsis">
+      PDB ID
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#getting-the-protein-sequence" class="md-nav__link">
+    <span class="md-ellipsis">
+      Getting the protein sequence
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#finding-missing-residues" class="md-nav__link">
+    <span class="md-ellipsis">
+      Finding missing residues
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#visualizing-a-protein" class="md-nav__link">
     <span class="md-ellipsis">
       Visualizing a protein
     </span>
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -2711,11 +2753,53 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#inspecting-the-protein" class="md-nav__link">
+    <span class="md-ellipsis">
+      Inspecting the Protein
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Inspecting the Protein">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pdb-id" class="md-nav__link">
+    <span class="md-ellipsis">
+      PDB ID
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#getting-the-protein-sequence" class="md-nav__link">
+    <span class="md-ellipsis">
+      Getting the protein sequence
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#finding-missing-residues" class="md-nav__link">
+    <span class="md-ellipsis">
+      Finding missing residues
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#visualizing-a-protein" class="md-nav__link">
     <span class="md-ellipsis">
       Visualizing a protein
     </span>
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -2866,7 +2950,51 @@
 
 <span class="n">protein</span> <span class="o">=</span> <span class="n">Protein</span><span class="o">.</span><span class="n">from_pdb_id</span><span class="p">(</span><span class="s2">&quot;1EBY&quot;</span><span class="p">)</span>
 </code></pre></div>
-<h2 id="visualizing-a-protein">Visualizing a protein<a class="headerlink" href="#visualizing-a-protein" title="Permanent link">&para;</a></h2>
+<h2 id="inspecting-the-protein">Inspecting the Protein<a class="headerlink" href="#inspecting-the-protein" title="Permanent link">&para;</a></h2>
+<h3 id="pdb-id">PDB ID<a class="headerlink" href="#pdb-id" title="Permanent link">&para;</a></h3>
+<p>To view the PDB ID of a Protein (if it exists, use):</p>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin.drug_discovery</span><span class="w"> </span><span class="kn">import</span> <span class="n">Protein</span>
+
+<span class="n">protein</span> <span class="o">=</span> <span class="n">Protein</span><span class="o">.</span><span class="n">from_pdb_id</span><span class="p">(</span><span class="s2">&quot;1EBY&quot;</span><span class="p">)</span>
+<span class="n">protein</span><span class="o">.</span><span class="n">pdb_id</span>
+</code></pre></div>
+<div class="admonition success">
+<p class="admonition-title">Expected output</p>
+<div class="language-text highlight"><pre><span></span><code>1EBY
+</code></pre></div>
+</div>
+<h3 id="getting-the-protein-sequence">Getting the protein sequence<a class="headerlink" href="#getting-the-protein-sequence" title="Permanent link">&para;</a></h3>
+<p>You can retrieve the amino acid sequences of all polypeptide chains in a protein structure using the <code>sequence</code> property:</p>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin.drug_discovery</span><span class="w"> </span><span class="kn">import</span> <span class="n">Protein</span>
+
+<span class="n">protein</span> <span class="o">=</span> <span class="n">Protein</span><span class="o">.</span><span class="n">from_pdb_id</span><span class="p">(</span><span class="s2">&quot;1EBY&quot;</span><span class="p">)</span>
+<span class="n">sequences</span> <span class="o">=</span> <span class="n">protein</span><span class="o">.</span><span class="n">sequence</span>
+<span class="k">for</span> <span class="n">seq</span> <span class="ow">in</span> <span class="n">sequences</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">seq</span><span class="p">)</span>
+</code></pre></div>
+<p>This property returns a list of amino acid sequences (as Bio.Seq objects) for each polypeptide chain found in the structure. If the structure contains multiple chains, each chain's sequence is included as a separate entry in the list. This is useful for analyzing the primary structure of the protein or for downstream sequence-based analyses.</p>
+<div class="admonition success">
+<p class="admonition-title">Expected output</p>
+<div class="language-text highlight"><pre><span></span><code>PQITLWQRPLVTIKIGGQLKEALLDTGADDTVLEEMNLPGRWKPKMIGGIGGFIKVRQYDQILIEICGHKAIGTVLVGPTPVNIIGRNLLTQIGCTLNF
+PQITLWQRPLVTIKIGGQLKEALLDTGADDTVLEEMNLPGRWKPKMIGGIGGFIKVRQYDQILIEICGHKAIGTVLVGPTPVNIIGRNLLTQIGCTLNF
+</code></pre></div>
+</div>
+<h3 id="finding-missing-residues">Finding missing residues<a class="headerlink" href="#finding-missing-residues" title="Permanent link">&para;</a></h3>
+<p>You can identify missing residues (gaps) in the protein structure using the <code>find_missing_residues</code> method:</p>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin.drug_discovery</span><span class="w"> </span><span class="kn">import</span> <span class="n">Protein</span>
+
+<span class="n">protein</span> <span class="o">=</span> <span class="n">Protein</span><span class="o">.</span><span class="n">from_pdb_id</span><span class="p">(</span><span class="s2">&quot;5QSP&quot;</span><span class="p">)</span>
+<span class="n">missing</span> <span class="o">=</span> <span class="n">protein</span><span class="o">.</span><span class="n">find_missing_residues</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">missing</span><span class="p">)</span>
+</code></pre></div>
+<p>This method scans each chain in the protein and returns a dictionary where the keys are chain IDs and the values are lists of tuples, each representing a gap. Each tuple is of the form <code>(start_resseq, end_resseq)</code>, indicating that residues between <code>start_resseq</code> and <code>end_resseq</code> (exclusive) are missing from the structure.</p>
+<div class="admonition success">
+<p class="admonition-title">Expected output</p>
+<div class="language-python highlight"><pre><span></span><code><span class="p">{</span><span class="s1">&#39;A&#39;</span><span class="p">:</span> <span class="p">[(</span><span class="mi">511</span><span class="p">,</span> <span class="mi">514</span><span class="p">),</span> <span class="p">(</span><span class="mi">547</span><span class="p">,</span> <span class="mi">550</span><span class="p">),</span> <span class="p">(</span><span class="mi">679</span><span class="p">,</span> <span class="mi">682</span><span class="p">),</span> <span class="p">(</span><span class="mi">841</span><span class="p">,</span> <span class="mi">855</span><span class="p">)],</span>
+ <span class="s1">&#39;B&#39;</span><span class="p">:</span> <span class="p">[(</span><span class="mi">509</span><span class="p">,</span> <span class="mi">516</span><span class="p">),</span> <span class="p">(</span><span class="mi">546</span><span class="p">,</span> <span class="mi">551</span><span class="p">),</span> <span class="p">(</span><span class="mi">679</span><span class="p">,</span> <span class="mi">684</span><span class="p">),</span> <span class="p">(</span><span class="mi">840</span><span class="p">,</span> <span class="mi">854</span><span class="p">)]}</span>
+</code></pre></div>
+</div>
+<h3 id="visualizing-a-protein">Visualizing a protein<a class="headerlink" href="#visualizing-a-protein" title="Permanent link">&para;</a></h3>
 <details class="warning">
 <summary>Browser support</summary>
 <p>These visualizations work best on Google Chrome. We are aware of issues on other browsers, especially Safari on macOS.</p>
