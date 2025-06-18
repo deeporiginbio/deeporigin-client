@@ -56,7 +56,7 @@ def count_atoms_in_pdb_file(pdb_file_path: str | Path) -> int:
 
 
 @beartype
-def three2one(prot: str) -> str:
+def three2one(prot) -> str:
     """Translate a protein sequence from 3 to 1 letter code.
 
     Args:

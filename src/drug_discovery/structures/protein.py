@@ -200,6 +200,39 @@ class Protein(Entity):
             )
         return structure[index]
 
+    @property
+    def sequence(self) -> list[str]:
+        """
+        Retrieve the amino acid sequences of all polypeptide chains in the protein structure.
+
+        This property parses the protein structure file using Bio.PDB and extracts the sequences
+        of all peptide chains present. Each sequence is returned as a Bio.Seq object, which can be
+        converted to a string if needed. The method is useful for analyzing the primary structure
+        of the protein or for downstream sequence-based analyses.
+
+        Returns:
+            list[str]: A list of amino acid sequences (as Bio.Seq objects) for each polypeptide chain
+                found in the protein structure. If the structure contains multiple chains, each chain's
+                sequence is included as a separate entry in the list.
+
+        Example:
+            >>> protein = Protein.from_file("example.pdb")
+            >>> sequences = protein.sequence
+            >>> for seq in sequences:
+            ...     print(seq)
+        """
+        from Bio.PDB import PDBParser, PPBuilder
+
+        parser = PDBParser(QUIET=True)
+        structure = parser.get_structure("X", self.file_path)
+
+        ppb = PPBuilder()
+        sequences = []
+        for pp in ppb.build_peptides(structure):
+            sequences.append(pp.get_sequence())
+
+        return sequences
+
     @beartype
     def dock(
         self,
@@ -500,6 +533,37 @@ class Protein(Entity):
 
         """
         self.structure = self.structure[~filter_solvent(self.structure)]
+
+    def find_missing_residues(self) -> dict[str, list[tuple[int, int]]]:
+        """find missing residues in the protein structure"""
+
+        from Bio.PDB import PDBParser
+
+        parser = PDBParser(QUIET=True)
+        structure = parser.get_structure("protein", self.file_path)
+
+        missing = {}
+
+        for model in structure:
+            for chain in model:
+                chain_id = chain.id
+                last_resseq = None
+                gaps = []
+
+                residues = sorted(
+                    [res for res in chain.get_residues() if res.id[0] == " "],
+                    key=lambda r: r.id[1],
+                )
+                for res in residues:
+                    resseq = res.id[1]
+                    if last_resseq is not None and resseq > last_resseq + 1:
+                        gaps.append((last_resseq, resseq))
+                    last_resseq = resseq
+
+                if gaps:
+                    missing[chain_id] = gaps
+
+        return missing
 
     def extract_metals_and_cofactors(self) -> Tuple[list[str], list[str]]:
         """
