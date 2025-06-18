@@ -134,6 +134,7 @@ exclude = [
     "conftest.py",
     "src/files",
     "notebooks/*",
+    "scripts/*",
 ]
 ignore-init-method = true
 ignore-init-module = true
