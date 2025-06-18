@@ -1,8 +1,7 @@
 """Base class for workflow steps like ABFE, RBFE, and Docking."""
 
-from typing import Optional
-
 from beartype import beartype
+import pandas as pd
 
 from deeporigin.tools.job import Job, get_dataframe
 from deeporigin.utils.core import PrettyDict
@@ -25,14 +24,27 @@ class WorkflowStep:
         self.parent = parent
         self._params = PrettyDict()
 
-    def get_jobs(self):
-        """Get the jobs for this workflow step."""
+    def get_jobs_df(self) -> pd.DataFrame:
+        """Get the jobs for this workflow step as a dataframe"""
         df = get_dataframe(
             _platform_clients=self.parent._platform_clients,
+            resolve_user_names=True,
+            include_metadata=True,
         )
+
+        if len(df) == 0:
+            return df
+
+        # filter by tool key
         df = df[df["tool_key"].str.contains(self._tool_key)]
 
-        df = df[df["protein_id"].str.contains(self.parent.protein.file_path.name)]
+        df = df.reset_index(drop=True)
+
+        return df
+
+    def get_jobs(self) -> None:
+        """Get the jobs for this workflow step and save to self.jobs"""
+        df = self.get_jobs_df()
 
         job_ids = df["id"].tolist()
 
@@ -56,28 +68,6 @@ class WorkflowStep:
             job._viz_func = self._render_progress
             job._name_func = self._name_job
             job.sync()
-
-        return df
-
-    def show_jobs(self, summary: Optional[bool] = None):
-        """Show the jobs for this workflow step."""
-
-        if self.jobs is None:
-            print("No jobs to show")
-            return
-
-        if summary is None:
-            if len(self.jobs) > 5:
-                summary = True
-            else:
-                summary = False
-
-        if summary:
-            return self.get_jobs()
-        else:
-            for job in self.jobs:
-                job.sync()
-                job.show()
 
     @beartype
     def _make_jobs_from_ids(self, job_ids: list[str]) -> None:
