@@ -1,26 +1,20 @@
-"""This module contains the function to run system preparation on a protein-ligand complex."""
+"""This module contains the function to run loop modelling on a protein identified by a PDB ID."""
 
-import base64
 import hashlib
 import os
-from pathlib import Path
 
 from beartype import beartype
 import requests
 
-URL = "http://sysprep.default.jobs.edge.deeporigin.io/sysprep"
-CACHE_DIR = os.path.expanduser("~/.deeporigin/sysprep")
+URL = "http://localhost:8080/model_loops"
+URL = "http://loop-modelling.default.jobs.edge.deeporigin.io/model_loops"
+CACHE_DIR = os.path.expanduser("~/.deeporigin/model_loops")
 
 
 @beartype
-def sysprep(
+def model_loops(
     *,
-    protein_path: str | Path,
-    ligand_path: str | Path,
-    padding: float = 1.0,
-    keep_waters: bool = False,
-    is_lig_protonated: bool = True,
-    is_protein_protonated: bool = True,
+    pdb_id: str,
 ) -> str:
     """
     Run system preparation on a protein-ligand complex.
@@ -36,21 +30,12 @@ def sysprep(
     Returns:
         Path to the output PDB file if successful, or raises RuntimeError if the server fails.
     """
-    # Ensure paths are strings for file operations and hashing
-    protein_path_str = str(protein_path)
-    ligand_path_str = str(ligand_path)
-
-    # Read and base64-encode the files
-    with open(protein_path_str, "rb") as f:
-        protein_b64 = base64.b64encode(f.read()).decode("utf-8")
-    with open(ligand_path_str, "rb") as f:
-        ligand_b64 = base64.b64encode(f.read()).decode("utf-8")
 
     # Create a hash of the input parameters for caching
-    hash_input = f"{protein_path_str}:{ligand_path_str}:{is_lig_protonated}:{is_protein_protonated}:{keep_waters}:{padding}"
+    hash_input = f"{pdb_id}"
     cache_key = hashlib.md5(hash_input.encode()).hexdigest()
     cache_path = os.path.join(CACHE_DIR, cache_key)
-    output_pdb_path = os.path.join(cache_path, "complex.pdb")
+    output_pdb_path = os.path.join(cache_path, "loops_modelled.pdb")
 
     # Check if cached results exist
     if os.path.exists(output_pdb_path):
@@ -58,12 +43,7 @@ def sysprep(
 
     # If no cached results, proceed with server call
     payload = {
-        "protein": protein_b64,
-        "ligand": ligand_b64,
-        "is_lig_protonated": is_lig_protonated,
-        "is_protein_protonated": is_protein_protonated,
-        "keep_waters": keep_waters,
-        "padding": padding,
+        "pdb_id": pdb_id,
     }
 
     response = requests.post(URL, json=payload, stream=True)
