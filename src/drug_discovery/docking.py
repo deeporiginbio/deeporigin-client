@@ -212,23 +212,19 @@ class Docking(WorkflowStep):
             include_outputs=True,
         )
 
-        if pocket_center is not None:
+        if pocket_center is not None and len(df) > 0:
             # Filter df rows where pocket_center matches row["user_inputs"]["pocket_center"]
             mask = df["user_inputs"].apply(
                 lambda x: bool(np.all(np.isclose(pocket_center, x["pocket_center"])))
             )
             df = df[mask]
-            if len(df) == 0:
-                return df
 
-        if box_size is not None:
+        if box_size is not None and len(df) > 0:
             # Filter df rows where box_size matches row["user_inputs"]["box_size"]
             mask = df["user_inputs"].apply(
                 lambda x: bool(np.all(np.isclose(box_size, x["box_size"])))
             )
             df = df[mask]
-            if len(df) == 0:
-                return df
 
         # filter to only keep jobs that match this protein.
         protein_basename = os.path.basename(self.parent.protein.file_path)
@@ -236,8 +232,6 @@ class Docking(WorkflowStep):
         if "metadata" in df.columns and len(df) > 0:
             mask = df["metadata"].apply(lambda x: x["protein_file"] == protein_basename)
             df = df[mask]
-            if len(df) == 0:
-                return df
 
         if "user_inputs" in df.columns and len(df) > 0:
             # only keep jobs where at least one ligand in that job matches what we have in the current complex
@@ -246,8 +240,7 @@ class Docking(WorkflowStep):
                 lambda x: any(s in smiles_strings for s in x["smiles_list"])
             )
             df = df[mask]
-            if len(df) == 0:
-                return df
+
         return df
 
     @beartype
