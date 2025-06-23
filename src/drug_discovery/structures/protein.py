@@ -551,31 +551,35 @@ class Protein(Entity):
     def find_missing_residues(self) -> dict[str, list[tuple[int, int]]]:
         """find missing residues in the protein structure"""
 
+        import tempfile
+
         from Bio.PDB import PDBParser
 
         parser = PDBParser(QUIET=True)
-        structure = parser.get_structure("protein", self.file_path)
-
         missing = {}
 
-        for model in structure:
-            for chain in model:
-                chain_id = chain.id
-                last_resseq = None
-                gaps = []
+        with tempfile.NamedTemporaryFile(suffix=".pdb") as temp_file:
+            self.to_pdb(temp_file.name)
+            structure = parser.get_structure("protein", temp_file.name)
 
-                residues = sorted(
-                    [res for res in chain.get_residues() if res.id[0] == " "],
-                    key=lambda r: r.id[1],
-                )
-                for res in residues:
-                    resseq = res.id[1]
-                    if last_resseq is not None and resseq > last_resseq + 1:
-                        gaps.append((last_resseq, resseq))
-                    last_resseq = resseq
+            for model in structure:
+                for chain in model:
+                    chain_id = chain.id
+                    last_resseq = None
+                    gaps = []
 
-                if gaps:
-                    missing[chain_id] = gaps
+                    residues = sorted(
+                        [res for res in chain.get_residues() if res.id[0] == " "],
+                        key=lambda r: r.id[1],
+                    )
+                    for res in residues:
+                        resseq = res.id[1]
+                        if last_resseq is not None and resseq > last_resseq + 1:
+                            gaps.append((last_resseq, resseq))
+                        last_resseq = resseq
+
+                    if gaps:
+                        missing[chain_id] = gaps
 
         return missing
 

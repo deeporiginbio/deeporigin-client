@@ -137,6 +137,21 @@ protein.show()
     title="Protein visualization"
 ></iframe>
 
+We can verify that there are missing residues using the `find_missing_residues` method:
+
+```python
+from deeporigin.drug_discovery import Protein
+
+protein = Protein.from_pdb_id("5QSP")
+protein.find_missing_residues()
+```
+
+!!! success "Expected output"
+    ```
+    {'A': [(511, 514), (547, 550), (679, 682), (841, 855)],
+     'B': [(509, 516), (546, 551), (679, 684), (840, 854)]}
+    ```
+
 
 We can use the loop modelling tool to fix this structure using:
 
@@ -154,6 +169,16 @@ protein.show()
     title="Protein visualization"
 ></iframe>
 
+We can verify that there are no missing residues anymore:
+
+```{.python notest}
+protein.find_missing_residues()
+```
+
+!!! success "Expected output"
+    ```
+    {}
+    ```
 
 
 ??? info "How does loop modelling work?"
