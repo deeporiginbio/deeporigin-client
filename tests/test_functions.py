@@ -65,3 +65,18 @@ def test_sysprep(config):  # noqa: F811
         ligand_path=sim.ligands[3].file_path,
         is_lig_protonated=True,
     )
+
+
+def test_loop_modelling(config):  # noqa: F811
+    if config["mock"]:
+        pytest.skip("test skipped with mock client")
+
+    from deeporigin.drug_discovery import Protein
+
+    protein = Protein.from_pdb_id("5QSP")
+    assert len(protein.find_missing_residues()) > 0, "Missing residues should be > 0"
+    protein.model_loops()
+
+    assert protein.structure is not None, "Structure should not be None"
+
+    assert len(protein.find_missing_residues()) == 0, "Missing residues should be 0"

@@ -116,6 +116,87 @@ A visualization such as this will be shown:
 
 ## Modifying and preparing a protein
 
+### Loop modelling 
+
+Missing information and gaps in the structure can be filled in using the Loop Modelling tool. 
+
+For example, this protein from the PDB has missing elements, as can be seen from the dashed lines below:
+
+```python
+from deeporigin.drug_discovery import Protein
+
+protein = Protein.from_pdb_id("5QSP")
+protein.show()
+```
+
+<iframe 
+    src="./5QSP.html" 
+    width="100%" 
+    height="600" 
+    style="border:none;"
+    title="Protein visualization"
+></iframe>
+
+We can verify that there are missing residues using the `find_missing_residues` method:
+
+```python
+from deeporigin.drug_discovery import Protein
+
+protein = Protein.from_pdb_id("5QSP")
+protein.find_missing_residues()
+```
+
+!!! success "Expected output"
+    ```
+    {'A': [(511, 514), (547, 550), (679, 682), (841, 855)],
+     'B': [(509, 516), (546, 551), (679, 684), (840, 854)]}
+    ```
+
+
+We can use the loop modelling tool to fix this structure using:
+
+
+```{.python notest}
+protein.model_loops()
+protein.show()
+```
+
+<iframe 
+    src="./5QSP-lm.html" 
+    width="100%" 
+    height="600" 
+    style="border:none;"
+    title="Protein visualization"
+></iframe>
+
+We can verify that there are no missing residues anymore:
+
+```{.python notest}
+protein.find_missing_residues()
+```
+
+!!! success "Expected output"
+    ```
+    {}
+    ```
+
+
+??? info "How does loop modelling work?"
+
+    The current implementation of LoopModeling tool can use known experimental or predicted structures to fill gaps in given protein structure.
+
+    The tool works by searching for potential templates for each chain with missing residues in Protein Data Bank (PDB) and specified directory of templates. If the PDB contains the Uniprot IDs, this can also be used to download the predicted AlphaFold2 structures from AF Structural Database.
+
+    First, for each chain the full sequence and the sequence of the resolved structure are extracted and aligned to identify gaps as continuous groups of missing residues. If gaps are found the PDB database is searched for templates using specified sequence identity threshold. Structures in the additional template directory and AF structure are added for consideration.
+
+    For each template, global 3D alignment is first performed and an attempt is made to transfer the motifs corresponding to missing residues in the target if corresponding residues are present in the given template. The success is evaluated based on CA-CA distances at the edges of the gap and sequence identity of the residues to be transferred.
+
+    If the global alignment fails for the given gap, the local alignment is attempted using the specified number of residues adjacent to the gap and the transfer of the structural motif is again attempted.
+
+    Based on each found template, a model is constructed with structural motifs that were successfully matched. If the b_mixed_models flag is on, the attempt will be made to fill the gaps where matching was not successful using models based on other templates, sorted by resolution.
+
+    Finally, the results for all chains are combined to obtain N possible structures using best models obtained for each chain.
+
 ### Removing specific residues
 
 You can remove specific residue names from a protein structure using the `remove_resnames` method:

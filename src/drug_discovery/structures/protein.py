@@ -233,6 +233,20 @@ class Protein(Entity):
 
         return sequences
 
+    def model_loops(self) -> None:
+        """model loops in protein structure"""
+
+        from deeporigin.functions.loop_modelling import model_loops
+
+        pdb_id = self.pdb_id
+
+        if pdb_id is None:
+            raise ValueError("Currently, PDB ID is required to model loops.")
+
+        file_path = model_loops(pdb_id=pdb_id)
+        protein = Protein.from_file(file_path)
+        self.structure = protein.structure
+
     @beartype
     def dock(
         self,
@@ -537,31 +551,40 @@ class Protein(Entity):
     def find_missing_residues(self) -> dict[str, list[tuple[int, int]]]:
         """find missing residues in the protein structure"""
 
+        import os
+        import tempfile
+
         from Bio.PDB import PDBParser
 
         parser = PDBParser(QUIET=True)
-        structure = parser.get_structure("protein", self.file_path)
-
         missing = {}
 
-        for model in structure:
-            for chain in model:
-                chain_id = chain.id
-                last_resseq = None
-                gaps = []
+        temp_file = tempfile.NamedTemporaryFile(suffix=".pdb", delete=False)
+        try:
+            self.to_pdb(temp_file.name)
+            temp_file.close()  # Close so it can be reopened on Windows
+            structure = parser.get_structure("protein", temp_file.name)
 
-                residues = sorted(
-                    [res for res in chain.get_residues() if res.id[0] == " "],
-                    key=lambda r: r.id[1],
-                )
-                for res in residues:
-                    resseq = res.id[1]
-                    if last_resseq is not None and resseq > last_resseq + 1:
-                        gaps.append((last_resseq, resseq))
-                    last_resseq = resseq
+            for model in structure:
+                for chain in model:
+                    chain_id = chain.id
+                    last_resseq = None
+                    gaps = []
 
-                if gaps:
-                    missing[chain_id] = gaps
+                    residues = sorted(
+                        [res for res in chain.get_residues() if res.id[0] == " "],
+                        key=lambda r: r.id[1],
+                    )
+                    for res in residues:
+                        resseq = res.id[1]
+                        if last_resseq is not None and resseq > last_resseq + 1:
+                            gaps.append((last_resseq, resseq))
+                        last_resseq = resseq
+
+                    if gaps:
+                        missing[chain_id] = gaps
+        finally:
+            os.unlink(temp_file.name)
 
         return missing
 

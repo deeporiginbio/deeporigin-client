@@ -81,4 +81,4 @@ def sysprep(
     # If the server request fails, raise an error
     raise RuntimeError(
         f"Server returned status code {response.status_code}: {response.text}"
-    )
+    ) from None
