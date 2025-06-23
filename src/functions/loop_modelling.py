@@ -6,7 +6,6 @@ import os
 from beartype import beartype
 import requests
 
-URL = "http://localhost:8080/model_loops"
 URL = "http://loop-modelling.default.jobs.edge.deeporigin.io/model_loops"
 CACHE_DIR = os.path.expanduser("~/.deeporigin/model_loops")
 
@@ -20,12 +19,7 @@ def model_loops(
     Run system preparation on a protein-ligand complex.
 
     Args:
-        protein_path (str | Path): Path to the protein file.
-        ligand_path (str | Path): Path to the ligand file.
-        padding (float, optional): Padding to add around the system. Defaults to 1.0.
-        keep_waters (bool, optional): Whether to keep water molecules. Defaults to False.
-        is_lig_protonated (bool, optional): Whether the ligand is already protonated. Defaults to True.
-        is_protein_protonated (bool, optional): Whether the protein is already protonated. Defaults to True.
+        pdb_id: PDB ID of the protein to model loops for.
 
     Returns:
         Path to the output PDB file if successful, or raises RuntimeError if the server fails.

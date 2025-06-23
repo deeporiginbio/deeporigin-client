@@ -123,7 +123,7 @@ Missing information and gaps in the structure can be filled in using the Loop Mo
 For example, this protein from the PDB has missing elements, as can be seen from the dashed lines below:
 
 ```python
-from deeporigin.drug_discovery import Complex
+from deeporigin.drug_discovery import Protein
 
 protein = Protein.from_pdb_id("5QSP")
 protein.show()
