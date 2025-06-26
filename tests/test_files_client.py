@@ -55,7 +55,10 @@ def test_list_folder(config):  # noqa: F811
 
     data = files_client.list_folder("test-upload/")
 
-    assert set(data.keys()) == set(src_to_dest.values()), (
+    remote_files = set(data.keys())
+    remote_files.discard("test-upload/.DS_Store")
+
+    assert remote_files == set(src_to_dest.values()).discard("test-upload/.DS_Store"), (
         "Failed to list files correctly"
     )
 
