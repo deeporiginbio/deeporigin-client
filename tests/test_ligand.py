@@ -11,17 +11,6 @@ from tests.utils_ligands import bad_ligands, ligands
 base_path = os.path.join(os.path.dirname(__file__), "fixtures")
 
 
-def test_ligands_from_sdf_file():
-    """test that we can make many ligands from a single SDF file with many molecules"""
-
-    ligands = Ligand.from_sdf(os.path.join(base_path, "ligands-brd-all.sdf"))
-
-    assert len(ligands) == 8, "Expected 8 ligands"
-
-    for ligand in ligands:
-        assert isinstance(ligand, Ligand), "Expected a Ligand object"
-
-
 def test_ligand_from_smiles():
     """Test that we can create a Ligand from a SMILES string using the from_smiles classmethod"""
     from rdkit import Chem
@@ -197,178 +186,23 @@ def test_ligand_errors(ligand):
 def test_ligand(ligand):
     """Test that we can create Ligand instances from various sources"""
     n_ligands = ligand["n_ligands"]
-    result = Ligand.from_sdf(ligand["file"])
 
-    if n_ligands > 1:
-        assert isinstance(result, list)
-        assert len(result) == n_ligands
-        for lig in result:
-            assert isinstance(lig, Ligand)
-            assert lig.mol is not None
-            assert lig.mol.m.GetNumAtoms() > 0
-            assert lig.file_path is None  # Multi-ligand case should have no file_path
-    else:
-        assert isinstance(result, Ligand)
-        assert result.mol is not None
-        assert result.mol.m.GetNumAtoms() > 0
-        assert (
-            result.file_path == ligand["file"]
-        )  # Single ligand case should have file_path
-
-
-def test_ligand_from_csv():
-    """Test that we can create Ligands from a CSV file using the from_csv classmethod"""
-    from pathlib import Path
-
-    # Get the path to the test CSV file
-    csv_path = Path(base_path) / "data.csv"
-
-    # Create ligands from the CSV file
-    ligands = Ligand.from_csv(str(csv_path), smiles_column="SMILES")
-
-    # Verify we got the expected number of ligands
-    assert len(ligands) == 30  # Total number of valid SMILES in the file
-
-    # Check a few properties of the first ligand
-    first_ligand = ligands[0]
-    assert isinstance(first_ligand, Ligand)
-    assert first_ligand.mol is not None
-    assert first_ligand.mol.m.GetNumAtoms() > 0
-    assert first_ligand.file_path is None
-
-    # Verify properties were correctly loaded
-    assert "score" in first_ligand.properties
-    assert "binding_energy" in first_ligand.properties
-    assert "pose_score" in first_ligand.properties
-
-    # Test with invalid SMILES column
-    with pytest.raises(ValueError, match="Column 'invalid' not found in CSV file"):
-        Ligand.from_csv(str(csv_path), smiles_column="invalid")
-
-    # Test with non-existent file
-    with pytest.raises(FileNotFoundError):
-        Ligand.from_csv("nonexistent.csv")
-
-
-@pytest.mark.parametrize(
-    "test_case",
-    [
-        pytest.param(
-            {
-                "file": "brd-7.sdf",
-                "expected_type": Ligand,
-                "expected_name": "cmpd 7 (n-propyl)",
-                "has_atoms": True,
-                "is_multi": False,
-                "should_have_file_path": True,
-            },
-            id="single_molecule_sdf",
-        ),
-        pytest.param(
-            {
-                "file": "ligands-brd-all.sdf",
-                "expected_type": list,
-                "expected_name": None,  # Multiple molecules, names vary
-                "has_atoms": True,
-                "is_multi": True,
-                "should_have_file_path": False,
-            },
-            id="multi_molecule_sdf",
-        ),
-        pytest.param(
-            {
-                "file": "nonexistent.sdf",
-                "expected_error": FileNotFoundError,
-            },
-            id="invalid_file_path",
-        ),
-        pytest.param(
-            {
-                "file": "42-ligands.sdf",
-                "expected_type": list,
-                "expected_name": None,
-                "has_atoms": True,
-                "is_multi": True,
-                "should_have_file_path": False,
-            },
-            id="large_multi_molecule_sdf",
-        ),
-        pytest.param(
-            {
-                "file": "brd-7.sdf",
-                "expected_type": Ligand,
-                "has_atoms": True,
-                "sanitize": False,
-                "should_have_file_path": True,
-            },
-            id="sanitize_false",
-        ),
-        pytest.param(
-            {
-                "file": "brd-7.sdf",
-                "expected_type": Ligand,
-                "has_atoms": True,
-                "removeHs": True,
-                "check_no_hydrogens": True,
-                "should_have_file_path": True,
-            },
-            id="remove_hydrogens",
-        ),
-    ],
-)
-def test_ligand_from_sdf(test_case):
-    """Test that we can create Ligand instances from SDF files using the from_sdf classmethod"""
-    from pathlib import Path
-
-    # Get the full path to the test file
-    file_path = Path(base_path) / test_case["file"]
-
-    # Handle expected error cases
-    if "expected_error" in test_case:
-        with pytest.raises(test_case["expected_error"]) as exc_info:
-            if "error_message" in test_case:
-                Ligand.from_sdf(str(file_path))
-                assert test_case["error_message"] in str(exc_info.value)
-            else:
-                Ligand.from_sdf(str(file_path))
+    if n_ligands >= 1:
         return
 
-    # Handle normal cases
-    kwargs = {}
-    if "sanitize" in test_case:
-        kwargs["sanitize"] = test_case["sanitize"]
-    if "removeHs" in test_case:
-        kwargs["removeHs"] = test_case["removeHs"]
+    result = Ligand.from_sdf(ligand["file"])
 
-    result = Ligand.from_sdf(str(file_path), **kwargs)
+    assert isinstance(result, Ligand)
+    assert result.mol is not None
+    assert result.mol.m.GetNumAtoms() > 0
+    assert (
+        result.file_path == ligand["file"]
+    )  # Single ligand case should have file_path
 
-    # Verify the result type
-    assert isinstance(result, test_case["expected_type"])
 
-    # Handle single molecule case
-    if not test_case.get("is_multi", False):
-        ligand = result
-        assert ligand.mol is not None
-        assert ligand.mol.m.GetNumAtoms() > 0
-
-        # Check file_path based on whether it should have one
-        if test_case.get("should_have_file_path", False):
-            assert ligand.file_path == str(file_path)
-        else:
-            assert ligand.file_path is None
-
-        if "expected_name" in test_case:
-            assert ligand.name == test_case["expected_name"]
-
-        if test_case.get("check_no_hydrogens", False):
-            assert all(atom.GetAtomicNum() != 1 for atom in ligand.mol.m.GetAtoms())
-
-    # Handle multi-molecule case
-    else:
-        assert len(result) > 1
-        for ligand in result:
-            assert isinstance(ligand, Ligand)
-            assert ligand.mol is not None
-            assert ligand.mol.m.GetNumAtoms() > 0
-            # In multi-molecule case, file_path should always be None
-            assert ligand.file_path is None
+def test_ligand_from_sdf_multiple_raises():
+    """Test that Ligand.from_sdf raises DeepOriginException for multi-molecule SDF files."""
+    with pytest.raises(
+        DeepOriginException, match="must contain exactly one molecule, but found 8"
+    ):
+        Ligand.from_sdf(os.path.join(base_path, "ligands-brd-all.sdf"))

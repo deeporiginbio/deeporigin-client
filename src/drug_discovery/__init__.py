@@ -33,6 +33,10 @@ def __getattr__(name):
         from .structures.ligand import Ligand
 
         return Ligand
+    elif name == "LigandSet":
+        from .structures.ligand import LigandSet
+
+        return LigandSet
     elif name == "Pocket":
         from .structures.pocket import Pocket
 

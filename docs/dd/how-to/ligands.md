@@ -1,19 +1,32 @@
 This document describes how to work with ligands (molecules) and use them in Deep Origin tools. 
 
-## The `Ligand` class
+There are two classes that help you work with ligands:
+
+- `Ligand`
+- `LigandSet`
 
 The [`Ligand` class](../ref/structures.md#src.drug_discovery.structures.Ligand) is the primary way to work with ligands in Deep Origin.
 
-## Constructing a ligand
+## Constructing a Ligand or LigandSet
 
-### From a file
+### Single Ligand from a SDF file
 
-A ligand can be constructed from a file:
+A single Ligand can be constructed from a file:
 
 ```python
 from deeporigin.drug_discovery import Ligand, EXAMPLE_DATA_DIR
 
 ligand = Ligand.from_sdf(EXAMPLE_DATA_DIR / "brd-2.sdf")
+```
+
+### Many ligands from a SDF file
+
+A LigandSet can be constructed from a SDF File:
+
+```python
+from deeporigin.drug_discovery import LigandSet, EXAMPLE_DATA_DIR
+
+ligands = Ligand.from_sdf(EXAMPLE_DATA_DIR / "ligands-brd-all.sdf")
 ```
 
 ### From a SMILES string
@@ -101,30 +114,6 @@ ligand = Ligand.from_rdkit_mol(
 
 This is particularly useful when you're working with RDKit's molecular manipulation functions and want to convert the results into a Deep Origin Ligand object for further processing or visualization.
 
-### From a CSV file
-
-You can create multiple ligands at once from a CSV file using the `from_csv` class method. This is useful when you have a dataset of molecules with their SMILES strings and associated properties. The `from_csv` method:
-
-- Requires a path to the CSV file and the name of the column containing SMILES strings
-- Automatically extracts all non-SMILES columns as properties
-- Skips rows with empty or invalid SMILES
-- Returns a list of `Ligand` objects
-
-This approach is ideal for processing large datasets of molecules where each row represents a different compound.
-
-#### Basic Usage
-
-For the simplest case, just specify the file path and which column contains the SMILES strings:
-
-```{.python notest}
-from deeporigin.drug_discovery import Ligand
-
-# Basic usage - just extracting SMILES from a column
-ligands = Ligand.from_csv(
-    file_path="molecules.csv",
-    smiles_column="SMILES"  # Optional, defaults to "smiles"
-)
-```
 
 The method will:
 
@@ -139,7 +128,22 @@ The method will:
     - `FileNotFoundError` if the CSV file does not exist
     - `ValueError` if the specified SMILES column is not found in the CSV file
 
-## Visualizing a ligand
+### From a CSV file
+
+You can also create a `LigandSet` from a CSV file containing SMILES strings and optional properties:
+
+```python
+from deeporigin.drug_discovery import LigandSet, EXAMPLE_DATA_DIR
+
+ligands = LigandSet.from_csv(
+    file_path=EXAMPLE_DATA_DIR / "ligands.csv",
+    smiles_column="SMILES"  # Optional, defaults to "smiles"
+)
+```
+
+## Visualization
+
+### Visualizing individual ligands
 
 ??? warning "Browser support"
     These visualizations work best on Google Chrome. We are aware of issues on other browsers, especially Safari on macOS.
@@ -173,6 +177,8 @@ A visualization such as this will be shown:
 If a ligand is not backed by a SDF file, a 2D visualization will be shown:
 
 ![](../../images/ligand.png)
+
+### Visualizing LigandSets
 
 ## Predicting ADMET Properties
 
@@ -255,3 +261,41 @@ from deeporigin.drug_discovery import Ligand
 ligand = Ligand.from_identifier("serotonin")
 ligand.to_pdb()
 ```
+
+
+### To Pandas DataFrames
+
+To convert a LigandSet to a Pandas DataFrame, use:
+
+```python
+from deeporigin.drug_discovery import LigandSet, EXAMPLE_DATA_DIR
+
+ligands = LigandSet.from_csv(
+    file_path=EXAMPLE_DATA_DIR / "ligands.csv",
+    smiles_column="SMILES"  # Optional, defaults to "smiles"
+)
+df = ligands.to_dataframe()
+```
+
+
+
+
+This will read the CSV, create a `Ligand` for each valid row, and store them in the set.
+
+
+This will display a table of ligands with their structures and properties, either in a Jupyter notebook or as a pandas DataFrame, depending on the environment.
+
+### From an SDF file
+
+You can create a `LigandSet` from an SDF file containing one or more molecules:
+
+```python
+from deeporigin.drug_discovery import LigandSet
+
+ligand_set = LigandSet.from_sdf(
+    file_path="molecules.sdf"
+)
+```
+
+This will load all valid molecules in the SDF file as `Ligand` objects in the set. If the file contains no valid molecules, an empty set will be returned.
+

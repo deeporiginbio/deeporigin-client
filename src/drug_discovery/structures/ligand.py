@@ -57,14 +57,13 @@ from dataclasses import dataclass, field
 import os
 from pathlib import Path
 import tempfile
-from typing import Any, List, Literal, Optional, Union
+from typing import Any, Literal, Optional
 
 from beartype import beartype
 from deeporigin_molstar import MoleculeViewer
 import numpy as np
 import pandas as pd
 from rdkit import Chem
-from tqdm import tqdm
 
 from deeporigin.drug_discovery.structures.internal_structures import (
     Molecule,
@@ -313,19 +312,21 @@ class Ligand(Entity):
         *,
         sanitize: bool = True,
         removeHs: bool = False,
-    ) -> Union[List["Ligand"], "Ligand"]:
+    ) -> "Ligand":
         """
-        Create Ligand instances from an SDF file.
+        Create a single Ligand instance from an SDF file containing exactly one molecule.
 
         Args:
             file_path (str): The path to the SDF file.
+            sanitize (bool): Whether to sanitize molecules. Defaults to True.
+            removeHs (bool): Whether to remove hydrogens. Defaults to False.
 
         Returns:
-            either a list of ligands or a single ligand
+            Ligand: The Ligand instance created from the SDF file.
 
         Raises:
             FileNotFoundError: If the file does not exist.
-            ValueError: If the file cannot be parsed correctly.
+            ValueError: If the file cannot be parsed correctly or contains more than one molecule.
         """
         path = Path(file_path)
         if not path.exists():
@@ -352,105 +353,15 @@ class Ligand(Entity):
                     )
         except Exception as e:
             raise ValueError(
-                f"Failed to create Ligands from SDF file '{file_path}': {str(e)}"
+                f"Failed to create Ligand from SDF file '{file_path}': {str(e)}"
             ) from e
 
-        if len(ligands) == 1:
-            # Set file_path for single ligand case
-            ligands[0].file_path = str(path)
-            return ligands[0]
-        return ligands
-
-    @classmethod
-    def from_csv(
-        cls,
-        file_path: str,
-        smiles_column: str = "smiles",
-    ) -> list["Ligand"]:
-        """
-        Create Ligand instances from a CSV file containing SMILES strings and additional properties.
-
-        Args:
-            file_path (str): The path to the CSV file.
-            smiles_column (str, optional): The name of the column containing SMILES strings. Defaults to "smiles".
-
-        Returns:
-            list[Ligand]: A list of Ligand instances created from the CSV file.
-
-        Raises:
-            FileNotFoundError: If the file does not exist.
-            ValueError: If the CSV does not contain the specified smiles column or if SMILES strings are invalid.
-        """
-        path = Path(file_path)
-        if not path.exists():
-            raise FileNotFoundError(f"The file '{file_path}' does not exist.")
-
-        # First read just the header to check for the smiles column
-        df_header = pd.read_csv(file_path, nrows=0)
-        if smiles_column not in df_header.columns:
-            raise ValueError(
-                f"Column '{smiles_column}' not found in CSV file '{file_path}'. Available columns: {', '.join(df_header.columns)}"
-            )
-
-        ligands = []
-        try:
-            df = pd.read_csv(file_path)
-            normalized_columns = [col.strip().lower() for col in df.columns]
-
-            if smiles_column.lower() not in normalized_columns:
-                raise ValueError(f"CSV file must contain a '{smiles_column}' column.")
-
-            smiles_col_index = normalized_columns.index(smiles_column.lower())
-            smiles_col = df.columns[smiles_col_index]
-            other_columns = [col for col in df.columns if col != smiles_col]
-
-            for idx, row in df.iterrows():
-                try:
-                    smiles = row[smiles_col]
-                    if pd.isna(smiles):
-                        print(
-                            f"Warning: Skipping row {idx + 1}: SMILES value is missing."
-                        )
-                        continue
-                    mol = Chem.MolFromSmiles(smiles)
-                    if mol is None:
-                        print(
-                            f"Warning: Skipping row {idx + 1}: Invalid SMILES '{smiles}'."
-                        )
-                        continue
-
-                    # Create properties dictionary
-                    properties = {}
-                    for col in other_columns:
-                        value = row[col]
-                        if pd.notna(value):
-                            properties[col] = value
-
-                    # Get name from properties if available
-                    name = properties.get("Name", "")
-
-                    # Create ligand using from_smiles
-                    ligand = cls.from_smiles(
-                        smiles=smiles,
-                        name=name,
-                        properties=properties,
-                    )
-                    ligands.append(ligand)
-                except Exception as e:
-                    print(
-                        f"Error: Failed to create Ligand from CSV file row {idx + 1}: {str(e)}"
-                    )
-
-        except pd.errors.EmptyDataError as e:
-            raise ValueError(f"The CSV file '{file_path}' is empty.") from e
-        except pd.errors.ParserError as e:
-            raise ValueError(f"Error parsing CSV file '{file_path}': {str(e)}") from e
-        except Exception as e:
-            raise ValueError(
-                f"Failed to create Ligands from CSV file '{file_path}': {str(e)}"
-            ) from e
-
-        return ligands
+        if len(ligands) != 1:
+            raise DeepOriginException(
+                f"SDF file '{file_path}' must contain exactly one molecule, but found {len(ligands)}. If you want to work with a set of ligands in a SDF file, use LigandSet.from_sdf instead."
+            ) from None
+        ligands[0].file_path = str(path)
+        return ligands[0]
 
     def __post_init__(self):
         """
@@ -475,7 +386,7 @@ class Ligand(Entity):
 
         self.hac = self.mol.m.GetNumHeavyAtoms()
         if self.hac < 5:
-            print("Warning: Ligand has less than 5 heavy atoms.")
+            print("Warning: Ligand has fewer than 5 heavy atoms.")
         file_props = self.mol.m.GetPropsAsDict()
 
         for key, value in file_props.items():
@@ -719,40 +630,6 @@ class Ligand(Entity):
         except Exception as e:
             raise ValueError(f"Visualization failed: {str(e)}") from e
 
-    @classmethod
-    @jupyter_visualization
-    def visualize_ligands(cls, ligands: list["Ligand"]):
-        """
-        Visualize ligands.
-
-        Args:
-            ligands: list["Ligand"]: The list of ligands objects to visualize.
-
-        Raises:
-            FileNotFoundError: If the file does not exist.
-            ValueError: If the file cannot be parsed correctly.
-        """
-        try:
-            sdf_data = []
-            current_file = f"{tempfile.mkstemp()[1]}.sdf"
-            for ligand in ligands:
-                ligand.write_to_file(output_format="sdf", output_path=current_file)
-
-                with open(current_file, "r") as fd:
-                    data = fd.read()
-
-                sdf_data.append(data)
-
-            sdf_data = "".join(sdf_data)
-            # Write the consolidated SDF data to a temporary file
-            with open(current_file, "w") as fd:
-                fd.write(sdf_data)
-
-            # Use visualize_ligands_from_sdf to handle the visualization
-            return cls.visualize_ligands_from_sdf(current_file)
-        except Exception as e:
-            raise ValueError(f"Visualization failed: {str(e)}") from e
-
     def minimize(self):
         """embed and optimize ligand in 3d space"""
 
@@ -875,38 +752,38 @@ class Ligand(Entity):
 
         conformer.SetPositions(coords.astype(np.float64))
 
-    @classmethod
-    def protonate_molecules(cls, ligands):
-        """
-        Predicts the right protonation of a molecule at given pH value.
+    # @classmethod
+    # def protonate_molecules(cls, ligands):
+    #     """
+    #     Predicts the right protonation of a molecule at given pH value.
 
-        Parameters:
-        - entry: A single or multiple ligands represented as SMILES or Ligand instances.
-        - pH: pH value of the solvent for concentration calculation. Default is 7.4.
-        - filter_percentage: Percentage threshold for filtering low concentration states. Default is 1.
+    #     Parameters:
+    #     - entry: A single or multiple ligands represented as SMILES or Ligand instances.
+    #     - pH: pH value of the solvent for concentration calculation. Default is 7.4.
+    #     - filter_percentage: Percentage threshold for filtering low concentration states. Default is 1.
 
-        Returns:
-        - ProtonationReport: A ProtonationReport instance.
-        """
-        mols = []
+    #     Returns:
+    #     - ProtonationReport: A ProtonationReport instance.
+    #     """
+    #     mols = []
 
-        for i in tqdm(range(0, len(ligands)), desc="Protonating Molecules"):
-            ligand = ligands[i]
-            if isinstance(ligand, str):
-                try:
-                    ligand = Ligand(smiles=ligand)
-                except Exception as e:
-                    print(f"Error: Failed to create Ligand from SMILES: {str(e)}")
-                    continue
-            try:
-                if not ligand.protonated_smiles:
-                    ligand.protonate()
-            except Exception as e:
-                print(f"Error: Failed to protonate the ligand molecule: {str(e)}")
-                continue
+    #     for i in tqdm(range(0, len(ligands)), desc="Protonating Molecules"):
+    #         ligand = ligands[i]
+    #         if isinstance(ligand, str):
+    #             try:
+    #                 ligand = Ligand(smiles=ligand)
+    #             except Exception as e:
+    #                 print(f"Error: Failed to create Ligand from SMILES: {str(e)}")
+    #                 continue
+    #         try:
+    #             if not ligand.protonated_smiles:
+    #                 ligand.protonate()
+    #         except Exception as e:
+    #             print(f"Error: Failed to protonate the ligand molecule: {str(e)}")
+    #             continue
 
-            mols.append(ligand)
-        return mols
+    #         mols.append(ligand)
+    #     return mols
 
 
 @beartype
@@ -938,33 +815,237 @@ def ligands_to_dataframe(ligands: list[Ligand]):
     return df
 
 
-def show_ligands(ligands: list[Ligand]):
-    """show ligands in the FEP object in a dataframe. This function visualizes the ligands using core-aligned 2D visualizations.
+@dataclass
+class LigandSet:
+    """
+    A class representing a set of Ligand objects.
 
-    Args:
-        ligands (list[Ligand]): list of ligands
-
+    Attributes:
+        ligands (list[Ligand]): A list of Ligand instances contained in the set.
     """
 
-    df = ligands_to_dataframe(ligands)
+    ligands: list[Ligand]
 
-    from rdkit.Chem import PandasTools
+    def __len__(self):
+        return len(self._ligands)
 
-    PandasTools.AddMoleculeColumnToFrame(df, smilesCol="Ligand", molCol="Ligand")
-    PandasTools.RenderImagesInAllDataFrames()
+    def __iter__(self):
+        return iter(self._ligands)
 
-    # show structure first
-    new_order = ["Ligand"] + [col for col in df.columns if col != "Ligand"]
+    def __getitem__(self, index):
+        return self._ligands[index]
 
-    # re‑index your DataFrame
-    df = df[new_order]
+    def __contains__(self, ligand):
+        return ligand in self._ligands
 
-    from deeporigin.utils.notebook import get_notebook_environment
+    def _repr_html_(self):
+        """Return an HTML representation of the LigandSet."""
+        return self.show().to_html()
 
-    if get_notebook_environment() == "marimo":
-        import marimo as mo
+    def to_dataframe(self) -> pd.DataFrame:
+        """Convert the LigandSet to a pandas DataFrame."""
 
-        return mo.plain(df)
+        return ligands_to_dataframe(self.ligands)
 
-    else:
-        return df
+    def show(self):
+        """Show ligands in the set in a dataframe with 2D visualizations."""
+        df = self.to_dataframe()
+
+        from rdkit.Chem import PandasTools
+
+        PandasTools.AddMoleculeColumnToFrame(df, smilesCol="Ligand", molCol="Ligand")
+        PandasTools.RenderImagesInAllDataFrames()
+
+        # show structure first
+        new_order = ["Ligand"] + [col for col in df.columns if col != "Ligand"]
+
+        # re‑index your DataFrame
+        df = df[new_order]
+
+        from deeporigin.utils.notebook import get_notebook_environment
+
+        if get_notebook_environment() == "marimo":
+            import marimo as mo
+
+            return mo.plain(df)
+        else:
+            return df
+
+    @classmethod
+    def from_csv(
+        cls,
+        file_path: str,
+        smiles_column: str = "smiles",
+    ) -> "LigandSet":
+        """
+        Create a LigandSet instance from a CSV file containing SMILES strings and additional properties.
+
+        Args:
+            file_path (str): The path to the CSV file.
+            smiles_column (str, optional): The name of the column containing SMILES strings. Defaults to "smiles".
+
+        Returns:
+            LigandSet: A LigandSet instance containing Ligand objects created from the CSV file.
+
+        Raises:
+            FileNotFoundError: If the file does not exist.
+            ValueError: If the CSV does not contain the specified smiles column or if SMILES strings are invalid.
+        """
+        path = Path(file_path)
+        if not path.exists():
+            raise FileNotFoundError(f"The file '{file_path}' does not exist.")
+
+        # First read just the header to check for the smiles column
+        df_header = pd.read_csv(file_path, nrows=0)
+        if smiles_column not in df_header.columns:
+            # Try case-insensitive match
+            lower_to_actual = {col.lower(): col for col in df_header.columns}
+            if smiles_column.lower() in lower_to_actual:
+                smiles_column = lower_to_actual[smiles_column.lower()]
+            else:
+                raise DeepOriginException(
+                    f"Column '{smiles_column}' not found in CSV file '{file_path}'. Available columns: {', '.join(df_header.columns)}"
+                )
+
+        ligands = []
+        try:
+            df = pd.read_csv(file_path)
+            normalized_columns = [col.strip().lower() for col in df.columns]
+
+            if smiles_column.lower() not in normalized_columns:
+                raise ValueError(f"CSV file must contain a '{smiles_column}' column.")
+
+            smiles_col_index = normalized_columns.index(smiles_column.lower())
+            smiles_col = df.columns[smiles_col_index]
+            other_columns = [col for col in df.columns if col != smiles_col]
+
+            for idx, row in df.iterrows():
+                try:
+                    smiles = row[smiles_col]
+                    if pd.isna(smiles):
+                        print(
+                            f"Warning: Skipping row {idx + 1}: SMILES value is missing."
+                        )
+                        continue
+                    mol = Chem.MolFromSmiles(smiles)
+                    if mol is None:
+                        print(
+                            f"Warning: Skipping row {idx + 1}: Invalid SMILES '{smiles}'."
+                        )
+                        continue
+
+                    # Create properties dictionary
+                    properties = {}
+                    for col in other_columns:
+                        value = row[col]
+                        if pd.notna(value):
+                            properties[col] = value
+
+                    # Get name from properties if available
+                    name = properties.get("Name", "")
+
+                    # Create ligand using from_smiles
+                    ligand = Ligand.from_smiles(
+                        smiles=smiles,
+                        name=name,
+                        properties=properties,
+                    )
+                    ligands.append(ligand)
+                except Exception as e:
+                    print(
+                        f"Error: Failed to create Ligand from CSV file row {idx + 1}: {str(e)}"
+                    )
+
+        except pd.errors.EmptyDataError as e:
+            raise ValueError(f"The CSV file '{file_path}' is empty.") from e
+        except pd.errors.ParserError as e:
+            raise ValueError(f"Error parsing CSV file '{file_path}': {str(e)}") from e
+        except Exception as e:
+            raise ValueError(
+                f"Failed to create Ligands from CSV file '{file_path}': {str(e)}"
+            ) from e
+
+        return cls(ligands=ligands)
+
+    @classmethod
+    def from_sdf(
+        cls,
+        file_path: str,
+        *,
+        sanitize: bool = True,
+        removeHs: bool = False,
+    ) -> "LigandSet":
+        """
+        Create a LigandSet instance from an SDF file containing one or more molecules.
+
+        Args:
+            file_path (str): The path to the SDF file.
+            sanitize (bool): Whether to sanitize molecules. Defaults to True.
+            removeHs (bool): Whether to remove hydrogens. Defaults to False.
+
+        Returns:
+            LigandSet: A LigandSet instance containing Ligand objects created from the SDF file.
+
+        Raises:
+            FileNotFoundError: If the file does not exist.
+            ValueError: If the file cannot be parsed correctly.
+        """
+        path = Path(file_path)
+        if not path.exists():
+            raise FileNotFoundError(f"The file '{file_path}' does not exist.")
+
+        ligands = []
+        try:
+            suppl = Chem.SDMolSupplier(str(path), sanitize=sanitize, removeHs=removeHs)
+            for idx, mol in enumerate(suppl, start=1):
+                try:
+                    if mol is None:
+                        print(
+                            f"Warning: Skipping molecule at index {idx} due to parsing error."
+                        )
+                        continue
+                    ligand = Ligand.from_rdkit_mol(
+                        mol,
+                        properties=mol.GetPropsAsDict(),
+                    )
+                    ligands.append(ligand)
+                except Exception as e:
+                    print(
+                        f"Error: Failed to create Ligand from SDF file molecule_idx = '{idx}': {str(e)}"
+                    )
+        except Exception as e:
+            raise ValueError(
+                f"Failed to create Ligands from SDF file '{file_path}': {str(e)}"
+            ) from e
+
+        return cls(ligands=ligands)
+
+        @jupyter_visualization
+        def visualize_ligands(self):
+            """
+            Visualize all ligands in this LigandSet.
+
+            Raises:
+                FileNotFoundError: If the file does not exist.
+                ValueError: If the file cannot be parsed correctly.
+            """
+            try:
+                sdf_data = []
+                current_file = f"{tempfile.mkstemp()[1]}.sdf"
+                for ligand in self.ligands:
+                    ligand.write_to_file(output_format="sdf", output_path=current_file)
+
+                    with open(current_file, "r") as fd:
+                        data = fd.read()
+
+                    sdf_data.append(data)
+
+                sdf_data = "".join(sdf_data)
+                # Write the consolidated SDF data to a temporary file
+                with open(current_file, "w") as fd:
+                    fd.write(sdf_data)
+
+                # Use visualize_ligands_from_sdf to handle the visualization
+                return self.visualize_ligands_from_sdf(current_file)
+            except Exception as e:
+                raise ValueError(f"Visualization failed: {str(e)}") from e
