@@ -54,10 +54,10 @@ def test_sysprep(config):  # noqa: F811
     if config["mock"]:
         pytest.skip("test skipped with mock client")
 
-    from deeporigin.drug_discovery import EXAMPLE_DATA_DIR, Complex
+    from deeporigin.drug_discovery import BRD_DATA_DIR, Complex
     from deeporigin.functions.sysprep import sysprep
 
-    sim = Complex.from_dir(EXAMPLE_DATA_DIR)
+    sim = Complex.from_dir(BRD_DATA_DIR)
 
     # this is chosen to be one where it takes >1 min
     sysprep(

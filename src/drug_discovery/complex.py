@@ -6,11 +6,10 @@ from typing import Optional
 
 from beartype import beartype
 
-from deeporigin.drug_discovery import chemistry as chem
 from deeporigin.drug_discovery.abfe import ABFE
 from deeporigin.drug_discovery.docking import Docking
 from deeporigin.drug_discovery.rbfe import RBFE
-from deeporigin.drug_discovery.structures import Ligand, Protein
+from deeporigin.drug_discovery.structures import Ligand, LigandSet, Protein
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.files import FilesClient
 from deeporigin.platform.utils import PlatformClients
@@ -23,25 +22,9 @@ class Complex:
     protein: Protein
 
     # Using a private attribute for ligands with the property decorator below
-    _ligands: list[Ligand] = field(default_factory=list, repr=False)
+    ligands: LigandSet = field(default_factory=LigandSet)
     _platform_clients: Optional[PlatformClients] = None
     _prepared_systems: dict[str, str] = field(default_factory=dict, repr=False)
-
-    @beartype
-    def __init__(
-        self,
-        *,
-        protein: Protein,
-        ligands: list[Ligand] | None = None,
-        _platform_clients: Optional[PlatformClients] = None,
-    ):
-        """Initialize a Complex with either ligands or _ligands parameter"""
-        self._ligands = ligands if ligands is not None else []
-        self.protein = protein
-
-        self._platform_clients = _platform_clients
-
-        self.__post_init__()
 
     def __post_init__(self):
         """various post init tasks"""
@@ -53,16 +36,6 @@ class Complex:
         self.rbfe = RBFE(parent=self)
 
         self._prepared_systems = {}
-
-    @property
-    def ligands(self) -> list[Ligand]:
-        """Get the current ligands"""
-        return self._ligands
-
-    @ligands.setter
-    def ligands(self, new_ligands: list[Ligand]):
-        """Set new ligands"""
-        self._ligands = new_ligands
 
     @classmethod
     def from_dir(
@@ -122,7 +95,7 @@ class Complex:
         # Create the Complex instance
         instance = cls(
             protein=protein,
-            ligands=ligands,
+            ligands=LigandSet(ligands=ligands),
             _platform_clients=_platform_clients,
         )
 
@@ -221,32 +194,3 @@ class Complex:
             p.text(f"protein={self.protein.name}")
             p.text(f" with {len(self.ligands)} ligands")
             p.text(")")
-
-    @beartype
-    def show_ligands(self, *, view: str = "2d", limit: Optional[int] = None):
-        """Display ligands in the complex object.
-
-        Args:
-            view: Visualization type, either "2d" (default) or "3d".
-                 - "2d": Shows ligands in a table with 2D structure renderings
-                 - "3d": Shows 3D molecular structures using SDF files
-            limit: Optional; maximum number of ligands to display.
-                  If None, all ligands will be shown.
-        """
-
-        if view.lower() == "3d":
-            files = [ligand.file_path for ligand in self.ligands]
-
-            if limit is not None:
-                files = files[:limit]
-
-            chem.show_molecules_in_sdf_files(files)
-        else:
-            from deeporigin.drug_discovery.structures.ligand import (
-                show_ligands as _show_ligands,
-            )
-
-            if limit is not None:
-                return _show_ligands(self.ligands[:limit])
-            else:
-                return _show_ligands(self.ligands)

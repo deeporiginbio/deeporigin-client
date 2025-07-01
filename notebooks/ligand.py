@@ -5,7 +5,8 @@ app = marimo.App(width="medium")
 
 with app.setup:
     import marimo as mo
-    from deeporigin.drug_discovery import EXAMPLE_DATA_DIR, Ligand
+
+    from deeporigin.drug_discovery import BRD_DATA_DIR, Ligand
 
 
 @app.cell(hide_code=True)
@@ -74,7 +75,7 @@ def _():
 
 @app.cell
 def _():
-    brd2 = Ligand.from_sdf(EXAMPLE_DATA_DIR / "brd-2.sdf")
+    brd2 = Ligand.from_sdf(BRD_DATA_DIR / "brd-2.sdf")
     brd2.show()
     return
 

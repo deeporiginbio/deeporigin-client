@@ -1,19 +1,32 @@
 This document describes how to work with ligands (molecules) and use them in Deep Origin tools. 
 
-## The `Ligand` class
+There are two classes that help you work with ligands:
+
+- `Ligand`
+- `LigandSet`
 
 The [`Ligand` class](../ref/structures.md#src.drug_discovery.structures.Ligand) is the primary way to work with ligands in Deep Origin.
 
-## Constructing a ligand
+## Constructing a Ligand or LigandSet
 
-### From a file
+### Single Ligand from a SDF file
 
-A ligand can be constructed from a file:
+A single Ligand can be constructed from a file:
 
 ```python
-from deeporigin.drug_discovery import Ligand, EXAMPLE_DATA_DIR
+from deeporigin.drug_discovery import Ligand, BRD_DATA_DIR
 
-ligand = Ligand.from_sdf(EXAMPLE_DATA_DIR / "brd-2.sdf")
+ligand = Ligand.from_sdf(BRD_DATA_DIR / "brd-2.sdf")
+```
+
+### Many ligands from a SDF file
+
+A LigandSet can be constructed from a SDF File:
+
+```python
+from deeporigin.drug_discovery import LigandSet, DATA_DIR
+
+ligands = LigandSet.from_sdf(DATA_DIR / "ligands" / "ligands-brd-all.sdf")
 ```
 
 ### From a SMILES string
@@ -101,30 +114,6 @@ ligand = Ligand.from_rdkit_mol(
 
 This is particularly useful when you're working with RDKit's molecular manipulation functions and want to convert the results into a Deep Origin Ligand object for further processing or visualization.
 
-### From a CSV file
-
-You can create multiple ligands at once from a CSV file using the `from_csv` class method. This is useful when you have a dataset of molecules with their SMILES strings and associated properties. The `from_csv` method:
-
-- Requires a path to the CSV file and the name of the column containing SMILES strings
-- Automatically extracts all non-SMILES columns as properties
-- Skips rows with empty or invalid SMILES
-- Returns a list of `Ligand` objects
-
-This approach is ideal for processing large datasets of molecules where each row represents a different compound.
-
-#### Basic Usage
-
-For the simplest case, just specify the file path and which column contains the SMILES strings:
-
-```{.python notest}
-from deeporigin.drug_discovery import Ligand
-
-# Basic usage - just extracting SMILES from a column
-ligands = Ligand.from_csv(
-    file_path="molecules.csv",
-    smiles_column="SMILES"  # Optional, defaults to "smiles"
-)
-```
 
 The method will:
 
@@ -139,7 +128,22 @@ The method will:
     - `FileNotFoundError` if the CSV file does not exist
     - `ValueError` if the specified SMILES column is not found in the CSV file
 
-## Visualizing a ligand
+### From a CSV file
+
+You can also create a `LigandSet` from a CSV file containing SMILES strings and optional properties:
+
+```python
+from deeporigin.drug_discovery import LigandSet, DATA_DIR
+
+ligands = LigandSet.from_csv(
+    file_path=DATA_DIR / "ligands" / "ligands.csv",
+    smiles_column="SMILES"  # Optional, defaults to "smiles"
+)
+```
+
+## Visualization
+
+### Visualizing individual ligands
 
 ??? warning "Browser support"
     These visualizations work best on Google Chrome. We are aware of issues on other browsers, especially Safari on macOS.
@@ -174,7 +178,37 @@ If a ligand is not backed by a SDF file, a 2D visualization will be shown:
 
 ![](../../images/ligand.png)
 
-## Predicting ADMET Properties
+### Visualizing LigandSets
+
+## Operations on Ligands
+
+### Ligand Minimization 
+
+You can minimize the 3D structure of a single ligand or all ligands in a LigandSet. Minimization optimizes the geometry of the molecule(s) using a force field, which is useful for preparing ligands for docking or other modeling tasks.
+
+#### Minimizing a single Ligand
+
+```python
+from deeporigin.drug_discovery import Ligand, BRD_DATA_DIR
+
+ligand = Ligand.from_sdf(BRD_DATA_DIR / "brd-2.sdf")
+ligand.minimize()  # Optimizes the 3D coordinates in place
+```
+
+#### Minimizing all ligands in a LigandSet
+
+```python
+from deeporigin.drug_discovery import LigandSet, DATA_DIR
+
+ligands = LigandSet.from_sdf(DATA_DIR / "ligands" / "ligands-brd-all.sdf")
+ligands.minimize()  # Optimizes all ligands in the set in place
+```
+
+This will call the `minimize()` method on each ligand in the set, updating their 3D coordinates. The method returns the LigandSet itself for convenience, so you can chain further operations if desired.
+
+### Predicting ADMET Properties
+
+#### For single Ligands
 
 You can predict ADMET (Absorption, Distribution, Metabolism, Excretion, and Toxicity) properties for a ligand using the `admet_properties` method:
 
@@ -189,12 +223,12 @@ The method returns a dictionary containing various ADMET-related predictions:
 {
     'smiles': 'Cn1c(=O)n(Cc2ccccc2)c(=O)c2c1nc(SCCO)n2Cc1ccccc1',
     'properties': {
-        'logS': {'value': -4.004},  # Aqueous solubility
-        'logP': 3.686,             # Partition coefficient
-        'logD': 2.528,             # Distribution coefficient
+        'logS': -4.004,  # Aqueous solubility
+        'logP': 3.686,   # Partition coefficient
+        'logD': 2.528,   # Distribution coefficient
         'hERG': {'probability': 0.264},  # hERG inhibition risk
         'ames': {'probability': 0.213}, # Ames mutagenicity
-        'cyp': {                                # Cytochrome P450 inhibition
+        'cyp': {     # Cytochrome P450 inhibition
             'probabilities': {
                 'cyp1a2': 0.134,
                 'cyp2c9': 0.744,
@@ -203,7 +237,7 @@ The method returns a dictionary containing various ADMET-related predictions:
                 'cyp3a4': 0.4718
             }
         },
-        'pains': {                              # PAINS (Pan Assay Interference Compounds)
+        'pains': {    # PAINS (Pan Assay Interference Compounds)
             'has_pains': None,
             'pains_fragments': []
         }
@@ -221,6 +255,35 @@ logP = ligand.get_property('logP')
 !!! note "Property Storage"
     All predicted properties are automatically stored in the ligand's properties dictionary and can be accessed at any time using the `get_property` method.
 
+#### For LigandSets
+
+You can predict ADMET properties for all ligands in a `LigandSet` using the `admet_properties` method. This will call the prediction for each ligand and display a progress bar using `tqdm`:
+
+```{.python notest}
+from deeporigin.drug_discovery import LigandSet, DATA_DIR
+
+ligands = LigandSet.from_csv(
+    file_path=DATA_DIR / "ligands" / "ligands.csv",
+    smiles_column="SMILES"
+)
+
+ligands.admet_properties()  
+```
+
+Each entry in `results` is a dictionary of ADMET properties for the corresponding ligand. The properties are also stored in each ligand's `.properties` attribute for later access.
+
+To view ADMET properties of all ligands in the ligand set, simply view the ligandset as a dataframe using:
+
+```{.python notest}
+ligands
+```
+
+or, optionally, convert to a DataFrame for further analysis:
+
+```{.python notest}
+ligands.to_dataframe()
+```
+
 ## Exporting ligands
 
 ### To SDF files
@@ -230,7 +293,7 @@ To write a ligand to a SDF file, use:
 ```python
 from deeporigin.drug_discovery import Ligand
 
-ligand = Ligand.from_identifier("serotonin")
+ligand = Ligand.from_smiles("NCCc1c[nH]c2ccc(O)cc12")
 ligand.to_sdf()
 ```
 
@@ -241,7 +304,7 @@ To write a ligand to a mol file, use:
 ```python
 from deeporigin.drug_discovery import Ligand
 
-ligand = Ligand.from_identifier("serotonin")
+ligand = Ligand.from_smiles("NCCc1c[nH]c2ccc(O)cc12")
 ligand.to_mol()
 ```
 
@@ -252,6 +315,32 @@ To write a ligand to a PDB file, use:
 ```python
 from deeporigin.drug_discovery import Ligand
 
-ligand = Ligand.from_identifier("serotonin")
+ligand = Ligand.from_smiles("NCCc1c[nH]c2ccc(O)cc12")
 ligand.to_pdb()
+```
+
+
+### To Pandas DataFrames
+
+To convert a LigandSet to a Pandas DataFrame, use:
+
+```python
+from deeporigin.drug_discovery import LigandSet, DATA_DIR
+
+ligands = LigandSet.from_csv(
+    file_path = DATA_DIR / "ligands" / "ligands.csv",
+    smiles_column="SMILES"  # Optional, defaults to "smiles"
+)
+df = ligands.to_dataframe()
+```
+
+### To CSV files
+
+To write a LigandSet to a CSV file, use method chaining:
+
+```{.python notest}
+# we're using pandas' native to_csv method here
+
+ligands.to_dataframe().to_csv("temp.csv")
+
 ```

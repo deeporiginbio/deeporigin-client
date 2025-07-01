@@ -11,8 +11,8 @@ The [`Protein` class](../ref/structures.md#src.drug_discovery.structures.Protein
 A protein can be constructed from a file:
 
 ```python
-from deeporigin.drug_discovery import Protein, EXAMPLE_DATA_DIR
-protein = Protein.from_file(EXAMPLE_DATA_DIR / "brd.pdb")
+from deeporigin.drug_discovery import Protein, BRD_DATA_DIR
+protein = Protein.from_file(BRD_DATA_DIR / "brd.pdb")
 ```
 
 ### From a PDB ID

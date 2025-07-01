@@ -1,5 +1,3 @@
-
-
 import marimo
 
 __generated_with = "0.13.2"
@@ -28,8 +26,9 @@ def _():
 
 @app.cell
 def _():
-    from deeporigin.drug_discovery import Complex, EXAMPLE_DATA_DIR, Protein, Ligand
-    return Complex, EXAMPLE_DATA_DIR, Protein
+    from deeporigin.drug_discovery import BRD_DATA_DIR, Complex, Protein
+
+    return Complex, BRD_DATA_DIR, Protein
 
 
 @app.cell(hide_code=True)
@@ -55,7 +54,9 @@ def _(Protein):
 
 @app.cell(hide_code=True)
 def _():
-    mo.md(r"""We can use the `show` method of the Protein class to visualize its 3D structure""")
+    mo.md(
+        r"""We can use the `show` method of the Protein class to visualize its 3D structure"""
+    )
     return
 
 
@@ -78,8 +79,8 @@ def _():
 
 
 @app.cell
-def _(Complex, EXAMPLE_DATA_DIR):
-    sim = Complex.from_dir(EXAMPLE_DATA_DIR)
+def _(Complex, BRD_DATA_DIR):
+    sim = Complex.from_dir(BRD_DATA_DIR)
     return (sim,)
 
 
