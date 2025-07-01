@@ -180,7 +180,35 @@ If a ligand is not backed by a SDF file, a 2D visualization will be shown:
 
 ### Visualizing LigandSets
 
-## Predicting ADMET Properties
+## Operations on Ligands
+
+### Ligand Minimization 
+
+You can minimize the 3D structure of a single ligand or all ligands in a LigandSet. Minimization optimizes the geometry of the molecule(s) using a force field, which is useful for preparing ligands for docking or other modeling tasks.
+
+#### Minimizing a single Ligand
+
+```python
+from deeporigin.drug_discovery import Ligand, EXAMPLE_DATA_DIR
+
+ligand = Ligand.from_sdf(EXAMPLE_DATA_DIR / "brd-2.sdf")
+ligand.minimize()  # Optimizes the 3D coordinates in place
+```
+
+#### Minimizing all ligands in a LigandSet
+
+```python
+from deeporigin.drug_discovery import LigandSet, EXAMPLE_DATA_DIR
+
+ligands = LigandSet.from_sdf(EXAMPLE_DATA_DIR / "ligands-brd-all.sdf")
+ligands.minimize()  # Optimizes all ligands in the set in place
+```
+
+This will call the `minimize()` method on each ligand in the set, updating their 3D coordinates. The method returns the LigandSet itself for convenience, so you can chain further operations if desired.
+
+### Predicting ADMET Properties
+
+#### For single Ligands
 
 You can predict ADMET (Absorption, Distribution, Metabolism, Excretion, and Toxicity) properties for a ligand using the `admet_properties` method:
 
@@ -226,6 +254,35 @@ logP = ligand.get_property('logP')
 
 !!! note "Property Storage"
     All predicted properties are automatically stored in the ligand's properties dictionary and can be accessed at any time using the `get_property` method.
+
+#### For LigandSets
+
+You can predict ADMET properties for all ligands in a `LigandSet` using the `admet_properties` method. This will call the prediction for each ligand and display a progress bar using `tqdm`:
+
+```{.python notest}
+from deeporigin.drug_discovery import LigandSet, EXAMPLE_DATA_DIR
+
+ligands = LigandSet.from_csv(
+    file_path=EXAMPLE_DATA_DIR / "ligands.csv",
+    smiles_column="SMILES"
+)
+
+ligands.admet_properties()  
+```
+
+Each entry in `results` is a dictionary of ADMET properties for the corresponding ligand. The properties are also stored in each ligand's `.properties` attribute for later access.
+
+To view ADMET properties of all ligands in the ligand set, simply view the ligandset as a dataframe using:
+
+```{.python notest}
+ligands
+```
+
+or, optionally, convert to a DataFrame for further analysis:
+
+```{.python notest}
+ligands.to_dataframe()
+```
 
 ## Exporting ligands
 
@@ -277,25 +334,13 @@ ligands = LigandSet.from_csv(
 df = ligands.to_dataframe()
 ```
 
+### To CSV files
 
+To write a LigandSet to a CSV file, use method chaining:
 
+```{.python notest}
+# we're using pandas' native to_csv method here
 
-This will read the CSV, create a `Ligand` for each valid row, and store them in the set.
+ligands.to_dataframe().to_csv("temp.csv")
 
-
-This will display a table of ligands with their structures and properties, either in a Jupyter notebook or as a pandas DataFrame, depending on the environment.
-
-### From an SDF file
-
-You can create a `LigandSet` from an SDF file containing one or more molecules:
-
-```python
-from deeporigin.drug_discovery import LigandSet
-
-ligand_set = LigandSet.from_sdf(
-    file_path="molecules.sdf"
-)
 ```
-
-This will load all valid molecules in the SDF file as `Ligand` objects in the set. If the file contains no valid molecules, an empty set will be returned.
-

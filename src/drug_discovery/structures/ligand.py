@@ -608,28 +608,6 @@ class Ligand(Entity):
                 f"Failed to convert ligand block content to SDF: {str(e)}"
             ) from e
 
-    @classmethod
-    @jupyter_visualization
-    def visualize_ligands_from_sdf(cls, file_path: str):
-        """
-        Visualize ligands from an SDF file.
-
-        Args:
-            file_path (str): The path to the SDF file.
-
-        Raises:
-            FileNotFoundError: If the file does not exist.
-            ValueError: If the file cannot be parsed correctly.
-        """
-        try:
-            viewer = MoleculeViewer(str(file_path), format="sdf")
-            ligand_config = viewer.get_ligand_visualization_config()
-            html = viewer.render_ligand(ligand_config=ligand_config)
-
-            return html
-        except Exception as e:
-            raise ValueError(f"Visualization failed: {str(e)}") from e
-
     def minimize(self):
         """embed and optimize ligand in 3d space"""
 
@@ -639,7 +617,7 @@ class Ligand(Entity):
         EmbedMolecule(self.mol.m)
         UFFOptimizeMolecule(self.mol.m, maxIters=5000)
 
-        return self
+        return None
 
     def _repr_html_(self) -> str:
         """
@@ -691,10 +669,8 @@ class Ligand(Entity):
 
     def admet_properties(self) -> str:
         """
-        Predict ADMET properties for the ligand.
+        Predict ADMET properties for the ligand using DO's molprops model.
 
-        Returns:
-            str: A string containing the predicted ADMET properties.
         """
 
         from deeporigin.functions.molprops import molprops
@@ -803,16 +779,38 @@ def ligands_to_dataframe(ligands: list[Ligand]):
         "File": file_list,
     }
 
-    # find all the common properties in all ligands
-    common_keys = set.intersection(
-        *(set(ligand.properties.keys()) for ligand in ligands)
-    )
-    for key in common_keys:
-        data[key] = [ligand.properties[key] for ligand in ligands]
+    # find the union of all properties in all ligands
+    all_keys = set()
+    for ligand in ligands:
+        all_keys.update(ligand.properties.keys())
+    for key in all_keys:
+        data[key] = [ligand.properties.get(key, None) for ligand in ligands]
 
     df = pd.DataFrame(data)
 
     return df
+
+
+@jupyter_visualization
+def visualize_mols_in_sdf(file_path: str):
+    """
+    Visualize ligands from an SDF file.
+
+    Args:
+        file_path (str): The path to the SDF file.
+
+    Raises:
+        FileNotFoundError: If the file does not exist.
+        ValueError: If the file cannot be parsed correctly.
+    """
+    try:
+        viewer = MoleculeViewer(str(file_path), format="sdf")
+        ligand_config = viewer.get_ligand_visualization_config()
+        html = viewer.render_ligand(ligand_config=ligand_config)
+
+        return html
+    except Exception as e:
+        raise ValueError(f"Visualization failed: {str(e)}") from e
 
 
 @dataclass
@@ -822,34 +820,45 @@ class LigandSet:
 
     Attributes:
         ligands (list[Ligand]): A list of Ligand instances contained in the set.
+
+    Methods:
+        minimize(): Minimize all ligands in the set using their 3D optimization routines.
     """
 
-    ligands: list[Ligand]
+    ligands: list[Ligand] = field(default_factory=list)
 
     def __len__(self):
-        return len(self._ligands)
+        return len(self.ligands)
 
     def __iter__(self):
-        return iter(self._ligands)
+        return iter(self.ligands)
 
     def __getitem__(self, index):
-        return self._ligands[index]
+        return self.ligands[index]
 
     def __contains__(self, ligand):
         return ligand in self._ligands
 
     def _repr_html_(self):
         """Return an HTML representation of the LigandSet."""
-        return self.show().to_html()
+        return self.show_df().to_html()
 
     def to_dataframe(self) -> pd.DataFrame:
         """Convert the LigandSet to a pandas DataFrame."""
 
+        if len(self.ligands) == 0:
+            return pd.DataFrame()
+
         return ligands_to_dataframe(self.ligands)
 
-    def show(self):
+    def show_df(self):
         """Show ligands in the set in a dataframe with 2D visualizations."""
+
         df = self.to_dataframe()
+
+        if len(df) == 0:
+            print("Empty LigandSet")
+            return df
 
         from rdkit.Chem import PandasTools
 
@@ -1020,32 +1029,71 @@ class LigandSet:
 
         return cls(ligands=ligands)
 
-        @jupyter_visualization
-        def visualize_ligands(self):
-            """
-            Visualize all ligands in this LigandSet.
+    @classmethod
+    def from_dir(cls, directory: str):
+        """
+        Create a LigandSet instance from a directory containing SDF files.
+        """
+        sdf_files = [f for f in os.listdir(directory) if f.endswith(".sdf")]
+        ligands = []
+        for sdf_file in sdf_files:
+            ligands.extend(cls.from_sdf(os.path.join(directory, sdf_file)))
 
-            Raises:
-                FileNotFoundError: If the file does not exist.
-                ValueError: If the file cannot be parsed correctly.
-            """
-            try:
-                sdf_data = []
-                current_file = f"{tempfile.mkstemp()[1]}.sdf"
-                for ligand in self.ligands:
-                    ligand.write_to_file(output_format="sdf", output_path=current_file)
+        #  now get all CSV files
+        csv_files = [f for f in os.listdir(directory) if f.endswith(".csv")]
+        for csv_file in csv_files:
+            ligands.extend(cls.from_csv(os.path.join(directory, csv_file)))
 
-                    with open(current_file, "r") as fd:
-                        data = fd.read()
+        return cls(ligands=ligands)
 
-                    sdf_data.append(data)
+    @jupyter_visualization
+    def show(self):
+        """
+        Visualize all ligands in this LigandSet.
 
-                sdf_data = "".join(sdf_data)
-                # Write the consolidated SDF data to a temporary file
-                with open(current_file, "w") as fd:
-                    fd.write(sdf_data)
+        Raises:
+            FileNotFoundError: If the file does not exist.
+            ValueError: If the file cannot be parsed correctly.
+        """
+        try:
+            sdf_data = []
+            current_file = f"{tempfile.mkstemp()[1]}.sdf"
+            for ligand in self.ligands:
+                ligand.write_to_file(output_format="sdf", output_path=current_file)
 
-                # Use visualize_ligands_from_sdf to handle the visualization
-                return self.visualize_ligands_from_sdf(current_file)
-            except Exception as e:
-                raise ValueError(f"Visualization failed: {str(e)}") from e
+                with open(current_file, "r") as fd:
+                    data = fd.read()
+
+                sdf_data.append(data)
+
+            sdf_data = "".join(sdf_data)
+            # Write the consolidated SDF data to a temporary file
+            with open(current_file, "w") as fd:
+                fd.write(sdf_data)
+
+            # Use visualize_ligands_from_sdf to handle the visualization
+            return visualize_mols_in_sdf(current_file)
+        except Exception as e:
+            raise ValueError(f"Visualization failed: {str(e)}") from e
+
+    def minimize(self):
+        """
+        Minimize all ligands in the set using their 3D optimization routines.
+        This calls the minimize() method on each Ligand in the set.
+        """
+        for ligand in self.ligands:
+            ligand.minimize()
+        return self
+
+    def admet_properties(self):
+        """
+        Predict ADMET properties for all ligands in the set.
+        This calls the admet_properties() method on each Ligand in the set.
+        Returns a list of the results for each ligand.
+        Shows a progress bar using tqdm.
+        """
+        from tqdm import tqdm
+
+        for ligand in tqdm(self.ligands, desc="Predicting ADMET properties"):
+            ligand.admet_properties()
+        return None

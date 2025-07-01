@@ -10,7 +10,7 @@ from deeporigin.drug_discovery import chemistry as chem
 from deeporigin.drug_discovery.abfe import ABFE
 from deeporigin.drug_discovery.docking import Docking
 from deeporigin.drug_discovery.rbfe import RBFE
-from deeporigin.drug_discovery.structures import Ligand, Protein
+from deeporigin.drug_discovery.structures import Ligand, LigandSet, Protein
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.files import FilesClient
 from deeporigin.platform.utils import PlatformClients
@@ -23,25 +23,9 @@ class Complex:
     protein: Protein
 
     # Using a private attribute for ligands with the property decorator below
-    _ligands: list[Ligand] = field(default_factory=list, repr=False)
+    ligands: LigandSet = field(default_factory=LigandSet)
     _platform_clients: Optional[PlatformClients] = None
     _prepared_systems: dict[str, str] = field(default_factory=dict, repr=False)
-
-    @beartype
-    def __init__(
-        self,
-        *,
-        protein: Protein,
-        ligands: list[Ligand] | None = None,
-        _platform_clients: Optional[PlatformClients] = None,
-    ):
-        """Initialize a Complex with either ligands or _ligands parameter"""
-        self._ligands = ligands if ligands is not None else []
-        self.protein = protein
-
-        self._platform_clients = _platform_clients
-
-        self.__post_init__()
 
     def __post_init__(self):
         """various post init tasks"""
@@ -53,16 +37,6 @@ class Complex:
         self.rbfe = RBFE(parent=self)
 
         self._prepared_systems = {}
-
-    @property
-    def ligands(self) -> list[Ligand]:
-        """Get the current ligands"""
-        return self._ligands
-
-    @ligands.setter
-    def ligands(self, new_ligands: list[Ligand]):
-        """Set new ligands"""
-        self._ligands = new_ligands
 
     @classmethod
     def from_dir(
@@ -122,7 +96,7 @@ class Complex:
         # Create the Complex instance
         instance = cls(
             protein=protein,
-            ligands=ligands,
+            ligands=LigandSet(ligands=ligands),
             _platform_clients=_platform_clients,
         )
 
