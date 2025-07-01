@@ -293,7 +293,7 @@ To write a ligand to a SDF file, use:
 ```python
 from deeporigin.drug_discovery import Ligand
 
-ligand = Ligand.from_identifier("serotonin")
+ligand = Ligand.from_smiles("NCCc1c[nH]c2ccc(O)cc12")
 ligand.to_sdf()
 ```
 
@@ -304,7 +304,7 @@ To write a ligand to a mol file, use:
 ```python
 from deeporigin.drug_discovery import Ligand
 
-ligand = Ligand.from_identifier("serotonin")
+ligand = Ligand.from_smiles("NCCc1c[nH]c2ccc(O)cc12")
 ligand.to_mol()
 ```
 
@@ -315,7 +315,7 @@ To write a ligand to a PDB file, use:
 ```python
 from deeporigin.drug_discovery import Ligand
 
-ligand = Ligand.from_identifier("serotonin")
+ligand = Ligand.from_smiles("NCCc1c[nH]c2ccc(O)cc12")
 ligand.to_pdb()
 ```
 
