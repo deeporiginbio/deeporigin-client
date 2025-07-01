@@ -14,9 +14,10 @@ import nest_asyncio  # we need this for asyncio  # noqa: F401
 
 from . import chemistry
 
-__all__ = ["chemistry", "Complex", "Protein", "Ligand", "Pocket"]
+__all__ = ["chemistry", "Complex", "Protein", "Ligand", "Pocket", "LigandSet"]
 
-EXAMPLE_DATA_DIR = files("deeporigin.data")
+DATA_DIR = files("deeporigin.data")
+BRD_DATA_DIR = DATA_DIR / "brd"
 
 
 def __getattr__(name):
@@ -44,4 +45,4 @@ def __getattr__(name):
 
 
 def __dir__():
-    return __all__ + ["EXAMPLE_DATA_DIR"]
+    return __all__ + ["BRD_DATA_DIR", "DATA_DIR"]

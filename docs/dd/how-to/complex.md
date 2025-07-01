@@ -7,9 +7,9 @@ This document describes how to create a `Complex` object, that can be used to ru
 
 ```python
 # here, we're using the example data directory
-from deeporigin.drug_discovery import Complex, EXAMPLE_DATA_DIR
+from deeporigin.drug_discovery import Complex, BRD_DATA_DIR
 
-sim = Complex.from_dir(EXAMPLE_DATA_DIR)
+sim = Complex.from_dir(BRD_DATA_DIR)
 ```
 
 The directory should contain:
@@ -22,10 +22,10 @@ The directory should contain:
 A `Complex` object can be also be constructed using `Protein` and `Ligand` objects. 
 
 ```python
-from deeporigin.drug_discovery import Complex, EXAMPLE_DATA_DIR, Protein, Ligand
+from deeporigin.drug_discovery import Complex, BRD_DATA_DIR, Protein, Ligand
 
-protein = Protein.from_file(EXAMPLE_DATA_DIR / "brd.pdb")
-ligand = Ligand.from_sdf(EXAMPLE_DATA_DIR / "brd-2.sdf")
+protein = Protein.from_file(BRD_DATA_DIR / "brd.pdb")
+ligand = Ligand.from_sdf(BRD_DATA_DIR / "brd-2.sdf")
 
 sim = Complex(protein=protein, ligands=[ligand])
 ```
@@ -36,8 +36,8 @@ You can modify a Complex object by adding or replacing ligands.
 
 ```{.python notest}
 from deeporigin.drug_discovery import Complex, Protein, Ligand
-protein = Protein.from_file(EXAMPLE_DATA_DIR / "brd.pdb")
-ligand = Ligand.from_sdf(EXAMPLE_DATA_DIR / "brd-2.sdf")
+protein = Protein.from_file(BRD_DATA_DIR / "brd.pdb")
+ligand = Ligand.from_sdf(BRD_DATA_DIR / "brd-2.sdf")
 
 # Create a complex with just the protein
 sim = Complex(protein=protein, ligands=[])

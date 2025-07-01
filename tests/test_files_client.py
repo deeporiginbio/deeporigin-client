@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-from deeporigin.drug_discovery import EXAMPLE_DATA_DIR
+from deeporigin.drug_discovery import BRD_DATA_DIR
 from deeporigin.files.files_client import FilesClient
 from tests.utils import config  # noqa: F401
 
@@ -13,9 +13,9 @@ def test_upload_and_download_files(config, tmp_path):  # noqa: F811
 
     files_client = FilesClient()
 
-    files = os.listdir(EXAMPLE_DATA_DIR)
+    files = os.listdir(BRD_DATA_DIR)
     src_to_dest = {
-        os.path.join(EXAMPLE_DATA_DIR, file): os.path.join("test-upload/", file)
+        os.path.join(BRD_DATA_DIR, file): os.path.join("test-upload/", file)
         for file in files
     }
 
@@ -44,9 +44,9 @@ def test_list_folder(config):  # noqa: F811
 
     files_client = FilesClient()
 
-    files = os.listdir(EXAMPLE_DATA_DIR)
+    files = os.listdir(BRD_DATA_DIR)
     src_to_dest = {
-        os.path.join(EXAMPLE_DATA_DIR, file): os.path.join("test-upload/", file)
+        os.path.join(BRD_DATA_DIR, file): os.path.join("test-upload/", file)
         for file in files
     }
 

@@ -7,9 +7,9 @@ This document describes how to run a [RBFE :octicons-link-external-16:](https://
 We assume that we have an initialized and configured `Complex` object:
 
 ```python
-from deeporigin.drug_discovery import Complex, EXAMPLE_DATA_DIR
+from deeporigin.drug_discovery import Complex, BRD_DATA_DIR
 
-sim = Complex.from_dir(EXAMPLE_DATA_DIR)
+sim = Complex.from_dir(BRD_DATA_DIR)
 ```
 For more details on how to get started, see [:material-page-previous: Getting Started ](./getting-started.md).
 
@@ -56,9 +56,9 @@ You will see a message printed to screen similar to:
 The end to end RBFE tool has a number of user-accessible parameters. To view all parameters, use:
 
 ```python
-from deeporigin.drug_discovery import Complex, EXAMPLE_DATA_DIR
+from deeporigin.drug_discovery import Complex, BRD_DATA_DIR
 
-sim = Complex.from_dir(EXAMPLE_DATA_DIR)
+sim = Complex.from_dir(BRD_DATA_DIR)
 
 sim.rbfe._params.end_to_end
 ```
@@ -334,9 +334,9 @@ sim.rbfe._params.end_to_end
 Any of these parameters are modifiable using dot notation. For example, to change the number of steps in the RBFE step, we can use:
 
 ```python
-from deeporigin.drug_discovery import Complex, EXAMPLE_DATA_DIR
+from deeporigin.drug_discovery import Complex, BRD_DATA_DIR
 
-sim = Complex.from_dir(EXAMPLE_DATA_DIR)
+sim = Complex.from_dir(BRD_DATA_DIR)
 
 sim.rbfe._params.end_to_end.binding.steps = 500000
 ```

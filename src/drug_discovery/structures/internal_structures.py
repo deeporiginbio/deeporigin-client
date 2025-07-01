@@ -67,6 +67,7 @@ import base64
 from enum import Enum
 import random
 import tempfile
+from typing import Optional
 import warnings
 
 from beartype import beartype
@@ -214,7 +215,13 @@ class Molecule:
         return conf.GetPositions()
 
     @classmethod
-    def from_smiles_or_name(cls, smiles=None, name=None, add_coords=False, seed=None):
+    def from_smiles_or_name(
+        cls,
+        smiles: Optional[str] = None,
+        name: Optional[str] = None,
+        add_coords: bool = False,
+        seed: Optional[int] = None,
+    ):
         """
         Create a Molecule instance from a SMILES string or compound name.
 
@@ -239,7 +246,22 @@ class Molecule:
             compound = compounds[0]
             smiles = compound.isomeric_smiles
 
-        assert smiles is not None
+            if smiles is None:
+                # try getting it manually
+                import requests
+
+                try:
+                    url = f"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/{name}/property/smiles/JSON"
+                    response = requests.get(url)
+                    data = response.json()
+                    smiles = data["PropertyTable"]["Properties"][0]["SMILES"]
+                except Exception:
+                    pass
+
+        if smiles is None:
+            raise ValueError(
+                f"Error resolving SMILES string of {name}. Pubchempy did not resolve SMILES"
+            )
 
         mol_rdk = Chem.MolFromSmiles(smiles)
 

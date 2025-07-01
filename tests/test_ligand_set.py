@@ -1,23 +1,22 @@
-import os
-
 import pytest
 
+from deeporigin.drug_discovery import DATA_DIR
 from deeporigin.drug_discovery.structures.ligand import Ligand, LigandSet
+from deeporigin.exceptions import DeepOriginException
 
 # Import shared test fixtures
 
-base_path = os.path.join(os.path.dirname(__file__), "fixtures")
 
 SDF_TEST_CASES = [
-    ("ligands-brd-all.sdf", 8),
-    ("42-ligands.sdf", 42),
+    (DATA_DIR / "ligands" / "ligands-brd-all.sdf", 8),
+    (DATA_DIR / "ligands" / "42-ligands.sdf", 42),
 ]
 
 
 @pytest.mark.parametrize("filename,expected_count", SDF_TEST_CASES)
 def test_ligand_set_from_sdf_file(filename, expected_count):
     """Test that we can make many ligands from a single SDF file with many molecules"""
-    ligands = LigandSet.from_sdf(os.path.join(base_path, filename))
+    ligands = LigandSet.from_sdf(filename)
     assert len(ligands.ligands) == expected_count, f"Expected {expected_count} ligands"
     for ligand in ligands.ligands:
         assert isinstance(ligand, Ligand), "Expected a Ligand object"
@@ -25,10 +24,9 @@ def test_ligand_set_from_sdf_file(filename, expected_count):
 
 def test_ligand_set_from_csv():
     """Test that we can create Ligands from a CSV file using the from_csv classmethod"""
-    from pathlib import Path
 
     # Get the path to the test CSV file
-    csv_path = Path(base_path) / "data.csv"
+    csv_path = DATA_DIR / "ligands" / "ligands.csv"
 
     # Create ligands from the CSV file
     ligands = LigandSet.from_csv(str(csv_path), smiles_column="SMILES")
@@ -51,7 +49,9 @@ def test_ligand_set_from_csv():
         assert df[prop].notna().all()
 
     # Test with invalid SMILES column
-    with pytest.raises(ValueError, match="Column 'invalid' not found in CSV file"):
+    with pytest.raises(
+        DeepOriginException, match="Column 'invalid' not found in CSV file"
+    ):
         LigandSet.from_csv(str(csv_path), smiles_column="invalid")
 
     # Test with non-existent file

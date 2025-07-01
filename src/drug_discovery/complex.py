@@ -6,7 +6,6 @@ from typing import Optional
 
 from beartype import beartype
 
-from deeporigin.drug_discovery import chemistry as chem
 from deeporigin.drug_discovery.abfe import ABFE
 from deeporigin.drug_discovery.docking import Docking
 from deeporigin.drug_discovery.rbfe import RBFE
@@ -195,32 +194,3 @@ class Complex:
             p.text(f"protein={self.protein.name}")
             p.text(f" with {len(self.ligands)} ligands")
             p.text(")")
-
-    @beartype
-    def show_ligands(self, *, view: str = "2d", limit: Optional[int] = None):
-        """Display ligands in the complex object.
-
-        Args:
-            view: Visualization type, either "2d" (default) or "3d".
-                 - "2d": Shows ligands in a table with 2D structure renderings
-                 - "3d": Shows 3D molecular structures using SDF files
-            limit: Optional; maximum number of ligands to display.
-                  If None, all ligands will be shown.
-        """
-
-        if view.lower() == "3d":
-            files = [ligand.file_path for ligand in self.ligands]
-
-            if limit is not None:
-                files = files[:limit]
-
-            chem.show_molecules_in_sdf_files(files)
-        else:
-            from deeporigin.drug_discovery.structures.ligand import (
-                show_ligands as _show_ligands,
-            )
-
-            if limit is not None:
-                return _show_ligands(self.ligands[:limit])
-            else:
-                return _show_ligands(self.ligands)

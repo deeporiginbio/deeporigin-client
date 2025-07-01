@@ -6,7 +6,7 @@ app = marimo.App(width="medium")
 with app.setup:
     import marimo as mo
 
-    from deeporigin.drug_discovery import EXAMPLE_DATA_DIR, Complex
+    from deeporigin.drug_discovery import BRD_DATA_DIR, Complex
 
 
 @app.cell(hide_code=True)
@@ -33,7 +33,7 @@ def _():
 
 @app.cell
 def _():
-    sim = Complex.from_dir(EXAMPLE_DATA_DIR)
+    sim = Complex.from_dir(BRD_DATA_DIR)
     return (sim,)
 
 

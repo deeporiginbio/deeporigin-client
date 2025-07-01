@@ -7,9 +7,9 @@ This document describes how to run a [ABFE :octicons-link-external-16:](https://
 We assume that we have an initialized and configured `Complex` object:
 
 ```python
-from deeporigin.drug_discovery import Complex, EXAMPLE_DATA_DIR
+from deeporigin.drug_discovery import Complex, BRD_DATA_DIR
 
-sim = Complex.from_dir(EXAMPLE_DATA_DIR)
+sim = Complex.from_dir(BRD_DATA_DIR)
 ```
 
 Here, ABFE requires that the `Complex` object have an already prepared protein (PDB), and the associated ligands (SDF) are in a docked pose.  
@@ -102,8 +102,8 @@ job.cancel() # returned from abfe.run_end_to_end()
 The end to end ABFE tool has a number of user-accessible parameters. To view all parameters, use:
 
 ```python
-from deeporigin.drug_discovery import Complex, EXAMPLE_DATA_DIR
-sim = Complex.from_dir(EXAMPLE_DATA_DIR)
+from deeporigin.drug_discovery import Complex, BRD_DATA_DIR
+sim = Complex.from_dir(BRD_DATA_DIR)
 
 sim.abfe._params.end_to_end
 ```
@@ -343,8 +343,8 @@ sim.abfe._params.end_to_end
 Any of these parameters are modifiable using dot notation. For example, to change the number of steps in the MD step, we can use:
 
 ```python
-from deeporigin.drug_discovery import Complex, EXAMPLE_DATA_DIR
-sim = Complex.from_dir(EXAMPLE_DATA_DIR)
+from deeporigin.drug_discovery import Complex, BRD_DATA_DIR
+sim = Complex.from_dir(BRD_DATA_DIR)
 
 sim.abfe._params.end_to_end.md.steps = 500000
 ```
@@ -358,8 +358,8 @@ To set the test run parameter to 1, we can use:
 
 ```python
 
-from deeporigin.drug_discovery import Complex, EXAMPLE_DATA_DIR
-sim = Complex.from_dir(EXAMPLE_DATA_DIR)
+from deeporigin.drug_discovery import Complex, BRD_DATA_DIR
+sim = Complex.from_dir(BRD_DATA_DIR)
 
 sim.abfe.set_test_run(1)
 ```

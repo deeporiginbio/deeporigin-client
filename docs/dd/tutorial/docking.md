@@ -7,9 +7,9 @@ This document describes how to [dock :octicons-link-external-16:](https://en.wik
 We assume that we have an initialized and configured a `Complex` object:
 
 ```python
-from deeporigin.drug_discovery import Complex, EXAMPLE_DATA_DIR
+from deeporigin.drug_discovery import Complex, BRD_DATA_DIR
 
-sim = Complex.from_dir(EXAMPLE_DATA_DIR) # or replace with your folder
+sim = Complex.from_dir(BRD_DATA_DIR) 
 ```
 
 For more details on how to get started, see [:material-page-previous: Getting Started ](./getting-started.md).

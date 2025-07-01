@@ -14,9 +14,9 @@ The [`Ligand` class](../ref/structures.md#src.drug_discovery.structures.Ligand) 
 A single Ligand can be constructed from a file:
 
 ```python
-from deeporigin.drug_discovery import Ligand, EXAMPLE_DATA_DIR
+from deeporigin.drug_discovery import Ligand, BRD_DATA_DIR
 
-ligand = Ligand.from_sdf(EXAMPLE_DATA_DIR / "brd-2.sdf")
+ligand = Ligand.from_sdf(BRD_DATA_DIR / "brd-2.sdf")
 ```
 
 ### Many ligands from a SDF file
@@ -24,9 +24,9 @@ ligand = Ligand.from_sdf(EXAMPLE_DATA_DIR / "brd-2.sdf")
 A LigandSet can be constructed from a SDF File:
 
 ```python
-from deeporigin.drug_discovery import LigandSet, EXAMPLE_DATA_DIR
+from deeporigin.drug_discovery import LigandSet, DATA_DIR
 
-ligands = Ligand.from_sdf(EXAMPLE_DATA_DIR / "ligands-brd-all.sdf")
+ligands = LigandSet.from_sdf(DATA_DIR / "ligands" / "ligands-brd-all.sdf")
 ```
 
 ### From a SMILES string
@@ -133,10 +133,10 @@ The method will:
 You can also create a `LigandSet` from a CSV file containing SMILES strings and optional properties:
 
 ```python
-from deeporigin.drug_discovery import LigandSet, EXAMPLE_DATA_DIR
+from deeporigin.drug_discovery import LigandSet, DATA_DIR
 
 ligands = LigandSet.from_csv(
-    file_path=EXAMPLE_DATA_DIR / "ligands.csv",
+    file_path=DATA_DIR / "ligands" / "ligands.csv",
     smiles_column="SMILES"  # Optional, defaults to "smiles"
 )
 ```
@@ -189,18 +189,18 @@ You can minimize the 3D structure of a single ligand or all ligands in a LigandS
 #### Minimizing a single Ligand
 
 ```python
-from deeporigin.drug_discovery import Ligand, EXAMPLE_DATA_DIR
+from deeporigin.drug_discovery import Ligand, BRD_DATA_DIR
 
-ligand = Ligand.from_sdf(EXAMPLE_DATA_DIR / "brd-2.sdf")
+ligand = Ligand.from_sdf(BRD_DATA_DIR / "brd-2.sdf")
 ligand.minimize()  # Optimizes the 3D coordinates in place
 ```
 
 #### Minimizing all ligands in a LigandSet
 
 ```python
-from deeporigin.drug_discovery import LigandSet, EXAMPLE_DATA_DIR
+from deeporigin.drug_discovery import LigandSet, DATA_DIR
 
-ligands = LigandSet.from_sdf(EXAMPLE_DATA_DIR / "ligands-brd-all.sdf")
+ligands = LigandSet.from_sdf(DATA_DIR / "ligands" / "ligands-brd-all.sdf")
 ligands.minimize()  # Optimizes all ligands in the set in place
 ```
 
@@ -223,12 +223,12 @@ The method returns a dictionary containing various ADMET-related predictions:
 {
     'smiles': 'Cn1c(=O)n(Cc2ccccc2)c(=O)c2c1nc(SCCO)n2Cc1ccccc1',
     'properties': {
-        'logS': {'value': -4.004},  # Aqueous solubility
-        'logP': 3.686,             # Partition coefficient
-        'logD': 2.528,             # Distribution coefficient
+        'logS': -4.004,  # Aqueous solubility
+        'logP': 3.686,   # Partition coefficient
+        'logD': 2.528,   # Distribution coefficient
         'hERG': {'probability': 0.264},  # hERG inhibition risk
         'ames': {'probability': 0.213}, # Ames mutagenicity
-        'cyp': {                                # Cytochrome P450 inhibition
+        'cyp': {     # Cytochrome P450 inhibition
             'probabilities': {
                 'cyp1a2': 0.134,
                 'cyp2c9': 0.744,
@@ -237,7 +237,7 @@ The method returns a dictionary containing various ADMET-related predictions:
                 'cyp3a4': 0.4718
             }
         },
-        'pains': {                              # PAINS (Pan Assay Interference Compounds)
+        'pains': {    # PAINS (Pan Assay Interference Compounds)
             'has_pains': None,
             'pains_fragments': []
         }
@@ -260,10 +260,10 @@ logP = ligand.get_property('logP')
 You can predict ADMET properties for all ligands in a `LigandSet` using the `admet_properties` method. This will call the prediction for each ligand and display a progress bar using `tqdm`:
 
 ```{.python notest}
-from deeporigin.drug_discovery import LigandSet, EXAMPLE_DATA_DIR
+from deeporigin.drug_discovery import LigandSet, DATA_DIR
 
 ligands = LigandSet.from_csv(
-    file_path=EXAMPLE_DATA_DIR / "ligands.csv",
+    file_path=DATA_DIR / "ligands" / "ligands.csv",
     smiles_column="SMILES"
 )
 
@@ -325,10 +325,10 @@ ligand.to_pdb()
 To convert a LigandSet to a Pandas DataFrame, use:
 
 ```python
-from deeporigin.drug_discovery import LigandSet, EXAMPLE_DATA_DIR
+from deeporigin.drug_discovery import LigandSet, DATA_DIR
 
 ligands = LigandSet.from_csv(
-    file_path=EXAMPLE_DATA_DIR / "ligands.csv",
+    file_path = DATA_DIR / "ligands" / "ligands.csv",
     smiles_column="SMILES"  # Optional, defaults to "smiles"
 )
 df = ligands.to_dataframe()

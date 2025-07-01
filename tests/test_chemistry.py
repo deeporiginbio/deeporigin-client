@@ -1,15 +1,11 @@
 """tests functions in the chemistry module"""
 
-import os
-
 import pytest
 
 from deeporigin.drug_discovery import chemistry
 
 # Import shared test fixtures
 from tests.utils_ligands import ligands
-
-base_path = os.path.join(os.path.dirname(__file__), "fixtures")
 
 
 @pytest.mark.parametrize("ligand", ligands)
