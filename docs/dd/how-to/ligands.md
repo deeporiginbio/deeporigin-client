@@ -361,6 +361,33 @@ ADMET (Absorption, Distribution, Metabolism, Excretion, and Toxicity) properties
     ligands.to_dataframe()
     ```
 
+### Most Common Substructure
+
+The Most Common Substructure (MCS) for a `LigandSet` can be computed as follows:
+
+```python
+from deeporigin.drug_discovery import LigandSet
+
+BRD_SMILES = {
+    "C/C=C/Cn1cc(-c2cccc(C(=O)N(C)C)c2)c2cc[nH]c2c1=O",
+    "C=CCCn1cc(-c2cccc(C(=O)N(C)C)c2)c2cc[nH]c2c1=O",
+    "C=CCn1cc(-c2cccc(C(=O)N(C)C)c2)c2cc[nH]c2c1=O",
+    "CCCCn1cc(-c2cccc(C(=O)N(C)C)c2)c2cc[nH]c2c1=O",
+    "CCCn1cc(-c2cccc(C(=O)N(C)C)c2)c2cc[nH]c2c1=O",
+    "CCn1cc(-c2cccc(C(=O)N(C)C)c2)c2cc[nH]c2c1=O",
+    "CN(C)C(=O)c1cccc(-c2cn(C)c(=O)c3[nH]ccc23)c1",
+    "COCCn1cc(-c2cccc(C(=O)N(C)C)c2)c2cc[nH]c2c1=O",
+}
+
+ligands = LigandSet.from_smiles(BRD_SMILES)
+ligands.mcs()
+```
+
+!!! success "Expected Output"
+    ```
+    '[#6]1=[#6]-[#6]=[#6]-[#6](=[#6]-1)-[#6]1=[#6]-[#7](-[#6])-[#6](-[#6]2=[#6]-1-[#6]=[#6]-[#7]-2)=[#8]'
+    ```
+
 ## Exporting ligands
 
 ### To SDF files
