@@ -894,7 +894,7 @@
   
   
   <span class="md-ellipsis">
-    Work with ligands
+    Work with Ligands
     
   </span>
   
@@ -1247,15 +1247,6 @@
   <a href="#src.drug_discovery.complex.Complex.prepare" class="md-nav__link">
     <span class="md-ellipsis">
       prepare
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#src.drug_discovery.complex.Complex.show_ligands" class="md-nav__link">
-    <span class="md-ellipsis">
-      show_ligands
     </span>
   </a>
   
@@ -2698,15 +2689,6 @@
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#src.drug_discovery.complex.Complex.show_ligands" class="md-nav__link">
-    <span class="md-ellipsis">
-      show_ligands
-    </span>
-  </a>
-  
-</li>
-        
       </ul>
     </nav>
   
@@ -2816,17 +2798,15 @@
 
 
   <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-property"><code>property</code></small>
-      <small class="doc doc-label doc-label-writable"><code>writable</code></small>
+      <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
   </span>
 
 <a href="#src.drug_discovery.complex.Complex.ligands" class="headerlink" title="Permanent link">&para;</a></h5>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="n">ligands</span><span class="p">:</span> <span class="n"><span title="list">list</span></span><span class="p">[</span><span class="n"><span title="deeporigin.drug_discovery.structures.Ligand">Ligand</span></span><span class="p">]</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="n">ligands</span><span class="p">:</span> <span class="n"><span title="deeporigin.drug_discovery.structures.LigandSet">LigandSet</span></span> <span class="o">=</span> <span class="n"><span title="dataclasses.field">field</span></span><span class="p">(</span><span class="n"><span title="dataclasses.field(default_factory)">default_factory</span></span><span class="o">=</span><span class="n"><span title="deeporigin.drug_discovery.structures.LigandSet">LigandSet</span></span><span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
-
-        <p>Get the current ligands</p>
 
     </div>
 
@@ -2845,7 +2825,7 @@
   </span>
 
 <a href="#src.drug_discovery.complex.Complex.protein" class="headerlink" title="Permanent link">&para;</a></h5>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="n">protein</span><span class="p">:</span> <span class="n"><span title="deeporigin.drug_discovery.structures.Protein">Protein</span></span> <span class="o">=</span> <span class="n"><span title="src.drug_discovery.complex.Complex(protein)">protein</span></span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="n">protein</span><span class="p">:</span> <span class="n"><span title="deeporigin.drug_discovery.structures.Protein">Protein</span></span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -2978,7 +2958,8 @@
     <span class="n">padding</span><span class="p">:</span> <span class="n"><span title="float">float</span></span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
     <span class="n">keep_waters</span><span class="p">:</span> <span class="n"><span title="bool">bool</span></span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">is_lig_protonated</span><span class="p">:</span> <span class="n"><span title="bool">bool</span></span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="n">is_protein_protonated</span><span class="p">:</span> <span class="n"><span title="bool">bool</span></span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">is_protein_protonated</span><span class="p">:</span> <span class="n"><span title="bool">bool</span></span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">use_cache</span><span class="p">:</span> <span class="n"><span title="bool">bool</span></span> <span class="o">=</span> <span class="kc">True</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
@@ -3076,78 +3057,6 @@
             </td>
             <td>
                   <code>True</code>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h5 id="src.drug_discovery.complex.Complex.show_ligands" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">show_ligands</span>
-
-
-<a href="#src.drug_discovery.complex.Complex.show_ligands" class="headerlink" title="Permanent link">&para;</a></h5>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">show_ligands</span><span class="p">(</span>
-    <span class="o">*</span><span class="p">,</span> <span class="n">view</span><span class="p">:</span> <span class="n"><span title="str">str</span></span> <span class="o">=</span> <span class="s2">&quot;2d&quot;</span><span class="p">,</span> <span class="n">limit</span><span class="p">:</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n"><span title="int">int</span></span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-<span class="p">)</span>
-</code></pre></div>
-
-    <div class="doc doc-contents ">
-
-        <p>Display ligands in the complex object.</p>
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>view</code>
-            </td>
-            <td>
-                  <code><span title="str">str</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Visualization type, either "2d" (default) or "3d".
- - "2d": Shows ligands in a table with 2D structure renderings
- - "3d": Shows 3D molecular structures using SDF files</p>
-              </div>
-            </td>
-            <td>
-                  <code>&#39;2d&#39;</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>limit</code>
-            </td>
-            <td>
-                  <code><span title="typing.Optional">Optional</span>[<span title="int">int</span>]</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Optional; maximum number of ligands to display.
-  If None, all ligands will be shown.</p>
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
             </td>
           </tr>
       </tbody>

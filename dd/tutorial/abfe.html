@@ -800,6 +800,15 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#system-preparation" class="md-nav__link">
+    <span class="md-ellipsis">
+      System Preparation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#single-ligand" class="md-nav__link">
     <span class="md-ellipsis">
       Single ligand
@@ -1108,7 +1117,7 @@
   
   
   <span class="md-ellipsis">
-    Work with ligands
+    Work with Ligands
     
   </span>
   
@@ -2700,6 +2709,15 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#system-preparation" class="md-nav__link">
+    <span class="md-ellipsis">
+      System Preparation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#single-ligand" class="md-nav__link">
     <span class="md-ellipsis">
       Single ligand
@@ -2871,9 +2889,9 @@
 <p>This document describes how to run a <a href="https://en.wikipedia.org/wiki/Free-energy_perturbation">ABFE <span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M3.75 2h3.5a.75.75 0 0 1 0 1.5h-3.5a.25.25 0 0 0-.25.25v8.5c0 .138.112.25.25.25h8.5a.25.25 0 0 0 .25-.25v-3.5a.75.75 0 0 1 1.5 0v3.5A1.75 1.75 0 0 1 12.25 14h-8.5A1.75 1.75 0 0 1 2 12.25v-8.5C2 2.784 2.784 2 3.75 2m6.854-1h4.146a.25.25 0 0 1 .25.25v4.146a.25.25 0 0 1-.427.177L13.03 4.03 9.28 7.78a.75.75 0 0 1-1.042-.018.75.75 0 0 1-.018-1.042l3.75-3.75-1.543-1.543A.25.25 0 0 1 10.604 1"/></svg></span></a> simulation using Deep Origin tools. </p>
 <h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h2>
 <p>We assume that we have an initialized and configured <code>Complex</code> object:</p>
-<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin.drug_discovery</span><span class="w"> </span><span class="kn">import</span> <span class="n">Complex</span><span class="p">,</span> <span class="n">EXAMPLE_DATA_DIR</span>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin.drug_discovery</span><span class="w"> </span><span class="kn">import</span> <span class="n">Complex</span><span class="p">,</span> <span class="n">BRD_DATA_DIR</span>
 
-<span class="n">sim</span> <span class="o">=</span> <span class="n">Complex</span><span class="o">.</span><span class="n">from_dir</span><span class="p">(</span><span class="n">EXAMPLE_DATA_DIR</span><span class="p">)</span>
+<span class="n">sim</span> <span class="o">=</span> <span class="n">Complex</span><span class="o">.</span><span class="n">from_dir</span><span class="p">(</span><span class="n">BRD_DATA_DIR</span><span class="p">)</span>
 </code></pre></div>
 <p>Here, ABFE requires that the <code>Complex</code> object have an already prepared protein (PDB), and the associated ligands (SDF) are in a docked pose.  </p>
 <div class="admonition warning">
@@ -2882,15 +2900,29 @@
 </div>
 <p>For more details on how to get started, see <a href="getting-started.html"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 21h15a2 2 0 0 0 2-2v-6h-4v2l-4-3 4-3v2h4V5a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2m0-6h4v2H4zm0-4h7v2H4zm0-4h7v2H4zm17 4h3v2h-3z"/></svg></span> Getting Started </a>.</p>
 <h2 id="starting-an-abfe-run">Starting an ABFE run<a class="headerlink" href="#starting-an-abfe-run" title="Permanent link">&para;</a></h2>
+<h3 id="system-preparation">System Preparation<a class="headerlink" href="#system-preparation" title="Permanent link">&para;</a></h3>
+<p>First, make sure you have prepared your system and verified that everything is as expected. To prepare a system for a single ligand, use::</p>
+<div class="language-python highlight"><pre><span></span><code><span class="n">sim</span><span class="o">.</span><span class="n">prepare</span><span class="p">(</span><span class="n">ligand</span><span class="o">=</span><span class="n">sim</span><span class="o">.</span><span class="n">ligands</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+</code></pre></div>
+<p>You will see something like:</p>
+<iframe 
+    src="./prepared-system.html" 
+    width="100%" 
+    height="600" 
+    style="border:none;"
+    title="Visualization of prepared system"
+></iframe>
+
 <h3 id="single-ligand">Single ligand<a class="headerlink" href="#single-ligand" title="Permanent link">&para;</a></h3>
 <p>To run an end-to-end ABFE workflow on a single ligand, we use:</p>
-<div class="language-python highlight"><pre><span></span><code><span class="n">jobs</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">abfe</span><span class="o">.</span><span class="n">run_end_to_end</span><span class="p">(</span><span class="n">ligands</span><span class="o">=</span><span class="p">[</span><span class="n">sim</span><span class="o">.</span><span class="n">ligand</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span> <span class="c1"># for example</span>
+<div class="language-python highlight"><pre><span></span><code><span class="n">jobs</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">abfe</span><span class="o">.</span><span class="n">run_end_to_end</span><span class="p">(</span><span class="n">ligands</span><span class="o">=</span><span class="p">[</span><span class="n">sim</span><span class="o">.</span><span class="n">ligands</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span> <span class="c1"># for example</span>
 <span class="n">job</span> <span class="o">=</span> <span class="n">jobs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 </code></pre></div>
 <p>This queues up a task on Deep Origin. When it completes, outputs will be written to the appropriate column in this database. </p>
 <h3 id="multiple-ligands">Multiple ligands<a class="headerlink" href="#multiple-ligands" title="Permanent link">&para;</a></h3>
 <p>To run an end-to-end ABFE workflow on multiple ligands, we use:</p>
-<div class="language-python highlight"><pre><span></span><code><span class="n">job</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">abfe</span><span class="o">.</span><span class="n">run_end_to_end</span><span class="p">(</span><span class="n">ligands</span><span class="o">=</span><span class="p">[</span><span class="n">sim</span><span class="o">.</span><span class="n">ligands</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">sim</span><span class="o">.</span><span class="n">ligand</span><span class="p">[</span><span class="mi">1</span><span class="p">]])</span> 
+<div class="language-python highlight"><pre><span></span><code><span class="n">jobs</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">abfe</span><span class="o">.</span><span class="n">run_end_to_end</span><span class="p">(</span><span class="n">ligands</span><span class="o">=</span><span class="p">[</span><span class="n">sim</span><span class="o">.</span><span class="n">ligands</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">sim</span><span class="o">.</span><span class="n">ligands</span><span class="p">[</span><span class="mi">1</span><span class="p">]])</span> 
+<span class="n">job</span> <span class="o">=</span> <span class="n">jobs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 </code></pre></div>
 <p>Omitting the ligand IDs will run ABFE on all ligands in the <code>Complex</code> object.</p>
 <div class="language-python highlight"><pre><span></span><code><span class="n">jobs</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">abfe</span><span class="o">.</span><span class="n">run_end_to_end</span><span class="p">()</span> 
@@ -2899,7 +2931,7 @@
 <h2 id="job-control">Job Control<a class="headerlink" href="#job-control" title="Permanent link">&para;</a></h2>
 <h3 id="visualize-job">Visualize Job<a class="headerlink" href="#visualize-job" title="Permanent link">&para;</a></h3>
 <p>Once a job has been submitted, you can track its status by inspecting the Job object:</p>
-<p><div class="language-python highlight"><pre><span></span><code><span class="n">job</span> <span class="c1"># returned from abfe.run_end_to_end()</span>
+<p><div class="language-python highlight"><pre><span></span><code><span class="n">job</span> 
 </code></pre></div>
 This shows a Job widget with information about the job, such as:</p>
 <div class="admonition success">
@@ -2908,22 +2940,22 @@ This shows a Job widget with information about the job, such as:</p>
 </div>
 <h3 id="watch-jobs">Watch jobs<a class="headerlink" href="#watch-jobs" title="Permanent link">&para;</a></h3>
 <p>To monitor the status of this job, use:</p>
-<p><div class="language-python highlight"><pre><span></span><code><span class="n">job</span><span class="o">.</span><span class="n">watch</span><span class="p">()</span> <span class="c1"># returned from abfe.run_end_to_end()</span>
+<p><div class="language-python highlight"><pre><span></span><code><span class="n">job</span><span class="o">.</span><span class="n">watch</span><span class="p">()</span> 
 </code></pre></div>
 This makes the widget auto-update, and monitor the status of the job till it reaches a terminal state (Cancelled, Succeeded, or Failed). </p>
 <h3 id="stop-watching-jobs">Stop watching jobs<a class="headerlink" href="#stop-watching-jobs" title="Permanent link">&para;</a></h3>
 <p>To manually stop watching a job, do:</p>
-<div class="language-python highlight"><pre><span></span><code><span class="n">job</span><span class="o">.</span><span class="n">stop_watching</span><span class="p">()</span> <span class="c1"># returned from abfe.run_end_to_end()</span>
+<div class="language-python highlight"><pre><span></span><code><span class="n">job</span><span class="o">.</span><span class="n">stop_watching</span><span class="p">()</span> 
 </code></pre></div>
 <h3 id="cancel-jobs">Cancel jobs<a class="headerlink" href="#cancel-jobs" title="Permanent link">&para;</a></h3>
 <p>To cancel a job, use:</p>
-<div class="language-python highlight"><pre><span></span><code><span class="n">job</span><span class="o">.</span><span class="n">cancel</span><span class="p">()</span> <span class="c1"># returned from abfe.run_end_to_end()</span>
+<div class="language-python highlight"><pre><span></span><code><span class="n">job</span><span class="o">.</span><span class="n">cancel</span><span class="p">()</span> 
 </code></pre></div>
 <h2 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h2>
 <h3 id="viewing-parameters">Viewing parameters<a class="headerlink" href="#viewing-parameters" title="Permanent link">&para;</a></h3>
 <p>The end to end ABFE tool has a number of user-accessible parameters. To view all parameters, use:</p>
-<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin.drug_discovery</span><span class="w"> </span><span class="kn">import</span> <span class="n">Complex</span><span class="p">,</span> <span class="n">EXAMPLE_DATA_DIR</span>
-<span class="n">sim</span> <span class="o">=</span> <span class="n">Complex</span><span class="o">.</span><span class="n">from_dir</span><span class="p">(</span><span class="n">EXAMPLE_DATA_DIR</span><span class="p">)</span>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin.drug_discovery</span><span class="w"> </span><span class="kn">import</span> <span class="n">Complex</span><span class="p">,</span> <span class="n">BRD_DATA_DIR</span>
+<span class="n">sim</span> <span class="o">=</span> <span class="n">Complex</span><span class="o">.</span><span class="n">from_dir</span><span class="p">(</span><span class="n">BRD_DATA_DIR</span><span class="p">)</span>
 
 <span class="n">sim</span><span class="o">.</span><span class="n">abfe</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">end_to_end</span>
 </code></pre></div>
@@ -3158,16 +3190,16 @@ This makes the widget auto-update, and monitor the status of the job till it rea
 </details>
 <h3 id="modifying-parameters">Modifying parameters<a class="headerlink" href="#modifying-parameters" title="Permanent link">&para;</a></h3>
 <p>Any of these parameters are modifiable using dot notation. For example, to change the number of steps in the MD step, we can use:</p>
-<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin.drug_discovery</span><span class="w"> </span><span class="kn">import</span> <span class="n">Complex</span><span class="p">,</span> <span class="n">EXAMPLE_DATA_DIR</span>
-<span class="n">sim</span> <span class="o">=</span> <span class="n">Complex</span><span class="o">.</span><span class="n">from_dir</span><span class="p">(</span><span class="n">EXAMPLE_DATA_DIR</span><span class="p">)</span>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin.drug_discovery</span><span class="w"> </span><span class="kn">import</span> <span class="n">Complex</span><span class="p">,</span> <span class="n">BRD_DATA_DIR</span>
+<span class="n">sim</span> <span class="o">=</span> <span class="n">Complex</span><span class="o">.</span><span class="n">from_dir</span><span class="p">(</span><span class="n">BRD_DATA_DIR</span><span class="p">)</span>
 
 <span class="n">sim</span><span class="o">.</span><span class="n">abfe</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">end_to_end</span><span class="o">.</span><span class="n">md</span><span class="o">.</span><span class="n">steps</span> <span class="o">=</span> <span class="mi">500000</span>
 </code></pre></div>
 <h3 id="using-test_run">Using <code>test_run</code><a class="headerlink" href="#using-test_run" title="Permanent link">&para;</a></h3>
 <p>The test run parameter can be used to run ABFE for a short number of steps, to verify that all steps execute without consuming too many CPU cycles. This should not be used to run production simulations.</p>
 <p>To set the test run parameter to 1, we can use:</p>
-<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin.drug_discovery</span><span class="w"> </span><span class="kn">import</span> <span class="n">Complex</span><span class="p">,</span> <span class="n">EXAMPLE_DATA_DIR</span>
-<span class="n">sim</span> <span class="o">=</span> <span class="n">Complex</span><span class="o">.</span><span class="n">from_dir</span><span class="p">(</span><span class="n">EXAMPLE_DATA_DIR</span><span class="p">)</span>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin.drug_discovery</span><span class="w"> </span><span class="kn">import</span> <span class="n">Complex</span><span class="p">,</span> <span class="n">BRD_DATA_DIR</span>
+<span class="n">sim</span> <span class="o">=</span> <span class="n">Complex</span><span class="o">.</span><span class="n">from_dir</span><span class="p">(</span><span class="n">BRD_DATA_DIR</span><span class="p">)</span>
 
 <span class="n">sim</span><span class="o">.</span><span class="n">abfe</span><span class="o">.</span><span class="n">set_test_run</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 </code></pre></div>

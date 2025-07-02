@@ -1020,7 +1020,7 @@
   
   
   <span class="md-ellipsis">
-    Work with ligands
+    Work with Ligands
     
   </span>
   
@@ -2699,9 +2699,9 @@
 <h2 id="creating-a-complex">Creating a Complex<a class="headerlink" href="#creating-a-complex" title="Permanent link">&para;</a></h2>
 <h3 id="from-a-directory">From a directory<a class="headerlink" href="#from-a-directory" title="Permanent link">&para;</a></h3>
 <div class="language-python highlight"><pre><span></span><code><span class="c1"># here, we&#39;re using the example data directory</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin.drug_discovery</span><span class="w"> </span><span class="kn">import</span> <span class="n">Complex</span><span class="p">,</span> <span class="n">EXAMPLE_DATA_DIR</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin.drug_discovery</span><span class="w"> </span><span class="kn">import</span> <span class="n">Complex</span><span class="p">,</span> <span class="n">BRD_DATA_DIR</span>
 
-<span class="n">sim</span> <span class="o">=</span> <span class="n">Complex</span><span class="o">.</span><span class="n">from_dir</span><span class="p">(</span><span class="n">EXAMPLE_DATA_DIR</span><span class="p">)</span>
+<span class="n">sim</span> <span class="o">=</span> <span class="n">Complex</span><span class="o">.</span><span class="n">from_dir</span><span class="p">(</span><span class="n">BRD_DATA_DIR</span><span class="p">)</span>
 </code></pre></div>
 <p>The directory should contain:</p>
 <ul>
@@ -2710,18 +2710,18 @@
 </ul>
 <h2 id="from-protein-and-ligand-objects">From <code>Protein</code> and <code>Ligand</code> objects<a class="headerlink" href="#from-protein-and-ligand-objects" title="Permanent link">&para;</a></h2>
 <p>A <code>Complex</code> object can be also be constructed using <code>Protein</code> and <code>Ligand</code> objects. </p>
-<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin.drug_discovery</span><span class="w"> </span><span class="kn">import</span> <span class="n">Complex</span><span class="p">,</span> <span class="n">EXAMPLE_DATA_DIR</span><span class="p">,</span> <span class="n">Protein</span><span class="p">,</span> <span class="n">Ligand</span>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin.drug_discovery</span><span class="w"> </span><span class="kn">import</span> <span class="n">Complex</span><span class="p">,</span> <span class="n">BRD_DATA_DIR</span><span class="p">,</span> <span class="n">Protein</span><span class="p">,</span> <span class="n">Ligand</span>
 
-<span class="n">protein</span> <span class="o">=</span> <span class="n">Protein</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">EXAMPLE_DATA_DIR</span> <span class="o">/</span> <span class="s2">&quot;brd.pdb&quot;</span><span class="p">)</span>
-<span class="n">ligand</span> <span class="o">=</span> <span class="n">Ligand</span><span class="o">.</span><span class="n">from_sdf</span><span class="p">(</span><span class="n">EXAMPLE_DATA_DIR</span> <span class="o">/</span> <span class="s2">&quot;brd-2.sdf&quot;</span><span class="p">)</span>
+<span class="n">protein</span> <span class="o">=</span> <span class="n">Protein</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">BRD_DATA_DIR</span> <span class="o">/</span> <span class="s2">&quot;brd.pdb&quot;</span><span class="p">)</span>
+<span class="n">ligand</span> <span class="o">=</span> <span class="n">Ligand</span><span class="o">.</span><span class="n">from_sdf</span><span class="p">(</span><span class="n">BRD_DATA_DIR</span> <span class="o">/</span> <span class="s2">&quot;brd-2.sdf&quot;</span><span class="p">)</span>
 
 <span class="n">sim</span> <span class="o">=</span> <span class="n">Complex</span><span class="p">(</span><span class="n">protein</span><span class="o">=</span><span class="n">protein</span><span class="p">,</span> <span class="n">ligands</span><span class="o">=</span><span class="p">[</span><span class="n">ligand</span><span class="p">])</span>
 </code></pre></div>
 <h2 id="modifying-a-complex">Modifying a Complex<a class="headerlink" href="#modifying-a-complex" title="Permanent link">&para;</a></h2>
 <p>You can modify a Complex object by adding or replacing ligands. </p>
 <div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin.drug_discovery</span><span class="w"> </span><span class="kn">import</span> <span class="n">Complex</span><span class="p">,</span> <span class="n">Protein</span><span class="p">,</span> <span class="n">Ligand</span>
-<span class="n">protein</span> <span class="o">=</span> <span class="n">Protein</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">EXAMPLE_DATA_DIR</span> <span class="o">/</span> <span class="s2">&quot;brd.pdb&quot;</span><span class="p">)</span>
-<span class="n">ligand</span> <span class="o">=</span> <span class="n">Ligand</span><span class="o">.</span><span class="n">from_sdf</span><span class="p">(</span><span class="n">EXAMPLE_DATA_DIR</span> <span class="o">/</span> <span class="s2">&quot;brd-2.sdf&quot;</span><span class="p">)</span>
+<span class="n">protein</span> <span class="o">=</span> <span class="n">Protein</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">BRD_DATA_DIR</span> <span class="o">/</span> <span class="s2">&quot;brd.pdb&quot;</span><span class="p">)</span>
+<span class="n">ligand</span> <span class="o">=</span> <span class="n">Ligand</span><span class="o">.</span><span class="n">from_sdf</span><span class="p">(</span><span class="n">BRD_DATA_DIR</span> <span class="o">/</span> <span class="s2">&quot;brd-2.sdf&quot;</span><span class="p">)</span>
 
 <span class="c1"># Create a complex with just the protein</span>
 <span class="n">sim</span> <span class="o">=</span> <span class="n">Complex</span><span class="p">(</span><span class="n">protein</span><span class="o">=</span><span class="n">protein</span><span class="p">,</span> <span class="n">ligands</span><span class="o">=</span><span class="p">[])</span>

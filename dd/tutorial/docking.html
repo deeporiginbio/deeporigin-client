@@ -1060,7 +1060,7 @@
   
   
   <span class="md-ellipsis">
-    Work with ligands
+    Work with Ligands
     
   </span>
   
@@ -2775,9 +2775,9 @@
 <p>This document describes how to <a href="https://en.wikipedia.org/wiki/Docking_(molecular)">dock <span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M3.75 2h3.5a.75.75 0 0 1 0 1.5h-3.5a.25.25 0 0 0-.25.25v8.5c0 .138.112.25.25.25h8.5a.25.25 0 0 0 .25-.25v-3.5a.75.75 0 0 1 1.5 0v3.5A1.75 1.75 0 0 1 12.25 14h-8.5A1.75 1.75 0 0 1 2 12.25v-8.5C2 2.784 2.784 2 3.75 2m6.854-1h4.146a.25.25 0 0 1 .25.25v4.146a.25.25 0 0 1-.427.177L13.03 4.03 9.28 7.78a.75.75 0 0 1-1.042-.018.75.75 0 0 1-.018-1.042l3.75-3.75-1.543-1.543A.25.25 0 0 1 10.604 1"/></svg></span></a> a set of ligands to a protein  using Deep Origin tools. </p>
 <h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h2>
 <p>We assume that we have an initialized and configured a <code>Complex</code> object:</p>
-<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin.drug_discovery</span><span class="w"> </span><span class="kn">import</span> <span class="n">Complex</span><span class="p">,</span> <span class="n">EXAMPLE_DATA_DIR</span>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin.drug_discovery</span><span class="w"> </span><span class="kn">import</span> <span class="n">Complex</span><span class="p">,</span> <span class="n">BRD_DATA_DIR</span>
 
-<span class="n">sim</span> <span class="o">=</span> <span class="n">Complex</span><span class="o">.</span><span class="n">from_dir</span><span class="p">(</span><span class="n">EXAMPLE_DATA_DIR</span><span class="p">)</span> <span class="c1"># or replace with your folder</span>
+<span class="n">sim</span> <span class="o">=</span> <span class="n">Complex</span><span class="o">.</span><span class="n">from_dir</span><span class="p">(</span><span class="n">BRD_DATA_DIR</span><span class="p">)</span> 
 </code></pre></div>
 <p>For more details on how to get started, see <a href="getting-started.html"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 21h15a2 2 0 0 0 2-2v-6h-4v2l-4-3 4-3v2h4V5a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2m0-6h4v2H4zm0-4h7v2H4zm0-4h7v2H4zm17 4h3v2h-3z"/></svg></span> Getting Started </a>.</p>
 <h2 id="find-pockets">Find pockets<a class="headerlink" href="#find-pockets" title="Permanent link">&para;</a></h2>
