@@ -1,6 +1,6 @@
-# `deeporigin.drug_discovery.Complex`
+# `deeporigin.drug_discovery.Protein`
 
-::: src.drug_discovery.complex.Complex
+::: src.drug_discovery.structures.Protein
     options:
       docstring_style: google
       show_root_heading: false

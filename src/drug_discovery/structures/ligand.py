@@ -271,16 +271,6 @@ class Ligand(Entity):
         Returns:
             Ligand: A new Ligand instance initialized from the chemical identifier
 
-        Example:
-            >>> # Create ATP molecule
-            >>> atp = Ligand.from_identifier("ATP", name="ATP")
-            >>>
-            >>> # Create serotonin molecule
-            >>> serotonin = Ligand.from_identifier(
-            ...     identifier="serotonin",
-            ...     name="Serotonin"
-            ... )
-
         Raises:
             DeepOriginException: If the identifier cannot be resolved to a valid molecule
         """

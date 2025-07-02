@@ -1,6 +1,6 @@
-# `deeporigin.drug_discovery.Complex`
+# `deeporigin.drug_discovery.LigandSet`
 
-::: src.drug_discovery.complex.Complex
+::: src.drug_discovery.structures.LigandSet
     options:
       docstring_style: google
       show_root_heading: false

@@ -5,7 +5,7 @@ There are two classes that help you work with ligands:
 - `Ligand`
 - `LigandSet`
 
-The [`Ligand` class](../ref/structures.md#src.drug_discovery.structures.Ligand) is the primary way to work with ligands in Deep Origin.
+The [`Ligand` class](../ref/ligand.md) is the primary way to work with ligands in Deep Origin.
 
 ## Constructing a Ligand or LigandSet
 
