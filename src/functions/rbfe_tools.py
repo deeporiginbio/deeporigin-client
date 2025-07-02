@@ -57,7 +57,11 @@ def map_network(
     results_json = str(Path(CACHE_DIR) / f"{cache_hash}.json")
 
     # Check if cached result exists
-    if not os.path.exists(results_json) or not use_cache:
+    if os.path.exists(results_json) and use_cache:
+        with open(results_json, "r") as f:
+            response = json.load(f)
+
+    else:
         # Make the API request
         response = requests.post(
             URL,
@@ -74,9 +78,5 @@ def map_network(
         Path(results_json).parent.mkdir(parents=True, exist_ok=True)
         with open(results_json, "w") as f:
             json.dump(response, f)
-
-    else:
-        with open(results_json, "r") as f:
-            response = json.load(f)
 
     return response

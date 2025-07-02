@@ -1084,10 +1084,43 @@ class LigandSet:
 
         return cls(ligands=[Ligand.from_smiles(smiles) for smiles in smiles])
 
-    def map_network(self):
+    def map_network(
+        self,
+        *,
+        use_cache: bool = True,
+        operation: Literal["mapping", "network", "full"] = "network",
+        network_type: Literal["star", "mst", "cyclic"] = "mst",
+    ):
         """
         Map a network of ligands from an SDF file using the DeepOrigin API.
         """
         from deeporigin.functions.rbfe_tools import map_network
 
-        self.network = map_network(sdf_file=self.to_sdf())
+        self.network = map_network(
+            sdf_file=self.to_sdf(),
+            use_cache=use_cache,
+            operation=operation,
+            network_type=network_type,
+        )
+
+        return self
+
+    def show_network(self):
+        """
+        Show the network of ligands in the set.
+        """
+
+        if "network_html" not in self.network.keys():
+            raise DeepOriginException(
+                "Network not mapped yet. Please map the network first using `map_network()`."
+            ) from None
+
+        from IPython.display import IFrame, display
+
+        file_name = "network.html"
+        try:
+            with open(file_name, "w") as file:
+                file.write(self.network["network_html"])
+            display(IFrame(file_name, width=1000, height=1000))
+        except Exception as e:
+            raise RuntimeError(f"Failed to display network: {e}")
