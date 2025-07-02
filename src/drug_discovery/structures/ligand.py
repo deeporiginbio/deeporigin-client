@@ -1126,3 +1126,31 @@ class LigandSet:
             display(IFrame(file_name, width=1000, height=1000))
         except Exception as e:
             raise DeepOriginException(f"Failed to display network: {e}") from None
+
+    def to_rdkit_mols(self) -> list[Chem.Mol]:
+        """
+        Convert all ligands in the set to RDKit molecules.
+        """
+        return [ligand.mol.m for ligand in self.ligands]
+
+    def mcs(self) -> str:
+        """
+        Generates the Most Common Substructure (MCS) for ligands in a LigandSet
+
+        Returns:
+            smartsString (str) : SMARTS string representing the MCS
+
+        """
+
+        from rdkit.Chem import rdFMCS
+
+        # Set some high level params
+        params = rdFMCS.MCSParameters()
+        params.AtomTyper = rdFMCS.AtomCompare.CompareElements
+        params.BondTyper = rdFMCS.BondCompare.CompareOrder
+        params.BondCompareParameters.RingMatchesRingOnly = True
+        params.BondCompareParameters.CompleteRingsOnly = True
+
+        # Generate the MCS for all valid mols
+        mcs_result = rdFMCS.FindMCS(self.to_rdkit_mols())
+        return mcs_result.smartsString
