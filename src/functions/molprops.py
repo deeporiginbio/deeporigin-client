@@ -10,8 +10,6 @@ from pathlib import Path
 from beartype import beartype
 import requests
 
-from deeporigin.exceptions import DeepOriginException
-
 URL = "http://molprops.default.jobs.edge.deeporigin.io/properties"
 CACHE_DIR = os.path.expanduser("~/.deeporigin/molprops")
 
@@ -22,19 +20,19 @@ os.makedirs(CACHE_DIR, exist_ok=True)
 @beartype
 def molprops(
     smiles_string: str,
+    *,
+    use_cache: bool = True,
 ) -> dict:
     """
     Run molecular property prediction using the DeepOrigin API.
 
     Args:
         smiles_string (str): SMILES string for the molecule
+        use_cache (bool): Whether to use the cache
 
     Returns:
         str: Path to the cached SDF file containing the results
     """
-
-    if smiles_string is None:
-        raise DeepOriginException("smiles_string must be provided") from None
 
     # Create hash of inputs
     hasher = hashlib.sha256()
@@ -43,7 +41,12 @@ def molprops(
     response_file = str(Path(CACHE_DIR) / f"{cache_hash}.json")
 
     # Check if cached result exists
-    if not os.path.exists(response_file):
+    if os.path.exists(response_file) and use_cache:
+        # Read cached response
+        with open(response_file, "r") as file:
+            response = json.load(file)
+
+    else:
         # Prepare the request payload
         payload = {
             "functionId": "molprops",
@@ -67,9 +70,5 @@ def molprops(
         # Write JSON response to cache
         with open(response_file, "w") as file:
             json.dump(response, file)
-    else:
-        # Read cached response
-        with open(response_file, "r") as file:
-            response = json.load(file)
 
     return response

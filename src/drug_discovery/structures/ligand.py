@@ -667,7 +667,8 @@ class Ligand(Entity):
 
         return str(ligands_base_dir)
 
-    def admet_properties(self) -> str:
+    @beartype
+    def admet_properties(self, use_cache: bool = True) -> dict:
         """
         Predict ADMET properties for the ligand using DO's molprops model.
 
@@ -676,7 +677,7 @@ class Ligand(Entity):
         from deeporigin.functions.molprops import molprops
 
         try:
-            props = molprops(self.mol.smiles)["properties"]
+            props = molprops(self.mol.smiles, use_cache=use_cache)["properties"]
             for key, value in props.items():
                 self.set_property(key, value)
 

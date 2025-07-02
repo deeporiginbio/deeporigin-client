@@ -22,6 +22,25 @@ For more details on how to get started, see [:material-page-previous: Getting St
 
 ## Starting an ABFE run
 
+### System Preparation
+
+First, make sure you have prepared your system and verified that everything is as expected. To prepare a system for a single ligand, use::
+
+
+```{.python notest}
+sim.prepare(ligand=sim.ligands[0])
+```
+
+You will see something like:
+
+<iframe 
+    src="./prepared-system.html" 
+    width="100%" 
+    height="600" 
+    style="border:none;"
+    title="Visualization of prepared system"
+></iframe>
+
 ### Single ligand
 
 To run an end-to-end ABFE workflow on a single ligand, we use:
@@ -40,7 +59,8 @@ This queues up a task on Deep Origin. When it completes, outputs will be written
 To run an end-to-end ABFE workflow on multiple ligands, we use:
 
 ```{.python notest}
-job = sim.abfe.run_end_to_end(ligands=[sim.ligands[0],sim.ligand[1]]) 
+jobs = sim.abfe.run_end_to_end(ligands=[sim.ligands[0],sim.ligand[1]]) 
+job = jobs[0]
 ```
 
 Omitting the ligand IDs will run ABFE on all ligands in the `Complex` object.
@@ -61,7 +81,7 @@ Each ligand will be run in parallel on a separate instance.
 Once a job has been submitted, you can track its status by inspecting the Job object:
 
 ```{.python notest} 
-job # returned from abfe.run_end_to_end()
+job 
 
 ```
 This shows a Job widget with information about the job, such as:
@@ -74,7 +94,7 @@ This shows a Job widget with information about the job, such as:
 To monitor the status of this job, use:
 
 ```{.python notest} 
-job.watch() # returned from abfe.run_end_to_end()
+job.watch() 
 ```
 This makes the widget auto-update, and monitor the status of the job till it reaches a terminal state (Cancelled, Succeeded, or Failed). 
 
@@ -83,7 +103,7 @@ This makes the widget auto-update, and monitor the status of the job till it rea
 To manually stop watching a job, do:
 
 ```{.python notest} 
-job.stop_watching() # returned from abfe.run_end_to_end()
+job.stop_watching() 
 ```
 
 ### Cancel jobs
@@ -92,7 +112,7 @@ To cancel a job, use:
 
 
 ```{.python notest} 
-job.cancel() # returned from abfe.run_end_to_end()
+job.cancel() 
 ```
 
 ## Parameters
