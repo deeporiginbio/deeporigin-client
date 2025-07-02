@@ -2,62 +2,79 @@ This document describes how to work with ligands (molecules) and use them in Dee
 
 There are two classes that help you work with ligands:
 
-- `Ligand`
-- `LigandSet`
+- [`Ligand` class](../ref/ligand.md)
+- [`LigandSet` class](../ref/ligandset.md)
 
-The [`Ligand` class](../ref/ligand.md) is the primary way to work with ligands in Deep Origin.
 
 ## Constructing a Ligand or LigandSet
 
-### Single Ligand from a SDF file
+### From a SDF file
 
-A single Ligand can be constructed from a file:
+=== "Single Ligand"
 
-```python
-from deeporigin.drug_discovery import Ligand, BRD_DATA_DIR
+    A single `Ligand` can be constructed from a SDF file:
 
-ligand = Ligand.from_sdf(BRD_DATA_DIR / "brd-2.sdf")
-```
+    ```python
+    from deeporigin.drug_discovery import Ligand, BRD_DATA_DIR
 
-### Many ligands from a SDF file
+    ligand = Ligand.from_sdf(BRD_DATA_DIR / "brd-2.sdf")
+    ```
 
-A LigandSet can be constructed from a SDF File:
+=== "Many Ligands"
 
-```python
-from deeporigin.drug_discovery import LigandSet, DATA_DIR
+    A `LigandSet` can be constructed from a SDF File:
 
-ligands = LigandSet.from_sdf(DATA_DIR / "ligands" / "ligands-brd-all.sdf")
-```
+    ```python
+    from deeporigin.drug_discovery import LigandSet, DATA_DIR
 
-### From a SMILES string
+    ligands = LigandSet.from_sdf(DATA_DIR / "ligands" / "ligands-brd-all.sdf")
+    ```
 
-A ligand can be constructed from a SMILES string, which is a compact way to represent molecular structures:
+### From SMILES string(s)
 
-```python
-from deeporigin.drug_discovery import Ligand
+=== "Single Ligands"
+
+    A ligand can be constructed from a SMILES string, which is a compact way to represent molecular structures:
+
+    ```python
+    from deeporigin.drug_discovery import Ligand
 
 
-# Basic usage with just a SMILES string
-ligand = Ligand.from_smiles(smiles="CCO")  # Ethanol
+    # Basic usage with just a SMILES string
+    ligand = Ligand.from_smiles(smiles="CCO")  # Ethanol
 
-# With additional parameters
-ligand = Ligand.from_smiles(
-    smiles="c1ccccc1",  # Benzene
-    name="Benzene",     # Optional name for the ligand
-    save_to_file=False  # Optional: whether to save the ligand to file
-)
-```
+    # With additional parameters
+    ligand = Ligand.from_smiles(
+        smiles="c1ccccc1",  # Benzene
+        name="Benzene",     # Optional name for the ligand
+    )
+    ```
 
-The `from_smiles` constructor:
+    The `from_smiles` constructor:
 
-- Takes a SMILES string as input
-- Optionally accepts a name for the ligand
-- Optionally accepts a `save_to_file` parameter to control file persistence
-- Automatically validates the SMILES string and creates a proper molecular representation
-- Returns a `Ligand` instance that can be used for further operations
+    - Takes a SMILES string as input
+    - Optionally accepts a name for the ligand
+    - Optionally accepts a `save_to_file` parameter to control file persistence
+    - Automatically validates the SMILES string and creates a proper molecular representation
+    - Returns a `Ligand` instance that can be used for further operations
 
-!!! note "SMILES Validation"
-    The constructor will raise an exception if the provided SMILES string is invalid or cannot be parsed into a valid molecule.
+    !!! note "SMILES Validation"
+        The constructor will raise an exception if the provided SMILES string is invalid or cannot be parsed into a valid molecule.
+
+=== "Many ligands"
+
+    A `LigandSet` can be constructed from a list or set of SMILES strings:
+
+    ```python
+    from deeporigin.drug_discovery import LigandSet
+
+    smiles = {
+        "C/C=C/Cn1cc(-c2cccc(C(=O)N(C)C)c2)c2cc[nH]c2c1=O",
+        "C=CCCn1cc(-c2cccc(C(=O)N(C)C)c2)c2cc[nH]c2c1=O",
+    }
+
+    ligands = LigandSet.from_smiles(smiles)
+    ```
 
 
 ### From a Chemical Identifier
@@ -143,10 +160,15 @@ ligands = LigandSet.from_csv(
 
 ## Visualization
 
-### Visualizing individual ligands
+!!! info "Jupyter notebook required"
+    Visualizations such as these require this code to be run in a jupyter notebook. We recommend using [these instructions](../../install.md) to install Jupyter.
 
 ??? warning "Browser support"
     These visualizations work best on Google Chrome. We are aware of issues on other browsers, especially Safari on macOS.
+
+
+### Ligands
+
 
 A ligand object can be visualized using `show`:
 
@@ -158,27 +180,61 @@ ligand = Ligand.from_identifier("serotonin")
 ligand.show()
 ```
 
-If a ligand is backed by a SDF file, a 3D visualization will be shown, similar to:
-
-A visualization such as this will be shown:
+A visualization similar to the following will be shown:
 
 <iframe 
-    src="./ligand.html" 
+    src="./serotonin.html" 
     width="100%" 
     height="600" 
     style="border:none;"
-    title="ligand visualization"
+    title="Visualization of single ligand (serotonin)"
 ></iframe>
 
-!!! info "Jupyter notebook required"
-    Visualizations such as these require this code to be run in a jupyter notebook. We recommend using [these instructions](../../install.md) to install Jupyter.
+### LigandSets
+
+A `LigandSet` can be visualized using two different methods. First, simply printing the `LigandSet` shows a table of ligands in the `LigandSet`:
 
 
-If a ligand is not backed by a SDF file, a 2D visualization will be shown:
 
-![](../../images/ligand.png)
+```python
+from deeporigin.drug_discovery import LigandSet
 
-### Visualizing LigandSets
+smiles = {
+    "C/C=C/Cn1cc(-c2cccc(C(=O)N(C)C)c2)c2cc[nH]c2c1=O",
+    "C=CCCn1cc(-c2cccc(C(=O)N(C)C)c2)c2cc[nH]c2c1=O",
+}
+
+ligands = LigandSet.from_smiles(smiles)
+ligands
+
+```
+
+!!! success "Expected Output"
+
+    ![](./ligands.png)
+
+
+To view 3D structures of all ligands in a LigandSet, use:
+
+
+```python
+
+from deeporigin.drug_discovery import LigandSet, DATA_DIR
+
+ligands = LigandSet.from_sdf(DATA_DIR / "ligands" / "ligands-brd-all.sdf")
+ligands.show()
+
+```
+
+A visualization similar to this will be shown. Use the arrows to flip between ligands in the `LigandSet`. 
+
+<iframe 
+    src="./brd-3d.html" 
+    width="100%" 
+    height="600" 
+    style="border:none;"
+    title="Visualization of ligands"
+></iframe>
 
 ## Operations on Ligands
 
@@ -186,25 +242,25 @@ If a ligand is not backed by a SDF file, a 2D visualization will be shown:
 
 You can minimize the 3D structure of a single ligand or all ligands in a LigandSet. Minimization optimizes the geometry of the molecule(s) using a force field, which is useful for preparing ligands for docking or other modeling tasks.
 
-#### Minimizing a single Ligand
+=== "Ligand"
 
-```python
-from deeporigin.drug_discovery import Ligand, BRD_DATA_DIR
+    ```python
+    from deeporigin.drug_discovery import Ligand, BRD_DATA_DIR
 
-ligand = Ligand.from_sdf(BRD_DATA_DIR / "brd-2.sdf")
-ligand.minimize()  # Optimizes the 3D coordinates in place
-```
+    ligand = Ligand.from_sdf(BRD_DATA_DIR / "brd-2.sdf")
+    ligand.minimize()  # Optimizes the 3D coordinates in place
+    ```
 
-#### Minimizing all ligands in a LigandSet
+=== "LigandSet"
 
-```python
-from deeporigin.drug_discovery import LigandSet, DATA_DIR
+    ```python
+    from deeporigin.drug_discovery import LigandSet, DATA_DIR
 
-ligands = LigandSet.from_sdf(DATA_DIR / "ligands" / "ligands-brd-all.sdf")
-ligands.minimize()  # Optimizes all ligands in the set in place
-```
+    ligands = LigandSet.from_sdf(DATA_DIR / "ligands" / "ligands-brd-all.sdf")
+    ligands.minimize()  # Optimizes all ligands in the set in place
+    ```
 
-This will call the `minimize()` method on each ligand in the set, updating their 3D coordinates. The method returns the LigandSet itself for convenience, so you can chain further operations if desired.
+    This will call the `minimize()` method on each ligand in the set, updating their 3D coordinates. The method returns the LigandSet itself for convenience, so you can chain further operations if desired.
 
 ### Constructing a network using Konnektor
 
@@ -227,94 +283,116 @@ maps the network and creates a visualization similar to:
 
 ### Predicting ADMET Properties
 
-#### For single Ligands
+ADMET (Absorption, Distribution, Metabolism, Excretion, and Toxicity) properties can be predicted for Ligands or LigandSets.
 
-You can predict ADMET (Absorption, Distribution, Metabolism, Excretion, and Toxicity) properties for a ligand using the `admet_properties` method:
+=== "Ligands"
 
-```{.python notest}
-# Predict ADMET properties
-properties = ligand.admet_properties()
-```
+    You can predict ADMET properties for a ligand using the `admet_properties` method:
 
-The method returns a dictionary containing various ADMET-related predictions:
+    ```{.python notest}
+    # Predict ADMET properties
+    properties = ligand.admet_properties()
+    ```
 
-```python
-{
-    'smiles': 'Cn1c(=O)n(Cc2ccccc2)c(=O)c2c1nc(SCCO)n2Cc1ccccc1',
-    'properties': {
-        'logS': -4.004,  # Aqueous solubility
-        'logP': 3.686,   # Partition coefficient
-        'logD': 2.528,   # Distribution coefficient
-        'hERG': {'probability': 0.264},  # hERG inhibition risk
-        'ames': {'probability': 0.213}, # Ames mutagenicity
-        'cyp': {     # Cytochrome P450 inhibition
-            'probabilities': {
-                'cyp1a2': 0.134,
-                'cyp2c9': 0.744,
-                'cyp2c19': 0.853,
-                'cyp2d6': 0.0252,
-                'cyp3a4': 0.4718
+    The method returns a dictionary containing various ADMET-related predictions:
+
+    ```python
+    {
+        'smiles': 'Cn1c(=O)n(Cc2ccccc2)c(=O)c2c1nc(SCCO)n2Cc1ccccc1',
+        'properties': {
+            'logS': -4.004,  # Aqueous solubility
+            'logP': 3.686,   # Partition coefficient
+            'logD': 2.528,   # Distribution coefficient
+            'hERG': {'probability': 0.264},  # hERG inhibition risk
+            'ames': {'probability': 0.213}, # Ames mutagenicity
+            'cyp': {     # Cytochrome P450 inhibition
+                'probabilities': {
+                    'cyp1a2': 0.134,
+                    'cyp2c9': 0.744,
+                    'cyp2c19': 0.853,
+                    'cyp2d6': 0.0252,
+                    'cyp3a4': 0.4718
+                }
+            },
+            'pains': {    # PAINS (Pan Assay Interference Compounds)
+                'has_pains': None,
+                'pains_fragments': []
             }
-        },
-        'pains': {    # PAINS (Pan Assay Interference Compounds)
-            'has_pains': None,
-            'pains_fragments': []
         }
     }
-}
-```
+    ```
 
-The predicted properties are automatically stored in the ligand's properties dictionary and can be accessed later using the `get_property` method:
+    The predicted properties are automatically stored in the ligand's properties dictionary and can be accessed later using the `get_property` method:
 
-```{.python notest}
-# Access a specific property
-logP = ligand.get_property('logP')
-```
+    ```{.python notest}
+    # Access a specific property
+    logP = ligand.get_property('logP')
+    ```
 
-!!! note "Property Storage"
-    All predicted properties are automatically stored in the ligand's properties dictionary and can be accessed at any time using the `get_property` method.
+    !!! note "Property Storage"
+        All predicted properties are automatically stored in the ligand's properties dictionary and can be accessed at any time using the `get_property` method.
 
-#### For LigandSets
+=== "LigandSets"
 
-You can predict ADMET properties for all ligands in a `LigandSet` using the `admet_properties` method. This will call the prediction for each ligand and display a progress bar using `tqdm`:
+    You can predict ADMET properties for all ligands in a `LigandSet` using the `admet_properties` method. This will call the prediction for each ligand and display a progress bar using `tqdm`:
 
-```{.python notest}
-from deeporigin.drug_discovery import LigandSet, DATA_DIR
+    ```{.python notest}
+    from deeporigin.drug_discovery import LigandSet, DATA_DIR
 
-ligands = LigandSet.from_csv(
-    file_path=DATA_DIR / "ligands" / "ligands.csv",
-    smiles_column="SMILES"
-)
+    ligands = LigandSet.from_csv(
+        file_path=DATA_DIR / "ligands" / "ligands.csv",
+        smiles_column="SMILES"
+    )
 
-ligands.admet_properties()  
-```
+    ligands.admet_properties()  
+    ```
 
-Each entry in `results` is a dictionary of ADMET properties for the corresponding ligand. The properties are also stored in each ligand's `.properties` attribute for later access.
+    Each entry in `results` is a dictionary of ADMET properties for the corresponding ligand. The properties are also stored in each ligand's `.properties` attribute for later access.
 
-To view ADMET properties of all ligands in the ligand set, simply view the ligandset as a dataframe using:
+    To view ADMET properties of all ligands in the ligand set, simply view the ligandset as a dataframe using:
 
-```{.python notest}
-ligands
-```
+    ```{.python notest}
+    ligands
+    ```
 
-or, optionally, convert to a DataFrame for further analysis:
+    or, optionally, convert to a DataFrame for further analysis:
 
-```{.python notest}
-ligands.to_dataframe()
-```
+    ```{.python notest}
+    ligands.to_dataframe()
+    ```
 
 ## Exporting ligands
 
 ### To SDF files
 
-To write a ligand to a SDF file, use:
 
-```python
-from deeporigin.drug_discovery import Ligand
+=== "Ligands"
 
-ligand = Ligand.from_smiles("NCCc1c[nH]c2ccc(O)cc12")
-ligand.to_sdf()
-```
+    To write a `Ligand` to a SDF file, use:
+
+    ```python
+    from deeporigin.drug_discovery import Ligand
+
+    ligand = Ligand.from_smiles("NCCc1c[nH]c2ccc(O)cc12")
+    ligand.to_sdf()
+    ```
+=== "LigandSet"
+
+    To write a `LigandSet` to a SDF file, use:
+
+    ```python
+    from deeporigin.drug_discovery import LigandSet
+
+    smiles = {
+    "C/C=C/Cn1cc(-c2cccc(C(=O)N(C)C)c2)c2cc[nH]c2c1=O",
+    "C=CCCn1cc(-c2cccc(C(=O)N(C)C)c2)c2cc[nH]c2c1=O",
+    }
+
+    ligands = LigandSet.from_smiles(smiles)
+    ligands.to_sdf()
+    ```
+
+
 
 ### To mol files
 
