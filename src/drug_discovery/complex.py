@@ -166,9 +166,8 @@ class Complex:
         protein_path = self.protein._remote_path_base + os.path.basename(
             self.protein.file_path
         )
-        if protein_path in remote_files:
-            self.protein._remote_path = protein_path
-        else:
+        self.protein._remote_path = protein_path
+        if protein_path not in remote_files:
             files_to_upload[str(self.protein.file_path)] = protein_path
 
         for ligand in self.ligands:
