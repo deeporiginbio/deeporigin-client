@@ -21,6 +21,7 @@ def sysprep(
     keep_waters: bool = False,
     is_lig_protonated: bool = True,
     is_protein_protonated: bool = True,
+    use_cache: bool = True,
 ) -> str:
     """
     Run system preparation on a protein-ligand complex.
@@ -53,7 +54,7 @@ def sysprep(
     output_pdb_path = os.path.join(cache_path, "complex.pdb")
 
     # Check if cached results exist
-    if os.path.exists(output_pdb_path):
+    if os.path.exists(output_pdb_path) and use_cache:
         return output_pdb_path
 
     # If no cached results, proceed with server call

@@ -110,6 +110,7 @@ class Complex:
         keep_waters: bool = False,
         is_lig_protonated: bool = True,
         is_protein_protonated: bool = True,
+        use_cache: bool = True,
     ) -> None:
         """run system preparation on the protein and one ligand from the Complex
 
@@ -135,6 +136,7 @@ class Complex:
             keep_waters=keep_waters,
             is_lig_protonated=is_lig_protonated,
             is_protein_protonated=is_protein_protonated,
+            use_cache=use_cache,
         )
 
         # set this complex path as the prepared system
