@@ -487,15 +487,12 @@ class Protein(Entity):
         """
         Remove HETATM records from the protein structure, with options to retain specified residues or exclude certain metals.
 
-        Parameters
-        ----------
-        keep_resnames : Optional[list[str]]
-            A list of residue names (strings) to keep in the structure even if they are HETATM records.
-        exclude_metals : Optional[list[str]]
-            A list of metal names (strings) to exclude from removal. These metals will be retained in the structure.
+        Args:
+            keep_resnames (Optional[list[str]]): A list of residue names (strings) to keep in the structure even if they are HETATM records.
+            remove_metals (Optional[list[str]]): A list of metal names (strings) to exclude from removal. These metals will be retained in the structure.
 
-        Notes
-        -----
+        Notes:
+
         - By default, a predefined list of metals is considered for removal unless specified in `exclude_metals`.
         - If `keep_resnames` is provided, those residues (along with any metals not excluded) will be retained even if they are HETATM records.
         - The method updates the current protein object in place.
@@ -808,20 +805,6 @@ class Protein(Entity):
                 structures. When provided, the ligands will be displayed alongside the protein
                 structure. Defaults to None.
 
-        Examples:
-            # Visualize protein structure only
-            >>> protein = Protein(file="protein.pdb")
-            >>> protein.show()
-
-            # Visualize protein with highlighted pockets
-            >>> pockets = protein.find_pockets(pocket_count=3)
-            >>> protein.show(pockets=pockets)
-
-            # Visualize protein with docked ligands
-            >>> protein.show(sdf_file="docked_ligands.sdf")
-
-            # Visualize protein with both pockets and docked ligands
-            >>> protein.show(pockets=pockets, sdf_file="docked_ligands.sdf")
 
         Notes:
             - When pockets are provided, they are displayed with semi-transparent surfaces

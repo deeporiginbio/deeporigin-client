@@ -1,3 +1,5 @@
+import os
+
 import pytest
 
 from deeporigin.drug_discovery import DATA_DIR
@@ -11,6 +13,17 @@ SDF_TEST_CASES = [
     (DATA_DIR / "ligands" / "ligands-brd-all.sdf", 8),
     (DATA_DIR / "ligands" / "42-ligands.sdf", 42),
 ]
+
+BRD_SMILES = {
+    "C/C=C/Cn1cc(-c2cccc(C(=O)N(C)C)c2)c2cc[nH]c2c1=O",
+    "C=CCCn1cc(-c2cccc(C(=O)N(C)C)c2)c2cc[nH]c2c1=O",
+    "C=CCn1cc(-c2cccc(C(=O)N(C)C)c2)c2cc[nH]c2c1=O",
+    "CCCCn1cc(-c2cccc(C(=O)N(C)C)c2)c2cc[nH]c2c1=O",
+    "CCCn1cc(-c2cccc(C(=O)N(C)C)c2)c2cc[nH]c2c1=O",
+    "CCn1cc(-c2cccc(C(=O)N(C)C)c2)c2cc[nH]c2c1=O",
+    "CN(C)C(=O)c1cccc(-c2cn(C)c(=O)c3[nH]ccc23)c1",
+    "COCCn1cc(-c2cccc(C(=O)N(C)C)c2)c2cc[nH]c2c1=O",
+}
 
 
 @pytest.mark.parametrize("filename,expected_count", SDF_TEST_CASES)
@@ -57,3 +70,63 @@ def test_ligand_set_from_csv():
     # Test with non-existent file
     with pytest.raises(FileNotFoundError):
         LigandSet.from_csv("nonexistent.csv")
+
+
+@pytest.mark.parametrize("filename,expected_count", SDF_TEST_CASES)
+def test_sdf_roundtrip(filename, expected_count):
+    """Test that we can roundtrip a LigandSet to an SDF file and back for all SDF_TEST_CASES"""
+
+    ligands = LigandSet.from_sdf(filename)
+    assert len(ligands.ligands) == expected_count
+    sdf_path = ligands.to_sdf()
+    assert os.path.exists(sdf_path)
+
+    new_ligands = LigandSet.from_sdf(sdf_path)
+    assert len(new_ligands.ligands) == len(ligands.ligands)
+    assert set(ligands.to_smiles()) == set(new_ligands.to_smiles()), (
+        "SMILES strings should be the same"
+    )
+
+    os.unlink(sdf_path)
+
+
+def test_to_smiles():
+    """Test that we can convert a LigandSet to SMILES strings"""
+
+    ligands = LigandSet.from_sdf(DATA_DIR / "ligands" / "ligands-brd-all.sdf")
+
+    assert set(ligands.to_smiles()) == BRD_SMILES, "SMILES strings should be the same"
+
+
+def test_from_smiles():
+    """Test that we can create a LigandSet from a list of SMILES strings."""
+
+    ligands = LigandSet.from_smiles(BRD_SMILES)
+    assert isinstance(ligands, LigandSet)
+    assert len(ligands) == len(BRD_SMILES)
+
+    # Check that all SMILES are present (order-insensitive)
+    assert set(ligands.to_smiles()) == set(BRD_SMILES)
+    for ligand in ligands:
+        assert isinstance(ligand, Ligand)
+
+
+def test_minimize():
+    """Test that we can minimize a LigandSet"""
+
+    ligands = LigandSet.from_smiles(BRD_SMILES)
+    ligands.minimize()
+
+
+def test_show():
+    """Test that we can show a LigandSet"""
+
+    ligands = LigandSet.from_smiles(BRD_SMILES)
+    ligands.show()
+
+
+def test_from_dir():
+    """Test that we can create a LigandSet from a directory"""
+
+    ligands = LigandSet.from_dir(DATA_DIR / "brd")
+    assert len(ligands) == 8

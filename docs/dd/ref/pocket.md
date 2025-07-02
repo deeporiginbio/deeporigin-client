@@ -1,6 +1,6 @@
-# `deeporigin.drug_discovery.structures`
+# `deeporigin.drug_discovery.Pocket`
 
-::: src.drug_discovery.structures
+::: src.drug_discovery.structures.Pocket
     options:
       docstring_style: google
       show_root_heading: false

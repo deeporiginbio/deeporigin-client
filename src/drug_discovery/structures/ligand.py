@@ -271,16 +271,6 @@ class Ligand(Entity):
         Returns:
             Ligand: A new Ligand instance initialized from the chemical identifier
 
-        Example:
-            >>> # Create ATP molecule
-            >>> atp = Ligand.from_identifier("ATP", name="ATP")
-            >>>
-            >>> # Create serotonin molecule
-            >>> serotonin = Ligand.from_identifier(
-            ...     identifier="serotonin",
-            ...     name="Serotonin"
-            ... )
-
         Raises:
             DeepOriginException: If the identifier cannot be resolved to a valid molecule
         """
@@ -685,32 +675,6 @@ class Ligand(Entity):
         except Exception as e:
             raise ValueError(f"Failed to predict ADMET properties: {str(e)}") from e
 
-    def protonate(self, pH: float = 7.4, filter_percentage: float = 1):
-        """
-        Predicts the right protonation of a molecule at given pH value.
-
-        Parameters:
-        - entry: A single or multiple ligands represented as SMILES or Ligand instances.
-        - pH: pH value of the solvent for concentration calculation. Default is 7.4.
-        - filter_percentage: Percentage threshold for filtering low concentration states. Default is 1.
-
-        Returns:
-        - ProtonationReport: A ProtonationReport instance.
-        """
-
-        raise NotImplementedError("Protonation prediction not implemented yet.")
-        # try:
-        #     smiles = protonate(
-        #         pH=pH,
-        #         smiles=self.mol.smiles,
-        #         filter_percentage=filter_percentage,
-        #     )
-        #     if smiles:
-        #         self.protonated_smiles = smiles
-        #         self.set_property("ProtonatedSMILES", smiles)
-        # except Exception as e:
-        #     raise ValueError(f"Failed to protonate the ligand molecule: {str(e)}")
-
     def update_coordinates(self, coords: np.ndarray):
         """update coordinates of the ligand structure"""
 
@@ -728,39 +692,6 @@ class Ligand(Entity):
                 )
 
         conformer.SetPositions(coords.astype(np.float64))
-
-    # @classmethod
-    # def protonate_molecules(cls, ligands):
-    #     """
-    #     Predicts the right protonation of a molecule at given pH value.
-
-    #     Parameters:
-    #     - entry: A single or multiple ligands represented as SMILES or Ligand instances.
-    #     - pH: pH value of the solvent for concentration calculation. Default is 7.4.
-    #     - filter_percentage: Percentage threshold for filtering low concentration states. Default is 1.
-
-    #     Returns:
-    #     - ProtonationReport: A ProtonationReport instance.
-    #     """
-    #     mols = []
-
-    #     for i in tqdm(range(0, len(ligands)), desc="Protonating Molecules"):
-    #         ligand = ligands[i]
-    #         if isinstance(ligand, str):
-    #             try:
-    #                 ligand = Ligand(smiles=ligand)
-    #             except Exception as e:
-    #                 print(f"Error: Failed to create Ligand from SMILES: {str(e)}")
-    #                 continue
-    #         try:
-    #             if not ligand.protonated_smiles:
-    #                 ligand.protonate()
-    #         except Exception as e:
-    #             print(f"Error: Failed to protonate the ligand molecule: {str(e)}")
-    #             continue
-
-    #         mols.append(ligand)
-    #     return mols
 
 
 @beartype
@@ -821,12 +752,14 @@ class LigandSet:
 
     Attributes:
         ligands (list[Ligand]): A list of Ligand instances contained in the set.
+        network (dict): A dictionary containing the network of ligands estimated using Konnektor.
 
     Methods:
         minimize(): Minimize all ligands in the set using their 3D optimization routines.
     """
 
     ligands: list[Ligand] = field(default_factory=list)
+    network: dict = field(default_factory=dict)
 
     def __len__(self):
         return len(self.ligands)
@@ -1031,7 +964,7 @@ class LigandSet:
         return cls(ligands=ligands)
 
     @classmethod
-    def from_dir(cls, directory: str):
+    def from_dir(cls, directory: str) -> "LigandSet":
         """
         Create a LigandSet instance from a directory containing SDF files.
         """
@@ -1086,7 +1019,8 @@ class LigandSet:
             ligand.minimize()
         return self
 
-    def admet_properties(self):
+    @beartype
+    def admet_properties(self, use_cache: bool = True):
         """
         Predict ADMET properties for all ligands in the set.
         This calls the admet_properties() method on each Ligand in the set.
@@ -1096,5 +1030,99 @@ class LigandSet:
         from tqdm import tqdm
 
         for ligand in tqdm(self.ligands, desc="Predicting ADMET properties"):
-            ligand.admet_properties()
-        return None
+            ligand.admet_properties(use_cache=use_cache)
+        return self
+
+    def to_sdf(self, output_path: Optional[str] = None) -> str:
+        """
+        Write all ligands in the set to a single SDF file, preserving all properties from each Ligand's mol.m field.
+
+        Args:
+            output_path (str): The path to the output SDF file.
+
+        Returns:
+            str: The path to the written SDF file.
+        """
+        from pathlib import Path
+
+        from rdkit import Chem
+
+        if output_path is None:
+            output_path = f"{tempfile.mkstemp()[1]}.sdf"
+
+        path = Path(output_path)
+        writer = Chem.SDWriter(str(path))
+        try:
+            for ligand in self.ligands:
+                # Ensure all properties are set on the RDKit Mol object
+                if ligand.name is not None:
+                    ligand.set_property("_Name", ligand.name)
+                if ligand.mol.smiles is not None:
+                    ligand.set_property("_SMILES", ligand.mol.smiles)
+                if ligand.properties:
+                    for prop_name, prop_value in ligand.properties.items():
+                        ligand.set_property(prop_name, str(prop_value))
+                writer.write(ligand.mol.m)
+            return str(path)
+        except Exception as e:
+            raise DeepOriginException(
+                f"Failed to write LigandSet to SDF file {output_path}: {str(e)}"
+            ) from None
+        finally:
+            writer.close()
+
+    def to_smiles(self) -> list[str]:
+        """
+        Convert all ligands in the set to SMILES strings.
+        """
+        return [ligand.smiles for ligand in self.ligands]
+
+    @beartype
+    @classmethod
+    def from_smiles(cls, smiles: list[str] | set[str]) -> "LigandSet":
+        """
+        Create a LigandSet from a list of SMILES strings.
+        """
+
+        return cls(ligands=[Ligand.from_smiles(s) for s in smiles])
+
+    def map_network(
+        self,
+        *,
+        use_cache: bool = True,
+        operation: Literal["mapping", "network", "full"] = "network",
+        network_type: Literal["star", "mst", "cyclic"] = "mst",
+    ):
+        """
+        Map a network of ligands from an SDF file using the DeepOrigin API.
+        """
+        from deeporigin.functions.rbfe_tools import map_network
+
+        self.network = map_network(
+            sdf_file=self.to_sdf(),
+            use_cache=use_cache,
+            operation=operation,
+            network_type=network_type,
+        )
+
+        return self
+
+    def show_network(self):
+        """
+        Show the network of ligands in the set.
+        """
+
+        if "network_html" not in self.network.keys():
+            raise DeepOriginException(
+                "Network not mapped yet. Please map the network first using `map_network()`."
+            ) from None
+
+        from IPython.display import IFrame, display
+
+        file_name = "network.html"
+        try:
+            with open(file_name, "w") as file:
+                file.write(self.network["network_html"])
+            display(IFrame(file_name, width=1000, height=1000))
+        except Exception as e:
+            raise DeepOriginException(f"Failed to display network: {e}") from None

@@ -12,6 +12,23 @@
         "projectKey": "formiclabs_deeporigin-client"
     },
     "cSpell.words": [
-        "deeporigin"
+        "admet",
+        "cheminformatics",
+        "deeporigin",
+        "drugability",
+        "Konnektor",
+        "marimo",
+        "molblock",
+        "molprops",
+        "molstar",
+        "ndarray",
+        "nrows",
+        "protonate",
+        "protonated",
+        "protonation",
+        "rbfe",
+        "rdchem",
+        "rdkit",
+        "SASA"
     ]
 }

@@ -81,6 +81,8 @@ def test_ligand_from_smiles():
         Ligand.from_smiles(smiles="InvalidSMILES")
 
 
+# this is marked as such because the pubchem API has become very flaky
+@pytest.mark.xfail(strict=False)
 def test_ligand_from_identifier():
     """Test that we can create a Ligand from common biochemical identifiers using the from_identifier classmethod"""
 

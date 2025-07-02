@@ -1,4 +1,4 @@
-"""This module contains the function to run loop modelling on a protein identified by a PDB ID."""
+"""This module contains functions to help with RBFE like network mapping and visualization."""
 
 import base64
 import hashlib
@@ -24,16 +24,16 @@ def map_network(
     use_cache: bool = True,
 ) -> dict:
     """
-    Run molecular docking using the DeepOrigin API.
+    Map a network of ligands from an SDF file using the DeepOrigin API.
 
     Args:
-        protein (Protein): Protein object representing the target protein
-        smiles_list (list[str]): List of SMILES strings for ligands
-        box_size (Tuple[float, float, float]): Size of the docking box (x, y, z)
-        pocket_center (Tuple[int, int, int]): Center coordinates of the docking pocket (x, y, z)
+        sdf_file (str): Path to the SDF file containing ligands.
+        operation (Literal["mapping", "network", "full"]): Type of operation to perform. Defaults to "network".
+        network_type (Literal["star", "mst", "cyclic"]): Type of network to generate. Defaults to "mst".
+        use_cache (bool): Whether to use cached results if available. Defaults to True.
 
     Returns:
-        dict: API response
+        dict: The result of the network mapping operation.
     """
 
     # Create hash of inputs
@@ -57,7 +57,11 @@ def map_network(
     results_json = str(Path(CACHE_DIR) / f"{cache_hash}.json")
 
     # Check if cached result exists
-    if not os.path.exists(results_json) or not use_cache:
+    if os.path.exists(results_json) and use_cache:
+        with open(results_json, "r") as f:
+            response = json.load(f)
+
+    else:
         # Make the API request
         response = requests.post(
             URL,
@@ -74,9 +78,5 @@ def map_network(
         Path(results_json).parent.mkdir(parents=True, exist_ok=True)
         with open(results_json, "w") as f:
             json.dump(response, f)
-
-    else:
-        with open(results_json, "r") as f:
-            response = json.load(f)
 
     return response

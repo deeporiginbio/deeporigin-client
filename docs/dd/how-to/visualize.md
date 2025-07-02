@@ -35,7 +35,7 @@ A visualization such as this will be shown:
 
 ### `Ligand` objects
 
-The [`Ligand` class](../ref/structures.md#src.drug_discovery.structures.Ligand)  is the primary way to work with ligands in Deep Origin.
+The [`Ligand` class](../ref/ligand.md)  is the primary way to work with ligands in Deep Origin.
 
 
 ??? warning "Browser support"
