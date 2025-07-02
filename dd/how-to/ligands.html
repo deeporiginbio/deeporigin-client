@@ -1084,6 +1084,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#constructing-a-network-using-konnektor" class="md-nav__link">
+    <span class="md-ellipsis">
+      Constructing a network using Konnektor
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#predicting-admet-properties" class="md-nav__link">
     <span class="md-ellipsis">
       Predicting ADMET Properties
@@ -1309,8 +1318,6 @@
       
         
       
-        
-      
     
     
     
@@ -1379,13 +1386,114 @@
   
   
   
-    <li class="md-nav__item">
-      <a href="../ref/structures.html" class="md-nav__link">
+    
+    
+      
         
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_3_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_3_2" id="__nav_2_3_2_label" tabindex="0">
+            
   
   
   <span class="md-ellipsis">
     structures
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_3_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_3_2">
+            <span class="md-nav__icon md-icon"></span>
+            structures
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ref/ligand.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Ligand
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ref/ligandset.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    LigandSet
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ref/protein.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Protein
     
   </span>
   
@@ -1408,12 +1516,43 @@
   
   
   <span class="md-ellipsis">
-    complex
+    Complex
     
   </span>
   
 
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ref/pocket.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Pocket
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -2895,6 +3034,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#constructing-a-network-using-konnektor" class="md-nav__link">
+    <span class="md-ellipsis">
+      Constructing a network using Konnektor
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#predicting-admet-properties" class="md-nav__link">
     <span class="md-ellipsis">
       Predicting ADMET Properties
@@ -3019,7 +3167,7 @@
 <li><code>Ligand</code></li>
 <li><code>LigandSet</code></li>
 </ul>
-<p>The <a href="../ref/structures.html#src.drug_discovery.structures.Ligand"><code>Ligand</code> class</a> is the primary way to work with ligands in Deep Origin.</p>
+<p>The <a href="../ref/ligand.html"><code>Ligand</code> class</a> is the primary way to work with ligands in Deep Origin.</p>
 <h2 id="constructing-a-ligand-or-ligandset">Constructing a Ligand or LigandSet<a class="headerlink" href="#constructing-a-ligand-or-ligandset" title="Permanent link">&para;</a></h2>
 <h3 id="single-ligand-from-a-sdf-file">Single Ligand from a SDF file<a class="headerlink" href="#single-ligand-from-a-sdf-file" title="Permanent link">&para;</a></h3>
 <p>A single Ligand can be constructed from a file:</p>
@@ -3177,6 +3325,20 @@
 <span class="n">ligands</span><span class="o">.</span><span class="n">minimize</span><span class="p">()</span>  <span class="c1"># Optimizes all ligands in the set in place</span>
 </code></pre></div>
 <p>This will call the <code>minimize()</code> method on each ligand in the set, updating their 3D coordinates. The method returns the LigandSet itself for convenience, so you can chain further operations if desired.</p>
+<h3 id="constructing-a-network-using-konnektor">Constructing a network using Konnektor<a class="headerlink" href="#constructing-a-network-using-konnektor" title="Permanent link">&para;</a></h3>
+<p>To run RBFE, it is helpful to map out a network within the ligand set, so that we can run RBFE on those pairs of ligands. To do so, use:</p>
+<div class="language-python highlight"><pre><span></span><code><span class="c1"># assuming ligands is a LigandSet</span>
+<span class="n">ligands</span><span class="o">.</span><span class="n">map_network</span><span class="p">()</span><span class="o">.</span><span class="n">show_network</span><span class="p">()</span>
+</code></pre></div>
+<p>maps the network and creates a visualization similar to:</p>
+<iframe 
+    src="./network.html" 
+    width="100%" 
+    height="600" 
+    style="border:none;"
+    title="Visualization of network"
+></iframe>
+
 <h3 id="predicting-admet-properties">Predicting ADMET Properties<a class="headerlink" href="#predicting-admet-properties" title="Permanent link">&para;</a></h3>
 <h4 id="for-single-ligands">For single Ligands<a class="headerlink" href="#for-single-ligands" title="Permanent link">&para;</a></h4>
 <p>You can predict ADMET (Absorption, Distribution, Metabolism, Excretion, and Toxicity) properties for a ligand using the <code>admet_properties</code> method:</p>
