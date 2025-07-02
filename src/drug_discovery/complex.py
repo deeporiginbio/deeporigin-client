@@ -176,9 +176,8 @@ class Complex:
                 # this ligand isn't being backed by a file, so we can't upload it
                 continue
             ligand_path = ligand._remote_path_base + os.path.basename(ligand.file_path)
-            if ligand_path in remote_files:
-                ligand._remote_path = ligand_path
-            else:
+            ligand._remote_path = ligand_path
+            if ligand_path not in remote_files:
                 files_to_upload[str(ligand.file_path)] = ligand_path
 
         files_client.upload_files(files_to_upload)
