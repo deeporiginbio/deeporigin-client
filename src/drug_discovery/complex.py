@@ -110,6 +110,7 @@ class Complex:
         keep_waters: bool = False,
         is_lig_protonated: bool = True,
         is_protein_protonated: bool = True,
+        use_cache: bool = True,
     ) -> None:
         """run system preparation on the protein and one ligand from the Complex
 
@@ -135,6 +136,7 @@ class Complex:
             keep_waters=keep_waters,
             is_lig_protonated=is_lig_protonated,
             is_protein_protonated=is_protein_protonated,
+            use_cache=use_cache,
         )
 
         # set this complex path as the prepared system
@@ -166,9 +168,8 @@ class Complex:
         protein_path = self.protein._remote_path_base + os.path.basename(
             self.protein.file_path
         )
-        if protein_path in remote_files:
-            self.protein._remote_path = protein_path
-        else:
+        self.protein._remote_path = protein_path
+        if protein_path not in remote_files:
             files_to_upload[str(self.protein.file_path)] = protein_path
 
         for ligand in self.ligands:
@@ -176,9 +177,8 @@ class Complex:
                 # this ligand isn't being backed by a file, so we can't upload it
                 continue
             ligand_path = ligand._remote_path_base + os.path.basename(ligand.file_path)
-            if ligand_path in remote_files:
-                ligand._remote_path = ligand_path
-            else:
+            ligand._remote_path = ligand_path
+            if ligand_path not in remote_files:
                 files_to_upload[str(ligand.file_path)] = ligand_path
 
         files_client.upload_files(files_to_upload)
