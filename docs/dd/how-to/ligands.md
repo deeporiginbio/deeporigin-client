@@ -206,6 +206,25 @@ ligands.minimize()  # Optimizes all ligands in the set in place
 
 This will call the `minimize()` method on each ligand in the set, updating their 3D coordinates. The method returns the LigandSet itself for convenience, so you can chain further operations if desired.
 
+### Constructing a network using Konnektor
+
+To run RBFE, it is helpful to map out a network within the ligand set, so that we can run RBFE on those pairs of ligands. To do so, use:
+
+```{.python notest}
+# assuming ligands is a LigandSet
+ligands.map_network().show_network()
+```
+
+maps the network and creates a visualization similar to:
+
+<iframe 
+    src="./network.html" 
+    width="100%" 
+    height="600" 
+    style="border:none;"
+    title="Visualization of network"
+></iframe>
+
 ### Predicting ADMET Properties
 
 #### For single Ligands
