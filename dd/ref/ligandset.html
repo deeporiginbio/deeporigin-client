@@ -1324,6 +1324,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#src.drug_discovery.structures.LigandSet.mcs" class="md-nav__link">
+    <span class="md-ellipsis">
+      mcs
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#src.drug_discovery.structures.LigandSet.minimize" class="md-nav__link">
     <span class="md-ellipsis">
       minimize
@@ -1363,6 +1372,15 @@
   <a href="#src.drug_discovery.structures.LigandSet.to_dataframe" class="md-nav__link">
     <span class="md-ellipsis">
       to_dataframe
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.drug_discovery.structures.LigandSet.to_rdkit_mols" class="md-nav__link">
+    <span class="md-ellipsis">
+      to_rdkit_mols
     </span>
   </a>
   
@@ -2907,6 +2925,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#src.drug_discovery.structures.LigandSet.mcs" class="md-nav__link">
+    <span class="md-ellipsis">
+      mcs
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#src.drug_discovery.structures.LigandSet.minimize" class="md-nav__link">
     <span class="md-ellipsis">
       minimize
@@ -2946,6 +2973,15 @@
   <a href="#src.drug_discovery.structures.LigandSet.to_dataframe" class="md-nav__link">
     <span class="md-ellipsis">
       to_dataframe
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.drug_discovery.structures.LigandSet.to_rdkit_mols" class="md-nav__link">
+    <span class="md-ellipsis">
+      to_rdkit_mols
     </span>
   </a>
   
@@ -3506,6 +3542,49 @@ Shows a progress bar using tqdm.</p>
 <div class="doc doc-object doc-function">
 
 
+<h3 id="src.drug_discovery.structures.LigandSet.mcs" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">mcs</span>
+
+
+<a href="#src.drug_discovery.structures.LigandSet.mcs" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">mcs</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n"><span title="str">str</span></span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Generates the Most Common Substructure (MCS) for ligands in a LigandSet</p>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>smartsString (str) : SMARTS string representing the MCS</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
 <h3 id="src.drug_discovery.structures.LigandSet.minimize" class="doc doc-heading">
 <code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">minimize</span>
 
@@ -3631,6 +3710,26 @@ This calls the minimize() method on each Ligand in the set.</p>
     <div class="doc doc-contents ">
 
         <p>Convert the LigandSet to a pandas DataFrame.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.drug_discovery.structures.LigandSet.to_rdkit_mols" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">to_rdkit_mols</span>
+
+
+<a href="#src.drug_discovery.structures.LigandSet.to_rdkit_mols" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">to_rdkit_mols</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n"><span title="list">list</span></span><span class="p">[</span><span class="n"><span title="rdkit.Chem.Mol">Mol</span></span><span class="p">]</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Convert all ligands in the set to RDKit molecules.</p>
 
 
     </div>
