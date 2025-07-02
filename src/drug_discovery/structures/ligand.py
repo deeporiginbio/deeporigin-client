@@ -1019,7 +1019,8 @@ class LigandSet:
             ligand.minimize()
         return self
 
-    def admet_properties(self):
+    @beartype
+    def admet_properties(self, use_cache: bool = True):
         """
         Predict ADMET properties for all ligands in the set.
         This calls the admet_properties() method on each Ligand in the set.
@@ -1029,7 +1030,7 @@ class LigandSet:
         from tqdm import tqdm
 
         for ligand in tqdm(self.ligands, desc="Predicting ADMET properties"):
-            ligand.admet_properties()
+            ligand.admet_properties(use_cache=use_cache)
         return self
 
     def to_sdf(self, output_path: Optional[str] = None) -> str:
@@ -1050,8 +1051,8 @@ class LigandSet:
             output_path = f"{tempfile.mkstemp()[1]}.sdf"
 
         path = Path(output_path)
+        writer = Chem.SDWriter(str(path))
         try:
-            writer = Chem.SDWriter(str(path))
             for ligand in self.ligands:
                 # Ensure all properties are set on the RDKit Mol object
                 if ligand.name is not None:
@@ -1062,12 +1063,13 @@ class LigandSet:
                     for prop_name, prop_value in ligand.properties.items():
                         ligand.set_property(prop_name, str(prop_value))
                 writer.write(ligand.mol.m)
-            writer.close()
             return str(path)
         except Exception as e:
             raise DeepOriginException(
                 f"Failed to write LigandSet to SDF file {output_path}: {str(e)}"
             ) from None
+        finally:
+            writer.close()
 
     def to_smiles(self) -> list[str]:
         """
@@ -1082,7 +1084,7 @@ class LigandSet:
         Create a LigandSet from a list of SMILES strings.
         """
 
-        return cls(ligands=[Ligand.from_smiles(smiles) for smiles in smiles])
+        return cls(ligands=[Ligand.from_smiles(s) for s in smiles])
 
     def map_network(
         self,
