@@ -675,32 +675,6 @@ class Ligand(Entity):
         except Exception as e:
             raise ValueError(f"Failed to predict ADMET properties: {str(e)}") from e
 
-    def protonate(self, pH: float = 7.4, filter_percentage: float = 1):
-        """
-        Predicts the right protonation of a molecule at given pH value.
-
-        Parameters:
-        - entry: A single or multiple ligands represented as SMILES or Ligand instances.
-        - pH: pH value of the solvent for concentration calculation. Default is 7.4.
-        - filter_percentage: Percentage threshold for filtering low concentration states. Default is 1.
-
-        Returns:
-        - ProtonationReport: A ProtonationReport instance.
-        """
-
-        raise NotImplementedError("Protonation prediction not implemented yet.")
-        # try:
-        #     smiles = protonate(
-        #         pH=pH,
-        #         smiles=self.mol.smiles,
-        #         filter_percentage=filter_percentage,
-        #     )
-        #     if smiles:
-        #         self.protonated_smiles = smiles
-        #         self.set_property("ProtonatedSMILES", smiles)
-        # except Exception as e:
-        #     raise ValueError(f"Failed to protonate the ligand molecule: {str(e)}")
-
     def update_coordinates(self, coords: np.ndarray):
         """update coordinates of the ligand structure"""
 
@@ -718,39 +692,6 @@ class Ligand(Entity):
                 )
 
         conformer.SetPositions(coords.astype(np.float64))
-
-    # @classmethod
-    # def protonate_molecules(cls, ligands):
-    #     """
-    #     Predicts the right protonation of a molecule at given pH value.
-
-    #     Parameters:
-    #     - entry: A single or multiple ligands represented as SMILES or Ligand instances.
-    #     - pH: pH value of the solvent for concentration calculation. Default is 7.4.
-    #     - filter_percentage: Percentage threshold for filtering low concentration states. Default is 1.
-
-    #     Returns:
-    #     - ProtonationReport: A ProtonationReport instance.
-    #     """
-    #     mols = []
-
-    #     for i in tqdm(range(0, len(ligands)), desc="Protonating Molecules"):
-    #         ligand = ligands[i]
-    #         if isinstance(ligand, str):
-    #             try:
-    #                 ligand = Ligand(smiles=ligand)
-    #             except Exception as e:
-    #                 print(f"Error: Failed to create Ligand from SMILES: {str(e)}")
-    #                 continue
-    #         try:
-    #             if not ligand.protonated_smiles:
-    #                 ligand.protonate()
-    #         except Exception as e:
-    #             print(f"Error: Failed to protonate the ligand molecule: {str(e)}")
-    #             continue
-
-    #         mols.append(ligand)
-    #     return mols
 
 
 @beartype
