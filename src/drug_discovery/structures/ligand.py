@@ -821,12 +821,14 @@ class LigandSet:
 
     Attributes:
         ligands (list[Ligand]): A list of Ligand instances contained in the set.
+        network (dict): A dictionary containing the network of ligands estimated using Konnektor.
 
     Methods:
         minimize(): Minimize all ligands in the set using their 3D optimization routines.
     """
 
     ligands: list[Ligand] = field(default_factory=list)
+    network: dict = field(default_factory=dict)
 
     def __len__(self):
         return len(self.ligands)
@@ -1031,7 +1033,7 @@ class LigandSet:
         return cls(ligands=ligands)
 
     @classmethod
-    def from_dir(cls, directory: str):
+    def from_dir(cls, directory: str) -> "LigandSet":
         """
         Create a LigandSet instance from a directory containing SDF files.
         """
@@ -1097,4 +1099,64 @@ class LigandSet:
 
         for ligand in tqdm(self.ligands, desc="Predicting ADMET properties"):
             ligand.admet_properties()
-        return None
+        return self
+
+    def to_sdf(self, output_path: Optional[str] = None) -> str:
+        """
+        Write all ligands in the set to a single SDF file, preserving all properties from each Ligand's mol.m field.
+
+        Args:
+            output_path (str): The path to the output SDF file.
+
+        Returns:
+            str: The path to the written SDF file.
+        """
+        from pathlib import Path
+
+        from rdkit import Chem
+
+        if output_path is None:
+            output_path = f"{tempfile.mkstemp()[1]}.sdf"
+
+        path = Path(output_path)
+        try:
+            writer = Chem.SDWriter(str(path))
+            for ligand in self.ligands:
+                # Ensure all properties are set on the RDKit Mol object
+                if ligand.name is not None:
+                    ligand.set_property("_Name", ligand.name)
+                if ligand.mol.smiles is not None:
+                    ligand.set_property("_SMILES", ligand.mol.smiles)
+                if ligand.properties:
+                    for prop_name, prop_value in ligand.properties.items():
+                        ligand.set_property(prop_name, str(prop_value))
+                writer.write(ligand.mol.m)
+            writer.close()
+            return str(path)
+        except Exception as e:
+            raise DeepOriginException(
+                f"Failed to write LigandSet to SDF file {output_path}: {str(e)}"
+            ) from None
+
+    def to_smiles(self) -> list[str]:
+        """
+        Convert all ligands in the set to SMILES strings.
+        """
+        return [ligand.smiles for ligand in self.ligands]
+
+    @beartype
+    @classmethod
+    def from_smiles(cls, smiles: list[str] | set[str]) -> "LigandSet":
+        """
+        Create a LigandSet from a list of SMILES strings.
+        """
+
+        return cls(ligands=[Ligand.from_smiles(smiles) for smiles in smiles])
+
+    def map_network(self):
+        """
+        Map a network of ligands from an SDF file using the DeepOrigin API.
+        """
+        from deeporigin.functions.rbfe_tools import map_network
+
+        self.network = map_network(sdf_file=self.to_sdf())
