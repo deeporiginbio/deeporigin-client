@@ -1123,4 +1123,4 @@ class LigandSet:
                 file.write(self.network["network_html"])
             display(IFrame(file_name, width=1000, height=1000))
         except Exception as e:
-            raise RuntimeError(f"Failed to display network: {e}")
+            raise DeepOriginException(f"Failed to display network: {e}") from None
