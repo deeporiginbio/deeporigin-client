@@ -33,6 +33,7 @@ def dock(
     box_size: tuple[float, float, float] = (20.0, 20.0, 20.0),
     pocket_center: Optional[tuple[int, int, int]] = None,
     pocket: Optional[Pocket] = None,
+    use_cache: bool = True,
 ) -> str:
     """
     Run molecular docking using the DeepOrigin API.
@@ -89,7 +90,9 @@ def dock(
     sdf_file = str(Path(CACHE_DIR) / f"{cache_hash}.sdf")
 
     # Check if cached result exists
-    if not os.path.exists(sdf_file):
+    if os.path.exists(sdf_file) and use_cache:
+        return sdf_file
+    else:
         # Read and encode the protein file
         with open(protein_file, "rb") as f:
             encoded_protein = base64.b64encode(f.read()).decode("utf-8")
