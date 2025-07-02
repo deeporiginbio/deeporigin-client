@@ -30,9 +30,9 @@ ligand.show()
 ```
 
 <iframe 
-    src="./dd/how-to/ligand.html" 
+    src="./dd/how-to/serotonin.html" 
     width="100%" 
     height="600" 
     style="border:none;"
-    title="ligand visualization"
+    title="Visualization of single ligand (serotonin)"
 ></iframe>
