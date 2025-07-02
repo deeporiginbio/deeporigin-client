@@ -491,8 +491,6 @@ class Protein(Entity):
             keep_resnames (Optional[list[str]]): A list of residue names (strings) to keep in the structure even if they are HETATM records.
             remove_metals (Optional[list[str]]): A list of metal names (strings) to exclude from removal. These metals will be retained in the structure.
 
-            A list of metal names (strings) to exclude from removal. These metals will be retained in the structure.
-
         Notes:
 
         - By default, a predefined list of metals is considered for removal unless specified in `exclude_metals`.
