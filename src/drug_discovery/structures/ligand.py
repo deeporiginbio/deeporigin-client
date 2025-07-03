@@ -943,7 +943,7 @@ class LigandSet:
         mols_per_row: int = 3,
         sub_img_size: tuple[int, int] = (300, 300),
     ):
-        """show all ligands in in the LigandSet in a grid"""
+        """show all ligands in the LigandSet in a grid"""
 
         from rdkit.Chem.Draw import MolsToGridImage
 
