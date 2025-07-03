@@ -89,6 +89,20 @@ class Protein(Entity):
     _remote_path_base = "entities/proteins/"
 
     @classmethod
+    def from_name(cls, name: str) -> "Protein":
+        """
+        Create a Protein instance from a name.
+        """
+
+        from rcsbapi.search import TextQuery
+
+        query = TextQuery(value=name)
+        results = query()
+        pdb_id = results.to_dict()["result_set"][0]  # top hit
+
+        return cls.from_pdb_id(pdb_id)
+
+    @classmethod
     def from_pdb_id(cls, pdb_id: str, struct_ind: int = 0) -> "Protein":
         """
         Create a Protein instance from a PDB ID.

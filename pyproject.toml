@@ -70,6 +70,7 @@ tools = [
     "biotite",
     "PubChemPy",
     "biopython",
+    "rcsb-api",
 ]
 
 [tool.setuptools]
