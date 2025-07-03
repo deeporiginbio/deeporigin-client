@@ -1024,6 +1024,39 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="LigandSets">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#table-view-2d" class="md-nav__link">
+    <span class="md-ellipsis">
+      Table view (2D)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#individual-view-3d" class="md-nav__link">
+    <span class="md-ellipsis">
+      Individual view (3D)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#grid-view-2d" class="md-nav__link">
+    <span class="md-ellipsis">
+      Grid view (2D)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
       </ul>
@@ -2926,6 +2959,39 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="LigandSets">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#table-view-2d" class="md-nav__link">
+    <span class="md-ellipsis">
+      Table view (2D)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#individual-view-3d" class="md-nav__link">
+    <span class="md-ellipsis">
+      Individual view (3D)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#grid-view-2d" class="md-nav__link">
+    <span class="md-ellipsis">
+      Grid view (2D)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
       </ul>
@@ -3233,7 +3299,9 @@
 ></iframe>
 
 <h3 id="ligandsets">LigandSets<a class="headerlink" href="#ligandsets" title="Permanent link">&para;</a></h3>
-<p>A <code>LigandSet</code> can be visualized using two different methods. First, simply printing the <code>LigandSet</code> shows a table of ligands in the <code>LigandSet</code>:</p>
+<p>A <code>LigandSet</code> can be visualized using several different methods. </p>
+<h4 id="table-view-2d">Table view (2D)<a class="headerlink" href="#table-view-2d" title="Permanent link">&para;</a></h4>
+<p>First, simply printing the <code>LigandSet</code> shows a table of ligands in the <code>LigandSet</code>:</p>
 <div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin.drug_discovery</span><span class="w"> </span><span class="kn">import</span> <span class="n">LigandSet</span>
 
 <span class="n">smiles</span> <span class="o">=</span> <span class="p">{</span>
@@ -3248,6 +3316,8 @@
 <p class="admonition-title">Expected Output</p>
 <p><img alt="" src="ligands.png" /></p>
 </div>
+<p>This table view is also available using <code>ligands.show_df</code></p>
+<h4 id="individual-view-3d">Individual view (3D)<a class="headerlink" href="#individual-view-3d" title="Permanent link">&para;</a></h4>
 <p>To view 3D structures of all ligands in a LigandSet, use:</p>
 <div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin.drug_discovery</span><span class="w"> </span><span class="kn">import</span> <span class="n">LigandSet</span><span class="p">,</span> <span class="n">DATA_DIR</span>
 
@@ -3263,6 +3333,14 @@
     title="Visualization of ligands"
 ></iframe>
 
+<h4 id="grid-view-2d">Grid view (2D)<a class="headerlink" href="#grid-view-2d" title="Permanent link">&para;</a></h4>
+<p>To view a grid of all 2D structures of all ligands in the <code>LigandSet</code>, use:</p>
+<div class="language-python highlight"><pre><span></span><code><span class="n">ligands</span><span class="o">.</span><span class="n">show_grid</span><span class="p">()</span>
+</code></pre></div>
+<div class="admonition success">
+<p class="admonition-title">Expected Output</p>
+<p><img alt="" src="grid.png" /></p>
+</div>
 <h2 id="operations-on-ligands">Operations on Ligands<a class="headerlink" href="#operations-on-ligands" title="Permanent link">&para;</a></h2>
 <h3 id="ligand-minimization">Ligand Minimization<a class="headerlink" href="#ligand-minimization" title="Permanent link">&para;</a></h3>
 <p>You can minimize the 3D structure of a single ligand or all ligands in a LigandSet. Minimization optimizes the geometry of the molecule(s) using a force field, which is useful for preparing ligands for docking or other modeling tasks.</p>

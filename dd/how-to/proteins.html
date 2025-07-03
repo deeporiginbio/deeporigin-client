@@ -935,6 +935,15 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#from-a-common-name" class="md-nav__link">
+    <span class="md-ellipsis">
+      From a common name
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#from-a-file" class="md-nav__link">
     <span class="md-ellipsis">
       From a file
@@ -2869,6 +2878,15 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#from-a-common-name" class="md-nav__link">
+    <span class="md-ellipsis">
+      From a common name
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#from-a-file" class="md-nav__link">
     <span class="md-ellipsis">
       From a file
@@ -3087,6 +3105,12 @@
 <h2 id="the-protein-class">The <code>Protein</code> class<a class="headerlink" href="#the-protein-class" title="Permanent link">&para;</a></h2>
 <p>The <a href="../ref/protein.html"><code>Protein</code> class</a>  is the primary way to work with proteins in Deep Origin.</p>
 <h2 id="constructing-a-protein">Constructing a protein<a class="headerlink" href="#constructing-a-protein" title="Permanent link">&para;</a></h2>
+<h3 id="from-a-common-name">From a common name<a class="headerlink" href="#from-a-common-name" title="Permanent link">&para;</a></h3>
+<p>A protein can be constructed by a common name or text identifier as follows:</p>
+<p><div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin.drug_discovery</span><span class="w"> </span><span class="kn">import</span> <span class="n">Protein</span>
+<span class="n">protein</span> <span class="o">=</span> <span class="n">Protein</span><span class="o">.</span><span class="n">from_name</span><span class="p">(</span><span class="s2">&quot;HIV-1 protease&quot;</span><span class="p">)</span>
+</code></pre></div>
+The top hit on the PDB will be retrieved. </p>
 <h3 id="from-a-file">From a file<a class="headerlink" href="#from-a-file" title="Permanent link">&para;</a></h3>
 <p>A protein can be constructed from a file:</p>
 <div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin.drug_discovery</span><span class="w"> </span><span class="kn">import</span> <span class="n">Protein</span><span class="p">,</span> <span class="n">BRD_DATA_DIR</span>
