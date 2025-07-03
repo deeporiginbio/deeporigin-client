@@ -1,56 +1,5 @@
 """
-LigandModule
-
-Description: This module encapsulates the Ligand class, which represents and manages small molecules (ligands)
-in computational biology workflows. It provides functionalities to initialize ligands from various sources,
-handle molecular properties, predict ADMET (Absorption, Distribution, Metabolism, Excretion, and Toxicity)
-properties, perform protonation state predictions, and visualize ligands within protein structures. The
-primary features and methods include:
-
-- **Ligand Class**: Represents a ligand molecule, managing its data loaded from identifiers, file paths,
-  SMILES strings, or direct block content. Handles molecule creation, property assignment, and ensures data
-  integrity during initialization.
-
-- **Initialization**: Allows creating a Ligand instance using an identifier (e.g., PubChem ID), local file,
-  SMILES string, or block content. Ensures only one source is provided and properly parses the molecular data.
-
-- **Property Management**: Stores and manages ligand-specific properties such as volume, SASA (Solvent Accessible
-  Surface Area), hydrophobicity, polarity, and drugability scores. Provides methods to set and retrieve these
-  properties, facilitating comprehensive molecular analysis.
-
-- **ADMET Prediction**: Integrates with predictive models to estimate ADMET properties of ligands, aiding in the
-  assessment of their drug-likeness and suitability for therapeutic applications.
-
-- **Protonation State Prediction**: Predicts the protonation states of ligands at specified pH levels, providing
-  insights into their chemical behavior and interactions within biological environments.
-
-- **Visualization**: Integrates with the MoleculeViewer to render interactive visualizations of ligands within
-  Jupyter Notebooks, facilitating intuitive analysis and presentation of molecular structures.
-
-- **Utility Methods**: Includes static and class methods for creating Ligand instances from SDF and CSV files,
-  converting molecular formats, fetching SMILES strings from APIs, and handling bulk visualization of multiple
-  ligands.
-
-Dependencies: Utilizes libraries such as RDKit for cheminformatics, Pandas for data manipulation, Termcolor for
-colored terminal output, Requests for API interactions, and integrates with the MoleculeViewer from the
-deeporigin_molstar package for visualization purposes.
-
-Usage Example:
-
-# Initialize a Ligand instance from a SMILES string
-ligand = Ligand(smiles="CCO", name="Ethanol")
-
-# Predict ADMET properties for the ligand
-admet = ligand.admet_properties()
-
-# Predict protonation states at pH 7.4
-ligand.protonate(pH=7.4)
-
-# Display ligand properties
-print(ligand)
-
-# Visualize the ligand within a protein structure
-ligand.visualize()
+This module contains the Ligand and LigandSet classes.
 """
 
 from dataclasses import dataclass, field
@@ -983,32 +932,27 @@ class LigandSet:
     @jupyter_visualization
     def show(self):
         """
-        Visualize all ligands in this LigandSet.
-
-        Raises:
-            FileNotFoundError: If the file does not exist.
-            ValueError: If the file cannot be parsed correctly.
+        Visualize all ligands in this LigandSet in 3D
         """
-        try:
-            sdf_data = []
-            current_file = f"{tempfile.mkstemp()[1]}.sdf"
-            for ligand in self.ligands:
-                ligand.write_to_file(output_format="sdf", output_path=current_file)
 
-                with open(current_file, "r") as fd:
-                    data = fd.read()
+        return visualize_mols_in_sdf(self.to_sdf())
 
-                sdf_data.append(data)
+    @beartype
+    def show_grid(
+        self,
+        mols_per_row: int = 3,
+        sub_img_size: tuple[int, int] = (300, 300),
+    ):
+        """show all ligands in in the LigandSet in a grid"""
 
-            sdf_data = "".join(sdf_data)
-            # Write the consolidated SDF data to a temporary file
-            with open(current_file, "w") as fd:
-                fd.write(sdf_data)
+        from rdkit.Chem.Draw import MolsToGridImage
 
-            # Use visualize_ligands_from_sdf to handle the visualization
-            return visualize_mols_in_sdf(current_file)
-        except Exception as e:
-            raise ValueError(f"Visualization failed: {str(e)}") from e
+        return MolsToGridImage(
+            self.to_rdkit_mols(),
+            legends=self.to_smiles(),
+            molsPerRow=mols_per_row,
+            subImgSize=sub_img_size,
+        )
 
     def minimize(self):
         """

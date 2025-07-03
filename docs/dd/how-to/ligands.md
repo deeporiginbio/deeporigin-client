@@ -192,9 +192,11 @@ A visualization similar to the following will be shown:
 
 ### LigandSets
 
-A `LigandSet` can be visualized using two different methods. First, simply printing the `LigandSet` shows a table of ligands in the `LigandSet`:
+A `LigandSet` can be visualized using several different methods. 
 
+#### Table view (2D)
 
+First, simply printing the `LigandSet` shows a table of ligands in the `LigandSet`:
 
 ```python
 from deeporigin.drug_discovery import LigandSet
@@ -213,6 +215,10 @@ ligands
 
     ![](./ligands.png)
 
+
+This table view is also available using `ligands.show_df`
+
+#### Individual view (3D)
 
 To view 3D structures of all ligands in a LigandSet, use:
 
@@ -235,6 +241,20 @@ A visualization similar to this will be shown. Use the arrows to flip between li
     style="border:none;"
     title="Visualization of ligands"
 ></iframe>
+
+#### Grid view (2D)
+
+To view a grid of all 2D structures of all ligands in the `LigandSet`, use:
+
+```{.python notest}
+ligands.show_grid()
+
+```
+
+!!! success "Expected Output"
+
+    ![](./grid.png)
+
 
 ## Operations on Ligands
 
