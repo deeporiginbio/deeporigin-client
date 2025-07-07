@@ -189,8 +189,6 @@ class Job:
         else:
             template = env.get_template("job_jupyter.html")
 
-        template = env.get_template("job.html")
-
         try:
             status_html = self._viz_func(self)
         except Exception as e:
