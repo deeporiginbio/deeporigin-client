@@ -10,6 +10,7 @@ from beartype import beartype
 import pandas as pd
 
 from deeporigin.drug_discovery import utils
+from deeporigin.drug_discovery.constants import tool_mapper
 from deeporigin.drug_discovery.structures.ligand import Ligand, ligands_to_dataframe
 from deeporigin.drug_discovery.workflow_step import WorkflowStep
 from deeporigin.platform import files_api
@@ -27,7 +28,7 @@ class RBFE(WorkflowStep):
 
     """tool version to use for RBFE"""
     tool_version = "0.2.7"
-    _tool_key = "deeporigin.rbfe-end-to-end"  # Tool key for RBFE jobs
+    _tool_key = tool_mapper["RBFE"]
 
     _max_atom_count: int = 100_000
 

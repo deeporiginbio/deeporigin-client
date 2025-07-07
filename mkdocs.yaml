@@ -56,6 +56,7 @@ nav:
     - Filter outputs of Docking: dd/how-to/filter-docking-outputs.md
     - Use outputs of Docking for FEP: dd/how-to/use-docking-outputs-for-fep.md
     - Visualize ABFE trajectories: dd/how-to/visualize-abfe-trajectories.md
+    - Job control: dd/how-to/job.md
   - Reference: 
     - chemistry: dd/ref/chemistry.md
     - structures: 
