@@ -154,12 +154,17 @@ To obtain the raw dataframe for further analysis, use:
 df = sim.docking.get_results()
 ```
 
-### Exporting a SDF with docked poses
+### Get all docked poses
 
-To export a SDF with docked poses, use:
+Use the `get_poses` function to return a [`LigandSet`](../ref/ligandset.md) with all docked poses
 
 ```{.python notest}
-sim.docking.get_poses("/path/to/output.sdf")
+poses = sim.docking.get_poses()
 ```
 
-This generates a SDF file with the docked poses for all ligands in the Complex. 
+and use a `LigandSet` method to write to SDF:
+
+```{.python notest}
+poses.to_sdf("/path/to/docked/ligands.sdf")
+```
+
