@@ -205,8 +205,13 @@
                 <span
                     class="badge {% if status == 'Running' %}bg-primary{% elif status == 'Failed' %}bg-danger{% elif status == 'Cancelled' %}bg-dark{% elif status == 'Succeeded' %}bg-success{% elif status == 'Created' %}bg-secondary{% endif %}">{{
                     status|e }}</span>
-                <span id="last-updated" class="text-muted" style="font-size: 0.9rem;">Last updated: {{ last_updated|e
-                    }}</span>
+                <span id="last-updated" class="text-muted" style="font-size: 0.9rem;">
+                    {% if will_auto_update %}
+                    ✅ This widget will auto-update.
+                    {% else %}
+                    ⚠️ This widget will not auto-update.
+                    {% endif %}
+                    Last updated: {{ last_updated|e }}</span>
             </div>
         </div>
     </div>

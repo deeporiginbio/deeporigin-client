@@ -146,7 +146,8 @@ class Job:
 
         return running_time
 
-    def _render_job_view(self):
+    @beartype
+    def _render_job_view(self, will_auto_update: bool = False):
         """Display the current job status and progress reports.
 
         This method renders and displays the current state of all jobs
@@ -213,6 +214,7 @@ class Job:
             "running_time": running_time,
             "card_title": card_title,
             "unique_id": str(uuid.uuid4()),
+            "will_auto_update": will_auto_update,
         }
 
         # Determine overall status based on priority: Failed > Cancelled > Succeeded
@@ -275,6 +277,8 @@ class Job:
         # Stop any existing task before starting a new one
         self.stop_watching()
 
+        # for reasons i don't understand, removing this breaks the display rendering
+        # when we do job.watch()
         initial_html = HTML("<div style='color: gray;'>Initializing...</div>")
         display_id = "timestamp_display"
         display(initial_html, display_id=display_id)
@@ -288,7 +292,7 @@ class Job:
             """
             while True:
                 self.sync()
-                html = self._render_job_view()
+                html = self._render_job_view(will_auto_update=True)
 
                 update_display(HTML(html), display_id=display_id)
 
