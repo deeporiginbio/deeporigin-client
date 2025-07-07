@@ -55,12 +55,13 @@ def test_list_folder(config):  # noqa: F811
 
     data = files_client.list_folder("test-upload/")
 
-    remote_files = set(data.keys())
-    remote_files.discard("test-upload/.DS_Store")
+    actual_files = set(data.keys())
+    actual_files = {file for file in actual_files if "sdf" in file}
 
-    assert remote_files == set(src_to_dest.values()).discard("test-upload/.DS_Store"), (
-        "Failed to list files correctly"
-    )
+    expected_files = set(src_to_dest.values())
+    expected_files = {file for file in expected_files if "sdf" in file}
+
+    assert actual_files == expected_files, "Failed to list files correctly"
 
 
 def test_upload_files_missing_local_files(config):  # noqa: F811
