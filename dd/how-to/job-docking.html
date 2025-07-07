@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self' https://cdn.jsdelivr.net; style-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; script-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'">
+    <title>Docking <code>kras.pdb</code> to 27 ligands.</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Custom style for JSON blocks */
+        pre,
+        .monospace-block {
+            background: #f8f9fa;
+            border: 1px solid #e3e3e3;
+            border-radius: 0.25rem;
+            padding: 1rem;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+
+        .card {
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Full-width, left-aligned card using container-fluid -->
+    <div class="container-fluid py-3">
+        <div class="card w-100">
+            <div class="card-header">
+                <h2 class="card-title mb-3">Docking <code>kras.pdb</code> to 27 ligands.</h2>
+                <ul class="nav nav-tabs card-header-tabs" id="jobTabs-29e7bb39-1c69-4173-a32a-61a983d84c40" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="status-tab-29e7bb39-1c69-4173-a32a-61a983d84c40" data-bs-toggle="tab"
+                            data-bs-target="#status-29e7bb39-1c69-4173-a32a-61a983d84c40" type="button" role="tab"
+                            aria-controls="status-29e7bb39-1c69-4173-a32a-61a983d84c40" aria-selected="true">
+                            Status
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="details-tab-29e7bb39-1c69-4173-a32a-61a983d84c40" data-bs-toggle="tab"
+                            data-bs-target="#details-29e7bb39-1c69-4173-a32a-61a983d84c40" type="button" role="tab"
+                            aria-controls="details-29e7bb39-1c69-4173-a32a-61a983d84c40" aria-selected="false">
+                            Details
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="inputs-tab-29e7bb39-1c69-4173-a32a-61a983d84c40" data-bs-toggle="tab"
+                            data-bs-target="#inputs-29e7bb39-1c69-4173-a32a-61a983d84c40" type="button" role="tab"
+                            aria-controls="inputs-29e7bb39-1c69-4173-a32a-61a983d84c40" aria-selected="false">
+                            Inputs
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="outputs-tab-29e7bb39-1c69-4173-a32a-61a983d84c40" data-bs-toggle="tab"
+                            data-bs-target="#outputs-29e7bb39-1c69-4173-a32a-61a983d84c40" type="button" role="tab"
+                            aria-controls="outputs-29e7bb39-1c69-4173-a32a-61a983d84c40" aria-selected="false">
+                            Outputs
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="raw-progress-tab-29e7bb39-1c69-4173-a32a-61a983d84c40" data-bs-toggle="tab"
+                            data-bs-target="#raw-progress-29e7bb39-1c69-4173-a32a-61a983d84c40" type="button" role="tab"
+                            aria-controls="raw-progress-29e7bb39-1c69-4173-a32a-61a983d84c40" aria-selected="false">
+                            Raw Progress Reports
+                        </button>
+                    </li>
+                </ul>
+            </div>
+            <!-- Card Body with Tab Content -->
+            <div class="card-body">
+                <div class="tab-content" id="jobTabsContent-29e7bb39-1c69-4173-a32a-61a983d84c40">
+                    <!-- Status Tab -->
+                    <div class="tab-pane fade show active" id="status-29e7bb39-1c69-4173-a32a-61a983d84c40" role="tabpanel"
+                        aria-labelledby="status-tab-29e7bb39-1c69-4173-a32a-61a983d84c40">
+                        
+    
+    
+    <h3>Docking Progress</h3>
+    <p style="color: #666; margin: 10px 0;">Average speed: 1.23 dockings/minute</p>
+    
+    <div style="margin-bottom: 5px;">
+      <span>Completed: 27</span>
+      <span style="margin-left: 15px;">Failed: 0</span>
+      <span style="margin-left: 15px;">Remaining: 0</span>
+    </div>
+    
+    
+    <div class="progress" style="height: 20px;">
+      <div class="progress-bar bg-success" role="progressbar" style="width: 100.0%"
+           aria-valuenow="27" aria-valuemin="0" aria-valuemax="27"></div>
+      <div class="progress-bar bg-danger" role="progressbar" style="width: 0.0%"
+           aria-valuenow="0" aria-valuemin="0" aria-valuemax="27"></div>
+      <div class="progress-bar bg-secondary" role="progressbar" style="width: 0.0%"
+           aria-valuenow="0" aria-valuemin="0" aria-valuemax="27"></div>
+    </div>
+    
+                    </div>
+                    <!-- Details Tab with Table -->
+                    <div class="tab-pane fade" id="details-29e7bb39-1c69-4173-a32a-61a983d84c40" role="tabpanel"
+                        aria-labelledby="details-tab-29e7bb39-1c69-4173-a32a-61a983d84c40">
+                        <table class="table table-bordered table-striped mb-0">
+                            <thead>
+                                <tr>
+                                    <th>jobID</th>
+                                    <th>executionID</th>
+                                    <th>Status</th>
+                                    <th>Started At</th>
+                                    <th>Running Time</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                
+                                <tr>
+                                    <td>4969a2c2-6350-4aef-bfc2-f67644b78f1d</td>
+                                    <td>muu823qhcjezetqnic5ol</td>
+                                    <td>Succeeded</td>
+                                    <td>an hour ago</td>
+                                    <td>22</td>
+                                </tr>
+                                
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- Inputs Tab with JSON (no extra text or collapsible behavior) -->
+                    <div class="tab-pane fade" id="inputs-29e7bb39-1c69-4173-a32a-61a983d84c40" role="tabpanel"
+                        aria-labelledby="inputs-tab-29e7bb39-1c69-4173-a32a-61a983d84c40">
+                        <pre>[
+  {
+    "protein": {
+      "key": "entities/proteins/kras.pdb",
+      "$provider": "ufa"
+    },
+    "box_size": [
+      15.494621789991566,
+      15.494621789991566,
+      15.494621789991566
+    ],
+    "smiles_list": [
+      "COc1cc(/C=C/C(=O)c2ccc(F)cc2)cc(OC)c1OC",
+      "COc1cc(/C=C/C(=O)c2ccc(N(C)C)cc2)cc(OC)c1OC",
+      "C=CC(=O)Nc1ccc(-n2nc(C)c(-c3c(C)ccc4[nH]ncc34)c2C)cc1",
+      "CN(C)Cc1[nH]c2ccccc2c1[C@H]1NC(=O)c2ccc(O)cc21",
+      "COc1cc(/C=C/C(=O)c2c(F)cccc2F)cc(OC)c1OC",
+      "Oc1cc(-c2ncc3c(N4C[C@H]5CC[C@@H](C4)N5)ncnc3c2F)c2ccccc2c1",
+      "C=CC(=O)N1CCN(c2ncnc3c2CCN(c2cccc4ccccc24)C3)CC1",
+      "C=CC(=O)N1CCN2Cc3ccc(-c4c(O)cccc4F)c(Cl)c3OC[C@H]2C1",
+      "COc1cc(/C=C/C(=O)c2ccc([N+](=O)[O-])cc2)cc(OC)c1OC",
+      "COc1cc(/C=C/C(=O)c2ccc(N)cc2)cc(OC)c1OC",
+      "Cc1[nH]c2cc(Cl)cc(Cl)c2c1CCN",
+      "C=CC(=O)N1CC2(CC(n3nc(C(C)C)c(-c4c(C)ccc5[nH]ncc45)c3C)C2)C1",
+      "COc1ccc(C(=O)/C=C/c2cc(OC)c(OC)c(OC)c2)cc1",
+      "C=CC(=O)N1CCN2Cc3cc(F)c(-c4c(C)cccc4O)c(F)c3OC[C@H]2C1",
+      "C=CC(=O)Nc1ccc(-n2nc(C(C)C)c(-c3c(C)ccc4[nH]ncc34)c2C)cc1",
+      "C=CC(=O)Nc1ccc(-n2nc(C)c(-c3c(C)ccc4[nH]ncc34)c2C)c(F)c1",
+      "COc1cc(/C=C/C(=O)c2ccccn2)cc(OC)c1OC",
+      "C=CC(=O)N1CCN(c2ncnc3c2CCN(c2c(O)cccc2F)C3)CC1",
+      "COc1cc(/C=C/C(=O)c2ccc(Br)cc2)cc(OC)c1OC",
+      "C=CC(=O)N1CCN(Cc2cc(F)c(-c3c(O)cccc3Cl)c(F)c2)CC1",
+      "C=CC(=O)N1CCN(c2ncnc3c2CCN(c2c(C)ccc4[nH]ncc24)C3)CC1",
+      "COc1cc(C(=O)/C=C/c2ccc([N+](=O)[O-])cc2)cc(OC)c1OC",
+      "O=S(=O)(NCCOc1ccc2ccccc2c1)c1ccc(NO)cc1",
+      "COc1cc(C(=O)/C=C/c2c(F)cccc2F)cc(OC)c1OC",
+      "C#Cc1cc(CN2CCN(C(=O)C=C)CC2)cc(F)c1-c1c(O)cccc1Cl",
+      "C=CC(=O)N1CCN(c2ncnc3c2CCN(c2cc(O)ccc2F)C3)CC1",
+      "C=CC(=O)N1CC(NC(=O)Cn2ccc3cc(Br)ccc32)C1"
+    ],
+    "pocket_center": [
+      17.29767608642578,
+      -9.101072311401367,
+      21.67137336730957
+    ]
+  }
+]</pre>
+                    </div>
+                    <!-- Outputs Tab with JSON (no extra text or collapsible behavior) -->
+                    <div class="tab-pane fade" id="outputs-29e7bb39-1c69-4173-a32a-61a983d84c40" role="tabpanel"
+                        aria-labelledby="outputs-tab-29e7bb39-1c69-4173-a32a-61a983d84c40">
+                        <pre>[
+  {
+    "data_file": {
+      "key": "tool-runs/Docking/kras.pdb/71ffb46287c101ff4428a52bcb5a8013/results.csv",
+      "$provider": "ufa"
+    },
+    "results_sdf": {
+      "key": "tool-runs/Docking/kras.pdb/71ffb46287c101ff4428a52bcb5a8013/results.sdf",
+      "$provider": "ufa"
+    }
+  }
+]</pre>
+                    </div>
+                    <!-- Raw Progress Reports Tab -->
+                    <div class="tab-pane fade" id="raw-progress-29e7bb39-1c69-4173-a32a-61a983d84c40" role="tabpanel"
+                        aria-labelledby="raw-progress-tab-29e7bb39-1c69-4173-a32a-61a983d84c40">
+                        <div class="monospace-block">['total_num_ligands = 27\nligand docked: Oc1cc(-c2ncc3c(N4C[C@H]5CC[C@@H](C4)N5)ncnc3c2F)c2ccccc2c1\nligand docked: CN(C)Cc1[nH]c2ccccc2c1[C@H]1NC(=O)c2ccc(O)cc21\nligand docked: C=CC(=O)N1CCN2Cc3ccc(-c4c(O)cccc4F)c(Cl)c3OC[C@H]2C1\nligand docked: C=CC(=O)N1CCN(c2ncnc3c2CCN(c2cccc4ccccc24)C3)CC1\nligand docked: C=CC(=O)Nc1ccc(-n2nc(C)c(-c3c(C)ccc4[nH]ncc34)c2C)cc1\nligand docked: Cc1[nH]c2cc(Cl)cc(Cl)c2c1CCN\nligand docked: COc1cc(/C=C/C(=O)c2ccc(F)cc2)cc(OC)c1OC\nligand docked: COc1cc(/C=C/C(=O)c2c(F)cccc2F)cc(OC)c1OC\nligand docked: COc1cc(/C=C/C(=O)c2ccc(N(C)C)cc2)cc(OC)c1OC\nligand docked: COc1cc(/C=C/C(=O)c2ccc(N)cc2)cc(OC)c1OC\nligand docked: COc1cc(/C=C/C(=O)c2ccc([N+](=O)[O-])cc2)cc(OC)c1OC\nligand docked: C=CC(=O)N1CCN2Cc3cc(F)c(-c4c(C)cccc4O)c(F)c3OC[C@H]2C1\nligand docked: COc1ccc(C(=O)/C=C/c2cc(OC)c(OC)c(OC)c2)cc1\nligand docked: COc1cc(/C=C/C(=O)c2ccccn2)cc(OC)c1OC\nligand docked: C=CC(=O)N1CC2(CC(n3nc(C(C)C)c(-c4c(C)ccc5[nH]ncc45)c3C)C2)C1\nligand docked: C=CC(=O)N1CCN(c2ncnc3c2CCN(c2c(O)cccc2F)C3)CC1\nligand docked: C=CC(=O)Nc1ccc(-n2nc(C)c(-c3c(C)ccc4[nH]ncc34)c2C)c(F)c1\nligand docked: C=CC(=O)Nc1ccc(-n2nc(C(C)C)c(-c3c(C)ccc4[nH]ncc34)c2C)cc1\nligand docked: COc1cc(/C=C/C(=O)c2ccc(Br)cc2)cc(OC)c1OC\nligand docked: C=CC(=O)N1CCN(Cc2cc(F)c(-c3c(O)cccc3Cl)c(F)c2)CC1\nligand docked: C=CC(=O)N1CCN(c2ncnc3c2CCN(c2c(C)ccc4[nH]ncc24)C3)CC1\nligand docked: COc1cc(C(=O)/C=C/c2c(F)cccc2F)cc(OC)c1OC\nligand docked: COc1cc(C(=O)/C=C/c2ccc([N+](=O)[O-])cc2)cc(OC)c1OC\nligand docked: C=CC(=O)N1CCN(c2ncnc3c2CCN(c2cc(O)ccc2F)C3)CC1\nligand docked: C=CC(=O)N1CC(NC(=O)Cn2ccc3cc(Br)ccc32)C1\nligand docked: O=S(=O)(NCCOc1ccc2ccccc2c1)c1ccc(NO)cc1\nligand docked: C#Cc1cc(CN2CCN(C(=O)C=C)CC2)cc(F)c1-c1c(O)cccc1Cl\n']</div>
+                    </div>
+                </div>
+            </div>
+            <!-- Card Footer with a Badge and Last Updated Timestamp -->
+            <div class="card-footer d-flex justify-content-between align-items-center">
+                <span
+                    class="badge bg-success">Succeeded</span>
+                <span id="last-updated" class="text-muted" style="font-size: 0.9rem;">Last updated: 2025-07-07 11:58:59</span>
+            </div>
+        </div>
+    </div>
+    <!-- Bootstrap 5 JS Bundle (includes Popper) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
