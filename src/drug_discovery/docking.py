@@ -34,54 +34,11 @@ class Docking(WorkflowStep):
 
     """tool version to use for Docking"""
     tool_version = "0.4.0"
-    _tool_key = "deeporigin.bulk-docking"  # Tool key for Docking jobs
+    _tool_key = tool_mapper["Docking"]
 
     def __init__(self, parent):
         super().__init__(parent)
         self._fuse_jobs = True
-
-    @beartype
-    def _name_job(self, job: Job) -> str:
-        """Generate a name for a job."""
-
-        unique_smiles = set()
-        for inputs in job._inputs:
-            unique_smiles.update(inputs["smiles_list"])
-        num_ligands = len(unique_smiles)
-
-        protein_file = os.path.basename(job._inputs[0]["protein"]["key"])
-
-        return f"Docking <code>{protein_file}</code> to {num_ligands} ligands."
-
-    @classmethod
-    @beartype
-    def _render_progress(cls, job: Job) -> str:
-        """Render progress visualization for a job."""
-
-        data = job._progress_reports
-
-        total_ligands = sum([len(inputs["smiles_list"]) for inputs in job._inputs])
-        total_docked = 0
-        total_failed = 0
-
-        for item in data:
-            if item is None:
-                continue
-            total_docked += item.count("ligand docked")
-            total_failed += item.count("ligand failed")
-
-        total_running_time = sum(job._get_running_time())
-        speed = total_docked / total_running_time if total_running_time > 0 else 0
-
-        from deeporigin.utils.notebook import render_progress_bar
-
-        return render_progress_bar(
-            completed=total_docked,
-            total=total_ligands,
-            failed=total_failed,
-            title="Docking Progress",
-            body_text=f"Average speed: {speed:.2f} dockings/minute",
-        )
 
     def show_results(self):
         """show results of bulk Docking run in a table, rendering 2D structures of molecules"""
@@ -372,10 +329,6 @@ class Docking(WorkflowStep):
             print("No new ligands to dock")
 
         job = Job.from_ids(job_ids)
-        job._viz_func = self._render_progress
-        job._name_func = self._name_job
-        job.sync()
-
         # for docking, we always have a single job
         self.jobs = [job]
 

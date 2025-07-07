@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 import json
 from pathlib import Path
 import time
-from typing import Any, Callable, Optional
+from typing import Optional, Protocol
 import uuid
 
 from beartype import beartype
@@ -17,12 +17,20 @@ from jinja2 import Environment, FileSystemLoader
 import nest_asyncio
 import pandas as pd
 
+from deeporigin.drug_discovery.constants import tool_mapper
 from deeporigin.platform import tools_api
 from deeporigin.platform.utils import PlatformClients
+from deeporigin.tools import job_viz_functions
 from deeporigin.utils.core import elapsed_minutes
 
 # Enable nested event loops for Jupyter
 nest_asyncio.apply()
+
+
+class JobFunc(Protocol):
+    """A protocol for functions that can be used to visualize a job or render a name for a job."""
+
+    def __call__(self, job: "Job") -> str: ...
 
 
 @dataclass
@@ -46,11 +54,9 @@ class Job:
     _ids: list[str]
 
     # functions
-    _viz_func: Optional[Callable[["Job"], Any]] = None
-    _parse_func: Optional[Callable[["Job"], Any]] = None
-    _name_func: Optional[Callable[["Job"], Any]] = field(
-        default_factory=lambda: lambda self: "Job"
-    )
+    _viz_func: Optional[JobFunc] = None
+    _parse_func: Optional[JobFunc] = None
+    _name_func: Optional[JobFunc] = field(default_factory=lambda: lambda job: "Job")
 
     _progress_reports: list = field(default_factory=list)
     _status: list = field(default_factory=list)
@@ -62,6 +68,17 @@ class Job:
 
     # clients
     _platform_clients: Optional[PlatformClients] = None
+
+    def __post_init__(self):
+        self.sync()
+
+        if self._viz_func is None:
+            if self._attributes[0]["tool"]["key"] == tool_mapper["Docking"]:
+                self._viz_func = job_viz_functions._viz_func_docking
+                self._name_func = job_viz_functions._name_func_docking
+            elif self._attributes[0]["tool"]["key"] == tool_mapper["ABFE"]:
+                self._viz_func = job_viz_functions._viz_func_abfe
+                self._name_func = job_viz_functions._name_func_abfe
 
     @classmethod
     def from_ids(
@@ -146,7 +163,8 @@ class Job:
 
         return running_time
 
-    def _render_job_view(self):
+    @beartype
+    def _render_job_view(self, *, will_auto_update: bool = False):
         """Display the current job status and progress reports.
 
         This method renders and displays the current state of all jobs
@@ -213,6 +231,7 @@ class Job:
             "running_time": running_time,
             "card_title": card_title,
             "unique_id": str(uuid.uuid4()),
+            "will_auto_update": will_auto_update,
         }
 
         # Determine overall status based on priority: Failed > Cancelled > Succeeded
@@ -220,10 +239,13 @@ class Job:
             template_vars["status"] = "Unknown"
         elif any(status == "Failed" for status in self._status):
             template_vars["status"] = "Failed"
+            template_vars["will_auto_update"] = False  # job in terminal state
         elif any(status == "Cancelled" for status in self._status):
             template_vars["status"] = "Cancelled"
+            template_vars["will_auto_update"] = False  # job in terminal state
         elif all(status == "Succeeded" for status in self._status):
             template_vars["status"] = "Succeeded"
+            template_vars["will_auto_update"] = False  # job in terminal state
         elif all(status == "Created" for status in self._status):
             template_vars["status"] = "Created"
         else:
@@ -275,6 +297,8 @@ class Job:
         # Stop any existing task before starting a new one
         self.stop_watching()
 
+        # for reasons i don't understand, removing this breaks the display rendering
+        # when we do job.watch()
         initial_html = HTML("<div style='color: gray;'>Initializing...</div>")
         display_id = "timestamp_display"
         display(initial_html, display_id=display_id)
@@ -288,7 +312,7 @@ class Job:
             """
             while True:
                 self.sync()
-                html = self._render_job_view()
+                html = self._render_job_view(will_auto_update=True)
 
                 update_display(HTML(html), display_id=display_id)
 
@@ -440,10 +464,10 @@ def get_dataframe(
     # Initialize lists to store data
     data = {
         "id": [],
-        "createdAt": [],
-        "executionId": [],
-        "completedAt": [],
-        "startedAt": [],
+        "created_at": [],  # converting some fields to snake_case
+        "execution_id": [],
+        "completed_at": [],
+        "started_at": [],
         "status": [],
         "tool_key": [],
         "tool_version": [],
@@ -466,10 +490,10 @@ def get_dataframe(
 
         # Add basic fields
         data["id"].append(job["id"])
-        data["createdAt"].append(attributes["createdAt"])
-        data["executionId"].append(attributes["executionId"])
-        data["completedAt"].append(attributes["completedAt"])
-        data["startedAt"].append(attributes["startedAt"])
+        data["created_at"].append(attributes["createdAt"])
+        data["execution_id"].append(attributes["executionId"])
+        data["completed_at"].append(attributes["completedAt"])
+        data["started_at"].append(attributes["startedAt"])
         data["status"].append(attributes["status"])
         data["tool_key"].append(attributes["tool"]["key"])
         data["tool_version"].append(attributes["tool"]["version"])
@@ -513,7 +537,7 @@ def get_dataframe(
     df = pd.DataFrame(data)
 
     # Convert datetime columns
-    datetime_cols = ["createdAt", "completedAt", "startedAt"]
+    datetime_cols = ["created_at", "completed_at", "started_at"]
     for col in datetime_cols:
         df[col] = (
             pd.to_datetime(df[col], errors="coerce", utc=True)  # parse → tz-aware

@@ -57,16 +57,14 @@ class WorkflowStep:
             ]
         else:
             self.jobs = [
-                Job.from_ids(
-                    [job_id],
+                Job.from_id(
+                    job_id,
                     _platform_clients=self.parent._platform_clients,
                 )
                 for job_id in job_ids
             ]
 
         for job in self.jobs:
-            job._viz_func = self._render_progress
-            job._name_func = self._name_job
             job.sync()
 
     @beartype
@@ -80,9 +78,6 @@ class WorkflowStep:
         if self._fuse_jobs:
             # fuse all job IDs into a single job
             job = Job.from_ids(job_ids)
-            job._viz_func = self._render_progress
-            job._name_func = self._name_job
-            job.sync()
             self.jobs = [job]
 
         else:
@@ -90,19 +85,6 @@ class WorkflowStep:
             jobs = []
             for job_id in job_ids:
                 job = Job.from_ids([job_id])
-                job._viz_func = self._render_progress
-                job._name_func = self._name_job
-                job.sync()
                 jobs.append(job)
 
             self.jobs = jobs
-
-    @beartype
-    def _render_progress(self, job: Job) -> str:
-        """Render progress visualization for a job. To be implemented by subclasses."""
-        raise NotImplementedError
-
-    @beartype
-    def _name_job(self, job: Job) -> str:
-        """Generate a name for a job. To be implemented by subclasses."""
-        raise NotImplementedError

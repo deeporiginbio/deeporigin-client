@@ -2,7 +2,6 @@
 
 The ABFE object instantiated here is contained in the Complex class is meant to be used within that class."""
 
-import json
 import os
 from pathlib import Path
 from typing import Literal, Optional
@@ -29,7 +28,7 @@ class ABFE(WorkflowStep):
 
     """tool version to use for ABFE"""
     tool_version = "0.2.7"
-    _tool_key = "deeporigin.abfe-end-to-end"  # Tool key for ABFE jobs
+    _tool_key = tool_mapper["ABFE"]
 
     _max_atom_count: int = 100_000
 
@@ -153,7 +152,7 @@ class ABFE(WorkflowStep):
 
     @beartype
     def set_test_run(self, value: int = 1):
-        """set test_run paramemter in abfe parameters"""
+        """set test_run parameter in abfe parameters"""
 
         utils._set_test_run(self._params.end_to_end, value)
 
@@ -269,11 +268,6 @@ class ABFE(WorkflowStep):
 
             job = Job.from_id(job_id, _platform_clients=self.parent._platform_clients)
 
-            job._viz_func = self._render_progress
-            job._name_func = self._name_job
-
-            job.sync()
-
             self.jobs.append(job)
             jobs_for_this_run.append(job)
 
@@ -361,152 +355,3 @@ class ABFE(WorkflowStep):
         from deeporigin_molstar import JupyterViewer
 
         JupyterViewer.visualize(html_content)
-
-    @classmethod
-    @beartype
-    def parse_progress(cls, job: Job) -> dict:
-        """parse progress from a ABFE job"""
-
-        steps = [
-            "init",
-            "complex",
-            "ligand",
-            "simple_md",
-            "solvation",
-            "binding",
-            "delta_g",
-        ]
-
-        if len(job._progress_reports) == 0:
-            return {step: "NotStarted" for step in steps}
-
-        try:
-            data = job._progress_reports[0]
-
-            if data is None:
-                progress = {step: "NotStarted" for step in steps}
-                progress["init"] = "Running"
-                return progress
-            else:
-                data = json.loads(data)
-
-            if "cmd" in data and data["cmd"] == "FEP Results":
-                return {step: "Succeeded" for step in steps}
-
-            if "status" in data and data["status"] == "Initiating":
-                progress = {step: "NotStarted" for step in steps}
-                progress["init"] = "Running"
-                return progress
-
-            status_value = job._status[0]
-
-            # If the overall status is Succeeded, return a dictionary with every key set to "Succeeded".
-            if status_value == "Succeeded":
-                return {step: "Succeeded" for step in steps}
-
-            current_step = data["run_name"]
-
-            # Validate the input step
-            if current_step not in steps:
-                raise ValueError(
-                    f"Invalid process step provided: {current_step}. "
-                    f"Valid steps are: {', '.join(steps)}."
-                )
-
-            progress = {}
-            for step in steps:
-                if step == current_step:
-                    progress[step] = "Running"
-                    # Once we hit the current step, stop processing further steps.
-                    break
-                else:
-                    progress[step] = "Succeeded"
-
-            # if the job failed, mark the step that is running as failed
-            if job._status[0] == "Failed":
-                progress[current_step] = "Failed"
-
-        except Exception:
-            progress = {step: "Indeterminate" for step in steps}
-            progress["init"] = "Indeterminate"
-
-        return progress
-
-    @classmethod
-    @beartype
-    def _name_job(cls, job: Job) -> str:
-        """utility function to name a job using inputs to that job"""
-        try:
-            return f"ABFE run using <code>{job._metadata[0]['protein_file']}</code> and <code>{job._metadata[0]['ligand_file']}</code>"
-        except Exception:
-            return "ABFE run"
-
-    @classmethod
-    @beartype
-    def _render_progress(cls, job: Job) -> str:
-        """
-        Render HTML for a Mermaid diagram where each node is drawn as arounded rectangle
-        with a color indicating its status.
-
-        Any node not specified in the node_status dict willdefault to "notStarted".
-        """
-
-        from deeporigin.utils.notebook import mermaid_to_html
-
-        statuses = cls.parse_progress(job)
-
-        # Define the fixed nodes in the diagram.
-        nodes = [
-            "init(Init)",
-            "complex(Complex Prep)",
-            "ligand(Ligand Prep)",
-            "solvation(Solvation FEP)",
-            "simple_md(Simple MD)",
-            "binding(Binding FEP)",
-            "delta_g(ΔG)",
-        ]
-
-        # Build node definitions. For each node, use the providedstatus or default to "notStarted".
-        node_defs = ""
-        for node in nodes:
-            label = node.split("(")[0]
-            status = statuses.get(label, "NotStarted")
-            node_defs += f"    {node}:::{status};\n"
-
-        # Define the fixed edges of the diagram.
-        edges = """
-        init --> complex;
-        init --> ligand;
-        ligand ----> solvation;
-        solvation --> delta_g;
-        complex ---> simple_md --> binding -->delta_g;
-        """
-
-        # Build the complete Mermaid diagram definition.
-        mermaid_code = f"""
-    graph LR;
-        %% Define styles for statuses:
-        classDef NotStarted   fill:#cccccc,stroke:#333,stroke-width:2px;
-        classDef Queued    fill:#cccccc,stroke:#222,stroke-width:2px;
-        classDef Succeeded   fill:#90ee90,stroke:#333,stroke-width:2px;
-        classDef Running      fill:#87CEFA,stroke:#333,stroke-width:2px;
-        classDef Failed    fill:#ff7f7f,stroke:#333,stroke-width:2px;
-
-    {node_defs}
-    {edges}
-        """
-
-        # Render the diagram using your helper function.
-        mermaid_html = mermaid_to_html(mermaid_code)
-
-        # Define HTML for the legend. Each status is displayed asa colored span.
-        legend_html = """
-        <div style="margin-top: 20px; font-family: sans-serif;">
-          <span style="background-color:#cccccc; color: black;padding:2px 4px; margin: 0 8px;">NotStarted</span>
-          <span style="background-color:#90ee90; color: black;padding:2px 4px; margin: 0 8px;">Suceedeed</span>
-          <span style="background-color:#87CEFA; color: black;padding:2px 4px; margin: 0 8px;">Running</span>
-          <span style="background-color:#ff7f7f; color: black;padding:2px 4px; margin: 0 8px;">Failed</span>
-        </div>
-        """
-        # Display the legend below the Mermaid diagram.
-        return mermaid_html + legend_html
