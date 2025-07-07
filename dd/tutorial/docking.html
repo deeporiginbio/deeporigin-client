@@ -864,9 +864,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#exporting-a-sdf-with-docked-poses" class="md-nav__link">
+  <a href="#get-all-docked-poses" class="md-nav__link">
     <span class="md-ellipsis">
-      Exporting a SDF with docked poses
+      Get all docked poses
     </span>
   </a>
   
@@ -2894,9 +2894,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#exporting-a-sdf-with-docked-poses" class="md-nav__link">
+  <a href="#get-all-docked-poses" class="md-nav__link">
     <span class="md-ellipsis">
-      Exporting a SDF with docked poses
+      Get all docked poses
     </span>
   </a>
   
@@ -3019,11 +3019,13 @@
 <p>To obtain the raw dataframe for further analysis, use:</p>
 <div class="language-python highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">docking</span><span class="o">.</span><span class="n">get_results</span><span class="p">()</span>
 </code></pre></div>
-<h3 id="exporting-a-sdf-with-docked-poses">Exporting a SDF with docked poses<a class="headerlink" href="#exporting-a-sdf-with-docked-poses" title="Permanent link">&para;</a></h3>
-<p>To export a SDF with docked poses, use:</p>
-<div class="language-python highlight"><pre><span></span><code><span class="n">sim</span><span class="o">.</span><span class="n">docking</span><span class="o">.</span><span class="n">get_poses</span><span class="p">(</span><span class="s2">&quot;/path/to/output.sdf&quot;</span><span class="p">)</span>
+<h3 id="get-all-docked-poses">Get all docked poses<a class="headerlink" href="#get-all-docked-poses" title="Permanent link">&para;</a></h3>
+<p>Use the <code>get_poses</code> function to return a <a href="../ref/ligandset.html"><code>LigandSet</code></a> with all docked poses</p>
+<div class="language-python highlight"><pre><span></span><code><span class="n">poses</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">docking</span><span class="o">.</span><span class="n">get_poses</span><span class="p">()</span>
 </code></pre></div>
-<p>This generates a SDF file with the docked poses for all ligands in the Complex. </p>
+<p>and use a <code>LigandSet</code> method to write to SDF:</p>
+<div class="language-python highlight"><pre><span></span><code><span class="n">poses</span><span class="o">.</span><span class="n">to_sdf</span><span class="p">(</span><span class="s2">&quot;/path/to/docked/ligands.sdf&quot;</span><span class="p">)</span>
+</code></pre></div>
 
 
 
