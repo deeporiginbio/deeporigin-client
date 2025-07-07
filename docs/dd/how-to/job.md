@@ -4,12 +4,6 @@ This document describes how to monitor, inspect, cancel and control jobs started
 
 ## Job dataframes
 
-```python
-from deeporigin.tools.job import get_dataframe
-
-df = get_dataframe()
-```
-
 
 ### View all jobs 
 
