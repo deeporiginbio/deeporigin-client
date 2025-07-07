@@ -17,7 +17,6 @@ from tqdm import tqdm
 from deeporigin.drug_discovery import LigandSet, utils
 from deeporigin.drug_discovery import chemistry as chem
 from deeporigin.drug_discovery.constants import tool_mapper
-from deeporigin.drug_discovery.structures.ligand import LigandSet
 from deeporigin.drug_discovery.structures.pocket import Pocket
 from deeporigin.drug_discovery.workflow_step import WorkflowStep
 from deeporigin.exceptions import DeepOriginException
@@ -86,6 +85,8 @@ class Docking(WorkflowStep):
         JupyterViewer.visualize(html_content)
 
     def get_poses(self) -> LigandSet | None:
+        """get all docked poses as a `LigandSet`"""
+
         file_paths = self.get_results(file_type="sdf")
 
         if file_paths is None:
