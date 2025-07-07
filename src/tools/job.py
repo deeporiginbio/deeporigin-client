@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 import json
 from pathlib import Path
 import time
-from typing import Any, Callable, Optional, Protocol
+from typing import Optional, Protocol
 import uuid
 
 from beartype import beartype
@@ -55,10 +55,8 @@ class Job:
 
     # functions
     _viz_func: Optional[JobFunc] = None
-    _parse_func: Optional[Callable[["Job"], Any]] = None
-    _name_func: Optional[Callable[["Job"], Any]] = field(
-        default_factory=lambda: lambda self: "Job"
-    )
+    _parse_func: Optional[JobFunc] = None
+    _name_func: Optional[JobFunc] = field(default_factory=lambda: lambda job: "Job")
 
     _progress_reports: list = field(default_factory=list)
     _status: list = field(default_factory=list)
