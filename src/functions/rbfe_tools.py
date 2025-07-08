@@ -6,6 +6,7 @@ import json
 import os
 from pathlib import Path
 from typing import Literal
+from urllib.parse import urljoin
 
 from beartype import beartype
 import requests
@@ -63,7 +64,7 @@ def map_network(
     else:
         # Make the API request
         response = requests.post(
-            URL + "/konnektor",
+            urljoin(URL, "konnektor"),
             json=payload,
             headers={"Content-Type": "application/json"},
         )

@@ -27,7 +27,7 @@ class RBFE(WorkflowStep):
     Objects instantiated here are meant to be used within the Complex class."""
 
     """tool version to use for RBFE"""
-    tool_version = "0.2.7"
+    tool_version = "0.2.8"
     _tool_key = tool_mapper["RBFE"]
 
     _max_atom_count: int = 100_000
