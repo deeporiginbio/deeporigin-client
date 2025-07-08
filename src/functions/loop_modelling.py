@@ -6,7 +6,8 @@ import os
 from beartype import beartype
 import requests
 
-URL = "http://loop-modelling.default.jobs.edge.deeporigin.io/model_loops"
+# URL = "http://loop-modelling.default.jobs.edge.deeporigin.io/model_loops"
+URL = "http://localhost:8080/model_loops"
 CACHE_DIR = os.path.expanduser("~/.deeporigin/model_loops")
 
 
@@ -14,7 +15,8 @@ CACHE_DIR = os.path.expanduser("~/.deeporigin/model_loops")
 def model_loops(
     *,
     pdb_id: str,
-) -> str:
+    use_cache: bool = True,
+) -> dict:
     """
     Run system preparation on a protein-ligand complex.
 
@@ -29,28 +31,44 @@ def model_loops(
     hash_input = f"{pdb_id}"
     cache_key = hashlib.md5(hash_input.encode()).hexdigest()
     cache_path = os.path.join(CACHE_DIR, cache_key)
-    output_pdb_path = os.path.join(cache_path, "loops_modelled.pdb")
+    output_json_path = os.path.join(cache_path, "data.json")
+    output_pdb_path = os.path.join(cache_path, "data.pdb")
+
+    # Create cache directory if it doesn't exist
+    os.makedirs(cache_path, exist_ok=True)
 
     # Check if cached results exist
-    if os.path.exists(output_pdb_path):
-        return output_pdb_path
+    if use_cache and os.path.exists(output_json_path):
+        import json
+
+        with open(output_json_path, "r") as f:
+            return json.load(f)
 
     # If no cached results, proceed with server call
     payload = {
         "pdb_id": pdb_id,
     }
 
-    response = requests.post(URL, json=payload, stream=True)
+    try:
+        response = requests.post(URL, json=payload, stream=True)
+    except Exception as e:
+        raise RuntimeError(f"Failed to connect to server: {e}") from None
 
     if response.status_code == 200:
-        # Create cache directory if it doesn't exist
-        os.makedirs(cache_path, exist_ok=True)
-        # Save the result to the cache
-        with open(output_pdb_path, "wb") as f:
-            for chunk in response.iter_content(chunk_size=8192):
-                if chunk:
-                    f.write(chunk)
-        return output_pdb_path
+        import json
+
+        response_json = response.json()
+        # Write pdb_contents to output_pdb_path
+        pdb_contents = response_json.pop("pdb_contents", None)
+        if pdb_contents is not None:
+            with open(output_pdb_path, "w") as pdb_file:
+                pdb_file.write(pdb_contents)
+
+        response_json["pdb_file"] = output_pdb_path
+        # Write the modified JSON (without pdb_contents) to output_json_path
+        with open(output_json_path, "w") as f:
+            json.dump(response_json, f, indent=2)
+        return response_json
 
     # If the server request fails, raise an error
     raise RuntimeError(
