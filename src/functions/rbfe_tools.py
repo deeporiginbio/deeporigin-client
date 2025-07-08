@@ -10,8 +10,7 @@ from typing import Literal
 from beartype import beartype
 import requests
 
-URL = "http://ddkit-kartograf.default.jobs.edge.deeporigin.io/map_network"
-URL = "http://localhost:8080/konnektor"
+URL = "http://rbfe-tools.default.jobs.edge.deeporigin.io"
 CACHE_DIR = os.path.expanduser("~/.deeporigin/konnektor")
 
 
@@ -64,7 +63,7 @@ def map_network(
     else:
         # Make the API request
         response = requests.post(
-            URL,
+            URL + "/konnektor",
             json=payload,
             headers={"Content-Type": "application/json"},
         )

@@ -46,8 +46,11 @@ You will see a message printed to screen similar to:
 
 ### Constructing a network
 
+!!! tip "Constructing a network"
+    View the documentation for `LigandSet` to learn how to [construct a network](../how-to/ligands.md#constructing-a-network-using-konnektor). 
+
 !!! tip "Coming soon" 
-    Ability to construct a network of ligands for RBFE is coming soon.
+    Ability to run a network of ligands is coming soon.
 
 
 ### Parameters

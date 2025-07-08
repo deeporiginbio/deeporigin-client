@@ -80,3 +80,18 @@ def test_loop_modelling(config):  # noqa: F811
     assert protein.structure is not None, "Structure should not be None"
 
     assert len(protein.find_missing_residues()) == 0, "Missing residues should be 0"
+
+
+def test_konnektor(config):  # noqa: F811
+    if config["mock"]:
+        pytest.skip("test skipped with mock client")
+
+    from deeporigin.drug_discovery import DATA_DIR, LigandSet
+
+    ligands = LigandSet.from_sdf(DATA_DIR / "ligands" / "ligands-brd-all.sdf")
+
+    ligands.map_network()
+
+    assert len(ligands.network.keys()) > 0, "Expected network to be non-empty"
+
+    assert len(ligands.network["edges"]) == 7, "Expected 7 edges"
