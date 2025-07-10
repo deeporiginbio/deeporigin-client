@@ -5,5 +5,4 @@ from .schema_api_httpx_client import FilePayload, SchemaApiHttpxClient
 __all__ = (
     "SchemaApiHttpxClient",
     "FilePayload",
-    "genapi",
 )
