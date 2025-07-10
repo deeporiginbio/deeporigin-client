@@ -720,7 +720,7 @@ class LigandSet:
         return self.ligands[index]
 
     def __contains__(self, ligand):
-        return ligand in self._ligands
+        return ligand in self.ligands
 
     def __add__(self, other):
         """Add another LigandSet or a Ligand to this LigandSet, returning a new LigandSet."""
