@@ -60,7 +60,7 @@ sim = Complex(protein=protein)
 # Add a single ligand
 sim.ligands = ligand3
 
-# Add another ligands
+# Add another ligand
 ligand4 = Ligand.from_sdf(BRD_DATA_DIR / "brd-4.sdf")
 sim.ligands = sim.ligands + ligand4
 

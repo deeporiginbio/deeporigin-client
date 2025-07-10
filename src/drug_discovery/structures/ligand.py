@@ -736,7 +736,6 @@ class LigandSet:
 
     def __radd__(self, other):
         """Support Ligand + LigandSet, returning a new LigandSet."""
-        from .ligand import Ligand
 
         if isinstance(other, Ligand):
             return LigandSet(ligands=[other] + self.ligands)
