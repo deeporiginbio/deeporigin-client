@@ -17,7 +17,7 @@ The directory should contain:
 - exactly one PDB file for the protein
 - one or more SDF files for the ligands. Each SDF file can contain one or more molecules.
 
-## From `Protein` and `Ligand` objects
+### From `Protein` and `Ligand` objects
 
 A `Complex` object can be also be constructed using `Protein` and `Ligand` objects. 
 
@@ -30,28 +30,43 @@ ligand = Ligand.from_sdf(BRD_DATA_DIR / "brd-2.sdf")
 sim = Complex(protein=protein, ligands=[ligand])
 ```
 
+### From `LigandSet` objects
+
+
+A `Complex` object can be also be constructed using `Protein` and `LigandSet` objects. 
+
+```python
+from deeporigin.drug_discovery import Complex, BRD_DATA_DIR, Protein, LigandSet
+
+protein = Protein.from_file(BRD_DATA_DIR / "brd.pdb")
+ligands = LigandSet.from_dir(BRD_DATA_DIR)
+
+sim = Complex(protein=protein, ligands=ligands)
+```
+
 ## Modifying a Complex
 
 You can modify a Complex object by adding or replacing ligands. 
 
-```{.python notest}
+```python
 from deeporigin.drug_discovery import Complex, Protein, Ligand
 protein = Protein.from_file(BRD_DATA_DIR / "brd.pdb")
 ligand = Ligand.from_sdf(BRD_DATA_DIR / "brd-2.sdf")
+ligand3 = Ligand.from_sdf(BRD_DATA_DIR / "brd-3.sdf")
 
 # Create a complex with just the protein
-sim = Complex(protein=protein, ligands=[])
+sim = Complex(protein=protein)
 
 # Add a single ligand
-new_ligand = Ligand.from_sdf("ligand.sdf")
-sim.ligands = sim.ligands + [new_ligand]
+sim.ligands = ligand3
 
-# Add multiple ligands
-more_ligands = Ligand.from_sdf("multiple_ligands.sdf")  # Returns a list if file contains multiple molecules
-sim.ligands = sim.ligands + more_ligands
+# Add another ligands
+ligand4 = Ligand.from_sdf(BRD_DATA_DIR / "brd-4.sdf")
+sim.ligands = sim.ligands + ligand4
 
 # Replace all ligands
-sim.ligands = [new_ligand]  # Replace with a single ligand
+ligand5 = Ligand.from_sdf(BRD_DATA_DIR / "brd-5.sdf")
+sim.ligands = ligand5  # Replace with a single ligand
 ```
 
 ??? tip "Constructing Ligands"
