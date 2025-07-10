@@ -43,9 +43,6 @@ class Complex:
         self.ligands = ligands
         self._platform_clients = _platform_clients
 
-    def __post_init__(self):
-        """various post init tasks"""
-
         # assign references to the complex in the
         # various child classes
         self.docking = Docking(parent=self)
@@ -53,10 +50,6 @@ class Complex:
         self.rbfe = RBFE(parent=self)
 
         self._prepared_systems = {}
-
-        # convert a list of ligands to a ligand set
-        if isinstance(self._ligands, list):
-            self._ligands = LigandSet(ligands=self._ligands)
 
     @property
     def ligands(self) -> LigandSet:
