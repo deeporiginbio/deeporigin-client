@@ -21,13 +21,27 @@ class Complex:
 
     protein: Protein
 
-    # Using a private attribute for ligands with the property decorator below
-    ligands: LigandSet = field(default_factory=LigandSet)
+    # Use a private attribute for ligands
+    _ligands: LigandSet = field(default_factory=LigandSet, repr=False)
     _platform_clients: Optional[PlatformClients] = None
     _prepared_systems: dict[str, str] = field(default_factory=dict, repr=False)
 
-    def __post_init__(self):
-        """various post init tasks"""
+    def __init__(
+        self,
+        *,
+        protein: Protein,
+        ligands: Optional[LigandSet | list[Ligand] | Ligand] = None,
+        _platform_clients: Optional[PlatformClients] = None,
+    ):
+        """Initialize a Complex object.
+
+        Args:
+            protein (Protein): The protein to use in the complex.
+            ligands (LigandSet | list[Ligand] | Ligand): The ligands to use in the complex.
+        """
+        self.protein = protein
+        self.ligands = ligands
+        self._platform_clients = _platform_clients
 
         # assign references to the complex in the
         # various child classes
@@ -36,6 +50,26 @@ class Complex:
         self.rbfe = RBFE(parent=self)
 
         self._prepared_systems = {}
+
+    @property
+    def ligands(self) -> LigandSet:
+        return self._ligands
+
+    @ligands.setter
+    def ligands(self, value):
+        if value is None:
+            self._ligands = LigandSet()
+            return
+        if isinstance(value, list):
+            self._ligands = LigandSet(ligands=value)
+        elif isinstance(value, LigandSet):
+            self._ligands = value
+        elif isinstance(value, Ligand):
+            self._ligands = LigandSet(ligands=[value])
+        else:
+            raise ValueError(
+                "ligands must be a list of Ligands, a Ligand, or a LigandSet"
+            )
 
     @classmethod
     def from_dir(

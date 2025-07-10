@@ -720,7 +720,29 @@ class LigandSet:
         return self.ligands[index]
 
     def __contains__(self, ligand):
-        return ligand in self._ligands
+        return ligand in self.ligands
+
+    def __add__(self, other):
+        """Add another LigandSet or a Ligand to this LigandSet, returning a new LigandSet."""
+
+        if isinstance(other, LigandSet):
+            return LigandSet(ligands=self.ligands + other.ligands)
+        elif isinstance(other, Ligand):
+            return LigandSet(ligands=self.ligands + [other])
+        elif isinstance(other, list):
+            return LigandSet(ligands=self.ligands + other)
+        else:
+            raise NotImplementedError(f"Cannot add {type(other)} to LigandSet")
+
+    def __radd__(self, other):
+        """Support Ligand + LigandSet, returning a new LigandSet."""
+
+        if isinstance(other, Ligand):
+            return LigandSet(ligands=[other] + self.ligands)
+        elif isinstance(other, list):
+            return LigandSet(ligands=other + self.ligands)
+        else:
+            raise NotImplementedError(f"Cannot add {type(other)} to LigandSet")
 
     def _repr_html_(self):
         """Return an HTML representation of the LigandSet."""

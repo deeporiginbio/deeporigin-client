@@ -1,7 +1,6 @@
 # Generated API client - DO NOT EDIT MANUALLY
 # This file was auto-generated from an OpenAPI schema
 
-import httpx
 from .schema_api_httpx_client import FilePayload
 
 
