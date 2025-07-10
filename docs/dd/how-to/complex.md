@@ -49,7 +49,7 @@ sim = Complex(protein=protein, ligands=ligands)
 You can modify a Complex object by adding or replacing ligands. 
 
 ```python
-from deeporigin.drug_discovery import Complex, Protein, Ligand
+from deeporigin.drug_discovery import Complex, Protein, Ligand, BRD_DATA_DIR
 protein = Protein.from_file(BRD_DATA_DIR / "brd.pdb")
 ligand = Ligand.from_sdf(BRD_DATA_DIR / "brd-2.sdf")
 ligand3 = Ligand.from_sdf(BRD_DATA_DIR / "brd-3.sdf")

@@ -26,6 +26,23 @@ class Complex:
     _platform_clients: Optional[PlatformClients] = None
     _prepared_systems: dict[str, str] = field(default_factory=dict, repr=False)
 
+    def __init__(
+        self,
+        *,
+        protein: Protein,
+        ligands: Optional[LigandSet | list[Ligand] | Ligand] = None,
+        _platform_clients: Optional[PlatformClients] = None,
+    ):
+        """Initialize a Complex object.
+
+        Args:
+            protein (Protein): The protein to use in the complex.
+            ligands (LigandSet | list[Ligand] | Ligand): The ligands to use in the complex.
+        """
+        self.protein = protein
+        self.ligands = ligands
+        self._platform_clients = _platform_clients
+
     def __post_init__(self):
         """various post init tasks"""
 
@@ -47,6 +64,9 @@ class Complex:
 
     @ligands.setter
     def ligands(self, value):
+        if value is None:
+            self._ligands = LigandSet()
+            return
         if isinstance(value, list):
             self._ligands = LigandSet(ligands=value)
         elif isinstance(value, LigandSet):
@@ -116,7 +136,7 @@ class Complex:
         # Create the Complex instance
         instance = cls(
             protein=protein,
-            _ligands=LigandSet(ligands=ligands),
+            ligands=LigandSet(ligands=ligands),
             _platform_clients=_platform_clients,
         )
 
