@@ -913,17 +913,26 @@
   
 </li>
         
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
+          <li class="md-nav__item">
   <a href="#from-protein-and-ligand-objects" class="md-nav__link">
     <span class="md-ellipsis">
       From Protein and Ligand objects
     </span>
   </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#from-ligandset-objects" class="md-nav__link">
+    <span class="md-ellipsis">
+      From LigandSet objects
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -2764,17 +2773,26 @@
   
 </li>
         
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
+          <li class="md-nav__item">
   <a href="#from-protein-and-ligand-objects" class="md-nav__link">
     <span class="md-ellipsis">
       From Protein and Ligand objects
     </span>
   </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#from-ligandset-objects" class="md-nav__link">
+    <span class="md-ellipsis">
+      From LigandSet objects
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -2863,7 +2881,7 @@
 <li>exactly one PDB file for the protein</li>
 <li>one or more SDF files for the ligands. Each SDF file can contain one or more molecules.</li>
 </ul>
-<h2 id="from-protein-and-ligand-objects">From <code>Protein</code> and <code>Ligand</code> objects<a class="headerlink" href="#from-protein-and-ligand-objects" title="Permanent link">&para;</a></h2>
+<h3 id="from-protein-and-ligand-objects">From <code>Protein</code> and <code>Ligand</code> objects<a class="headerlink" href="#from-protein-and-ligand-objects" title="Permanent link">&para;</a></h3>
 <p>A <code>Complex</code> object can be also be constructed using <code>Protein</code> and <code>Ligand</code> objects. </p>
 <div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin.drug_discovery</span><span class="w"> </span><span class="kn">import</span> <span class="n">Complex</span><span class="p">,</span> <span class="n">BRD_DATA_DIR</span><span class="p">,</span> <span class="n">Protein</span><span class="p">,</span> <span class="n">Ligand</span>
 
@@ -2872,25 +2890,35 @@
 
 <span class="n">sim</span> <span class="o">=</span> <span class="n">Complex</span><span class="p">(</span><span class="n">protein</span><span class="o">=</span><span class="n">protein</span><span class="p">,</span> <span class="n">ligands</span><span class="o">=</span><span class="p">[</span><span class="n">ligand</span><span class="p">])</span>
 </code></pre></div>
+<h3 id="from-ligandset-objects">From <code>LigandSet</code> objects<a class="headerlink" href="#from-ligandset-objects" title="Permanent link">&para;</a></h3>
+<p>A <code>Complex</code> object can also be constructed using <code>Protein</code> and <code>LigandSet</code> objects. </p>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin.drug_discovery</span><span class="w"> </span><span class="kn">import</span> <span class="n">Complex</span><span class="p">,</span> <span class="n">BRD_DATA_DIR</span><span class="p">,</span> <span class="n">Protein</span><span class="p">,</span> <span class="n">LigandSet</span>
+
+<span class="n">protein</span> <span class="o">=</span> <span class="n">Protein</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">BRD_DATA_DIR</span> <span class="o">/</span> <span class="s2">&quot;brd.pdb&quot;</span><span class="p">)</span>
+<span class="n">ligands</span> <span class="o">=</span> <span class="n">LigandSet</span><span class="o">.</span><span class="n">from_dir</span><span class="p">(</span><span class="n">BRD_DATA_DIR</span><span class="p">)</span>
+
+<span class="n">sim</span> <span class="o">=</span> <span class="n">Complex</span><span class="p">(</span><span class="n">protein</span><span class="o">=</span><span class="n">protein</span><span class="p">,</span> <span class="n">ligands</span><span class="o">=</span><span class="n">ligands</span><span class="p">)</span>
+</code></pre></div>
 <h2 id="modifying-a-complex">Modifying a Complex<a class="headerlink" href="#modifying-a-complex" title="Permanent link">&para;</a></h2>
 <p>You can modify a Complex object by adding or replacing ligands. </p>
-<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin.drug_discovery</span><span class="w"> </span><span class="kn">import</span> <span class="n">Complex</span><span class="p">,</span> <span class="n">Protein</span><span class="p">,</span> <span class="n">Ligand</span>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin.drug_discovery</span><span class="w"> </span><span class="kn">import</span> <span class="n">Complex</span><span class="p">,</span> <span class="n">Protein</span><span class="p">,</span> <span class="n">Ligand</span><span class="p">,</span> <span class="n">BRD_DATA_DIR</span>
 <span class="n">protein</span> <span class="o">=</span> <span class="n">Protein</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">BRD_DATA_DIR</span> <span class="o">/</span> <span class="s2">&quot;brd.pdb&quot;</span><span class="p">)</span>
 <span class="n">ligand</span> <span class="o">=</span> <span class="n">Ligand</span><span class="o">.</span><span class="n">from_sdf</span><span class="p">(</span><span class="n">BRD_DATA_DIR</span> <span class="o">/</span> <span class="s2">&quot;brd-2.sdf&quot;</span><span class="p">)</span>
+<span class="n">ligand3</span> <span class="o">=</span> <span class="n">Ligand</span><span class="o">.</span><span class="n">from_sdf</span><span class="p">(</span><span class="n">BRD_DATA_DIR</span> <span class="o">/</span> <span class="s2">&quot;brd-3.sdf&quot;</span><span class="p">)</span>
 
 <span class="c1"># Create a complex with just the protein</span>
-<span class="n">sim</span> <span class="o">=</span> <span class="n">Complex</span><span class="p">(</span><span class="n">protein</span><span class="o">=</span><span class="n">protein</span><span class="p">,</span> <span class="n">ligands</span><span class="o">=</span><span class="p">[])</span>
+<span class="n">sim</span> <span class="o">=</span> <span class="n">Complex</span><span class="p">(</span><span class="n">protein</span><span class="o">=</span><span class="n">protein</span><span class="p">)</span>
 
 <span class="c1"># Add a single ligand</span>
-<span class="n">new_ligand</span> <span class="o">=</span> <span class="n">Ligand</span><span class="o">.</span><span class="n">from_sdf</span><span class="p">(</span><span class="s2">&quot;ligand.sdf&quot;</span><span class="p">)</span>
-<span class="n">sim</span><span class="o">.</span><span class="n">ligands</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">ligands</span> <span class="o">+</span> <span class="p">[</span><span class="n">new_ligand</span><span class="p">]</span>
+<span class="n">sim</span><span class="o">.</span><span class="n">ligands</span> <span class="o">=</span> <span class="n">ligand3</span>
 
-<span class="c1"># Add multiple ligands</span>
-<span class="n">more_ligands</span> <span class="o">=</span> <span class="n">Ligand</span><span class="o">.</span><span class="n">from_sdf</span><span class="p">(</span><span class="s2">&quot;multiple_ligands.sdf&quot;</span><span class="p">)</span>  <span class="c1"># Returns a list if file contains multiple molecules</span>
-<span class="n">sim</span><span class="o">.</span><span class="n">ligands</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">ligands</span> <span class="o">+</span> <span class="n">more_ligands</span>
+<span class="c1"># Add another ligand</span>
+<span class="n">ligand4</span> <span class="o">=</span> <span class="n">Ligand</span><span class="o">.</span><span class="n">from_sdf</span><span class="p">(</span><span class="n">BRD_DATA_DIR</span> <span class="o">/</span> <span class="s2">&quot;brd-4.sdf&quot;</span><span class="p">)</span>
+<span class="n">sim</span><span class="o">.</span><span class="n">ligands</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">ligands</span> <span class="o">+</span> <span class="n">ligand4</span>
 
 <span class="c1"># Replace all ligands</span>
-<span class="n">sim</span><span class="o">.</span><span class="n">ligands</span> <span class="o">=</span> <span class="p">[</span><span class="n">new_ligand</span><span class="p">]</span>  <span class="c1"># Replace with a single ligand</span>
+<span class="n">ligand5</span> <span class="o">=</span> <span class="n">Ligand</span><span class="o">.</span><span class="n">from_sdf</span><span class="p">(</span><span class="n">BRD_DATA_DIR</span> <span class="o">/</span> <span class="s2">&quot;brd-5.sdf&quot;</span><span class="p">)</span>
+<span class="n">sim</span><span class="o">.</span><span class="n">ligands</span> <span class="o">=</span> <span class="n">ligand5</span>  <span class="c1"># Replace with a single ligand</span>
 </code></pre></div>
 <details class="tip">
 <summary>Constructing Ligands</summary>
