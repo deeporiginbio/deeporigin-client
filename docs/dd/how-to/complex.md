@@ -33,7 +33,7 @@ sim = Complex(protein=protein, ligands=[ligand])
 ### From `LigandSet` objects
 
 
-A `Complex` object can be also be constructed using `Protein` and `LigandSet` objects. 
+A `Complex` object can also be constructed using `Protein` and `LigandSet` objects. 
 
 ```python
 from deeporigin.drug_discovery import Complex, BRD_DATA_DIR, Protein, LigandSet
