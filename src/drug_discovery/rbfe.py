@@ -13,6 +13,7 @@ from deeporigin.drug_discovery import utils
 from deeporigin.drug_discovery.constants import tool_mapper
 from deeporigin.drug_discovery.structures.ligand import Ligand, ligands_to_dataframe
 from deeporigin.drug_discovery.workflow_step import WorkflowStep
+from deeporigin.exceptions import DeepOriginException
 from deeporigin.platform import files_api
 from deeporigin.tools.job import Job
 from deeporigin.utils.core import PrettyDict
@@ -144,6 +145,12 @@ class RBFE(WorkflowStep):
             return df
 
     @beartype
+    def set_test_run(self, value: int = 1):
+        """set test_run parameter in abfe parameters"""
+
+        utils._set_test_run(self._params.end_to_end, value)
+
+    @beartype
     def run_ligand_pair(
         self,
         *,
@@ -216,3 +223,10 @@ class RBFE(WorkflowStep):
         self.jobs.append(job)
 
         return job
+
+    @beartype
+    def run_network(self):
+        if "edges" not in self.parent.ligands.network.keys():
+            raise DeepOriginException(
+                "Network not mapped yet. Please map the network first using `map_network()`."
+            )
