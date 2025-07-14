@@ -38,15 +38,6 @@ class RBFE(WorkflowStep):
         self._params = PrettyDict()
         self._params.end_to_end = utils._load_params("rbfe_end_to_end")
 
-    def _render_progress(self, job) -> str:
-        """Render progress visualization for a job."""
-        # TODO: Implement RBFE-specific progress visualization
-        return "[WIP] RBFE Progress Visualization"
-
-    def _name_job(self, job) -> str:
-        """Generate a name for a job."""
-        return f"RBFE run using <code>{job._metadata[0]['protein_file']}</code>, <code>{job._metadata[0]['ligand1_file']}</code>, and <code>{job._metadata[0]['ligand2_file']}</code>"
-
     def get_results(self) -> pd.DataFrame | None:
         """get ABFE results and return in a dataframe.
 
@@ -158,7 +149,8 @@ class RBFE(WorkflowStep):
         ligand2: Ligand,
         re_run: bool = False,
         _output_dir_path: Optional[str] = None,
-    ) -> Job | None:
+        return_job: bool = True,
+    ) -> Job | None | str:
         """Method to run an end-to-end RBFE run.
 
         Args:
@@ -213,20 +205,61 @@ class RBFE(WorkflowStep):
             _output_dir_path=_output_dir_path,
         )
 
-        job = Job.from_id(job_id, _platform_clients=self.parent._platform_clients)
+        if return_job:
+            job = Job.from_id(job_id, _platform_clients=self.parent._platform_clients)
 
-        job._viz_func = self._render_progress
-        job._name_func = self._name_job
-
-        job.sync()
-
-        self.jobs.append(job)
-
-        return job
+            self.jobs.append(job)
+            return job
+        else:
+            return job_id
 
     @beartype
-    def run_network(self):
+    def run_network(self, *, re_run: bool = False) -> Job:
         if "edges" not in self.parent.ligands.network.keys():
             raise DeepOriginException(
                 "Network not mapped yet. Please map the network first using `map_network()`."
             )
+
+        job_ids = []
+
+        from tqdm import tqdm
+
+        # Wrap the edge iteration in a tqdm progress bar
+        for edge in tqdm(
+            self.parent.ligands.network["edges"], desc="Starting RBFE network..."
+        ):
+            ligand1_name = edge["source"]
+            ligand2_name = edge["target"]
+
+            ligand1 = [
+                ligand for ligand in self.parent.ligands if ligand.name == ligand1_name
+            ]
+
+            if len(ligand1) == 0:
+                raise DeepOriginException(
+                    f"Ligand {ligand1_name} not found in the network."
+                )
+
+            ligand1 = ligand1[0]
+
+            ligand2 = [
+                ligand for ligand in self.parent.ligands if ligand.name == ligand2_name
+            ]
+
+            if len(ligand2) == 0:
+                raise DeepOriginException(
+                    f"Ligand {ligand2_name} not found in the network."
+                )
+
+            ligand2 = ligand2[0]
+
+            job_id = self.run_ligand_pair(
+                ligand1=ligand1,
+                ligand2=ligand2,
+                re_run=re_run,
+                return_job=False,
+            )
+
+            job_ids.append(job_id)
+
+        return Job.from_ids(job_ids, _platform_clients=self.parent._platform_clients)
