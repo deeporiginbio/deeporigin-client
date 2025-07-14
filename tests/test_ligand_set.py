@@ -132,6 +132,11 @@ def test_from_dir():
     ligands = LigandSet.from_dir(DATA_DIR / "brd")
     assert len(ligands) == 8
 
+    for ligand in ligands:
+        assert ligand.file_path is not None, (
+            "Every ligand in a LigandSet should have a file_path"
+        )
+
 
 def test_mcs():
     """Test that LigandSet.mcs() returns a valid SMARTS string for a simple set of ligands."""

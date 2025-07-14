@@ -932,6 +932,10 @@ class LigandSet:
                 f"Failed to create Ligands from SDF file '{file_path}': {str(e)}"
             ) from e
 
+        # set the file_path for each ligand
+        for ligand in ligands:
+            ligand.file_path = file_path
+
         return cls(ligands=ligands)
 
     @classmethod
