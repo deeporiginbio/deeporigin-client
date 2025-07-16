@@ -138,13 +138,14 @@ class Complex:
     @beartype
     def prepare(
         self,
-        ligand: Ligand,
+        ligand: Optional[Ligand] = None,
         *,
         padding: float = 1.0,
         keep_waters: bool = False,
         is_lig_protonated: bool = True,
         is_protein_protonated: bool = True,
         use_cache: bool = True,
+        show_prepared_system: bool = True,
     ) -> None:
         """run system preparation on the protein and one ligand from the Complex
 
@@ -156,6 +157,23 @@ class Complex:
             is_protein_protonated (bool, optional): Whether the protein is already protonated. Defaults to True.
         """
         from deeporigin.functions.sysprep import sysprep
+
+        if ligand is None:
+            from tqdm import tqdm
+
+            show_prepared_system = False
+
+            for ligand in tqdm(self.ligands, desc="Preparing systems"):
+                self.prepare(
+                    ligand=ligand,
+                    padding=padding,
+                    keep_waters=keep_waters,
+                    is_lig_protonated=is_lig_protonated,
+                    is_protein_protonated=is_protein_protonated,
+                    use_cache=use_cache,
+                    show_prepared_system=False,
+                )
+            return
 
         if ligand.file_path is None:
             ligand_path = ligand.to_sdf()
@@ -177,7 +195,8 @@ class Complex:
         self._prepared_systems[ligand.name] = complex_path
 
         # show it
-        Protein.from_file(complex_path).show()
+        if show_prepared_system:
+            Protein.from_file(complex_path).show()
 
     def _sync_protein_and_ligands(self) -> None:
         """Ensure that the protein and ligands are uploaded to Deep Origin

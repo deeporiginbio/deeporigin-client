@@ -182,7 +182,7 @@ def _start_tool_run(
         clusters_client=clusters_client,
     )
 
-    print(f"Job started with Job ID: {job_id}")
+    # print(f"Job started with Job ID: {job_id}")
 
     return job_id
 

@@ -163,9 +163,9 @@ class RBFE(WorkflowStep):
         # check that there is a prepared system for each ligand
         for ligand in [ligand1, ligand2]:
             if ligand.name not in self.parent._prepared_systems:
-                raise ValueError(
+                raise DeepOriginException(
                     f"Complex with Ligand {ligand.name} is not prepared. Please prepare the system using the `prepare` method of Complex."
-                )
+                ) from None
 
         # check that for every prepared system, the number of atoms is less than the max atom count
         for ligand_name, prepared_system in self.parent._prepared_systems.items():
