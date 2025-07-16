@@ -79,6 +79,9 @@ class Job:
             elif self._attributes[0]["tool"]["key"] == tool_mapper["ABFE"]:
                 self._viz_func = job_viz_functions._viz_func_abfe
                 self._name_func = job_viz_functions._name_func_abfe
+            elif self._attributes[0]["tool"]["key"] == tool_mapper["RBFE"]:
+                self._viz_func = job_viz_functions._viz_func_rbfe
+                self._name_func = job_viz_functions._name_func_rbfe
 
     @classmethod
     def from_ids(
