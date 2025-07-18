@@ -42,6 +42,7 @@ class WorkflowStep:
 
         return df
 
+    @beartype
     def get_jobs(self) -> None:
         """Get the jobs for this workflow step and save to self.jobs"""
         df = self.get_jobs_df()

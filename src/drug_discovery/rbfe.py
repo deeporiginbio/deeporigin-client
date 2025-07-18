@@ -263,3 +263,36 @@ class RBFE(WorkflowStep):
             job_ids.append(job_id)
 
         return Job.from_ids(job_ids, _platform_clients=self.parent._platform_clients)
+
+    def get_jobs(self) -> None:
+        """Get the jobs for  and save to self.jobs"""
+
+        if self.parent.ligands.network.get("edges", None) is None:
+            # no network mapped. use the default get_jobs method
+            return super().get_jobs()
+
+        # at this point, we know that the network is mapped
+        # so we need to get the jobs for each ligand pair
+        df = self.get_jobs_df()
+
+        ligand_dict = {ligand.smiles: ligand.name for ligand in self.parent.ligands}
+        edges = self.parent.ligands.network["edges"]
+        valid_job_ids = []
+        for _, row in df.iterrows():
+            metadata = row["metadata"]
+            if "ligand1_smiles" not in metadata.keys():
+                continue
+            if "ligand2_smiles" not in metadata.keys():
+                continue
+            edge = dict(
+                source=ligand_dict[metadata["ligand1_smiles"]],
+                target=ligand_dict[metadata["ligand2_smiles"]],
+            )
+            if edge in edges:
+                valid_job_ids.append(row["id"])
+
+        job = Job.from_ids(
+            valid_job_ids,
+            _platform_clients=self.parent._platform_clients,
+        )
+        self.jobs = [job]
