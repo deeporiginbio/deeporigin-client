@@ -76,6 +76,44 @@ def _abfe_parse_progress(job) -> dict:
 
 
 @beartype
+def _viz_func_rbfe(job) -> str:
+    """
+    Render HTML for a Mermaid diagram where each node is drawn as a rounded rectangle
+    with a color indicating its status.
+    """
+    import json
+
+    steps = []
+    sub_steps = []
+    ligand1 = []
+    ligand2 = []
+
+    for metadata, report in zip(job._metadata, job._progress_reports, strict=False):
+        ligand1.append(metadata.get("ligand1_file", "Unknown ligand"))
+        ligand2.append(metadata.get("ligand2_file", "Unknown ligand"))
+        if report is None:
+            steps.append("")
+            sub_steps.append("")
+
+        else:
+            data = json.loads(report)
+            steps.append(data.get("cmd", ""))
+            sub_steps.append(data.get("sub_step", ""))
+
+    import pandas as pd
+
+    df = pd.DataFrame(
+        dict(
+            ligand1=ligand1,
+            ligand2=ligand2,
+            steps=steps,
+            sub_steps=sub_steps,
+        )
+    )
+    return df.to_html()
+
+
+@beartype
 def _viz_func_abfe(job) -> str:
     """
     Render HTML for a Mermaid diagram where each node is drawn as a rounded rectangle
@@ -195,3 +233,18 @@ def _name_func_abfe(job) -> str:
         return f"ABFE run using <code>{job._metadata[0]['protein_file']}</code> and <code>{job._metadata[0]['ligand_file']}</code>"
     except Exception:
         return "ABFE run"
+
+
+@beartype
+def _name_func_rbfe(job) -> str:
+    """utility function to name a job using inputs to that job"""
+
+    try:
+        if len(job._metadata) == 1:
+            # single ligand pair
+            return f"RBFE run using <code>{job._metadata[0]['protein_file']}</code> and <code>{job._metadata[0]['ligand_file']}</code>"
+        else:
+            return f"RBFE network run using <code>{job._metadata[0]['protein_file']}</code> and {len(job._metadata)} ligand pairs"
+
+    except Exception:
+        return "RBFE run"

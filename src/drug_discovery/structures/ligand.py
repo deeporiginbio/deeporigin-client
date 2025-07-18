@@ -942,12 +942,20 @@ class LigandSet:
         sdf_files = [f for f in os.listdir(directory) if f.endswith(".sdf")]
         ligands = []
         for sdf_file in sdf_files:
-            ligands.extend(cls.from_sdf(os.path.join(directory, sdf_file)))
+            this_file = os.path.join(directory, sdf_file)
+            this_set = cls.from_sdf(this_file)
+            for ligand in this_set.ligands:
+                ligand.file_path = this_file
+            ligands.extend(this_set.ligands)
 
         #  now get all CSV files
         csv_files = [f for f in os.listdir(directory) if f.endswith(".csv")]
         for csv_file in csv_files:
-            ligands.extend(cls.from_csv(os.path.join(directory, csv_file)))
+            this_file = os.path.join(directory, csv_file)
+            this_set = cls.from_csv(this_file)
+            for ligand in this_set.ligands:
+                ligand.file_path = this_file
+            ligands.extend(this_set)
 
         return cls(ligands=ligands)
 
