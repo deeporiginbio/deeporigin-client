@@ -33,7 +33,7 @@ dependencies = [
     "pyjwt",
     "cryptography",
     "python-box",
-    "do-sdk-platform==3.2.0",
+    "do-sdk-platform==4.0.0",
     "urllib3>=2.0.0",
     "more-itertools",
     "nest_asyncio",
