@@ -130,15 +130,15 @@ class Job:
         reached a terminal state (Succeeded or Failed).
         """
 
-        # get the org_friendly_id from the platform clients if it's not None
-        org_friendly_id = getattr(self._platform_clients, "org_friendly_id", None)
+        # get the org_key from the platform clients if it's not None
+        org_key = getattr(self._platform_clients, "org_key", None)
         tools_client = getattr(self._platform_clients, "ToolsApi", None)
 
         # use
         results = tools_api.get_statuses_and_progress(
             self._ids,
             client=tools_client,
-            org_friendly_id=org_friendly_id,
+            org_key=org_key,
         )
 
         self._status = [result["status"] for result in results]
@@ -360,13 +360,13 @@ class Job:
             The result of the cancellation operation from utils.cancel_runs.
         """
 
-        org_friendly_id = getattr(self._platform_clients, "org_friendly_id", None)
+        org_key = getattr(self._platform_clients, "org_key", None)
         tools_client = getattr(self._platform_clients, "ToolsApi", None)
 
         tools_api.cancel_runs(
             self._ids,
             client=tools_client,
-            org_friendly_id=org_friendly_id,
+            org_key=org_key,
         )
 
 
@@ -418,14 +418,14 @@ def get_dataframe(
     if _platform_clients is None:
         from deeporigin.config import get_value
 
-        org_friendly_id = get_value()["organization_id"]
+        org_key = get_value()["organization_id"]
     else:
-        org_friendly_id = _platform_clients.org_friendly_id
+        org_key = _platform_clients.org_key
 
     tools_client = getattr(_platform_clients, "ToolsApi", None)
 
     response = tools_api.get_tool_executions(
-        org_friendly_id=org_friendly_id,
+        org_key=org_key,
         filter=_filter,
         page_size=10000,
         client=tools_client,
@@ -438,7 +438,7 @@ def get_dataframe(
         orgs_client = getattr(_platform_clients, "OrganizationsApi", None)
 
         users = organizations_api.get_organization_users(
-            org_friendly_id=org_friendly_id,
+            org_key=org_key,
             client=orgs_client,
         )
 
@@ -498,12 +498,12 @@ def get_dataframe(
         data["tool_key"].append(attributes["tool"]["key"])
         data["tool_version"].append(attributes["tool"]["version"])
 
+        user_id = attributes["createdBy"]
+
         if resolve_user_names:
-            data["user_name"].append(
-                user_id_to_name.get(attributes["user"]["id"], "Unknown")
-            )
+            data["user_name"].append(user_id_to_name.get(user_id, "Unknown"))
         else:
-            data["user_name"].append(attributes["user"]["id"])
+            data["user_name"].append(user_id)
 
         user_inputs = attributes.get("userInputs", {})
 
