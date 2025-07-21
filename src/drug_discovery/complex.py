@@ -187,36 +187,34 @@ class Complex:
         # and protein.upload() is so that we can make one call to upload_files, instead
         # of several
 
-        pass
-
-        # if self._platform_clients is None:
-        #     files_client = FilesClient()
-        # else:
-        #     files_client = self._platform_clients.FilesApi
-
-        # # get a list of all files in the entities directory
+        # get a list of all files in the entities directory
+        # disabled because this doesn't work now
         # remote_files = files_client.list_folder("entities", recursive=True)
         # remote_files = list(remote_files.keys())
 
-        # files_to_upload = {}
+        from deeporigin.platform import file_api
 
-        # protein_path = self.protein._remote_path_base + os.path.basename(
-        #     self.protein.file_path
-        # )
-        # self.protein._remote_path = protein_path
-        # if protein_path not in remote_files:
-        #     files_to_upload[str(self.protein.file_path)] = protein_path
+        remote_files = []
 
-        # for ligand in self.ligands:
-        #     if ligand.file_path is None:
-        #         # this ligand isn't being backed by a file, so we can't upload it
-        #         continue
-        #     ligand_path = ligand._remote_path_base + os.path.basename(ligand.file_path)
-        #     ligand._remote_path = ligand_path
-        #     if ligand_path not in remote_files:
-        #         files_to_upload[str(ligand.file_path)] = ligand_path
+        files_to_upload = {}
 
-        # files_client.upload_files(files_to_upload)
+        protein_path = self.protein._remote_path_base + os.path.basename(
+            self.protein.file_path
+        )
+        self.protein._remote_path = protein_path
+        if protein_path not in remote_files:
+            files_to_upload[str(self.protein.file_path)] = protein_path
+
+        for ligand in self.ligands:
+            if ligand.file_path is None:
+                # this ligand isn't being backed by a file, so we can't upload it
+                continue
+            ligand_path = ligand._remote_path_base + os.path.basename(ligand.file_path)
+            ligand._remote_path = ligand_path
+            if ligand_path not in remote_files:
+                files_to_upload[str(ligand.file_path)] = ligand_path
+
+        file_api.upload_files(files_to_upload)
 
     def _repr_pretty_(self, p, cycle):
         """pretty print a Docking object"""

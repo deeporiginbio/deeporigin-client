@@ -59,7 +59,7 @@ def download_file(
 
 
 @beartype
-def upload_files(*, files: dict[str, str]):
+def upload_files(files: dict[str, str]):
     """Upload multiple files in parallel. files: {local_path: remote_path}. Raises RuntimeError if any upload fails.
 
     Args:

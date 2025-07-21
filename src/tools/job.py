@@ -65,6 +65,7 @@ class Job:
     _attributes: list = field(default_factory=list)
     _execution_ids: list = field(default_factory=list)
     _metadata: list = field(default_factory=list)
+    _tool: dict = field(default_factory=dict)
 
     # clients
     _platform_clients: Optional[PlatformClients] = None
@@ -73,10 +74,10 @@ class Job:
         self.sync()
 
         if self._viz_func is None:
-            if self._attributes[0]["tool"]["key"] == tool_mapper["Docking"]:
+            if self._tool[0]["key"] == tool_mapper["Docking"]:
                 self._viz_func = job_viz_functions._viz_func_docking
                 self._name_func = job_viz_functions._name_func_docking
-            elif self._attributes[0]["tool"]["key"] == tool_mapper["ABFE"]:
+            elif self._tool[0]["key"] == tool_mapper["ABFE"]:
                 self._viz_func = job_viz_functions._viz_func_abfe
                 self._name_func = job_viz_functions._name_func_abfe
 
@@ -142,11 +143,11 @@ class Job:
         )
 
         self._status = [result["status"] for result in results]
-        self._progress_reports = [result["progress"] for result in results]
-        self._execution_ids = [result["execution_id"] for result in results]
-        self._inputs = [result["inputs"] for result in results]
-        self._attributes = [result["attributes"] for result in results]
-        self._metadata = [result["attributes"]["metadata"] for result in results]
+        self._progress_reports = [result["progressReport"] for result in results]
+        self._execution_ids = [result["executionId"] for result in results]
+        self._inputs = [result["userInputs"] for result in results]
+        self._metadata = [result["metadata"] for result in results]
+        self._tool = [result["tool"] for result in results]
 
     def _get_running_time(self) -> list:
         """Get the running time of the job.
