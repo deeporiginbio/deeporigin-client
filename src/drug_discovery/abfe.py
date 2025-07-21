@@ -14,7 +14,7 @@ from deeporigin.drug_discovery.constants import tool_mapper
 from deeporigin.drug_discovery.structures.ligand import Ligand
 from deeporigin.drug_discovery.workflow_step import WorkflowStep
 from deeporigin.exceptions import DeepOriginException
-from deeporigin.platform import files_api
+from deeporigin.platform import file_api
 from deeporigin.tools.job import Job, get_dataframe
 from deeporigin.utils.notebook import get_notebook_environment
 
@@ -56,7 +56,7 @@ class ABFE(WorkflowStep):
             print("No ABFE results found for this protein.")
             return None
 
-        files_api.download_files(
+        file_api.download_files(
             results_files,
             client=files_client,
         )
@@ -341,7 +341,7 @@ class ABFE(WorkflowStep):
 
         files_to_download.append(remote_xtc_file)
 
-        files_api.download_files(files_to_download, client=files_client)
+        file_api.download_files(files_to_download, client=files_client)
 
         from deeporigin_molstar.src.viewers import ProteinViewer
 

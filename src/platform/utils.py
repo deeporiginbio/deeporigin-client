@@ -2,29 +2,35 @@
 
 import inspect
 from typing import Optional
-from urllib.parse import urljoin
+import warnings
 
 from beartype import beartype
 from box import Box
-
-# Import SDKs at module level
-import do_sdk_platform
 
 from deeporigin.auth import get_tokens
 from deeporigin.config import get_value
 from deeporigin.utils.core import _get_method
 
+warnings.filterwarnings(
+    "ignore",
+    module="pydantic._internal._fields",
+)
+
+# we're importing this here after the warnings are supressed
+# because importing this raises UserWarnings we don't want to show
+import do_sdk_platform  # noqa: E402
+
 
 class PlatformClients:
     """
-    A container for all DeepOrigin platform API clients, instantiated with a token, base_url, and org_friendly_id.
+    A container for all DeepOrigin platform API clients, instantiated with a token, base_url, and org_key.
 
     Each API client is available as an attribute of this class, e.g., self.FilesApi, self.ToolsApi, etc.
 
     Args:
         token (str): The authentication token to use for all API clients.
         base_url (str): The base URL of the DeepOrigin platform (e.g., 'https://os.deeporigin.io').
-        org_friendly_id (str): The organization-friendly ID to use for API requests.
+        org_key (str): The organization-friendly ID to use for API requests.
     """
 
     def __init__(
@@ -32,17 +38,17 @@ class PlatformClients:
         *,
         token: str,
         base_url: str,
-        org_friendly_id: str,
+        org_key: str,
     ) -> None:
         from deeporigin.files import FilesClient
 
-        self.org_friendly_id = org_friendly_id
+        self.org_key = org_key
 
         # FilesApi is a special case
         self.FilesApi = FilesClient(
             token=token,
             base_url=base_url,
-            organization_id=org_friendly_id,
+            organization_id=org_key,
         )
 
         api_endpoint = base_url + "/api/"
@@ -91,11 +97,15 @@ def _add_functions_to_module(
 
     for method in methods:
         # clean up the name so that it's more readable
-        sanitized_method_name = method.split("controller")[-1]
+        # here we're removing the first word, which is the same as the api name
+        sanitized_method_name = "_".join(method.split("_")[1:])
 
         sanitized_method_name = sanitized_method_name.replace(
             "_without_preload_content", ""
         ).lstrip("_")
+
+        # debug
+        # print(f"method: {method} sanitized_method_name: {sanitized_method_name}")
 
         sanitized_methods.append(sanitized_method_name)
 
@@ -136,13 +146,11 @@ def _get_api_client(
         if api_endpoint is None:
             api_endpoint = get_value()["api_endpoint"]
 
-        host = urljoin(api_endpoint, "/api")
-
         if token is None:
             token = get_tokens()["access"]
 
         configuration = do_sdk_platform.Configuration(
-            host=host,
+            host=api_endpoint,
             access_token=token,
         )
 
@@ -205,13 +213,11 @@ def _create_function(
             )
         method = _get_method(client, method_path)
 
-        # Insert org_friendly_id if not present in kwargs, and
+        # Insert org_key if not present in kwargs, and
         # if it's required by the method
         method_sig = inspect.signature(method)
-        if "org_friendly_id" in method_sig.parameters and (
-            kwargs.get("org_friendly_id") is None
-        ):
-            kwargs["org_friendly_id"] = get_value()["organization_id"]
+        if "org_key" in method_sig.parameters and (kwargs.get("org_key") is None):
+            kwargs["org_key"] = get_value()["organization_id"]
 
         # call the low level API method
         response = method(**kwargs)
