@@ -5,6 +5,8 @@ import os
 import sys
 from typing import Optional
 
+from beartype import beartype
+
 from deeporigin.platform.utils import _add_functions_to_module
 from deeporigin.utils.core import _ensure_do_folder
 
@@ -17,18 +19,32 @@ __all__ = _add_functions_to_module(
 DO_FOLDER = _ensure_do_folder()
 
 
+@beartype
 def upload_file(*, local_path: str, remote_path: str):
+    """upload a single file to UFA
+
+    Args:
+        local_path (str): The local path of the file to upload.
+        remote_path (str): The remote path of the file to upload.
+    """
+
     with open(local_path, "rb") as f:
         file_data = (remote_path, f.read())
         put_object(file_path=remote_path, file=file_data)  # noqa: F821
 
 
+@beartype
 def download_file(
     *,
     remote_path: str,
     local_path: Optional[str] = None,
 ):
-    """download a single file from UFA to ~/.deeporigin/, or some other local path"""
+    """download a single file from UFA to ~/.deeporigin/, or some other local path
+
+    Args:
+        remote_path (str): The remote path of the file to download.
+        local_path (str): The local path to save the file to. If None, uses ~/.deeporigin/.
+    """
 
     if local_path is None:
         local_path = os.path.join(DO_FOLDER, remote_path)
@@ -42,8 +58,14 @@ def download_file(
     download_sync(response.url, save_path=local_path)
 
 
+@beartype
 def upload_files(*, files: dict[str, str]):
-    """Upload multiple files in parallel. files: {local_path: remote_path}. Raises RuntimeError if any upload fails."""
+    """Upload multiple files in parallel. files: {local_path: remote_path}. Raises RuntimeError if any upload fails.
+
+    Args:
+        files (dict[str, str]): A dictionary of local paths to remote paths.
+    """
+
     results = []
     errors = []
     with concurrent.futures.ThreadPoolExecutor() as executor:
@@ -68,6 +90,7 @@ def upload_files(*, files: dict[str, str]):
     return results
 
 
+@beartype
 def download_files(*, files: dict[str, str | None]):
     """Download multiple files in parallel. files: {remote_path: local_path or None}. If local_path is None, use default. Raises RuntimeError if any download fails."""
     results = []

@@ -11,7 +11,6 @@ from deeporigin.drug_discovery.docking import Docking
 from deeporigin.drug_discovery.rbfe import RBFE
 from deeporigin.drug_discovery.structures import Ligand, LigandSet, Protein
 from deeporigin.exceptions import DeepOriginException
-from deeporigin.files import FilesClient
 from deeporigin.platform.utils import PlatformClients
 
 
@@ -188,34 +187,36 @@ class Complex:
         # and protein.upload() is so that we can make one call to upload_files, instead
         # of several
 
-        if self._platform_clients is None:
-            files_client = FilesClient()
-        else:
-            files_client = self._platform_clients.FilesApi
+        pass
 
-        # get a list of all files in the entities directory
-        remote_files = files_client.list_folder("entities", recursive=True)
-        remote_files = list(remote_files.keys())
+        # if self._platform_clients is None:
+        #     files_client = FilesClient()
+        # else:
+        #     files_client = self._platform_clients.FilesApi
 
-        files_to_upload = {}
+        # # get a list of all files in the entities directory
+        # remote_files = files_client.list_folder("entities", recursive=True)
+        # remote_files = list(remote_files.keys())
 
-        protein_path = self.protein._remote_path_base + os.path.basename(
-            self.protein.file_path
-        )
-        self.protein._remote_path = protein_path
-        if protein_path not in remote_files:
-            files_to_upload[str(self.protein.file_path)] = protein_path
+        # files_to_upload = {}
 
-        for ligand in self.ligands:
-            if ligand.file_path is None:
-                # this ligand isn't being backed by a file, so we can't upload it
-                continue
-            ligand_path = ligand._remote_path_base + os.path.basename(ligand.file_path)
-            ligand._remote_path = ligand_path
-            if ligand_path not in remote_files:
-                files_to_upload[str(ligand.file_path)] = ligand_path
+        # protein_path = self.protein._remote_path_base + os.path.basename(
+        #     self.protein.file_path
+        # )
+        # self.protein._remote_path = protein_path
+        # if protein_path not in remote_files:
+        #     files_to_upload[str(self.protein.file_path)] = protein_path
 
-        files_client.upload_files(files_to_upload)
+        # for ligand in self.ligands:
+        #     if ligand.file_path is None:
+        #         # this ligand isn't being backed by a file, so we can't upload it
+        #         continue
+        #     ligand_path = ligand._remote_path_base + os.path.basename(ligand.file_path)
+        #     ligand._remote_path = ligand_path
+        #     if ligand_path not in remote_files:
+        #         files_to_upload[str(ligand.file_path)] = ligand_path
+
+        # files_client.upload_files(files_to_upload)
 
     def _repr_pretty_(self, p, cycle):
         """pretty print a Docking object"""
