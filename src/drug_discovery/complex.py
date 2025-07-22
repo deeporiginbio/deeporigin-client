@@ -187,14 +187,13 @@ class Complex:
         # and protein.upload() is so that we can make one call to upload_files, instead
         # of several
 
-        # get a list of all files in the entities directory
-        # disabled because this doesn't work now
-        # remote_files = files_client.list_folder("entities", recursive=True)
-        # remote_files = list(remote_files.keys())
-
         from deeporigin.platform import file_api
 
-        remote_files = []
+        remote_files = file_api.get_object_directory(
+            file_path="/entities/",
+            recursive=True,
+        )
+        remote_files = [file.Key for file in remote_files]
 
         files_to_upload = {}
 
