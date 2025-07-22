@@ -341,6 +341,7 @@ class ABFE(WorkflowStep):
             )
 
         files_to_download.append(remote_xtc_file)
+        files_to_download = {str(file): None for file in files_to_download}
 
         file_api.download_files(files_to_download, client=files_client)
 
