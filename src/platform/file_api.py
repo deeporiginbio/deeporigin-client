@@ -38,6 +38,7 @@ def download_file(
     *,
     remote_path: str,
     local_path: Optional[str] = None,
+    client=None,
 ):
     """download a single file from UFA to ~/.deeporigin/, or some other local path
 
@@ -51,7 +52,10 @@ def download_file(
 
     os.makedirs(os.path.dirname(local_path), exist_ok=True)
 
-    response = get_signed_url(file_path=remote_path)  # noqa: F821
+    response = get_signed_url(  # noqa: F821
+        file_path=remote_path,
+        client=client,
+    )
 
     from deeporigin.utils.network import download_sync
 
@@ -59,7 +63,11 @@ def download_file(
 
 
 @beartype
-def upload_files(files: dict[str, str]):
+def upload_files(
+    files: dict[str, str],
+    *,
+    client=None,
+):
     """Upload multiple files in parallel. files: {local_path: remote_path}. Raises RuntimeError if any upload fails.
 
     Args:
@@ -70,7 +78,9 @@ def upload_files(files: dict[str, str]):
     errors = []
     with concurrent.futures.ThreadPoolExecutor() as executor:
         future_to_pair = {
-            executor.submit(upload_file, local_path=lp, remote_path=rp): (lp, rp)
+            executor.submit(
+                upload_file, local_path=lp, remote_path=rp, client=client
+            ): (lp, rp)
             for lp, rp in files.items()
         }
         for future in concurrent.futures.as_completed(future_to_pair):
@@ -91,13 +101,15 @@ def upload_files(files: dict[str, str]):
 
 
 @beartype
-def download_files(*, files: dict[str, str | None]):
+def download_files(files: dict[str, str | None], *, client=None):
     """Download multiple files in parallel. files: {remote_path: local_path or None}. If local_path is None, use default. Raises RuntimeError if any download fails."""
     results = []
     errors = []
     with concurrent.futures.ThreadPoolExecutor() as executor:
         future_to_pair = {
-            executor.submit(download_file, remote_path=rp, local_path=lp): (rp, lp)
+            executor.submit(
+                download_file, remote_path=rp, local_path=lp, client=client
+            ): (rp, lp)
             for rp, lp in files.items()
         }
         for future in concurrent.futures.as_completed(future_to_pair):
