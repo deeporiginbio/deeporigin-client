@@ -11,7 +11,6 @@ from deeporigin.drug_discovery.docking import Docking
 from deeporigin.drug_discovery.rbfe import RBFE
 from deeporigin.drug_discovery.structures import Ligand, LigandSet, Protein
 from deeporigin.exceptions import DeepOriginException
-from deeporigin.files import FilesClient
 from deeporigin.platform.utils import PlatformClients
 
 
@@ -188,14 +187,13 @@ class Complex:
         # and protein.upload() is so that we can make one call to upload_files, instead
         # of several
 
-        if self._platform_clients is None:
-            files_client = FilesClient()
-        else:
-            files_client = self._platform_clients.FilesApi
+        from deeporigin.platform import file_api
 
-        # get a list of all files in the entities directory
-        remote_files = files_client.list_folder("entities", recursive=True)
-        remote_files = list(remote_files.keys())
+        remote_files = file_api.get_object_directory(
+            file_path="/entities/",
+            recursive=True,
+        )
+        remote_files = [file.Key for file in remote_files]
 
         files_to_upload = {}
 
@@ -215,7 +213,7 @@ class Complex:
             if ligand_path not in remote_files:
                 files_to_upload[str(ligand.file_path)] = ligand_path
 
-        files_client.upload_files(files_to_upload)
+        file_api.upload_files(files_to_upload)
 
     def _repr_pretty_(self, p, cycle):
         """pretty print a Docking object"""

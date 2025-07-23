@@ -9,7 +9,6 @@ from beartype import beartype
 import pandas as pd
 
 from deeporigin.drug_discovery.constants import tool_mapper, valid_tools
-from deeporigin.files import FilesClient
 from deeporigin.platform import tools_api
 from deeporigin.platform.utils import PlatformClients
 from deeporigin.utils.core import PrettyDict
@@ -163,14 +162,13 @@ def _start_tool_run(
         )
 
     tools_client = getattr(_platform_clients, "ToolsApi", None)
-    clusters_client = getattr(_platform_clients, "ClustersApi", None)
 
     if _platform_clients is None:
         from deeporigin.config import get_value
 
-        org_friendly_id = get_value()["organization_id"]
+        org_key = get_value()["organization_id"]
     else:
-        org_friendly_id = _platform_clients.org_friendly_id
+        org_key = _platform_clients.org_key
 
     job_id = tools_api._process_job(
         inputs=params,
@@ -178,8 +176,7 @@ def _start_tool_run(
         tool_key=tool_mapper[tool],
         metadata=metadata,
         client=tools_client,
-        org_friendly_id=org_friendly_id,
-        clusters_client=clusters_client,
+        org_key=org_key,
     )
 
     print(f"Job started with Job ID: {job_id}")
@@ -225,7 +222,7 @@ def find_files_on_ufa(
     tool: str,
     protein: str,
     ligand: Optional[str] = None,
-    client: Optional[FilesClient] = None,
+    client=None,
 ) -> list:
     """
     Find files on the UFA (Unified File API) storage for a given tool run.
@@ -244,17 +241,18 @@ def find_files_on_ufa(
         List[str]: A list of file paths found in the specified UFA directory.
     """
 
-    if client is None:
-        from deeporigin.files import FilesClient
-
-        client = FilesClient()
+    from deeporigin.platform import file_api
 
     if ligand is not None:
         search_str = f"tool-runs/{tool}/{protein}/{ligand}/"
     else:
         search_str = f"tool-runs/{tool}/{protein}/"
-    files = client.list_folder(search_str, recursive=True)
-    files = list(files.keys())
+    files = file_api.get_object_directory(
+        file_path=search_str,
+        recursive=True,
+        client=client,
+    )
+    files = [file.Key for file in files]
 
     return files
 

@@ -65,6 +65,7 @@ class Job:
     _attributes: list = field(default_factory=list)
     _execution_ids: list = field(default_factory=list)
     _metadata: list = field(default_factory=list)
+    _tool: dict = field(default_factory=dict)
 
     # clients
     _platform_clients: Optional[PlatformClients] = None
@@ -73,12 +74,18 @@ class Job:
         self.sync()
 
         if self._viz_func is None:
-            if self._attributes[0]["tool"]["key"] == tool_mapper["Docking"]:
-                self._viz_func = job_viz_functions._viz_func_docking
-                self._name_func = job_viz_functions._name_func_docking
-            elif self._attributes[0]["tool"]["key"] == tool_mapper["ABFE"]:
-                self._viz_func = job_viz_functions._viz_func_abfe
-                self._name_func = job_viz_functions._name_func_abfe
+            if (
+                isinstance(self._tool, list)
+                and len(self._tool) > 0
+                and isinstance(self._tool[0], dict)
+                and "key" in self._tool[0]
+            ):
+                if self._tool[0]["key"] == tool_mapper["Docking"]:
+                    self._viz_func = job_viz_functions._viz_func_docking
+                    self._name_func = job_viz_functions._name_func_docking
+                elif self._tool[0]["key"] == tool_mapper["ABFE"]:
+                    self._viz_func = job_viz_functions._viz_func_abfe
+                    self._name_func = job_viz_functions._name_func_abfe
 
     @classmethod
     def from_ids(
@@ -130,23 +137,23 @@ class Job:
         reached a terminal state (Succeeded or Failed).
         """
 
-        # get the org_friendly_id from the platform clients if it's not None
-        org_friendly_id = getattr(self._platform_clients, "org_friendly_id", None)
+        # get the org_key from the platform clients if it's not None
+        org_key = getattr(self._platform_clients, "org_key", None)
         tools_client = getattr(self._platform_clients, "ToolsApi", None)
 
         # use
         results = tools_api.get_statuses_and_progress(
             self._ids,
             client=tools_client,
-            org_friendly_id=org_friendly_id,
+            org_key=org_key,
         )
 
         self._status = [result["status"] for result in results]
-        self._progress_reports = [result["progress"] for result in results]
-        self._execution_ids = [result["execution_id"] for result in results]
-        self._inputs = [result["inputs"] for result in results]
-        self._attributes = [result["attributes"] for result in results]
-        self._metadata = [result["attributes"]["metadata"] for result in results]
+        self._progress_reports = [result["progressReport"] for result in results]
+        self._execution_ids = [result["executionId"] for result in results]
+        self._inputs = [result["userInputs"] for result in results]
+        self._metadata = [result["metadata"] for result in results]
+        self._tool = [result["tool"] for result in results]
 
     def _get_running_time(self) -> list:
         """Get the running time of the job.
@@ -360,13 +367,13 @@ class Job:
             The result of the cancellation operation from utils.cancel_runs.
         """
 
-        org_friendly_id = getattr(self._platform_clients, "org_friendly_id", None)
+        org_key = getattr(self._platform_clients, "org_key", None)
         tools_client = getattr(self._platform_clients, "ToolsApi", None)
 
         tools_api.cancel_runs(
             self._ids,
             client=tools_client,
-            org_friendly_id=org_friendly_id,
+            org_key=org_key,
         )
 
 
@@ -418,14 +425,14 @@ def get_dataframe(
     if _platform_clients is None:
         from deeporigin.config import get_value
 
-        org_friendly_id = get_value()["organization_id"]
+        org_key = get_value()["organization_id"]
     else:
-        org_friendly_id = _platform_clients.org_friendly_id
+        org_key = _platform_clients.org_key
 
     tools_client = getattr(_platform_clients, "ToolsApi", None)
 
     response = tools_api.get_tool_executions(
-        org_friendly_id=org_friendly_id,
+        org_key=org_key,
         filter=_filter,
         page_size=10000,
         client=tools_client,
@@ -438,7 +445,7 @@ def get_dataframe(
         orgs_client = getattr(_platform_clients, "OrganizationsApi", None)
 
         users = organizations_api.get_organization_users(
-            org_friendly_id=org_friendly_id,
+            org_key=org_key,
             client=orgs_client,
         )
 
@@ -498,12 +505,12 @@ def get_dataframe(
         data["tool_key"].append(attributes["tool"]["key"])
         data["tool_version"].append(attributes["tool"]["version"])
 
+        user_id = attributes.get("createdBy", "Unknown")
+
         if resolve_user_names:
-            data["user_name"].append(
-                user_id_to_name.get(attributes["user"]["id"], "Unknown")
-            )
+            data["user_name"].append(user_id_to_name.get(user_id, "Unknown"))
         else:
-            data["user_name"].append(attributes["user"]["id"])
+            data["user_name"].append(user_id)
 
         user_inputs = attributes.get("userInputs", {})
 
