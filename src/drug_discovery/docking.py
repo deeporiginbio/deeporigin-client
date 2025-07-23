@@ -20,7 +20,7 @@ from deeporigin.drug_discovery.constants import tool_mapper
 from deeporigin.drug_discovery.structures.pocket import Pocket
 from deeporigin.drug_discovery.workflow_step import WorkflowStep
 from deeporigin.exceptions import DeepOriginException
-from deeporigin.platform import files_api, tools_api
+from deeporigin.platform import file_api, tools_api
 from deeporigin.tools.job import Job, get_dataframe
 
 Number = float | int
@@ -138,7 +138,7 @@ class Docking(WorkflowStep):
             print("No Docking results found for this protein.")
             return None
 
-        files_api.download_files(
+        file_api.download_files(
             results_files,
             client=files_client,
         )
