@@ -270,10 +270,6 @@ def _process_job(
         metadata=metadata,
     )
 
-    import json
-
-    print(json.dumps(payload, indent=4))
-
     response = run_tool(
         data=payload,
         tool_key=tool_key,

@@ -104,9 +104,6 @@ def _add_functions_to_module(
             "_without_preload_content", ""
         ).lstrip("_")
 
-        # debug
-        # print(f"method: {method} sanitized_method_name: {sanitized_method_name}")
-
         sanitized_methods.append(sanitized_method_name)
 
         # add this function as an attribute to this module

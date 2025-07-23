@@ -74,12 +74,18 @@ class Job:
         self.sync()
 
         if self._viz_func is None:
-            if self._tool[0]["key"] == tool_mapper["Docking"]:
-                self._viz_func = job_viz_functions._viz_func_docking
-                self._name_func = job_viz_functions._name_func_docking
-            elif self._tool[0]["key"] == tool_mapper["ABFE"]:
-                self._viz_func = job_viz_functions._viz_func_abfe
-                self._name_func = job_viz_functions._name_func_abfe
+            if (
+                isinstance(self._tool, list)
+                and len(self._tool) > 0
+                and isinstance(self._tool[0], dict)
+                and "key" in self._tool[0]
+            ):
+                if self._tool[0]["key"] == tool_mapper["Docking"]:
+                    self._viz_func = job_viz_functions._viz_func_docking
+                    self._name_func = job_viz_functions._name_func_docking
+                elif self._tool[0]["key"] == tool_mapper["ABFE"]:
+                    self._viz_func = job_viz_functions._viz_func_abfe
+                    self._name_func = job_viz_functions._name_func_abfe
 
     @classmethod
     def from_ids(
@@ -499,7 +505,7 @@ def get_dataframe(
         data["tool_key"].append(attributes["tool"]["key"])
         data["tool_version"].append(attributes["tool"]["version"])
 
-        user_id = attributes["createdBy"]
+        user_id = attributes.get("createdBy", "Unknown")
 
         if resolve_user_names:
             data["user_name"].append(user_id_to_name.get(user_id, "Unknown"))
