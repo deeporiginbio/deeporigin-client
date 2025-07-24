@@ -541,7 +541,7 @@ def mcs(mols: list[Chem.Mol], *, timeout: int = 10) -> Chem.Mol:
     params.BondCompareParameters.RingMatchesRingOnly = False
     params.BondCompareParameters.CompleteRingsOnly = False
     params.Timeout = timeout
-    params.Verbose = True
+    params.Verbose = False
 
     result = rdFMCS.FindMCS(prepped, parameters=params)
 
@@ -637,8 +637,9 @@ def safe_substruct_match(
     """
     match = mol.GetSubstructMatch(query)
     if not match:
-        print(f"[❌] MCS SMARTS did not match {label}.")
-        print(f"  SMARTS: {Chem.MolToSmarts(query)}")
-        print(f"  Mol SMILES: {Chem.MolToSmiles(mol)}")
-        raise ValueError(f"MCS does not match {label}")
+        raise ValueError(
+            f"MCS does not match {label}.\n"
+            f"  SMARTS: {Chem.MolToSmarts(query)}\n"
+            f"  Mol SMILES: {Chem.MolToSmiles(mol)}"
+        )
     return match
