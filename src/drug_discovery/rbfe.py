@@ -52,6 +52,8 @@ class RBFE(WorkflowStep):
         )
 
         results_files = [file for file in files if file.endswith("/results.csv")]
+        results_files = {file: None for file in results_files}
+
 
         if len(results_files) == 0:
             print("No RBFE results found for this protein.")
@@ -77,7 +79,7 @@ class RBFE(WorkflowStep):
             dfs.append(df)
         df1 = pd.concat(dfs)
 
-        df2 = ligands_to_dataframe(self.parent.ligands)
+        df2 = self.parent.ligands.to_dataframe()
 
         # Merge to get SMILES1
         df1 = df1.merge(
