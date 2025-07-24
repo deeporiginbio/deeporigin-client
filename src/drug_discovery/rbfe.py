@@ -54,7 +54,6 @@ class RBFE(WorkflowStep):
         results_files = [file for file in files if file.endswith("/results.csv")]
         results_files = {file: None for file in results_files}
 
-
         if len(results_files) == 0:
             print("No RBFE results found for this protein.")
             return None
