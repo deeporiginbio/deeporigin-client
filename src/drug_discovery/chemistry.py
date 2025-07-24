@@ -9,11 +9,7 @@ from typing import Optional
 
 from beartype import beartype
 from rdkit import Chem
-
-from rdkit import Chem
-from rdkit.Chem import rdFMCS
-
-from rdkit.Chem import AllChem
+from rdkit.Chem import AllChem, rdFMCS
 
 
 @beartype
@@ -263,7 +259,7 @@ def smiles_list_to_base64_png_list(
     """
 
     from rdkit import Chem
-    from rdkit.Chem import AllChem, rdDepictor
+    from rdkit.Chem import rdDepictor
     from rdkit.Chem.Draw import rdMolDraw2D
 
     if reference_smiles is None:
@@ -374,7 +370,7 @@ def smiles_to_sdf(smiles: str, sdf_path: str) -> None:
     """
 
     from rdkit import Chem
-    from rdkit.Chem import AllChem, SDWriter
+    from rdkit.Chem import SDWriter
 
     mol = Chem.MolFromSmiles(smiles)
     if mol is None:
@@ -528,8 +524,6 @@ def show_molecules_in_sdf_file(sdf_file: str | Path):
     JupyterViewer.visualize(html_content)
 
 
-
-
 def mcs(mols: list[Chem.Mol], timeout: int = 10) -> Chem.Mol:
     """
     Generate the Most Common Substructure (MCS) for molecules
@@ -538,7 +532,6 @@ def mcs(mols: list[Chem.Mol], timeout: int = 10) -> Chem.Mol:
         smartsString (str) : SMARTS string representing the MCS
 
     """
-    from rdkit.Chem import rdFMCS
 
     prepped = [preprocess_mol(m) for m in mols]
 
@@ -573,8 +566,9 @@ def preprocess_mol(mol: Chem.Mol) -> Chem.Mol:
     return mol
 
 
-
-def align(mols: list[Chem.Mol], reference: Chem.Mol, mcs_mol: Chem.Mol, energy: float = 5) -> list[list[dict]]:
+def align(
+    mols: list[Chem.Mol], reference: Chem.Mol, mcs_mol: Chem.Mol, energy: float = 5
+) -> list[list[dict]]:
     """
     Aligns a set of molecules to a reference and returns MCS atom constraints.
 
@@ -587,7 +581,6 @@ def align(mols: list[Chem.Mol], reference: Chem.Mol, mcs_mol: Chem.Mol, energy: 
     Returns:
         list[list[dict]]: Constraints for each molecule.
     """
-    from rdkit.Chem import AllChem
 
     ref = preprocess_mol(reference)
     mcs_match_ref = safe_substruct_match(ref, mcs_mol, "reference")
@@ -603,7 +596,9 @@ def align(mols: list[Chem.Mol], reference: Chem.Mol, mcs_mol: Chem.Mol, energy: 
         match = safe_substruct_match(mol_p, mcs_mol, f"mol #{i}")
 
         # Align molecule to reference using MCS
-        AllChem.AlignMol(mol_p, ref, atomMap=list(zip(match, mcs_match_ref)))
+        AllChem.AlignMol(
+            mol_p, ref, atomMap=list(zip(match, mcs_match_ref, strict=False))
+        )
 
         # Build constraints: atom index + 1 (1-based), and position from ref
         constraints = [
@@ -639,4 +634,3 @@ def safe_substruct_match(mol: Chem.Mol, query: Chem.Mol, label: str) -> list[int
         print(f"  Mol SMILES: {Chem.MolToSmiles(mol)}")
         raise ValueError(f"MCS does not match {label}")
     return match
-
