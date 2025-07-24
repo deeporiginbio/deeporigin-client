@@ -39,9 +39,9 @@ class RBFE(WorkflowStep):
         self._params.end_to_end = utils._load_params("rbfe_end_to_end")
 
     def get_results(self) -> pd.DataFrame | None:
-        """get ABFE results and return in a dataframe.
+        """get RBFE results and return in a dataframe.
 
-        This method returns a dataframe showing the results of ABFE runs associated with this simulation session. The ligand file name and ΔG are shown, together with user-supplied properties"""
+        This method returns a dataframe showing the results of RBFE runs associated with this simulation session. The ligand file name and ΔG are shown, together with user-supplied properties"""
 
         files_client = getattr(self.parent._platform_clients, "FilesApi", None)
 
@@ -102,9 +102,9 @@ class RBFE(WorkflowStep):
         return df1
 
     def show_results(self):
-        """Show ABFE results in a dataframe.
+        """Show RBFE results in a dataframe.
 
-        This method returns a dataframe showing the results of ABFE runs associated with this simulation session. The ligand file name, 2-D structure, and ΔG are shown."""
+        This method returns a dataframe showing the results of RBFE runs associated with this simulation session. The ligand file name, 2-D structure, and ΔG are shown."""
 
         df = self.get_results()
 
@@ -137,7 +137,7 @@ class RBFE(WorkflowStep):
 
     @beartype
     def set_test_run(self, value: int = 1):
-        """set test_run parameter in abfe parameters"""
+        """set test_run parameter in RBFE parameters"""
 
         utils._set_test_run(self._params.end_to_end, value)
 
@@ -274,7 +274,7 @@ class RBFE(WorkflowStep):
         return Job.from_ids(job_ids, _platform_clients=self.parent._platform_clients)
 
     def get_jobs(self) -> None:
-        """Get the jobs for  and save to self.jobs"""
+        """Get the jobs for jobs corresponding to this network and save to self.jobs"""
 
         if self.parent.ligands.network.get("edges", None) is None:
             # no network mapped. use the default get_jobs method
