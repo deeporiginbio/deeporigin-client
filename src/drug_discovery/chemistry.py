@@ -9,6 +9,7 @@ from typing import Optional
 
 from beartype import beartype
 from rdkit import Chem
+from rdkit.Chem import AllChem, rdFMCS
 
 
 @beartype
@@ -258,7 +259,7 @@ def smiles_list_to_base64_png_list(
     """
 
     from rdkit import Chem
-    from rdkit.Chem import AllChem, rdDepictor
+    from rdkit.Chem import rdDepictor
     from rdkit.Chem.Draw import rdMolDraw2D
 
     if reference_smiles is None:
@@ -369,7 +370,7 @@ def smiles_to_sdf(smiles: str, sdf_path: str) -> None:
     """
 
     from rdkit import Chem
-    from rdkit.Chem import AllChem, SDWriter
+    from rdkit.Chem import SDWriter
 
     mol = Chem.MolFromSmiles(smiles)
     if mol is None:
@@ -521,3 +522,124 @@ def show_molecules_in_sdf_file(sdf_file: str | Path):
     )
     html_content = molecule_viewer.render_ligand()
     JupyterViewer.visualize(html_content)
+
+
+def mcs(mols: list[Chem.Mol], *, timeout: int = 10) -> Chem.Mol:
+    """
+    Generate the Maximum Common Substructure (MCS) for molecules
+
+    Returns:
+        Mol: MCS molecule constructed from the smarts string
+
+    """
+
+    prepped = [preprocess_mol(m) for m in mols]
+
+    params = rdFMCS.MCSParameters()
+    params.AtomTyper = rdFMCS.AtomCompare.CompareElements
+    params.BondTyper = rdFMCS.BondCompare.CompareOrder
+    params.BondCompareParameters.RingMatchesRingOnly = False
+    params.BondCompareParameters.CompleteRingsOnly = False
+    params.Timeout = timeout
+    params.Verbose = False
+
+    result = rdFMCS.FindMCS(prepped, parameters=params)
+
+    if result.canceled:
+        raise RuntimeError("MCS computation timed out or failed.")
+
+    return Chem.MolFromSmarts(result.smartsString)
+
+
+def preprocess_mol(mol: Chem.Mol) -> Chem.Mol:
+    """
+    Preprocess a molecule for MCS
+
+    Args:
+        mol (Chem.Mol): RDKit molecule
+
+    Returns:
+        Chem.Mol: Preprocessed molecule
+    """
+    mol = Chem.RemoveHs(mol)
+    Chem.SanitizeMol(mol)
+    return mol
+
+
+def align(
+    *,
+    mols: list[Chem.Mol],
+    reference: Chem.Mol,
+    mcs_mol: Chem.Mol,
+    energy: float = 5,
+) -> list[list[dict]]:
+    """
+    Aligns a set of molecules to a reference and returns MCS atom constraints.
+
+    Args:
+        mols (list[Chem.Mol]): Molecules to align.
+        reference (Chem.Mol): Reference molecule (with 3D coords).
+        mcs_mol (Chem.Mol): MCS molecule.
+        energy (float): Energy weight for constraints.
+
+    Returns:
+        list[list[dict]]: Constraints for each molecule.
+    """
+
+    ref = preprocess_mol(reference)
+    mcs_match_ref = safe_substruct_match(ref, mcs_mol, "reference")
+    ref_conf = ref.GetConformer()
+
+    # Get reference atom positions for the MCS atoms
+    ref_positions = [list(ref_conf.GetAtomPosition(idx)) for idx in mcs_match_ref]
+
+    all_constraints = []
+
+    for i, mol in enumerate(mols):
+        mol_p = preprocess_mol(mol)
+        match = safe_substruct_match(mol_p, mcs_mol, f"mol #{i}")
+
+        # Align molecule to reference using MCS
+        AllChem.AlignMol(
+            mol_p, ref, atomMap=list(zip(match, mcs_match_ref, strict=False))
+        )
+
+        # Build constraints: atom index + 1 (1-based), and position from ref
+        constraints = [
+            {
+                "index": atom_idx + 1,  # +1 for 1-based indexing
+                "coordinates": ref_positions[i],
+                "energy": energy,
+            }
+            for i, atom_idx in enumerate(match)
+        ]
+
+        all_constraints.append(constraints)
+
+    return all_constraints
+
+
+def safe_substruct_match(
+    mol: Chem.Mol,
+    query: Chem.Mol,
+    label: str,
+) -> list[int]:
+    """
+    Safely get a substructure match for a molecule
+
+    Args:
+        mol (Chem.Mol): RDKit molecule
+        query (Chem.Mol): Query molecule
+        label (str): Label for the molecule
+
+    Returns:
+        list[int]: List of atom indices that match the query
+    """
+    match = mol.GetSubstructMatch(query)
+    if not match:
+        raise ValueError(
+            f"MCS does not match {label}.\n"
+            f"  SMARTS: {Chem.MolToSmarts(query)}\n"
+            f"  Mol SMILES: {Chem.MolToSmiles(mol)}"
+        )
+    return match

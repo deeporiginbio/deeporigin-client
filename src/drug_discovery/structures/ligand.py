@@ -1116,15 +1116,18 @@ class LigandSet:
 
         """
 
-        from rdkit.Chem import rdFMCS
+        from deeporigin.drug_discovery import chemistry
 
-        # Set some high level params
-        params = rdFMCS.MCSParameters()
-        params.AtomTyper = rdFMCS.AtomCompare.CompareElements
-        params.BondTyper = rdFMCS.BondCompare.CompareOrder
-        params.BondCompareParameters.RingMatchesRingOnly = True
-        params.BondCompareParameters.CompleteRingsOnly = True
+        return chemistry.mcs(self.to_rdkit_mols())
 
-        # Generate the MCS for all valid mols
-        mcs_result = rdFMCS.FindMCS(self.to_rdkit_mols())
-        return mcs_result.smartsString
+    def align(self, *, reference: Ligand) -> list[list[dict]]:
+        """
+        Align a set of ligands to a reference ligand
+        """
+        from deeporigin.drug_discovery import chemistry
+
+        return chemistry.align(
+            mols=self.to_rdkit_mols(),
+            reference=reference.mol.m,
+            mcs_mol=self.mcs(),
+        )
