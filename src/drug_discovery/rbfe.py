@@ -11,7 +11,7 @@ import pandas as pd
 
 from deeporigin.drug_discovery import utils
 from deeporigin.drug_discovery.constants import tool_mapper
-from deeporigin.drug_discovery.structures.ligand import Ligand, ligands_to_dataframe
+from deeporigin.drug_discovery.structures.ligand import Ligand
 from deeporigin.drug_discovery.workflow_step import WorkflowStep
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.platform import file_api

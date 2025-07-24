@@ -142,7 +142,7 @@ def test_mcs():
     from deeporigin.drug_discovery import BRD_DATA_DIR, LigandSet
 
     ligands = LigandSet.from_dir(BRD_DATA_DIR)
-    mcs = ligands.mcs()
+    ligands.mcs()
 
 
 def test_align():
