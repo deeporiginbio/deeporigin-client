@@ -157,7 +157,6 @@ def cancel_run(
         action="cancel",
         client=client,
         org_key=org_key,
-        tool_key=data.tool.key,
     )
 
 

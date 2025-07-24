@@ -13,6 +13,7 @@ from deeporigin.drug_discovery import utils
 from deeporigin.drug_discovery.constants import tool_mapper
 from deeporigin.drug_discovery.structures.ligand import Ligand, ligands_to_dataframe
 from deeporigin.drug_discovery.workflow_step import WorkflowStep
+from deeporigin.exceptions import DeepOriginException
 from deeporigin.platform import file_api
 from deeporigin.tools.job import Job
 from deeporigin.utils.core import PrettyDict
@@ -37,19 +38,10 @@ class RBFE(WorkflowStep):
         self._params = PrettyDict()
         self._params.end_to_end = utils._load_params("rbfe_end_to_end")
 
-    def _render_progress(self, job) -> str:
-        """Render progress visualization for a job."""
-        # TODO: Implement RBFE-specific progress visualization
-        return "[WIP] RBFE Progress Visualization"
-
-    def _name_job(self, job) -> str:
-        """Generate a name for a job."""
-        return f"RBFE run using <code>{job._metadata[0]['protein_file']}</code>, <code>{job._metadata[0]['ligand1_file']}</code>, and <code>{job._metadata[0]['ligand2_file']}</code>"
-
     def get_results(self) -> pd.DataFrame | None:
-        """get ABFE results and return in a dataframe.
+        """get RBFE results and return in a dataframe.
 
-        This method returns a dataframe showing the results of ABFE runs associated with this simulation session. The ligand file name and ΔG are shown, together with user-supplied properties"""
+        This method returns a dataframe showing the results of RBFE runs associated with this simulation session. The ligand file name and ΔG are shown, together with user-supplied properties"""
 
         files_client = getattr(self.parent._platform_clients, "FilesApi", None)
 
@@ -60,6 +52,7 @@ class RBFE(WorkflowStep):
         )
 
         results_files = [file for file in files if file.endswith("/results.csv")]
+        results_files = {file: None for file in results_files}
 
         if len(results_files) == 0:
             print("No RBFE results found for this protein.")
@@ -85,7 +78,7 @@ class RBFE(WorkflowStep):
             dfs.append(df)
         df1 = pd.concat(dfs)
 
-        df2 = ligands_to_dataframe(self.parent.ligands)
+        df2 = self.parent.ligands.to_dataframe()
 
         # Merge to get SMILES1
         df1 = df1.merge(
@@ -110,9 +103,9 @@ class RBFE(WorkflowStep):
         return df1
 
     def show_results(self):
-        """Show ABFE results in a dataframe.
+        """Show RBFE results in a dataframe.
 
-        This method returns a dataframe showing the results of ABFE runs associated with this simulation session. The ligand file name, 2-D structure, and ΔG are shown."""
+        This method returns a dataframe showing the results of RBFE runs associated with this simulation session. The ligand file name, 2-D structure, and ΔG are shown."""
 
         df = self.get_results()
 
@@ -144,6 +137,12 @@ class RBFE(WorkflowStep):
             return df
 
     @beartype
+    def set_test_run(self, value: int = 1):
+        """set test_run parameter in RBFE parameters"""
+
+        utils._set_test_run(self._params.end_to_end, value)
+
+    @beartype
     def run_ligand_pair(
         self,
         *,
@@ -151,7 +150,8 @@ class RBFE(WorkflowStep):
         ligand2: Ligand,
         re_run: bool = False,
         _output_dir_path: Optional[str] = None,
-    ) -> Job | None:
+        return_job: bool = True,
+    ) -> Job | None | str:
         """Method to run an end-to-end RBFE run.
 
         Args:
@@ -164,9 +164,9 @@ class RBFE(WorkflowStep):
         # check that there is a prepared system for each ligand
         for ligand in [ligand1, ligand2]:
             if ligand.name not in self.parent._prepared_systems:
-                raise ValueError(
+                raise DeepOriginException(
                     f"Complex with Ligand {ligand.name} is not prepared. Please prepare the system using the `prepare` method of Complex."
-                )
+                ) from None
 
         # check that for every prepared system, the number of atoms is less than the max atom count
         for ligand_name, prepared_system in self.parent._prepared_systems.items():
@@ -206,13 +206,103 @@ class RBFE(WorkflowStep):
             _output_dir_path=_output_dir_path,
         )
 
-        job = Job.from_id(job_id, _platform_clients=self.parent._platform_clients)
+        if return_job:
+            job = Job.from_id(job_id, _platform_clients=self.parent._platform_clients)
 
-        job._viz_func = self._render_progress
-        job._name_func = self._name_job
+            self.jobs.append(job)
+            return job
+        else:
+            return job_id
 
-        job.sync()
+    @beartype
+    def run_network(self, *, re_run: bool = False) -> Job:
+        """
+        Run RBFE for the ligand pairs in the network in the ligand set in the Complex.
 
-        self.jobs.append(job)
+        Args:
+            re_run (bool, optional): If True, re-run jobs even if results already exist. Defaults to False.
 
-        return job
+        Returns:
+            Job: The Job object representing the network run.
+        """
+        if "edges" not in self.parent.ligands.network.keys():
+            raise DeepOriginException(
+                "Network not mapped yet. Please map the network first using `map_network()`."
+            )
+
+        job_ids = []
+
+        from tqdm import tqdm
+
+        # Wrap the edge iteration in a tqdm progress bar
+        for edge in tqdm(
+            self.parent.ligands.network["edges"], desc="Starting RBFE network..."
+        ):
+            ligand1_name = edge["source"]
+            ligand2_name = edge["target"]
+
+            ligand1 = [
+                ligand for ligand in self.parent.ligands if ligand.name == ligand1_name
+            ]
+
+            if len(ligand1) == 0:
+                raise DeepOriginException(
+                    f"Ligand {ligand1_name} not found in the network."
+                )
+
+            ligand1 = ligand1[0]
+
+            ligand2 = [
+                ligand for ligand in self.parent.ligands if ligand.name == ligand2_name
+            ]
+
+            if len(ligand2) == 0:
+                raise DeepOriginException(
+                    f"Ligand {ligand2_name} not found in the network."
+                )
+
+            ligand2 = ligand2[0]
+
+            job_id = self.run_ligand_pair(
+                ligand1=ligand1,
+                ligand2=ligand2,
+                re_run=re_run,
+                return_job=False,
+            )
+
+            job_ids.append(job_id)
+
+        return Job.from_ids(job_ids, _platform_clients=self.parent._platform_clients)
+
+    def get_jobs(self) -> None:
+        """Get the jobs for jobs corresponding to this network and save to self.jobs"""
+
+        if self.parent.ligands.network.get("edges", None) is None:
+            # no network mapped. use the default get_jobs method
+            return super().get_jobs()
+
+        # at this point, we know that the network is mapped
+        # so we need to get the jobs for each ligand pair
+        df = self.get_jobs_df()
+
+        ligand_dict = {ligand.smiles: ligand.name for ligand in self.parent.ligands}
+        edges = self.parent.ligands.network["edges"]
+        valid_job_ids = []
+        for _, row in df.iterrows():
+            metadata = row["metadata"]
+            if "ligand1_smiles" not in metadata.keys():
+                continue
+            if "ligand2_smiles" not in metadata.keys():
+                continue
+            edge = dict(
+                source=ligand_dict[metadata["ligand1_smiles"]],
+                target=ligand_dict[metadata["ligand2_smiles"]],
+            )
+            if edge in edges:
+                valid_job_ids.append(row["id"])
+
+        job = Job.from_ids(
+            valid_job_ids,
+            _platform_clients=self.parent._platform_clients,
+        )
+        self.jobs = [job]
