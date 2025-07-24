@@ -524,12 +524,12 @@ def show_molecules_in_sdf_file(sdf_file: str | Path):
     JupyterViewer.visualize(html_content)
 
 
-def mcs(mols: list[Chem.Mol], timeout: int = 10) -> Chem.Mol:
+def mcs(mols: list[Chem.Mol], *, timeout: int = 10) -> Chem.Mol:
     """
-    Generate the Most Common Substructure (MCS) for molecules
+    Generate the Maximum Common Substructure (MCS) for molecules
 
     Returns:
-        smartsString (str) : SMARTS string representing the MCS
+        Mol: MCS molecule constructed from the smarts string
 
     """
 
@@ -567,7 +567,10 @@ def preprocess_mol(mol: Chem.Mol) -> Chem.Mol:
 
 
 def align(
-    mols: list[Chem.Mol], reference: Chem.Mol, mcs_mol: Chem.Mol, energy: float = 5
+    mols: list[Chem.Mol],
+    reference: Chem.Mol,
+    mcs_mol: Chem.Mol,
+    energy: float = 5,
 ) -> list[list[dict]]:
     """
     Aligns a set of molecules to a reference and returns MCS atom constraints.
@@ -615,7 +618,11 @@ def align(
     return all_constraints
 
 
-def safe_substruct_match(mol: Chem.Mol, query: Chem.Mol, label: str) -> list[int]:
+def safe_substruct_match(
+    mol: Chem.Mol,
+    query: Chem.Mol,
+    label: str,
+) -> list[int]:
     """
     Safely get a substructure match for a molecule
 
