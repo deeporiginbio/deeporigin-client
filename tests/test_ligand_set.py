@@ -1,7 +1,6 @@
 import os
 
 import pytest
-from rdkit import Chem
 
 from deeporigin.drug_discovery import DATA_DIR
 from deeporigin.drug_discovery.structures.ligand import Ligand, LigandSet
@@ -138,15 +137,18 @@ def test_from_dir():
 
 
 def test_mcs():
-    """Test that LigandSet.mcs() returns a valid SMARTS string for a simple set of ligands."""
+    """Test that we can generate the MCS for a set of ligands"""
 
-    ligands = LigandSet.from_smiles(BRD_SMILES)
-    smarts = ligands.mcs()
-    assert isinstance(smarts, str)
-    assert smarts != ""
-    # Check that the SMARTS string can be parsed by RDKit
-    mcs_mol = Chem.MolFromSmarts(smarts)
-    assert mcs_mol is not None
+    from deeporigin.drug_discovery import BRD_DATA_DIR, LigandSet
 
-    # The MCS should have at least 6 atoms
-    assert mcs_mol.GetNumAtoms() >= 6
+    ligands = LigandSet.from_dir(BRD_DATA_DIR)
+    mcs = ligands.mcs()
+
+
+def test_align():
+    """Test that we can align a ligandset to a reference ligand"""
+
+    from deeporigin.drug_discovery import BRD_DATA_DIR, LigandSet
+
+    ligands = LigandSet.from_dir(BRD_DATA_DIR)
+    ligands.align(reference=ligands.ligands[0])

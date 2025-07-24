@@ -567,6 +567,7 @@ def preprocess_mol(mol: Chem.Mol) -> Chem.Mol:
 
 
 def align(
+    *,
     mols: list[Chem.Mol],
     reference: Chem.Mol,
     mcs_mol: Chem.Mol,
