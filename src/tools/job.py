@@ -35,19 +35,13 @@ class JobFunc(Protocol):
 
 @dataclass
 class Job:
-    """A class representing a job that can be monitored and managed.
+    """
+    Represents one or more computational jobs that can be monitored and managed.
 
-    This class provides functionality to track the status and progress of jobs,
-    with support for real-time monitoring in Jupyter notebooks.
+    This class provides methods to track, visualize, and parse the status and progress of jobs, with optional real-time updates (e.g., in Jupyter notebooks).
 
     Attributes:
-        name: A string representing the name of the job.
-        _ids: A list of job IDs being tracked.
-        _viz_func: Optional function to customize job visualization.
-        _parse_func: Optional function to parse job data.
-        _progress_reports: List of progress reports for each job.
-        _status: List of statuses for each job.
-        _task: The asyncio task handling job monitoring.
+        name (str): Name of the job or job group.
     """
 
     name: str
