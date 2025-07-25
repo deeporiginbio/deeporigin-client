@@ -1,5 +1,8 @@
 # Data hub
 
+!!! danger "Deprecated"
+    The Deep Origin DataHub is deprecated. 
+
 The Deep Origin data hub provides R&D teams a foundation for collaboratively capturing data, extracting insights, and making decisions:
 
 - **Databases** for capturing rows of data, metadata, and procedures.

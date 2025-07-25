@@ -1,5 +1,9 @@
 # API reference: High-level API
 
+!!! danger "Deprecated"
+    The Deep Origin DataHub is deprecated. 
+
+
 !!! tip "How to use this reference"
     This page contains information about each class and function in this module. This is meant as a detailed reference for this module. If you're looking an introduction, we recommend reviewing the **How to** section.
 

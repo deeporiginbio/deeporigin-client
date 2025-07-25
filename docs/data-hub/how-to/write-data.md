@@ -1,3 +1,8 @@
+
+!!! danger "Deprecated"
+    The Deep Origin DataHub is deprecated. 
+
+
 This page describes how to write data to the Deep Origin data hub.
 
 ## Write data to a cell in a database

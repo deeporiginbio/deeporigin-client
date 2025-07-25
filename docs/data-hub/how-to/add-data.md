@@ -1,5 +1,9 @@
 # Add data to a Deep Origin Database
 
+!!! danger "Deprecated"
+    The Deep Origin DataHub is deprecated. 
+
+
 This document describes how to add data to a Deep Origin Database.
 
 Consider the following dataframe constructed from a database using:

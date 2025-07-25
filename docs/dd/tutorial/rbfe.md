@@ -49,8 +49,16 @@ You will see a message printed to screen similar to:
 !!! tip "Constructing a network"
     View the documentation for `LigandSet` to learn how to [construct a network](../how-to/ligands.md#constructing-a-network-using-konnektor). 
 
-!!! tip "Coming soon" 
-    Ability to run a network of ligands is coming soon.
+
+### Run an entire network
+
+To run an entire network, use:
+
+```{.python notest}
+job = sim.rbfe.run_network()
+```
+
+This creates a compound job on Deep Origin, where each ligand pair will be run in parallel. 
 
 
 ### Parameters

@@ -1,3 +1,8 @@
+
+!!! danger "Deprecated"
+    The Deep Origin DataHub is deprecated. 
+
+
 This document describes how to delete objects in the Deep Origin data hub:
 
 - Database rows
