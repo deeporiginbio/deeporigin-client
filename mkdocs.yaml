@@ -36,6 +36,7 @@ theme:
 extra_css:
   - stylesheets/extra.css
 
+
 nav:
 - Quickstart:
   - index.md
@@ -72,34 +73,33 @@ nav:
     - Docking: notebooks/docking.html
 - Platform: 
   - platform/index.md
-  - Reference:
-      - Platform API: platform/ref/platform.md
-- Data hub: 
-  - data-hub/index.md
-  - Deep Origin DataFrames:
-    - Tutorial: data-hub/dataframes.md
-  - How to:
-    - Create objects: data-hub/how-to/create.md
-    - Delete objects: data-hub/how-to/delete.md
-    - List data: data-hub/how-to/list-data.md
-    - View data: data-hub/how-to/view-data.md
-    - Upload files: data-hub/how-to/upload-files.md
-    - Download files: data-hub/how-to/download-files.md
-    - Write data: data-hub/how-to/write-data.md
-    - Add data to database: data-hub/how-to/add-data.md
-  - API reference:
-    - High-level API: data-hub/ref/high-level-api.md
-    - Low-level API: data-hub/ref/low-level-api.md
-    - Classes & constants: data-hub/ref/types.md
-- Compute hub: 
-  - compute-hub/index.md
-  - How to:
-    - Install variables and secrets: compute-hub/how-to/variables.md
-    - Get info about your workstation: compute-hub/how-to/workstation-info.md
-- Tools: 
-  - tools/index.md
-  - How to:
-    - List tools: tools/how-to/list-tools.md
+  - Tools & Functions:
+    - Reference: platform/ref/tools.md
+  - Files:
+    - Reference: platform/ref/files.md
+  - Compute hub: 
+    - platform/compute-hub/index.md
+    - How to:
+      - Install variables and secrets: platform/compute-hub/how-to/variables.md
+      - Get info about your workstation: platform/compute-hub/how-to/workstation-info.md
+  - Data hub: 
+    - data-hub/index.md
+    - Deep Origin DataFrames:
+      - Tutorial: data-hub/dataframes.md
+    - How to:
+      - Create objects: data-hub/how-to/create.md
+      - Delete objects: data-hub/how-to/delete.md
+      - List data: data-hub/how-to/list-data.md
+      - View data: data-hub/how-to/view-data.md
+      - Upload files: data-hub/how-to/upload-files.md
+      - Download files: data-hub/how-to/download-files.md
+      - Write data: data-hub/how-to/write-data.md
+      - Add data to database: data-hub/how-to/add-data.md
+    - API reference:
+      - High-level API: data-hub/ref/high-level-api.md
+      - Low-level API: data-hub/ref/low-level-api.md
+      - Classes & constants: data-hub/ref/types.md
+
 - Changelog: changelog.md
 - Support: https://www.support.deeporigin.com/servicedesk/customer/portals
 
