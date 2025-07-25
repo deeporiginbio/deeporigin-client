@@ -1,3 +1,6 @@
+!!! danger "Deprecated"
+    The Deep Origin DataHub is deprecated. 
+
 
 This page describes how to list resources on Deep Origin.
 Listing folders (workspaces), databases, rows and files can be used

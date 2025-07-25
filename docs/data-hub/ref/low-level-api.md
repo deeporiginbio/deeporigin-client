@@ -1,5 +1,9 @@
 # API reference: Low-level API
 
+!!! danger "Deprecated"
+    The Deep Origin DataHub is deprecated. 
+
+
 ## Background
 
 We use automatically generated code to implement a low-level Python SDK that connects to the Deep Origin data hub API. This page describes that API. In most cases, you will not need to know how this works, nor will you need to use it.

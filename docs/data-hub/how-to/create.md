@@ -1,3 +1,8 @@
+
+!!! danger "Deprecated"
+    The Deep Origin DataHub is deprecated. 
+
+
 This document describes how to create databases, columns in databases, and folders (workspaces) in the Deep Origin data hub.
 
 ## Folders

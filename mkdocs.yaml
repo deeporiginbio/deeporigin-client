@@ -72,10 +72,7 @@ nav:
     - Docking: notebooks/docking.html
 - Platform: 
   - platform/index.md
-  - How to:
-    - Get user information: platform/how-to/user-info.md
-    - Get workstation information: platform/how-to/workstation-info.md
-  - Refrence:
+  - Reference:
       - Platform API: platform/ref/platform.md
 - Data hub: 
   - data-hub/index.md

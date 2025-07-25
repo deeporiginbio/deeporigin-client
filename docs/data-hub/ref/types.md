@@ -1,5 +1,9 @@
 # Classes and constants
 
+!!! danger "Deprecated"
+    The Deep Origin DataHub is deprecated. 
+
+
 This page lists some classes, types and constants used in this library.
 
 ::: src.data_hub.dataframe.DataFrame
