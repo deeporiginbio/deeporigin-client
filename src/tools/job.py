@@ -35,19 +35,13 @@ class JobFunc(Protocol):
 
 @dataclass
 class Job:
-    """A class representing a job that can be monitored and managed.
+    """
+    Represents one or more computational jobs that can be monitored and managed.
 
-    This class provides functionality to track the status and progress of jobs,
-    with support for real-time monitoring in Jupyter notebooks.
+    This class provides methods to track, visualize, and parse the status and progress of jobs, with optional real-time updates (e.g., in Jupyter notebooks).
 
     Attributes:
-        name: A string representing the name of the job.
-        _ids: A list of job IDs being tracked.
-        _viz_func: Optional function to customize job visualization.
-        _parse_func: Optional function to parse job data.
-        _progress_reports: List of progress reports for each job.
-        _status: List of statuses for each job.
-        _task: The asyncio task handling job monitoring.
+        name (str): Name of the job or job group.
     """
 
     name: str
@@ -61,6 +55,7 @@ class Job:
     _progress_reports: list = field(default_factory=list)
     _status: list = field(default_factory=list)
     _inputs: list = field(default_factory=list)
+    _outputs: list = field(default_factory=list)
     _task = None
     _attributes: list = field(default_factory=list)
     _execution_ids: list = field(default_factory=list)
@@ -155,6 +150,7 @@ class Job:
         self._progress_reports = [result["progressReport"] for result in results]
         self._execution_ids = [result["executionId"] for result in results]
         self._inputs = [result["userInputs"] for result in results]
+        self._outputs = [result["userOutputs"] for result in results]
         self._metadata = [result["metadata"] for result in results]
         self._tool = [result["tool"] for result in results]
 
@@ -228,12 +224,8 @@ class Job:
         template_vars = {
             "status_html": status_html,
             "last_updated": time.strftime("%Y-%m-%d %H:%M:%S"),
-            "outputs_json": json.dumps(
-                [attribute.userOutputs for attribute in self._attributes], indent=2
-            ),
-            "inputs_json": json.dumps(
-                [attribute.userInputs for attribute in self._attributes], indent=2
-            ),
+            "outputs_json": json.dumps(self._outputs, indent=2),
+            "inputs_json": json.dumps(self._inputs, indent=2),
             "job_ids": self._ids,
             "execution_ids": self._execution_ids,
             "statuses": self._status,
