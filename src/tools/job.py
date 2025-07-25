@@ -61,6 +61,7 @@ class Job:
     _progress_reports: list = field(default_factory=list)
     _status: list = field(default_factory=list)
     _inputs: list = field(default_factory=list)
+    _outputs: list = field(default_factory=list)
     _task = None
     _attributes: list = field(default_factory=list)
     _execution_ids: list = field(default_factory=list)
@@ -155,6 +156,7 @@ class Job:
         self._progress_reports = [result["progressReport"] for result in results]
         self._execution_ids = [result["executionId"] for result in results]
         self._inputs = [result["userInputs"] for result in results]
+        self._outputs = [result["userOutputs"] for result in results]
         self._metadata = [result["metadata"] for result in results]
         self._tool = [result["tool"] for result in results]
 
@@ -228,12 +230,8 @@ class Job:
         template_vars = {
             "status_html": status_html,
             "last_updated": time.strftime("%Y-%m-%d %H:%M:%S"),
-            "outputs_json": json.dumps(
-                [attribute.userOutputs for attribute in self._attributes], indent=2
-            ),
-            "inputs_json": json.dumps(
-                [attribute.userInputs for attribute in self._attributes], indent=2
-            ),
+            "outputs_json": json.dumps(self._outputs, indent=2),
+            "inputs_json": json.dumps(self._inputs, indent=2),
             "job_ids": self._ids,
             "execution_ids": self._execution_ids,
             "statuses": self._status,
