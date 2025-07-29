@@ -13,15 +13,14 @@ import json
 import os
 from pathlib import Path
 from typing import Optional
+import zipfile
 
 from beartype import beartype
+from rdkit import Chem
 import requests
 
 from deeporigin.drug_discovery.structures import Ligand, Pocket, Protein
 from deeporigin.exceptions import DeepOriginException
-
-URL = "http://docking.default.jobs.edge.deeporigin.io/dock"
-CACHE_DIR = os.path.expanduser("~/.deeporigin/docking")
 
 
 @beartype
@@ -47,6 +46,9 @@ def dock(
     Returns:
         dict: API response
     """
+
+    URL = "http://docking.default.jobs.edge.deeporigin.io/dock"
+    CACHE_DIR = os.path.expanduser("~/.deeporigin/docking")
 
     if pocket is not None:
         pocket_center = pocket.get_center().tolist()
@@ -127,3 +129,118 @@ def dock(
                 file.write(solution["output_sdf_content"])
 
     return sdf_file
+
+
+def constrained_dock(
+    *,
+    protein: Protein,
+    reference_ligand: Ligand,
+    ligand: Ligand,
+    pocket: Pocket,
+    box_size: tuple[float, float, float] = (20.0, 20.0, 20.0),
+    pocket_center: Optional[tuple[int, int, int]] = None,
+    mcs: Chem.Mol,
+    use_cache: bool = True,
+):
+    URL = "http://localhost:8080/dock"
+    CACHE_DIR = os.path.expanduser("~/.deeporigin/constrained_docking")
+
+    from deeporigin.drug_discovery import chemistry
+
+    constraints = chemistry.align(
+        mols=[ligand.mol.m],
+        reference=reference_ligand.mol.m,
+        mcs_mol=mcs,
+    )[0]
+
+    # get pocket center
+    if pocket_center is None:
+        pocket_center = pocket.get_center().tolist()
+
+    # Create hash of inputs
+    hasher = hashlib.sha256()
+
+    # Hash protein file contents
+    protein_file = protein._dump_state()
+    with open(protein_file, "rb") as f:
+        hasher.update(f.read())
+
+    # Hash reference ligand
+    reference_ligand_file = reference_ligand._dump_state()
+    with open(reference_ligand_file, "rb") as f:
+        hasher.update(f.read())
+
+    # Hash ligand
+    ligand_file = ligand._dump_state()
+    with open(ligand_file, "rb") as f:
+        hasher.update(f.read())
+
+    # Hash other inputs
+    hasher.update(
+        json.dumps(
+            {
+                "constraints": constraints,
+                "box_size": list(box_size),
+                "pocket_center": list(pocket_center),
+                "top_criteria": "energy_score",
+            }
+        ).encode()
+    )
+
+    cache_hash = hasher.hexdigest()
+    zip_file = str(Path(CACHE_DIR) / f"{cache_hash}.zip")
+    extract_dir = str(Path(CACHE_DIR) / cache_hash)
+
+    # Check if cached result exists
+    if os.path.exists(extract_dir) and use_cache:
+        # Return paths to extracted files
+        extracted_files = []
+        for file_path in Path(extract_dir).glob("*"):
+            if file_path.is_file():
+                extracted_files.append(str(file_path))
+        return extracted_files
+    else:
+        payload = {
+            "box_size": box_size,
+            "constraints": constraints,
+            "ligands": "/data/ligand.sdf",
+            "protein": {
+                "file_path": "/data/protein.pdb",
+                "pocket_center": pocket_center,
+            },
+            "top_criteria": "energy_score",
+        }
+
+        # Inject the base64-encoded strings into the payload
+        payload["protein_b64"] = protein.to_base64()
+        payload["ligand_b64"] = ligand.to_base64()
+
+        # Send the POST request
+        response = requests.post(
+            URL,
+            headers={"Content-Type": "application/json"},
+            json=payload,
+        )
+
+        # Raise an exception for bad status codes
+        response.raise_for_status()
+
+        # Write zip file to cache temporarily
+        Path(zip_file).parent.mkdir(parents=True, exist_ok=True)
+        with open(zip_file, "wb") as f:
+            f.write(response.content)
+
+        # Extract zip file
+        Path(extract_dir).mkdir(parents=True, exist_ok=True)
+        with zipfile.ZipFile(zip_file, "r") as zip_ref:
+            zip_ref.extractall(extract_dir)
+
+        # Delete the zip file
+        os.remove(zip_file)
+
+        # Return paths to extracted files
+        extracted_files = []
+        for file_path in Path(extract_dir).glob("*"):
+            if file_path.is_file():
+                extracted_files.append(str(file_path))
+        return extracted_files
