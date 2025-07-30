@@ -833,7 +833,7 @@ def constrained_minimize(
     # add a “spring” constraint on each core atom
     for idx in atom_indices:
         ff.MMFFAddPositionConstraint(idx, tol, force_const)
-    # run minimization in chunks, as shown by Greg :contentReference[oaicite:0]{index=0}
+    # Run minimization in chunks to ensure convergence within the specified cycles.
     cycles = max_cycles
     while ff.Minimize(maxIts=max_iter_per_cycle) and cycles > 0:
         cycles -= 1
