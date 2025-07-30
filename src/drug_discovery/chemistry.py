@@ -983,7 +983,7 @@ def pairwise_align_and_annotate(
                 #failed_copy = generate_3d(failed_copy, random_seed=42 + idx)
                 failed_targets.append(failed_copy)
 
-        if  alignment_success:
+        if alignment_success:
             # 5) Annotate the target (tgt_3d) with SD properties
             tgt_3d.SetProp("Alignment_Success", str(alignment_success))
             tgt_3d.SetProp("Total_Atoms", str(total_atoms))
