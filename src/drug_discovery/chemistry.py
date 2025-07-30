@@ -1023,7 +1023,7 @@ def pairwise_align_and_annotate(
         else:
             # writes only the Alignment_Error prop (already set on failed_copy)
             tgt_3d.SetProp("Alignment_Error", error_msg)
-            failed_targets.append(failed_copy)
+            failed_targets.append(tgt_3d)
 
     return ref_annotated, annotated_targets, failed_targets
 
@@ -1156,3 +1156,4 @@ def align(
         all_constraints.append(constraints)
 
     return all_constraints
+
