@@ -8,7 +8,7 @@ import re
 from typing import Optional
 
 
-#from beartype import beartype
+from beartype import beartype
 from typing import List, Tuple
 
 from rdkit import Chem
@@ -17,6 +17,7 @@ from rdkit.Chem import rdForceFieldHelpers
 from rdkit.Chem.Scaffolds import MurckoScaffold
 import pandas as pd
 
+@beartype
 def read_molecules(input_file: str, column: str = None, threshold: float = 0.9) -> List[Chem.Mol]:
     """
     Read molecules from CSV/TSV/SDF/MOL/SMILES files into RDKit Mol objects.
@@ -73,8 +74,7 @@ def read_molecules(input_file: str, column: str = None, threshold: float = 0.9) 
     return mols
 
 
-
-#@beartype
+@beartype
 def read_molecules_in_sdf_file(sdf_file: str | Path) -> list[dict]:
     """
     Reads an SDF file containing one or more molecules, and for each molecule:
@@ -109,6 +109,7 @@ def read_molecules_in_sdf_file(sdf_file: str | Path) -> list[dict]:
 
     return output
 
+@beartype
 def load_reference_molecule(
     ref_arg: str,
     random_seed: int = 42,
@@ -153,7 +154,7 @@ def load_reference_molecule(
     return ref
 
 
-#@beartype
+@beartype
 def read_sdf_properties(sdf_file: str | Path) -> dict:
     """Reads all user-defined properties from an SDF file (single molecule) and returns them as a dictionary.
 
@@ -178,7 +179,7 @@ def read_sdf_properties(sdf_file: str | Path) -> dict:
     return {prop: mol.GetProp(prop) for prop in mol.GetPropNames()}
 
 
-#@beartype
+@beartype
 def get_properties_in_sdf_file(sdf_file: str | Path) -> list:
     """Returns a list of all user-defined properties in an SDF file
 
@@ -205,7 +206,7 @@ def get_properties_in_sdf_file(sdf_file: str | Path) -> list:
     return list(set(properties))
 
 
-#@beartype
+@beartype
 def count_molecules_in_sdf_file(sdf_file: str | Path) -> int:
     """
     Count the number of valid (sanitizable) molecules in an SDF file using RDKit,
@@ -239,7 +240,7 @@ def count_molecules_in_sdf_file(sdf_file: str | Path) -> int:
     return valid_count
 
 
-#@beartype
+@beartype
 def read_property_values(sdf_file: str | Path, key: str):
     """Given a SDF file with more than 1 molecule, return the values of the properties for each molecule
 
@@ -269,7 +270,7 @@ def read_property_values(sdf_file: str | Path, key: str):
     return values
 
 
-#@beartype
+@beartype
 def split_sdf_file(
     *,
     input_sdf_path: str | Path,
@@ -343,7 +344,7 @@ def split_sdf_file(
     return generated_paths
 
 
-#@beartype
+@beartype
 def smiles_list_to_base64_png_list(
     smiles_list: list[str],
     *,
@@ -421,7 +422,7 @@ def smiles_list_to_base64_png_list(
     return imgs
 
 
-#@beartype
+@beartype
 def smiles_to_base64_png(
     smiles: str,
     *,
@@ -465,7 +466,7 @@ def smiles_to_base64_png(
     )
 
 
-#@beartype
+@beartype
 def smiles_to_sdf(smiles: str, sdf_path: str) -> None:
     """convert a SMILES string to a SDF file
 
@@ -496,7 +497,7 @@ def smiles_to_sdf(smiles: str, sdf_path: str) -> None:
         writer.write(mol)
 
 
-#@beartype
+@beartype
 def sdf_to_smiles(sdf_file: str | Path) -> list[str]:
     """
     Extracts the SMILES strings of all valid molecules from an SDF file using RDKit.
@@ -526,7 +527,7 @@ def sdf_to_smiles(sdf_file: str | Path) -> list[str]:
     return smiles_list
 
 
-#@beartype
+@beartype
 def merge_sdf_files(
     sdf_file_list: list[str],
     output_path: Optional[str] = None,
@@ -577,7 +578,7 @@ def merge_sdf_files(
     return output_path
 
 
-#@beartype
+@beartype
 def canonicalize_smiles(smiles: str) -> str:
     """Canonicalize a SMILES string.
 
@@ -593,7 +594,7 @@ def canonicalize_smiles(smiles: str) -> str:
     return Chem.MolToSmiles(mol, canonical=True)
 
 
-#@beartype
+@beartype
 def show_molecules_in_sdf_files(sdf_files: list[str]):
     """show molecules in an SDF file in a Jupyter notebook using molstar"""
 
@@ -616,7 +617,7 @@ def show_molecules_in_sdf_files(sdf_files: list[str]):
     JupyterViewer.visualize(html_content)
 
 
-#@beartype
+@beartype
 def show_molecules_in_sdf_file(sdf_file: str | Path):
     """show molecules in an SDF file in a Jupyter notebook using molstar"""
 
@@ -629,7 +630,7 @@ def show_molecules_in_sdf_file(sdf_file: str | Path):
     html_content = molecule_viewer.render_ligand()
     JupyterViewer.visualize(html_content)
 
-
+@beartype
 def mcs(mols: list[Chem.Mol], *, timeout: int = 10) -> Chem.Mol:
     """
     Generate the Maximum Common Substructure (MCS) for molecules
@@ -659,7 +660,7 @@ def mcs(mols: list[Chem.Mol], *, timeout: int = 10) -> Chem.Mol:
 
     return Chem.MolFromSmarts(result.smartsString)
 
-
+@beartype
 def preprocess_mol(mol: Chem.Mol) -> Chem.Mol:
     """
     Preprocess a molecule for MCS
@@ -674,6 +675,7 @@ def preprocess_mol(mol: Chem.Mol) -> Chem.Mol:
     Chem.SanitizeMol(mol)
     return mol
 
+@beartype
 def generate_3d(mol: Chem.Mol, random_seed: int = 42) -> Chem.Mol:
     """
     Given an RDKit Mol (2D or 3D), generate a single 3D conformer via ETKDG + UFF.
@@ -701,6 +703,7 @@ def generate_3d(mol: Chem.Mol, random_seed: int = 42) -> Chem.Mol:
     m = Chem.RemoveHs(m)
     return m
 
+@beartype
 def _extract_mcs_fragment_from_reference(
     ref_mol: Chem.Mol,
     target: Chem.Mol,
@@ -805,6 +808,7 @@ def _extract_mcs_fragment_from_reference(
 
     return core
 
+@beartype
 def constrained_minimize(
     mol: Chem.Mol,
     atom_indices: List[int],
@@ -838,6 +842,7 @@ def constrained_minimize(
     while ff.Minimize(maxIts=max_iter_per_cycle) and cycles > 0:
         cycles -= 1
 
+@beartype
 def pairwise_align_and_annotate(
     ref_mol: Chem.Mol,
     targets: List[Chem.Mol],
@@ -980,8 +985,9 @@ def pairwise_align_and_annotate(
                 failed_copy = Chem.Mol(tgt)  # 2D-only tgt
                 failed_copy.SetProp("Alignment_Error", error_msg)
                 # Then give it a normal 3D so it still ends up with coordinates
+                # currently commented as we might not need it 
                 #failed_copy = generate_3d(failed_copy, random_seed=42 + idx)
-                failed_targets.append(failed_copy)
+                tgt_3d = failed_copy
 
         if alignment_success:
             # 5) Annotate the target (tgt_3d) with SD properties
@@ -1012,13 +1018,16 @@ def pairwise_align_and_annotate(
             # 8) Minimized if necessary
             if minimize:
                 constrained_minimize(tgt_3d, list(match_tgt))
-        else:
-            tgt_3d.SetProp("Alignment_Error", error_msg)
 
-        annotated_targets.append(tgt_3d)
+            annotated_targets.append(tgt_3d)
+        else:
+            # writes only the Alignment_Error prop (already set on failed_copy)
+            tgt_3d.SetProp("Alignment_Error", error_msg)
+            failed_targets.append(failed_copy)
 
     return ref_annotated, annotated_targets, failed_targets
 
+@beartype
 def consolidate_reference_annotations(
     ref_annotated: Chem.Mol
 ) -> Chem.Mol:
@@ -1048,6 +1057,7 @@ def consolidate_reference_annotations(
 
     return ref_annotated
 
+@beartype
 def run_pairwise_alignment(
     input_mols: List[Chem.Mol],
     reference: Chem.Mol,
@@ -1091,29 +1101,33 @@ def run_pairwise_alignment(
 
     return annotated_targets
 
+@beartype
 def align(
     *,
     mols: list[Chem.Mol],
     reference: Chem.Mol,
-    energy: float = 5,
+    energy: float = 5.0,
     minimize: bool,
     debug: bool
 ) -> list[list[dict]]:
     """
-    Aligns a set of molecules to a reference and returns MCS atom constraints.
+    Aligns a set of ligands to a reference molecule and returns per‐atom constraints.
 
     Args:
         mols (List[Chem.Mol]]): Ligands to align.
         reference (Chem.Mol): Reference molecule (3D, AtomMapNum set).
         mcs_mol (Chem.Mol): SMARTS‐derived MCS for alignment.
         energy (float): Constraint energy weight.
-        minimize (bool): Whether to apply constrained MMFF minimization.
+        minimize (bool): Whether to apply constrained MMFF minimization after alignment.
         debug (bool): Print debug info (mapped SMILES, etc.).
 
     Returns:
-        List[List[Dict[str, Any]]]]: For each ligand, a list of dicts:
-            - "index" (int): target atom’s AtomMapNum
-            - "coordinates" (List[float]): [x,y,z] from reference
+        List[List[Dict[str, Any]]]]: For each ligand, a list of constraint dicts—
+        one per atom—each containing:
+            - "index" (int): the index of the atom in the reference molecule that this ligand
+                             atom was matched to (>0), or –1 if no match was found.
+            - "coordinates" (List[float]): the [x, y, z] position of that atom in the
+                                          aligned ligand conformer.
             - "energy" (float): energy weight
     """
 
@@ -1132,7 +1146,7 @@ def align(
         # Build constraints: atom index + 1 (1-based), and position from ref
         constraints = [
             {
-                "index": atom.GetAtomMapNum(),  
+                "index": atom.GetAtomMapNum() or -1,  
                 "coordinates": list(mol.GetConformer(0).GetAtomPosition(idx)),
                 "energy": energy,
             }
