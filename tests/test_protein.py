@@ -2,8 +2,24 @@ import os
 
 import pytest
 
-from deeporigin.drug_discovery import Protein
+from deeporigin.drug_discovery import BRD_DATA_DIR, Protein
 from deeporigin.exceptions import DeepOriginException
+
+
+def test_from_file():
+    protein = Protein.from_file(BRD_DATA_DIR / "brd.pdb")
+
+    assert (
+        str(protein.sequence[0])
+        == "STNPPPPETSNPNKPKRQTNQLQYLLRVVLKTLWKHQFAWPFQQPVDAVKLNLPDYYKIIKTPMDMGTIKKRLENNYYWNAQECIQDFNTMFTNCYIYNKPGDDIVLMAEALEKLFLQKINELPTE"
+    )
+
+
+def test_from_name():
+    protein = Protein.from_name("conotoxin")
+    assert protein.pdb_id == "1P1P"
+
+    assert str(protein.sequence[0]) == "GCCGSYPNAACHPCSCKDR"
 
 
 def test_from_pdb_id():
