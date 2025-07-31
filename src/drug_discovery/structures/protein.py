@@ -660,13 +660,17 @@ class Protein(Entity):
             raise ValueError("No ligand HETATM records found in the PDB.")
 
         # Write ligand atoms to a temporary file
-        with tempfile.NamedTemporaryFile(mode="w+", suffix=".pdb", delete=False) as tmp:
+        tmp = tempfile.NamedTemporaryFile(mode="w+", suffix=".pdb", delete=False)
+        try:
             for line in ligand_lines:
                 tmp.write(line)
             tmp.write("END\n")
             tmp.flush()
             tmp.seek(0)
             ligand_pdb_block = tmp.read()
+        finally:
+            tmp.close()
+            os.unlink(tmp.name)
 
         # Parse with RDKit
         mol = Chem.MolFromPDBBlock(ligand_pdb_block, sanitize=True, removeHs=False)
