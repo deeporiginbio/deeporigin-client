@@ -634,15 +634,13 @@ class Protein(Entity):
 
         return metal_resnames, cofactor_resnames
 
-    def extract_ligand(self, exclude_resnames: set = None):
+    def extract_ligand(self, exclude_resnames: Optional[set] = None):
         """
         Extracts ligand(s) from a PDB file using RDKit.
 
         Args:
             exclude_resnames (set): Residue names to exclude (e.g., water).
 
-        Returns:
-            list of rdkit.Chem.Mol: List of ligand molecules as RDKit Mol objects.
         """
 
         from rdkit import Chem
