@@ -948,6 +948,15 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#extract-crystal-ligands" class="md-nav__link">
+    <span class="md-ellipsis">
+      Extract crystal ligands
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -2750,6 +2759,15 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#extract-crystal-ligands" class="md-nav__link">
+    <span class="md-ellipsis">
+      Extract crystal ligands
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -2985,6 +3003,22 @@ PQITLWQRPLVTIKIGGQLKEALLDTGADDTVLEEMNLPGRWKPKMIGGIGGFIKVRQYDQILIEICGHKAIGTVLVGPT
 <p class="admonition-title">Jupyter notebook required</p>
 <p>Visualizations such as these require this code to be run in a jupyter notebook. We recommend using <a href="../../install.html">these instructions</a> to install Jupyter.</p>
 </div>
+<h3 id="extract-crystal-ligands">Extract crystal ligands<a class="headerlink" href="#extract-crystal-ligands" title="Permanent link">&para;</a></h3>
+<p>When PDB files contain a crystal ligand, the crystal ligand can be extracted using:</p>
+<p><div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin.drug_discovery</span><span class="w"> </span><span class="kn">import</span> <span class="n">Protein</span>
+
+<span class="n">protein</span> <span class="o">=</span> <span class="n">Protein</span><span class="o">.</span><span class="n">from_pdb_id</span><span class="p">(</span><span class="s2">&quot;1EBY&quot;</span><span class="p">)</span>
+<span class="n">ligand</span> <span class="o">=</span> <span class="n">protein</span><span class="o">.</span><span class="n">extract_ligand</span><span class="p">()</span>
+</code></pre></div>
+This ligand will be extracted:</p>
+<iframe 
+src="./crystal-ligand.html" 
+width="100%" 
+height="600" 
+style="border:none;"
+title="Extracted crystal ligand from 1EBY"
+></iframe>
+
 <h2 id="modifying-and-preparing-a-protein">Modifying and preparing a protein<a class="headerlink" href="#modifying-and-preparing-a-protein" title="Permanent link">&para;</a></h2>
 <h3 id="loop-modelling">Loop modelling<a class="headerlink" href="#loop-modelling" title="Permanent link">&para;</a></h3>
 <p>Missing information and gaps in the structure can be filled in using the Loop Modelling tool. </p>

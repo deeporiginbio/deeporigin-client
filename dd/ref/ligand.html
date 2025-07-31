@@ -1386,6 +1386,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#src.drug_discovery.structures.Ligand.from_base64" class="md-nav__link">
+    <span class="md-ellipsis">
+      from_base64
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#src.drug_discovery.structures.Ligand.from_block_content" class="md-nav__link">
     <span class="md-ellipsis">
       from_block_content
@@ -1470,6 +1479,15 @@
   <a href="#src.drug_discovery.structures.Ligand.show" class="md-nav__link">
     <span class="md-ellipsis">
       show
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.drug_discovery.structures.Ligand.to_base64" class="md-nav__link">
+    <span class="md-ellipsis">
+      to_base64
     </span>
   </a>
   
@@ -3035,6 +3053,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#src.drug_discovery.structures.Ligand.from_base64" class="md-nav__link">
+    <span class="md-ellipsis">
+      from_base64
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#src.drug_discovery.structures.Ligand.from_block_content" class="md-nav__link">
     <span class="md-ellipsis">
       from_block_content
@@ -3119,6 +3146,15 @@
   <a href="#src.drug_discovery.structures.Ligand.show" class="md-nav__link">
     <span class="md-ellipsis">
       show
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.drug_discovery.structures.Ligand.to_base64" class="md-nav__link">
+    <span class="md-ellipsis">
+      to_base64
     </span>
   </a>
   
@@ -4002,6 +4038,160 @@ methods for property prediction, visualization, and file operations.</p>
 <div class="doc doc-object doc-function">
 
 
+<h3 id="src.drug_discovery.structures.Ligand.from_base64" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">from_base64</span>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
+  </span>
+
+<a href="#src.drug_discovery.structures.Ligand.from_base64" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">from_base64</span><span class="p">(</span>
+    <span class="n">base64_string</span><span class="p">:</span> <span class="n"><span title="str">str</span></span><span class="p">,</span>
+    <span class="n">name</span><span class="p">:</span> <span class="n"><span title="str">str</span></span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+    <span class="n">save_to_file</span><span class="p">:</span> <span class="n"><span title="bool">bool</span></span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n"><span title="typing.Any">Any</span></span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><span title="src.drug_discovery.structures.ligand.Ligand">Ligand</span></span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Create a Ligand instance from a base64 encoded SDF string.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>base64_string</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Base64 encoded SDF content</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>name</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Name of the ligand. Defaults to "".</p>
+              </div>
+            </td>
+            <td>
+                  <code>&#39;&#39;</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>save_to_file</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Whether to save the ligand to file. Defaults to False.</p>
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>**kwargs</code>
+            </td>
+            <td>
+                  <code><span title="typing.Any">Any</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Additional arguments to pass to the constructor</p>
+              </div>
+            </td>
+            <td>
+                  <code>{}</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>Ligand</code></td>            <td>
+                  <code><span title="src.drug_discovery.structures.ligand.Ligand">Ligand</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A new Ligand instance</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="deeporigin.exceptions.DeepOriginException">DeepOriginException</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the base64 string cannot be decoded or parsed</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
 <h3 id="src.drug_discovery.structures.Ligand.from_block_content" class="doc doc-heading">
 <code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">from_block_content</span>
 
@@ -4813,6 +5003,49 @@ CCO</p>
 - str: HTML representation of the visualization.</p>
 <p>Raises:
 - Exception: If visualization fails.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.drug_discovery.structures.Ligand.to_base64" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">to_base64</span>
+
+
+<a href="#src.drug_discovery.structures.Ligand.to_base64" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">to_base64</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n"><span title="str">str</span></span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Convert the ligand to base64 encoded SDF format.</p>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>str</code></td>            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Base64 encoded string of the SDF file content</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
 
 
     </div>

@@ -1333,6 +1333,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#src.drug_discovery.structures.Protein.extract_ligand" class="md-nav__link">
+    <span class="md-ellipsis">
+      extract_ligand
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#src.drug_discovery.structures.Protein.extract_metals_and_cofactors" class="md-nav__link">
     <span class="md-ellipsis">
       extract_metals_and_cofactors
@@ -1354,6 +1363,15 @@
   <a href="#src.drug_discovery.structures.Protein.find_pockets" class="md-nav__link">
     <span class="md-ellipsis">
       find_pockets
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.drug_discovery.structures.Protein.from_base64" class="md-nav__link">
+    <span class="md-ellipsis">
+      from_base64
     </span>
   </a>
   
@@ -1489,6 +1507,15 @@
   <a href="#src.drug_discovery.structures.Protein.show" class="md-nav__link">
     <span class="md-ellipsis">
       show
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.drug_discovery.structures.Protein.to_base64" class="md-nav__link">
+    <span class="md-ellipsis">
+      to_base64
     </span>
   </a>
   
@@ -2882,6 +2909,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#src.drug_discovery.structures.Protein.extract_ligand" class="md-nav__link">
+    <span class="md-ellipsis">
+      extract_ligand
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#src.drug_discovery.structures.Protein.extract_metals_and_cofactors" class="md-nav__link">
     <span class="md-ellipsis">
       extract_metals_and_cofactors
@@ -2903,6 +2939,15 @@
   <a href="#src.drug_discovery.structures.Protein.find_pockets" class="md-nav__link">
     <span class="md-ellipsis">
       find_pockets
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.drug_discovery.structures.Protein.from_base64" class="md-nav__link">
+    <span class="md-ellipsis">
+      from_base64
     </span>
   </a>
   
@@ -3038,6 +3083,15 @@
   <a href="#src.drug_discovery.structures.Protein.show" class="md-nav__link">
     <span class="md-ellipsis">
       show
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.drug_discovery.structures.Protein.to_base64" class="md-nav__link">
+    <span class="md-ellipsis">
+      to_base64
     </span>
   </a>
   
@@ -3497,6 +3551,57 @@ should be docked.</p>
 <div class="doc doc-object doc-function">
 
 
+<h3 id="src.drug_discovery.structures.Protein.extract_ligand" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">extract_ligand</span>
+
+
+<a href="#src.drug_discovery.structures.Protein.extract_ligand" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">extract_ligand</span><span class="p">(</span><span class="n">exclude_resnames</span><span class="p">:</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n"><span title="set">set</span></span><span class="p">[</span><span class="n"><span title="str">str</span></span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Extracts ligand(s) from a PDB file using RDKit.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>exclude_resnames</code>
+            </td>
+            <td>
+                  <code><span title="set">set</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Residue names to exclude (e.g., water).</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
 <h3 id="src.drug_discovery.structures.Protein.extract_metals_and_cofactors" class="doc doc-heading">
 <code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">extract_metals_and_cofactors</span>
 
@@ -3662,6 +3767,141 @@ binding site in the protein. Each Pocket object contains:
 <span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">pocket</span> <span class="ow">in</span> <span class="n">pockets</span><span class="p">:</span>
 <span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Pocket: </span><span class="si">{</span><span class="n">pocket</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">, Volume: </span><span class="si">{</span><span class="n">pocket</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;volume&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2"> Å³&quot;</span><span class="p">)</span>
 </code></pre></div>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.drug_discovery.structures.Protein.from_base64" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">from_base64</span>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
+  </span>
+
+<a href="#src.drug_discovery.structures.Protein.from_base64" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">from_base64</span><span class="p">(</span>
+    <span class="n">base64_string</span><span class="p">:</span> <span class="n"><span title="str">str</span></span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="n"><span title="str">str</span></span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n"><span title="typing.Any">Any</span></span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><span title="src.drug_discovery.structures.protein.Protein">Protein</span></span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Create a Protein instance from a base64 encoded PDB string.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>base64_string</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Base64 encoded PDB content</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>name</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Name of the protein. Defaults to "".</p>
+              </div>
+            </td>
+            <td>
+                  <code>&#39;&#39;</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>**kwargs</code>
+            </td>
+            <td>
+                  <code><span title="typing.Any">Any</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Additional arguments to pass to the constructor</p>
+              </div>
+            </td>
+            <td>
+                  <code>{}</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>Protein</code></td>            <td>
+                  <code><span title="src.drug_discovery.structures.protein.Protein">Protein</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A new Protein instance</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="deeporigin.exceptions.DeepOriginException">DeepOriginException</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the base64 string cannot be decoded or parsed</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
 
 
     </div>
@@ -4503,6 +4743,49 @@ structure. Defaults to None.</p>
   the docked ligands in their respective binding poses</li>
 </ul>
 </details>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.drug_discovery.structures.Protein.to_base64" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">to_base64</span>
+
+
+<a href="#src.drug_discovery.structures.Protein.to_base64" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">to_base64</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n"><span title="str">str</span></span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Convert the protein to base64 encoded PDB format.</p>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>str</code></td>            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Base64 encoded string of the PDB file content</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
 
     </div>
 
