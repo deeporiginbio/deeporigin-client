@@ -68,7 +68,6 @@ tools = [
     "rdkit",
     "deeporigin-molstar==0.1.3",
     "biotite",
-    "PubChemPy",
     "biopython",
     "rcsb-api>=1.1.4",
 ]

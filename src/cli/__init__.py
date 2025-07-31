@@ -7,9 +7,6 @@ import termcolor
 
 from deeporigin import __version__, auth
 from deeporigin.cli.config import CONTROLLERS as CONFIG_CONTROLLERS
-from deeporigin.cli.context import CONTROLLERS as CONTEXT_CONTROLLERS
-from deeporigin.cli.data import CONTROLLERS as DATA_CONTROLLERS
-from deeporigin.cli.variables import CONTROLLERS as VARIABLE_CONTROLLERS
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.warnings import DeepOriginWarning
 
@@ -54,13 +51,7 @@ class App(cement.App):
     class Meta:
         label = "deeporigin"
         base_controller = "base"
-        handlers = (
-            [BaseController]
-            + VARIABLE_CONTROLLERS
-            + CONTEXT_CONTROLLERS
-            + DATA_CONTROLLERS
-            + CONFIG_CONTROLLERS
-        )
+        handlers = [BaseController] + CONFIG_CONTROLLERS
 
 
 def except_hook(built_in_except_hook, type, value, tb):

@@ -14,7 +14,6 @@ import pandas as pd
 
 from deeporigin.data_hub import api
 from deeporigin.exceptions import DeepOriginException
-from deeporigin.platform.api import get_last_edited_user_name
 from deeporigin.utils.config import construct_resource_url
 from deeporigin.utils.constants import DataType, IDFormat
 from deeporigin.utils.network import check_for_updates
@@ -259,16 +258,8 @@ class DataFrame(pd.DataFrame):
 
             header = f'<h4 style="color: #808080;">Deep Origin / {org_name} / <a href = "{url}">{name} </a></h4>'
             txt = f'<p style="font-size: 12px; color: #808080;">Created {created_time_ago}. Row {self.attrs["last_updated_row"].hid} was last edited {edited_time_ago}'
-            try:
-                last_edited_by = get_last_edited_user_name(
-                    self.attrs["last_updated_row"]
-                )
-                txt += "  by " + last_edited_by + ".</p>"
-            except Exception as error:
-                # give up. this should not cause the dataframe to
-                # not print.
-                print(error)
-                txt += ".</p>"
+
+            txt += ".</p>"
 
             if self._modified_columns:
                 txt += '<p style="color: #808080; font-size: 12px">⚠️ This dataframe contains changes that have not been written back to the Deep Origin database.</p>'
