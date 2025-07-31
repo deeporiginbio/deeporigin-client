@@ -125,6 +125,29 @@ A visualization such as this will be shown:
 !!! info "Jupyter notebook required"
     Visualizations such as these require this code to be run in a jupyter notebook. We recommend using [these instructions](../../install.md) to install Jupyter.
 
+
+### Extract crystal ligands
+
+When PDB files contain a crystal ligand, the crystal ligand can be extracted using:
+
+
+```python
+from deeporigin.drug_discovery import Protein
+
+protein = Protein.from_pdb_id("1EBY")
+ligand = protein.extract_ligand()
+```
+This ligand will be extracted:
+
+<iframe 
+src="./crystal-ligand.html" 
+width="100%" 
+height="600" 
+style="border:none;"
+title="Extracted crystal ligand from 1EBY"
+></iframe>
+
+
 ## Modifying and preparing a protein
 
 ### Loop modelling 

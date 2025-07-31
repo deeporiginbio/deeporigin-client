@@ -634,6 +634,49 @@ class Protein(Entity):
 
         return metal_resnames, cofactor_resnames
 
+    def extract_ligand(self, exclude_resnames: set = None):
+        """
+        Extracts ligand(s) from a PDB file using RDKit.
+
+        Args:
+            exclude_resnames (set): Residue names to exclude (e.g., water).
+
+        Returns:
+            list of rdkit.Chem.Mol: List of ligand molecules as RDKit Mol objects.
+        """
+
+        from rdkit import Chem
+
+        if exclude_resnames is None:
+            exclude_resnames = {"HOH"}
+
+        ligand_lines = []
+        with open(self.file_path, "r") as f:
+            for line in f:
+                if line.startswith("HETATM"):
+                    resname = line[17:20].strip()
+                    if resname not in exclude_resnames:
+                        ligand_lines.append(line)
+
+        if not ligand_lines:
+            raise ValueError("No ligand HETATM records found in the PDB.")
+
+        # Write ligand atoms to a temporary file
+        with tempfile.NamedTemporaryFile(mode="w+", suffix=".pdb", delete=False) as tmp:
+            for line in ligand_lines:
+                tmp.write(line)
+            tmp.write("END\n")
+            tmp.flush()
+            tmp.seek(0)
+            ligand_pdb_block = tmp.read()
+
+        # Parse with RDKit
+        mol = Chem.MolFromPDBBlock(ligand_pdb_block, sanitize=True, removeHs=False)
+        if mol is None:
+            raise ValueError("RDKit could not parse the ligand from the PDB block.")
+
+        return Ligand.from_rdkit_mol(mol)
+
     def _create_new_protein_with_structure(
         self, new_structure, suffix: str = "_modified"
     ) -> "Protein":
