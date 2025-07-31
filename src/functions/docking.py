@@ -141,7 +141,40 @@ def constrained_dock(
     box_size: tuple[float, float, float] = (20.0, 20.0, 20.0),
     pocket_center: Optional[tuple[int, int, int]] = None,
     use_cache: bool = True,
-):
+) -> list[str]:
+    """Perform constrained molecular docking using a reference ligand and MCS alignment.
+
+    This function performs molecular docking with constraints based on a reference ligand
+    and a maximum common substructure (MCS). The ligand is aligned to the reference ligand
+    using the MCS, and docking is performed with these alignment constraints applied.
+
+    The function uses a remote docking service and implements caching to avoid redundant
+    computations. Results are cached based on a hash of all input parameters.
+
+    Args:
+        protein: The protein structure to dock against.
+        reference_ligand: The reference ligand used for alignment constraints.
+        ligand: The ligand to be docked.
+        mcs: The maximum common substructure (RDKit Mol object) between reference and target ligands.
+        pocket: Optional pocket object. If provided, its center will be used as pocket_center.
+        box_size: Size of the docking box in Angstroms (x, y, z). Defaults to (20.0, 20.0, 20.0).
+        pocket_center: Optional center coordinates for the docking box. If None and pocket is provided,
+                     uses the pocket center. If both are None, raises an error.
+        use_cache: Whether to use cached results if available. Defaults to True.
+
+    Returns:
+        list[str]: List of file paths to the docking result files (typically SDF files).
+
+    Raises:
+        ValueError: If neither pocket_center nor pocket is provided.
+        requests.RequestException: If the docking service request fails.
+        zipfile.BadZipFile: If the response from the service is not a valid zip file.
+
+    Note:
+        The function creates a cache directory at ~/.deeporigin/constrained_docking/ and
+        stores results based on a SHA256 hash of all input parameters. This allows for
+        efficient reuse of previous docking results.
+    """
     URL = "http://constrained-docking.default.jobs.edge.deeporigin.io/dock"
     CACHE_DIR = os.path.expanduser("~/.deeporigin/constrained_docking")
 
