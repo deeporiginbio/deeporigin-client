@@ -59,7 +59,7 @@ from biotite.structure.io.pdb import PDBFile
 from deeporigin_molstar import DockingViewer, JupyterViewer, ProteinViewer
 import numpy as np
 
-from deeporigin.drug_discovery.constants import METALS, STATE_DUMP_PATH
+from deeporigin.drug_discovery.constants import METAL_ELEMENTS, METALS, STATE_DUMP_PATH
 from deeporigin.drug_discovery.external_tools.utils import (
     generate_html_output,
     get_protein_info_dict,
@@ -612,102 +612,6 @@ class Protein(Entity):
             ~np.isin(hetatm_records.res_name, water_residue_names)
         ]
 
-        metal_elements = {
-            "AC",
-            "AG",
-            "AL",
-            "AM",
-            "AS",
-            "AU",
-            "B",
-            "BA",
-            "BE",
-            "BH",
-            "BI",
-            "BK",
-            "CA",
-            "CD",
-            "CE",
-            "CF",
-            "CM",
-            "CN",
-            "CS",
-            "CU",
-            "DB",
-            "DS",
-            "DY",
-            "ER",
-            "ES",
-            "EU",
-            "FE",
-            "FM",
-            "FR",
-            "GA",
-            "GD",
-            "GE",
-            "HF",
-            "HG",
-            "HO",
-            "HS",
-            "K",
-            "LA",
-            "LI",
-            "LR",
-            "LU",
-            "MD",
-            "MG",
-            "MN",
-            "MO",
-            "MT",
-            "NA",
-            "NB",
-            "ND",
-            "NI",
-            "NO",
-            "NP",
-            "OS",
-            "PA",
-            "TA",
-            "PM",
-            "PO",
-            "PR",
-            "PT",
-            "PU",
-            "RA",
-            "RB",
-            "RE",
-            "RF",
-            "RG",
-            "RH",
-            "RU",
-            "SB",
-            "SC",
-            "SG",
-            "SI",
-            "SM",
-            "SN",
-            "SR",
-            "TB",
-            "TC",
-            "TE",
-            "TH",
-            "TI",
-            "TL",
-            "TM",
-            "U",
-            "V",
-            "W",
-            "YB",
-            "ZN",
-            "ZR",
-            "CO",
-            "CR",
-            "IN",
-            "IR",
-            "PB",
-            "PD",
-        }
-
         residue_groups = defaultdict(list)
         for atom in hetatm_records:
             key = (atom.chain_id, atom.res_id, atom.ins_code)
@@ -718,7 +622,7 @@ class Protein(Entity):
         for _, atoms in residue_groups.items():
             res_name = atoms[0].res_name.strip().upper()
             is_metal = all(
-                atom.element.strip().upper() in metal_elements for atom in atoms
+                atom.element.strip().upper() in METAL_ELEMENTS for atom in atoms
             )
             if is_metal:
                 metal_resnames.add(res_name)
