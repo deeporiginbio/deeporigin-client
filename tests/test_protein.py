@@ -63,7 +63,6 @@ def test_pdb_id():
     assert protein.pdb_id == "1EBY"
 
 
-
 def test_extract_ligand():
     protein = Protein.from_pdb_id("1EBY")
     ligand = protein.extract_ligand()
@@ -71,6 +70,8 @@ def test_extract_ligand():
     assert (
         ligand.smiles
         == "OC(N[C@H]1C2CCCCC2C[C@H]1O)[C@H](OCC1CCCCC1)[C@H](O)[C@@H](O)[C@@H](OCC1CCCCC1)[C@@H](O)N[C@H]1C2CCCCC2C[C@H]1O"
+    )
+
 
 def test_protein_base64():
     """Test that we can convert a Protein to base64 and back"""
