@@ -11,7 +11,7 @@ def test_from_pdb_id():
 
     os.remove(conotoxin.file_path)
 
-    conotoxin = Protein.from_pdb_id("2JUQ")
+    _ = Protein.from_pdb_id("2JUQ")
 
 
 def test_from_pdb_id_with_invalid_id():
@@ -45,3 +45,27 @@ def test_find_missing_residues():
 def test_pdb_id():
     protein = Protein.from_pdb_id("1EBY")
     assert protein.pdb_id == "1EBY"
+
+
+def test_protein_base64():
+    """Test that we can convert a Protein to base64 and back"""
+    # Create a protein using from_pdb_id
+    protein = Protein.from_pdb_id("1EBY")
+
+    # Convert to base64
+    b64 = protein.to_base64()
+
+    # Convert back from base64
+    new_protein = Protein.from_base64(b64)
+
+    # Verify the structures have the same number of atoms
+    assert len(new_protein.structure) == len(protein.structure)
+
+    # Verify the structures have the same coordinates (within numerical precision)
+    import numpy as np
+
+    np.testing.assert_array_almost_equal(
+        new_protein.structure.coord,
+        protein.structure.coord,
+        decimal=3,
+    )

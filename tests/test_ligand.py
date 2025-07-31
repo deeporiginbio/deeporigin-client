@@ -175,6 +175,47 @@ def test_ligand_from_rdkit_mol():
         assert ligand.mol.m.GetNumAtoms() == mol.GetNumAtoms()
 
 
+def test_ligand_from_sdf():
+    """Test that we can create a Ligand from an SDF file using the from_sdf classmethod"""
+    # Use the brd-7.sdf file which contains exactly one ligand
+    # Find the ligand entry for brd-7.sdf from the imported ligands variable
+    brd7_ligand = next(ligand for ligand in ligands if "brd-7.sdf" in ligand["file"])
+    sdf_file = brd7_ligand["file"]
+
+    # Create a ligand using the from_sdf method
+    ligand = Ligand.from_sdf(sdf_file)
+
+    # Verify the ligand was created successfully
+    assert isinstance(ligand, Ligand)
+    assert ligand.mol is not None
+    assert ligand.mol.m.GetNumAtoms() > 0
+
+    # Verify that the file_path was set correctly
+    assert ligand.file_path == sdf_file
+
+    # Verify that the ligand has a name
+    assert ligand.name is not None
+    assert ligand.name != "Unknown_Ligand"
+
+    # Verify that the ligand has SMILES
+    assert ligand.smiles is not None
+
+    # Verify that the ligand has properties (SDF files typically contain properties)
+    assert isinstance(ligand.properties, dict)
+
+
+def test_ligand_base64():
+    brd7_ligand = next(ligand for ligand in ligands if "brd-7.sdf" in ligand["file"])
+    sdf_file = brd7_ligand["file"]
+
+    ligand = Ligand.from_sdf(sdf_file)
+
+    b64 = ligand.to_base64()
+    new_ligand = Ligand.from_base64(b64)
+
+    assert new_ligand.smiles == ligand.smiles
+
+
 @pytest.mark.parametrize("ligand", bad_ligands)
 def test_ligand_errors(ligand):
     with pytest.raises(Exception):  # noqa: B017

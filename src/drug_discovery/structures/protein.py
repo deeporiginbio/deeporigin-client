@@ -50,7 +50,7 @@ import io
 import os
 from pathlib import Path
 import tempfile
-from typing import Optional, Tuple
+from typing import Any, Optional, Tuple
 
 from beartype import beartype
 from biotite.structure import filter_solvent
@@ -784,6 +784,94 @@ class Protein(Entity):
             raise RuntimeError(
                 f"Failed to write structure to file {file_path}: {str(e)}"
             ) from e
+
+    @beartype
+    def to_base64(self) -> str:
+        """Convert the protein to base64 encoded PDB format.
+
+        Returns:
+            str: Base64 encoded string of the PDB file content
+        """
+        import base64
+        import tempfile
+
+        # Create a temporary PDB file
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".pdb", delete=False
+        ) as temp_file:
+            temp_file_path = temp_file.name
+
+        try:
+            # Write the protein to the temporary file
+            self.to_pdb(temp_file_path)
+
+            # Read the file and encode to base64
+            with open(temp_file_path, "rb") as f:
+                pdb_content = f.read()
+                base64_encoded = base64.b64encode(pdb_content).decode("utf-8")
+
+            return base64_encoded
+        finally:
+            # Clean up the temporary file
+            import os
+
+            if os.path.exists(temp_file_path):
+                os.remove(temp_file_path)
+
+    @classmethod
+    @beartype
+    def from_base64(
+        cls,
+        base64_string: str,
+        name: str = "",
+        **kwargs: Any,
+    ) -> "Protein":
+        """
+        Create a Protein instance from a base64 encoded PDB string.
+
+        Args:
+            base64_string (str): Base64 encoded PDB content
+            name (str, optional): Name of the protein. Defaults to "".
+            **kwargs: Additional arguments to pass to the constructor
+
+        Returns:
+            Protein: A new Protein instance
+
+        Raises:
+            DeepOriginException: If the base64 string cannot be decoded or parsed
+        """
+        import base64
+        import tempfile
+
+        try:
+            # Decode the base64 string
+            pdb_content = base64.b64decode(base64_string)
+
+            # Create a temporary file with the decoded content
+            with tempfile.NamedTemporaryFile(
+                mode="wb", suffix=".pdb", delete=False
+            ) as temp_file:
+                temp_file.write(pdb_content)
+                temp_file_path = temp_file.name
+
+            # Create the protein from the temporary PDB file
+            protein = cls.from_file(temp_file_path, **kwargs)
+
+            # Set the name if provided
+            if name:
+                protein.name = name
+
+            # Clean up the temporary file
+            import os
+
+            os.remove(temp_file_path)
+
+            return protein
+
+        except Exception as e:
+            raise DeepOriginException(
+                f"Failed to create Protein from base64 string: {str(e)}"
+            ) from None
 
     @beartype
     def _dump_state(self) -> str:
