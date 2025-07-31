@@ -13,7 +13,6 @@ from tqdm import tqdm
 from deeporigin.data_hub import _api
 from deeporigin.data_hub._api import *  # noqa: F403
 from deeporigin.exceptions import DeepOriginException
-from deeporigin.platform.api import get_user_name
 from deeporigin.utils import constants, network
 from deeporigin.utils.core import find_last_updated_row, sha256_checksum
 
@@ -1334,8 +1333,7 @@ def row_to_dict(
         elif field.type == "user":
             user_ids = field.value.userDrns
 
-            # convert to names using the platform API
-            value = [get_user_name(user_id) for user_id in user_ids]
+            value = [user_id for user_id in user_ids]
         else:
             value = field.value
         values[field.columnId] = value
