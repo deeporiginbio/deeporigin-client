@@ -240,14 +240,15 @@ class Molecule:
         if smiles is None and name is not None:
             import requests
 
-            url = f"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/{name}/property/smiles/JSON"
-            response = requests.get(url)
-            data = response.json()
-            smiles = data["PropertyTable"]["Properties"][0]["SMILES"]
-        if smiles is None:
-            raise ValueError(
-                f"Error resolving SMILES string of {name}. Pubchempy did not resolve SMILES"
-            )
+            try:
+                url = f"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/{name}/property/smiles/JSON"
+                response = requests.get(url)
+                data = response.json()
+                smiles = data["PropertyTable"]["Properties"][0]["SMILES"]
+            except Exception:
+                raise ValueError(
+                    f"Error resolving SMILES string of {name}. Pubchempy did not resolve SMILES"
+                ) from None
 
         mol_rdk = Chem.MolFromSmiles(smiles)
 
