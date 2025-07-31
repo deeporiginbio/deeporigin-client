@@ -136,13 +136,13 @@ def constrained_dock(
     protein: Protein,
     reference_ligand: Ligand,
     ligand: Ligand,
-    pocket: Pocket,
+    mcs: Chem.Mol,
+    pocket: Optional[Pocket] = None,
     box_size: tuple[float, float, float] = (20.0, 20.0, 20.0),
     pocket_center: Optional[tuple[int, int, int]] = None,
-    mcs: Chem.Mol,
     use_cache: bool = True,
 ):
-    URL = "http://localhost:8080/dock"
+    URL = "http://constrained-docking.default.jobs.edge.deeporigin.io/dock"
     CACHE_DIR = os.path.expanduser("~/.deeporigin/constrained_docking")
 
     from deeporigin.drug_discovery import chemistry
@@ -166,14 +166,12 @@ def constrained_dock(
         hasher.update(f.read())
 
     # Hash reference ligand
-    reference_ligand_file = reference_ligand._dump_state()
-    with open(reference_ligand_file, "rb") as f:
-        hasher.update(f.read())
+    reference_ligand_b64 = reference_ligand.to_base64()
+    hasher.update(reference_ligand_b64.encode())
 
     # Hash ligand
-    ligand_file = ligand._dump_state()
-    with open(ligand_file, "rb") as f:
-        hasher.update(f.read())
+    ligand_b64 = ligand.to_base64()
+    hasher.update(ligand_b64.encode())
 
     # Hash other inputs
     hasher.update(
