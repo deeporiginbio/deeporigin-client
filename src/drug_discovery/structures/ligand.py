@@ -245,6 +245,63 @@ class Ligand(Entity):
         )
 
     @classmethod
+    @beartype
+    def from_base64(
+        cls,
+        base64_string: str,
+        name: str = "",
+        save_to_file: bool = False,
+        **kwargs: Any,
+    ) -> "Ligand":
+        """
+        Create a Ligand instance from a base64 encoded SDF string.
+
+        Args:
+            base64_string (str): Base64 encoded SDF content
+            name (str, optional): Name of the ligand. Defaults to "".
+            save_to_file (bool, optional): Whether to save the ligand to file. Defaults to False.
+            **kwargs: Additional arguments to pass to the constructor
+
+        Returns:
+            Ligand: A new Ligand instance
+
+        Raises:
+            DeepOriginException: If the base64 string cannot be decoded or parsed
+        """
+        import base64
+        import tempfile
+
+        try:
+            # Decode the base64 string
+            sdf_content = base64.b64decode(base64_string)
+
+            # Create a temporary file with the decoded content
+            with tempfile.NamedTemporaryFile(
+                mode="wb", suffix=".sdf", delete=False
+            ) as temp_file:
+                temp_file.write(sdf_content)
+                temp_file_path = temp_file.name
+
+            # Create the ligand from the temporary SDF file
+            ligand = cls.from_sdf(temp_file_path, **kwargs)
+
+            # Set the name if provided
+            if name:
+                ligand.name = name
+
+            # Clean up the temporary file
+            import os
+
+            os.remove(temp_file_path)
+
+            return ligand
+
+        except Exception as e:
+            raise DeepOriginException(
+                f"Failed to create Ligand from base64 string: {str(e)}"
+            ) from None
+
+    @classmethod
     def from_sdf(
         cls,
         file_path: str,
@@ -458,6 +515,30 @@ class Ligand(Entity):
     def to_sdf(self, output_path: Optional[str] = None) -> str | Path:
         """Write the ligand to an SDF file."""
         return self.write_to_file(output_path=output_path, output_format="sdf")
+
+    @beartype
+    def to_base64(self) -> str:
+        """Convert the ligand to base64 encoded SDF format.
+
+        Returns:
+            str: Base64 encoded string of the SDF file content
+        """
+        import base64
+
+        # Create a temporary SDF file
+        temp_sdf_path = self.to_sdf()
+
+        # Read the file and encode to base64
+        with open(temp_sdf_path, "rb") as f:
+            sdf_content = f.read()
+            base64_encoded = base64.b64encode(sdf_content).decode("utf-8")
+
+        # Clean up the temporary file
+        import os
+
+        os.remove(temp_sdf_path)
+
+        return base64_encoded
 
     @beartype
     def to_pdb(self, output_path: Optional[str] = None) -> str | Path:
