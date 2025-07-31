@@ -634,7 +634,7 @@ class Protein(Entity):
 
         return metal_resnames, cofactor_resnames
 
-    def extract_ligand(self, exclude_resnames: Optional[set] = None):
+    def extract_ligand(self, exclude_resnames: Optional[set[str]] = None):
         """
         Extracts ligand(s) from a PDB file using RDKit.
 
@@ -649,28 +649,45 @@ class Protein(Entity):
             exclude_resnames = {"HOH"}
 
         ligand_lines = []
+        conect_lines = []
+        ligand_resnames = set()
+
+        # First pass: collect HETATM lines and their residue names
         with open(self.file_path, "r") as f:
             for line in f:
                 if line.startswith("HETATM"):
                     resname = line[17:20].strip()
-                    if resname not in exclude_resnames:
-                        ligand_lines.append(line)
+                    altloc = line[16].strip()
+                    if resname in exclude_resnames:
+                        continue
+
+                    if altloc not in ("", "A"):  # skip altLocs other than primary
+                        continue
+                    ligand_lines.append(line)
+                    ligand_resnames.add(resname)
+
+        # Second pass: collect CONECT records for the ligand atoms
+        with open(self.file_path, "r") as f:
+            for line in f:
+                if line.startswith("CONECT"):
+                    try:
+                        atom1 = int(line[6:11].strip())
+                        # Check if this CONECT involves any ligand atoms
+                        # We'll need to check against the atom serial numbers in our HETATM records
+                        for hetatm_line in ligand_lines:
+                            hetatm_atom_serial = int(hetatm_line[6:11].strip())
+                            if atom1 == hetatm_atom_serial:
+                                conect_lines.append(line)
+                                break
+                    except ValueError:
+                        # Skip malformed CONECT records
+                        continue
 
         if not ligand_lines:
             raise ValueError("No ligand HETATM records found in the PDB.")
 
-        # Write ligand atoms to a temporary file
-        tmp = tempfile.NamedTemporaryFile(mode="w+", suffix=".pdb", delete=False)
-        try:
-            for line in ligand_lines:
-                tmp.write(line)
-            tmp.write("END\n")
-            tmp.flush()
-            tmp.seek(0)
-            ligand_pdb_block = tmp.read()
-        finally:
-            tmp.close()
-            os.unlink(tmp.name)
+        # Create PDB block from ligand lines and CONECT records
+        ligand_pdb_block = "".join(ligand_lines) + "".join(conect_lines) + "END\n"
 
         # Parse with RDKit
         mol = Chem.MolFromPDBBlock(ligand_pdb_block, sanitize=True, removeHs=False)
