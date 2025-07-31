@@ -71,7 +71,6 @@ from typing import Optional
 import warnings
 
 from beartype import beartype
-from pubchempy import get_compounds
 from rdkit import Chem, RDLogger
 from rdkit.Chem import AllChem, SaltRemover, rdMolDescriptors
 from rdkit.Chem.Draw import rdMolDraw2D
@@ -239,25 +238,12 @@ class Molecule:
             AssertionError: If neither smiles nor name is provided
         """
         if smiles is None and name is not None:
-            compounds = get_compounds(name, "name")
-            if not compounds:
-                raise ValueError(f"No compound found for identifier: {name}")
+            import requests
 
-            compound = compounds[0]
-            smiles = compound.isomeric_smiles
-
-            if smiles is None:
-                # try getting it manually
-                import requests
-
-                try:
-                    url = f"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/{name}/property/smiles/JSON"
-                    response = requests.get(url)
-                    data = response.json()
-                    smiles = data["PropertyTable"]["Properties"][0]["SMILES"]
-                except Exception:
-                    pass
-
+            url = f"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/{name}/property/smiles/JSON"
+            response = requests.get(url)
+            data = response.json()
+            smiles = data["PropertyTable"]["Properties"][0]["SMILES"]
         if smiles is None:
             raise ValueError(
                 f"Error resolving SMILES string of {name}. Pubchempy did not resolve SMILES"
