@@ -2,8 +2,24 @@ import os
 
 import pytest
 
-from deeporigin.drug_discovery import Protein
+from deeporigin.drug_discovery import BRD_DATA_DIR, Protein
 from deeporigin.exceptions import DeepOriginException
+
+
+def test_from_file():
+    protein = Protein.from_file(BRD_DATA_DIR / "brd.pdb")
+
+    assert (
+        str(protein.sequence[0])
+        == "STNPPPPETSNPNKPKRQTNQLQYLLRVVLKTLWKHQFAWPFQQPVDAVKLNLPDYYKIIKTPMDMGTIKKRLENNYYWNAQECIQDFNTMFTNCYIYNKPGDDIVLMAEALEKLFLQKINELPTE"
+    )
+
+
+def test_from_name():
+    protein = Protein.from_name("conotoxin")
+    assert protein.pdb_id == "1P1P"
+
+    assert str(protein.sequence[0]) == "GCCGSYPNAACHPCSCKDR"
 
 
 def test_from_pdb_id():
@@ -45,6 +61,16 @@ def test_find_missing_residues():
 def test_pdb_id():
     protein = Protein.from_pdb_id("1EBY")
     assert protein.pdb_id == "1EBY"
+
+
+def test_extract_ligand():
+    protein = Protein.from_pdb_id("1EBY")
+    ligand = protein.extract_ligand()
+
+    assert (
+        ligand.smiles
+        == "OC(N[C@H]1C2CCCCC2C[C@H]1O)[C@H](OCC1CCCCC1)[C@H](O)[C@@H](O)[C@@H](OCC1CCCCC1)[C@@H](O)N[C@H]1C2CCCCC2C[C@H]1O"
+    )
 
 
 def test_protein_base64():

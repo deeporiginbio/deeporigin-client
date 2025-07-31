@@ -59,7 +59,7 @@ from biotite.structure.io.pdb import PDBFile
 from deeporigin_molstar import DockingViewer, JupyterViewer, ProteinViewer
 import numpy as np
 
-from deeporigin.drug_discovery.constants import METALS, STATE_DUMP_PATH
+from deeporigin.drug_discovery.constants import METAL_ELEMENTS, METALS, STATE_DUMP_PATH
 from deeporigin.drug_discovery.external_tools.utils import (
     generate_html_output,
     get_protein_info_dict,
@@ -612,102 +612,6 @@ class Protein(Entity):
             ~np.isin(hetatm_records.res_name, water_residue_names)
         ]
 
-        metal_elements = {
-            "AC",
-            "AG",
-            "AL",
-            "AM",
-            "AS",
-            "AU",
-            "B",
-            "BA",
-            "BE",
-            "BH",
-            "BI",
-            "BK",
-            "CA",
-            "CD",
-            "CE",
-            "CF",
-            "CM",
-            "CN",
-            "CS",
-            "CU",
-            "DB",
-            "DS",
-            "DY",
-            "ER",
-            "ES",
-            "EU",
-            "FE",
-            "FM",
-            "FR",
-            "GA",
-            "GD",
-            "GE",
-            "HF",
-            "HG",
-            "HO",
-            "HS",
-            "K",
-            "LA",
-            "LI",
-            "LR",
-            "LU",
-            "MD",
-            "MG",
-            "MN",
-            "MO",
-            "MT",
-            "NA",
-            "NB",
-            "ND",
-            "NI",
-            "NO",
-            "NP",
-            "OS",
-            "PA",
-            "TA",
-            "PM",
-            "PO",
-            "PR",
-            "PT",
-            "PU",
-            "RA",
-            "RB",
-            "RE",
-            "RF",
-            "RG",
-            "RH",
-            "RU",
-            "SB",
-            "SC",
-            "SG",
-            "SI",
-            "SM",
-            "SN",
-            "SR",
-            "TB",
-            "TC",
-            "TE",
-            "TH",
-            "TI",
-            "TL",
-            "TM",
-            "U",
-            "V",
-            "W",
-            "YB",
-            "ZN",
-            "ZR",
-            "CO",
-            "CR",
-            "IN",
-            "IR",
-            "PB",
-            "PD",
-        }
-
         residue_groups = defaultdict(list)
         for atom in hetatm_records:
             key = (atom.chain_id, atom.res_id, atom.ins_code)
@@ -718,7 +622,7 @@ class Protein(Entity):
         for _, atoms in residue_groups.items():
             res_name = atoms[0].res_name.strip().upper()
             is_metal = all(
-                atom.element.strip().upper() in metal_elements for atom in atoms
+                atom.element.strip().upper() in METAL_ELEMENTS for atom in atoms
             )
             if is_metal:
                 metal_resnames.add(res_name)
@@ -729,6 +633,68 @@ class Protein(Entity):
         cofactor_resnames = list(cofactor_resnames)
 
         return metal_resnames, cofactor_resnames
+
+    def extract_ligand(self, exclude_resnames: Optional[set[str]] = None):
+        """
+        Extracts ligand(s) from a PDB file using RDKit.
+
+        Args:
+            exclude_resnames (set): Residue names to exclude (e.g., water).
+
+        """
+
+        from rdkit import Chem
+
+        if exclude_resnames is None:
+            exclude_resnames = {"HOH"}
+
+        ligand_lines = []
+        conect_lines = []
+        ligand_resnames = set()
+
+        # First pass: collect HETATM lines and their residue names
+        with open(self.file_path, "r") as f:
+            for line in f:
+                if line.startswith("HETATM"):
+                    resname = line[17:20].strip()
+                    altloc = line[16].strip()
+                    if resname in exclude_resnames:
+                        continue
+
+                    if altloc not in ("", "A"):  # skip altLocs other than primary
+                        continue
+                    ligand_lines.append(line)
+                    ligand_resnames.add(resname)
+
+        # Second pass: collect CONECT records for the ligand atoms
+        with open(self.file_path, "r") as f:
+            for line in f:
+                if line.startswith("CONECT"):
+                    try:
+                        atom1 = int(line[6:11].strip())
+                        # Check if this CONECT involves any ligand atoms
+                        # We'll need to check against the atom serial numbers in our HETATM records
+                        for hetatm_line in ligand_lines:
+                            hetatm_atom_serial = int(hetatm_line[6:11].strip())
+                            if atom1 == hetatm_atom_serial:
+                                conect_lines.append(line)
+                                break
+                    except ValueError:
+                        # Skip malformed CONECT records
+                        continue
+
+        if not ligand_lines:
+            raise ValueError("No ligand HETATM records found in the PDB.")
+
+        # Create PDB block from ligand lines and CONECT records
+        ligand_pdb_block = "".join(ligand_lines) + "".join(conect_lines) + "END\n"
+
+        # Parse with RDKit
+        mol = Chem.MolFromPDBBlock(ligand_pdb_block, sanitize=True, removeHs=False)
+        if mol is None:
+            raise ValueError("RDKit could not parse the ligand from the PDB block.")
+
+        return Ligand.from_rdkit_mol(mol)
 
     def _create_new_protein_with_structure(
         self, new_structure, suffix: str = "_modified"
