@@ -644,16 +644,7 @@ def mcs(mols: list[Chem.Mol], *, timeout: int = 10) -> Chem.Mol:
     """
 
     prepped = [preprocess_mol(m) for m in mols]
-
-    params = rdFMCS.MCSParameters()
-    params.AtomTyper = rdFMCS.AtomCompare.CompareElements
-    params.BondTyper = rdFMCS.BondCompare.CompareOrder
-    params.BondCompareParameters.RingMatchesRingOnly = False
-    params.BondCompareParameters.CompleteRingsOnly = False
-    params.Timeout = timeout
-    params.Verbose = False
-
-    result = rdFMCS.FindMCS(prepped, parameters=params)
+    result = find_global_mcs(prepped)
 
     if result.canceled:
         raise RuntimeError("MCS computation timed out or failed.")
@@ -1102,12 +1093,203 @@ def run_pairwise_alignment(
     return annotated_targets
 
 @beartype
+def find_global_mcs(mols: List[Chem.Mol]) -> rdFMCS.MCSResult:
+    """
+    Find the maximum common substructure (MCS) among a list of molecules.
+
+    Args:
+        mols (List[Chem.Mol]): Molecules to compare.
+        threshold (float): Minimum fraction of molecules that must match the MCS.
+        ring_matches_ring_only (bool): If True, rings only match rings.
+        atom_compare (rdFMCS.AtomCompare): How to compare atoms.
+        bond_compare (rdFMCS.BondCompare): How to compare bonds.
+        timeout (int): Maximum time (in seconds) before aborting the search.
+
+    Returns:
+        rdFMCS.MCSResult: Object containing:
+            - smartsString (str): SMARTS representation of the MCS.
+            - numAtoms (int): Number of atoms in the MCS.
+            - numBonds (int): Number of bonds in the MCS.
+            - canceled (bool): True if the search was canceled (e.g., by timeout).
+    """
+    mcs = rdFMCS.FindMCS(
+        mols,
+        threshold=0.9,
+        ringMatchesRingOnly=True,
+        atomCompare=rdFMCS.AtomCompare.CompareAny,
+        bondCompare=rdFMCS.BondCompare.CompareAny,
+        timeout=300,
+    )
+    return mcs
+
+@beartype
+def annotate_molecules_with_global_mcs(
+    mols: List[Chem.Mol],
+    mcs_smarts: str,
+    debug: bool = False
+) -> List[Chem.Mol]:
+    """
+    Annotate each molecule with a global MCS atom‐map and SMARTS.
+
+    Args:
+        mols (List[Chem.Mol]]): Molecules to tag.
+        mcs_smarts (str): SMARTS string of the global MCS.
+        debug (bool): If True, print each mapped SMILES.
+
+    Returns:
+        List[Chem.Mol]: Copy of each input with:
+            - atom‐map numbers set to (pattern index + 1)
+            - `MatchedAtomMap` property = “i:j,i2:j2,…”
+            - `MCS_SMARTS` property = the SMARTS string
+    """
+    patt = Chem.MolFromSmarts(mcs_smarts)
+    annotated: List[Chem.Mol] = []
+    for mol in mols:
+        m = Chem.Mol(mol)
+        match = m.GetSubstructMatch(patt)
+        mapping_pairs: List[str] = []
+        if match:
+            for pat_idx, tgt_idx in enumerate(match):
+                ref_idx = pat_idx + 1
+                atom = m.GetAtomWithIdx(tgt_idx)
+                # now using the raw ref_idx
+                atom.SetAtomMapNum(ref_idx)
+                mapping_pairs.append(f"{ref_idx}:{tgt_idx}")
+        if mapping_pairs:
+            m.SetProp("MatchedAtomMap", ",".join(mapping_pairs))
+        m.SetProp("MCS_SMARTS", mcs_smarts)
+        if debug:
+            print(f"[DEBUG global] Annotated SMILES: {Chem.MolToSmiles(m, isomericSmiles=True)}")
+        annotated.append(m)
+    return annotated
+
+@beartype
+def run_global_alignment(
+    input_mols: List[Chem.Mol],
+    ref_mol: Chem.Mol,
+    minimize: bool,
+    align_with_MCS: bool,
+    debug: bool
+) -> List[Chem.Mol]:
+    """
+    Aligns a set of molecules to a reference via a global‐MCS‐based approach,
+    and annotates each with the MCS atom mapping.
+
+    Args:
+        input_mols (List[Chem.Mol]]): Ligand molecules to align (2D, may lack conformers).
+        ref_mol (Chem.Mol): Reference molecule (must have a valid 3D conformer).
+        minimize (bool): If True, apply constrained MMFF minimization after embedding.
+        align_with_MCS (bool): If True, attribute the atom mapping based on MCS otherwise 
+                               based on the reference molecule.
+        debug (bool): If True, print debug and warning messages during alignment.
+
+    Returns:
+        List[Chem.Mol]: A list of molecules (first the reference, then each target)
+                        all in 3D, annotated with:
+                          - `_Name` (if missing, a default “Target_i”)
+                          - `MatchedAtomMap` (atom‐map numbers from the reference)
+                          - `MCS_SMARTS` (the SMARTS pattern used)
+                        Molecules that failed to align still receive a 3D conformer
+                        and an `Alignment_Error` property.
+    """
+    if len(input_mols) < 2:
+        print("Need at least two molecules to compute a global MCS.")
+        return
+
+    #remove Hs
+    input_mols = [Chem.RemoveHs(mol) for mol in input_mols]
+
+    failed_records: List[Chem.Mol] = []
+
+    # 1) Find the global MCS
+    print("Finding global MCS among all input molecules...")
+    mcs_result = find_global_mcs(input_mols)
+    mcs_smarts = mcs_result.smartsString
+    print(f"Global MCS SMARTS: {mcs_smarts}")
+
+    if ref_mol == None:
+        print("Embedding reference (largest input) for global MCS alignment...")
+        idx_largest = max(range(len(input_mols)), key=lambda i: input_mols[i].GetNumAtoms())
+        ref_mol = input_mols[idx_largest]
+
+    if ref_mol.GetNumConformers() == 0 or not ref_mol.GetConformer().Is3D():
+        ref_3d = generate_3d(ref_mol)
+    else:
+        ref_3d = Chem.AddHs(ref_mol)
+        AllChem.UFFOptimizeMolecule(ref_3d)
+        ref_3d = Chem.RemoveHs(ref_3d)
+
+    # align every molecule to that reference
+    print("Aligning all molecules to reference via global MCS...")
+    aligned: List[Chem.Mol] = []
+    aligned.append(ref_3d)
+
+    patt_g = Chem.MolFromSmarts(mcs_smarts)
+    for i, mol in enumerate(input_mols):
+        if mol == ref_3d:
+            continue
+
+        tgt = Chem.RemoveHs(Chem.Mol(mol))
+        match_tgt = tgt.GetSubstructMatch(patt_g)
+
+        if not match_tgt:
+            # no MCS → record failure + fallback embed
+            if debug:
+                print(f"  [Global] target {i} has NO MCS → fallback 3D")
+            bad = Chem.Mol(tgt)
+            bad.SetProp("Alignment_Error", "no MCS match")
+            failed_records.append(bad)
+            #tgt_3d = generate_3d(tgt, random_seed=42 + i)
+        else:
+            # attempt strict ConstrainedEmbed
+            core_global = _extract_mcs_fragment_from_reference(ref_3d, tgt, mcs_smarts, debug=debug)
+            try:
+                tgt_3d = AllChem.ConstrainedEmbed(
+                    tgt,
+                    core_global
+                )
+                # Add Title if necessary
+                if not tgt_3d.HasProp("_Name") or not tgt_3d.GetProp("_Name").strip():
+                    tgt_3d.SetProp("_Name", f"Target_{i}")
+
+                # Minimized if necessary
+                if minimize:
+                    constrained_minimize(tgt_3d, list(match_tgt))
+
+                if not align_with_MCS:
+                    patt_ref = Chem.MolFromSmarts(mcs_smarts)
+                    match_ref = ref_mol.GetSubstructMatch(patt_ref)
+                    mapping_pairs_tgt: List[str] = []
+                    for pat_idx, tgt_idx in enumerate(match_tgt):
+                        ref_idx = match_ref[pat_idx] + 1
+                        atom = tgt_3d.GetAtomWithIdx(tgt_idx)
+                        # now using the raw ref_idx
+                        atom.SetAtomMapNum(ref_idx)
+                        mapping_pairs_tgt.append(f"{ref_idx}:{tgt_idx}")
+                    if mapping_pairs_tgt:
+                        tgt_3d.SetProp("MatchedAtomMap", ",".join(mapping_pairs_tgt))
+                aligned.append(tgt_3d)
+            except Exception as ex:
+                if debug:
+                    print(f"  [Global] target {i} embed failed: {ex}")
+                bad = Chem.Mol(tgt)
+                bad.SetProp("Alignment_Error", str(ex))
+                failed_records.append(bad)
+
+    print("Annotating molecules with global MCS atom maps...")
+    if align_with_MCS == True:
+        return annotate_molecules_with_global_mcs(aligned, mcs_smarts, debug=debug)
+    else:
+        return aligned
+
+@beartype
 def align(
     *,
     mols: list[Chem.Mol],
     reference: Chem.Mol,
     energy: float = 5.0,
     minimize: bool,
+    global_align: bool,
     debug: bool
 ) -> list[list[dict]]:
     """
@@ -1130,30 +1312,56 @@ def align(
                                           aligned ligand conformer.
             - "energy" (float): energy weight
     """
-
-    #align Molecules
-    aligned_mols = run_pairwise_alignment(
-        mols,
-        reference,
-        minimize,
-        debug
-    )
-
-    # Generate constraints
+    align_with_MCS = True
     all_constraints = []
 
-    for i, mol in enumerate(aligned_mols):
-        # Build constraints: atom index + 1 (1-based), and position from ref
-        constraints = [
-            {
-                "index": atom.GetAtomMapNum() or -1,  
-                "coordinates": list(mol.GetConformer(0).GetAtomPosition(idx)),
-                "energy": energy,
-            }
-            for idx, atom in enumerate(mol.GetAtoms())
-        ]
+    #align Molecules
+    if global_align or align_with_MCS:
+        aligned_mols = run_global_alignment(
+            mols,
+            reference,
+            minimize,
+            align_with_MCS,
+            debug
+        )
+        #remove reference
+        aligned_mols = aligned_mols[1:]
+        for i, mol in enumerate(aligned_mols):
+            if mol.GetNumConformers() == 0:
+                if debug:
+                    print(f"[WARN] Molecule {i} has no conformer. Generating 3D.")
+                continue
+            # Build constraints: atom index + 1 (1-based), and position from ref
+            constraints = [
+                {
+                    "index": atom.GetAtomMapNum(),  
+                    "coordinates": list(mol.GetConformer(0).GetAtomPosition(idx)),
+                    "energy": energy,
+                }
+                for idx, atom in enumerate(mol.GetAtoms())
+                if atom.GetAtomMapNum() > 0 
+            ]
 
-        all_constraints.append(constraints)
+            all_constraints.append(constraints)
+
+    else:
+        aligned_mols = run_pairwise_alignment(
+            mols,
+            reference,
+            minimize,
+            debug
+        )
+        for i, mol in enumerate(aligned_mols):
+            # Build constraints: atom index + 1 (1-based), and position from ref
+            constraints = [
+                {
+                    "index": atom.GetAtomMapNum() or -1,  
+                    "coordinates": list(mol.GetConformer(0).GetAtomPosition(idx)),
+                    "energy": energy,
+                }
+                for idx, atom in enumerate(mol.GetAtoms())
+            ]
+
+            all_constraints.append(constraints)
 
     return all_constraints
-
