@@ -119,7 +119,7 @@ class Docking(WorkflowStep):
     def get_results(self, *, file_type: str = "csv") -> pd.DataFrame | None | list[str]:
         """return a list of paths to CSV files that contain the results from docking"""
 
-        files_client = getattr(self.parent._platform_clients, "FilesApi", None)
+        files_client = getattr(self.parent._platform_clients, "FileApi", None)
 
         files = utils.find_files_on_ufa(
             tool="Docking",
@@ -138,8 +138,11 @@ class Docking(WorkflowStep):
             print("No Docking results found for this protein.")
             return None
 
+        # Convert list to dict where each file path is a key with None as value
+        results_files_dict = {file: None for file in results_files}
+
         file_api.download_files(
-            results_files,
+            results_files_dict,
             client=files_client,
         )
 
