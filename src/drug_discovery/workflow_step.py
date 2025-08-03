@@ -28,7 +28,7 @@ class WorkflowStep:
         """Get the jobs for this workflow step as a dataframe"""
         df = get_dataframe(
             _platform_clients=self.parent._platform_clients,
-            resolve_user_names=True,
+            resolve_user_names=False,
             include_metadata=True,
         )
 

@@ -435,6 +435,10 @@ def get_dataframe(
     jobs = response["data"]
 
     if resolve_user_names:
+        raise Exception(
+            "Due to changes in the platform API, resolve_user_names is currently not supported"
+        )
+
         from deeporigin.platform import organizations_api
 
         orgs_client = getattr(_platform_clients, "OrganizationsApi", None)
