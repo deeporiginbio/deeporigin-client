@@ -396,7 +396,7 @@ ligands.mcs()
     ![](./mcs.png)
 
 
-### Alignment
+### Constraints
 
 Ligands in a LigandSet can be aligned to a reference ligand using:
 
@@ -404,7 +404,7 @@ Ligands in a LigandSet can be aligned to a reference ligand using:
 from deeporigin.drug_discovery import BRD_DATA_DIR, LigandSet
 
 ligands = LigandSet.from_dir(BRD_DATA_DIR)
-ligands.align(reference=ligands[1])
+ligands.compute_constraints(reference=ligands[1])
 ```
 
 ## Exporting ligands

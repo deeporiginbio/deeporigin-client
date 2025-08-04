@@ -1210,17 +1210,17 @@ class LigandSet:
 
         """
 
-        from deeporigin.drug_discovery import chemistry
+        from deeporigin.drug_discovery import align
 
-        return chemistry.mcs(self.to_rdkit_mols())
+        return align.mcs(self.to_rdkit_mols())
 
-    def align(self, *, reference: Ligand) -> list[list[dict]]:
+    def compute_constraints(self, *, reference: Ligand) -> list[list[dict]]:
         """
         Align a set of ligands to a reference ligand
         """
-        from deeporigin.drug_discovery import chemistry
+        from deeporigin.drug_discovery import align
 
-        return chemistry.align(
+        return align.compute_constraints(
             mols=self.to_rdkit_mols(),
             reference=reference.mol.m,
             mcs_mol=self.mcs(),

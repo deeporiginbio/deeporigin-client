@@ -145,10 +145,10 @@ def test_mcs():
     ligands.mcs()
 
 
-def test_align():
+def test_compute_constraints():
     """Test that we can align a ligandset to a reference ligand"""
 
     from deeporigin.drug_discovery import BRD_DATA_DIR, LigandSet
 
     ligands = LigandSet.from_dir(BRD_DATA_DIR)
-    ligands.align(reference=ligands.ligands[0])
+    ligands.compute_constraints(reference=ligands.ligands[0])

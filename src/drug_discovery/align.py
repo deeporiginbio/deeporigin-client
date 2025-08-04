@@ -52,10 +52,6 @@ def randomize_mol_pose(mol: Chem.Mol, seed: int = None) -> Chem.Mol:
     return mol
 
 
-def randomize_mols(mols: list[Chem.Mol]) -> list[Chem.Mol]:
-    return [randomize_mol_pose(mol) for mol in mols]
-
-
 def kabsch_alignment(P: np.ndarray, Q: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     """
     Computes the optimal rotation matrix R and translation vector t
@@ -97,8 +93,8 @@ def apply_rigid_transform(mol: Chem.Mol, R: np.ndarray, t: np.ndarray) -> Chem.M
 
 
 def apply_alignment(
+    *,
     mols: list[Chem.rdchem.Mol],
-    reference_mol: Chem.rdchem.Mol,
     alignments: list[list[dict]],  # one list of dicts per mol
 ) -> list[Chem.rdchem.Mol]:
     """
