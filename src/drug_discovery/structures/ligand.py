@@ -813,7 +813,7 @@ class LigandSet:
         elif isinstance(other, list):
             return LigandSet(ligands=self.ligands + other)
         else:
-            raise NotImplementedError(f"Cannot add {type(other)} to LigandSet")
+            return NotImplemented
 
     def __radd__(self, other):
         """Support Ligand + LigandSet, returning a new LigandSet."""
@@ -823,7 +823,7 @@ class LigandSet:
         elif isinstance(other, list):
             return LigandSet(ligands=other + self.ligands)
         else:
-            raise NotImplementedError(f"Cannot add {type(other)} to LigandSet")
+            return NotImplemented
 
     def _repr_html_(self):
         """Return an HTML representation of the LigandSet."""
