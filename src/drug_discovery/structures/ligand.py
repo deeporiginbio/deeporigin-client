@@ -867,6 +867,19 @@ class LigandSet:
             return df
 
     @classmethod
+    def from_rdkit_mols(cls, mols: list[Chem.rdchem.Mol]):
+        """Create a LigandSet from a list of RDKit molecules."""
+        ligands = []
+        for mol in mols:
+            ligand = Ligand.from_rdkit_mol(
+                mol,
+                properties=mol.GetPropsAsDict(),
+            )
+            ligands.append(ligand)
+
+        return cls(ligands=ligands)
+
+    @classmethod
     def from_csv(
         cls,
         file_path: str,
