@@ -813,7 +813,7 @@ class LigandSet:
         elif isinstance(other, list):
             return LigandSet(ligands=self.ligands + other)
         else:
-            raise NotImplementedError(f"Cannot add {type(other)} to LigandSet")
+            return NotImplemented
 
     def __radd__(self, other):
         """Support Ligand + LigandSet, returning a new LigandSet."""
@@ -823,7 +823,7 @@ class LigandSet:
         elif isinstance(other, list):
             return LigandSet(ligands=other + self.ligands)
         else:
-            raise NotImplementedError(f"Cannot add {type(other)} to LigandSet")
+            return NotImplemented
 
     def _repr_html_(self):
         """Return an HTML representation of the LigandSet."""
@@ -865,6 +865,19 @@ class LigandSet:
             return mo.plain(df)
         else:
             return df
+
+    @classmethod
+    def from_rdkit_mols(cls, mols: list[Chem.rdchem.Mol]):
+        """Create a LigandSet from a list of RDKit molecules."""
+        ligands = []
+        for mol in mols:
+            ligand = Ligand.from_rdkit_mol(
+                mol,
+                properties=mol.GetPropsAsDict(),
+            )
+            ligands.append(ligand)
+
+        return cls(ligands=ligands)
 
     @classmethod
     def from_csv(
@@ -1197,17 +1210,17 @@ class LigandSet:
 
         """
 
-        from deeporigin.drug_discovery import chemistry
+        from deeporigin.drug_discovery import align
 
-        return chemistry.mcs(self.to_rdkit_mols())
+        return align.mcs(self.to_rdkit_mols())
 
-    def align(self, *, reference: Ligand) -> list[list[dict]]:
+    def compute_constraints(self, *, reference: Ligand) -> list[list[dict]]:
         """
         Align a set of ligands to a reference ligand
         """
-        from deeporigin.drug_discovery import chemistry
+        from deeporigin.drug_discovery import align
 
-        return chemistry.align(
+        return align.compute_constraints(
             mols=self.to_rdkit_mols(),
             reference=reference.mol.m,
             mcs_mol=self.mcs(),

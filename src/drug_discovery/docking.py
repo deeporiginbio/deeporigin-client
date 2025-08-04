@@ -15,7 +15,6 @@ import pandas as pd
 from tqdm import tqdm
 
 from deeporigin.drug_discovery import LigandSet, utils
-from deeporigin.drug_discovery import chemistry as chem
 from deeporigin.drug_discovery.constants import tool_mapper
 from deeporigin.drug_discovery.structures.pocket import Pocket
 from deeporigin.drug_discovery.workflow_step import WorkflowStep
@@ -50,10 +49,11 @@ class Docking(WorkflowStep):
             return
 
         from IPython.display import HTML, display
+        from rdkit.Chem import PandasTools
 
-        smiles_list = list(df["SMILES"])
-        images = chem.smiles_list_to_base64_png_list(smiles_list)
-        df["Structure"] = images
+        PandasTools.AddMoleculeColumnToFrame(df, smilesCol="SMILES", molCol="Structure")
+        PandasTools.RenderImagesInAllDataFrames()
+
         df.drop("SMILES", axis=1, inplace=True)
 
         # Reorder columns to put Structure first

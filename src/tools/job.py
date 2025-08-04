@@ -146,7 +146,7 @@ class Job:
             org_key=org_key,
         )
 
-        self._attributes = [result for result in results]
+        self._attributes = results
         self._status = [result["status"] for result in results]
         self._progress_reports = [result["progressReport"] for result in results]
         self._execution_ids = [result["executionId"] for result in results]
@@ -436,21 +436,19 @@ def get_dataframe(
     jobs = response["data"]
 
     if resolve_user_names:
-        raise NotImplementedError(
-            "Due to changes in the platform API, resolve_user_names is currently not supported"
-        ) from None
+        from deeporigin.platform import entities_api
 
-        # from deeporigin.platform import organizations_api
+        orgs_client = getattr(_platform_clients, "EntitiesApi", None)
 
-        # orgs_client = getattr(_platform_clients, "OrganizationsApi", None)
+        users = entities_api.get_organization_users(
+            org_key=org_key,
+            client=orgs_client,
+        )
 
-        # users = organizations_api.get_organization_users(
-        #     org_key=org_key,
-        #     client=orgs_client,
-        # )
-
-        # # Create a mapping of user IDs to user names
-        # user_id_to_name = {user["id"]: user["attributes"]["name"] for user in users}
+        # Create a mapping of user IDs to user names
+        user_id_to_name = {
+            user["id"]: user["firstName"] + " " + user["lastName"] for user in users
+        }
 
     # Initialize lists to store data
     data = {
@@ -492,11 +490,7 @@ def get_dataframe(
         user_id = attributes.get("createdBy", "Unknown")
 
         if resolve_user_names:
-            raise NotImplementedError(
-                "Due to changes in the platform API, resolve_user_names is currently not supported"
-            ) from None
-
-            # data["user_name"].append(user_id_to_name.get(user_id, "Unknown"))
+            data["user_name"].append(user_id_to_name.get(user_id, "Unknown"))
         else:
             data["user_name"].append(user_id)
 

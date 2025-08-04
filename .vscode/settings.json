@@ -16,9 +16,12 @@
         "admet",
         "allatom",
         "cheminformatics",
+        "dataframe",
         "dateutil",
         "deeporigin",
         "drugability",
+        "FMCS",
+        "kabsch",
         "Konnektor",
         "marimo",
         "molblock",
@@ -32,6 +35,7 @@
         "rbfe",
         "rdchem",
         "rdkit",
-        "SASA"
+        "SASA",
+        "Substruct"
     ]
 }

@@ -232,6 +232,9 @@ def _create_function(
                     response = Box(response)
             else:
                 response = Box(response)
+
+        elif isinstance(response, list):
+            response = [Box(item) for item in response]
         else:
             raise NotImplementedError(f"Unexpected response type: {type(response)}")
 
