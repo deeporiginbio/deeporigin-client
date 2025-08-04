@@ -146,7 +146,7 @@ class Job:
             org_key=org_key,
         )
 
-        self._attributes = [result for result in results]
+        self._attributes = results
         self._status = [result["status"] for result in results]
         self._progress_reports = [result["progressReport"] for result in results]
         self._execution_ids = [result["executionId"] for result in results]
