@@ -114,7 +114,7 @@ def apply_alignment(
         target_coords = np.array([entry["coordinates"] for entry in alignment])
 
         conf = mol.GetConformer()
-        source_coords = np.array([conf.GetAtomPosition(i) for i in indices])
+        source_coords = np.array([conf.GetAtomPosition(i - 1) for i in indices])
 
         R, t = kabsch_alignment(source_coords, target_coords)
         aligned_mol = apply_rigid_transform(mol, R, t)
