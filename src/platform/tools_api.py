@@ -91,7 +91,7 @@ def cancel_runs(
         futures = [
             executor.submit(
                 cancel_run,
-                job_id,
+                execution_id=job_id,
                 client=client,
                 org_key=org_key,
             )
@@ -119,7 +119,7 @@ def cancel_run(
     """
 
     data = get_tool_execution(  # noqa: F821
-        execution_id,
+        execution_id=execution_id,
         client=client,
         org_key=org_key,
     )
@@ -215,7 +215,7 @@ def run_tool(
         clusters = list_clusters(client=client, org_key=org_key)  # noqa: F821
         if len(clusters) == 0:
             raise RuntimeError("No clusters found.")
-        cluster_id = clusters.data[0].id
+        cluster_id = clusters[0].id
         data["clusterId"] = cluster_id
 
     return execute_tool(  # noqa: F821
