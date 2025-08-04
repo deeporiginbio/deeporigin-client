@@ -427,13 +427,12 @@ def get_dataframe(
 
     tools_client = getattr(_platform_clients, "ToolsApi", None)
 
-    response = tools_api.get_tool_executions(
+    jobs = tools_api.get_tool_executions(
         org_key=org_key,
         filter=_filter,
         page_size=10000,
         client=tools_client,
     )
-    jobs = response["data"]
 
     if resolve_user_names:
         from deeporigin.platform import entities_api
