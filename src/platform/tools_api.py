@@ -1,10 +1,8 @@
 """bridge module to interact with the platform tools api"""
 
 import concurrent.futures
-from functools import wraps
-import inspect
 import sys
-from typing import Any, Callable, Literal, Optional
+from typing import Literal, Optional
 
 from beartype import beartype
 import pandas as pd
@@ -27,30 +25,6 @@ PROVIDER = Literal["ufa", "s3"]
 
 
 @beartype
-def get_status_and_progress(
-    execution_id: str,
-    *,
-    client=None,
-    org_key: Optional[str] = None,
-) -> dict:
-    """Determine the status of a run, identified by job ID
-
-    Args:
-        execution_id (str): execution_id
-
-
-    """
-
-    data = get_tool_execution(  # noqa: F821
-        execution_id=execution_id,
-        org_key=org_key,
-        client=client,
-    )
-
-    return data
-
-
-@beartype
 def get_statuses_and_progress(
     job_ids: list[str],
     *,
@@ -70,8 +44,8 @@ def get_statuses_and_progress(
         # Submit all jobs and create a mapping from future to job_id
         future_to_job_id = {
             executor.submit(
-                get_status_and_progress,
-                job_id,
+                get_tool_execution,  # noqa: F821
+                execution_id=job_id,
                 client=client,
                 org_key=org_key,
             ): job_id
@@ -144,7 +118,7 @@ def cancel_run(
         execution_id (str): execution ID
     """
 
-    data = get_status_and_progress(
+    data = get_tool_execution(  # noqa: F821
         execution_id,
         client=client,
         org_key=org_key,
@@ -279,133 +253,3 @@ def _process_job(
     job_id = response.id
 
     return job_id
-
-
-def generate_tool_function(
-    *,
-    tool_key: str,
-    tool_version: str,
-    org_key: Optional[str] = None,
-) -> Callable:
-    """utility function that generates a function that can be used to run a too, from schema
-
-    Example usage:
-
-        docking_func = tools_api.generate_tool_function(tool_key="deeporigin.bulk-docking", tool_version="0.3.0")
-        docking_func(
-            protein_path="path/to/protein.pdb",
-            ligand_path="path/to/ligand.sdf",
-            ...
-        )
-
-    """
-
-    data = get_tool(tool_key=tool_key)  # noqa: F821
-    data = [item for item in data if item.version == tool_version]
-
-    if len(data) == 0:
-        raise ValueError(
-            f"No tool found for tool_key={tool_key} and tool_version={tool_version}"
-        )
-    elif len(data) > 1:
-        raise ValueError(
-            f"Multiple tools found for tool_key={tool_key} and tool_version={tool_version}"
-        )
-
-    schema = data[0]
-
-    inputs_schema = schema["inputs"]
-    outputs_schema = schema["outputs"]
-
-    required_inputs = inputs_schema.get("required", [])
-    required_outputs = outputs_schema.get("required", [])
-
-    input_props = inputs_schema["properties"]
-
-    # --- Construct argument specification
-    parameters = []
-
-    for name in required_inputs:
-        prop = input_props[name]
-        annotation = (
-            str
-            if prop.get("format") == "file"
-            else (
-                list[float]
-                if prop.get("type") == "array" and prop["items"]["type"] == "number"
-                else (
-                    list[str]
-                    if prop.get("type") == "array" and prop["items"]["type"] == "string"
-                    else Any
-                )
-            )
-        )
-        parameters.append(
-            inspect.Parameter(
-                name, inspect.Parameter.POSITIONAL_OR_KEYWORD, annotation=annotation
-            )
-        )
-
-    for name in required_outputs:
-        parameters.append(
-            inspect.Parameter(
-                name, inspect.Parameter.POSITIONAL_OR_KEYWORD, annotation=str
-            )
-        )
-
-    parameters.append(
-        inspect.Parameter(
-            "metadata",
-            inspect.Parameter.KEYWORD_ONLY,
-            default=None,
-            annotation=dict[str, Any] | None,
-        )
-    )
-    parameters.append(
-        inspect.Parameter(
-            "client",
-            inspect.Parameter.KEYWORD_ONLY,
-            default=None,
-            annotation=Any,
-        )
-    )
-
-    sig = inspect.Signature(parameters)
-
-    @wraps(lambda *args, **kwargs: None)
-    def generated_function(*args, **kwargs):
-        bound = sig.bind(*args, **kwargs)
-        bound.apply_defaults()
-        arguments = bound.arguments
-
-        inputs = {}
-        for name in required_inputs:
-            val = arguments[name]
-            if input_props[name].get("format") == "file":
-                inputs[name] = {"$provider": "ufa", "key": val}
-            else:
-                inputs[name] = val
-
-        outputs = {
-            name: {"$provider": "ufa", "key": arguments[name]}
-            for name in required_outputs
-        }
-
-        metadata = arguments.get("metadata")
-        client = arguments.get("client")
-
-        return _process_job(
-            inputs=inputs,
-            outputs=outputs,
-            tool_key=tool_key,
-            metadata=metadata,
-            client=client,
-            org_key=org_key,
-        )
-
-    # Sanitize function name to be a valid Python identifier
-    func_name = tool_key.replace(".", "_").replace("-", "_")
-    generated_function.__name__ = func_name
-    generated_function.__signature__ = sig
-
-    return generated_function

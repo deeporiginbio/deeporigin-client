@@ -146,6 +146,7 @@ class Job:
             org_key=org_key,
         )
 
+        self._attributes = [result for result in results]
         self._status = [result["status"] for result in results]
         self._progress_reports = [result["progressReport"] for result in results]
         self._execution_ids = [result["executionId"] for result in results]
@@ -372,7 +373,7 @@ class Job:
         )
 
 
-@beartype
+# @beartype
 def get_dataframe(
     *,
     tool_key: Optional[str] = None,
@@ -435,33 +436,21 @@ def get_dataframe(
     jobs = response["data"]
 
     if resolve_user_names:
-        from deeporigin.platform import organizations_api
+        raise NotImplementedError(
+            "Due to changes in the platform API, resolve_user_names is currently not supported"
+        ) from None
 
-        orgs_client = getattr(_platform_clients, "OrganizationsApi", None)
+        # from deeporigin.platform import organizations_api
 
-        users = organizations_api.get_organization_users(
-            org_key=org_key,
-            client=orgs_client,
-        )
+        # orgs_client = getattr(_platform_clients, "OrganizationsApi", None)
 
-        # Create a mapping of user IDs to user names
-        user_id_to_name = {user["id"]: user["attributes"]["name"] for user in users}
+        # users = organizations_api.get_organization_users(
+        #     org_key=org_key,
+        #     client=orgs_client,
+        # )
 
-    def find_boolean_value(d, key):
-        """Recursively search for a key in a nested dictionary and return its value as boolean."""
-        if isinstance(d, dict):
-            if key in d:
-                return d[key] == 1
-            for v in d.values():
-                result = find_boolean_value(v, key)
-                if result is not None:
-                    return result
-        elif isinstance(d, list):
-            for item in d:
-                result = find_boolean_value(item, key)
-                if result is not None:
-                    return result
-        return False
+        # # Create a mapping of user IDs to user names
+        # user_id_to_name = {user["id"]: user["attributes"]["name"] for user in users}
 
     # Initialize lists to store data
     data = {
@@ -503,7 +492,11 @@ def get_dataframe(
         user_id = attributes.get("createdBy", "Unknown")
 
         if resolve_user_names:
-            data["user_name"].append(user_id_to_name.get(user_id, "Unknown"))
+            raise NotImplementedError(
+                "Due to changes in the platform API, resolve_user_names is currently not supported"
+            ) from None
+
+            # data["user_name"].append(user_id_to_name.get(user_id, "Unknown"))
         else:
             data["user_name"].append(user_id)
 

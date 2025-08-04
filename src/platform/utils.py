@@ -40,16 +40,7 @@ class PlatformClients:
         base_url: str,
         org_key: str,
     ) -> None:
-        from deeporigin.files import FilesClient
-
         self.org_key = org_key
-
-        # FilesApi is a special case
-        self.FilesApi = FilesClient(
-            token=token,
-            base_url=base_url,
-            organization_id=org_key,
-        )
 
         api_endpoint = base_url + "/api/"
         apis = [attr for attr in do_sdk_platform.__dir__() if attr.endswith("Api")]

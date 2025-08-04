@@ -1,5 +1,7 @@
 """Base class for workflow steps like ABFE, RBFE, and Docking."""
 
+import os
+
 from beartype import beartype
 import pandas as pd
 
@@ -28,7 +30,7 @@ class WorkflowStep:
         """Get the jobs for this workflow step as a dataframe"""
         df = get_dataframe(
             _platform_clients=self.parent._platform_clients,
-            resolve_user_names=True,
+            resolve_user_names=False,
             include_metadata=True,
         )
 
@@ -37,6 +39,15 @@ class WorkflowStep:
 
         # filter by tool key
         df = df[df["tool_key"].str.contains(self._tool_key)]
+
+        # filter by protein file
+        df = df[
+            df["metadata"].apply(
+                lambda x: isinstance(x, dict)
+                and x.get("protein_file")
+                == os.path.basename(self.parent.protein.file_path)
+            )
+        ]
 
         df = df.reset_index(drop=True)
 
