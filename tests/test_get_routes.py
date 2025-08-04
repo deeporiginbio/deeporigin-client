@@ -55,7 +55,7 @@ def test_get_functions_bykey(config):  # noqa: F811
     assert isinstance(functions, list)
 
 
-def test_get_job_df(config):
+def test_get_job_df(config):  # noqa: F811
     if config["mock"]:
         pytest.skip("test skipped with mock client")
     import pandas as pd
