@@ -516,6 +516,11 @@ class Ligand(Entity):
         """Write the ligand to an SDF file."""
         return self.write_to_file(output_path=output_path, output_format="sdf")
 
+    def add_hydrogens(self) -> None:
+        """Add hydrogens to the ligand."""
+
+        self.mol.add_hydrogens()
+
     @beartype
     def to_base64(self) -> str:
         """Convert the ligand to base64 encoded SDF format.
@@ -628,16 +633,10 @@ class Ligand(Entity):
                 f"Failed to convert ligand block content to SDF: {str(e)}"
             ) from e
 
-    def minimize(self):
+    def minimize(self) -> None:
         """embed and optimize ligand in 3d space"""
 
-        from rdkit.Chem.AllChem import EmbedMolecule, UFFOptimizeMolecule
-
-        # Embed the molecules into 3d space
-        EmbedMolecule(self.mol.m)
-        UFFOptimizeMolecule(self.mol.m, maxIters=5000)
-
-        return None
+        self.mol.embed()
 
     def _repr_html_(self) -> str:
         """
@@ -1052,6 +1051,11 @@ class LigandSet:
             ligands.extend(this_set)
 
         return cls(ligands=ligands)
+
+    def add_hydrogens(self) -> None:
+        """Add hydrogens to all ligands in the set."""
+        for ligand in self.ligands:
+            ligand.add_hydrogens()
 
     @jupyter_visualization
     def show(self):
