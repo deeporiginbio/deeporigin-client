@@ -16,7 +16,6 @@ from typing import Optional
 import zipfile
 
 from beartype import beartype
-from rdkit import Chem
 import requests
 
 from deeporigin.drug_discovery.structures import Ligand, Pocket, Protein
@@ -134,9 +133,8 @@ def dock(
 def constrained_dock(
     *,
     protein: Protein,
-    reference_ligand: Ligand,
     ligand: Ligand,
-    mcs: Chem.Mol,
+    constraints: list[dict],
     pocket: Optional[Pocket] = None,
     box_size: tuple[float, float, float] = (20.0, 20.0, 20.0),
     pocket_center: Optional[tuple[int, int, int]] = None,
@@ -153,9 +151,7 @@ def constrained_dock(
 
     Args:
         protein: The protein structure to dock against.
-        reference_ligand: The reference ligand used for alignment constraints.
         ligand: The ligand to be docked.
-        mcs: The maximum common substructure (RDKit Mol object) between reference and target ligands.
         pocket: Optional pocket object. If provided, its center will be used as pocket_center.
         box_size: Size of the docking box in Angstroms (x, y, z). Defaults to (20.0, 20.0, 20.0).
         pocket_center: Optional center coordinates for the docking box. If None and pocket is provided,
@@ -175,16 +171,14 @@ def constrained_dock(
         stores results based on a SHA256 hash of all input parameters. This allows for
         efficient reuse of previous docking results.
     """
-    URL = "http://constrained-docking.default.jobs.edge.deeporigin.io/dock"
+    # URL = "http://constrained-docking.default.jobs.edge.deeporigin.io/dock"
+    URL = "http://localhost:8080/dock"
     CACHE_DIR = os.path.expanduser("~/.deeporigin/constrained_docking")
 
-    from deeporigin.drug_discovery import chemistry
-
-    constraints = chemistry.align(
-        mols=[ligand.mol.m],
-        reference=reference_ligand.mol.m,
-        mcs_mol=mcs,
-    )[0]
+    if pocket is None and pocket_center is None:
+        raise DeepOriginException(
+            "Either pocket or pocket_center must be provided"
+        ) from None
 
     # get pocket center
     if pocket_center is None:
@@ -197,10 +191,6 @@ def constrained_dock(
     protein_file = protein._dump_state()
     with open(protein_file, "rb") as f:
         hasher.update(f.read())
-
-    # Hash reference ligand
-    reference_ligand_b64 = reference_ligand.to_base64()
-    hasher.update(reference_ligand_b64.encode())
 
     # Hash ligand
     ligand_b64 = ligand.to_base64()

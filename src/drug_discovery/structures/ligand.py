@@ -1214,14 +1214,19 @@ class LigandSet:
 
         return align.mcs(self.to_rdkit_mols())
 
-    def compute_constraints(self, *, reference: Ligand) -> list[list[dict]]:
+    def compute_constraints(
+        self, *, reference: Ligand, mcs_mol=None
+    ) -> list[list[dict]]:
         """
         Align a set of ligands to a reference ligand
         """
         from deeporigin.drug_discovery import align
 
+        if mcs_mol is None:
+            mcs_mol = self.mcs()
+
         return align.compute_constraints(
             mols=self.to_rdkit_mols(),
             reference=reference.mol.m,
-            mcs_mol=self.mcs(),
+            mcs_mol=mcs_mol,
         )

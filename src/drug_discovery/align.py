@@ -95,18 +95,18 @@ def apply_rigid_transform(mol: Chem.Mol, R: np.ndarray, t: np.ndarray) -> Chem.M
 def apply_alignment(
     *,
     mols: list[Chem.rdchem.Mol],
-    alignments: list[list[dict]],  # one list of dicts per mol
+    constraints: list[list[dict]],  # one list of dicts per mol
 ) -> list[Chem.rdchem.Mol]:
     """
     Applies the alignment to each molecule in mols, using the corresponding alignment dicts.
     Returns a list of new molecules aligned to the reference frame.
     """
-    if len(mols) != len(alignments):
+    if len(mols) != len(constraints):
         raise ValueError("Each molecule must have a corresponding alignment.")
 
     aligned_mols = []
 
-    for mol, alignment in zip(mols, alignments, strict=False):
+    for mol, alignment in zip(mols, constraints, strict=False):
         if not alignment:
             raise ValueError("Empty alignment for molecule")
 
