@@ -68,7 +68,7 @@ from deeporigin.exceptions import DeepOriginException
 from deeporigin.functions.pocket_finder import find_pockets
 
 from .entity import Entity
-from .ligand import Ligand
+from .ligand import Ligand, LigandSet
 from .pocket import Pocket
 
 
@@ -856,8 +856,11 @@ class Protein(Entity):
     @beartype
     def show(
         self,
+        *,
         pockets: Optional[list[Pocket]] = None,
         sdf_file: Optional[str] = None,
+        ligand: Optional[Ligand] = None,
+        ligands: Optional[LigandSet | list[Ligand]] = None,
     ):
         """Visualize the protein structure in a Jupyter notebook using MolStar viewer.
 
@@ -885,7 +888,30 @@ class Protein(Entity):
 
         current_protein_file = self._dump_state()
 
+        if ligand is not None and ligands is not None:
+            raise DeepOriginException(
+                "Either ligand or ligands must be provided, not both"
+            ) from None
+
+        if ligand is not None and sdf_file is not None:
+            raise DeepOriginException(
+                "Either ligand or sdf_file must be provided, not both"
+            ) from None
+
+        if ligands is not None and sdf_file is not None:
+            raise DeepOriginException(
+                "Either ligands or sdf_file must be provided, not both"
+            ) from None
+
+        if ligand is not None:
+            sdf_file = ligand.to_sdf()
+        elif ligands is not None:
+            if isinstance(ligands, list):
+                ligands = LigandSet(ligands)
+            sdf_file = ligands.to_sdf()
+
         if pockets is None and sdf_file is None:
+            # we're only showing the protein, use ProteinViewer
             protein_viewer = ProteinViewer(
                 data=current_protein_file,
                 format="pdb",
@@ -893,6 +919,7 @@ class Protein(Entity):
             html_content = protein_viewer.render_protein()
             JupyterViewer.visualize(html_content)
         elif pockets is not None and sdf_file is None:
+            # need to show pockets
             pocket_surface_alpha: float = 0.7
             protein_surface_alpha: float = 0.1
 
