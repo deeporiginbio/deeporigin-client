@@ -171,7 +171,8 @@ def constrained_dock(
         stores results based on a SHA256 hash of all input parameters. This allows for
         efficient reuse of previous docking results.
     """
-    URL = "http://constrained-docking.default.jobs.edge.deeporigin.io/dock"
+    # URL = "http://constrained-docking.default.jobs.edge.deeporigin.io/dock"
+    URL = "http://localhost:8080/dock"
     CACHE_DIR = os.path.expanduser("~/.deeporigin/constrained_docking")
 
     if pocket is None and pocket_center is None:
@@ -183,31 +184,25 @@ def constrained_dock(
     if pocket_center is None:
         pocket_center = pocket.get_center().tolist()
 
+    # make the payload
+    payload = {
+        "box_size": box_size,
+        "constraints": constraints,
+        "protein": {
+            "pocket_center": pocket_center,
+        },
+        "top_criteria": "score",
+    }
+
+    # Inject the base64-encoded strings into the payload
+    payload["protein_b64"] = protein.to_base64()
+    payload["ligand_b64"] = ligand.to_base64()
+
     # Create hash of inputs
     hasher = hashlib.sha256()
-
-    # Hash protein file contents
-    protein_file = protein._dump_state()
-    with open(protein_file, "rb") as f:
-        hasher.update(f.read())
-
-    # Hash ligand
-    ligand_b64 = ligand.to_base64()
-    hasher.update(ligand_b64.encode())
-
-    # Hash other inputs
-    hasher.update(
-        json.dumps(
-            {
-                "constraints": constraints,
-                "box_size": list(box_size),
-                "pocket_center": list(pocket_center),
-                "top_criteria": "energy_score",
-            }
-        ).encode()
-    )
-
+    hasher.update(json.dumps(payload).encode())
     cache_hash = hasher.hexdigest()
+
     zip_file = str(Path(CACHE_DIR) / f"{cache_hash}.zip")
     extract_dir = str(Path(CACHE_DIR) / cache_hash)
 
@@ -220,21 +215,6 @@ def constrained_dock(
                 extracted_files.append(str(file_path))
         return extracted_files
     else:
-        payload = {
-            "box_size": box_size,
-            "constraints": constraints,
-            "ligands": "/data/ligand.sdf",
-            "protein": {
-                "file_path": "/data/protein.pdb",
-                "pocket_center": pocket_center,
-            },
-            "top_criteria": "energy_score",
-        }
-
-        # Inject the base64-encoded strings into the payload
-        payload["protein_b64"] = protein.to_base64()
-        payload["ligand_b64"] = ligand.to_base64()
-
         # Send the POST request
         response = requests.post(
             URL,
