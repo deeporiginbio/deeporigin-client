@@ -16,7 +16,6 @@ from typing import Optional
 import zipfile
 
 from beartype import beartype
-from rdkit import Chem
 import requests
 
 from deeporigin.drug_discovery.structures import Ligand, Pocket, Protein
@@ -39,12 +38,15 @@ def dock(
 
     Args:
         protein (Protein): Protein object representing the target protein
-        smiles_list (list[str]): List of SMILES strings for ligands
-        box_size (Tuple[float, float, float]): Size of the docking box (x, y, z)
-        pocket_center (Tuple[int, int, int]): Center coordinates of the docking pocket (x, y, z)
+        smiles_string (Optional[str]): SMILES string for the ligand to dock
+        ligand (Optional[Ligand]): Ligand object to dock
+        box_size (tuple[float, float, float]): Size of the docking box (x, y, z)
+        pocket_center (Optional[tuple[int, int, int]]): Center coordinates of the docking pocket (x, y, z)
+        pocket (Optional[Pocket]): Pocket object defining the docking region
+        use_cache (bool): Whether to use cached results. Defaults to True
 
     Returns:
-        dict: API response
+        str: path to the SDF file containing the docking results
     """
 
     URL = "http://docking.default.jobs.edge.deeporigin.io/dock"
@@ -134,41 +136,32 @@ def dock(
 def constrained_dock(
     *,
     protein: Protein,
-    reference_ligand: Ligand,
     ligand: Ligand,
-    mcs: Chem.Mol,
+    constraints: list[dict],
     pocket: Optional[Pocket] = None,
     box_size: tuple[float, float, float] = (20.0, 20.0, 20.0),
     pocket_center: Optional[tuple[int, int, int]] = None,
     use_cache: bool = True,
 ) -> list[str]:
-    """Perform constrained molecular docking using a reference ligand and MCS alignment.
+    """Perform constrained molecular docking using a reference ligand constraints.
 
     This function performs molecular docking with constraints based on a reference ligand
     and a maximum common substructure (MCS). The ligand is aligned to the reference ligand
     using the MCS, and docking is performed with these alignment constraints applied.
 
-    The function uses a remote docking service and implements caching to avoid redundant
-    computations. Results are cached based on a hash of all input parameters.
-
     Args:
-        protein: The protein structure to dock against.
-        reference_ligand: The reference ligand used for alignment constraints.
-        ligand: The ligand to be docked.
-        mcs: The maximum common substructure (RDKit Mol object) between reference and target ligands.
-        pocket: Optional pocket object. If provided, its center will be used as pocket_center.
-        box_size: Size of the docking box in Angstroms (x, y, z). Defaults to (20.0, 20.0, 20.0).
-        pocket_center: Optional center coordinates for the docking box. If None and pocket is provided,
+        protein (Protein): The protein structure to dock against.
+        ligand (Ligand): The ligand to be docked.
+        constraints (list[dict]): List of constraints for the docking. Generate this using `align.compute_constraints`.
+        pocket (Optional[Pocket]): Optional pocket object. If provided, its center will be used as pocket_center.
+        box_size (tuple[float, float, float]): Size of the docking box in Angstroms (x, y, z). Defaults to (20.0, 20.0, 20.0).
+        pocket_center (Optional[tuple[int, int, int]]): Optional center coordinates for the docking box. If None and pocket is provided,
                      uses the pocket center. If both are None, raises an error.
-        use_cache: Whether to use cached results if available. Defaults to True.
+        use_cache (bool): Whether to use cached results if available. Defaults to True.
 
     Returns:
         list[str]: List of file paths to the docking result files (typically SDF files).
 
-    Raises:
-        ValueError: If neither pocket_center nor pocket is provided.
-        requests.RequestException: If the docking service request fails.
-        zipfile.BadZipFile: If the response from the service is not a valid zip file.
 
     Note:
         The function creates a cache directory at ~/.deeporigin/constrained_docking/ and
@@ -176,49 +169,37 @@ def constrained_dock(
         efficient reuse of previous docking results.
     """
     URL = "http://constrained-docking.default.jobs.edge.deeporigin.io/dock"
+    # URL = "http://localhost:8080/dock"
     CACHE_DIR = os.path.expanduser("~/.deeporigin/constrained_docking")
 
-    from deeporigin.drug_discovery import chemistry
-
-    constraints = chemistry.align(
-        mols=[ligand.mol.m],
-        reference=reference_ligand.mol.m,
-        mcs_mol=mcs,
-    )[0]
+    if pocket is None and pocket_center is None:
+        raise DeepOriginException(
+            "Either pocket or pocket_center must be provided"
+        ) from None
 
     # get pocket center
     if pocket_center is None:
         pocket_center = pocket.get_center().tolist()
 
+    # make the payload
+    payload = {
+        "box_size": box_size,
+        "constraints": constraints,
+        "protein": {
+            "pocket_center": pocket_center,
+        },
+        "top_criteria": "score",
+    }
+
+    # Inject the base64-encoded strings into the payload
+    payload["protein_b64"] = protein.to_base64()
+    payload["ligand_b64"] = ligand.to_base64()
+
     # Create hash of inputs
     hasher = hashlib.sha256()
-
-    # Hash protein file contents
-    protein_file = protein._dump_state()
-    with open(protein_file, "rb") as f:
-        hasher.update(f.read())
-
-    # Hash reference ligand
-    reference_ligand_b64 = reference_ligand.to_base64()
-    hasher.update(reference_ligand_b64.encode())
-
-    # Hash ligand
-    ligand_b64 = ligand.to_base64()
-    hasher.update(ligand_b64.encode())
-
-    # Hash other inputs
-    hasher.update(
-        json.dumps(
-            {
-                "constraints": constraints,
-                "box_size": list(box_size),
-                "pocket_center": list(pocket_center),
-                "top_criteria": "energy_score",
-            }
-        ).encode()
-    )
-
+    hasher.update(json.dumps(payload).encode())
     cache_hash = hasher.hexdigest()
+
     zip_file = str(Path(CACHE_DIR) / f"{cache_hash}.zip")
     extract_dir = str(Path(CACHE_DIR) / cache_hash)
 
@@ -231,21 +212,6 @@ def constrained_dock(
                 extracted_files.append(str(file_path))
         return extracted_files
     else:
-        payload = {
-            "box_size": box_size,
-            "constraints": constraints,
-            "ligands": "/data/ligand.sdf",
-            "protein": {
-                "file_path": "/data/protein.pdb",
-                "pocket_center": pocket_center,
-            },
-            "top_criteria": "energy_score",
-        }
-
-        # Inject the base64-encoded strings into the payload
-        payload["protein_b64"] = protein.to_base64()
-        payload["ligand_b64"] = ligand.to_base64()
-
         # Send the POST request
         response = requests.post(
             URL,
