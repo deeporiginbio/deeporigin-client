@@ -38,12 +38,15 @@ def dock(
 
     Args:
         protein (Protein): Protein object representing the target protein
-        smiles_list (list[str]): List of SMILES strings for ligands
-        box_size (Tuple[float, float, float]): Size of the docking box (x, y, z)
-        pocket_center (Tuple[int, int, int]): Center coordinates of the docking pocket (x, y, z)
+        smiles_string (Optional[str]): SMILES string for the ligand to dock
+        ligand (Optional[Ligand]): Ligand object to dock
+        box_size (tuple[float, float, float]): Size of the docking box (x, y, z)
+        pocket_center (Optional[tuple[int, int, int]]): Center coordinates of the docking pocket (x, y, z)
+        pocket (Optional[Pocket]): Pocket object defining the docking region
+        use_cache (bool): Whether to use cached results. Defaults to True
 
     Returns:
-        dict: API response
+        str: path to the SDF file containing the docking results
     """
 
     URL = "http://docking.default.jobs.edge.deeporigin.io/dock"
@@ -140,31 +143,25 @@ def constrained_dock(
     pocket_center: Optional[tuple[int, int, int]] = None,
     use_cache: bool = True,
 ) -> list[str]:
-    """Perform constrained molecular docking using a reference ligand and MCS alignment.
+    """Perform constrained molecular docking using a reference ligand constraints.
 
     This function performs molecular docking with constraints based on a reference ligand
     and a maximum common substructure (MCS). The ligand is aligned to the reference ligand
     using the MCS, and docking is performed with these alignment constraints applied.
 
-    The function uses a remote docking service and implements caching to avoid redundant
-    computations. Results are cached based on a hash of all input parameters.
-
     Args:
-        protein: The protein structure to dock against.
-        ligand: The ligand to be docked.
-        pocket: Optional pocket object. If provided, its center will be used as pocket_center.
-        box_size: Size of the docking box in Angstroms (x, y, z). Defaults to (20.0, 20.0, 20.0).
-        pocket_center: Optional center coordinates for the docking box. If None and pocket is provided,
+        protein (Protein): The protein structure to dock against.
+        ligand (Ligand): The ligand to be docked.
+        constraints (list[dict]): List of constraints for the docking. Generate this using `align.compute_constraints`.
+        pocket (Optional[Pocket]): Optional pocket object. If provided, its center will be used as pocket_center.
+        box_size (tuple[float, float, float]): Size of the docking box in Angstroms (x, y, z). Defaults to (20.0, 20.0, 20.0).
+        pocket_center (Optional[tuple[int, int, int]]): Optional center coordinates for the docking box. If None and pocket is provided,
                      uses the pocket center. If both are None, raises an error.
-        use_cache: Whether to use cached results if available. Defaults to True.
+        use_cache (bool): Whether to use cached results if available. Defaults to True.
 
     Returns:
         list[str]: List of file paths to the docking result files (typically SDF files).
 
-    Raises:
-        ValueError: If neither pocket_center nor pocket is provided.
-        requests.RequestException: If the docking service request fails.
-        zipfile.BadZipFile: If the response from the service is not a valid zip file.
 
     Note:
         The function creates a cache directory at ~/.deeporigin/constrained_docking/ and
