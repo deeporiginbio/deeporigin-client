@@ -15,6 +15,7 @@ CACHE_DIR = os.path.expanduser("~/.deeporigin/model_loops")
 def model_loops(
     *,
     pdb_id: str,
+    use_cache: bool = True,
 ) -> str:
     """
     Run system preparation on a protein-ligand complex.
@@ -36,7 +37,7 @@ def model_loops(
     output_pdb_path = os.path.join(cache_path, "loops_modelled.pdb")
 
     # Check if cached results exist
-    if os.path.exists(output_pdb_path):
+    if use_cache and os.path.exists(output_pdb_path):
         return output_pdb_path
 
     response = requests.post(URL, json=payload, stream=True)

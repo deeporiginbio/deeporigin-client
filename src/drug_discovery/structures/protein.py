@@ -249,7 +249,7 @@ class Protein(Entity):
     def model_loops(self) -> None:
         """model loops in protein structure"""
 
-        from deeporigin.functions.loop_modelling import _model_loops
+        from deeporigin.functions.loop_modelling import model_loops as _model_loops
 
         pdb_id = self.pdb_id
 
@@ -266,6 +266,7 @@ class Protein(Entity):
         *,
         ligand: Ligand,
         pocket: Pocket,
+        use_cache: bool = True,
     ) -> str:
         """Dock a ligand into a specific pocket of the protein.
 
@@ -288,6 +289,7 @@ class Protein(Entity):
             protein=self,
             ligand=ligand,
             pocket=pocket,
+            use_cache=use_cache,
         )
 
         return docked_ligand_sdf_file
@@ -458,6 +460,7 @@ class Protein(Entity):
         self,
         pocket_count: int = 1,
         pocket_min_size: int = 30,
+        use_cache: bool = True,
     ) -> list[Pocket]:
         """Find potential binding pockets in the protein structure.
 
@@ -492,6 +495,7 @@ class Protein(Entity):
             protein=self,
             pocket_count=pocket_count,
             pocket_min_size=pocket_min_size,
+            use_cache=use_cache,
         )
 
         return Pocket.from_pocket_finder_results(results_dir)

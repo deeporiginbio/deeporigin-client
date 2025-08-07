@@ -20,6 +20,7 @@ def find_pockets(
     protein: Protein,
     pocket_count: int = 5,
     pocket_min_size: int = 30,
+    use_cache: bool = True,
 ) -> str | None:
     """Find protein binding pockets in a PDB structure and save the results.
 
@@ -46,7 +47,7 @@ def find_pockets(
     cache_path = os.path.join(CACHE_DIR, cache_key)
 
     # Check if cached results exist
-    if os.path.exists(cache_path):
+    if use_cache and os.path.exists(cache_path):
         return cache_path
 
     # Send the request to the server
