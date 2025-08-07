@@ -1,10 +1,11 @@
 """This module contains the function to run loop modelling on a protein identified by a PDB ID."""
 
-import hashlib
 import os
 
 from beartype import beartype
 import requests
+
+from deeporigin.utils.core import hash_dict
 
 URL = "http://loop-modelling.default.jobs.edge.deeporigin.io/model_loops"
 CACHE_DIR = os.path.expanduser("~/.deeporigin/model_loops")
@@ -25,20 +26,18 @@ def model_loops(
         Path to the output PDB file if successful, or raises RuntimeError if the server fails.
     """
 
-    # Create a hash of the input parameters for caching
-    hash_input = f"{pdb_id}"
-    cache_key = hashlib.md5(hash_input.encode()).hexdigest()
-    cache_path = os.path.join(CACHE_DIR, cache_key)
+    # If no cached results, proceed with server call
+    payload = {
+        "pdb_id": pdb_id,
+    }
+
+    cache_hash = hash_dict(payload)
+    cache_path = os.path.join(CACHE_DIR, cache_hash)
     output_pdb_path = os.path.join(cache_path, "loops_modelled.pdb")
 
     # Check if cached results exist
     if os.path.exists(output_pdb_path):
         return output_pdb_path
-
-    # If no cached results, proceed with server call
-    payload = {
-        "pdb_id": pdb_id,
-    }
 
     response = requests.post(URL, json=payload, stream=True)
 

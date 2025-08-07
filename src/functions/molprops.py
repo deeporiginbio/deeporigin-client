@@ -2,13 +2,14 @@
 using the DeepOrigin API.
 """
 
-import hashlib
 import json
 import os
 from pathlib import Path
 
 from beartype import beartype
 import requests
+
+from deeporigin.utils.core import hash_dict
 
 URL = "http://molprops.default.jobs.edge.deeporigin.io/properties"
 CACHE_DIR = os.path.expanduser("~/.deeporigin/molprops")
@@ -34,10 +35,12 @@ def molprops(
         str: Path to the cached SDF file containing the results
     """
 
+    payload = {
+        "smiles": smiles_string,
+    }
+
     # Create hash of inputs
-    hasher = hashlib.sha256()
-    hasher.update(smiles_string.encode("utf-8"))
-    cache_hash = hasher.hexdigest()
+    cache_hash = hash_dict(payload)
     response_file = str(Path(CACHE_DIR) / f"{cache_hash}.json")
 
     # Check if cached result exists
@@ -48,17 +51,11 @@ def molprops(
 
     else:
         # Prepare the request payload
-        payload = {
-            "functionId": "molprops",
-            "params": {
-                "smiles": smiles_string,
-            },
-        }
 
         # Make the API request
         response = requests.post(
             URL,
-            json=payload["params"],
+            json=payload,
             headers={"Content-Type": "application/json"},
         )
 

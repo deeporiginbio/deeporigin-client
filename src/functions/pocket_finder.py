@@ -1,29 +1,23 @@
 """this module implements a low level function to find pockets in a protein determined by a PDB file"""
 
 import base64
-import hashlib
 import os
-from pathlib import Path
 import zipfile
 
 from beartype import beartype
 import requests
 
+from deeporigin.drug_discovery.structures import Protein
+from deeporigin.utils.core import hash_dict
+
 URL = "http://pocketfinder.default.jobs.edge.deeporigin.io/find_pockets"
-# URL = "http://localhost:8080/find_pockets"
 CACHE_DIR = os.path.expanduser("~/.deeporigin/pocket-finder")
 
 
 @beartype
-def encode_pdb_file(file_path: str) -> str:
-    """Read a PDB file and return its base64 encoded content."""
-    with open(file_path, "rb") as f:
-        return base64.b64encode(f.read()).decode("utf-8")
-
-
-@beartype
 def find_pockets(
-    pdb_file_path: str | Path,
+    *,
+    protein: Protein,
     pocket_count: int = 5,
     pocket_min_size: int = 30,
 ) -> str | None:
@@ -33,33 +27,27 @@ def find_pockets(
     saves the returned results to a cache directory.
 
     Args:
-        pdb_file_path (str | Path): Path to the PDB file to analyze.
+        protein (Protein): protein to find pockets in
         pocket_count (int, optional): Maximum number of pockets to detect. Defaults to 5.
         pocket_min_size (int, optional): Minimum size of pockets to consider. Defaults to 30.
 
     Returns:
         str | None: Path to the cache directory if successful, None if the request failed.
     """
-    # Create a hash of the input parameters
-    pdb_file_path = str(pdb_file_path)
-    hash_input = f"{pdb_file_path}:{pocket_count}:{pocket_min_size}"
-    cache_key = hashlib.md5(hash_input.encode()).hexdigest()
+
+    # Prepare the request payload
+    payload = {
+        "protein": protein.to_base64(),
+        "pocket_count": pocket_count,
+        "pocket_min_size": pocket_min_size,
+    }
+
+    cache_key = hash_dict(payload)
     cache_path = os.path.join(CACHE_DIR, cache_key)
 
     # Check if cached results exist
     if os.path.exists(cache_path):
         return cache_path
-
-    # If no cached results, proceed with server call
-    # Base64 encode the PDB file
-    encoded_pdb = encode_pdb_file(pdb_file_path)
-
-    # Prepare the request payload
-    payload = {
-        "protein": encoded_pdb,
-        "pocket_count": pocket_count,
-        "pocket_min_size": pocket_min_size,
-    }
 
     # Send the request to the server
     response = requests.post(URL, json=payload)

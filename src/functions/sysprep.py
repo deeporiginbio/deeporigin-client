@@ -1,12 +1,12 @@
 """This module contains the function to run system preparation on a protein-ligand complex."""
 
-import base64
-import hashlib
 import os
-from pathlib import Path
 
 from beartype import beartype
 import requests
+
+from deeporigin.drug_discovery.structures import Ligand, Protein
+from deeporigin.utils.core import hash_dict
 
 URL = "http://sysprep.default.jobs.edge.deeporigin.io/sysprep"
 CACHE_DIR = os.path.expanduser("~/.deeporigin/sysprep")
@@ -15,8 +15,8 @@ CACHE_DIR = os.path.expanduser("~/.deeporigin/sysprep")
 @beartype
 def sysprep(
     *,
-    protein_path: str | Path,
-    ligand_path: str | Path,
+    protein: Protein,
+    ligand: Ligand,
     padding: float = 1.0,
     keep_waters: bool = False,
     is_lig_protonated: bool = True,
@@ -37,19 +37,19 @@ def sysprep(
     Returns:
         Path to the output PDB file if successful, or raises RuntimeError if the server fails.
     """
-    # Ensure paths are strings for file operations and hashing
-    protein_path_str = str(protein_path)
-    ligand_path_str = str(ligand_path)
 
-    # Read and base64-encode the files
-    with open(protein_path_str, "rb") as f:
-        protein_b64 = base64.b64encode(f.read()).decode("utf-8")
-    with open(ligand_path_str, "rb") as f:
-        ligand_b64 = base64.b64encode(f.read()).decode("utf-8")
+    payload = {
+        "protein": protein.to_base64(),
+        "ligand": ligand.to_base64(),
+        "is_lig_protonated": is_lig_protonated,
+        "is_protein_protonated": is_protein_protonated,
+        "keep_waters": keep_waters,
+        "padding": padding,
+    }
 
     # Create a hash of the input parameters for caching
-    hash_input = f"{protein_path_str}:{ligand_path_str}:{is_lig_protonated}:{is_protein_protonated}:{keep_waters}:{padding}"
-    cache_key = hashlib.md5(hash_input.encode()).hexdigest()
+
+    cache_key = hash_dict(payload)
     cache_path = os.path.join(CACHE_DIR, cache_key)
     output_pdb_path = os.path.join(cache_path, "complex.pdb")
 
@@ -58,14 +58,6 @@ def sysprep(
         return output_pdb_path
 
     # If no cached results, proceed with server call
-    payload = {
-        "protein": protein_b64,
-        "ligand": ligand_b64,
-        "is_lig_protonated": is_lig_protonated,
-        "is_protein_protonated": is_protein_protonated,
-        "keep_waters": keep_waters,
-        "padding": padding,
-    }
 
     response = requests.post(URL, json=payload, stream=True)
 

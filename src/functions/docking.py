@@ -7,9 +7,6 @@ pocket center, or by passing a Pocket object which contains the pocket center in
 The module interfaces with the Deep Origin docking service to perform the actual docking calculations remotely.
 """
 
-import base64
-import hashlib
-import json
 import os
 from pathlib import Path
 from typing import Optional
@@ -20,6 +17,7 @@ import requests
 
 from deeporigin.drug_discovery.structures import Ligand, Pocket, Protein
 from deeporigin.exceptions import DeepOriginException
+from deeporigin.utils.core import hash_dict
 
 
 @beartype
@@ -66,35 +64,15 @@ def dock(
             "Either smiles_string or ligand must be provided"
         ) from None
 
-    # Create hash of inputs
-    hasher = hashlib.sha256()
-
-    # Hash protein file contents
-    protein_file = protein._dump_state()
-    with open(protein_file, "rb") as f:
-        hasher.update(f.read())
-
-    # Hash pocket file if provided
-    if pocket is not None and pocket.file_path is not None:
-        with open(pocket.file_path, "rb") as f:
-            hasher.update(f.read())
-
-    # Read and encode the protein file
-    with open(protein_file, "rb") as f:
-        encoded_protein = base64.b64encode(f.read()).decode("utf-8")
-
     # Prepare the request payload
     payload = {
-        "protein": encoded_protein,
+        "protein": protein.to_base64(),
         "smiles_list": [smiles_string],
         "box_size": list(box_size),
         "pocket_center": list(pocket_center),
     }
 
-    # Hash payload
-    hasher.update(json.dumps(payload).encode())
-    cache_hash = hasher.hexdigest()
-
+    cache_hash = hash_dict(payload)
     sdf_file = str(Path(CACHE_DIR) / f"{cache_hash}.sdf")
 
     # Check if cached result exists
@@ -158,7 +136,6 @@ def constrained_dock(
         efficient reuse of previous docking results.
     """
     URL = "http://constrained-docking.default.jobs.edge.deeporigin.io/dock"
-    # URL = "http://localhost:8080/dock"
     CACHE_DIR = os.path.expanduser("~/.deeporigin/constrained_docking")
 
     if pocket is None and pocket_center is None:
@@ -184,10 +161,7 @@ def constrained_dock(
     payload["protein_b64"] = protein.to_base64()
     payload["ligand_b64"] = ligand.to_base64()
 
-    # Create hash of inputs
-    hasher = hashlib.sha256()
-    hasher.update(json.dumps(payload).encode())
-    cache_hash = hasher.hexdigest()
+    cache_hash = hash_dict(payload)
 
     zip_file = str(Path(CACHE_DIR) / f"{cache_hash}.zip")
     extract_dir = str(Path(CACHE_DIR) / cache_hash)
