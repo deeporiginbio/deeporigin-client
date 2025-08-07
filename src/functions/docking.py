@@ -79,43 +79,32 @@ def dock(
         with open(pocket.file_path, "rb") as f:
             hasher.update(f.read())
 
-    # Hash other inputs
-    hasher.update(
-        json.dumps(
-            {
-                "smiles": smiles_string,
-                "box_size": list(box_size),
-                "pocket_center": list(pocket_center),
-            }
-        ).encode()
-    )
+    # Read and encode the protein file
+    with open(protein_file, "rb") as f:
+        encoded_protein = base64.b64encode(f.read()).decode("utf-8")
 
+    # Prepare the request payload
+    payload = {
+        "protein": encoded_protein,
+        "smiles_list": [smiles_string],
+        "box_size": list(box_size),
+        "pocket_center": list(pocket_center),
+    }
+
+    # Hash payload
+    hasher.update(json.dumps(payload).encode())
     cache_hash = hasher.hexdigest()
+
     sdf_file = str(Path(CACHE_DIR) / f"{cache_hash}.sdf")
 
     # Check if cached result exists
     if os.path.exists(sdf_file) and use_cache:
         return sdf_file
     else:
-        # Read and encode the protein file
-        with open(protein_file, "rb") as f:
-            encoded_protein = base64.b64encode(f.read()).decode("utf-8")
-
-        # Prepare the request payload
-        payload = {
-            "functionId": "docking",
-            "params": {
-                "protein": encoded_protein,
-                "smiles_list": [smiles_string],
-                "box_size": list(box_size),
-                "pocket_center": list(pocket_center),
-            },
-        }
-
         # Make the API request
         response = requests.post(
             URL,
-            json=payload["params"],
+            json=payload,
             headers={"Content-Type": "application/json"},
         )
 
