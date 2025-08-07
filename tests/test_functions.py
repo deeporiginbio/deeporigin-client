@@ -55,14 +55,14 @@ def test_sysprep(config):  # noqa: F811
         pytest.skip("test skipped with mock client")
 
     from deeporigin.drug_discovery import BRD_DATA_DIR, Complex
-    from deeporigin.functions.sysprep import sysprep
+    from deeporigin.functions.sysprep import run_sysprep
 
     sim = Complex.from_dir(BRD_DATA_DIR)
 
     # this is chosen to be one where it takes >1 min
-    sysprep(
-        protein_path=sim.protein.file_path,
-        ligand_path=sim.ligands[3].file_path,
+    run_sysprep(
+        protein=sim.protein,
+        ligand=sim.ligands[3],
         is_lig_protonated=True,
     )
 

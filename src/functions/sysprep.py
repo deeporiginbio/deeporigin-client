@@ -13,7 +13,7 @@ CACHE_DIR = os.path.expanduser("~/.deeporigin/sysprep")
 
 
 @beartype
-def sysprep(
+def run_sysprep(
     *,
     protein: Protein,
     ligand: Ligand,
