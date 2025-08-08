@@ -178,6 +178,25 @@ def hash_file(file_path: str | Path) -> str:
 
 
 @beartype
+def hash_dict(data: dict) -> str:
+    """
+    Computes a SHA-256 hash for a dictionary.
+
+    Parameters:
+        data (dict): A dictionary.
+
+    Returns:
+        str: The hexadecimal SHA-256 hash of the dictionary.
+    """
+    sorted_keys = sorted(data.keys())
+    data = {key: data[key] for key in sorted_keys}
+
+    hasher = hashlib.sha256()
+    hasher.update(json.dumps(data).encode())
+    return hasher.hexdigest()
+
+
+@beartype
 def hash_strings(strings: list[str]) -> str:
     """
     Computes a SHA-256 hash for a list of strings in an order-insensitive manner.

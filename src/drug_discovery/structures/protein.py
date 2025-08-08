@@ -65,7 +65,6 @@ from deeporigin.drug_discovery.external_tools.utils import (
     get_protein_info_dict,
 )
 from deeporigin.exceptions import DeepOriginException
-from deeporigin.functions.pocket_finder import find_pockets
 
 from .entity import Entity
 from .ligand import Ligand, LigandSet
@@ -247,17 +246,17 @@ class Protein(Entity):
 
         return sequences
 
-    def model_loops(self) -> None:
+    def model_loops(self, use_cache: bool = True) -> None:
         """model loops in protein structure"""
 
-        from deeporigin.functions.loop_modelling import model_loops
+        from deeporigin.functions.loop_modelling import model_loops as _model_loops
 
         pdb_id = self.pdb_id
 
         if pdb_id is None:
             raise ValueError("Currently, PDB ID is required to model loops.")
 
-        file_path = model_loops(pdb_id=pdb_id)
+        file_path = _model_loops(pdb_id=pdb_id, use_cache=use_cache)
         protein = Protein.from_file(file_path)
         self.structure = protein.structure
 
@@ -267,6 +266,7 @@ class Protein(Entity):
         *,
         ligand: Ligand,
         pocket: Pocket,
+        use_cache: bool = True,
     ) -> str:
         """Dock a ligand into a specific pocket of the protein.
 
@@ -282,12 +282,14 @@ class Protein(Entity):
         Returns:
             str: Path to the SDF file containing the docked ligand structure.
         """
+        # Import here to avoid circular import
         from deeporigin.functions import docking
 
         docked_ligand_sdf_file = docking.dock(
             protein=self,
             ligand=ligand,
             pocket=pocket,
+            use_cache=use_cache,
         )
 
         return docked_ligand_sdf_file
@@ -295,53 +297,6 @@ class Protein(Entity):
     @property
     def coordinates(self):
         return self.structure.coord
-
-    # @beartype
-    # def prepare(self, model_loops: bool = False, pdb_id: str = "") -> "Protein":
-    #     """
-    #     Prepares the protein by calling the 'prepare' function with the specified protein path, PDB ID, and extension.
-    #     It extracts metal and cofactor residue names from the protein structure and passes them to the 'prepare' function.
-
-    #     Returns:
-    #         protein (Protein): The prepared Protein object.
-    #     Raises:
-    #         Exception: If the preparation of the protein fails.
-    #     """
-    #     pdb_id = pdb_id if pdb_id else self.pdb_id
-    #     if model_loops and not pdb_id:
-    #         raise ValueError("PDB ID must be provided to model loops.")
-
-    #     metal_resnames, cofactor_resnames = self.extract_metals_and_cofactors()
-    #     metals_to_keep = [
-    #         resname for resname in metal_resnames if resname.upper() in METALS
-    #     ]
-
-    #     response = prepare(
-    #         protein_path=self.file_path,
-    #         protein_pdb_id=pdb_id,
-    #         protein_extension=self.block_type,
-    #         metal_resnames=metals_to_keep,
-    #         cofactor_resnames=cofactor_resnames,
-    #         model_loops=model_loops,
-    #     )
-    #     if not response["prepared_protein_content"]:
-    #         raise Exception("Failed to prepare protein.")
-
-    #     protein_dir = Path(self.file_path).parent
-    #     base_name = (
-    #         Path(self.file_path).stem if self.file_path else "modified_structure"
-    #     )
-    #     new_file_name = protein_dir / f"{base_name}_prep.pdb"
-
-    #     intermediate_protein = Protein(
-    #         block_content=response["prepared_protein_content"], block_type="pdb"
-    #     )
-    #     intermediate_protein.write_to_file(str(new_file_name))
-
-    #     protein = Protein(file_path=new_file_name)
-    #     protein.pdb_id = self.pdb_id
-
-    #     return protein
 
     def _filter_hetatm_records(
         self, exclude_water: bool = True, keep_resnames: Optional[list[str]] = None
@@ -458,6 +413,7 @@ class Protein(Entity):
         self,
         pocket_count: int = 1,
         pocket_min_size: int = 30,
+        use_cache: bool = True,
     ) -> list[Pocket]:
         """Find potential binding pockets in the protein structure.
 
@@ -484,10 +440,15 @@ class Protein(Entity):
             >>> for pocket in pockets:
             ...     print(f"Pocket: {pocket.name}, Volume: {pocket.properties.get('volume')} Å³")
         """
-        results_dir = find_pockets(
-            self.file_path,
+        # Import here to avoid circular import
+        # note that name is changed to avoid conflict with the function
+        from deeporigin.functions.pocket_finder import find_pockets as _find_pockets
+
+        results_dir = _find_pockets(
+            protein=self,
             pocket_count=pocket_count,
             pocket_min_size=pocket_min_size,
+            use_cache=use_cache,
         )
 
         return Pocket.from_pocket_finder_results(results_dir)
