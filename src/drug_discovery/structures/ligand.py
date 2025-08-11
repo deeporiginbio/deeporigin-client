@@ -179,11 +179,7 @@ class Ligand(Entity):
         Create a Ligand instance from a compound name.
 
         Args:
-            name (str, optional): Compound name
-            seed (int, optional): Random seed for coordinate generation
-
-        Returns:
-            Molecule: New Molecule instance
+            identifier (str): The identifier to resolve to a SMILES string.
 
         Raises:
             DeepOriginException: If no compound is found for the given name
@@ -276,7 +272,7 @@ class Ligand(Entity):
         Args:
             file_path (str): The path to the SDF file.
             sanitize (bool): Whether to sanitize molecules. Defaults to True.
-            removeHs (bool): Whether to remove hydrogens. Defaults to False.
+            remove_hydrogens (bool): Whether to remove hydrogens. Defaults to False.
 
         Returns:
             Ligand: The Ligand instance created from the SDF file.
@@ -324,15 +320,9 @@ class Ligand(Entity):
         ligands[0].file_path = str(path)
         return ligands[0]
 
-    def process_mol(self):
+    def process_mol(self) -> None:
         """
         Clean the ligand molecule by removing hydrogens and sanitizing the structure.
-
-        Args:
-            mol (rdkit.Chem.Mol): Input molecule to process
-
-        Returns:
-            rdkit.Chem.Mol: Processed molecule
 
         Raises:
             DeepOriginException: If salt removal or kekulization fails
@@ -362,13 +352,10 @@ class Ligand(Entity):
 
         Args:
             conformer_id (int): Conformer index
-
-        Returns:
-            rdkit.Chem.Conformer: The requested conformer
         """
         return self.mol.GetConformer(conformer_id)
 
-    def get_conformer_id(self):
+    def get_conformer_id(self) -> int:
         """
         Get the ID of the current conformer.
 
@@ -416,13 +403,11 @@ class Ligand(Entity):
         Args:
             i (int): Conformer index
 
-        Returns:
-            numpy.ndarray: Array of atomic coordinates
         """
         conf = self.get_conformer(i)
         return conf.GetPositions()
 
-    def species(self):
+    def species(self) -> list[str]:
         """
         Get the atomic symbols of all atoms in the molecule.
 
@@ -545,13 +530,13 @@ class Ligand(Entity):
         self,
         output_path: Optional[str] = None,
         output_format: Literal["mol", "sdf", "pdb"] = "sdf",
-    ):
+    ) -> None:
         """
         Writes the ligand molecule to a file, including all properties.
 
         Parameters:
-            - output_path (str): Path where the ligand will be written.
-            output_format (Literal[".mol", ".sdf", ".pdb", "mol", "sdf", "pdb"]): Format to write the ligand in.
+        - output_path (str): Path where the ligand will be written.
+        - output_format (Literal[".mol", ".sdf", ".pdb", "mol", "sdf", "pdb"]): Format to write the ligand in.
 
         Raises:
             - DeepOriginException: If the file extension is unsupported.
@@ -1131,7 +1116,7 @@ class LigandSet:
         Args:
             file_path (str): The path to the SDF file.
             sanitize (bool): Whether to sanitize molecules. Defaults to True.
-            removeHs (bool): Whether to remove hydrogens. Defaults to False.
+            remove_hydrogens (bool): Whether to remove hydrogens. Defaults to False.
 
         Returns:
             LigandSet: A LigandSet instance containing Ligand objects created from the SDF file.
