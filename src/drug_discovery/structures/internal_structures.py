@@ -1,112 +1,20 @@
 """
 MoleculeModule
 
-Description: This module encapsulates the Molecule class and related utilities for managing and manipulating
-small molecule structures in computational biology and cheminformatics workflows. It provides functionalities
-to initialize molecules from various sources, handle molecular properties, perform format conversions, and
-visualize molecular structures. The primary features and methods include:
-
-- **FileFormat Enum**: Defines supported file formats (`MOL`, `MOL2`, `PDB`, `PDBQT`, `XYZ`, `SDF`) for
-  molecular data, ensuring consistent handling across different input types.
-
-- **Molecule Class**: Represents a small molecule, managing its RDKit molecule object (`mol_rdk`), chemical
-  properties (e.g., formula, SMILES), coordinate generation, and conformer management. Provides methods for
-  molecule manipulation such as adding hydrogens, embedding coordinates, and assigning bond orders from SMILES.
-
-- **Initialization Methods**:
-  - **from_smiles_or_name**: Creates a Molecule instance from a SMILES string or a compound name using PubChem API.
-  - **mol_from_file**: Loads a Molecule from a specified file based on its format, supporting error handling for
-    unsupported formats or parsing failures.
-  - **mol_from_smiles**: Generates a Molecule from a SMILES string with optional sanitization.
-  - **mol_from_block**: Converts block content (e.g., MOL, PDB) into a Molecule instance by writing to a temporary
-    file and parsing it.
-
-- **Property Management**: Calculates and stores molecular properties such as the number of heavy atoms (`hac`),
-  molecular formula, and atomic species. Facilitates property assignment and retrieval for further analysis.
-
-- **Conformer Management**: Handles the generation and selection of molecular conformers, allowing for the
-  computation of 2D or 3D coordinates and the assignment of unique conformer IDs.
-
-- **Utility Functions**:
-  - **convert_to_sdf**: Converts molecular block content to SDF format, ensuring compatibility with various tools.
-
-- **Visualization**: Integrates with the `MoleculeViewer` to render interactive visualizations of molecules within
-  Jupyter Notebooks, facilitating intuitive analysis and presentation of molecular structures.
-
-Dependencies: Utilizes libraries such as RDKit for cheminformatics, PubChemPy for API interactions, NumPy and Pandas
-for data manipulation, Termcolor for colored terminal output, and integrates with the `MoleculeViewer` from the
-`deeporigin_molstar` package for visualization purposes.
-
-Usage Example:
-
-from molecule_module import Molecule, mol_from_smiles, mol_from_file
-
-# Initialize a Molecule instance from a SMILES string
-molecule = Molecule.from_smiles_or_name(smiles="CCO", name="Ethanol", add_coords=True)
-
-# Initialize a Molecule instance from a file
-molecule = mol_from_file("pdb", "/path/to/molecule.pdb")
-
-# Calculate molecular properties
-print(f"Formula: {molecule.formula}")
-print(f"SMILES: {molecule.smiles}")
-
-# Add hydrogens and embed coordinates
-molecule.add_hydrogens(add_coords=True)
-molecule.embed(add_hs=True, seed=42)
-
-# Assign bond orders from a template SMILES string
-molecule.assign_bond_order_from_smiles(smiles="CCO")
-
-# Visualize the molecule
-molecule.visualize()
 
 """
 
 import base64
-from enum import Enum
 import random
-import tempfile
 from typing import Optional
 import warnings
 
-from beartype import beartype
 from rdkit import Chem, RDLogger
 from rdkit.Chem import AllChem, SaltRemover, rdMolDescriptors
 from rdkit.Chem.Draw import rdMolDraw2D
 
-# from ..utilities.conversions import convert_file
-
-
 warnings.filterwarnings("ignore", category=UserWarning, module="rdkit")
 RDLogger.DisableLog("rdApp.*")
-
-
-class FileFormat(Enum):
-    """
-    Enumeration of supported file formats for molecular data.
-
-    This enum class defines the various file formats that can be used to represent molecular structures,
-    including MOL, MOL2, PDB, PDBQT, XYZ, and SDF formats.
-    """
-
-    MOL = "mol"
-    MOL2 = "mol2"
-
-    PDB = "pdb"
-    PDBQT = "pdbqt"
-
-    XYZ = "xyz"
-    SDF = "sdf"
-
-
-RDKIT_SUPPORTED_INPUT_TYPES = [
-    FileFormat.MOL.value,
-    FileFormat.MOL2.value,
-    FileFormat.PDB.value,
-    FileFormat.XYZ.value,
-    FileFormat.SDF.value,
-]
 
 
 class Molecule:
@@ -373,108 +281,3 @@ class Molecule:
             self.m = AllChem.AssignBondOrdersFromTemplate(template, self.m)
 
         self.smiles = smiles
-
-
-@beartype
-def mol_from_file(
-    file_type: str,
-    file_path: str,
-    sanitize: bool = True,
-    remove_hs: bool = False,
-) -> Molecule:
-    """
-    Create a Molecule instance from a file.
-
-    Args:
-        file_type (str): Type of the input file (must be in RDKIT_SUPPORTED_INPUT_TYPES)
-        file_path (str): Path to the input file
-        sanitize (bool): Whether to sanitize the molecule
-        remove_hs (bool): Whether to remove hydrogens
-
-    Returns:
-        Molecule: New Molecule instance
-
-    Raises:
-        ValueError: If the file format is invalid or parsing fails
-        NotImplementedError: If the file type is not supported
-    """
-    if file_type in RDKIT_SUPPORTED_INPUT_TYPES:
-        mol_rdk = None
-
-        if file_type == FileFormat.MOL.value:
-            mol_rdk = Chem.MolFromMolFile(file_path, sanitize, remove_hs)
-        elif file_type == FileFormat.MOL2.value:
-            mol_rdk = Chem.MolFromMol2File(file_path, sanitize, remove_hs)
-        elif file_type == FileFormat.PDB.value:
-            mol_rdk = Chem.MolFromPDBFile(file_path, sanitize, remove_hs)
-        elif file_type == FileFormat.XYZ.value:
-            mol_rdk = Chem.MolFromXYZFile(file_path)
-            if sanitize:
-                Chem.SanitizeMol(mol_rdk)
-            if remove_hs:
-                mol_rdk = Chem.RemoveHs(mol_rdk)
-        elif file_type == FileFormat.SDF.value:
-            mol_rdk = next(iter(Chem.SDMolSupplier(file_path, sanitize, remove_hs)))
-
-        if mol_rdk is None:
-            raise ValueError(
-                "Invalid file format or file path or failed to sanitize the molecule"
-            )
-
-        return Molecule(mol_rdk)
-    else:
-        raise NotImplementedError(
-            f"Conversions of file types not supported yet. File format {file_type} is not supported."
-        )
-
-
-@beartype
-def mol_from_smiles(smiles: str, sanitize: bool = True) -> Molecule:
-    """
-    Create a Molecule instance from a SMILES string.
-
-    Args:
-        smiles (str): SMILES string
-        sanitize (bool): Whether to sanitize the molecule
-
-    Returns:
-        Molecule: New Molecule instance
-
-    Raises:
-        ValueError: If the SMILES string is invalid
-    """
-    mol_rdk = Chem.MolFromSmiles(smiles, sanitize=sanitize)
-    if mol_rdk is None:
-        raise ValueError("Invalid SMILES string")
-
-    return Molecule(mol_rdk, add_coords=False)
-
-
-@beartype
-def mol_from_block(
-    block_type: str,
-    block: str,
-    sanitize: bool = True,
-    remove_hs: bool = False,
-) -> Molecule:
-    """
-    Create a Molecule instance from a block of text.
-
-    Args:
-        block_type (str): Type of the input block
-        block (str): Text block containing molecular data
-        sanitize (bool): Whether to sanitize the molecule
-        remove_hs (bool): Whether to remove hydrogens
-
-    Returns:
-        Molecule: New Molecule instance
-    """
-    with tempfile.TemporaryFile(mode="w+") as temp_file:
-        temp_file.write(block)
-        temp_file.seek(0)  # Reset file pointer to beginning
-        return mol_from_file(
-            block_type,
-            temp_file.name,
-            sanitize=sanitize,
-            remove_hs=remove_hs,
-        )
