@@ -24,8 +24,6 @@ from termcolor import colored
 
 from deeporigin.drug_discovery.utilities.visualize import jupyter_visualization
 
-# from deeporigin.drug_discovery.utilities.conversions import convert_file
-
 
 @dataclass
 class Pocket:

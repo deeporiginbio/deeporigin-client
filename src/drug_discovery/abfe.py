@@ -51,7 +51,7 @@ class ABFE(WorkflowStep):
         )
 
         results_files = [file for file in files if file.endswith("/results.csv")]
-        results_files = {file: None for file in results_files}
+        results_files = dict.fromkeys(results_files, None)
 
         if len(results_files) == 0:
             print("No ABFE results found for this protein.")
@@ -176,13 +176,13 @@ class ABFE(WorkflowStep):
 
         # Build set of ligand names that have already been run
         if len(df) > 0:
-            ligands_already_run = set(
+            ligands_already_run = {
                 ligand_file
                 for ligand_file in df["metadata"].apply(
                     lambda d: d.get("ligand_file") if isinstance(d, dict) else None
                 )
                 if isinstance(ligand_file, str) and ligand_file
-            )
+            }
         else:
             ligands_already_run = set()
 
@@ -341,7 +341,7 @@ class ABFE(WorkflowStep):
             )
 
         files_to_download.append(remote_xtc_file)
-        files_to_download = {str(file): None for file in files_to_download}
+        files_to_download = dict.fromkeys(map(str, files_to_download), None)
 
         file_api.download_files(files_to_download, client=files_client)
 
