@@ -173,7 +173,7 @@ class Ligand(Entity):
     @classmethod
     def from_identifier(
         cls,
-        identifier: Optional[str] = None,
+        identifier: str,
     ):
         """
         Create a Ligand instance from a compound name.
