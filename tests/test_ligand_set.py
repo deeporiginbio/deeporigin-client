@@ -51,7 +51,7 @@ def test_ligand_set_from_csv():
     first_ligand = ligands.ligands[0]
     assert isinstance(first_ligand, Ligand)
     assert first_ligand.mol is not None
-    assert first_ligand.mol.m.GetNumAtoms() > 0
+    assert first_ligand.mol.GetNumAtoms() > 0
     assert first_ligand.file_path is None
 
     # Verify properties were correctly loaded
@@ -111,11 +111,11 @@ def test_from_smiles():
         assert isinstance(ligand, Ligand)
 
 
-def test_minimize():
+def test_embed():
     """Test that we can minimize a LigandSet"""
 
     ligands = LigandSet.from_smiles(BRD_SMILES)
-    ligands.minimize()
+    ligands.embed()
 
 
 def test_show():

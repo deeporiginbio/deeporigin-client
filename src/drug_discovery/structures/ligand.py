@@ -643,11 +643,6 @@ class Ligand(Entity):
         """Write the ligand to an SDF file."""
         return self.write_to_file(output_path=output_path, output_format="sdf")
 
-    def add_hydrogens(self) -> None:
-        """Add hydrogens to the ligand."""
-
-        self.mol.add_hydrogens()
-
     @beartype
     def to_base64(self) -> str:
         """Convert the ligand to base64 encoded SDF format.
@@ -676,7 +671,8 @@ class Ligand(Entity):
         """Write the ligand to a PDB file."""
         return self.write_to_file(output_path=output_path, output_format="pdb")
 
-    def get_center(self) -> Optional[list[float]]:
+    @beartype
+    def get_center(self) -> list[float]:
         """
         Get the center of the ligand based on its coordinates.
 
@@ -687,14 +683,13 @@ class Ligand(Entity):
 
         """
         if self.coordinates is None:
-            print("Warning: Coordinates are not available for this ligand.")
-            return None
+            raise ValueError("Warning: Coordinates are not available for this ligand.")
         center = self.coordinates.mean(axis=0)
         return [float(x) for x in center.tolist()]
 
     def draw(self):
         """
-        Draw the ligand molecule.
+        Draw the contained rdkit molecule using rdkit methods
 
         """
         return self.mol.draw()
@@ -723,46 +718,6 @@ class Ligand(Entity):
             return html
         except Exception as e:
             raise ValueError(f"Visualization failed: {str(e)}") from e
-
-    @classmethod
-    @beartype
-    def convert_to_sdf(
-        cls,
-        block_content: str,
-        block_type: str,
-    ) -> str:
-        """
-        Convert a ligand block content to SDF format.
-
-        Args:
-            block_content (str): The block content of the ligand.
-            block_type (str): The type of the block content.
-
-        Returns:
-            str: The ligand block content in SDF format.
-        """
-        try:
-            molecule = mol_from_block(
-                block_type,
-                block_content,
-                sanitize=True,
-                remove_hs=False,
-            )
-            with tempfile.TemporaryFile(mode="w+", suffix=".sdf") as temp_file:
-                writer = Chem.SDWriter(temp_file.name)
-                writer.write(molecule)
-                writer.close()
-
-            return molecule.molblock()
-        except Exception as e:
-            raise ValueError(
-                f"Failed to convert ligand block content to SDF: {str(e)}"
-            ) from e
-
-    def minimize(self) -> None:
-        """embed and optimize ligand in 3d space"""
-
-        self.mol.embed()
 
     def _repr_html_(self) -> str:
         """
@@ -909,8 +864,6 @@ class LigandSet:
         ligands (list[Ligand]): A list of Ligand instances contained in the set.
         network (dict): A dictionary containing the network of ligands estimated using Konnektor.
 
-    Methods:
-        minimize(): Minimize all ligands in the set using their 3D optimization routines.
     """
 
     ligands: list[Ligand] = field(default_factory=list)
@@ -1208,13 +1161,13 @@ class LigandSet:
             subImgSize=sub_img_size,
         )
 
-    def minimize(self):
+    def embed(self):
         """
         Minimize all ligands in the set using their 3D optimization routines.
-        This calls the minimize() method on each Ligand in the set.
+        This calls the embed() method on each Ligand in the set.
         """
         for ligand in self.ligands:
-            ligand.minimize()
+            ligand.embed()
         return self
 
     @beartype
@@ -1255,8 +1208,8 @@ class LigandSet:
                 # Ensure all properties are set on the RDKit Mol object
                 if ligand.name is not None:
                     ligand.set_property("_Name", ligand.name)
-                if ligand.mol.smiles is not None:
-                    ligand.set_property("_SMILES", ligand.mol.smiles)
+                if ligand.smiles is not None:
+                    ligand.set_property("_SMILES", ligand.smiles)
                 if ligand.properties:
                     for prop_name, prop_value in ligand.properties.items():
                         ligand.set_property(prop_name, str(prop_value))
