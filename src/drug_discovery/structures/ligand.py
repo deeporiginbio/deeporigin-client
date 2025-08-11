@@ -483,11 +483,13 @@ class Ligand(Entity):
 
     @property
     def coordinates(self):
-        return np.array(self.mol.coords(), dtype=np.float32)
+        if self.mol.GetNumConformers() == 0:
+            return None
+        return np.array(self.get_coordinates(0), dtype=np.float32)
 
     @property
     def atom_types(self):
-        return self.mol.species()
+        return self.species()
 
     def set_property(self, prop_name: str, prop_value):
         """
@@ -530,7 +532,7 @@ class Ligand(Entity):
         self,
         output_path: Optional[str] = None,
         output_format: Literal["mol", "sdf", "pdb"] = "sdf",
-    ) -> None:
+    ) -> str | Path:
         """
         Writes the ligand molecule to a file, including all properties.
 
@@ -656,7 +658,9 @@ class Ligand(Entity):
         Draw the contained rdkit molecule using rdkit methods
 
         """
-        return self.mol.draw()
+        from rdkit.Chem.Draw import MolToImage
+
+        return MolToImage(self.mol)
 
     @jupyter_visualization
     def show(self) -> str:
@@ -875,28 +879,6 @@ def ligands_to_dataframe(ligands: list[Ligand]):
     df = pd.DataFrame(data)
 
     return df
-
-
-@jupyter_visualization
-def visualize_mols_in_sdf(file_path: str):
-    """
-    Visualize ligands from an SDF file.
-
-    Args:
-        file_path (str): The path to the SDF file.
-
-    Raises:
-        FileNotFoundError: If the file does not exist.
-        ValueError: If the file cannot be parsed correctly.
-    """
-    try:
-        viewer = MoleculeViewer(str(file_path), format="sdf")
-        ligand_config = viewer.get_ligand_visualization_config()
-        html = viewer.render_ligand(ligand_config=ligand_config)
-
-        return html
-    except Exception as e:
-        raise DeepOriginException(f"Visualization failed: {str(e)}") from e
 
 
 @dataclass
@@ -1195,7 +1177,16 @@ class LigandSet:
         Visualize all ligands in this LigandSet in 3D
         """
 
-        return visualize_mols_in_sdf(self.to_sdf())
+        sdf_file = self.to_sdf()
+
+        try:
+            viewer = MoleculeViewer(str(sdf_file), format="sdf")
+            ligand_config = viewer.get_ligand_visualization_config()
+            html = viewer.render_ligand(ligand_config=ligand_config)
+
+            return html
+        except Exception as e:
+            raise DeepOriginException(f"Visualization failed: {str(e)}") from e
 
     @beartype
     def show_grid(
