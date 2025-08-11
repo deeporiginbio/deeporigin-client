@@ -95,11 +95,11 @@ def test_ligand_from_identifier(identifier, expected_atoms):
 def test_ligand_from_identifier_invalid():
     """Test that invalid identifier raises appropriate exception"""
     invalid_id = "InvalidMolecule123"
-    with pytest.raises(ValueError) as exc_info:
+    with pytest.raises(
+        DeepOriginException,
+        match=f"Error resolving SMILES string of {invalid_id}",
+    ):
         Ligand.from_identifier(identifier=invalid_id)
-    assert str(exc_info.value).startswith(
-        f"Error resolving SMILES string of {invalid_id}"
-    )
 
 
 def test_ligand_from_rdkit_mol():
@@ -175,10 +175,10 @@ def test_ligand_base64():
 
 @pytest.mark.parametrize("ligand", bad_ligands)
 def test_ligand_errors(ligand):
-    with pytest.raises(Exception):  # noqa: B017
+    with pytest.raises(DeepOriginException):  # noqa: B017
         Ligand(
             file_path=ligand["file"],
-            smiles=ligand["smiles"],
+            smiles=ligand["smiles_string"],
         )
 
 
@@ -203,6 +203,7 @@ def test_ligand(ligand):
 def test_ligand_from_sdf_multiple_raises():
     """Test that Ligand.from_sdf raises DeepOriginException for multi-molecule SDF files."""
     with pytest.raises(
-        DeepOriginException, match="must contain exactly one molecule, but found 8"
+        DeepOriginException,
+        match="must contain exactly one molecule, but found 8",
     ):
         Ligand.from_sdf(os.path.join(base_path, "ligands-brd-all.sdf"))

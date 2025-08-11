@@ -1,5 +1,5 @@
 """
-This module contains the Ligand and LigandSet classes.
+This module contains the Ligand and LigandSet classes, which allow you to work with ligands (molecules) in drug discovery workflows.
 """
 
 import base64
@@ -32,43 +32,11 @@ FILE_FORMATS = Literal["mol", "mol2", "pdb", "pdbqt", "xyz", "sdf"]
 @dataclass
 class Ligand(Entity):
     """A class representing a ligand molecule in drug discovery workflows.
+
     The Ligand class provides functionality to create, manipulate, and analyze small molecules
     (ligands) in computational drug discovery. It supports various input formats and provides
     methods for property prediction, visualization, and file operations.
 
-    Attributes:
-        identifier (Optional[str]): Ligand identifier (e.g., PubChem ID)
-        file_path (Optional[str]): Path to the ligand file
-        smiles (Optional[str]): SMILES string representing the ligand
-        block_type (Optional[str]): Format of the block content ('mol', 'mol2', 'sdf', 'pdb')
-        block_content (Optional[str]): String containing the molecule data
-        name (Optional[str]): Optional name of the ligand
-        seed (Optional[int]): Random seed for coordinate generation
-        xref_protein (Optional[str]): Cross-reference to protein
-        xref_ins_code (Optional[str]): Cross-reference insertion code
-        xref_residue_id (Optional[str]): Cross-reference residue ID
-        xref_protein_chain_id (Optional[str]): Cross-reference protein chain ID
-        save_to_file (bool): Whether to save the ligand to file
-        properties (dict): Dictionary of ligand properties
-        mol (Optional[Molecule]): Direct Molecule object initialization
-
-
-    Examples:
-        >>> # Create from SMILES
-        >>> ligand = Ligand.from_smiles("CCO", name="Ethanol")
-
-        >>> # Create from SDF file
-        >>> ligand = Ligand.from_sdf("ligand.sdf")
-
-        >>> # Get properties
-        >>> center = ligand.get_center()
-        >>> props = ligand.admet_properties()
-
-        >>> # Visualize
-        >>> ligand.visualize()
-
-        >>> # Save to file
-        >>> ligand.write_to_file("output.pdb")
     """
 
     identifier: str | None = None
@@ -87,8 +55,6 @@ class Ligand(Entity):
     mol: Chem.Mol | None = None
 
     # Additional attributes that are initialized in __post_init__
-    protonated_smiles: str | None = field(init=False, default=None)
-    hac: int = field(init=False, default=0)
     available_for_docking: bool = field(init=False, default=True)
 
     _remote_path_base = "entities/ligands/"
@@ -152,7 +118,7 @@ class Ligand(Entity):
         try:
             # Create a Molecule object from the SMILES string
             mol = Chem.MolFromSmiles(smiles)
-        except ValueError as e:
+        except Exception as e:
             raise DeepOriginException(
                 f"Cannot create Ligand from SMILES string `{smiles}`: {str(e)}"
             ) from None
@@ -193,7 +159,7 @@ class Ligand(Entity):
             Ligand: A new Ligand instance
         """
 
-        mol = mol_from_block(block_type, block_content)
+        mol = cls.mol_from_block(block_type, block_content)
 
         return cls(
             block_content=block_content,
@@ -214,14 +180,13 @@ class Ligand(Entity):
 
         Args:
             name (str, optional): Compound name
-            add_coords (bool, optional): Whether to generate 3D coordinates
             seed (int, optional): Random seed for coordinate generation
 
         Returns:
             Molecule: New Molecule instance
 
         Raises:
-            ValueError: If no compound is found for the given name
+            DeepOriginException: If no compound is found for the given name
             AssertionError: If neither smiles nor name is provided
         """
 
@@ -233,7 +198,7 @@ class Ligand(Entity):
             data = response.json()
             smiles = data["PropertyTable"]["Properties"][0]["SMILES"]
         except Exception:
-            raise ValueError(
+            raise DeepOriginException(
                 f"Error resolving SMILES string of {identifier}. Pubchempy did not resolve SMILES"
             ) from None
 
@@ -303,7 +268,7 @@ class Ligand(Entity):
         file_path: str,
         *,
         sanitize: bool = True,
-        remove_hs: bool = False,
+        remove_hydrogens: bool = False,
     ) -> "Ligand":
         """
         Create a single Ligand instance from an SDF file containing exactly one molecule.
@@ -318,7 +283,7 @@ class Ligand(Entity):
 
         Raises:
             FileNotFoundError: If the file does not exist.
-            ValueError: If the file cannot be parsed correctly or contains more than one molecule.
+            DeepOriginException: If the file cannot be parsed correctly or contains more than one molecule.
         """
         path = Path(file_path)
         if not path.exists():
@@ -326,7 +291,11 @@ class Ligand(Entity):
 
         ligands = []
         try:
-            suppl = Chem.SDMolSupplier(str(path), sanitize=sanitize, removeHs=remove_hs)
+            suppl = Chem.SDMolSupplier(
+                str(path),
+                sanitize=sanitize,
+                removeHs=remove_hydrogens,
+            )
             for idx, mol in enumerate(suppl, start=1):
                 try:
                     if mol is None:
@@ -334,7 +303,7 @@ class Ligand(Entity):
                             f"Warning: Skipping molecule at index {idx} due to parsing error."
                         )
                         continue
-                    ligand = Ligand.from_rdkit_mol(
+                    ligand = cls.from_rdkit_mol(
                         mol,
                         properties=mol.GetPropsAsDict(),
                     )
@@ -344,7 +313,7 @@ class Ligand(Entity):
                         f"Error: Failed to create Ligand from SDF file molecule_idx = '{idx}': {str(e)}"
                     )
         except Exception as e:
-            raise ValueError(
+            raise DeepOriginException(
                 f"Failed to create Ligand from SDF file '{file_path}': {str(e)}"
             ) from e
 
@@ -366,20 +335,26 @@ class Ligand(Entity):
             rdkit.Chem.Mol: Processed molecule
 
         Raises:
-            ValueError: If salt removal or kekulization fails
+            DeepOriginException: If salt removal or kekulization fails
         """
         remover = SaltRemover.SaltRemover()
 
         stripped_mol = remover.StripMol(self.mol)
         if stripped_mol is None:
-            raise ValueError("Salt removal failed.")
+            raise DeepOriginException("Salt removal failed.")
 
         try:
             Chem.Kekulize(stripped_mol, clearAromaticFlags=False)
         except Chem.KekulizeException as e:
-            raise ValueError("Kekulization failed.") from e
+            raise DeepOriginException("Kekulization failed.") from e
 
         self.mol = stripped_mol
+
+    def get_heavy_atom_count(self) -> int:
+        """
+        Get the number of heavy atoms in the molecule.
+        """
+        return self.mol.GetNumHeavyAtoms()
 
     def get_conformer(self, conformer_id: int = 0):
         """
@@ -425,16 +400,16 @@ class Ligand(Entity):
         AllChem.EmbedMolecule(self.mol, randomSeed=seed)
         self.set_conformer_id(0)
 
-    def add_hydrogens(self, add_coords: bool = True):
+    def add_hydrogens(self, add_coordinates: bool = True):
         """
         Add hydrogens to the molecule.
 
         Args:
-            add_coords (bool): Whether to generate coordinates for added hydrogens
+            add_coordinates (bool): Whether to generate coordinates for added hydrogens
         """
-        self.mol = Chem.AddHs(self.mol, addCoords=add_coords)
+        self.mol = Chem.AddHs(self.mol, addCoords=add_coordinates)
 
-    def coords(self, i: int = 0):
+    def get_coordinates(self, i: int = 0):
         """
         Get the coordinates of atoms in a specific conformer.
 
@@ -444,7 +419,7 @@ class Ligand(Entity):
         Returns:
             numpy.ndarray: Array of atomic coordinates
         """
-        conf = self.conformer_id(i)
+        conf = self.get_conformer(i)
         return conf.GetPositions()
 
     def species(self):
@@ -465,6 +440,12 @@ class Ligand(Entity):
         """
         return Chem.MolToMolBlock(self.mol)
 
+    def get_formula(self) -> str:
+        """
+        Get the chemical formula of the molecule.
+        """
+        return rdMolDescriptors.CalcMolFormula(self.mol)
+
     def __post_init__(self):
         """
         Initialize a Ligand instance from an identifier, file path, SMILES string,
@@ -473,12 +454,11 @@ class Ligand(Entity):
 
         # check that a mol exists
         if self.mol is None:
-            raise ValueError(
+            raise DeepOriginException(
                 "mol must be provided when initializing from an identifier, file path, SMILES string, or block content."
             )
 
         self.process_mol()
-        self.formula = rdMolDescriptors.CalcMolFormula(self.mol)
         self.smiles = Chem.MolToSmiles(Chem.RemoveHs(self.mol), canonical=True)
 
         if not self.mol.GetConformers():
@@ -495,9 +475,6 @@ class Ligand(Entity):
             num = len(list(directory.glob(f"{self.name}*")))
             self.name = f"{self.name}_{num + 1}"
 
-        self.hac = self.mol.GetNumHeavyAtoms()
-        if self.hac < 5:
-            print("Warning: Ligand has fewer than 5 heavy atoms.")
         file_props = self.mol.GetPropsAsDict()
 
         for key, value in file_props.items():
@@ -573,12 +550,12 @@ class Ligand(Entity):
         Writes the ligand molecule to a file, including all properties.
 
         Parameters:
-        - output_path (str): Path where the ligand will be written.
-        - output_format (Literal[".mol", ".sdf", ".pdb", "mol", "sdf", "pdb"]): Format to write the ligand in.
+            - output_path (str): Path where the ligand will be written.
+            output_format (Literal[".mol", ".sdf", ".pdb", "mol", "sdf", "pdb"]): Format to write the ligand in.
 
         Raises:
-        - ValueError: If the file extension is unsupported.
-        - Exception: If writing to the file fails.
+            - DeepOriginException: If the file extension is unsupported.
+            - Exception: If writing to the file fails.
 
         """
         try:
@@ -683,7 +660,9 @@ class Ligand(Entity):
 
         """
         if self.coordinates is None:
-            raise ValueError("Warning: Coordinates are not available for this ligand.")
+            raise DeepOriginException(
+                "Warning: Coordinates are not available for this ligand."
+            )
         center = self.coordinates.mean(axis=0)
         return [float(x) for x in center.tolist()]
 
@@ -717,7 +696,7 @@ class Ligand(Entity):
 
             return html
         except Exception as e:
-            raise ValueError(f"Visualization failed: {str(e)}") from e
+            raise DeepOriginException(f"Visualization failed: {str(e)}") from e
 
     def _repr_html_(self) -> str:
         """
@@ -734,9 +713,7 @@ class Ligand(Entity):
             return self.__str__()
 
     def __str__(self) -> str:
-        info_str = (
-            f"Name: {self.name}\nSMILES: {self.smiles}\nHeavy Atoms: {self.hac}\n"
-        )
+        info_str = f"Name: {self.name}\nSMILES: {self.smiles}\nHeavy Atoms: {self.get_heavy_atom_count()}\n"
         if self.properties:
             info_str += "Properties:\n"
             for prop_name, prop_value in self.properties.items():
@@ -783,25 +760,107 @@ class Ligand(Entity):
 
             return props
         except Exception as e:
-            raise ValueError(f"Failed to predict ADMET properties: {str(e)}") from e
+            raise DeepOriginException(
+                f"Failed to predict ADMET properties: {str(e)}"
+            ) from e
 
-    def update_coordinates(self, coords: np.ndarray):
+    def update_coordinates(self, coordinates: np.ndarray):
         """update coordinates of the ligand structure"""
 
         if self.mol.GetNumConformers() == 0:
-            raise ValueError("Ligand molecule has no conformers to update.")
+            raise DeepOriginException("Ligand molecule has no conformers to update.")
 
         conformer = self.mol.GetConformer()
         mol_without_hs = Chem.RemoveHs(self.mol)
 
         conformer_no_hs = mol_without_hs.GetConformer()
-        if coords.shape[0] != conformer.GetNumAtoms():
-            if coords.shape[0] != conformer_no_hs.GetNumAtoms():
-                raise ValueError(
+        if coordinates.shape[0] != conformer.GetNumAtoms():
+            if coordinates.shape[0] != conformer_no_hs.GetNumAtoms():
+                raise DeepOriginException(
                     "Number of ligand atoms does not match the conformer's atom count."
-                )
+                ) from None
 
-        conformer.SetPositions(coords.astype(np.float64))
+        conformer.SetPositions(coordinates.astype(np.float64))
+
+    @classmethod
+    def mol_from_block(
+        cls,
+        block_type: str,
+        block: str,
+        sanitize: bool = True,
+        remove_hs: bool = False,
+    ) -> Chem.Mol:
+        """
+        Create a molecule from a block of text.
+
+        Args:
+            block_type (str): Type of the input block
+            block (str): Text block containing molecular data
+            sanitize (bool): Whether to sanitize the molecule
+            remove_hs (bool): Whether to remove hydrogens
+
+        Returns:
+            Chem.Mol: RDKit molecule object
+        """
+        with tempfile.TemporaryFile(mode="w+") as temp_file:
+            temp_file.write(block)
+            temp_file.seek(0)  # Reset file pointer to beginning
+            return cls.mol_from_file(
+                file_type=block_type,
+                file_path=temp_file.name,
+                sanitize=sanitize,
+                remove_hs=remove_hs,
+            )
+
+    @classmethod
+    def mol_from_file(
+        cls,
+        *,
+        file_type: FILE_FORMATS,
+        file_path: str,
+        sanitize: bool = True,
+        remove_hs: bool = False,
+    ) -> Chem.Mol:
+        """
+        Create a molecule from a file.
+
+        Args:
+            file_type (str): Type of the input file (must be in FILE_FORMATS)
+            file_path (str): Path to the input file
+            sanitize (bool): Whether to sanitize the molecule
+            remove_hs (bool): Whether to remove hydrogens
+
+        Returns:
+            Chem.Mol: RDKit molecule object
+
+        Raises:
+            DeepOriginException: If the file format is invalid or parsing fails
+            NotImplementedError: If the file type is not supported
+        """
+
+        mol_rdk = None
+
+        if file_type == "mol":
+            mol_rdk = Chem.MolFromMolFile(file_path, sanitize, remove_hs)
+        elif file_type == "mol2":
+            mol_rdk = Chem.MolFromMol2File(file_path, sanitize, remove_hs)
+        elif file_type == "pdb":
+            mol_rdk = Chem.MolFromPDBFile(file_path, sanitize, remove_hs)
+        elif file_type == "xyz":
+            mol_rdk = Chem.MolFromXYZFile(file_path)
+            if sanitize:
+                Chem.SanitizeMol(mol_rdk)
+            if remove_hs:
+                mol_rdk = Chem.RemoveHs(mol_rdk)
+        elif file_type == "sdf":
+            mol_rdk = next(iter(Chem.SDMolSupplier(file_path, sanitize, remove_hs)))
+
+        if mol_rdk is None:
+            raise DeepOriginException(
+                "Invalid file format or file path or failed to sanitize the molecule"
+            )
+
+        return mol_rdk
 
 
 @beartype
@@ -852,7 +911,7 @@ def visualize_mols_in_sdf(file_path: str):
 
         return html
     except Exception as e:
-        raise ValueError(f"Visualization failed: {str(e)}") from e
+        raise DeepOriginException(f"Visualization failed: {str(e)}") from e
 
 
 @dataclass
@@ -947,6 +1006,7 @@ class LigandSet:
     @classmethod
     def from_rdkit_mols(cls, mols: list[Chem.rdchem.Mol]):
         """Create a LigandSet from a list of RDKit molecules."""
+
         ligands = []
         for mol in mols:
             ligand = Ligand.from_rdkit_mol(
@@ -975,7 +1035,7 @@ class LigandSet:
 
         Raises:
             FileNotFoundError: If the file does not exist.
-            ValueError: If the CSV does not contain the specified smiles column or if SMILES strings are invalid.
+            DeepOriginException: If the CSV does not contain the specified smiles column or if SMILES strings are invalid.
         """
         path = Path(file_path)
         if not path.exists():
@@ -999,7 +1059,9 @@ class LigandSet:
             normalized_columns = [col.strip().lower() for col in df.columns]
 
             if smiles_column.lower() not in normalized_columns:
-                raise ValueError(f"CSV file must contain a '{smiles_column}' column.")
+                raise DeepOriginException(
+                    f"CSV file must contain a '{smiles_column}' column."
+                )
 
             smiles_col_index = normalized_columns.index(smiles_column.lower())
             smiles_col = df.columns[smiles_col_index]
@@ -1043,11 +1105,13 @@ class LigandSet:
                     )
 
         except pd.errors.EmptyDataError as e:
-            raise ValueError(f"The CSV file '{file_path}' is empty.") from e
+            raise DeepOriginException(f"The CSV file '{file_path}' is empty.") from e
         except pd.errors.ParserError as e:
-            raise ValueError(f"Error parsing CSV file '{file_path}': {str(e)}") from e
+            raise DeepOriginException(
+                f"Error parsing CSV file '{file_path}': {str(e)}"
+            ) from e
         except Exception as e:
-            raise ValueError(
+            raise DeepOriginException(
                 f"Failed to create Ligands from CSV file '{file_path}': {str(e)}"
             ) from e
 
@@ -1059,7 +1123,7 @@ class LigandSet:
         file_path: str,
         *,
         sanitize: bool = True,
-        removeHs: bool = False,
+        remove_hydrogens: bool = False,
     ) -> "LigandSet":
         """
         Create a LigandSet instance from an SDF file containing one or more molecules.
@@ -1074,7 +1138,7 @@ class LigandSet:
 
         Raises:
             FileNotFoundError: If the file does not exist.
-            ValueError: If the file cannot be parsed correctly.
+            DeepOriginException: If the file cannot be parsed correctly.
         """
         path = Path(file_path)
         if not path.exists():
@@ -1082,7 +1146,11 @@ class LigandSet:
 
         ligands = []
         try:
-            suppl = Chem.SDMolSupplier(str(path), sanitize=sanitize, removeHs=removeHs)
+            suppl = Chem.SDMolSupplier(
+                str(path),
+                sanitize=sanitize,
+                removeHs=remove_hydrogens,
+            )
             for idx, mol in enumerate(suppl, start=1):
                 try:
                     if mol is None:
@@ -1100,7 +1168,7 @@ class LigandSet:
                         f"Error: Failed to create Ligand from SDF file molecule_idx = '{idx}': {str(e)}"
                     )
         except Exception as e:
-            raise ValueError(
+            raise DeepOriginException(
                 f"Failed to create Ligands from SDF file '{file_path}': {str(e)}"
             ) from e
 
@@ -1313,102 +1381,3 @@ class LigandSet:
             reference=reference.mol,
             mcs_mol=mcs_mol,
         )
-
-
-@beartype
-def mol_from_block(
-    block_type: str,
-    block: str,
-    sanitize: bool = True,
-    remove_hs: bool = False,
-):
-    """
-    Create a Molecule instance from a block of text.
-
-    Args:
-        block_type (str): Type of the input block
-        block (str): Text block containing molecular data
-        sanitize (bool): Whether to sanitize the molecule
-        remove_hs (bool): Whether to remove hydrogens
-
-    Returns:
-        Molecule: New Molecule instance
-    """
-    with tempfile.TemporaryFile(mode="w+") as temp_file:
-        temp_file.write(block)
-        temp_file.seek(0)  # Reset file pointer to beginning
-        return mol_from_file(
-            block_type,
-            temp_file.name,
-            sanitize=sanitize,
-            remove_hs=remove_hs,
-        )
-
-
-@beartype
-def mol_from_smiles(smiles: str, sanitize: bool = True) -> Chem.Mol:
-    """
-    Create a Molecule instance from a SMILES string.
-
-    Args:
-        smiles (str): SMILES string
-        sanitize (bool): Whether to sanitize the molecule
-
-    Returns:
-        Molecule: New Molecule instance
-    """
-    mol_rdk = Chem.MolFromSmiles(smiles, sanitize=sanitize)
-    if mol_rdk is None:
-        raise ValueError("Invalid SMILES string")
-
-    return mol_rdk
-
-
-@beartype
-def mol_from_file(
-    *,
-    file_type: FILE_FORMATS,
-    file_path: str,
-    sanitize: bool = True,
-    remove_hs: bool = False,
-) -> Chem.Mol:
-    """
-    Create a Molecule instance from a file.
-
-    Args:
-        file_type (str): Type of the input file (must be in FILE_FORMATS)
-        file_path (str): Path to the input file
-        sanitize (bool): Whether to sanitize the molecule
-        remove_hs (bool): Whether to remove hydrogens
-
-    Returns:
-        Molecule: New Molecule instance
-
-    Raises:
-        ValueError: If the file format is invalid or parsing fails
-        NotImplementedError: If the file type is not supported
-    """
-
-    mol_rdk = None
-
-    if file_type == "mol":
-        mol_rdk = Chem.MolFromMolFile(file_path, sanitize, remove_hs)
-    elif file_type == "mol2":
-        mol_rdk = Chem.MolFromMol2File(file_path, sanitize, remove_hs)
-    elif file_type == "pdb":
-        mol_rdk = Chem.MolFromPDBFile(file_path, sanitize, remove_hs)
-    elif file_type == "xyz":
-        mol_rdk = Chem.MolFromXYZFile(file_path)
-        if sanitize:
-            Chem.SanitizeMol(mol_rdk)
-        if remove_hs:
-            mol_rdk = Chem.RemoveHs(mol_rdk)
-    elif file_type == "sdf":
-        mol_rdk = next(iter(Chem.SDMolSupplier(file_path, sanitize, remove_hs)))
-
-    if mol_rdk is None:
-        raise ValueError(
-            "Invalid file format or file path or failed to sanitize the molecule"
-        )
-
-    return mol_rdk
