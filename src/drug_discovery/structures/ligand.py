@@ -902,7 +902,7 @@ class LigandSet:
         return iter(self.ligands)
 
     def __getitem__(self, index):
-        return self.ligands[index]
+        return LigandSet(ligands=[self.ligands[index]])
 
     def __contains__(self, ligand):
         return ligand in self.ligands
