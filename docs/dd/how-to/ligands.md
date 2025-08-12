@@ -365,6 +365,31 @@ ADMET (Absorption, Distribution, Metabolism, Excretion, and Toxicity) properties
     ligands.to_dataframe()
     ```
 
+### Random Sampling
+
+You can randomly sample ligands from a `LigandSet` using the `random_sample` method:
+
+```python
+from deeporigin.drug_discovery import LigandSet, DATA_DIR
+
+ligands = LigandSet.from_sdf(DATA_DIR / "ligands" / "ligands-brd-all.sdf")
+
+# Sample 3 random ligands
+sample = ligands.random_sample(3)
+print(f"Sampled {len(sample)} ligands from {len(ligands)} total ligands")
+```
+
+The `random_sample` method:
+- Returns a new `LigandSet` containing the randomly selected ligands
+- Uses unbiased random sampling without replacement
+- Preserves the original `LigandSet` (doesn't modify it)
+- Raises a `ValueError` if you try to sample more ligands than available
+
+This is useful for:
+- Creating smaller subsets for testing or development
+- Statistical analysis and validation
+- Reducing computational load while maintaining diversity
+
 ### Maximum Common Substructure
 
 The Maximum Common Substructure (MCS) for a `LigandSet` can be computed as follows:

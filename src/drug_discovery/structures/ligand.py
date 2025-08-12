@@ -6,6 +6,7 @@ import base64
 from dataclasses import dataclass, field
 import os
 from pathlib import Path
+import random
 import tempfile
 from typing import Any, Literal, Optional
 import warnings
@@ -901,8 +902,31 @@ class LigandSet:
     def __iter__(self):
         return iter(self.ligands)
 
-    def __getitem__(self, index):
-        return LigandSet(ligands=[self.ligands[index]])
+    def __getitem__(self, index) -> "Ligand | LigandSet":
+        """
+        Get a single ligand or a subset of ligands.
+
+        Args:
+            index: Integer index for single ligand, or slice for subset
+
+        Returns:
+            Ligand: If index is a single integer
+            LigandSet: If index is a slice (e.g., [1:3], [:2], etc.)
+
+        Examples:
+            >>> ligands = LigandSet([ligand1, ligand2, ligand3])
+            >>> ligands[0]      # Returns: Ligand
+            >>> ligands[1:3]    # Returns: LigandSet
+            >>> ligands[:2]     # Returns: LigandSet
+        """
+        result = self.ligands[index]
+
+        # If result is a list (from slicing), return a new LigandSet
+        if isinstance(result, list):
+            return LigandSet(ligands=result)
+
+        # If result is a single Ligand, return it directly
+        return result
 
     def __contains__(self, ligand):
         return ligand in self.ligands
@@ -928,6 +952,31 @@ class LigandSet:
             return LigandSet(ligands=other + self.ligands)
         else:
             return NotImplemented
+
+    @beartype
+    def random_sample(self, n: int) -> "LigandSet":
+        """
+        Return a new LigandSet containing n randomly selected ligands.
+
+        Args:
+            n (int): Number of ligands to randomly sample
+
+        Returns:
+            LigandSet: A new LigandSet with n randomly selected ligands
+
+        Raises:
+            ValueError: If n is greater than the total number of ligands
+        """
+
+        if n < 1:
+            raise ValueError("n must be at least 1")
+        if n > len(self.ligands):
+            raise ValueError(
+                f"Cannot sample {n} ligands from a set of {len(self.ligands)} ligands"
+            )
+
+        sampled_ligands = random.sample(self.ligands, n)
+        return LigandSet(ligands=sampled_ligands)
 
     def _repr_html_(self):
         """Return an HTML representation of the LigandSet."""
