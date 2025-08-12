@@ -5,43 +5,6 @@ This module encapsulates the Protein class, which is responsible for managing an
 protein structures in computational biology workflows. It provides functionalities to load protein data
 from various sources, preprocess structures, handle ligands, and visualize protein-ligand interactions.
 
-Key Features:
-- Protein Class: Manages protein data loaded from PDB IDs, file paths, or direct block content.
-  Handles structure selection, filtering of HETATM records, and extraction of metal and cofactor residues.
-- Initialization: Allows initializing a Protein instance using a PDB ID, local file, or block content,
-  ensuring only one source is provided and properly loading the structure.
-- Preparation Methods: Includes methods like `prepare`, `remove_hetatm`, `remove_resnames`, and
-  `remove_water` to preprocess and clean protein structures for downstream analysis.
-- Ligand Management: Provides methods to select and manage ligands within the protein structure,
-  enabling extraction and manipulation of ligand residues.
-- Visualization: Integrates with the ProteinViewer to render interactive visualizations of protein
-  structures within Jupyter Notebooks, facilitating intuitive analysis and presentation of protein-ligand complexes.
-- Utility Functions: Offers static and internal helper methods for downloading protein data, loading structures,
-  and creating new Protein instances with modified structures.
-
-Dependencies:
-- Biotite for structure handling
-- RDKit for cheminformatics
-- Plotly for interactive visualizations
-- External tools for enhanced functionality
-
-Usage Example:
-
-# Initialize with a PDB ID
-protein = Protein.from_pdb_id("1ABC")
-
-# Initialize with a file
-protein = Protein.from_file("/path/to/protein.pdb")
-
-# Select a specific chain
-chain_a = protein.select_chain('A')
-
-# Remove water molecules
-protein_no_water = protein.remove_water()
-
-# Visualize the protein structure
-protein.show()
-
 """
 
 from collections import defaultdict
@@ -267,6 +230,7 @@ class Protein(Entity):
         ligand: Ligand,
         pocket: Pocket,
         use_cache: bool = True,
+        constraints: Optional[list[dict]] = None,
     ) -> str:
         """Dock a ligand into a specific pocket of the protein.
 
@@ -278,21 +242,38 @@ class Protein(Entity):
             ligand (Ligand): The ligand to dock into the protein pocket.
             pocket (Pocket): The specific pocket in the protein where the ligand
                 should be docked.
+            use_cache (bool): Whether to use cached results if available. Defaults to True.
+            constraints (Optional[list[dict]]): List of constraints for the docking. Generate this using `align.compute_constraints`.
 
         Returns:
             str: Path to the SDF file containing the docked ligand structure.
         """
-        # Import here to avoid circular import
-        from deeporigin.functions import docking
+        if constraints is not None:
+            # perform constrained docking
+            from deeporigin.functions import constrained_dock
 
-        docked_ligand_sdf_file = docking.dock(
-            protein=self,
-            ligand=ligand,
-            pocket=pocket,
-            use_cache=use_cache,
-        )
+            _, _, top_sdf = constrained_dock(
+                protein=self,
+                ligand=ligand,
+                constraints=constraints,
+                pocket=pocket,
+                use_cache=use_cache,
+            )
 
-        return docked_ligand_sdf_file
+            return top_sdf
+        else:
+            # perform normal docking
+            # Import here to avoid circular import
+            from deeporigin.functions import docking
+
+            docked_ligand_sdf_file = docking.dock(
+                protein=self,
+                ligand=ligand,
+                pocket=pocket,
+                use_cache=use_cache,
+            )
+
+            return docked_ligand_sdf_file
 
     @property
     def coordinates(self):
@@ -595,9 +576,9 @@ class Protein(Entity):
 
         return metal_resnames, cofactor_resnames
 
-    def extract_ligand(self, exclude_resnames: Optional[set[str]] = None):
+    def extract_ligand(self, exclude_resnames: Optional[set[str]] = None) -> Ligand:
         """
-        Extracts ligand(s) from a PDB file using RDKit.
+        Extracts ligand(s) from a Protein object.
 
         Args:
             exclude_resnames (set): Residue names to exclude (e.g., water).

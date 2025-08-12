@@ -21,6 +21,8 @@
         "deeporigin",
         "drugability",
         "FMCS",
+        "HETATM",
+        "isin",
         "kabsch",
         "Kekulization",
         "Kekulize",
@@ -36,8 +38,11 @@
         "protonated",
         "protonation",
         "rbfe",
+        "rcsb",
+        "rcsbapi",
         "rdchem",
         "rdkit",
+        "resnames",
         "SASA",
         "Substruct"
     ]
