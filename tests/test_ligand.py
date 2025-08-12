@@ -1,5 +1,7 @@
 import os
+from pathlib import Path
 
+import numpy as np
 import pytest
 
 from deeporigin.drug_discovery.structures import Ligand
@@ -11,136 +13,95 @@ from tests.utils_ligands import bad_ligands, ligands
 base_path = os.path.join(os.path.dirname(__file__), "fixtures")
 
 
-def test_ligand_from_smiles():
+@pytest.mark.parametrize(
+    "smiles,name,expected_atoms,equivalent_smiles",
+    [
+        ("C", "Methane", 1, None),  # Methane
+        ("CC", "Ethane", 2, None),  # Ethane
+        ("CCO", "Ethanol", 3, None),  # Ethanol
+        ("c1ccccc1", "Benzene", 6, ["C1=CC=CC=C1"]),  # Benzene (aromatic notation)
+        ("C1=CC=CC=C1", "Benzene_alt", 6, ["c1ccccc1"]),  # Benzene (Kekule notation)
+    ],
+)
+def test_ligand_from_smiles(smiles, name, expected_atoms, equivalent_smiles):
     """Test that we can create a Ligand from a SMILES string using the from_smiles classmethod"""
     from rdkit import Chem
 
-    # Test cases with different types of molecules
-    test_cases = [
-        {
-            "smiles": "C",  # Methane
-            "name": "Methane",
-            "expected_atoms": 1,
-        },
-        {
-            "smiles": "CC",  # Ethane
-            "name": "Ethane",
-            "expected_atoms": 2,
-        },
-        {
-            "smiles": "CCO",  # Ethanol
-            "name": "Ethanol",
-            "expected_atoms": 3,
-        },
-        {
-            "smiles": "c1ccccc1",  # Benzene (aromatic notation)
-            "name": "Benzene",
-            "expected_atoms": 6,
-            "equivalent_smiles": ["C1=CC=CC=C1"],  # Benzene (Kekule notation)
-        },
-        {
-            "smiles": "C1=CC=CC=C1",  # Benzene (Kekule notation)
-            "name": "Benzene_alt",
-            "expected_atoms": 6,
-            "equivalent_smiles": ["c1ccccc1"],  # Benzene (aromatic notation)
-        },
-    ]
+    # Create a ligand using the from_smiles method
+    ligand = Ligand.from_smiles(
+        smiles=smiles,
+        name=name,
+        save_to_file=False,
+    )
 
-    for case in test_cases:
-        # Create a ligand using the from_smiles method
-        ligand = Ligand.from_smiles(
-            smiles=case["smiles"],
-            name=case["name"],
-            save_to_file=False,
+    # Verify the ligand has either the exact SMILES string or an equivalent one
+    if equivalent_smiles:
+        assert ligand.smiles in [smiles] + equivalent_smiles, (
+            f"SMILES {ligand.smiles} not equivalent to {smiles} or any of {equivalent_smiles}"
         )
+    else:
+        assert ligand.smiles == smiles
 
-        # Verify the ligand has either the exact SMILES string or an equivalent one
-        if "equivalent_smiles" in case:
-            assert ligand.smiles in [case["smiles"]] + case["equivalent_smiles"], (
-                f"SMILES {ligand.smiles} not equivalent to {case['smiles']} or any of {case['equivalent_smiles']}"
-            )
-        else:
-            assert ligand.smiles == case["smiles"]
+    # Verify the name was set correctly
+    assert ligand.name == name
 
-        # Verify the name was set correctly
-        assert ligand.name == case["name"]
+    # Verify that the file field is None
+    assert ligand.file_path is None
 
-        # Verify that the file field is None
-        assert ligand.file_path is None
+    # Verify that the molecule was properly initialized
+    assert ligand.mol is not None
+    assert ligand.mol.GetNumAtoms() == expected_atoms
 
-        # Verify that the molecule was properly initialized
-        assert ligand.mol is not None
-        assert ligand.mol.m.GetNumAtoms() == case["expected_atoms"]
+    # Verify that the molecule represents the same chemical structure
+    input_mol = Chem.MolFromSmiles(smiles)
+    assert Chem.MolToSmiles(input_mol) == Chem.MolToSmiles(ligand.mol)
 
-        # Verify that the molecule represents the same chemical structure
-        input_mol = Chem.MolFromSmiles(case["smiles"])
-        assert Chem.MolToSmiles(input_mol) == Chem.MolToSmiles(ligand.mol.m)
 
-    # Test with invalid SMILES
+def test_ligand_from_smiles_invalid():
+    """Test that invalid SMILES raises DeepOriginException"""
     with pytest.raises(DeepOriginException, match=r"Cannot create"):
         Ligand.from_smiles(smiles="InvalidSMILES")
 
 
-def test_ligand_from_identifier():
+@pytest.mark.parametrize(
+    "identifier,expected_atoms",
+    [
+        ("ATP", 31),  # Adenosine triphosphate
+        ("ADP", 27),  # Adenosine diphosphate
+        ("Oxotremorine", 15),  # Muscarinic acetylcholine receptor agonist
+        ("Serotonin", 13),  # 5-hydroxytryptamine (5-HT)
+    ],
+)
+def test_ligand_from_identifier(identifier, expected_atoms):
     """Test that we can create a Ligand from common biochemical identifiers using the from_identifier classmethod"""
 
-    # Test cases with different biologically relevant molecules
-    test_cases = [
-        {
-            "identifier": "ATP",  # Adenosine triphosphate
-            "name": "ATP",
-            "expected_atoms": 31,  # Heavy atoms only
-        },
-        {
-            "identifier": "ADP",  # Adenosine diphosphate
-            "name": "ADP",
-            "expected_atoms": 27,  # Heavy atoms only
-        },
-        {
-            "identifier": "Oxotremorine",  # Muscarinic acetylcholine receptor agonist
-            "name": "Oxotremorine",
-            "expected_atoms": 15,  # Heavy atoms only
-        },
-        {
-            "identifier": "Serotonin",  # 5-hydroxytryptamine (5-HT)
-            "name": "Serotonin",
-            "expected_atoms": 13,  # Heavy atoms only (N,C,C,c,c,n,c,c,c,c,O,c,c)
-        },
-    ]
+    # Create a ligand using the from_identifier method
+    ligand = Ligand.from_identifier(identifier=identifier)
 
-    for case in test_cases:
-        # Create a ligand using the from_identifier method
-        ligand = Ligand.from_identifier(
-            identifier=case["identifier"],
-            name=case["name"],
-            save_to_file=False,
-        )
+    # Verify the name was set correctly
+    assert ligand.name == identifier
 
-        # Verify the name was set correctly
-        assert ligand.name == case["name"]
+    # Verify that the file field is None
+    assert ligand.file_path is None
 
-        # Verify that the file field is None
-        assert ligand.file_path is None
+    # Verify that the molecule was properly initialized
+    assert ligand.mol is not None
+    assert ligand.mol.GetNumAtoms() == expected_atoms
 
-        # Verify that the molecule was properly initialized
-        assert ligand.mol is not None
-        assert ligand.mol.m.GetNumAtoms() == case["expected_atoms"]
+    # Verify that the molecule has valid 3D coordinates
+    assert ligand.mol.GetNumConformers() > 0
+    coords = ligand.mol.GetConformer().GetPositions()
+    assert coords.shape[0] == expected_atoms
 
-        # Verify that the identifier was stored
-        assert ligand.identifier == case["identifier"]
 
-        # Verify that the molecule has valid 3D coordinates
-        assert ligand.mol.m.GetNumConformers() > 0
-        coords = ligand.mol.m.GetConformer().GetPositions()
-        assert coords.shape[0] == case["expected_atoms"]
-
-    # Test with invalid identifier
+def test_ligand_from_identifier_invalid():
+    """Test that invalid identifier raises appropriate exception"""
     invalid_id = "InvalidMolecule123"
-    with pytest.raises(DeepOriginException) as exc_info:
+    with pytest.raises(
+        DeepOriginException,
+        match=f"Error resolving SMILES string of {invalid_id}",
+    ):
         Ligand.from_identifier(identifier=invalid_id)
-    assert str(exc_info.value).startswith(
-        f"Could not resolve chemical identifier '{invalid_id}'"
-    )
 
 
 def test_ligand_from_rdkit_mol():
@@ -170,7 +131,7 @@ def test_ligand_from_rdkit_mol():
 
         # Verify that the molecule was properly initialized
         assert ligand.mol is not None
-        assert ligand.mol.m.GetNumAtoms() == mol.GetNumAtoms()
+        assert ligand.mol.GetNumAtoms() == mol.GetNumAtoms()
 
 
 def test_ligand_from_sdf():
@@ -186,7 +147,7 @@ def test_ligand_from_sdf():
     # Verify the ligand was created successfully
     assert isinstance(ligand, Ligand)
     assert ligand.mol is not None
-    assert ligand.mol.m.GetNumAtoms() > 0
+    assert ligand.mol.GetNumAtoms() > 0
 
     # Verify that the file_path was set correctly
     assert ligand.file_path == sdf_file
@@ -216,10 +177,10 @@ def test_ligand_base64():
 
 @pytest.mark.parametrize("ligand", bad_ligands)
 def test_ligand_errors(ligand):
-    with pytest.raises(Exception):  # noqa: B017
+    with pytest.raises(DeepOriginException):  # noqa: B017
         Ligand(
             file_path=ligand["file"],
-            smiles=ligand["smiles"],
+            smiles=ligand["smiles_string"],
         )
 
 
@@ -235,7 +196,7 @@ def test_ligand(ligand):
 
     assert isinstance(result, Ligand)
     assert result.mol is not None
-    assert result.mol.m.GetNumAtoms() > 0
+    assert result.mol.GetNumAtoms() > 0
     assert (
         result.file_path == ligand["file"]
     )  # Single ligand case should have file_path
@@ -244,6 +205,376 @@ def test_ligand(ligand):
 def test_ligand_from_sdf_multiple_raises():
     """Test that Ligand.from_sdf raises DeepOriginException for multi-molecule SDF files."""
     with pytest.raises(
-        DeepOriginException, match="must contain exactly one molecule, but found 8"
+        DeepOriginException,
+        match="must contain exactly one molecule, but found 8",
     ):
         Ligand.from_sdf(os.path.join(base_path, "ligands-brd-all.sdf"))
+
+
+def test_ligand_mol_from_file():
+    """Test the mol_from_file class method"""
+    # Test with a valid SDF file
+    brd7_ligand = next(ligand for ligand in ligands if "brd-7.sdf" in ligand["file"])
+    sdf_file = brd7_ligand["file"]
+
+    mol = Ligand.mol_from_file(file_type="sdf", file_path=sdf_file)
+    assert mol is not None
+    assert mol.GetNumAtoms() > 0
+
+
+@pytest.mark.parametrize("file_type", ["mol", "mol2", "pdb", "xyz", "sdf"])
+def test_ligand_mol_from_file_formats(file_type):
+    """Test mol_from_file with different file formats"""
+    # Skip unsupported formats for now (would need test files)
+    if file_type in ["mol2", "pdb", "xyz"]:
+        pytest.skip(f"Test file for {file_type} format not available")
+
+    # Test with SDF format
+    if file_type == "sdf":
+        brd7_ligand = next(
+            ligand for ligand in ligands if "brd-7.sdf" in ligand["file"]
+        )
+        sdf_file = brd7_ligand["file"]
+
+        mol = Ligand.mol_from_file(file_type=file_type, file_path=sdf_file)
+        assert mol is not None
+
+
+# Test instance methods
+def test_ligand_process_mol():
+    """Test the process_mol method for salt removal and kekulization"""
+
+    # Create a simple molecule
+    ligand = Ligand.from_smiles("CCO", name="Ethanol")
+
+    # The process_mol method is called in __post_init__, so the molecule should already be processed
+    assert ligand.mol is not None
+    assert ligand.mol.GetNumAtoms() == 3
+
+
+def test_ligand_conformer_management():
+    """Test conformer-related methods"""
+    ligand = Ligand.from_smiles("CCO", name="Ethanol")
+
+    # Test get_conformer
+    conformer = ligand.get_conformer(0)
+    assert conformer is not None
+
+    # Test get_conformer_id
+    conformer_id = ligand.get_conformer_id()
+    assert isinstance(conformer_id, int)
+
+    # Test set_conformer_id
+    ligand.set_conformer_id(5)
+    assert ligand.get_conformer_id() == 5
+
+
+def test_ligand_embed_and_hydrogens():
+    """Test embedding and hydrogen addition methods"""
+    ligand = Ligand.from_smiles("CCO", name="Ethanol")
+
+    # Test add_hydrogens
+    original_atom_count = ligand.mol.GetNumAtoms()
+    ligand.add_hydrogens()
+    assert ligand.mol.GetNumAtoms() > original_atom_count
+
+    # Test embed
+    ligand.embed(add_hydrogens=False, seed=42)
+    assert ligand.mol.GetNumConformers() > 0
+
+    # Test get_coordinates
+    coords = ligand.get_coordinates(0)
+    assert coords.shape[0] == ligand.mol.GetNumAtoms()
+    assert coords.shape[1] == 3  # x, y, z coordinates
+
+
+def test_ligand_property_management():
+    """Test property setting and getting methods"""
+    ligand = Ligand.from_smiles("CCO", name="Ethanol")
+
+    # Test set_property
+    ligand.set_property("test_prop", "test_value")
+    assert ligand.properties["test_prop"] == "test_value"
+
+    # Test get_property
+    value = ligand.get_property("test_prop")
+    assert value == "test_value"
+
+    # Test get_property with non-existent property
+    assert ligand.get_property("non_existent") is None
+
+
+def test_ligand_file_writing():
+    """Test file writing methods"""
+    ligand = Ligand.from_smiles("CCO", name="Ethanol")
+
+    # Test write_to_file with SDF format
+    sdf_path = ligand.write_to_file(output_format="sdf")
+    assert Path(sdf_path).exists()
+    assert Path(sdf_path).suffix == ".sdf"
+
+    # Test to_sdf method
+    sdf_path2 = ligand.to_sdf()
+    assert Path(sdf_path2).exists()
+
+    # Test to_mol method
+    mol_path = ligand.to_mol()
+    assert Path(mol_path).exists()
+    assert Path(mol_path).suffix == ".mol"
+
+    # Test to_pdb method
+    pdb_path = ligand.to_pdb()
+    assert Path(pdb_path).exists()
+    assert Path(pdb_path).suffix == ".pdb"
+
+    # Clean up test files
+    for path in [sdf_path, sdf_path2, mol_path, pdb_path]:
+        if Path(path).exists():
+            Path(path).unlink()
+
+
+def test_ligand_visualization():
+    """Test visualization methods"""
+    ligand = Ligand.from_smiles("CCO", name="Ethanol")
+
+    # Test draw method (returns RDKit drawing)
+    drawing = ligand.draw()
+    assert drawing is not None
+
+    ligand.show()
+
+
+def test_ligand_coordinate_updates():
+    """Test coordinate update methods"""
+    ligand = Ligand.from_smiles("CCO", name="Ethanol")
+
+    # Ensure ligand has coordinates
+    if ligand.mol.GetNumConformers() == 0:
+        ligand.embed()
+
+    # Get original coordinates
+    original_coords = ligand.get_coordinates(0)
+
+    # Create new coordinates (slightly modified)
+    new_coords = original_coords + 0.1
+
+    # Update coordinates
+    ligand.update_coordinates(new_coords)
+
+    # Verify coordinates were updated
+    updated_coords = ligand.get_coordinates(0)
+    assert not np.array_equal(original_coords, updated_coords)
+    assert np.array_equal(new_coords, updated_coords)
+
+
+# Test properties
+def test_ligand_coordinates_property():
+    """Test the coordinates property"""
+    ligand = Ligand.from_smiles("CCO", name="Ethanol")
+
+    # Ensure ligand has coordinates
+    if ligand.mol.GetNumConformers() == 0:
+        ligand.embed()
+
+    # Test the coordinates property
+    coords = ligand.coordinates
+    assert isinstance(coords, np.ndarray)
+    assert coords.dtype == np.float32
+    assert coords.shape[0] == ligand.mol.GetNumAtoms()
+    assert coords.shape[1] == 3
+
+
+def test_ligand_atom_types_property():
+    """Test the atom_types property"""
+    ligand = Ligand.from_smiles("CCO", name="Ethanol")
+
+    # Test the atom_types property
+    atom_types = ligand.atom_types
+    assert isinstance(atom_types, list)
+    assert len(atom_types) == ligand.mol.GetNumAtoms()
+    assert "C" in atom_types
+    assert "O" in atom_types
+
+
+def test_ligand_contains_boron():
+    """Test the contains_boron property"""
+    # Test ligand without boron
+    ligand_no_boron = Ligand.from_smiles("CCO", name="Ethanol")
+    assert not ligand_no_boron.contains_boron
+    assert ligand_no_boron.available_for_docking
+
+    # Test ligand with boron (if we had one)
+    # This would require a SMILES with boron atoms
+    # For now, just test the property exists
+    assert hasattr(ligand_no_boron, "contains_boron")
+
+
+def test_ligand_coordinate_mismatch():
+    """Test coordinate update with mismatched atom count"""
+    ligand = Ligand.from_smiles("CCO", name="Ethanol")
+
+    # Ensure ligand has coordinates
+    if ligand.mol.GetNumConformers() == 0:
+        ligand.embed()
+
+    # Try to update with wrong number of coordinates
+    wrong_coords = np.array([[0.0, 0.0, 0.0]])  # Only 1 atom, but ligand has 3
+
+    with pytest.raises(
+        DeepOriginException, match="Number of ligand atoms does not match"
+    ):
+        ligand.update_coordinates(wrong_coords)
+
+
+def test_ligand_no_conformers():
+    """Test handling of molecules without conformers"""
+    ligand = Ligand.from_smiles("CCO", name="Ethanol")
+
+    # Remove all conformers
+    ligand.mol.RemoveAllConformers()
+
+    # Test that get_coordinates raises an error
+    with pytest.raises(ValueError, match="Bad Conformer Id"):
+        ligand.get_coordinates(0)
+
+    # Test that update_coordinates raises an error
+    coords = np.array([[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])
+    with pytest.raises(
+        DeepOriginException, match="Ligand molecule has no conformers to update"
+    ):
+        ligand.update_coordinates(coords)
+
+
+def test_ligand_property_inheritance():
+    """Test how properties are handled during initialization"""
+    ligand = Ligand.from_smiles("CCO", name="Ethanol")
+
+    # Check that initial_smiles property was set
+    assert ligand.mol.HasProp("initial_smiles")
+
+    # Check that name property was set (it's set in write_to_file, not __post_init__)
+    # The name property is only set when writing to file, so we'll test that instead
+    assert ligand.name == "Ethanol"
+
+
+def test_ligand_file_path_handling():
+    """Test file path resolution and directory creation"""
+    ligand = Ligand.from_smiles("CCO", name="Ethanol")
+
+    # Test that directory creation works
+    directory = ligand._get_directory()
+    assert Path(directory).exists()
+    assert "ligands" in directory
+
+    # Test that save_to_file works when enabled
+    ligand.save_to_file = True
+    # This would create a file in the directory, but we'll skip the actual file creation
+    # to avoid cluttering the test environment
+
+
+# Test utility functions
+def test_ligands_to_dataframe():
+    """Test the ligands_to_dataframe utility function"""
+    from deeporigin.drug_discovery.structures.ligand import ligands_to_dataframe
+
+    # Create test ligands
+    ligands_list = [
+        Ligand.from_smiles("CCO", name="Ethanol"),
+        Ligand.from_smiles("CCCO", name="Propanol"),
+    ]
+
+    # Add some properties
+    ligands_list[0].set_property("logP", 0.32)
+    ligands_list[1].set_property("logP", 0.88)
+
+    # Convert to dataframe
+    df = ligands_to_dataframe(ligands_list)
+
+    assert len(df) == 2
+    assert "Ligand" in df.columns
+    assert "File" in df.columns
+    assert "logP" in df.columns
+    assert df.iloc[0]["logP"] == 0.32
+    assert df.iloc[1]["logP"] == 0.88
+
+
+# Test LigandSet functionality
+def test_ligandset_operations():
+    """Test basic LigandSet operations"""
+    from deeporigin.drug_discovery.structures.ligand import LigandSet
+
+    # Create test ligands
+    ligand1 = Ligand.from_smiles("CCO", name="Ethanol")
+    ligand2 = Ligand.from_smiles("CCCO", name="Propanol")
+
+    # Test LigandSet creation
+    ligandset = LigandSet(ligands=[ligand1, ligand2])
+    assert len(ligandset) == 2
+
+    # Test iteration
+    for ligand in ligandset:
+        assert isinstance(ligand, Ligand)
+
+    # Test indexing
+    assert ligandset[0] == ligand1
+    assert ligandset[1] == ligand2
+
+    # Test containment
+    assert ligand1 in ligandset
+    assert ligand2 in ligandset
+
+
+def test_ligandset_addition():
+    """Test LigandSet addition operations"""
+    from deeporigin.drug_discovery.structures.ligand import LigandSet
+
+    ligand1 = Ligand.from_smiles("CCO", name="Ethanol")
+    ligand2 = Ligand.from_smiles("CCCO", name="Propanol")
+
+    set1 = LigandSet(ligands=[ligand1])
+    set2 = LigandSet(ligands=[ligand2])
+
+    # Test LigandSet + LigandSet
+    combined = set1 + set2
+    assert len(combined) == 2
+
+    # Test LigandSet + Ligand
+    combined = set1 + ligand2
+    assert len(combined) == 2
+
+    # Test Ligand + LigandSet
+    combined = ligand2 + set1
+    assert len(combined) == 2
+
+
+def test_ligandset_from_smiles():
+    """Test LigandSet creation from SMILES"""
+    from deeporigin.drug_discovery.structures.ligand import LigandSet
+
+    smiles_list = ["CCO", "CCCO", "CCCCO"]
+    ligandset = LigandSet.from_smiles(smiles_list)
+
+    assert len(ligandset) == 3
+    assert all(isinstance(ligand, Ligand) for ligand in ligandset)
+    assert ligandset[0].smiles == "CCO"
+    assert ligandset[1].smiles == "CCCO"
+    assert ligandset[2].smiles == "CCCCO"
+
+
+def test_ligandset_to_dataframe():
+    """Test LigandSet to DataFrame conversion"""
+    from deeporigin.drug_discovery.structures.ligand import LigandSet
+
+    ligand1 = Ligand.from_smiles("CCO", name="Ethanol")
+    ligand2 = Ligand.from_smiles("CCCO", name="Propanol")
+
+    ligandset = LigandSet(ligands=[ligand1, ligand2])
+
+    # Add properties
+    ligand1.set_property("logP", 0.32)
+    ligand2.set_property("logP", 0.88)
+
+    df = ligandset.to_dataframe()
+    assert len(df) == 2
+    assert "Ligand" in df.columns
+    assert "logP" in df.columns

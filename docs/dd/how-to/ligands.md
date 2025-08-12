@@ -39,24 +39,11 @@ There are two classes that help you work with ligands:
     ```python
     from deeporigin.drug_discovery import Ligand
 
-
-    # Basic usage with just a SMILES string
-    ligand = Ligand.from_smiles(smiles="CCO")  # Ethanol
-
-    # With additional parameters
     ligand = Ligand.from_smiles(
-        smiles="c1ccccc1",  # Benzene
-        name="Benzene",     # Optional name for the ligand
+        smiles="c1ccccc1", 
+        name="Oxo",     # Optional name for the ligand
     )
     ```
-
-    The `from_smiles` constructor:
-
-    - Takes a SMILES string as input
-    - Optionally accepts a name for the ligand
-    - Optionally accepts a `save_to_file` parameter to control file persistence
-    - Automatically validates the SMILES string and creates a proper molecular representation
-    - Returns a `Ligand` instance that can be used for further operations
 
     !!! note "SMILES Validation"
         The constructor will raise an exception if the provided SMILES string is invalid or cannot be parsed into a valid molecule.
@@ -86,13 +73,11 @@ from deeporigin.drug_discovery import Ligand
 
 # Create ligands from common biochemical names
 atp = Ligand.from_identifier(
-    identifier="ATP",  # Adenosine triphosphate
-    name="ATP"
+    identifier="ATP",  
 )
 
 serotonin = Ligand.from_identifier(
-    identifier="serotonin",  # 5-hydroxytryptamine (5-HT)
-    name="Serotonin"
+    identifier="serotonin", 
 )
 ```
 
@@ -112,7 +97,7 @@ The `from_identifier` constructor:
 
 ### From an RDKit Mol object
 
-If you're working with RDKit molecules directly, you can create a Ligand from an RDKit Mol object:
+If you're working with RDKit molecules directly, you can create a `Ligand` from an RDKit Mol object:
 
 ```python
 from deeporigin.drug_discovery import Ligand
@@ -125,7 +110,6 @@ mol = Chem.MolFromSmiles("CCO")  # Ethanol
 ligand = Ligand.from_rdkit_mol(
     mol=mol,
     name="Ethanol",  # Optional name for the ligand
-    save_to_file=False  # Optional: whether to save the ligand to file
 )
 ```
 
