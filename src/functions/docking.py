@@ -11,7 +11,7 @@ import concurrent.futures
 import os
 from pathlib import Path
 import time
-from typing import Dict, Optional
+from typing import Optional
 import zipfile
 
 from beartype import beartype
@@ -211,9 +211,10 @@ def _parallel_dock(
     batch_size: int = 10,
     max_retries: int = 3,
     sleep_between_batches: float = 0.1,
-) -> Dict[str, object]:
+    use_cache: bool = True,
+) -> dict[str, object]:
     """
-    Run sim.protein.dock in parallel batches with retries for failures.
+    Run docking in parallel batches with retries for failures.
 
     Args:
         protein: protein argument to be passed to dock().
@@ -222,6 +223,7 @@ def _parallel_dock(
         batch_size: number of ligands to process in parallel.
         max_retries: max times to retry failed dockings.
         sleep_between_batches: delay between batches, in seconds.
+        use_cache: whether to use cached results if available. Defaults to True.
 
     Returns:
         Dict with:
@@ -241,7 +243,12 @@ def _parallel_dock(
         nonlocal total_failures
         try:
             start = time.time()
-            result = dock(ligand=ligands[idx], pocket=pocket, protein=protein)
+            result = dock(
+                ligand=ligands[idx],
+                pocket=pocket,
+                protein=protein,
+                use_cache=use_cache,
+            )
             end = time.time()
             return (idx, result, end - start)
         except Exception as e:
