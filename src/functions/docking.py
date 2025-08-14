@@ -269,7 +269,7 @@ def _parallel_dock(
             )
             if out is None and retries > 0
         ]
-        print(f"Processing batch of {min(batch_size, len(to_process))} ligands...")
+        # print(f"Processing batch of {min(batch_size, len(to_process))} ligands...")
 
         for i in range(0, len(to_process), batch_size):
             batch = to_process[i : i + batch_size]

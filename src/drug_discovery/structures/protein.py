@@ -227,11 +227,12 @@ class Protein(Entity):
     def dock(
         self,
         *,
-        ligand: Ligand,
+        ligand: Optional[Ligand] = None,
+        ligands: Optional[LigandSet] = None,
         pocket: Pocket,
         use_cache: bool = True,
         constraints: Optional[list[dict]] = None,
-    ) -> str:
+    ):
         """Dock a ligand into a specific pocket of the protein.
 
         This method performs molecular docking of a ligand into a specified pocket
@@ -250,9 +251,9 @@ class Protein(Entity):
         """
         if constraints is not None:
             # perform constrained docking
-            from deeporigin.functions import constrained_dock
+            from deeporigin.functions import docking
 
-            _, _, top_sdf = constrained_dock(
+            _, _, top_sdf = docking.constrained_dock(
                 protein=self,
                 ligand=ligand,
                 constraints=constraints,
@@ -260,20 +261,32 @@ class Protein(Entity):
                 use_cache=use_cache,
             )
 
-            return top_sdf
+            return Ligand.from_sdf(top_sdf)
         else:
             # perform normal docking
+
+            if ligand is None and ligands is not None:
+                pass
+
+            elif ligand is not None and ligands is None:
+                ligands = [ligand]
+
+            else:
+                raise DeepOriginException(
+                    "Either ligand or ligands must be provided to protein.dock()"
+                ) from None
+
             # Import here to avoid circular import
             from deeporigin.functions import docking
 
-            docked_ligand_sdf_file = docking.dock(
+            data = docking._parallel_dock(
                 protein=self,
-                ligand=ligand,
+                ligands=ligands,
                 pocket=pocket,
                 use_cache=use_cache,
             )
 
-            return docked_ligand_sdf_file
+            return LigandSet.from_sdf_files(data["output_paths"])
 
     @property
     def coordinates(self):
@@ -578,13 +591,15 @@ class Protein(Entity):
 
     def extract_ligand(self, exclude_resnames: Optional[set[str]] = None) -> Ligand:
         """
-        Extracts ligand(s) from a Protein object.
+        Extracts ligand(s) from a Protein object and removes them from the protein structure.
+        This method mutates the protein object by removing ligand records.
 
         Args:
             exclude_resnames (set): Residue names to exclude (e.g., water).
 
+        Returns:
+            Ligand: The extracted ligand molecule.
         """
-
         from rdkit import Chem
 
         if exclude_resnames is None:
@@ -593,6 +608,7 @@ class Protein(Entity):
         ligand_lines = []
         conect_lines = []
         ligand_resnames = set()
+        ligand_atom_serials = set()
 
         # First pass: collect HETATM lines and their residue names
         with open(self.file_path, "r") as f:
@@ -607,6 +623,12 @@ class Protein(Entity):
                         continue
                     ligand_lines.append(line)
                     ligand_resnames.add(resname)
+                    # Store atom serial for later removal from structure
+                    try:
+                        atom_serial = int(line[6:11].strip())
+                        ligand_atom_serials.add(atom_serial)
+                    except ValueError:
+                        continue
 
         # Second pass: collect CONECT records for the ligand atoms
         with open(self.file_path, "r") as f:
@@ -636,7 +658,123 @@ class Protein(Entity):
         if mol is None:
             raise ValueError("RDKit could not parse the ligand from the PDB block.")
 
+        # Now remove the ligand from the protein structure
+        self._remove_ligand_from_structure(ligand_atom_serials, ligand_resnames)
+
         return Ligand.from_rdkit_mol(mol)
+
+    def _remove_ligand_from_structure(
+        self, ligand_atom_serials: set[int], ligand_resnames: set[str]
+    ):
+        """
+        Remove ligand atoms from the protein structure and update block_content.
+
+        Args:
+            ligand_atom_serials: Set of atom serial numbers to remove
+            ligand_resnames: Set of residue names to remove
+        """
+        if not self.block_content:
+            return
+
+        # Filter out ligand lines from block_content
+        filtered_lines = []
+        lines = self.block_content.split("\n")
+        removed_atoms = 0
+        removed_conect = 0
+
+        for line in lines:
+            # Skip HETATM lines for ligands
+            if line.startswith("HETATM"):
+                resname = line[17:20].strip()
+                if resname in ligand_resnames:
+                    removed_atoms += 1
+                    continue
+
+            # Skip CONECT lines involving ligand atoms
+            if line.startswith("CONECT"):
+                try:
+                    atom1 = int(line[6:11].strip())
+                    if atom1 in ligand_atom_serials:
+                        removed_conect += 1
+                        continue
+                    # Check if any other atoms in CONECT are ligand atoms
+                    atom2 = int(line[11:16].strip()) if len(line) > 16 else None
+                    atom3 = int(line[16:21].strip()) if len(line) > 21 else None
+                    atom4 = int(line[21:26].strip()) if len(line) > 26 else None
+
+                    if (
+                        atom2
+                        and atom2 in ligand_atom_serials
+                        or atom3
+                        and atom3 in ligand_atom_serials
+                        or atom4
+                        and atom4 in ligand_atom_serials
+                    ):
+                        removed_conect += 1
+                        continue
+                except ValueError:
+                    # Keep malformed CONECT records
+                    pass
+
+            filtered_lines.append(line)
+
+        # Update MASTER record if it exists
+        for i, line in enumerate(filtered_lines):
+            if line.startswith("MASTER"):
+                # MASTER record format: MASTER xxxxx xxxxx xxxxx xxxxx xxxxx xxxxx xxxxx xxxxx xxxxx xxxxx xxxxx xxxxx
+                # Field 9 (index 8) is total number of atoms, Field 11 (index 10) is total number of CONECT records
+                parts = line.split()
+                if len(parts) >= 12:
+                    try:
+                        # Update atom count (field 9)
+                        old_atom_count = int(parts[8])
+                        new_atom_count = old_atom_count - removed_atoms
+                        parts[8] = str(new_atom_count)
+
+                        # Update CONECT count (field 11)
+                        old_conect_count = int(parts[10])
+                        new_conect_count = old_conect_count - removed_conect
+                        parts[10] = str(new_conect_count)
+
+                        # Reconstruct the MASTER line with proper spacing
+                        filtered_lines[i] = (
+                            f"{parts[0]:<6}{parts[1]:>5}{parts[2]:>5}{parts[3]:>5}{parts[4]:>5}{parts[5]:>5}{parts[6]:>5}{parts[7]:>5}{parts[8]:>5}{parts[9]:>5}{parts[10]:>5}{parts[11]:>5}"
+                        )
+                    except (ValueError, IndexError):
+                        # If we can't parse the MASTER record, leave it unchanged
+                        pass
+                break
+
+        # Update block_content
+        self.block_content = "\n".join(filtered_lines)
+
+        # Update the structure by reloading from the filtered content
+        try:
+            new_structure = self.load_structure_from_block(
+                self.block_content, self.block_type
+            )
+            # Ensure we get an AtomArray, not AtomArrayStack
+            if (
+                hasattr(new_structure, "array_length")
+                and new_structure.array_length() > 0
+            ):
+                # It's an AtomArrayStack, select the first structure
+                self.structure = new_structure[0]
+            else:
+                # It's already an AtomArray
+                self.structure = new_structure
+
+            # Update atom_types if they exist
+            if hasattr(self.structure, "atom_name"):
+                self.atom_types = self.structure.atom_name
+        except Exception as e:
+            # If structure reloading fails, log warning but don't fail the extraction
+            import warnings
+
+            warnings.warn(
+                f"Failed to update protein structure after ligand removal: {e}",
+                stacklevel=2,
+            )
 
     def _create_new_protein_with_structure(
         self, new_structure, suffix: str = "_modified"
@@ -803,6 +941,7 @@ class Protein(Entity):
         sdf_file: Optional[str] = None,
         ligand: Optional[Ligand] = None,
         ligands: Optional[LigandSet | list[Ligand]] = None,
+        poses: Optional[LigandSet | list[Ligand]] = None,
     ):
         """Visualize the protein structure in a Jupyter notebook using MolStar viewer.
 
@@ -829,6 +968,10 @@ class Protein(Entity):
         from deeporigin_molstar import JupyterViewer
 
         current_protein_file = self._dump_state()
+
+        # poses is an alias for ligands
+        if poses is not None:
+            ligands = poses
 
         if ligand is not None and ligands is not None:
             raise DeepOriginException(

@@ -73,6 +73,85 @@ def test_extract_ligand():
     )
 
 
+def test_extract_ligand_mutates_protein():
+    """Test that extract_ligand both extracts the ligand and removes it from the protein."""
+    protein = Protein.from_pdb_id("1EBY")
+
+    # Store initial state
+    initial_structure_length = len(protein.structure)
+    initial_block_content_length = (
+        len(protein.block_content) if protein.block_content else 0
+    )
+
+    # Extract the ligand
+    ligand = protein.extract_ligand()
+
+    # Verify the ligand was extracted correctly
+    expected_smiles = "OC(N[C@H]1C2CCCCC2C[C@H]1O)[C@H](OCC1CCCCC1)[C@H](O)[C@@H](O)[C@@H](OCC1CCCCC1)[C@@H](O)N[C@H]1C2CCCCC2C[C@H]1O"
+    assert ligand.smiles == expected_smiles
+
+    # Verify the protein structure was mutated (ligand removed)
+    assert len(protein.structure) < initial_structure_length
+
+    # Verify the block_content was updated
+    if protein.block_content:
+        assert len(protein.block_content) < initial_block_content_length
+
+        # Verify that the protein structure no longer contains the ligand atoms
+        # The structure should have fewer atoms after ligand removal
+        assert len(protein.structure) < initial_structure_length
+
+
+def test_extract_ligand_updates_master_record():
+    """Test that extract_ligand properly updates the MASTER record in the PDB content."""
+    protein = Protein.from_pdb_id("1EBY")
+
+    # Find the initial MASTER record
+    initial_master_line = None
+    for line in protein.block_content.split("\n"):
+        if line.startswith("MASTER"):
+            initial_master_line = line
+            break
+
+    assert initial_master_line is not None, "MASTER record should exist in PDB"
+
+    # Parse initial values
+    parts = initial_master_line.split()
+    initial_atom_count = int(parts[8])  # Field 9: total number of atoms
+    initial_conect_count = int(parts[10])  # Field 11: total number of CONECT records
+
+    # Extract the ligand
+    ligand = protein.extract_ligand()
+
+    # Find the updated MASTER record
+    updated_master_line = None
+    for line in protein.block_content.split("\n"):
+        if line.startswith("MASTER"):
+            updated_master_line = line
+            break
+
+    assert updated_master_line is not None, (
+        "MASTER record should still exist after ligand extraction"
+    )
+
+    # Parse updated values
+    parts = updated_master_line.split()
+    updated_atom_count = int(parts[8])
+    updated_conect_count = int(parts[10])
+
+    # Verify that the MASTER record was updated
+    assert updated_atom_count < initial_atom_count, (
+        "Atom count should decrease after ligand removal"
+    )
+    assert updated_conect_count <= initial_conect_count, (
+        "CONECT count should not increase after ligand removal"
+    )
+
+    # Verify the ligand was extracted correctly
+    expected_smiles = "OC(N[C@H]1C2CCCCC2C[C@H]1O)[C@H](OCC1CCCCC1)[C@H](O)[C@@H](O)[C@@H](OCC1CCCCC1)[C@@H](O)N[C@H]1C2CCCCC2C[C@H]1O"
+    assert ligand.smiles == expected_smiles
+
+
 def test_protein_base64():
     """Test that we can convert a Protein to base64 and back"""
     # Create a protein using from_pdb_id
@@ -95,3 +174,12 @@ def test_protein_base64():
         protein.structure.coord,
         decimal=3,
     )
+
+
+def test_extract_ligand_remove_water():
+    """check that we can remove waters after we extract the ligand"""
+
+    protein = Protein.from_pdb_id("1EBY")
+    _ = protein.extract_ligand()
+
+    protein.remove_water()

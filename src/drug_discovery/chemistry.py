@@ -4,11 +4,13 @@ import hashlib
 import os
 from pathlib import Path
 import re
-from typing import Optional
+from typing import Dict, Literal, Optional
 
 from beartype import beartype
 from rdkit import Chem
-from rdkit.Chem import AllChem
+from rdkit.Chem import AllChem, rdMolAlign
+
+KeyType = Literal["smiles", "inchi"]
 
 
 @beartype
@@ -312,3 +314,111 @@ def show_molecules_in_sdf_file(sdf_file: str | Path):
     )
     html_content = molecule_viewer.render_ligand()
     JupyterViewer.visualize(html_content)
+
+
+def group_by_prop_smiles_to_multiconf(
+    sdf_path: str,
+    *,
+    smiles_prop_name: str = "SMILES",
+    keep_hs: bool = False,
+    align_conformers: bool = True,
+    skip_no_coords: bool = True,
+) -> Dict[str, Chem.Mol]:
+    """
+    Read an SDF that contains many poses (possibly for multiple ligands) and group them by
+    an SDF property (default: <SMILES>). For each unique value, return one RDKit Mol
+    holding all poses as conformers.
+
+    Returns
+    -------
+    dict[str, Chem.Mol]: {prop_smiles_value -> Mol with N conformers}
+    """
+    suppl = Chem.SDMolSupplier(sdf_path, sanitize=True, removeHs=False)
+    entries = [m for m in suppl if m is not None]
+    if not entries:
+        raise ValueError("No valid molecules found in SDF.")
+
+    grouped: Dict[str, Chem.Mol] = {}
+    ref_graph_by_key: Dict[str, Chem.Mol] = {}  # heavy-atom reference used for mapping
+
+    for i, m in enumerate(entries):
+        if not m.HasProp(smiles_prop_name):
+            raise ValueError(
+                f"SDF record {i} is missing <{smiles_prop_name}> property; "
+                "set smiles_prop_name accordingly."
+            )
+        key = m.GetProp(smiles_prop_name).strip()
+
+        # Ensure we have 3D coords
+        if m.GetNumConformers() == 0 or not m.GetConformer().Is3D():
+            if skip_no_coords:
+                continue
+            raise ValueError(f"SDF record {i} has no 3D coordinates.")
+
+        # Normalize Hs for robust atom mapping
+        m_proc = Chem.Mol(m)
+        if not keep_hs:
+            m_proc = Chem.RemoveHs(m_proc)
+
+        if key not in grouped:
+            # First pose for this ligand: establish container and reference atom order
+            base = Chem.Mol(m_proc)
+            base.RemoveAllConformers()
+
+            # Copy coordinates as conformer 0
+            conf_in = m_proc.GetConformer()
+            conf_out = Chem.Conformer(base.GetNumAtoms())
+            conf_out.Set3D(True)
+            for aidx in range(base.GetNumAtoms()):
+                conf_out.SetAtomPosition(aidx, conf_in.GetAtomPosition(aidx))
+            base.AddConformer(conf_out, assignId=True)
+
+            grouped[key] = base
+            ref_graph_by_key[key] = Chem.Mol(base)  # heavy-atom reference
+            continue
+
+        # Subsequent pose: remap into the reference atom order
+        ref = grouped[key]
+        ref_nh = ref_graph_by_key[key]
+
+        cur_nh = m_proc  # already heavy-atom if keep_hs=False
+        if cur_nh.GetNumAtoms() != ref_nh.GetNumAtoms():
+            # Different topology; skip this pose (or raise)
+            continue
+
+        # mapping[t] = index in cur_nh that corresponds to atom t in ref_nh
+        mapping = ref_nh.GetSubstructMatch(cur_nh)
+        if not mapping or len(mapping) != ref_nh.GetNumAtoms():
+            # Could not find a full-graph mapping; skip (or raise)
+            continue
+
+        conf_in = cur_nh.GetConformer()
+        conf_out = Chem.Conformer(ref.GetNumAtoms())
+        conf_out.Set3D(True)
+        for t in range(ref_nh.GetNumAtoms()):
+            src = mapping[t]
+            conf_out.SetAtomPosition(t, conf_in.GetAtomPosition(src))
+
+        # Optionally carry per-record fields onto the conformer
+        # (SDF props -> conformer string props)
+        for k in m.GetPropNames():
+            try:
+                conf_out.SetProp(k, m.GetProp(k))
+            except Exception:
+                pass
+
+        ref.AddConformer(conf_out, assignId=True)
+
+    # Optional alignment within each ligand
+    if align_conformers:
+        for key, mol in grouped.items():
+            if mol.GetNumConformers() > 1:
+                rdMolAlign.AlignMolConformers(mol)
+
+    # If explicit Hs are desired, re-add per-ligand after grouping
+    if keep_hs:
+        # already kept; nothing to do
+        return grouped
+    else:
+        # return heavy-atom graphs; caller can AddHs(mol, addCoords=True) if needed
+        return grouped

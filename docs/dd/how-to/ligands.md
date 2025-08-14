@@ -30,6 +30,31 @@ There are two classes that help you work with ligands:
     ligands = LigandSet.from_sdf(DATA_DIR / "ligands" / "ligands-brd-all.sdf")
     ```
 
+=== "Multiple SDF Files"
+
+    A `LigandSet` can be constructed from multiple SDF files by concatenating them together:
+
+    ```python
+    from deeporigin.drug_discovery import LigandSet, DATA_DIR
+
+    # List of SDF file paths
+    sdf_files = [
+        DATA_DIR / "ligands" / "ligands-brd-all.sdf",
+        DATA_DIR / "ligands" / "42-ligands.sdf"
+    ]
+
+    # Create LigandSet from multiple files
+    ligands = LigandSet.from_sdf_files(sdf_files)
+    
+    # The resulting LigandSet contains all ligands from both files
+    print(f"Total ligands: {len(ligands)}")  # Should be 8 + 42 = 50
+    ```
+
+    This is particularly useful when you have:
+    - Multiple SDF files from different experiments
+    - Split datasets that you want to combine
+    - Files from different sources that need to be merged
+
 ### From SMILES string(s)
 
 === "Single Ligands"
@@ -140,6 +165,36 @@ ligands = LigandSet.from_csv(
     file_path=DATA_DIR / "ligands" / "ligands.csv",
     smiles_column="SMILES"  # Optional, defaults to "smiles"
 )
+```
+
+### Filtering Top Poses
+
+When working with docking results, you often have multiple poses for the same molecule. The `filter_top_poses()` method helps you select only the best pose for each unique molecule:
+
+```python
+from deeporigin.drug_discovery import LigandSet
+
+# Load docking results with multiple poses
+ligands = LigandSet.from_sdf("docking_results.sdf")
+
+# Filter to keep only the best pose per molecule (by binding energy)
+best_poses = ligands.filter_top_poses()
+
+# Or filter by pose score instead
+best_poses_by_score = ligands.filter_top_poses(by_pose_score=True)
+
+print(f"Original poses: {len(ligands)}")
+print(f"Best poses: {len(best_poses)}")
+
+
+The method groups ligands by their `initial_smiles` property and selects:
+- **By binding energy (default)**: The pose with the lowest (most negative) binding energy
+- **By pose score**: The pose with the highest pose score
+
+This is particularly useful for:
+- Post-processing docking results
+- Selecting representative poses for further analysis
+- Reducing dataset size while maintaining quality
 ```
 
 ## Visualization
@@ -374,21 +429,11 @@ from deeporigin.drug_discovery import LigandSet, DATA_DIR
 
 ligands = LigandSet.from_sdf(DATA_DIR / "ligands" / "ligands-brd-all.sdf")
 
-# Sample 3 random ligands
-sample = ligands.random_sample(3)
-print(f"Sampled {len(sample)} ligands from {len(ligands)} total ligands")
+# Sample 5 random ligands
+sample = ligands.random_sample(5)
 ```
 
-The `random_sample` method:
-- Returns a new `LigandSet` containing the randomly selected ligands
-- Uses unbiased random sampling without replacement
-- Preserves the original `LigandSet` (doesn't modify it)
-- Raises a `ValueError` if you try to sample more ligands than available
-
-This is useful for:
-- Creating smaller subsets for testing or development
-- Statistical analysis and validation
-- Reducing computational load while maintaining diversity
+This creates a new `LigandSet` containing a copy of those ligands. 
 
 ### Maximum Common Substructure
 
