@@ -228,23 +228,23 @@ class Protein(Entity):
         self,
         *,
         ligand: Optional[Ligand] = None,
-        ligands: Optional[LigandSet] = None,
+        ligands: Optional[LigandSet | list[Ligand]] = None,
         pocket: Pocket,
         use_cache: bool = True,
-        constraints: Optional[list[dict]] = None,
+        constraints: Optional[list[list[dict]]] = None,
     ):
         """Dock a ligand into a specific pocket of the protein.
 
-        This method performs molecular docking of a ligand into a specified pocket
-        of the protein structure. It uses the Deep Origin docking to
-        generate a 3D structure of the docked ligand.
+        This method performs docking of a ligand or a set of ligands into a specified pocket
+        of the protein structure.
 
         Args:
             ligand (Ligand): The ligand to dock into the protein pocket.
+            ligands (LigandSet | list[Ligand]): A set of ligands to dock into the protein pocket.
             pocket (Pocket): The specific pocket in the protein where the ligand
                 should be docked.
             use_cache (bool): Whether to use cached results if available. Defaults to True.
-            constraints (Optional[list[dict]]): List of constraints for the docking. Generate this using `align.compute_constraints`.
+            constraints (Optional[list[dict]]): List of constraints for the docking. Generate this using `align.compute_constraints`. The length of this list must match the number of ligands to dock. Note that to dock a single ligand, you must pass a list of length 1, the only element of which is a list of constraints.
 
         Returns:
             str: Path to the SDF file containing the docked ligand structure.
@@ -277,16 +277,17 @@ class Protein(Entity):
                 ) from None
 
             # Import here to avoid circular import
-            from deeporigin.functions import docking
+            from deeporigin.functions.docking import dock
+            from deeporigin.functions.parallel import run_func_in_parallel
 
-            data = docking._parallel_dock(
-                protein=self,
-                ligands=ligands,
-                pocket=pocket,
-                use_cache=use_cache,
-            )
+            args = [
+                {"protein": self, "ligand": ligand, "pocket": pocket}
+                for ligand in ligands
+            ]
 
-            return LigandSet.from_sdf_files(data["output_paths"])
+            data = run_func_in_parallel(func=dock, args=args)
+
+            return LigandSet.from_sdf_files(data["results"])
 
     @property
     def coordinates(self):
