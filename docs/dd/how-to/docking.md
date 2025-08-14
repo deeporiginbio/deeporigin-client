@@ -102,3 +102,13 @@ We can use constrained docking to dock a Ligand to a Protein while constraining 
 
 Typically, these constraints are computed a reference docked pose for another Ligand, using a Maximum Common Substructure (MCS) shared across Ligands. 
 
+Assuming we have a reference pose in `reference_pose` and we want to dock a Ligand in `ligand_to_dock` to a protein, constrained by `pose`, we first compute constraints using:
+
+```{.python notest}
+
+ligands = LigandSet([reference_pose, ligand_to_dock])
+
+constraints = ligands_to_dock.compute_constraints(
+    reference=reference_pose,
+)
+

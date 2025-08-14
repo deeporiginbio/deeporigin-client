@@ -192,10 +192,12 @@ The method groups ligands by their `initial_smiles` property and selects:
 - **By pose score**: The pose with the highest pose score
 
 This is particularly useful for:
+
 - Post-processing docking results
 - Selecting representative poses for further analysis
 - Reducing dataset size while maintaining quality
-```
+
+
 
 ## Visualization
 
