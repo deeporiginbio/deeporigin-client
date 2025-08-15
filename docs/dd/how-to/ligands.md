@@ -171,32 +171,14 @@ ligands = LigandSet.from_csv(
 
 When working with docking results, you often have multiple poses for the same molecule. The `filter_top_poses()` method helps you select only the best pose for each unique molecule:
 
-```python
-from deeporigin.drug_discovery import LigandSet
+```{.python notest}
 
-# Load docking results with multiple poses
-ligands = LigandSet.from_sdf("docking_results.sdf")
+# assuming poses comes from protein.dock()
 
 # Filter to keep only the best pose per molecule (by binding energy)
-best_poses = ligands.filter_top_poses()
+best_poses = poses.filter_top_poses()
 
-# Or filter by pose score instead
-best_poses_by_score = ligands.filter_top_poses(by_pose_score=True)
-
-print(f"Original poses: {len(ligands)}")
-print(f"Best poses: {len(best_poses)}")
-
-
-The method groups ligands by their `initial_smiles` property and selects:
-- **By binding energy (default)**: The pose with the lowest (most negative) binding energy
-- **By pose score**: The pose with the highest pose score
-
-This is particularly useful for:
-
-- Post-processing docking results
-- Selecting representative poses for further analysis
-- Reducing dataset size while maintaining quality
-
+```
 
 
 ## Visualization

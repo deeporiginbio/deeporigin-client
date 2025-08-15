@@ -1,3 +1,5 @@
+"""this module contains functions for plotting"""
+
 import math
 from typing import Optional, Sequence
 
@@ -89,22 +91,25 @@ def plot_heatmap(
             jj.append(j)
 
     source = ColumnDataSource(
-        dict(
-            x=xs,
-            y=ys,
-            value=vals,
-            i=ii,
-            j=jj,
-            value_str=[("NA" if not np.isfinite(v) else f"{v:.4f}") for v in vals],
-        )
+        {
+            "x": xs,
+            "y": ys,
+            "value": vals,
+            "i": ii,
+            "j": jj,
+            "value_str": [("NA" if not np.isfinite(v) else f"{v:.4f}") for v in vals],
+        }
     )
 
     # --- Color mapper ---
     mapper = LinearColorMapper(
-        palette=palette, low=vmin, high=vmax, nan_color="#dddddd"
+        palette=palette,
+        low=vmin,
+        high=vmax,
+        nan_color="#dddddd",
     )
 
-    # --- Figure ---
+    # --- Create and configure figure ---
     p = figure(
         title=title,
         x_range=labels,
@@ -118,7 +123,7 @@ def plot_heatmap(
         match_aspect=True,
     )
 
-    # Cells
+    # Add cells
     p.rect(
         x="x",
         y="y",
@@ -129,7 +134,6 @@ def plot_heatmap(
         fill_color={"field": "value", "transform": mapper},
     )
 
-    # Optional hover
     if show_values_on_hover:
         hover = HoverTool(
             tooltips=[
@@ -142,7 +146,6 @@ def plot_heatmap(
         )
         p.add_tools(hover)
 
-    # Color bar
     color_bar = ColorBar(
         color_mapper=mapper,
         location=(0, 0),
@@ -152,9 +155,8 @@ def plot_heatmap(
     )
     p.add_layout(color_bar, "right")
 
-    # Axis aesthetics
     p.axis.major_label_text_font_size = "9pt"
-    p.xaxis.major_label_orientation = 0.9  # tilt x labels for readability
+    p.xaxis.major_label_orientation = 0.9
     p.grid.visible = False
 
     show(p)

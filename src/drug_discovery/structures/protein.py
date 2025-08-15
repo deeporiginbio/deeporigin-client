@@ -288,7 +288,6 @@ class Protein(Entity):
             ]
 
             from deeporigin.functions.docking import constrained_dock
-            # from deeporigin.functions.parallel import run_func_in_parallel
 
             # running in series for now, while we sort out the parallelization
             all_top_poses = []
@@ -604,7 +603,7 @@ class Protein(Entity):
 
         metal_resnames = set()
         cofactor_resnames = set()
-        for _, atoms in residue_groups.items():
+        for atoms in residue_groups.values():
             res_name = atoms[0].res_name.strip().upper()
             is_metal = all(
                 atom.element.strip().upper() in METAL_ELEMENTS for atom in atoms

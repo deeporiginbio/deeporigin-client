@@ -16,12 +16,14 @@
         "admet",
         "allatom",
         "cheminformatics",
+        "cofactors",
         "dataframe",
         "dateutil",
         "deeporigin",
         "drugability",
         "FMCS",
         "HETATM",
+        "inchi",
         "isin",
         "kabsch",
         "Kekulization",
@@ -44,6 +46,8 @@
         "rdchem",
         "rdkit",
         "resnames",
+        "rmsd",
+        "sanitizable",
         "SASA",
         "Substruct"
     ]

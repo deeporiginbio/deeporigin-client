@@ -69,6 +69,8 @@ def run_func_in_parallel(
     durations = [None] * total  # Track time spent per call
 
     def call_func_timed(idx: int) -> Optional[tuple]:
+        """Call a function and track the time it takes."""
+
         nonlocal total_failures
         try:
             start = time.time()
@@ -172,6 +174,7 @@ def run_func_in_parallel_async(
     durations = [None] * total
 
     async def call_func_timed(idx: int) -> Optional[tuple]:
+        """Call a function and track the time it takes. Async version."""
         nonlocal total_failures
         try:
             start = time.time()

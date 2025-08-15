@@ -72,21 +72,3 @@ If a ligand is not backed by a SDF file, a 2D visualization will be shown:
 ![](../../images/ligand.png)
 
 
-### SDF Files
-
-Molecules in SDF files can be visualized the `show_molecules_in_sdf_file` function as follows:
-
-
-```{.python notest}
-from deeporigin.drug_discovery.chemistry import show_molecules_in_sdf_file
-show_molecules_in_sdf_file("path/to/file.sdf")
-```
-
-<iframe 
-    src="./brd-ligands.html" 
-    width="100%" 
-    height="650" 
-    style="border:none;"
-    title="Ligands visualization"
-></iframe>
-

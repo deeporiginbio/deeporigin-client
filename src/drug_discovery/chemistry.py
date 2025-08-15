@@ -1,7 +1,5 @@
 """Contains functions for working with SDF files."""
 
-import hashlib
-import os
 from pathlib import Path
 import re
 from typing import Literal, Optional, Sequence, Tuple
@@ -214,57 +212,6 @@ def sdf_to_smiles(sdf_file: str | Path) -> list[str]:
 
 
 @beartype
-def merge_sdf_files(
-    sdf_file_list: list[str],
-    output_path: Optional[str] = None,
-) -> str:
-    """
-    Merge a list of SDF files into a single SDF file.
-
-    Args:
-        sdf_file_list (list of str): List of paths to SDF files.
-
-    Returns:
-        str: Path to the merged SDF file.
-    """
-    from rdkit import Chem
-
-    # Get the absolute directory of the first file.
-    base_dir = os.path.dirname(os.path.abspath(sdf_file_list[0]))
-
-    # Check that all files are in the same directory.
-    for sdf_file in sdf_file_list:
-        if os.path.dirname(os.path.abspath(sdf_file)) != base_dir:
-            raise ValueError("All input files must be in the same directory.")
-
-    # Create a combined string from the sorted basenames of the input files.
-    basenames = sorted([os.path.basename(file) for file in sdf_file_list])
-    combined_string = "".join(basenames)
-
-    # Hash the combined string using SHA256 and take the first 10 characters.
-    hash_digest = hashlib.sha256(combined_string.encode("utf-8")).hexdigest()[:10]
-    output_filename = f"{hash_digest}.sdf"
-
-    if output_path is None:
-        output_path = os.path.join(base_dir, output_filename)
-
-    # Check if the output file already exists; if so, do nothing and return it.
-    if os.path.exists(output_path):
-        return output_path
-
-    # Merge the molecules from all SDF files into the new file.
-    writer = Chem.SDWriter(output_path)
-    for sdf_file in sdf_file_list:
-        supplier = Chem.SDMolSupplier(sdf_file)
-        for mol in supplier:
-            if mol is not None:  # Skip molecules that failed to parse.
-                writer.write(mol)
-    writer.close()
-
-    return output_path
-
-
-@beartype
 def canonicalize_smiles(smiles: str) -> str:
     """Canonicalize a SMILES string.
 
@@ -278,43 +225,6 @@ def canonicalize_smiles(smiles: str) -> str:
     if mol is None:
         raise ValueError(f"Invalid SMILES: {smiles}")
     return Chem.MolToSmiles(mol, canonical=True)
-
-
-@beartype
-def show_molecules_in_sdf_files(sdf_files: list[str]):
-    """show molecules in an SDF file in a Jupyter notebook using molstar"""
-
-    import tempfile
-
-    temp_dir = tempfile.TemporaryDirectory()
-
-    sdf_file = os.path.join(temp_dir.name, "temp.sdf")
-
-    # combine the SDF files
-    merge_sdf_files(sdf_files, sdf_file)
-
-    from deeporigin_molstar import JupyterViewer, MoleculeViewer
-
-    molecule_viewer = MoleculeViewer(
-        data=str(sdf_file),
-        format="sdf",
-    )
-    html_content = molecule_viewer.render_ligand()
-    JupyterViewer.visualize(html_content)
-
-
-@beartype
-def show_molecules_in_sdf_file(sdf_file: str | Path):
-    """show molecules in an SDF file in a Jupyter notebook using molstar"""
-
-    from deeporigin_molstar import JupyterViewer, MoleculeViewer
-
-    molecule_viewer = MoleculeViewer(
-        data=str(sdf_file),
-        format="sdf",
-    )
-    html_content = molecule_viewer.render_ligand()
-    JupyterViewer.visualize(html_content)
 
 
 def group_by_prop_smiles_to_multiconf(
@@ -412,7 +322,7 @@ def group_by_prop_smiles_to_multiconf(
 
     # Optional alignment within each ligand
     if align_conformers:
-        for key, mol in grouped.items():
+        for mol in grouped.values():
             if mol.GetNumConformers() > 1:
                 rdMolAlign.AlignMolConformers(mol)
 
@@ -421,14 +331,14 @@ def group_by_prop_smiles_to_multiconf(
 
 
 def raw_rmsd_from_map(
-    molA: Chem.Mol,
-    molB: Chem.Mol,
+    mol_a: Chem.Mol,
+    mol_b: Chem.Mol,
     atom_map: list[Tuple[int, int]],
     conf_id_a: int = 0,
     conf_id_b: int = 0,
 ) -> float:
     """Compute RMSD directly from coordinates on a given atom mapping. NO alignment, NO centering."""
-    cA, cB = molA.GetConformer(conf_id_a), molB.GetConformer(conf_id_b)
+    cA, cB = mol_a.GetConformer(conf_id_a), mol_b.GetConformer(conf_id_b)
     diffsq = 0.0
     for ia, ib in atom_map:
         pa, pb = cA.GetAtomPosition(ia), cB.GetAtomPosition(ib)
@@ -438,11 +348,14 @@ def raw_rmsd_from_map(
 
 
 def full_graph_map(
-    molA: Chem.Mol, molB: Chem.Mol, ignore_hs: bool = True
+    mol_a: Chem.Mol,
+    mol_b: Chem.Mol,
+    ignore_hs: bool = True,
 ) -> Optional[list[Tuple[int, int]]]:
     """Return atom map for identical graphs (isomorphic)."""
-    A = Chem.RemoveHs(molA) if ignore_hs else molA
-    B = Chem.RemoveHs(molB) if ignore_hs else molB
+
+    A = Chem.RemoveHs(mol_a) if ignore_hs else mol_a
+    B = Chem.RemoveHs(mol_b) if ignore_hs else mol_b
     if A.GetNumAtoms() != B.GetNumAtoms():
         return None
     match = B.GetSubstructMatch(A)
@@ -453,8 +366,8 @@ def full_graph_map(
 
 
 def mcs_map(
-    molA: Chem.Mol,
-    molB: Chem.Mol,
+    mol_a: Chem.Mol,
+    mol_b: Chem.Mol,
     ignore_hs: bool = True,
     ring_matches_ring_only: bool = True,
     complete_rings_only: bool = True,
@@ -463,8 +376,9 @@ def mcs_map(
     timeout: int = 10,
 ) -> Optional[list[Tuple[int, int]]]:
     """Return an atom map for the maximum common substructure (subset comparison)."""
-    A = Chem.RemoveHs(molA) if ignore_hs else molA
-    B = Chem.RemoveHs(molB) if ignore_hs else molB
+
+    A = Chem.RemoveHs(mol_a) if ignore_hs else mol_a
+    B = Chem.RemoveHs(mol_b) if ignore_hs else mol_b
     params = rdFMCS.MCSParameters()
     params.AtomCompare = rdFMCS.AtomCompare.CompareElements
     params.BondCompare = rdFMCS.BondCompare.CompareOrder
@@ -495,8 +409,8 @@ def mcs_map(
 
 
 def pose_rmsd(
-    molA: Chem.Mol,
-    molB: Chem.Mol,
+    mol_a: Chem.Mol,
+    mol_b: Chem.Mol,
     *,
     conf_id_a: int = 0,
     conf_id_b: int = 0,
@@ -509,22 +423,28 @@ def pose_rmsd(
     Returns None if no mapping found.
     """
     # Sanity: need 3D confs
-    if molA.GetNumConformers() <= conf_id_a or not molA.GetConformer(conf_id_a).Is3D():
-        raise ValueError("molA lacks a 3D conformer at conf_id_a")
-    if molB.GetNumConformers() <= conf_id_b or not molB.GetConformer(conf_id_b).Is3D():
-        raise ValueError("molB lacks a 3D conformer at conf_id_b")
+    if (
+        mol_a.GetNumConformers() <= conf_id_a
+        or not mol_a.GetConformer(conf_id_a).Is3D()
+    ):
+        raise ValueError("mol_a lacks a 3D conformer at conf_id_a")
+    if (
+        mol_b.GetNumConformers() <= conf_id_b
+        or not mol_b.GetConformer(conf_id_b).Is3D()
+    ):
+        raise ValueError("mol_b lacks a 3D conformer at conf_id_b")
 
     # Full-graph map
-    amap = full_graph_map(molA, molB, ignore_hs=ignore_hs)
+    amap = full_graph_map(mol_a, mol_b, ignore_hs=ignore_hs)
     if amap is None and use_mcs_if_needed:
-        amap = mcs_map(molA, molB, ignore_hs=ignore_hs)
+        amap = mcs_map(mol_a, mol_b, ignore_hs=ignore_hs)
     if amap is None:
         return None
 
     # If we removed Hs to build the map, compare the same H-stripped versions to keep indices consistent
-    A_cmp = Chem.RemoveHs(molA) if ignore_hs else molA
-    B_cmp = Chem.RemoveHs(molB) if ignore_hs else molB
-    return raw_rmsd_from_map(A_cmp, B_cmp, amap, conf_id_a, conf_id_b)
+    a_cmp = Chem.RemoveHs(mol_a) if ignore_hs else mol_a
+    b_cmp = Chem.RemoveHs(mol_b) if ignore_hs else mol_b
+    return raw_rmsd_from_map(a_cmp, b_cmp, amap, conf_id_a, conf_id_b)
 
 
 @beartype
