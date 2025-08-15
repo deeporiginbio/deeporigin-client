@@ -1,6 +1,14 @@
 
 # Deep Origin Python client
 
+<iframe 
+src="./images/1eby.html" 
+width="100%" 
+height="650" 
+style="border:none;"
+title="1EBY"
+></iframe>
+
 <div class="grid cards" markdown>
 
 - :fontawesome-solid-handshake-simple: **Use Deep Origin Tools**  <br>Run Docking, molprops, FEP and other molecular modeling tools
@@ -13,26 +21,3 @@
 
 </div>
 
-## Example
-
-The Deep Origin CLI and Python client allow you to programmatically
-interact with the [Deep Origin OS :octicons-link-external-16:](https://os.deeporigin.io/).
-
-For example:
-
-
-```python
-from deeporigin.drug_discovery import Ligand
-
-ligand = Ligand.from_identifier("serotonin")
-
-ligand.show()
-```
-
-<iframe 
-    src="./dd/how-to/serotonin.html" 
-    width="100%" 
-    height="600" 
-    style="border:none;"
-    title="Visualization of single ligand (serotonin)"
-></iframe>

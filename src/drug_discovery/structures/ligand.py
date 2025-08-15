@@ -6,6 +6,7 @@ import base64
 from dataclasses import dataclass, field
 import os
 from pathlib import Path
+import random
 import tempfile
 from typing import Any, Literal, Optional
 import warnings
@@ -901,8 +902,31 @@ class LigandSet:
     def __iter__(self):
         return iter(self.ligands)
 
-    def __getitem__(self, index):
-        return self.ligands[index]
+    def __getitem__(self, index) -> "Ligand | LigandSet":
+        """
+        Get a single ligand or a subset of ligands.
+
+        Args:
+            index: Integer index for single ligand, or slice for subset
+
+        Returns:
+            Ligand: If index is a single integer
+            LigandSet: If index is a slice (e.g., [1:3], [:2], etc.)
+
+        Examples:
+            >>> ligands = LigandSet([ligand1, ligand2, ligand3])
+            >>> ligands[0]      # Returns: Ligand
+            >>> ligands[1:3]    # Returns: LigandSet
+            >>> ligands[:2]     # Returns: LigandSet
+        """
+        result = self.ligands[index]
+
+        # If result is a list (from slicing), return a new LigandSet
+        if isinstance(result, list):
+            return LigandSet(ligands=result)
+
+        # If result is a single Ligand, return it directly
+        return result
 
     def __contains__(self, ligand):
         return ligand in self.ligands
@@ -928,6 +952,31 @@ class LigandSet:
             return LigandSet(ligands=other + self.ligands)
         else:
             return NotImplemented
+
+    @beartype
+    def random_sample(self, n: int) -> "LigandSet":
+        """
+        Return a new LigandSet containing n randomly selected ligands.
+
+        Args:
+            n (int): Number of ligands to randomly sample
+
+        Returns:
+            LigandSet: A new LigandSet with n randomly selected ligands
+
+        Raises:
+            ValueError: If n is greater than the total number of ligands
+        """
+
+        if n < 1:
+            raise ValueError("n must be at least 1")
+        if n > len(self.ligands):
+            raise ValueError(
+                f"Cannot sample {n} ligands from a set of {len(self.ligands)} ligands"
+            )
+
+        sampled_ligands = random.sample(self.ligands, n)
+        return LigandSet(ligands=sampled_ligands)
 
     def _repr_html_(self):
         """Return an HTML representation of the LigandSet."""
@@ -1142,6 +1191,56 @@ class LigandSet:
         return cls(ligands=ligands)
 
     @classmethod
+    def from_sdf_files(
+        cls,
+        file_paths: list[str],
+        *,
+        sanitize: bool = True,
+        remove_hydrogens: bool = False,
+    ) -> "LigandSet":
+        """
+        Create a LigandSet instance from multiple SDF files by concatenating them together.
+
+        Args:
+            file_paths (list[str]): A list of paths to SDF files.
+            sanitize (bool): Whether to sanitize molecules. Defaults to True.
+            remove_hydrogens (bool): Whether to remove hydrogens. Defaults to False.
+
+        Returns:
+            LigandSet: A LigandSet instance containing Ligand objects from all SDF files.
+
+        Raises:
+            FileNotFoundError: If any of the files do not exist.
+            DeepOriginException: If any of the files cannot be parsed correctly.
+        """
+        all_ligands = []
+
+        for file_path in file_paths:
+            try:
+                # Use the existing from_sdf method for each file
+                file_ligand_set = cls.from_sdf(
+                    file_path, sanitize=sanitize, remove_hydrogens=remove_hydrogens
+                )
+                all_ligands.extend(file_ligand_set.ligands)
+            except FileNotFoundError as e:
+                # Re-raise with more context
+                raise FileNotFoundError(
+                    f"Failed to process file '{file_path}': {str(e)}"
+                ) from e
+            except DeepOriginException as e:
+                # Re-raise with more context
+                raise DeepOriginException(
+                    f"Failed to process file '{file_path}': {str(e)}"
+                ) from e
+            except Exception as e:
+                # Catch any other unexpected errors
+                raise DeepOriginException(
+                    f"Unexpected error processing file '{file_path}': {str(e)}"
+                ) from e
+
+        return cls(ligands=all_ligands)
+
+    @classmethod
     def from_dir(cls, directory: str) -> "LigandSet":
         """
         Create a LigandSet instance from a directory containing SDF files.
@@ -1341,6 +1440,119 @@ class LigandSet:
 
         return align.mcs(self.to_rdkit_mols())
 
+    @beartype
+    def filter_top_poses(self, *, by_pose_score: bool = False) -> "LigandSet":
+        """
+        Filter ligands to keep only the best pose for each unique molecule.
+
+        Groups ligands by their 'initial_smiles' property and retains only the one with:
+        - Minimum binding energy (default), or
+        - Maximum pose score (when by_pose_score=True)
+
+        Args:
+            by_pose_score (bool): If True, select by maximum pose score.
+                                If False (default), select by minimum binding energy.
+
+        Returns:
+            LigandSet: A new LigandSet containing only the best pose for each unique molecule.
+
+        Raises:
+            DeepOriginException: If required properties are missing from ligands.
+
+        Example:
+            >>> # Filter by binding energy (default)
+            >>> filtered_ligands = ligand_set.filter_top_poses()
+
+            >>> # Filter by pose score
+            >>> filtered_ligands = ligand_set.filter_top_poses(by_pose_score=True)
+        """
+        if not self.ligands:
+            return LigandSet(ligands=[])
+
+        # Group ligands by initial_smiles
+        grouped_ligands = {}
+        for ligand in self.ligands:
+            initial_smiles = ligand.properties.get("initial_smiles")
+            if initial_smiles is None:
+                # Skip ligands without initial_smiles property
+                continue
+
+            if initial_smiles not in grouped_ligands:
+                grouped_ligands[initial_smiles] = []
+            grouped_ligands[initial_smiles].append(ligand)
+
+        # Select best pose for each group
+        best_ligands = []
+        for _initial_smiles, ligands in grouped_ligands.items():
+            if len(ligands) == 1:
+                # Only one pose, keep it
+                best_ligands.append(ligands[0])
+            else:
+                # Multiple poses, select the best one
+                if by_pose_score:
+                    # Select by maximum pose score
+                    best_ligand = max(ligands, key=lambda x: self._get_pose_score(x))
+                else:
+                    # Select by minimum binding energy
+                    best_ligand = min(
+                        ligands, key=lambda x: self._get_binding_energy(x)
+                    )
+                best_ligands.append(best_ligand)
+
+        return LigandSet(ligands=best_ligands)
+
+    def _get_pose_score(self, ligand: "Ligand") -> float:
+        """
+        Extract pose score from ligand properties.
+
+        Args:
+            ligand: The ligand to extract pose score from.
+
+        Returns:
+            float: The pose score value.
+
+        Raises:
+            DeepOriginException: If pose score property is missing or invalid.
+        """
+        pose_score_str = ligand.properties.get("POSE SCORE")
+        if pose_score_str is None:
+            raise DeepOriginException(
+                f"Ligand {ligand.name or 'unnamed'} missing 'POSE SCORE' property"
+            )
+
+        try:
+            return float(pose_score_str)
+        except (ValueError, TypeError) as e:
+            raise DeepOriginException(
+                f"Invalid pose score value '{pose_score_str}' for ligand {ligand.name or 'unnamed'}: {str(e)}"
+            ) from e
+
+    def _get_binding_energy(self, ligand: "Ligand") -> float:
+        """
+        Extract binding energy from ligand properties.
+
+        Args:
+            ligand: The ligand to extract binding energy from.
+
+        Returns:
+            float: The binding energy value.
+
+        Raises:
+            DeepOriginException: If binding energy property is missing or invalid.
+        """
+        binding_energy_str = ligand.properties.get("Binding Energy")
+        if binding_energy_str is None:
+            raise DeepOriginException(
+                f"Ligand {ligand.name or 'unnamed'} missing 'Binding Energy' property"
+            )
+
+        try:
+            return float(binding_energy_str)
+        except (ValueError, TypeError) as e:
+            raise DeepOriginException(
+                f"Invalid binding energy value '{binding_energy_str}' for ligand {ligand.name or 'unnamed'}: {str(e)}"
+            ) from e
+
     def compute_constraints(
         self, *, reference: Ligand, mcs_mol=None
     ) -> list[list[dict]]:
@@ -1357,3 +1569,10 @@ class LigandSet:
             reference=reference.mol,
             mcs_mol=mcs_mol,
         )
+
+    def compute_rmsd(self):
+        """compute pairwise rmsd between all ligands in the set"""
+
+        from deeporigin.drug_discovery import chemistry
+
+        return chemistry.pairwise_pose_rmsd(self.to_rdkit_mols())

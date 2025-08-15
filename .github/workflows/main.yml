@@ -78,7 +78,7 @@ jobs:
         run: |
           pip install --upgrade pip
           pip install --upgrade setuptools
-          pip install -e .[test,tools]
+          pip install -e .[test,tools,plots]
           make test-github 
 
 

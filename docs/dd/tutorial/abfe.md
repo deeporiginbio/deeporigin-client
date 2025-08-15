@@ -34,9 +34,9 @@ sim.prepare(ligand=sim.ligands[0])
 You will see something like:
 
 <iframe 
-    src="./prepared-system.html" 
+    src="../../images/prepared-system.html" 
     width="100%" 
-    height="600" 
+    height="660" 
     style="border:none;"
     title="Visualization of prepared system"
 ></iframe>
@@ -114,6 +114,11 @@ To cancel a job, use:
 ```{.python notest} 
 job.cancel() 
 ```
+
+!!! tip "Monitoring jobs"
+    For more details about how to monitor jobs, look at this [How To section](../how-to/job.md).
+
+
 
 ## Parameters
 

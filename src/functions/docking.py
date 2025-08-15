@@ -20,6 +20,26 @@ from deeporigin.exceptions import DeepOriginException
 from deeporigin.utils.core import hash_dict
 
 
+def _extract_cached_files(extract_dir: str) -> list[str]:
+    """Extract and return paths to cached files."""
+
+    extracted_files = []
+    for file_path in Path(extract_dir).glob("*"):
+        if file_path.is_file():
+            extracted_files.append(str(file_path))
+    return extracted_files
+
+
+def _get_pocket_center(
+    pocket: Optional[Pocket],
+    pocket_center: Optional[tuple[int, int, int]],
+) -> list:
+    """Extract pocket center coordinates."""
+    if pocket_center is None:
+        return pocket.get_center().tolist()
+    return list(pocket_center)
+
+
 @beartype
 def dock(
     *,
@@ -50,10 +70,9 @@ def dock(
     URL = "http://docking.default.jobs.edge.deeporigin.io/dock"
     CACHE_DIR = os.path.expanduser("~/.deeporigin/docking")
 
-    if pocket is not None:
-        pocket_center = pocket.get_center().tolist()
-
-    if pocket_center is None:
+    if pocket is not None or pocket_center is not None:
+        pocket_center = _get_pocket_center(pocket, pocket_center)
+    else:
         raise DeepOriginException("Pocket center is required") from None
 
     if ligand is not None:
@@ -143,64 +162,40 @@ def constrained_dock(
             "Either pocket or pocket_center must be provided"
         ) from None
 
-    # get pocket center
-    if pocket_center is None:
-        pocket_center = pocket.get_center().tolist()
+    pocket_center_list = _get_pocket_center(pocket, pocket_center)
 
-    # make the payload
     payload = {
         "box_size": box_size,
         "constraints": constraints,
-        "protein": {
-            "pocket_center": pocket_center,
-        },
+        "protein": {"pocket_center": pocket_center_list},
         "top_criteria": "score",
+        "protein_b64": protein.to_base64(),
+        "ligand_b64": ligand.to_base64(),
     }
 
-    # Inject the base64-encoded strings into the payload
-    payload["protein_b64"] = protein.to_base64()
-    payload["ligand_b64"] = ligand.to_base64()
-
     cache_hash = hash_dict(payload)
-
     zip_file = str(Path(CACHE_DIR) / f"{cache_hash}.zip")
     extract_dir = str(Path(CACHE_DIR) / cache_hash)
 
-    # Check if cached result exists
     if os.path.exists(extract_dir) and use_cache:
-        # Return paths to extracted files
-        extracted_files = []
-        for file_path in Path(extract_dir).glob("*"):
-            if file_path.is_file():
-                extracted_files.append(str(file_path))
-        return extracted_files
-    else:
-        # Send the POST request
-        response = requests.post(
-            URL,
-            headers={"Content-Type": "application/json"},
-            json=payload,
-        )
+        return _extract_cached_files(extract_dir)
 
-        # Raise an exception for bad status codes
-        response.raise_for_status()
+    # Send the POST request
+    response = requests.post(
+        URL,
+        headers={"Content-Type": "application/json"},
+        json=payload,
+    )
+    response.raise_for_status()
 
-        # Write zip file to cache temporarily
-        Path(zip_file).parent.mkdir(parents=True, exist_ok=True)
-        with open(zip_file, "wb") as f:
-            f.write(response.content)
+    # Write and extract zip file
+    Path(zip_file).parent.mkdir(parents=True, exist_ok=True)
+    with open(zip_file, "wb") as f:
+        f.write(response.content)
 
-        # Extract zip file
-        Path(extract_dir).mkdir(parents=True, exist_ok=True)
-        with zipfile.ZipFile(zip_file, "r") as zip_ref:
-            zip_ref.extractall(extract_dir)
+    Path(extract_dir).mkdir(parents=True, exist_ok=True)
+    with zipfile.ZipFile(zip_file, "r") as zip_ref:
+        zip_ref.extractall(extract_dir)
 
-        # Delete the zip file
-        os.remove(zip_file)
-
-        # Return paths to extracted files
-        extracted_files = []
-        for file_path in Path(extract_dir).glob("*"):
-            if file_path.is_file():
-                extracted_files.append(str(file_path))
-        return extracted_files
+    os.remove(zip_file)
+    return _extract_cached_files(extract_dir)

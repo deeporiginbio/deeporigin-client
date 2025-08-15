@@ -1,6 +1,10 @@
 # Docking
 
-This document describes how to [dock :octicons-link-external-16:](https://en.wikipedia.org/wiki/Docking_(molecular)) a set of ligands to a protein  using Deep Origin tools. 
+This document describes how to [dock :octicons-link-external-16:](https://en.wikipedia.org/wiki/Docking_(molecular)) a large set of ligands to a protein  using Deep Origin tools. 
+
+
+!!! tip "Looking to dock a few ligands?"
+    This document describes how to dock a large number of ligands using a batch job. To dock a single (or a few ligands), you might prefer to use the `.dock()` function of the `Protein` class, as [described here](../how-to/docking.md). 
 
 ## Prerequisites
 
@@ -32,16 +36,20 @@ sim.protein.show(pockets=pockets)
 You should see something along the lines of:
 
 <iframe 
-    src="./pockets.html" 
+    src="../../images/pockets.html" 
     width="100%" 
     height="650" 
     style="border:none;"
     title="Protein visualization"
 ></iframe>
 
+!!! tip "The Pocket Finder Function"
+    For more details on how to use the Pocket Finder, look at the [How To section for the Pocket Finder](../how-to/find-pockets.md).
+
+
 ## Starting a docking run
 
-### Using pocket
+### Using a pocket
 
 To dock all ligands in the complex to the protein, using the pocket we found, we can do:
 
@@ -115,6 +123,9 @@ To stop watching a job, do:
 job.stop_watching()
 ```
 
+!!! tip "Monitoring jobs"
+    For more details about how to monitor jobs, look at this [How To section](../how-to/job.md).
+
 ## Results
 
 ### Viewing results
@@ -138,7 +149,7 @@ sim.docking.show_poses()
 ```
 
 <iframe 
-    src="./docked-poses.html" 
+    src="../../images/docked-poses.html" 
     width="100%" 
     height="650" 
     style="border:none;"

@@ -119,7 +119,7 @@ job
 A widget such as the following will be shown.
 
 <iframe 
-    src="./job-docking.html" 
+    src="../../images/job-docking.html" 
     width="100%" 
     height="400" 
     style="border:none;"

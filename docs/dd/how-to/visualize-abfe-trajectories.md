@@ -55,7 +55,7 @@ sim.abfe.show_trajectory(ligand_id="ligand1", step="binding", window=5)
 When visualizing the binding step, you can specify which window to visualize using the `window` parameter. The windows represent different stages of the binding process. If you specify an invalid window number, the method will show you a list of available windows.
 
 <iframe 
-    src="./traj.html" 
+    src="../../images/traj.html" 
     width="100%" 
     height="600" 
     style="border:none;"
