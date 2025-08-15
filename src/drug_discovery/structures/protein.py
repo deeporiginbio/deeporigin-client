@@ -231,7 +231,7 @@ class Protein(Entity):
         ligands: Optional[LigandSet | list[Ligand]] = None,
         pocket: Pocket,
         use_cache: bool = True,
-        constraints: Optional[list[list[dict]]] = None,
+        reference_pose: Optional[Ligand] = None,
     ):
         """Dock a ligand into a specific pocket of the protein.
 
@@ -244,44 +244,73 @@ class Protein(Entity):
             pocket (Pocket): The specific pocket in the protein where the ligand
                 should be docked.
             use_cache (bool): Whether to use cached results if available. Defaults to True.
-            constraints (Optional[list[dict]]): List of constraints for the docking. Generate this using `align.compute_constraints`. The length of this list must match the number of ligands to dock. Note that to dock a single ligand, you must pass a list of length 1, the only element of which is a list of constraints.
+            reference_pose (Ligand): A reference pose to use for constrained docking. If provided, the constraints will be computed using the MCS of the reference pose and the all the ligands to dock.
 
         Returns:
             str: Path to the SDF file containing the docked ligand structure.
         """
-        if constraints is not None:
-            # perform constrained docking
-            from deeporigin.functions import docking
 
-            _, _, top_sdf = docking.constrained_dock(
-                protein=self,
-                ligand=ligand,
-                constraints=constraints,
-                pocket=pocket,
-                use_cache=use_cache,
+        if ligand is None and ligands is not None:
+            pass
+
+        elif ligand is not None and ligands is None:
+            ligands = [ligand]
+
+        else:
+            raise DeepOriginException(
+                "Either ligand or ligands must be provided to protein.dock()"
+            ) from None
+
+        if reference_pose is not None:
+            # perform constrained docking
+
+            all_ligands = LigandSet([reference_pose] + ligands)
+
+            # find the mcs across all ligands
+            mcs_mol = all_ligands.mcs()
+
+            # compute constraints for each ligand
+            constraints = ligands.compute_constraints(
+                reference=reference_pose,
+                mcs_mol=mcs_mol,
             )
 
-            return Ligand.from_sdf(top_sdf)
+            # construct args
+            args = [
+                {
+                    "protein": self,
+                    "ligand": ligand,
+                    "pocket": pocket,
+                    "constraints": constraint,
+                    "use_cache": use_cache,
+                }
+                for ligand, constraint in zip(ligands, constraints, strict=True)
+            ]
+
+            from deeporigin.functions.docking import constrained_dock
+            # from deeporigin.functions.parallel import run_func_in_parallel
+
+            # running in series for now, while we sort out the parallelization
+            all_top_poses = []
+            for arg in args:
+                _, _, top_pose = constrained_dock(**arg)
+                all_top_poses.append(top_pose)
+
+            return all_top_poses
         else:
             # perform normal docking
-
-            if ligand is None and ligands is not None:
-                pass
-
-            elif ligand is not None and ligands is None:
-                ligands = [ligand]
-
-            else:
-                raise DeepOriginException(
-                    "Either ligand or ligands must be provided to protein.dock()"
-                ) from None
 
             # Import here to avoid circular import
             from deeporigin.functions.docking import dock
             from deeporigin.functions.parallel import run_func_in_parallel
 
             args = [
-                {"protein": self, "ligand": ligand, "pocket": pocket}
+                {
+                    "protein": self,
+                    "ligand": ligand,
+                    "pocket": pocket,
+                    "use_cache": use_cache,
+                }
                 for ligand in ligands
             ]
 

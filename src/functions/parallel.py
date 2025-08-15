@@ -6,9 +6,12 @@ import concurrent.futures
 import time
 from typing import Any, Callable, Dict, List, Optional, TypeVar
 
+from beartype import beartype
+
 T = TypeVar("T")
 
 
+@beartype
 def run_func_in_parallel(
     *,
     func: Callable[..., T],
@@ -38,22 +41,7 @@ def run_func_in_parallel(
             - elapsed_time: Time in seconds for entire process
             - durations: List of time spent on each call (or None if permanently failed)
 
-    Example:
-        >>> def my_func(x, y, offset=1):
-        ...     return x * y + offset
-        ...
-        >>> args_list = [
-        ...     {"x": 1, "y": 10, "offset": 100},
-        ...     {"x": 2, "y": 20, "offset": 100},
-        ...     {"x": 3, "y": 30, "offset": 100}
-        ... ]
-        ...
-        >>> results = run_func_in_parallel(
-        ...     func=my_func,
-        ...     batch_size=2,
-        ...     max_retries=1,
-        ...     args=args_list
-        ... )
+
     """
     if not args:
         return {

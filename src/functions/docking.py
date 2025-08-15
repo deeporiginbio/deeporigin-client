@@ -7,17 +7,15 @@ pocket center, or by passing a Pocket object which contains the pocket center in
 The module interfaces with the Deep Origin docking service to perform the actual docking calculations remotely.
 """
 
-import concurrent.futures
 import os
 from pathlib import Path
-import time
 from typing import Optional
 import zipfile
 
 from beartype import beartype
 import requests
 
-from deeporigin.drug_discovery.structures import Ligand, LigandSet, Pocket, Protein
+from deeporigin.drug_discovery.structures import Ligand, Pocket, Protein
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.utils.core import hash_dict
 
@@ -201,95 +199,3 @@ def constrained_dock(
 
     os.remove(zip_file)
     return _extract_cached_files(extract_dir)
-
-
-def _parallel_dock(
-    *,
-    protein: Protein,
-    ligands: LigandSet,
-    pocket: Pocket,
-    batch_size: int = 10,
-    max_retries: int = 3,
-    sleep_between_batches: float = 0.1,
-    use_cache: bool = True,
-) -> dict[str, object]:
-    """
-    Run docking in parallel batches with retries for failures.
-
-    Args:
-        protein: protein argument to be passed to dock().
-        ligands: A ligand set to be docked
-        pocket: A pocket in the protein to dock into
-        batch_size: number of ligands to process in parallel.
-        max_retries: max times to retry failed dockings.
-        sleep_between_batches: delay between batches, in seconds.
-        use_cache: whether to use cached results if available. Defaults to True.
-
-    Returns:
-        Dict with:
-            - output_paths: list of output paths or None for failures
-            - total_failures: total number of failures encountered (including retries)
-            - permanent_failures: indices of ligands that failed even after retries
-            - elapsed_time: time in seconds for entire process
-            - durations: list of time spent docking each ligand (or None if permanently failed)
-    """
-    total = len(ligands)
-    output_paths = [None] * total
-    retries_left = [max_retries] * total
-    total_failures = 0
-    durations = [None] * total  # Track time spent per ligand
-
-    def dock_ligand_timed(idx: int) -> Optional[tuple]:
-        nonlocal total_failures
-        try:
-            start = time.time()
-            result = dock(
-                ligand=ligands[idx],
-                pocket=pocket,
-                protein=protein,
-                use_cache=use_cache,
-            )
-            end = time.time()
-            return (idx, result, end - start)
-        except Exception as e:
-            print(f"[Error] Ligand {idx} failed: {e}")
-            total_failures += 1
-            return (idx, None, None)
-
-    start_time = time.time()
-
-    while any(
-        (out is None and retries > 0)
-        for out, retries in zip(output_paths, retries_left, strict=False)
-    ):
-        to_process = [
-            i
-            for i, (out, retries) in enumerate(
-                zip(output_paths, retries_left, strict=False)
-            )
-            if out is None and retries > 0
-        ]
-        # print(f"Processing batch of {min(batch_size, len(to_process))} ligands...")
-
-        for i in range(0, len(to_process), batch_size):
-            batch = to_process[i : i + batch_size]
-            with concurrent.futures.ThreadPoolExecutor() as executor:
-                results = list(executor.map(dock_ligand_timed, batch))
-            for idx, result, duration in results:
-                if result is not None:
-                    output_paths[idx] = result
-                    durations[idx] = duration
-                else:
-                    retries_left[idx] -= 1
-            time.sleep(sleep_between_batches)
-
-    elapsed_time = time.time() - start_time
-    permanent_failures = [i for i, out in enumerate(output_paths) if out is None]
-
-    return {
-        "output_paths": output_paths,
-        "total_failures": total_failures,
-        "permanent_failures": permanent_failures,
-        "elapsed_time": elapsed_time,
-        "durations": durations,
-    }
