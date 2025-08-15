@@ -4,11 +4,12 @@ import hashlib
 import os
 from pathlib import Path
 import re
-from typing import Dict, Literal, Optional
+from typing import Literal, Optional, Sequence, Tuple
 
 from beartype import beartype
+import numpy as np
 from rdkit import Chem
-from rdkit.Chem import AllChem, rdMolAlign
+from rdkit.Chem import AllChem, rdFMCS, rdMolAlign
 
 KeyType = Literal["smiles", "inchi"]
 
@@ -323,7 +324,7 @@ def group_by_prop_smiles_to_multiconf(
     keep_hs: bool = False,
     align_conformers: bool = True,
     skip_no_coords: bool = True,
-) -> Dict[str, Chem.Mol]:
+) -> dict[str, Chem.Mol]:
     """
     Read an SDF that contains many poses (possibly for multiple ligands) and group them by
     an SDF property (default: <SMILES>). For each unique value, return one RDKit Mol
@@ -338,8 +339,8 @@ def group_by_prop_smiles_to_multiconf(
     if not entries:
         raise ValueError("No valid molecules found in SDF.")
 
-    grouped: Dict[str, Chem.Mol] = {}
-    ref_graph_by_key: Dict[str, Chem.Mol] = {}  # heavy-atom reference used for mapping
+    grouped = {}
+    ref_graph_by_key: dict[str, Chem.Mol] = {}  # heavy-atom reference used for mapping
 
     for i, m in enumerate(entries):
         if not m.HasProp(smiles_prop_name):
@@ -415,10 +416,141 @@ def group_by_prop_smiles_to_multiconf(
             if mol.GetNumConformers() > 1:
                 rdMolAlign.AlignMolConformers(mol)
 
-    # If explicit Hs are desired, re-add per-ligand after grouping
-    if keep_hs:
-        # already kept; nothing to do
-        return grouped
-    else:
-        # return heavy-atom graphs; caller can AddHs(mol, addCoords=True) if needed
-        return grouped
+    # return heavy-atom graphs; caller can AddHs(mol, addCoords=True) if needed
+    return grouped
+
+
+def raw_rmsd_from_map(
+    molA: Chem.Mol,
+    molB: Chem.Mol,
+    atom_map: list[Tuple[int, int]],
+    conf_id_a: int = 0,
+    conf_id_b: int = 0,
+) -> float:
+    """Compute RMSD directly from coordinates on a given atom mapping. NO alignment, NO centering."""
+    cA, cB = molA.GetConformer(conf_id_a), molB.GetConformer(conf_id_b)
+    diffsq = 0.0
+    for ia, ib in atom_map:
+        pa, pb = cA.GetAtomPosition(ia), cB.GetAtomPosition(ib)
+        dx, dy, dz = (pa.x - pb.x), (pa.y - pb.y), (pa.z - pb.z)
+        diffsq += dx * dx + dy * dy + dz * dz
+    return np.sqrt(diffsq / len(atom_map))
+
+
+def full_graph_map(
+    molA: Chem.Mol, molB: Chem.Mol, ignore_hs: bool = True
+) -> Optional[list[Tuple[int, int]]]:
+    """Return atom map for identical graphs (isomorphic)."""
+    A = Chem.RemoveHs(molA) if ignore_hs else molA
+    B = Chem.RemoveHs(molB) if ignore_hs else molB
+    if A.GetNumAtoms() != B.GetNumAtoms():
+        return None
+    match = B.GetSubstructMatch(A)
+    if not match or len(match) != A.GetNumAtoms():
+        return None
+    # Map indices in A -> B; if we removed Hs, indices still correspond to those versions we’ll compare
+    return [(i, match[i]) for i in range(A.GetNumAtoms())]
+
+
+def mcs_map(
+    molA: Chem.Mol,
+    molB: Chem.Mol,
+    ignore_hs: bool = True,
+    ring_matches_ring_only: bool = True,
+    complete_rings_only: bool = True,
+    match_valences: bool = True,
+    match_chiral_tag: bool = False,
+    timeout: int = 10,
+) -> Optional[list[Tuple[int, int]]]:
+    """Return an atom map for the maximum common substructure (subset comparison)."""
+    A = Chem.RemoveHs(molA) if ignore_hs else molA
+    B = Chem.RemoveHs(molB) if ignore_hs else molB
+    params = rdFMCS.MCSParameters()
+    params.AtomCompare = rdFMCS.AtomCompare.CompareElements
+    params.BondCompare = rdFMCS.BondCompare.CompareOrder
+    params.RingMatchesRingOnly = ring_matches_ring_only
+    params.CompleteRingsOnly = complete_rings_only
+    params.MatchValences = match_valences
+    params.MatchChiralTag = match_chiral_tag
+    params.Timeout = timeout
+    res = rdFMCS.FindMCS([A, B], params)
+    if res.canceled or res.numAtoms == 0:
+        return None
+    q = Chem.MolFromSmarts(res.smartsString)
+    if q is None:
+        return None
+    mA = A.GetSubstructMatches(q, uniquify=True, maxMatches=1024)
+    mB = B.GetSubstructMatches(q, uniquify=True, maxMatches=4096)
+    if not mA or not mB:
+        return None
+    # Fix atom order using first match in A, then choose B’s match minimizing RAW (unaligned) RMSD
+    ref = mA[0]
+    best_map, best_rms = None, None
+    for cand in mB:
+        amap = list(zip(ref, cand, strict=False))
+        rms = raw_rmsd_from_map(A, B, amap)  # still NO alignment
+        if best_rms is None or rms < best_rms:
+            best_rms, best_map = rms, amap
+    return best_map
+
+
+def pose_rmsd(
+    molA: Chem.Mol,
+    molB: Chem.Mol,
+    *,
+    conf_id_a: int = 0,
+    conf_id_b: int = 0,
+    ignore_hs: bool = True,
+    use_mcs_if_needed: bool = True,
+) -> Optional[float]:
+    """
+    Pose-sensitive RMSD: NO alignment, NO centering. High if the same structure is translated/rotated.
+    Tries full-graph mapping; if that fails and use_mcs_if_needed=True, uses MCS subset mapping.
+    Returns None if no mapping found.
+    """
+    # Sanity: need 3D confs
+    if molA.GetNumConformers() <= conf_id_a or not molA.GetConformer(conf_id_a).Is3D():
+        raise ValueError("molA lacks a 3D conformer at conf_id_a")
+    if molB.GetNumConformers() <= conf_id_b or not molB.GetConformer(conf_id_b).Is3D():
+        raise ValueError("molB lacks a 3D conformer at conf_id_b")
+
+    # Full-graph map
+    amap = full_graph_map(molA, molB, ignore_hs=ignore_hs)
+    if amap is None and use_mcs_if_needed:
+        amap = mcs_map(molA, molB, ignore_hs=ignore_hs)
+    if amap is None:
+        return None
+
+    # If we removed Hs to build the map, compare the same H-stripped versions to keep indices consistent
+    A_cmp = Chem.RemoveHs(molA) if ignore_hs else molA
+    B_cmp = Chem.RemoveHs(molB) if ignore_hs else molB
+    return raw_rmsd_from_map(A_cmp, B_cmp, amap, conf_id_a, conf_id_b)
+
+
+@beartype
+def pairwise_pose_rmsd(
+    mols: Sequence[Chem.Mol],
+    *,
+    conf_id: int = 0,
+    ignore_hs: bool = True,
+    use_mcs_if_needed: bool = True,
+    fill_value_for_unmapped: float = np.nan,
+):
+    """
+    NxN matrix of pose-sensitive RMSDs (no alignment).
+    If two mols can’t be mapped, entry is fill_value_for_unmapped (default NaN).
+    """
+    n = len(mols)
+    M = np.zeros((n, n), float)
+    for i in range(n):
+        for j in range(i + 1, n):
+            r = pose_rmsd(
+                mols[i],
+                mols[j],
+                conf_id_a=conf_id,
+                conf_id_b=conf_id,
+                ignore_hs=ignore_hs,
+                use_mcs_if_needed=use_mcs_if_needed,
+            )
+            M[i, j] = M[j, i] = r if r is not None else fill_value_for_unmapped
+    return M
