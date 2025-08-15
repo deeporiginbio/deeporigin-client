@@ -296,7 +296,7 @@ class Protein(Entity):
                 _, _, top_pose = constrained_dock(**arg)
                 all_top_poses.append(top_pose)
 
-            return all_top_poses
+            return LigandSet.from_sdf_files(all_top_poses)
         else:
             # perform normal docking
 
