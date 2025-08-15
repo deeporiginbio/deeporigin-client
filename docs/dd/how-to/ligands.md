@@ -236,7 +236,7 @@ ligands
 
 !!! success "Expected Output"
 
-    ![](./ligands.png)
+    ![](./../../images/ligands.png)
 
 
 This table view is also available using `ligands.show_df`
@@ -276,7 +276,7 @@ ligands.show_grid()
 
 !!! success "Expected Output"
 
-    ![](./grid.png)
+    ![](../../images/grid.png)
 
 
 ## Operations on Ligands

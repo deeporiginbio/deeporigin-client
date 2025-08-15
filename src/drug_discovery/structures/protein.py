@@ -246,8 +246,6 @@ class Protein(Entity):
             use_cache (bool): Whether to use cached results if available. Defaults to True.
             reference_pose (Ligand): A reference pose to use for constrained docking. If provided, the constraints will be computed using the MCS of the reference pose and the all the ligands to dock.
 
-        Returns:
-            str: Path to the SDF file containing the docked ligand structure.
         """
 
         if ligand is None and ligands is not None:

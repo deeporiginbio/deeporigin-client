@@ -93,7 +93,7 @@ sim.ligands
 
 !!! success "Expected output"
 
-    ![](./ligands.png)
+    ![](../../images//ligands.png)
     
 
 !!! tip "Jupyter notebooks"

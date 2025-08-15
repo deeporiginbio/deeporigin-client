@@ -6,7 +6,7 @@ This document describes how to dock ligands to a Protein.
 
 ## Prerequisites
 
-- You have a prepared [Protein](./protein.md)
+- You have a prepared [Protein](./proteins.md)
 - You have a [Ligand or LigandSet](./ligands.md)
 - You have found pockets in your Protein using the [Pocket Finder](./find-pockets.md)
 
