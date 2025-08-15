@@ -206,7 +206,7 @@ ligand.show()
 A visualization similar to the following will be shown:
 
 <iframe 
-    src="./serotonin.html" 
+    src="../../images/serotonin.html" 
     width="100%" 
     height="600" 
     style="border:none;"
@@ -258,7 +258,7 @@ ligands.show()
 A visualization similar to this will be shown. Use the arrows to flip between ligands in the `LigandSet`. 
 
 <iframe 
-    src="./brd-3d.html" 
+    src="../../images/brd-3d.html" 
     width="100%" 
     height="600" 
     style="border:none;"
@@ -317,7 +317,7 @@ ligands.map_network().show_network()
 maps the network and creates a visualization similar to:
 
 <iframe 
-    src="./network.html" 
+    src="../../images/network.html" 
     width="100%" 
     height="600" 
     style="border:none;"
@@ -431,7 +431,7 @@ ligands.mcs()
 ```
 
 !!! success "Expected Output"
-    ![](./mcs.png)
+    ![](../../images/mcs.png)
 
 
 ### Constraints

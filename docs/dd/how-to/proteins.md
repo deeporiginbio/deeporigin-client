@@ -42,7 +42,7 @@ protein = Protein.from_pdb_id("1EBY")
 
 ### PDB ID
 
-To view the PDB ID of a Protein (if it exists, use):
+To view the PDB ID of a Protein (if it exists), use:
 
 ```python
 from deeporigin.drug_discovery import Protein
@@ -65,6 +65,7 @@ from deeporigin.drug_discovery import Protein
 
 protein = Protein.from_pdb_id("1EBY")
 sequences = protein.sequence
+
 for seq in sequences:
     print(seq)
 ```
@@ -115,7 +116,7 @@ protein.show()
 A visualization such as this will be shown:
 
 <iframe 
-    src="./protein.html" 
+    src="../../images/1eby.html" 
     width="100%" 
     height="600" 
     style="border:none;"
@@ -145,16 +146,6 @@ ligand = protein.extract_ligand()
 !!! warning "Method mutates the `Protein` object"
     The `extract_ligand()` method not only extracts the ligand but also **mutates the protein object** by removing the ligand from the protein structure. This means that after calling this method, the protein will no longer contain the ligand atoms.
 
-This ligand will be extracted:
-
-<iframe 
-src="./crystal-ligand.html" 
-width="100%" 
-height="650" 
-style="border:none;"
-title="Extracted crystal ligand from 1EBY"
-></iframe>
-
 
 !!! note "Note about atom counts"
     In this example, the atom count might not change significantly because the ligand atoms are typically a small fraction of the total protein structure. However, the protein's internal structure and `block_content` are updated to exclude the ligand. Additionally, the PDB file's MASTER record is automatically updated to reflect the new atom and CONECT record counts.
@@ -174,7 +165,7 @@ protein.show()
 ```
 
 <iframe 
-    src="./5QSP.html" 
+    src="../../images/5QSP.html" 
     width="100%" 
     height="600" 
     style="border:none;"
@@ -206,7 +197,7 @@ protein.show()
 ```
 
 <iframe 
-    src="./5QSP-lm.html" 
+    src="../../images/5QSP-lm.html" 
     width="100%" 
     height="600" 
     style="border:none;"

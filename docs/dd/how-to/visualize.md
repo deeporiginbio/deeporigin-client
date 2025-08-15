@@ -18,7 +18,7 @@ protein.show()
 A visualization such as this will be shown:
 
 <iframe 
-    src="./protein.html" 
+    src="../../images/1eby.html" 
     width="100%" 
     height="600" 
     style="border:none;"
@@ -56,7 +56,7 @@ If a ligand is backed by a SDF file, a 3D visualization will be shown, similar t
 A visualization such as this will be shown:
 
 <iframe 
-    src="./ligand.html" 
+    src="../../images/serotonin.html" 
     width="100%" 
     height="650" 
     style="border:none;"

@@ -34,7 +34,7 @@ sim.prepare(ligand=sim.ligands[0])
 You will see something like:
 
 <iframe 
-    src="./prepared-system.html" 
+    src="../../images/prepared-system.html" 
     width="100%" 
     height="660" 
     style="border:none;"

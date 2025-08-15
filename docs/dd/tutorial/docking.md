@@ -36,7 +36,7 @@ sim.protein.show(pockets=pockets)
 You should see something along the lines of:
 
 <iframe 
-    src="./pockets.html" 
+    src="../../images/pockets.html" 
     width="100%" 
     height="650" 
     style="border:none;"
@@ -149,7 +149,7 @@ sim.docking.show_poses()
 ```
 
 <iframe 
-    src="./docked-poses.html" 
+    src="../../images/docked-poses.html" 
     width="100%" 
     height="650" 
     style="border:none;"
