@@ -733,6 +733,10 @@
       
         
       
+        
+      
+        
+      
     
     
     
@@ -854,6 +858,52 @@
   
   <span class="md-ellipsis">
     Visualize proteins and ligands
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-to/find-pockets.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Find pockets
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-to/docking.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Dock Ligands
     
   </span>
   
@@ -3462,15 +3512,21 @@ for seq in sequences:
 
 
 <a href="#src.drug_discovery.structures.Protein.dock" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">dock</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">ligand</span><span class="p">:</span> <span class="n"><span title="src.drug_discovery.structures.ligand.Ligand">Ligand</span></span><span class="p">,</span> <span class="n">pocket</span><span class="p">:</span> <span class="n"><span title="src.drug_discovery.structures.pocket.Pocket">Pocket</span></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><span title="str">str</span></span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">dock</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">ligand</span><span class="p">:</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n"><span title="src.drug_discovery.structures.ligand.Ligand">Ligand</span></span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">ligands</span><span class="p">:</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n"><span title="src.drug_discovery.structures.ligand.LigandSet">LigandSet</span></span> <span class="o">|</span> <span class="n"><span title="list">list</span></span><span class="p">[</span><span class="n"><span title="src.drug_discovery.structures.ligand.Ligand">Ligand</span></span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">pocket</span><span class="p">:</span> <span class="n"><span title="src.drug_discovery.structures.pocket.Pocket">Pocket</span></span><span class="p">,</span>
+    <span class="n">use_cache</span><span class="p">:</span> <span class="n"><span title="bool">bool</span></span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">reference_pose</span><span class="p">:</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n"><span title="src.drug_discovery.structures.ligand.Ligand">Ligand</span></span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
         <p>Dock a ligand into a specific pocket of the protein.</p>
-<p>This method performs molecular docking of a ligand into a specified pocket
-of the protein structure. It uses the Deep Origin docking to
-generate a 3D structure of the docked ligand.</p>
+<p>This method performs docking of a ligand or a set of ligands into a specified pocket
+of the protein structure.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -3497,7 +3553,23 @@ generate a 3D structure of the docked ligand.</p>
               </div>
             </td>
             <td>
-                <em>required</em>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>ligands</code>
+            </td>
+            <td>
+                  <code><span title="src.drug_discovery.structures.ligand.LigandSet">LigandSet</span> | <span title="list">list</span>[<span title="src.drug_discovery.structures.ligand.Ligand">Ligand</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A set of ligands to dock into the protein pocket.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -3517,27 +3589,36 @@ should be docked.</p>
                 <em>required</em>
             </td>
           </tr>
-      </tbody>
-    </table>
-
-
-    <p><span class="doc-section-title">Returns:</span></p>
-    <table>
-      <thead>
-        <tr>
-<th>Name</th>          <th>Type</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
           <tr class="doc-section-item">
-<td><code>str</code></td>            <td>
-                  <code><span title="str">str</span></code>
+            <td>
+                <code>use_cache</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Path to the SDF file containing the docked ligand structure.</p>
+                <p>Whether to use cached results if available. Defaults to True.</p>
               </div>
+            </td>
+            <td>
+                  <code>True</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>reference_pose</code>
+            </td>
+            <td>
+                  <code><span title="src.drug_discovery.structures.ligand.Ligand">Ligand</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A reference pose to use for constrained docking. If provided, the constraints will be computed using the MCS of the reference pose and the all the ligands to dock.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
             </td>
           </tr>
       </tbody>
@@ -3556,12 +3637,15 @@ should be docked.</p>
 
 
 <a href="#src.drug_discovery.structures.Protein.extract_ligand" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">extract_ligand</span><span class="p">(</span><span class="n">exclude_resnames</span><span class="p">:</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n"><span title="set">set</span></span><span class="p">[</span><span class="n"><span title="str">str</span></span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">extract_ligand</span><span class="p">(</span>
+    <span class="n">exclude_resnames</span><span class="p">:</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n"><span title="set">set</span></span><span class="p">[</span><span class="n"><span title="str">str</span></span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><span title="src.drug_discovery.structures.ligand.Ligand">Ligand</span></span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
-        <p>Extracts ligand(s) from a PDB file using RDKit.</p>
+        <p>Extracts ligand(s) from a Protein object and removes them from the protein structure.
+This method mutates the protein object by removing ligand records.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -3589,6 +3673,29 @@ should be docked.</p>
             </td>
             <td>
                   <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>Ligand</code></td>            <td>
+                  <code><span title="src.drug_discovery.structures.ligand.Ligand">Ligand</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The extracted ligand molecule.</p>
+              </div>
             </td>
           </tr>
       </tbody>
@@ -3673,7 +3780,9 @@ should be docked.</p>
 
 <a href="#src.drug_discovery.structures.Protein.find_pockets" class="headerlink" title="Permanent link">&para;</a></h3>
 <div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">find_pockets</span><span class="p">(</span>
-    <span class="n">pocket_count</span><span class="p">:</span> <span class="n"><span title="int">int</span></span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">pocket_min_size</span><span class="p">:</span> <span class="n"><span title="int">int</span></span> <span class="o">=</span> <span class="mi">30</span>
+    <span class="n">pocket_count</span><span class="p">:</span> <span class="n"><span title="int">int</span></span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">pocket_min_size</span><span class="p">:</span> <span class="n"><span title="int">int</span></span> <span class="o">=</span> <span class="mi">30</span><span class="p">,</span>
+    <span class="n">use_cache</span><span class="p">:</span> <span class="n"><span title="bool">bool</span></span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><span title="list">list</span></span><span class="p">[</span><span class="n"><span title="src.drug_discovery.structures.pocket.Pocket">Pocket</span></span><span class="p">]</span>
 </code></pre></div>
 
@@ -4398,7 +4507,7 @@ binding site in the protein. Each Pocket object contains:
 
 
 <a href="#src.drug_discovery.structures.Protein.model_loops" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">model_loops</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">model_loops</span><span class="p">(</span><span class="n">use_cache</span><span class="p">:</span> <span class="n"><span title="bool">bool</span></span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -4669,8 +4778,12 @@ binding site in the protein. Each Pocket object contains:
 
 <a href="#src.drug_discovery.structures.Protein.show" class="headerlink" title="Permanent link">&para;</a></h3>
 <div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">show</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span>
     <span class="n">pockets</span><span class="p">:</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n"><span title="list">list</span></span><span class="p">[</span><span class="n"><span title="src.drug_discovery.structures.pocket.Pocket">Pocket</span></span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">sdf_file</span><span class="p">:</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n"><span title="str">str</span></span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">ligand</span><span class="p">:</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n"><span title="src.drug_discovery.structures.ligand.Ligand">Ligand</span></span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">ligands</span><span class="p">:</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n"><span title="src.drug_discovery.structures.ligand.LigandSet">LigandSet</span></span> <span class="o">|</span> <span class="n"><span title="list">list</span></span><span class="p">[</span><span class="n"><span title="src.drug_discovery.structures.ligand.Ligand">Ligand</span></span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">poses</span><span class="p">:</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n"><span title="src.drug_discovery.structures.ligand.LigandSet">LigandSet</span></span> <span class="o">|</span> <span class="n"><span title="list">list</span></span><span class="p">[</span><span class="n"><span title="src.drug_discovery.structures.ligand.Ligand">Ligand</span></span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span>
 </code></pre></div>
 

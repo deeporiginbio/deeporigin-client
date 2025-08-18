@@ -723,6 +723,10 @@
       
         
       
+        
+      
+        
+      
     
     
     
@@ -841,6 +845,52 @@
   
   <span class="md-ellipsis">
     Visualize proteins and ligands
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dd/how-to/find-pockets.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Find pockets
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dd/how-to/docking.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Dock Ligands
     
   </span>
   
@@ -1639,24 +1689,6 @@
   <a href="#src.platform.tools_api.cancel_runs" class="md-nav__link">
     <span class="md-ellipsis">
       cancel_runs
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#src.platform.tools_api.generate_tool_function" class="md-nav__link">
-    <span class="md-ellipsis">
-      generate_tool_function
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#src.platform.tools_api.get_status_and_progress" class="md-nav__link">
-    <span class="md-ellipsis">
-      get_status_and_progress
     </span>
   </a>
   
@@ -2690,24 +2722,6 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#src.platform.tools_api.generate_tool_function" class="md-nav__link">
-    <span class="md-ellipsis">
-      generate_tool_function
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#src.platform.tools_api.get_status_and_progress" class="md-nav__link">
-    <span class="md-ellipsis">
-      get_status_and_progress
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#src.platform.tools_api.get_statuses_and_progress" class="md-nav__link">
     <span class="md-ellipsis">
       get_statuses_and_progress
@@ -3004,95 +3018,6 @@
             <td>
               <div class="doc-md-description">
                 <p>List of job IDs to cancel.</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h4 id="src.platform.tools_api.generate_tool_function" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>            <span class="doc doc-object-name doc-function-name">generate_tool_function</span>
-
-
-<a href="#src.platform.tools_api.generate_tool_function" class="headerlink" title="Permanent link">&para;</a></h4>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">generate_tool_function</span><span class="p">(</span>
-    <span class="o">*</span><span class="p">,</span>
-    <span class="n">tool_key</span><span class="p">:</span> <span class="n"><span title="str">str</span></span><span class="p">,</span>
-    <span class="n">tool_version</span><span class="p">:</span> <span class="n"><span title="str">str</span></span><span class="p">,</span>
-    <span class="n">org_key</span><span class="p">:</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n"><span title="str">str</span></span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><span title="typing.Callable">Callable</span></span>
-</code></pre></div>
-
-    <div class="doc doc-contents ">
-
-        <p>utility function that generates a function that can be used to run a too, from schema</p>
-<p>Example usage:</p>
-<div class="codehilite"><pre><span></span><code><span class="n">docking_func</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tools_api</span><span class="o">.</span><span class="n">generate_tool_function</span><span class="p">(</span><span class="n">tool_key</span><span class="o">=</span><span class="s2">&quot;deeporigin.bulk-docking&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">tool_version</span><span class="o">=</span><span class="s2">&quot;0.3.0&quot;</span><span class="p">)</span>
-<span class="n">docking_func</span><span class="p">(</span>
-<span class="w">    </span><span class="n">protein_path</span><span class="o">=</span><span class="s2">&quot;path/to/protein.pdb&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="n">ligand_path</span><span class="o">=</span><span class="s2">&quot;path/to/ligand.sdf&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="o">...</span>
-<span class="p">)</span>
-</code></pre></div>
-
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h4 id="src.platform.tools_api.get_status_and_progress" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>            <span class="doc doc-object-name doc-function-name">get_status_and_progress</span>
-
-
-<a href="#src.platform.tools_api.get_status_and_progress" class="headerlink" title="Permanent link">&para;</a></h4>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">get_status_and_progress</span><span class="p">(</span>
-    <span class="n">execution_id</span><span class="p">:</span> <span class="n"><span title="str">str</span></span><span class="p">,</span>
-    <span class="o">*</span><span class="p">,</span>
-    <span class="n">client</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">org_key</span><span class="p">:</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n"><span title="str">str</span></span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><span title="dict">dict</span></span>
-</code></pre></div>
-
-    <div class="doc doc-contents ">
-
-        <p>Determine the status of a run, identified by job ID</p>
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>execution_id</code>
-            </td>
-            <td>
-                  <code><span title="str">str</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>execution_id</p>
               </div>
             </td>
             <td>

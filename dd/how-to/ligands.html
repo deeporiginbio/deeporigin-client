@@ -735,6 +735,10 @@
       
         
       
+        
+      
+        
+      
     
     
     
@@ -929,6 +933,15 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#filtering-top-poses" class="md-nav__link">
+    <span class="md-ellipsis">
+      Filtering Top Poses
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1038,6 +1051,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#random-sampling" class="md-nav__link">
+    <span class="md-ellipsis">
+      Random Sampling
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#maximum-common-substructure" class="md-nav__link">
     <span class="md-ellipsis">
       Maximum Common Substructure
@@ -1047,9 +1069,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#alignment" class="md-nav__link">
+  <a href="#constraints" class="md-nav__link">
     <span class="md-ellipsis">
-      Alignment
+      Constraints
     </span>
   </a>
   
@@ -1142,6 +1164,52 @@
   
   <span class="md-ellipsis">
     Visualize proteins and ligands
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="find-pockets.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Find pockets
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="docking.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Dock Ligands
     
   </span>
   
@@ -2732,6 +2800,15 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#filtering-top-poses" class="md-nav__link">
+    <span class="md-ellipsis">
+      Filtering Top Poses
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -2841,6 +2918,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#random-sampling" class="md-nav__link">
+    <span class="md-ellipsis">
+      Random Sampling
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#maximum-common-substructure" class="md-nav__link">
     <span class="md-ellipsis">
       Maximum Common Substructure
@@ -2850,9 +2936,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#alignment" class="md-nav__link">
+  <a href="#constraints" class="md-nav__link">
     <span class="md-ellipsis">
-      Alignment
+      Constraints
     </span>
   </a>
   
@@ -2952,7 +3038,7 @@
 </ul>
 <h2 id="constructing-a-ligand-or-ligandset">Constructing a Ligand or LigandSet<a class="headerlink" href="#constructing-a-ligand-or-ligandset" title="Permanent link">&para;</a></h2>
 <h3 id="from-a-sdf-file">From a SDF file<a class="headerlink" href="#from-a-sdf-file" title="Permanent link">&para;</a></h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Single Ligand</label><label for="__tabbed_1_2">Many Ligands</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Single Ligand</label><label for="__tabbed_1_2">Many Ligands</label><label for="__tabbed_1_3">Multiple SDF Files</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>A single <code>Ligand</code> can be constructed from a SDF file:</p>
@@ -2968,6 +3054,27 @@
 <span class="n">ligands</span> <span class="o">=</span> <span class="n">LigandSet</span><span class="o">.</span><span class="n">from_sdf</span><span class="p">(</span><span class="n">DATA_DIR</span> <span class="o">/</span> <span class="s2">&quot;ligands&quot;</span> <span class="o">/</span> <span class="s2">&quot;ligands-brd-all.sdf&quot;</span><span class="p">)</span>
 </code></pre></div>
 </div>
+<div class="tabbed-block">
+<p>A <code>LigandSet</code> can be constructed from multiple SDF files by concatenating them together:</p>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin.drug_discovery</span><span class="w"> </span><span class="kn">import</span> <span class="n">LigandSet</span><span class="p">,</span> <span class="n">DATA_DIR</span>
+
+<span class="c1"># List of SDF file paths</span>
+<span class="n">sdf_files</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">DATA_DIR</span> <span class="o">/</span> <span class="s2">&quot;ligands&quot;</span> <span class="o">/</span> <span class="s2">&quot;ligands-brd-all.sdf&quot;</span><span class="p">,</span>
+    <span class="n">DATA_DIR</span> <span class="o">/</span> <span class="s2">&quot;ligands&quot;</span> <span class="o">/</span> <span class="s2">&quot;42-ligands.sdf&quot;</span>
+<span class="p">]</span>
+
+<span class="c1"># Create LigandSet from multiple files</span>
+<span class="n">ligands</span> <span class="o">=</span> <span class="n">LigandSet</span><span class="o">.</span><span class="n">from_sdf_files</span><span class="p">(</span><span class="n">sdf_files</span><span class="p">)</span>
+
+<span class="c1"># The resulting LigandSet contains all ligands from both files</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Total ligands: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ligands</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>  <span class="c1"># Should be 8 + 42 = 50</span>
+</code></pre></div>
+<p>This is particularly useful when you have:
+- Multiple SDF files from different experiments
+- Split datasets that you want to combine
+- Files from different sources that need to be merged</p>
+</div>
 </div>
 </div>
 <h3 id="from-smiles-strings">From SMILES string(s)<a class="headerlink" href="#from-smiles-strings" title="Permanent link">&para;</a></h3>
@@ -2977,24 +3084,11 @@
 <p>A ligand can be constructed from a SMILES string, which is a compact way to represent molecular structures:</p>
 <div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin.drug_discovery</span><span class="w"> </span><span class="kn">import</span> <span class="n">Ligand</span>
 
-
-<span class="c1"># Basic usage with just a SMILES string</span>
-<span class="n">ligand</span> <span class="o">=</span> <span class="n">Ligand</span><span class="o">.</span><span class="n">from_smiles</span><span class="p">(</span><span class="n">smiles</span><span class="o">=</span><span class="s2">&quot;CCO&quot;</span><span class="p">)</span>  <span class="c1"># Ethanol</span>
-
-<span class="c1"># With additional parameters</span>
 <span class="n">ligand</span> <span class="o">=</span> <span class="n">Ligand</span><span class="o">.</span><span class="n">from_smiles</span><span class="p">(</span>
-    <span class="n">smiles</span><span class="o">=</span><span class="s2">&quot;c1ccccc1&quot;</span><span class="p">,</span>  <span class="c1"># Benzene</span>
-    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Benzene&quot;</span><span class="p">,</span>     <span class="c1"># Optional name for the ligand</span>
+    <span class="n">smiles</span><span class="o">=</span><span class="s2">&quot;c1ccccc1&quot;</span><span class="p">,</span> 
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Oxo&quot;</span><span class="p">,</span>     <span class="c1"># Optional name for the ligand</span>
 <span class="p">)</span>
 </code></pre></div>
-<p>The <code>from_smiles</code> constructor:</p>
-<ul>
-<li>Takes a SMILES string as input</li>
-<li>Optionally accepts a name for the ligand</li>
-<li>Optionally accepts a <code>save_to_file</code> parameter to control file persistence</li>
-<li>Automatically validates the SMILES string and creates a proper molecular representation</li>
-<li>Returns a <code>Ligand</code> instance that can be used for further operations</li>
-</ul>
 <div class="admonition note">
 <p class="admonition-title">SMILES Validation</p>
 <p>The constructor will raise an exception if the provided SMILES string is invalid or cannot be parsed into a valid molecule.</p>
@@ -3020,13 +3114,11 @@
 
 <span class="c1"># Create ligands from common biochemical names</span>
 <span class="n">atp</span> <span class="o">=</span> <span class="n">Ligand</span><span class="o">.</span><span class="n">from_identifier</span><span class="p">(</span>
-    <span class="n">identifier</span><span class="o">=</span><span class="s2">&quot;ATP&quot;</span><span class="p">,</span>  <span class="c1"># Adenosine triphosphate</span>
-    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;ATP&quot;</span>
+    <span class="n">identifier</span><span class="o">=</span><span class="s2">&quot;ATP&quot;</span><span class="p">,</span>  
 <span class="p">)</span>
 
 <span class="n">serotonin</span> <span class="o">=</span> <span class="n">Ligand</span><span class="o">.</span><span class="n">from_identifier</span><span class="p">(</span>
-    <span class="n">identifier</span><span class="o">=</span><span class="s2">&quot;serotonin&quot;</span><span class="p">,</span>  <span class="c1"># 5-hydroxytryptamine (5-HT)</span>
-    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Serotonin&quot;</span>
+    <span class="n">identifier</span><span class="o">=</span><span class="s2">&quot;serotonin&quot;</span><span class="p">,</span> 
 <span class="p">)</span>
 </code></pre></div>
 <p>The <code>from_identifier</code> constructor:</p>
@@ -3047,7 +3139,7 @@
 <p>The constructor will attempt to resolve the identifier using chemical databases. If the identifier cannot be resolved, it will raise an exception.</p>
 </div>
 <h3 id="from-an-rdkit-mol-object">From an RDKit Mol object<a class="headerlink" href="#from-an-rdkit-mol-object" title="Permanent link">&para;</a></h3>
-<p>If you're working with RDKit molecules directly, you can create a Ligand from an RDKit Mol object:</p>
+<p>If you're working with RDKit molecules directly, you can create a <code>Ligand</code> from an RDKit Mol object:</p>
 <div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin.drug_discovery</span><span class="w"> </span><span class="kn">import</span> <span class="n">Ligand</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">rdkit</span><span class="w"> </span><span class="kn">import</span> <span class="n">Chem</span>
 
@@ -3058,7 +3150,6 @@
 <span class="n">ligand</span> <span class="o">=</span> <span class="n">Ligand</span><span class="o">.</span><span class="n">from_rdkit_mol</span><span class="p">(</span>
     <span class="n">mol</span><span class="o">=</span><span class="n">mol</span><span class="p">,</span>
     <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Ethanol&quot;</span><span class="p">,</span>  <span class="c1"># Optional name for the ligand</span>
-    <span class="n">save_to_file</span><span class="o">=</span><span class="kc">False</span>  <span class="c1"># Optional: whether to save the ligand to file</span>
 <span class="p">)</span>
 </code></pre></div>
 <p>This is particularly useful when you're working with RDKit's molecular manipulation functions and want to convert the results into a Deep Origin Ligand object for further processing or visualization.</p>
@@ -3085,6 +3176,13 @@
     <span class="n">smiles_column</span><span class="o">=</span><span class="s2">&quot;SMILES&quot;</span>  <span class="c1"># Optional, defaults to &quot;smiles&quot;</span>
 <span class="p">)</span>
 </code></pre></div>
+<h3 id="filtering-top-poses">Filtering Top Poses<a class="headerlink" href="#filtering-top-poses" title="Permanent link">&para;</a></h3>
+<p>When working with docking results, you often have multiple poses for the same molecule. The <code>filter_top_poses()</code> method helps you select only the best pose for each unique molecule:</p>
+<div class="language-python highlight"><pre><span></span><code><span class="c1"># assuming poses comes from protein.dock()</span>
+
+<span class="c1"># Filter to keep only the best pose per molecule (by binding energy)</span>
+<span class="n">best_poses</span> <span class="o">=</span> <span class="n">poses</span><span class="o">.</span><span class="n">filter_top_poses</span><span class="p">()</span>
+</code></pre></div>
 <h2 id="visualization">Visualization<a class="headerlink" href="#visualization" title="Permanent link">&para;</a></h2>
 <div class="admonition info">
 <p class="admonition-title">Jupyter notebook required</p>
@@ -3104,7 +3202,7 @@
 </code></pre></div>
 <p>A visualization similar to the following will be shown:</p>
 <iframe 
-    src="./serotonin.html" 
+    src="../../images/serotonin.html" 
     width="100%" 
     height="600" 
     style="border:none;"
@@ -3127,7 +3225,7 @@
 </code></pre></div>
 <div class="admonition success">
 <p class="admonition-title">Expected Output</p>
-<p><img alt="" src="ligands.png" /></p>
+<p><img alt="" src="../../images/ligands.png" /></p>
 </div>
 <p>This table view is also available using <code>ligands.show_df</code></p>
 <h4 id="individual-view-3d">Individual view (3D)<a class="headerlink" href="#individual-view-3d" title="Permanent link">&para;</a></h4>
@@ -3139,7 +3237,7 @@
 </code></pre></div>
 <p>A visualization similar to this will be shown. Use the arrows to flip between ligands in the <code>LigandSet</code>. </p>
 <iframe 
-    src="./brd-3d.html" 
+    src="../../images/brd-3d.html" 
     width="100%" 
     height="600" 
     style="border:none;"
@@ -3152,7 +3250,7 @@
 </code></pre></div>
 <div class="admonition success">
 <p class="admonition-title">Expected Output</p>
-<p><img alt="" src="grid.png" /></p>
+<p><img alt="" src="../../images/grid.png" /></p>
 </div>
 <h2 id="operations-on-ligands">Operations on Ligands<a class="headerlink" href="#operations-on-ligands" title="Permanent link">&para;</a></h2>
 <h3 id="ligand-minimization">Ligand Minimization<a class="headerlink" href="#ligand-minimization" title="Permanent link">&para;</a></h3>
@@ -3183,7 +3281,7 @@
 </code></pre></div>
 <p>maps the network and creates a visualization similar to:</p>
 <iframe 
-    src="./network.html" 
+    src="../../images/network.html" 
     width="100%" 
     height="600" 
     style="border:none;"
@@ -3254,6 +3352,16 @@
 </div>
 </div>
 </div>
+<h3 id="random-sampling">Random Sampling<a class="headerlink" href="#random-sampling" title="Permanent link">&para;</a></h3>
+<p>You can randomly sample ligands from a <code>LigandSet</code> using the <code>random_sample</code> method:</p>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin.drug_discovery</span><span class="w"> </span><span class="kn">import</span> <span class="n">LigandSet</span><span class="p">,</span> <span class="n">DATA_DIR</span>
+
+<span class="n">ligands</span> <span class="o">=</span> <span class="n">LigandSet</span><span class="o">.</span><span class="n">from_sdf</span><span class="p">(</span><span class="n">DATA_DIR</span> <span class="o">/</span> <span class="s2">&quot;ligands&quot;</span> <span class="o">/</span> <span class="s2">&quot;ligands-brd-all.sdf&quot;</span><span class="p">)</span>
+
+<span class="c1"># Sample 5 random ligands</span>
+<span class="n">sample</span> <span class="o">=</span> <span class="n">ligands</span><span class="o">.</span><span class="n">random_sample</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+</code></pre></div>
+<p>This creates a new <code>LigandSet</code> containing a copy of those ligands. </p>
 <h3 id="maximum-common-substructure">Maximum Common Substructure<a class="headerlink" href="#maximum-common-substructure" title="Permanent link">&para;</a></h3>
 <p>The Maximum Common Substructure (MCS) for a <code>LigandSet</code> can be computed as follows:</p>
 <div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin.drug_discovery</span><span class="w"> </span><span class="kn">import</span> <span class="n">BRD_DATA_DIR</span><span class="p">,</span> <span class="n">LigandSet</span>
@@ -3263,14 +3371,14 @@
 </code></pre></div>
 <div class="admonition success">
 <p class="admonition-title">Expected Output</p>
-<p><img alt="" src="mcs.png" /></p>
+<p><img alt="" src="../../images/mcs.png" /></p>
 </div>
-<h3 id="alignment">Alignment<a class="headerlink" href="#alignment" title="Permanent link">&para;</a></h3>
+<h3 id="constraints">Constraints<a class="headerlink" href="#constraints" title="Permanent link">&para;</a></h3>
 <p>Ligands in a LigandSet can be aligned to a reference ligand using:</p>
 <div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin.drug_discovery</span><span class="w"> </span><span class="kn">import</span> <span class="n">BRD_DATA_DIR</span><span class="p">,</span> <span class="n">LigandSet</span>
 
 <span class="n">ligands</span> <span class="o">=</span> <span class="n">LigandSet</span><span class="o">.</span><span class="n">from_dir</span><span class="p">(</span><span class="n">BRD_DATA_DIR</span><span class="p">)</span>
-<span class="n">ligands</span><span class="o">.</span><span class="n">align</span><span class="p">(</span><span class="n">reference</span><span class="o">=</span><span class="n">ligands</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">ligands</span><span class="o">.</span><span class="n">compute_constraints</span><span class="p">(</span><span class="n">reference</span><span class="o">=</span><span class="n">ligands</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 </code></pre></div>
 <h2 id="exporting-ligands">Exporting ligands<a class="headerlink" href="#exporting-ligands" title="Permanent link">&para;</a></h2>
 <h3 id="to-sdf-files">To SDF files<a class="headerlink" href="#to-sdf-files" title="Permanent link">&para;</a></h3>

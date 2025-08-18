@@ -16,7 +16,7 @@
         <link rel="prev" href="ligands.html">
       
       
-        <link rel="next" href="filter-docking-outputs.html">
+        <link rel="next" href="find-pockets.html">
       
       
       <link rel="icon" href="../../images/favicon.png">
@@ -735,6 +735,10 @@
       
         
       
+        
+      
+        
+      
     
     
     
@@ -925,15 +929,6 @@
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#sdf-files" class="md-nav__link">
-    <span class="md-ellipsis">
-      SDF Files
-    </span>
-  </a>
-  
-</li>
-        
       </ul>
     </nav>
   
@@ -943,6 +938,52 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="find-pockets.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Find pockets
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="docking.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Dock Ligands
+    
+  </span>
+  
+
+      </a>
     </li>
   
 
@@ -2501,15 +2542,6 @@
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#sdf-files" class="md-nav__link">
-    <span class="md-ellipsis">
-      SDF Files
-    </span>
-  </a>
-  
-</li>
-        
       </ul>
     </nav>
   
@@ -2551,7 +2583,7 @@
 </code></pre></div>
 <p>A visualization such as this will be shown:</p>
 <iframe 
-    src="./protein.html" 
+    src="../../images/1eby.html" 
     width="100%" 
     height="600" 
     style="border:none;"
@@ -2579,7 +2611,7 @@
 <p>If a ligand is backed by a SDF file, a 3D visualization will be shown, similar to:</p>
 <p>A visualization such as this will be shown:</p>
 <iframe 
-    src="./ligand.html" 
+    src="../../images/serotonin.html" 
     width="100%" 
     height="650" 
     style="border:none;"
@@ -2592,18 +2624,6 @@
 </div>
 <p>If a ligand is not backed by a SDF file, a 2D visualization will be shown:</p>
 <p><img alt="" src="../../images/ligand.png" /></p>
-<h3 id="sdf-files">SDF Files<a class="headerlink" href="#sdf-files" title="Permanent link">&para;</a></h3>
-<p>Molecules in SDF files can be visualized the <code>show_molecules_in_sdf_file</code> function as follows:</p>
-<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">deeporigin.drug_discovery.chemistry</span><span class="w"> </span><span class="kn">import</span> <span class="n">show_molecules_in_sdf_file</span>
-<span class="n">show_molecules_in_sdf_file</span><span class="p">(</span><span class="s2">&quot;path/to/file.sdf&quot;</span><span class="p">)</span>
-</code></pre></div>
-<iframe 
-    src="./brd-ligands.html" 
-    width="100%" 
-    height="650" 
-    style="border:none;"
-    title="Ligands visualization"
-></iframe>
 
 
 
@@ -2658,13 +2678,13 @@
         
         
           
-          <a href="filter-docking-outputs.html" class="md-footer__link md-footer__link--next" aria-label="Next: Filter outputs of Docking">
+          <a href="find-pockets.html" class="md-footer__link md-footer__link--next" aria-label="Next: Find pockets">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Filter outputs of Docking
+                Find pockets
               </div>
             </div>
             <div class="md-footer__button md-icon">
