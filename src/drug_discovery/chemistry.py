@@ -1,14 +1,15 @@
 """Contains functions for working with SDF files."""
 
-import hashlib
-import os
 from pathlib import Path
 import re
-from typing import Optional
+from typing import Literal, Optional, Sequence, Tuple
 
 from beartype import beartype
+import numpy as np
 from rdkit import Chem
-from rdkit.Chem import AllChem
+from rdkit.Chem import AllChem, rdFMCS, rdMolAlign
+
+KeyType = Literal["smiles", "inchi"]
 
 
 @beartype
@@ -211,57 +212,6 @@ def sdf_to_smiles(sdf_file: str | Path) -> list[str]:
 
 
 @beartype
-def merge_sdf_files(
-    sdf_file_list: list[str],
-    output_path: Optional[str] = None,
-) -> str:
-    """
-    Merge a list of SDF files into a single SDF file.
-
-    Args:
-        sdf_file_list (list of str): List of paths to SDF files.
-
-    Returns:
-        str: Path to the merged SDF file.
-    """
-    from rdkit import Chem
-
-    # Get the absolute directory of the first file.
-    base_dir = os.path.dirname(os.path.abspath(sdf_file_list[0]))
-
-    # Check that all files are in the same directory.
-    for sdf_file in sdf_file_list:
-        if os.path.dirname(os.path.abspath(sdf_file)) != base_dir:
-            raise ValueError("All input files must be in the same directory.")
-
-    # Create a combined string from the sorted basenames of the input files.
-    basenames = sorted([os.path.basename(file) for file in sdf_file_list])
-    combined_string = "".join(basenames)
-
-    # Hash the combined string using SHA256 and take the first 10 characters.
-    hash_digest = hashlib.sha256(combined_string.encode("utf-8")).hexdigest()[:10]
-    output_filename = f"{hash_digest}.sdf"
-
-    if output_path is None:
-        output_path = os.path.join(base_dir, output_filename)
-
-    # Check if the output file already exists; if so, do nothing and return it.
-    if os.path.exists(output_path):
-        return output_path
-
-    # Merge the molecules from all SDF files into the new file.
-    writer = Chem.SDWriter(output_path)
-    for sdf_file in sdf_file_list:
-        supplier = Chem.SDMolSupplier(sdf_file)
-        for mol in supplier:
-            if mol is not None:  # Skip molecules that failed to parse.
-                writer.write(mol)
-    writer.close()
-
-    return output_path
-
-
-@beartype
 def canonicalize_smiles(smiles: str) -> str:
     """Canonicalize a SMILES string.
 
@@ -277,38 +227,250 @@ def canonicalize_smiles(smiles: str) -> str:
     return Chem.MolToSmiles(mol, canonical=True)
 
 
+def group_by_prop_smiles_to_multiconf(
+    sdf_path: str,
+    *,
+    smiles_prop_name: str = "SMILES",
+    keep_hs: bool = False,
+    align_conformers: bool = True,
+    skip_no_coords: bool = True,
+) -> dict[str, Chem.Mol]:
+    """
+    Read an SDF that contains many poses (possibly for multiple ligands) and group them by
+    an SDF property (default: <SMILES>). For each unique value, return one RDKit Mol
+    holding all poses as conformers.
+
+    Returns
+    -------
+    dict[str, Chem.Mol]: {prop_smiles_value -> Mol with N conformers}
+    """
+    suppl = Chem.SDMolSupplier(sdf_path, sanitize=True, removeHs=False)
+    entries = [m for m in suppl if m is not None]
+    if not entries:
+        raise ValueError("No valid molecules found in SDF.")
+
+    grouped = {}
+    ref_graph_by_key: dict[str, Chem.Mol] = {}  # heavy-atom reference used for mapping
+
+    for i, m in enumerate(entries):
+        if not m.HasProp(smiles_prop_name):
+            raise ValueError(
+                f"SDF record {i} is missing <{smiles_prop_name}> property; "
+                "set smiles_prop_name accordingly."
+            )
+        key = m.GetProp(smiles_prop_name).strip()
+
+        # Ensure we have 3D coords
+        if m.GetNumConformers() == 0 or not m.GetConformer().Is3D():
+            if skip_no_coords:
+                continue
+            raise ValueError(f"SDF record {i} has no 3D coordinates.")
+
+        # Normalize Hs for robust atom mapping
+        m_proc = Chem.Mol(m)
+        if not keep_hs:
+            m_proc = Chem.RemoveHs(m_proc)
+
+        if key not in grouped:
+            # First pose for this ligand: establish container and reference atom order
+            base = Chem.Mol(m_proc)
+            base.RemoveAllConformers()
+
+            # Copy coordinates as conformer 0
+            conf_in = m_proc.GetConformer()
+            conf_out = Chem.Conformer(base.GetNumAtoms())
+            conf_out.Set3D(True)
+            for aidx in range(base.GetNumAtoms()):
+                conf_out.SetAtomPosition(aidx, conf_in.GetAtomPosition(aidx))
+            base.AddConformer(conf_out, assignId=True)
+
+            grouped[key] = base
+            ref_graph_by_key[key] = Chem.Mol(base)  # heavy-atom reference
+            continue
+
+        # Subsequent pose: remap into the reference atom order
+        ref = grouped[key]
+        ref_nh = ref_graph_by_key[key]
+
+        cur_nh = m_proc  # already heavy-atom if keep_hs=False
+        if cur_nh.GetNumAtoms() != ref_nh.GetNumAtoms():
+            # Different topology; skip this pose (or raise)
+            continue
+
+        # mapping[t] = index in cur_nh that corresponds to atom t in ref_nh
+        mapping = ref_nh.GetSubstructMatch(cur_nh)
+        if not mapping or len(mapping) != ref_nh.GetNumAtoms():
+            # Could not find a full-graph mapping; skip (or raise)
+            continue
+
+        conf_in = cur_nh.GetConformer()
+        conf_out = Chem.Conformer(ref.GetNumAtoms())
+        conf_out.Set3D(True)
+        for t in range(ref_nh.GetNumAtoms()):
+            src = mapping[t]
+            conf_out.SetAtomPosition(t, conf_in.GetAtomPosition(src))
+
+        # Optionally carry per-record fields onto the conformer
+        # (SDF props -> conformer string props)
+        for k in m.GetPropNames():
+            try:
+                conf_out.SetProp(k, m.GetProp(k))
+            except Exception:
+                pass
+
+        ref.AddConformer(conf_out, assignId=True)
+
+    # Optional alignment within each ligand
+    if align_conformers:
+        for mol in grouped.values():
+            if mol.GetNumConformers() > 1:
+                rdMolAlign.AlignMolConformers(mol)
+
+    # return heavy-atom graphs; caller can AddHs(mol, addCoords=True) if needed
+    return grouped
+
+
+def raw_rmsd_from_map(
+    mol_a: Chem.Mol,
+    mol_b: Chem.Mol,
+    atom_map: list[Tuple[int, int]],
+    conf_id_a: int = 0,
+    conf_id_b: int = 0,
+) -> float:
+    """Compute RMSD directly from coordinates on a given atom mapping. NO alignment, NO centering."""
+    cA, cB = mol_a.GetConformer(conf_id_a), mol_b.GetConformer(conf_id_b)
+    diffsq = 0.0
+    for ia, ib in atom_map:
+        pa, pb = cA.GetAtomPosition(ia), cB.GetAtomPosition(ib)
+        dx, dy, dz = (pa.x - pb.x), (pa.y - pb.y), (pa.z - pb.z)
+        diffsq += dx * dx + dy * dy + dz * dz
+    return np.sqrt(diffsq / len(atom_map))
+
+
+def full_graph_map(
+    mol_a: Chem.Mol,
+    mol_b: Chem.Mol,
+    ignore_hs: bool = True,
+) -> Optional[list[Tuple[int, int]]]:
+    """Return atom map for identical graphs (isomorphic)."""
+
+    A = Chem.RemoveHs(mol_a) if ignore_hs else mol_a
+    B = Chem.RemoveHs(mol_b) if ignore_hs else mol_b
+    if A.GetNumAtoms() != B.GetNumAtoms():
+        return None
+    match = B.GetSubstructMatch(A)
+    if not match or len(match) != A.GetNumAtoms():
+        return None
+    # Map indices in A -> B; if we removed Hs, indices still correspond to those versions we’ll compare
+    return [(i, match[i]) for i in range(A.GetNumAtoms())]
+
+
+def mcs_map(
+    mol_a: Chem.Mol,
+    mol_b: Chem.Mol,
+    ignore_hs: bool = True,
+    ring_matches_ring_only: bool = True,
+    complete_rings_only: bool = True,
+    match_valences: bool = True,
+    match_chiral_tag: bool = False,
+    timeout: int = 10,
+) -> Optional[list[Tuple[int, int]]]:
+    """Return an atom map for the maximum common substructure (subset comparison)."""
+
+    A = Chem.RemoveHs(mol_a) if ignore_hs else mol_a
+    B = Chem.RemoveHs(mol_b) if ignore_hs else mol_b
+    params = rdFMCS.MCSParameters()
+    params.AtomCompare = rdFMCS.AtomCompare.CompareElements
+    params.BondCompare = rdFMCS.BondCompare.CompareOrder
+    params.RingMatchesRingOnly = ring_matches_ring_only
+    params.CompleteRingsOnly = complete_rings_only
+    params.MatchValences = match_valences
+    params.MatchChiralTag = match_chiral_tag
+    params.Timeout = timeout
+    res = rdFMCS.FindMCS([A, B], params)
+    if res.canceled or res.numAtoms == 0:
+        return None
+    q = Chem.MolFromSmarts(res.smartsString)
+    if q is None:
+        return None
+    mA = A.GetSubstructMatches(q, uniquify=True, maxMatches=1024)
+    mB = B.GetSubstructMatches(q, uniquify=True, maxMatches=4096)
+    if not mA or not mB:
+        return None
+    # Fix atom order using first match in A, then choose B’s match minimizing RAW (unaligned) RMSD
+    ref = mA[0]
+    best_map, best_rms = None, None
+    for cand in mB:
+        amap = list(zip(ref, cand, strict=False))
+        rms = raw_rmsd_from_map(A, B, amap)  # still NO alignment
+        if best_rms is None or rms < best_rms:
+            best_rms, best_map = rms, amap
+    return best_map
+
+
+def pose_rmsd(
+    mol_a: Chem.Mol,
+    mol_b: Chem.Mol,
+    *,
+    conf_id_a: int = 0,
+    conf_id_b: int = 0,
+    ignore_hs: bool = True,
+    use_mcs_if_needed: bool = True,
+) -> Optional[float]:
+    """
+    Pose-sensitive RMSD: NO alignment, NO centering. High if the same structure is translated/rotated.
+    Tries full-graph mapping; if that fails and use_mcs_if_needed=True, uses MCS subset mapping.
+    Returns None if no mapping found.
+    """
+    # Sanity: need 3D confs
+    if (
+        mol_a.GetNumConformers() <= conf_id_a
+        or not mol_a.GetConformer(conf_id_a).Is3D()
+    ):
+        raise ValueError("mol_a lacks a 3D conformer at conf_id_a")
+    if (
+        mol_b.GetNumConformers() <= conf_id_b
+        or not mol_b.GetConformer(conf_id_b).Is3D()
+    ):
+        raise ValueError("mol_b lacks a 3D conformer at conf_id_b")
+
+    # Full-graph map
+    amap = full_graph_map(mol_a, mol_b, ignore_hs=ignore_hs)
+    if amap is None and use_mcs_if_needed:
+        amap = mcs_map(mol_a, mol_b, ignore_hs=ignore_hs)
+    if amap is None:
+        return None
+
+    # If we removed Hs to build the map, compare the same H-stripped versions to keep indices consistent
+    a_cmp = Chem.RemoveHs(mol_a) if ignore_hs else mol_a
+    b_cmp = Chem.RemoveHs(mol_b) if ignore_hs else mol_b
+    return raw_rmsd_from_map(a_cmp, b_cmp, amap, conf_id_a, conf_id_b)
+
+
 @beartype
-def show_molecules_in_sdf_files(sdf_files: list[str]):
-    """show molecules in an SDF file in a Jupyter notebook using molstar"""
-
-    import tempfile
-
-    temp_dir = tempfile.TemporaryDirectory()
-
-    sdf_file = os.path.join(temp_dir.name, "temp.sdf")
-
-    # combine the SDF files
-    merge_sdf_files(sdf_files, sdf_file)
-
-    from deeporigin_molstar import JupyterViewer, MoleculeViewer
-
-    molecule_viewer = MoleculeViewer(
-        data=str(sdf_file),
-        format="sdf",
-    )
-    html_content = molecule_viewer.render_ligand()
-    JupyterViewer.visualize(html_content)
-
-
-@beartype
-def show_molecules_in_sdf_file(sdf_file: str | Path):
-    """show molecules in an SDF file in a Jupyter notebook using molstar"""
-
-    from deeporigin_molstar import JupyterViewer, MoleculeViewer
-
-    molecule_viewer = MoleculeViewer(
-        data=str(sdf_file),
-        format="sdf",
-    )
-    html_content = molecule_viewer.render_ligand()
-    JupyterViewer.visualize(html_content)
+def pairwise_pose_rmsd(
+    mols: Sequence[Chem.Mol],
+    *,
+    conf_id: int = 0,
+    ignore_hs: bool = True,
+    use_mcs_if_needed: bool = True,
+    fill_value_for_unmapped: float = np.nan,
+):
+    """
+    NxN matrix of pose-sensitive RMSDs (no alignment).
+    If two mols can’t be mapped, entry is fill_value_for_unmapped (default NaN).
+    """
+    n = len(mols)
+    M = np.zeros((n, n), float)
+    for i in range(n):
+        for j in range(i + 1, n):
+            r = pose_rmsd(
+                mols[i],
+                mols[j],
+                conf_id_a=conf_id,
+                conf_id_b=conf_id,
+                ignore_hs=ignore_hs,
+                use_mcs_if_needed=use_mcs_if_needed,
+            )
+            M[i, j] = M[j, i] = r if r is not None else fill_value_for_unmapped
+    return M

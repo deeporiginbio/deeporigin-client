@@ -3,6 +3,7 @@
 import pytest
 
 from deeporigin.drug_discovery import chemistry
+from deeporigin.drug_discovery.structures.ligand import LigandSet
 
 # Import shared test fixtures
 from tests.utils_ligands import ligands
@@ -50,3 +51,13 @@ def test_split_sdf_file(
     for sdf_file in sdf_files:
         n_mol = chemistry.count_molecules_in_sdf_file(sdf_file)
         assert n_mol == 1, "The SDF file contains more than one molecule."
+
+
+@pytest.mark.parametrize("ligand_set", ligands)
+def test_pairwise_pose_rmsd(ligand_set):
+    if ligand_set["n_ligands"] > 10:
+        pytest.skip("Skipping test for large number of ligands")
+
+    ligands = LigandSet.from_sdf(ligand_set["file"])
+    mols = ligands.to_rdkit_mols()
+    chemistry.pairwise_pose_rmsd(mols)

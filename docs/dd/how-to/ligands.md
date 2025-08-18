@@ -30,6 +30,31 @@ There are two classes that help you work with ligands:
     ligands = LigandSet.from_sdf(DATA_DIR / "ligands" / "ligands-brd-all.sdf")
     ```
 
+=== "Multiple SDF Files"
+
+    A `LigandSet` can be constructed from multiple SDF files by concatenating them together:
+
+    ```python
+    from deeporigin.drug_discovery import LigandSet, DATA_DIR
+
+    # List of SDF file paths
+    sdf_files = [
+        DATA_DIR / "ligands" / "ligands-brd-all.sdf",
+        DATA_DIR / "ligands" / "42-ligands.sdf"
+    ]
+
+    # Create LigandSet from multiple files
+    ligands = LigandSet.from_sdf_files(sdf_files)
+    
+    # The resulting LigandSet contains all ligands from both files
+    print(f"Total ligands: {len(ligands)}")  # Should be 8 + 42 = 50
+    ```
+
+    This is particularly useful when you have:
+    - Multiple SDF files from different experiments
+    - Split datasets that you want to combine
+    - Files from different sources that need to be merged
+
 ### From SMILES string(s)
 
 === "Single Ligands"
@@ -142,6 +167,20 @@ ligands = LigandSet.from_csv(
 )
 ```
 
+### Filtering Top Poses
+
+When working with docking results, you often have multiple poses for the same molecule. The `filter_top_poses()` method helps you select only the best pose for each unique molecule:
+
+```{.python notest}
+
+# assuming poses comes from protein.dock()
+
+# Filter to keep only the best pose per molecule (by binding energy)
+best_poses = poses.filter_top_poses()
+
+```
+
+
 ## Visualization
 
 !!! info "Jupyter notebook required"
@@ -167,7 +206,7 @@ ligand.show()
 A visualization similar to the following will be shown:
 
 <iframe 
-    src="./serotonin.html" 
+    src="../../images/serotonin.html" 
     width="100%" 
     height="600" 
     style="border:none;"
@@ -197,7 +236,7 @@ ligands
 
 !!! success "Expected Output"
 
-    ![](./ligands.png)
+    ![](./../../images/ligands.png)
 
 
 This table view is also available using `ligands.show_df`
@@ -219,7 +258,7 @@ ligands.show()
 A visualization similar to this will be shown. Use the arrows to flip between ligands in the `LigandSet`. 
 
 <iframe 
-    src="./brd-3d.html" 
+    src="../../images/brd-3d.html" 
     width="100%" 
     height="600" 
     style="border:none;"
@@ -237,7 +276,7 @@ ligands.show_grid()
 
 !!! success "Expected Output"
 
-    ![](./grid.png)
+    ![](../../images/grid.png)
 
 
 ## Operations on Ligands
@@ -278,7 +317,7 @@ ligands.map_network().show_network()
 maps the network and creates a visualization similar to:
 
 <iframe 
-    src="./network.html" 
+    src="../../images/network.html" 
     width="100%" 
     height="600" 
     style="border:none;"
@@ -365,6 +404,21 @@ ADMET (Absorption, Distribution, Metabolism, Excretion, and Toxicity) properties
     ligands.to_dataframe()
     ```
 
+### Random Sampling
+
+You can randomly sample ligands from a `LigandSet` using the `random_sample` method:
+
+```python
+from deeporigin.drug_discovery import LigandSet, DATA_DIR
+
+ligands = LigandSet.from_sdf(DATA_DIR / "ligands" / "ligands-brd-all.sdf")
+
+# Sample 5 random ligands
+sample = ligands.random_sample(5)
+```
+
+This creates a new `LigandSet` containing a copy of those ligands. 
+
 ### Maximum Common Substructure
 
 The Maximum Common Substructure (MCS) for a `LigandSet` can be computed as follows:
@@ -377,7 +431,7 @@ ligands.mcs()
 ```
 
 !!! success "Expected Output"
-    ![](./mcs.png)
+    ![](../../images/mcs.png)
 
 
 ### Constraints

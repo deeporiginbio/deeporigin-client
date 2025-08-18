@@ -54,6 +54,8 @@ nav:
     - Work with Proteins: dd/how-to/proteins.md
     - Work with Ligands: dd/how-to/ligands.md
     - Visualize proteins and ligands: dd/how-to/visualize.md
+    - Find pockets: dd/how-to/find-pockets.md
+    - Dock Ligands: dd/how-to/docking.md
     - Filter outputs of Docking: dd/how-to/filter-docking-outputs.md
     - Use outputs of Docking for FEP: dd/how-to/use-docking-outputs-for-fep.md
     - Visualize ABFE trajectories: dd/how-to/visualize-abfe-trajectories.md

@@ -71,7 +71,7 @@ sim.protein.show()
 This generates a 3D visualization of the protein, similar to:
 
 <iframe 
-    src="../how-to/protein.html" 
+    src="../../images/brd-protein.html" 
     width="100%" 
     height="650" 
     style="border:none;"
@@ -93,7 +93,7 @@ sim.ligands
 
 !!! success "Expected output"
 
-    ![](./ligands.png)
+    ![](../../images//ligands.png)
     
 
 !!! tip "Jupyter notebooks"
@@ -115,7 +115,7 @@ sim.ligands.show()
 
 
 <iframe 
-    src="../how-to/brd-ligands.html" 
+    src="../../images/brd-ligands.html" 
     width="100%" 
     height="650" 
     style="border:none;"
