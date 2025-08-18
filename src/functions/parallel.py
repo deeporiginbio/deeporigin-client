@@ -104,7 +104,7 @@ def run_func_in_parallel(
         to_process = [
             i
             for i, (result, retries) in enumerate(
-                zip(results, retries_left, strict=False)
+                zip(results, retries_left, strict=True)
             )
             if result is None and retries > 0
         ]
@@ -205,12 +205,12 @@ def run_func_in_parallel_async(
         """Process all batches until completion."""
         while any(
             (result is None and retries > 0)
-            for result, retries in zip(results, retries_left, strict=False)
+            for result, retries in zip(results, retries_left, strict=True)
         ):
             to_process = [
                 i
                 for i, (result, retries) in enumerate(
-                    zip(results, retries_left, strict=False)
+                    zip(results, retries_left, strict=True)
                 )
                 if result is None and retries > 0
             ]
