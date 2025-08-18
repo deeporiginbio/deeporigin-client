@@ -99,7 +99,7 @@ def run_func_in_parallel(
     # Process in batches until all successful or max retries exhausted
     while any(
         (result is None and retries > 0)
-        for result, retries in zip(results, retries_left, strict=False)
+        for result, retries in zip(results, retries_left, strict=True)
     ):
         to_process = [
             i

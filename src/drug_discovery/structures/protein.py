@@ -248,16 +248,16 @@ class Protein(Entity):
 
         """
 
-        if ligand is None and ligands is not None:
-            pass
-
-        elif ligand is not None and ligands is None:
-            ligands = [ligand]
-
-        else:
+        if ligands is None and ligand is None:
             raise DeepOriginException(
                 "Either ligand or ligands must be provided to protein.dock()"
             ) from None
+
+        if ligand is not None and ligands is None:
+            ligands = [ligand]
+
+        if isinstance(ligands, list):
+            ligands = LigandSet(ligands)
 
         if reference_pose is not None:
             # perform constrained docking
