@@ -8,7 +8,12 @@ from deeporigin.drug_discovery.structures import Ligand
 from deeporigin.exceptions import DeepOriginException
 
 # Import shared test fixtures
-from tests.utils_ligands import bad_ligands, ligands
+from tests.utils_ligands import (
+    bad_ligands,
+    ligands,
+    single_ligand_files,
+    single_ligand_hashes,
+)
 
 base_path = os.path.join(os.path.dirname(__file__), "fixtures")
 
@@ -173,6 +178,25 @@ def test_ligand_base64():
     new_ligand = Ligand.from_base64(b64)
 
     assert new_ligand.smiles == ligand.smiles
+
+
+@pytest.mark.parametrize(
+    "sdf_file, hash_value",
+    zip(
+        single_ligand_files,
+        single_ligand_hashes,
+        strict=True,
+    ),
+)
+def test_ligand_hash(sdf_file, hash_value):
+    """Test the to_hash method that returns SHA256 hash of SDF content"""
+
+    ligand = Ligand.from_sdf(sdf_file)
+
+    # Get the hash
+    assert ligand.to_hash() == hash_value, (
+        f"Error in computing hash for {sdf_file}. Computed hash: {ligand.to_hash()}, Expected hash: {hash}"
+    )
 
 
 @pytest.mark.parametrize("ligand", bad_ligands)

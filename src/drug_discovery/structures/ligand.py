@@ -4,6 +4,7 @@ This module contains the Ligand and LigandSet classes, which allow you to work w
 
 import base64
 from dataclasses import dataclass, field
+import hashlib
 import os
 from pathlib import Path
 import random
@@ -630,6 +631,28 @@ class Ligand(Entity):
         os.remove(temp_sdf_path)
 
         return base64_encoded
+
+    @beartype
+    def to_hash(self) -> str:
+        """Convert the ligand to SHA256 hash of the SDF file content.
+
+        Returns:
+            str: SHA256 hash string of the SDF file content
+        """
+
+        # Create a temporary SDF file
+        temp_sdf_path = self.to_sdf()
+
+        # Read the file and compute SHA256 hash
+        with open(temp_sdf_path, "rb") as f:
+            sdf_content = f.read()
+            hash_object = hashlib.sha256(sdf_content)
+            hash_hex = hash_object.hexdigest()
+
+        # Clean up the temporary file
+        os.remove(temp_sdf_path)
+
+        return hash_hex
 
     @beartype
     def to_pdb(self, output_path: Optional[str] = None) -> str | Path:

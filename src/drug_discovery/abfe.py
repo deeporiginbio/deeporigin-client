@@ -11,7 +11,7 @@ import pandas as pd
 
 from deeporigin.drug_discovery import utils
 from deeporigin.drug_discovery.constants import tool_mapper
-from deeporigin.drug_discovery.structures.ligand import Ligand
+from deeporigin.drug_discovery.structures.ligand import Ligand, LigandSet
 from deeporigin.drug_discovery.workflow_step import WorkflowStep
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.platform import file_api
@@ -199,10 +199,11 @@ class ABFE(WorkflowStep):
         return ligands_to_run
 
     @beartype
-    def run_end_to_end(
+    def run(
         self,
         *,
-        ligands: Optional[list[Ligand]] = None,
+        ligands: Optional[list[Ligand] | LigandSet] = None,
+        ligand: Optional[Ligand] = None,
         re_run: bool = False,
         _output_dir_path: Optional[str] = None,
     ) -> list[Job] | None:
@@ -211,8 +212,13 @@ class ABFE(WorkflowStep):
         Args:
             ligands: List of ligand to run. Defaults to None. When None, all ligands in the object will be run. To view a list of valid ligands, use the `.show_ligands()` method"""
 
-        if ligands is None:
+        if ligands is None and ligand is None:
             ligands = self.parent.ligands
+        elif ligands is None:
+            ligands = [ligand]
+
+        if isinstance(ligands, LigandSet):
+            ligands = ligands.ligands
 
         # check that there is a prepared system for each ligand
         for ligand in ligands:
