@@ -60,6 +60,7 @@ class Ligand(Entity):
     available_for_docking: bool = field(init=False, default=True)
 
     _remote_path_base = "entities/ligands/"
+    _preferred_ext = ".sdf"
 
     @classmethod
     @beartype
