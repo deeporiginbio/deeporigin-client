@@ -30,7 +30,7 @@ class Entity:
         from deeporigin.platform import file_api
 
         remote_files = file_api.get_object_directory(
-            file_path=self.remote_base,
+            file_path=self._remote_path_base,
             recursive=True,
         )
         remote_files = [file.Key for file in remote_files]

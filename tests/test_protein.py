@@ -176,6 +176,28 @@ def test_protein_base64():
     )
 
 
+def test_protein_hash():
+    """Test that we can convert a Protein to SHA256 hash"""
+    # Create a protein using from_pdb_id
+    protein = Protein.from_pdb_id("1EBY")
+
+    # Get the hash
+    hash_value = protein.to_hash()
+
+    # Verify it's a valid SHA256 hash (64 character hex string)
+    assert len(hash_value) == 64
+    assert all(c in "0123456789abcdef" for c in hash_value)
+
+    # Verify the hash is consistent (same protein should produce same hash)
+    hash_value2 = protein.to_hash()
+    assert hash_value == hash_value2
+
+    # Verify different proteins produce different hashes
+    protein2 = Protein.from_pdb_id("2JUQ")
+    hash_value3 = protein2.to_hash()
+    assert hash_value != hash_value3
+
+
 def test_extract_ligand_remove_water():
     """check that we can remove waters after we extract the ligand"""
 

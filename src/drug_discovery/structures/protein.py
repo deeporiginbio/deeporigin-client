@@ -9,6 +9,7 @@ from various sources, preprocess structures, handle ligands, and visualize prote
 
 from collections import defaultdict
 from dataclasses import dataclass, field
+import hashlib
 import io
 import os
 from pathlib import Path
@@ -49,6 +50,7 @@ class Protein(Entity):
     block_content: Optional[str] = None
 
     _remote_path_base = "entities/proteins/"
+    _preferred_ext = ".pdb"
 
     @classmethod
     def from_name(cls, name: str) -> "Protein":
@@ -888,6 +890,37 @@ class Protein(Entity):
             # Clean up the temporary file
             import os
 
+            if os.path.exists(temp_file_path):
+                os.remove(temp_file_path)
+
+    @beartype
+    def to_hash(self) -> str:
+        """Convert the protein to SHA256 hash of the PDB file content.
+
+        Returns:
+            str: SHA256 hash string of the PDB file content
+        """
+        import tempfile
+
+        # Create a temporary PDB file
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".pdb", delete=False
+        ) as temp_file:
+            temp_file_path = temp_file.name
+
+        try:
+            # Write the protein to the temporary file
+            self.to_pdb(temp_file_path)
+
+            # Read the file and compute SHA256 hash
+            with open(temp_file_path, "rb") as f:
+                pdb_content = f.read()
+                hash_object = hashlib.sha256(pdb_content)
+                hash_hex = hash_object.hexdigest()
+
+            return hash_hex
+        finally:
+            # Clean up the temporary file
             if os.path.exists(temp_file_path):
                 os.remove(temp_file_path)
 

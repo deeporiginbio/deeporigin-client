@@ -2,6 +2,7 @@
 
 import concurrent.futures
 import os
+from pathlib import Path
 import sys
 from typing import Optional
 
@@ -20,7 +21,12 @@ DO_FOLDER = _ensure_do_folder()
 
 
 @beartype
-def upload_file(*, local_path: str, remote_path: str, client=None):
+def upload_file(
+    *,
+    local_path: str | Path,
+    remote_path: str | Path,
+    client=None,
+):
     """upload a single file to UFA
 
     Args:
@@ -30,7 +36,11 @@ def upload_file(*, local_path: str, remote_path: str, client=None):
 
     with open(local_path, "rb") as f:
         file_data = (remote_path, f.read())
-        put_object(file_path=remote_path, file=file_data, client=client)  # noqa: F821
+        put_object(  # noqa: F821
+            file_path=str(remote_path),
+            file=file_data,
+            client=client,
+        )
 
 
 @beartype
