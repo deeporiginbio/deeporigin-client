@@ -179,23 +179,12 @@ def test_protein_base64():
 def test_protein_hash():
     """Test that we can convert a Protein to SHA256 hash"""
     # Create a protein using from_pdb_id
-    protein = Protein.from_pdb_id("1EBY")
+    protein = Protein.from_file(BRD_DATA_DIR / "brd.pdb")
 
-    # Get the hash
-    hash_value = protein.to_hash()
-
-    # Verify it's a valid SHA256 hash (64 character hex string)
-    assert len(hash_value) == 64
-    assert all(c in "0123456789abcdef" for c in hash_value)
-
-    # Verify the hash is consistent (same protein should produce same hash)
-    hash_value2 = protein.to_hash()
-    assert hash_value == hash_value2
-
-    # Verify different proteins produce different hashes
-    protein2 = Protein.from_pdb_id("2JUQ")
-    hash_value3 = protein2.to_hash()
-    assert hash_value != hash_value3
+    assert (
+        "db4aa32e2e8ffa976a60004a8361b86427a2e5653a6623bb60b7913445902549"
+        == protein.to_hash()
+    ), "Protein hash did not match"
 
 
 def test_extract_ligand_remove_water():
