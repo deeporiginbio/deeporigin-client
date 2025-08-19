@@ -155,7 +155,7 @@ class Complex:
             is_lig_protonated (bool, optional): Whether the ligand is already protonated. Defaults to True.
             is_protein_protonated (bool, optional): Whether the protein is already protonated. Defaults to True.
         """
-        from deeporigin.functions.sysprep import sysprep
+        from deeporigin.functions.sysprep import run_sysprep
 
         if ligand is None:
             from tqdm import tqdm
@@ -180,7 +180,7 @@ class Complex:
             ligand_path = ligand.file_path
 
         # run sysprep on the ligand
-        complex_path = sysprep(
+        complex_path = run_sysprep(
             protein_path=self.protein.file_path,
             padding=padding,
             ligand_path=ligand_path,
