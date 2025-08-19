@@ -1,4 +1,4 @@
-name: Build Documentation
+name: Test build of Documentation
 
 on:
   pull_request:
