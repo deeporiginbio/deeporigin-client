@@ -411,7 +411,7 @@ class Ligand(Entity):
         conf = self.get_conformer(i)
         return conf.GetPositions()
 
-    def species(self) -> list[str]:
+    def get_species(self) -> list[str]:
         """
         Get the atomic symbols of all atoms in the molecule.
 
@@ -493,7 +493,7 @@ class Ligand(Entity):
 
     @property
     def atom_types(self):
-        return self.species()
+        return self.get_species()
 
     def set_property(self, prop_name: str, prop_value):
         """
@@ -713,10 +713,9 @@ class Ligand(Entity):
 
         """
         try:
-            temp_file = Path(tempfile.gettempdir()) / f"{self.name}_visualize.sdf"
-            self.write_to_file(str(temp_file))
+            sdf_file = self.to_sdf()
 
-            viewer = MoleculeViewer(str(temp_file), format="sdf")
+            viewer = MoleculeViewer(str(sdf_file), format="sdf")
             ligand_config = viewer.get_ligand_visualization_config()
             html = viewer.render_ligand(ligand_config=ligand_config)
 

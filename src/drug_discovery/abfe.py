@@ -166,10 +166,17 @@ class ABFE(WorkflowStep):
     def _get_ligands_to_run(
         self,
         *,
-        ligands: list[Ligand],
+        ligands: list[Ligand] | LigandSet,
         re_run: bool,
     ) -> list[Ligand]:
         """Helper method to determine which ligands need to be run based on already run jobs and re_run flag."""
+
+        if isinstance(ligands, LigandSet):
+            ligands = ligands.ligands
+
+        if re_run:
+            # we're re-running, so we need to re-run all ligands
+            return ligands
 
         df = get_dataframe(
             tool_key=tool_mapper["ABFE"],
@@ -181,26 +188,24 @@ class ABFE(WorkflowStep):
 
         # Build set of ligand names that have already been run
         if len(df) > 0:
-            ligands_already_run = {
-                ligand_file
-                for ligand_file in df["metadata"].apply(
-                    lambda d: d.get("ligand_file") if isinstance(d, dict) else None
+            ligand_hashes_already_run = {
+                ligand_hash
+                for ligand_hash in df["metadata"].apply(
+                    lambda d: d.get("ligand_hash") if isinstance(d, dict) else None
                 )
-                if isinstance(ligand_file, str) and ligand_file
+                if isinstance(ligand_hash, str) and ligand_hash
             }
         else:
-            ligands_already_run = set()
+            ligand_hashes_already_run = set()
 
-        if re_run:
-            # need to re-run, so don't remove already run ligands
-            ligands_to_run = ligands
-        else:
-            # no re-run, remove already run ligands
-            ligands_to_run = [
-                ligand
-                for ligand in ligands
-                if os.path.basename(ligand._remote_path) not in ligands_already_run
-            ]
+        print(ligand_hashes_already_run)
+
+        # no re-run, remove already run ligands
+        ligands_to_run = [
+            ligand
+            for ligand in ligands
+            if ligand.to_hash() not in ligand_hashes_already_run
+        ]
         return ligands_to_run
 
     @beartype

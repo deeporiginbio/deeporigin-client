@@ -18,6 +18,32 @@ from tests.utils_ligands import (
 base_path = os.path.join(os.path.dirname(__file__), "fixtures")
 
 
+@pytest.mark.parametrize("ligand_file", single_ligand_files)
+def test_ligand_hash_stable(ligand_file):
+    """check that the ligand hash doesn't change if we perform various read-only operations"""
+
+    ligand = Ligand.from_sdf(ligand_file)
+
+    hash_before = ligand.to_hash()
+    ligand.show()
+    ligand.get_heavy_atom_count()
+    ligand.get_conformer_id()
+    ligand.get_coordinates(0)
+    ligand.get_species()
+    ligand.to_molblock()
+    ligand.get_formula()
+    _ = ligand.contains_boron
+    _ = ligand.coordinates
+    _ = ligand.atom_types
+    ligand.to_base64()
+    ligand.get_center()
+    ligand.draw()
+    ligand.__str__()
+    hash_after = ligand.to_hash()
+
+    assert hash_before == hash_after
+
+
 @pytest.mark.parametrize(
     "smiles,name,expected_atoms,equivalent_smiles",
     [
