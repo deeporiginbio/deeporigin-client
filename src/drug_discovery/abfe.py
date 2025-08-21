@@ -126,19 +126,24 @@ class ABFE(WorkflowStep):
         """get jobs for this workflow step"""
         df = super().get_jobs_df()
 
+        ligand_hashes = [ligand.to_hash() for ligand in self.parent.ligands]
+
+        # filter df by ligand_hash
+        df = df[df["metadata"].apply(lambda d: d.get("ligand_hash") in ligand_hashes)]
+
         # make a new column called ligand_smiles using the metadata column
         df["ligand_smiles"] = df["metadata"].apply(
             lambda d: d.get("ligand_smiles") if isinstance(d, dict) else None
         )
 
         # make a new column called protein_file using the metadata column
-        df["protein_file"] = df["metadata"].apply(
-            lambda d: d.get("protein_file") if isinstance(d, dict) else None
+        df["protein_name"] = df["metadata"].apply(
+            lambda d: d.get("protein_name") if isinstance(d, dict) else None
         )
 
         # make a new column called ligand_file using the metadata column
-        df["ligand_file"] = df["metadata"].apply(
-            lambda d: d.get("ligand_file") if isinstance(d, dict) else None
+        df["ligand_name"] = df["metadata"].apply(
+            lambda d: d.get("ligand_name") if isinstance(d, dict) else None
         )
 
         df.drop(columns=["metadata"], inplace=True)

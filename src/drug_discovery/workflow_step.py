@@ -1,7 +1,5 @@
 """Base class for workflow steps like ABFE, RBFE, and Docking."""
 
-import os
-
 from beartype import beartype
 import pandas as pd
 
@@ -44,8 +42,7 @@ class WorkflowStep:
         df = df[
             df["metadata"].apply(
                 lambda x: isinstance(x, dict)
-                and x.get("protein_file")
-                == os.path.basename(self.parent.protein.file_path)
+                and x.get("protein_hash") == self.parent.protein.to_hash()
             )
         ]
 
