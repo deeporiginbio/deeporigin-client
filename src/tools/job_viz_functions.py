@@ -20,23 +20,23 @@ def _abfe_parse_progress(job) -> dict:
     ]
 
     if len(job._progress_reports) == 0:
-        return {step: "NotStarted" for step in steps}
+        return dict.fromkeys(steps, "NotStarted")
 
     try:
         data = job._progress_reports[0]
 
         if data is None:
-            progress = {step: "NotStarted" for step in steps}
+            progress = dict.fromkeys(steps, "NotStarted")
             progress["init"] = "Running"
             return progress
         else:
             data = json.loads(data)
 
         if "cmd" in data and data["cmd"] == "FEP Results":
-            return {step: "Succeeded" for step in steps}
+            return dict.fromkeys(steps, "Succeeded")
 
         if "status" in data and data["status"] == "Initiating":
-            progress = {step: "NotStarted" for step in steps}
+            progress = dict.fromkeys(steps, "NotStarted")
             progress["init"] = "Running"
             return progress
 
@@ -44,7 +44,7 @@ def _abfe_parse_progress(job) -> dict:
 
         # If the overall status is Succeeded, return a dictionary with every key set to "Succeeded".
         if status_value == "Succeeded":
-            return {step: "Succeeded" for step in steps}
+            return dict.fromkeys(steps, "Succeeded")
 
         current_step = data["run_name"]
 
@@ -69,7 +69,7 @@ def _abfe_parse_progress(job) -> dict:
             progress[current_step] = "Failed"
 
     except Exception:
-        progress = {step: "Indeterminate" for step in steps}
+        progress = dict.fromkeys(steps, "Indeterminate")
         progress["init"] = "Indeterminate"
 
     return progress
@@ -103,12 +103,12 @@ def _viz_func_rbfe(job) -> str:
     import pandas as pd
 
     df = pd.DataFrame(
-        dict(
-            ligand1=ligand1,
-            ligand2=ligand2,
-            steps=steps,
-            sub_steps=sub_steps,
-        )
+        {
+            "ligand1": ligand1,
+            "ligand2": ligand2,
+            "steps": steps,
+            "sub_steps": sub_steps,
+        }
     )
     return df.to_html()
 
@@ -230,7 +230,7 @@ def _name_func_docking(job) -> str:
 def _name_func_abfe(job) -> str:
     """utility function to name a job using inputs to that job"""
     try:
-        return f"ABFE run using <code>{job._metadata[0]['protein_file']}</code> and <code>{job._metadata[0]['ligand_file']}</code>"
+        return f"ABFE run using <code>{job._metadata[0]['protein_name']}</code> and <code>{job._metadata[0]['ligand_name']}</code>"
     except Exception:
         return "ABFE run"
 
