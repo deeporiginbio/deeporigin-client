@@ -197,21 +197,11 @@ class Complex:
 
         files_to_upload = {}
 
-        protein_path = self.protein._remote_path_base + os.path.basename(
-            self.protein.file_path
-        )
-        self.protein._remote_path = protein_path
-        if protein_path not in remote_files:
-            files_to_upload[str(self.protein.file_path)] = protein_path
-
+        if self.protein._remote_path not in remote_files:
+            files_to_upload[str(self.protein.to_pdb())] = self.protein._remote_path
         for ligand in self.ligands:
-            if ligand.file_path is None:
-                # this ligand isn't being backed by a file, so we can't upload it
-                continue
-            ligand_path = ligand._remote_path_base + os.path.basename(ligand.file_path)
-            ligand._remote_path = ligand_path
-            if ligand_path not in remote_files:
-                files_to_upload[str(ligand.file_path)] = ligand_path
+            if ligand._remote_path not in remote_files:
+                files_to_upload[str(ligand.to_sdf())] = ligand._remote_path
 
         file_api.upload_files(files_to_upload)
 

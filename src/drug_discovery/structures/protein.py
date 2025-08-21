@@ -23,7 +23,12 @@ from biotite.structure.io.pdb import PDBFile
 from deeporigin_molstar import DockingViewer, JupyterViewer, ProteinViewer
 import numpy as np
 
-from deeporigin.drug_discovery.constants import METAL_ELEMENTS, METALS, STATE_DUMP_PATH
+from deeporigin.drug_discovery.constants import (
+    METAL_ELEMENTS,
+    METALS,
+    PROTEINS_DIR,
+    STATE_DUMP_PATH,
+)
 from deeporigin.drug_discovery.external_tools.utils import (
     generate_html_output,
     get_protein_info_dict,
@@ -842,7 +847,8 @@ class Protein(Entity):
                 f"Failed to create new Protein with modified structure: {str(e)}"
             ) from e
 
-    def to_pdb(self, file_path: str):
+    @beartype
+    def to_pdb(self, file_path: Optional[str | Path] = None) -> str:
         """
         Write the protein structure to a PDB file.
 
@@ -851,10 +857,15 @@ class Protein(Entity):
 
 
         """
+
+        if file_path is None:
+            file_path = PROTEINS_DIR / (self.to_hash() + ".pdb")
+
         try:
             pdb_file = PDBFile()
             pdb_file.set_structure(self.structure)
-            pdb_file.write(file_path)
+            pdb_file.write(str(file_path))
+            return str(file_path)
         except Exception as e:
             raise RuntimeError(
                 f"Failed to write structure to file {file_path}: {str(e)}"

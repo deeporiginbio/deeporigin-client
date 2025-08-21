@@ -16,7 +16,7 @@ warnings.filterwarnings(
     module="pydantic._internal._fields",
 )
 
-# we're importing this here after the warnings are supressed
+# we're importing this here after the warnings are suppressed
 # because importing this raises UserWarnings we don't want to show
 import do_sdk_platform  # noqa: E402
 
@@ -29,7 +29,7 @@ class PlatformClients:
 
     Args:
         token (str): The authentication token to use for all API clients.
-        base_url (str): The base URL of the DeepOrigin platform (e.g., 'https://os.deeporigin.io').
+        base_url (str): The base URL of the DeepOrigin platform (e.g., 'https://api.deeporigin.io').
         org_key (str): The organization-friendly ID to use for API requests.
     """
 
@@ -37,12 +37,11 @@ class PlatformClients:
         self,
         *,
         token: str,
-        base_url: str,
+        api_endpoint: str,
         org_key: str,
     ) -> None:
         self.org_key = org_key
 
-        api_endpoint = base_url + "/api/"
         apis = [attr for attr in do_sdk_platform.__dir__() if attr.endswith("Api")]
 
         for api in apis:
@@ -133,6 +132,7 @@ def _get_api_client(
     if configure:
         if api_endpoint is None:
             api_endpoint = get_value()["api_endpoint"]
+            print(f"Setting api_endpoint to {api_endpoint}")
 
         if token is None:
             token = get_tokens()["access"]

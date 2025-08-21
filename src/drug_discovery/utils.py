@@ -16,7 +16,7 @@ from deeporigin.utils.core import PrettyDict
 PROVIDER_KEY = "$provider"
 RESULTS_CSV = "results.csv"
 
-DATA_DIRS = dict()
+DATA_DIRS = {}
 
 for tool in tool_mapper.keys():
     DATA_DIRS[tool] = os.path.join(os.path.expanduser("~"), ".deeporigin", tool)

@@ -255,12 +255,15 @@ class ABFE(WorkflowStep):
 
         jobs_for_this_run = []
 
+        # TODO -- parallelize this
         for ligand in ligands_to_run:
-            metadata = dict(
-                protein_file=os.path.basename(self.parent.protein._remote_path),
-                ligand_file=os.path.basename(ligand._remote_path),
-                ligand_smiles=ligand.smiles,
-            )
+            metadata = {
+                "protein_hash": self.parent.protein.to_hash(),
+                "ligand_hash": ligand.to_hash(),
+                "ligand_smiles": ligand.smiles,
+                "protein_name": self.parent.protein.name,
+                "ligand_name": ligand.name,
+            }
 
             job_id = utils._start_tool_run(
                 metadata=metadata,

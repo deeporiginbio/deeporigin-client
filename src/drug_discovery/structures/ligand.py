@@ -19,6 +19,7 @@ import pandas as pd
 from rdkit import Chem, RDLogger
 from rdkit.Chem import AllChem, SaltRemover, rdMolDescriptors
 
+from deeporigin.drug_discovery.constants import LIGANDS_DIR
 from deeporigin.drug_discovery.utilities.visualize import jupyter_visualization
 from deeporigin.exceptions import DeepOriginException
 
@@ -606,9 +607,20 @@ class Ligand(Entity):
         return self.write_to_file(output_path=output_path, output_format="mol")
 
     @beartype
-    def to_sdf(self, output_path: Optional[str] = None) -> str | Path:
+    def to_sdf(self, output_path: Optional[str] = None) -> str:
         """Write the ligand to an SDF file."""
-        return self.write_to_file(output_path=output_path, output_format="sdf")
+
+        if output_path is None:
+            output_path = LIGANDS_DIR / (self.to_hash() + ".sdf")
+
+        with open(output_path, "w+") as file:
+            writer = Chem.SDWriter(file.name)
+            writer.write(self.mol)
+            writer.close()
+            file.flush()
+            file.seek(0)
+
+        return str(output_path)
 
     @beartype
     def to_base64(self) -> str:
@@ -642,7 +654,7 @@ class Ligand(Entity):
         """
 
         # Create a temporary SDF file
-        temp_sdf_path = self.to_sdf()
+        temp_sdf_path = self.to_sdf("__ligand_hash__.sdf")
 
         # Read the file and compute SHA256 hash
         with open(temp_sdf_path, "rb") as f:
@@ -1351,6 +1363,7 @@ class LigandSet:
             ligand.admet_properties(use_cache=use_cache)
         return self
 
+    @beartype
     def to_sdf(self, output_path: Optional[str] = None) -> str:
         """
         Write all ligands in the set to a single SDF file, preserving all properties from each Ligand's mol field.
