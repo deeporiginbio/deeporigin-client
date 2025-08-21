@@ -172,7 +172,7 @@ class Complex:
         )
 
         # set this complex path as the prepared system
-        self._prepared_systems[ligand.name] = complex_path
+        self._prepared_systems[ligand.to_hash()] = complex_path
 
         # show it
         if show_prepared_system:
@@ -206,7 +206,7 @@ class Complex:
         file_api.upload_files(files_to_upload)
 
     def _repr_pretty_(self, p, cycle):
-        """pretty print a Docking object"""
+        """pretty print a Complex object"""
 
         if cycle:
             p.text("Complex(...)")

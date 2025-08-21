@@ -232,10 +232,10 @@ class ABFE(WorkflowStep):
 
         # check that there is a prepared system for each ligand
         for ligand in ligands:
-            if ligand.name not in self.parent._prepared_systems:
-                raise ValueError(
+            if ligand.to_hash() not in self.parent._prepared_systems:
+                raise DeepOriginException(
                     f"Complex with Ligand {ligand.name} is not prepared. Please prepare the system using the `prepare` method of Complex."
-                )
+                ) from None
 
         # check that for every prepared system, the number of atoms is less than the max atom count
         for ligand_name, prepared_system in self.parent._prepared_systems.items():

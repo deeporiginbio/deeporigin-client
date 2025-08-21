@@ -12,9 +12,10 @@ Comparison:
   for network/file operations
 """
 
+from collections.abc import Callable
 import concurrent.futures
 import time
-from typing import Any, Callable, Optional, TypeVar
+from typing import Any, Optional, TypeVar
 
 from beartype import beartype
 
@@ -24,7 +25,7 @@ T = TypeVar("T")
 @beartype
 def run_func_in_parallel(
     *,
-    func: Callable[..., T],
+    func: Callable,
     batch_size: int = 10,
     max_retries: int = 3,
     sleep_between_batches: float = 0.1,
@@ -129,7 +130,7 @@ def run_func_in_parallel(
 
 def run_func_in_parallel_async(
     *,
-    func: Callable[..., T],
+    func: Callable,
     batch_size: int = 10,
     max_retries: int = 3,
     sleep_between_batches: float = 0.1,
