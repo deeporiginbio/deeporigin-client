@@ -42,11 +42,20 @@ class ABFE(WorkflowStep):
 
         This method returns a dataframe showing the results of ABFE runs associated with this simulation session. The ligand file name and ΔG are shown, together with user-supplied properties"""
 
+        df = self.get_jobs(include_outputs=True)
+
+        results_files = []
+
+        for _, row in df.iterrows():
+            file_path = row["user_outputs"]["abfe_results_summary"]["key"]
+            results_files.append(file_path)
+
+        return results_files
+
         files_client = getattr(self.parent._platform_clients, "FilesApi", None)
 
-        files = utils.find_files_on_ufa(
-            tool="ABFE",
-            protein=self.parent.protein.file_path.name,
+        files = file_api.list_files_in_dir(
+            file_path=f"tool-runs/ABFE/{self.parent.protein.to_hash()}.pdb/",
             client=files_client,
         )
 
@@ -57,7 +66,7 @@ class ABFE(WorkflowStep):
             print("No ABFE results found for this protein.")
             return None
 
-        file_api.download_files(
+        results_files = file_api.download_files(
             results_files,
             client=files_client,
         )
@@ -77,6 +86,8 @@ class ABFE(WorkflowStep):
         df2 = self.parent.ligands.to_dataframe()
         df2["SMILES"] = df2["Ligand"]
         df2.drop(columns=["Ligand", "initial_smiles"], inplace=True)
+
+        return df1, df2
 
         df = pd.merge(
             df1,
@@ -122,9 +133,14 @@ class ABFE(WorkflowStep):
         else:
             return df
 
-    def get_jobs(self):
+    def get_jobs(
+        self,
+        *,
+        include_metadata: bool = False,
+        include_outputs: bool = False,
+    ):
         """get jobs for this workflow step"""
-        df = super().get_jobs_df()
+        df = super().get_jobs_df(include_outputs=include_outputs)
 
         ligand_hashes = [ligand.to_hash() for ligand in self.parent.ligands]
 
@@ -146,7 +162,8 @@ class ABFE(WorkflowStep):
             lambda d: d.get("ligand_name") if isinstance(d, dict) else None
         )
 
-        df.drop(columns=["metadata"], inplace=True)
+        if not include_metadata:
+            df.drop(columns=["metadata"], inplace=True)
 
         return df
 

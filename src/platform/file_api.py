@@ -21,6 +21,35 @@ DO_FOLDER = _ensure_do_folder()
 
 
 @beartype
+def list_files_in_dir(
+    file_path: str,
+    *,
+    client=None,
+) -> list:
+    """
+    Find files on the UFA (Unified File API) storage in some directory.
+
+    Args:
+        file_path (str): The path to the directory to list files from.
+        client (FilesApi): The client to use to list files.
+
+    Returns:
+        List[str]: A list of file paths found in the specified UFA directory.
+    """
+
+    from deeporigin.platform import file_api
+
+    files = file_api.get_object_directory(
+        file_path=file_path,
+        recursive=True,
+        client=client,
+    )
+    files = [file.Key for file in files]
+
+    return files
+
+
+@beartype
 def upload_file(
     *,
     local_path: str | Path,
