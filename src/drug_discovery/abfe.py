@@ -11,7 +11,7 @@ import pandas as pd
 
 from deeporigin.drug_discovery import utils
 from deeporigin.drug_discovery.constants import tool_mapper
-from deeporigin.drug_discovery.structures.ligand import Ligand
+from deeporigin.drug_discovery.structures.ligand import Ligand, LigandSet
 from deeporigin.drug_discovery.workflow_step import WorkflowStep
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.platform import file_api
@@ -42,11 +42,20 @@ class ABFE(WorkflowStep):
 
         This method returns a dataframe showing the results of ABFE runs associated with this simulation session. The ligand file name and ΔG are shown, together with user-supplied properties"""
 
+        df = self.get_jobs(include_outputs=True)
+
+        results_files = []
+
+        for _, row in df.iterrows():
+            file_path = row["user_outputs"]["abfe_results_summary"]["key"]
+            results_files.append(file_path)
+
+        return results_files
+
         files_client = getattr(self.parent._platform_clients, "FilesApi", None)
 
-        files = utils.find_files_on_ufa(
-            tool="ABFE",
-            protein=self.parent.protein.file_path.name,
+        files = file_api.list_files_in_dir(
+            file_path=f"tool-runs/ABFE/{self.parent.protein.to_hash()}.pdb/",
             client=files_client,
         )
 
@@ -57,7 +66,7 @@ class ABFE(WorkflowStep):
             print("No ABFE results found for this protein.")
             return None
 
-        file_api.download_files(
+        results_files = file_api.download_files(
             results_files,
             client=files_client,
         )
@@ -77,6 +86,8 @@ class ABFE(WorkflowStep):
         df2 = self.parent.ligands.to_dataframe()
         df2["SMILES"] = df2["Ligand"]
         df2.drop(columns=["Ligand", "initial_smiles"], inplace=True)
+
+        return df1, df2
 
         df = pd.merge(
             df1,
@@ -122,9 +133,19 @@ class ABFE(WorkflowStep):
         else:
             return df
 
-    def get_jobs(self):
+    def get_jobs(
+        self,
+        *,
+        include_metadata: bool = False,
+        include_outputs: bool = False,
+    ):
         """get jobs for this workflow step"""
-        df = super().get_jobs_df()
+        df = super().get_jobs_df(include_outputs=include_outputs)
+
+        ligand_hashes = [ligand.to_hash() for ligand in self.parent.ligands]
+
+        # filter df by ligand_hash
+        df = df[df["metadata"].apply(lambda d: d.get("ligand_hash") in ligand_hashes)]
 
         # make a new column called ligand_smiles using the metadata column
         df["ligand_smiles"] = df["metadata"].apply(
@@ -132,16 +153,17 @@ class ABFE(WorkflowStep):
         )
 
         # make a new column called protein_file using the metadata column
-        df["protein_file"] = df["metadata"].apply(
-            lambda d: d.get("protein_file") if isinstance(d, dict) else None
+        df["protein_name"] = df["metadata"].apply(
+            lambda d: d.get("protein_name") if isinstance(d, dict) else None
         )
 
         # make a new column called ligand_file using the metadata column
-        df["ligand_file"] = df["metadata"].apply(
-            lambda d: d.get("ligand_file") if isinstance(d, dict) else None
+        df["ligand_name"] = df["metadata"].apply(
+            lambda d: d.get("ligand_name") if isinstance(d, dict) else None
         )
 
-        df.drop(columns=["metadata"], inplace=True)
+        if not include_metadata:
+            df.drop(columns=["metadata"], inplace=True)
 
         return df
 
@@ -161,10 +183,17 @@ class ABFE(WorkflowStep):
     def _get_ligands_to_run(
         self,
         *,
-        ligands: list[Ligand],
+        ligands: list[Ligand] | LigandSet,
         re_run: bool,
     ) -> list[Ligand]:
         """Helper method to determine which ligands need to be run based on already run jobs and re_run flag."""
+
+        if isinstance(ligands, LigandSet):
+            ligands = ligands.ligands
+
+        if re_run:
+            # we're re-running, so we need to re-run all ligands
+            return ligands
 
         df = get_dataframe(
             tool_key=tool_mapper["ABFE"],
@@ -176,33 +205,32 @@ class ABFE(WorkflowStep):
 
         # Build set of ligand names that have already been run
         if len(df) > 0:
-            ligands_already_run = {
-                ligand_file
-                for ligand_file in df["metadata"].apply(
-                    lambda d: d.get("ligand_file") if isinstance(d, dict) else None
+            ligand_hashes_already_run = {
+                ligand_hash
+                for ligand_hash in df["metadata"].apply(
+                    lambda d: d.get("ligand_hash") if isinstance(d, dict) else None
                 )
-                if isinstance(ligand_file, str) and ligand_file
+                if isinstance(ligand_hash, str) and ligand_hash
             }
         else:
-            ligands_already_run = set()
+            ligand_hashes_already_run = set()
 
-        if re_run:
-            # need to re-run, so don't remove already run ligands
-            ligands_to_run = ligands
-        else:
-            # no re-run, remove already run ligands
-            ligands_to_run = [
-                ligand
-                for ligand in ligands
-                if os.path.basename(ligand._remote_path) not in ligands_already_run
-            ]
+        print(ligand_hashes_already_run)
+
+        # no re-run, remove already run ligands
+        ligands_to_run = [
+            ligand
+            for ligand in ligands
+            if ligand.to_hash() not in ligand_hashes_already_run
+        ]
         return ligands_to_run
 
     @beartype
-    def run_end_to_end(
+    def run(
         self,
         *,
-        ligands: Optional[list[Ligand]] = None,
+        ligands: Optional[list[Ligand] | LigandSet] = None,
+        ligand: Optional[Ligand] = None,
         re_run: bool = False,
         _output_dir_path: Optional[str] = None,
     ) -> list[Job] | None:
@@ -211,15 +239,20 @@ class ABFE(WorkflowStep):
         Args:
             ligands: List of ligand to run. Defaults to None. When None, all ligands in the object will be run. To view a list of valid ligands, use the `.show_ligands()` method"""
 
-        if ligands is None:
+        if ligands is None and ligand is None:
             ligands = self.parent.ligands
+        elif ligands is None:
+            ligands = [ligand]
+
+        if isinstance(ligands, LigandSet):
+            ligands = ligands.ligands
 
         # check that there is a prepared system for each ligand
         for ligand in ligands:
-            if ligand.name not in self.parent._prepared_systems:
-                raise ValueError(
+            if ligand.to_hash() not in self.parent._prepared_systems:
+                raise DeepOriginException(
                     f"Complex with Ligand {ligand.name} is not prepared. Please prepare the system using the `prepare` method of Complex."
-                )
+                ) from None
 
         # check that for every prepared system, the number of atoms is less than the max atom count
         for ligand_name, prepared_system in self.parent._prepared_systems.items():
@@ -249,12 +282,15 @@ class ABFE(WorkflowStep):
 
         jobs_for_this_run = []
 
+        # TODO -- parallelize this
         for ligand in ligands_to_run:
-            metadata = dict(
-                protein_file=os.path.basename(self.parent.protein._remote_path),
-                ligand_file=os.path.basename(ligand._remote_path),
-                ligand_smiles=ligand.smiles,
-            )
+            metadata = {
+                "protein_hash": self.parent.protein.to_hash(),
+                "ligand_hash": ligand.to_hash(),
+                "ligand_smiles": ligand.smiles,
+                "protein_name": self.parent.protein.name,
+                "ligand_name": ligand.name,
+            }
 
             job_id = utils._start_tool_run(
                 metadata=metadata,

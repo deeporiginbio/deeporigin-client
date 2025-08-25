@@ -1,7 +1,5 @@
 """Base class for workflow steps like ABFE, RBFE, and Docking."""
 
-import os
-
 from beartype import beartype
 import pandas as pd
 
@@ -26,12 +24,17 @@ class WorkflowStep:
         self.parent = parent
         self._params = PrettyDict()
 
-    def get_jobs_df(self) -> pd.DataFrame:
+    def get_jobs_df(
+        self,
+        *,
+        include_outputs: bool = True,
+    ) -> pd.DataFrame:
         """Get the jobs for this workflow step as a dataframe"""
         df = get_dataframe(
             _platform_clients=self.parent._platform_clients,
             resolve_user_names=False,
             include_metadata=True,
+            include_outputs=include_outputs,
         )
 
         if len(df) == 0:
@@ -44,8 +47,7 @@ class WorkflowStep:
         df = df[
             df["metadata"].apply(
                 lambda x: isinstance(x, dict)
-                and x.get("protein_file")
-                == os.path.basename(self.parent.protein.file_path)
+                and x.get("protein_hash") == self.parent.protein.to_hash()
             )
         ]
 

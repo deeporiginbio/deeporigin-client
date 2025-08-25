@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+import sys
 
 import numpy as np
 import pytest
@@ -8,9 +9,40 @@ from deeporigin.drug_discovery.structures import Ligand
 from deeporigin.exceptions import DeepOriginException
 
 # Import shared test fixtures
-from tests.utils_ligands import bad_ligands, ligands
+from tests.utils_ligands import (
+    bad_ligands,
+    ligands,
+    single_ligand_files,
+    single_ligand_hashes,
+)
 
 base_path = os.path.join(os.path.dirname(__file__), "fixtures")
+
+
+@pytest.mark.parametrize("ligand_file", single_ligand_files)
+def test_ligand_hash_stable(ligand_file):
+    """check that the ligand hash doesn't change if we perform various read-only operations"""
+
+    ligand = Ligand.from_sdf(ligand_file)
+
+    hash_before = ligand.to_hash()
+    ligand.show()
+    ligand.get_heavy_atom_count()
+    ligand.get_conformer_id()
+    ligand.get_coordinates(0)
+    ligand.get_species()
+    ligand.to_molblock()
+    ligand.get_formula()
+    _ = ligand.contains_boron
+    _ = ligand.coordinates
+    _ = ligand.atom_types
+    ligand.to_base64()
+    ligand.get_center()
+    ligand.draw()
+    ligand.__str__()
+    hash_after = ligand.to_hash()
+
+    assert hash_before == hash_after
 
 
 @pytest.mark.parametrize(
@@ -173,6 +205,29 @@ def test_ligand_base64():
     new_ligand = Ligand.from_base64(b64)
 
     assert new_ligand.smiles == ligand.smiles
+
+
+@pytest.mark.parametrize(
+    "sdf_file, hash_value",
+    zip(
+        single_ligand_files,
+        single_ligand_hashes,
+        strict=True,
+    ),
+)
+@pytest.mark.skipif(
+    sys.platform == "win32",
+    reason="Hash computation may differ on Windows due to line ending differences",
+)
+def test_ligand_hash(sdf_file, hash_value):
+    """Test the to_hash method that returns SHA256 hash of SDF content"""
+
+    ligand = Ligand.from_sdf(sdf_file)
+
+    # Get the hash
+    assert ligand.to_hash() == hash_value, (
+        f"Error in computing hash for {sdf_file}. Computed hash: {ligand.to_hash()}, Expected hash: {hash_value}"
+    )
 
 
 @pytest.mark.parametrize("ligand", bad_ligands)

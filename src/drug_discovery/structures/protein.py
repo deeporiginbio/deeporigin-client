@@ -9,6 +9,7 @@ from various sources, preprocess structures, handle ligands, and visualize prote
 
 from collections import defaultdict
 from dataclasses import dataclass, field
+import hashlib
 import io
 import os
 from pathlib import Path
@@ -22,7 +23,12 @@ from biotite.structure.io.pdb import PDBFile
 from deeporigin_molstar import DockingViewer, JupyterViewer, ProteinViewer
 import numpy as np
 
-from deeporigin.drug_discovery.constants import METAL_ELEMENTS, METALS, STATE_DUMP_PATH
+from deeporigin.drug_discovery.constants import (
+    METAL_ELEMENTS,
+    METALS,
+    PROTEINS_DIR,
+    STATE_DUMP_PATH,
+)
 from deeporigin.drug_discovery.external_tools.utils import (
     generate_html_output,
     get_protein_info_dict,
@@ -49,6 +55,7 @@ class Protein(Entity):
     block_content: Optional[str] = None
 
     _remote_path_base = "entities/proteins/"
+    _preferred_ext = ".pdb"
 
     @classmethod
     def from_name(cls, name: str) -> "Protein":
@@ -840,7 +847,8 @@ class Protein(Entity):
                 f"Failed to create new Protein with modified structure: {str(e)}"
             ) from e
 
-    def to_pdb(self, file_path: str):
+    @beartype
+    def to_pdb(self, file_path: Optional[str | Path] = None) -> str:
         """
         Write the protein structure to a PDB file.
 
@@ -849,10 +857,15 @@ class Protein(Entity):
 
 
         """
+
+        if file_path is None:
+            file_path = PROTEINS_DIR / (self.to_hash() + ".pdb")
+
         try:
             pdb_file = PDBFile()
             pdb_file.set_structure(self.structure)
-            pdb_file.write(file_path)
+            pdb_file.write(str(file_path))
+            return str(file_path)
         except Exception as e:
             raise RuntimeError(
                 f"Failed to write structure to file {file_path}: {str(e)}"
@@ -888,6 +901,37 @@ class Protein(Entity):
             # Clean up the temporary file
             import os
 
+            if os.path.exists(temp_file_path):
+                os.remove(temp_file_path)
+
+    @beartype
+    def to_hash(self) -> str:
+        """Convert the protein to SHA256 hash of the PDB file content.
+
+        Returns:
+            str: SHA256 hash string of the PDB file content
+        """
+        import tempfile
+
+        # Create a temporary PDB file
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".pdb", delete=False
+        ) as temp_file:
+            temp_file_path = temp_file.name
+
+        try:
+            # Write the protein to the temporary file
+            self.to_pdb(temp_file_path)
+
+            # Read the file and compute SHA256 hash
+            with open(temp_file_path, "rb") as f:
+                pdb_content = f.read()
+                hash_object = hashlib.sha256(pdb_content)
+                hash_hex = hash_object.hexdigest()
+
+            return hash_hex
+        finally:
+            # Clean up the temporary file
             if os.path.exists(temp_file_path):
                 os.remove(temp_file_path)
 

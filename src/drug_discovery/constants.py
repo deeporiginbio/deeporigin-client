@@ -108,6 +108,12 @@ METAL_ELEMENTS = {
 
 # File paths
 STATE_DUMP_PATH = Path.home() / ".deeporigin" / "state_dump.pdb"
+PROTEINS_DIR = Path.home() / ".deeporigin" / "proteins"
+LIGANDS_DIR = Path.home() / ".deeporigin" / "ligands"
+
+# make sure these directories exist
+PROTEINS_DIR.mkdir(parents=True, exist_ok=True)
+LIGANDS_DIR.mkdir(parents=True, exist_ok=True)
 
 valid_tools = Literal["ABFE", "RBFE", "Docking"]
 

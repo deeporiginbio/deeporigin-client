@@ -474,26 +474,24 @@ def get_dataframe(
         data["user_outputs"] = []
 
     for job in jobs:
-        attributes = job["attributes"]
-
         # Add basic fields
         data["id"].append(job["id"])
-        data["created_at"].append(attributes["createdAt"])
-        data["execution_id"].append(attributes["executionId"])
-        data["completed_at"].append(attributes["completedAt"])
-        data["started_at"].append(attributes["startedAt"])
-        data["status"].append(attributes["status"])
-        data["tool_key"].append(attributes["tool"]["key"])
-        data["tool_version"].append(attributes["tool"]["version"])
+        data["created_at"].append(job["createdAt"])
+        data["execution_id"].append(job["executionId"])
+        data["completed_at"].append(job["completedAt"])
+        data["started_at"].append(job["startedAt"])
+        data["status"].append(job["status"])
+        data["tool_key"].append(job["tool"]["key"])
+        data["tool_version"].append(job["tool"]["version"])
 
-        user_id = attributes.get("createdBy", "Unknown")
+        user_id = job.get("createdBy", "Unknown")
 
         if resolve_user_names:
             data["user_name"].append(user_id_to_name.get(user_id, "Unknown"))
         else:
             data["user_name"].append(user_id)
 
-        user_inputs = attributes.get("userInputs", {})
+        user_inputs = job.get("userInputs", {})
 
         if include_inputs:
             data["user_inputs"].append(user_inputs)
@@ -504,12 +502,12 @@ def get_dataframe(
             data["n_ligands"].append(1)
 
         # Handle protein_id (may not exist or metadata may be None)
-        metadata = attributes.get("metadata")
+        metadata = job.get("metadata")
 
         # Calculate run duration in minutes and round to nearest integer
-        if attributes["completedAt"] and attributes["startedAt"]:
-            start = parser.isoparse(attributes["startedAt"])
-            end = parser.isoparse(attributes["completedAt"])
+        if job["completedAt"] and job["startedAt"]:
+            start = parser.isoparse(job["startedAt"])
+            end = parser.isoparse(job["completedAt"])
             duration = round((end - start).total_seconds() / 60)
             data["run_duration_minutes"].append(duration)
         else:
@@ -519,7 +517,7 @@ def get_dataframe(
             data["metadata"].append(metadata)
 
         if include_outputs:
-            data["user_outputs"].append(attributes.get("userOutputs", {}))
+            data["user_outputs"].append(job.get("userOutputs", {}))
 
     # Create DataFrame
     df = pd.DataFrame(data)

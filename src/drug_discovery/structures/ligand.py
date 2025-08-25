@@ -4,6 +4,7 @@ This module contains the Ligand and LigandSet classes, which allow you to work w
 
 import base64
 from dataclasses import dataclass, field
+import hashlib
 import os
 from pathlib import Path
 import random
@@ -18,6 +19,7 @@ import pandas as pd
 from rdkit import Chem, RDLogger
 from rdkit.Chem import AllChem, SaltRemover, rdMolDescriptors
 
+from deeporigin.drug_discovery.constants import LIGANDS_DIR
 from deeporigin.drug_discovery.utilities.visualize import jupyter_visualization
 from deeporigin.exceptions import DeepOriginException
 
@@ -59,6 +61,7 @@ class Ligand(Entity):
     available_for_docking: bool = field(init=False, default=True)
 
     _remote_path_base = "entities/ligands/"
+    _preferred_ext = ".sdf"
 
     @classmethod
     @beartype
@@ -408,7 +411,7 @@ class Ligand(Entity):
         conf = self.get_conformer(i)
         return conf.GetPositions()
 
-    def species(self) -> list[str]:
+    def get_species(self) -> list[str]:
         """
         Get the atomic symbols of all atoms in the molecule.
 
@@ -490,7 +493,7 @@ class Ligand(Entity):
 
     @property
     def atom_types(self):
-        return self.species()
+        return self.get_species()
 
     def set_property(self, prop_name: str, prop_value):
         """
@@ -604,9 +607,20 @@ class Ligand(Entity):
         return self.write_to_file(output_path=output_path, output_format="mol")
 
     @beartype
-    def to_sdf(self, output_path: Optional[str] = None) -> str | Path:
+    def to_sdf(self, output_path: Optional[str] = None) -> str:
         """Write the ligand to an SDF file."""
-        return self.write_to_file(output_path=output_path, output_format="sdf")
+
+        if output_path is None:
+            output_path = LIGANDS_DIR / (self.to_hash() + ".sdf")
+
+        with open(output_path, "w+") as file:
+            writer = Chem.SDWriter(file.name)
+            writer.write(self.mol)
+            writer.close()
+            file.flush()
+            file.seek(0)
+
+        return str(output_path)
 
     @beartype
     def to_base64(self) -> str:
@@ -630,6 +644,28 @@ class Ligand(Entity):
         os.remove(temp_sdf_path)
 
         return base64_encoded
+
+    @beartype
+    def to_hash(self) -> str:
+        """Convert the ligand to SHA256 hash of the SDF file content.
+
+        Returns:
+            str: SHA256 hash string of the SDF file content
+        """
+
+        # Create a temporary SDF file
+        temp_sdf_path = self.to_sdf("__ligand_hash__.sdf")
+
+        # Read the file and compute SHA256 hash
+        with open(temp_sdf_path, "rb") as f:
+            sdf_content = f.read()
+            hash_object = hashlib.sha256(sdf_content)
+            hash_hex = hash_object.hexdigest()
+
+        # Clean up the temporary file
+        os.remove(temp_sdf_path)
+
+        return hash_hex
 
     @beartype
     def to_pdb(self, output_path: Optional[str] = None) -> str | Path:
@@ -677,10 +713,9 @@ class Ligand(Entity):
 
         """
         try:
-            temp_file = Path(tempfile.gettempdir()) / f"{self.name}_visualize.sdf"
-            self.write_to_file(str(temp_file))
+            sdf_file = self.to_sdf()
 
-            viewer = MoleculeViewer(str(temp_file), format="sdf")
+            viewer = MoleculeViewer(str(sdf_file), format="sdf")
             ligand_config = viewer.get_ligand_visualization_config()
             html = viewer.render_ligand(ligand_config=ligand_config)
 
@@ -1327,6 +1362,7 @@ class LigandSet:
             ligand.admet_properties(use_cache=use_cache)
         return self
 
+    @beartype
     def to_sdf(self, output_path: Optional[str] = None) -> str:
         """
         Write all ligands in the set to a single SDF file, preserving all properties from each Ligand's mol field.
