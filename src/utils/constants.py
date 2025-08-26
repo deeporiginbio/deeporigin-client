@@ -50,3 +50,6 @@ class PREFIXES:
     DB = "_database"
     ROW = "_row"
     FOLDER = "_workspace"
+
+
+number = int | float

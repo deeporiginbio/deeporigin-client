@@ -9,6 +9,7 @@ from pathlib import Path
 from beartype import beartype
 import requests
 
+from deeporigin.utils.constants import number
 from deeporigin.utils.core import hash_dict
 
 URL = "http://molprops.default.jobs.edge.deeporigin.io/protonation"
@@ -22,8 +23,8 @@ os.makedirs(CACHE_DIR, exist_ok=True)
 def protonate(
     *,
     smiles: str,
-    ph: float = 7.4,
-    filter_percentage: float = 1.0,
+    ph: number = 7.4,
+    filter_percentage: number = 1.0,
     use_cache: bool = True,
 ) -> dict:
     """
@@ -39,8 +40,8 @@ def protonate(
 
     payload = {
         "smiles": smiles,
-        "ph": ph,
-        "filter_percentage": filter_percentage,
+        "pH": ph,
+        "filter_percentage": float(filter_percentage),
     }
 
     # Create hash of inputs
@@ -68,6 +69,11 @@ def protonate(
 
         response = response.json()
 
+        # check response pH
+        if response["pH"] != ph:
+            raise ValueError(
+                f"Protonation failed. Expected pH {ph}, got {response['pH']}"
+            )
         # Write JSON response to cache
         with open(response_file, "w") as file:
             json.dump(response, file)
