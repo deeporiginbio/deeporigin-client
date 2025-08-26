@@ -17,9 +17,11 @@ import numpy as np
 import pandas as pd
 from rdkit import Chem, RDLogger
 from rdkit.Chem import AllChem, SaltRemover, rdMolDescriptors
+from tqdm import tqdm
 
 from deeporigin.drug_discovery.utilities.visualize import jupyter_visualization
 from deeporigin.exceptions import DeepOriginException
+from deeporigin.utils.constants import number
 
 from .entity import Entity
 
@@ -408,6 +410,27 @@ class Ligand(Entity):
         conf = self.get_conformer(i)
         return conf.GetPositions()
 
+    @beartype
+    def protonate(
+        self,
+        *,
+        ph: number = 7.4,
+        filter_percentage: number = 1.0,
+    ):
+        """
+        Protonate the ligand at a given pH.
+
+        Only the most abundant species is retained.
+        """
+        from deeporigin.functions.protonation import protonate
+
+        data = protonate(
+            smiles=self.smiles,
+            ph=ph,
+            filter_percentage=filter_percentage,
+        )
+        self.mol = Chem.MolFromSmiles(data["protonation_states"]["smiles_list"][0])
+
     def species(self) -> list[str]:
         """
         Get the atomic symbols of all atoms in the molecule.
@@ -637,7 +660,7 @@ class Ligand(Entity):
         return self.write_to_file(output_path=output_path, output_format="pdb")
 
     @beartype
-    def get_center(self) -> list[float]:
+    def get_center(self) -> list[number]:
         """
         Get the center of the ligand based on its coordinates.
 
@@ -1314,6 +1337,20 @@ class LigandSet:
         return self
 
     @beartype
+    def protonate(
+        self,
+        *,
+        ph: number = 7.4,
+        filter_percentage: number = 1.0,
+    ):
+        """
+        Protonate the ligandSet. Only the most abundant species is retained for each ligand.
+        """
+        for ligand in tqdm(self.ligands, desc="Protonating ligands", unit="ligand"):
+            ligand.protonate(ph=ph, filter_percentage=filter_percentage)
+        return self
+
+    @beartype
     def admet_properties(self, use_cache: bool = True):
         """
         Predict ADMET properties for all ligands in the set.
@@ -1321,7 +1358,6 @@ class LigandSet:
         Returns a list of the results for each ligand.
         Shows a progress bar using tqdm.
         """
-        from tqdm import tqdm
 
         for ligand in tqdm(self.ligands, desc="Predicting ADMET properties"):
             ligand.admet_properties(use_cache=use_cache)
@@ -1501,15 +1537,13 @@ class LigandSet:
 
         return LigandSet(ligands=best_ligands)
 
-    def _get_pose_score(self, ligand: "Ligand") -> float:
+    def _get_pose_score(self, ligand: "Ligand") -> number:
         """
         Extract pose score from ligand properties.
 
         Args:
             ligand: The ligand to extract pose score from.
 
-        Returns:
-            float: The pose score value.
 
         Raises:
             DeepOriginException: If pose score property is missing or invalid.
@@ -1527,7 +1561,7 @@ class LigandSet:
                 f"Invalid pose score value '{pose_score_str}' for ligand {ligand.name or 'unnamed'}: {str(e)}"
             ) from e
 
-    def _get_binding_energy(self, ligand: "Ligand") -> float:
+    def _get_binding_energy(self, ligand: "Ligand") -> number:
         """
         Extract binding energy from ligand properties.
 
@@ -1535,7 +1569,7 @@ class LigandSet:
             ligand: The ligand to extract binding energy from.
 
         Returns:
-            float: The binding energy value.
+            number: The binding energy value.
 
         Raises:
             DeepOriginException: If binding energy property is missing or invalid.
