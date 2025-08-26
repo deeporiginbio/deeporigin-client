@@ -26,7 +26,7 @@ def protonate(
     use_cache: bool = True,
 ) -> dict:
     """
-    Run molecular property prediction using the DeepOrigin API.
+    Run ligand protonation using the DeepOrigin API.
 
     Args:
         smiles (str): SMILES string for the molecule
@@ -55,8 +55,6 @@ def protonate(
             response = json.load(file)
 
     else:
-        # Prepare the request payload
-
         # Make the API request
         response = requests.post(
             URL,
