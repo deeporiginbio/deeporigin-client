@@ -1,6 +1,4 @@
-"""This module implements a low level function to perform molecular property predictions
-using the DeepOrigin API.
-"""
+"""This module contains functions to protonate molecules using DeepOrigin Functions."""
 
 import json
 import os
