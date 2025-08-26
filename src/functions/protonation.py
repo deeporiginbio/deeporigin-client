@@ -29,11 +29,13 @@ def protonate(
     Run molecular property prediction using the DeepOrigin API.
 
     Args:
-        smiles_string (str): SMILES string for the molecule
+        smiles (str): SMILES string for the molecule
+        ph (number): pH value
+        filter_percentage (number): Percentage of the most abundant species to retain
         use_cache (bool): Whether to use the cache
 
     Returns:
-        str: Path to the cached SDF file containing the results
+        dict: Dictionary containing the protonation states of the molecule
     """
 
     payload = {
