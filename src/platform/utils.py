@@ -176,6 +176,7 @@ def _create_function(
                 api_endpoint=client.api_endpoint,
             )
             use_config = False
+            client_org_key = client.org_key
 
         method = _get_method(client, method_path)
 
@@ -186,7 +187,7 @@ def _create_function(
             if use_config:
                 kwargs["org_key"] = get_value()["organization_id"]
             else:
-                kwargs["org_key"] = client.org_key
+                kwargs["org_key"] = client_org_key
 
         # call the low level API method
         response = method(**kwargs)

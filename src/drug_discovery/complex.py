@@ -75,7 +75,7 @@ class Complex:
         cls,
         directory: str,
         *,
-        client: Optional[client] = None,
+        client: Optional[Client] = None,
     ) -> "Complex":
         """Initialize a Complex from a directory containing protein and ligand files.
 
