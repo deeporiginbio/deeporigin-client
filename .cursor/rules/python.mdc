@@ -4,8 +4,6 @@ globs: *.py
 alwaysApply: true
 ---
 
-# Architecture
-
 # Code Style
 
 
