@@ -25,6 +25,7 @@
         "HETATM",
         "inchi",
         "isin",
+        "isoparse",
         "kabsch",
         "Kekulization",
         "Kekulize",

@@ -92,23 +92,9 @@ class Complex:
         Raises:
             ValueError: If no PDB file is found or if multiple PDB files are found.
         """
-        # Find all SDF files in the directory
-        sdf_files = sorted(
-            [
-                os.path.join(directory, f)
-                for f in os.listdir(directory)
-                if f.lower().endswith(".sdf")
-            ]
-        )
 
         # Load all ligands from SDF files
-        ligands = []
-        for sdf_file in sdf_files:
-            result = Ligand.from_sdf(sdf_file)
-            if isinstance(result, list):
-                ligands.extend(result)
-            else:
-                ligands.append(result)
+        ligands = LigandSet.from_dir(directory)
 
         # Find PDB file
         pdb_files = [
@@ -128,7 +114,7 @@ class Complex:
         # Create the Complex instance
         instance = cls(
             protein=protein,
-            ligands=LigandSet(ligands=ligands),
+            ligands=ligands,
             _platform_clients=_platform_clients,
         )
 
@@ -174,16 +160,11 @@ class Complex:
                 )
             return
 
-        if ligand.file_path is None:
-            ligand_path = ligand.to_sdf()
-        else:
-            ligand_path = ligand.file_path
-
         # run sysprep on the ligand
         complex_path = run_sysprep(
-            protein_path=self.protein.file_path,
+            protein=self.protein,
             padding=padding,
-            ligand_path=ligand_path,
+            ligand=ligand,
             keep_waters=keep_waters,
             is_lig_protonated=is_lig_protonated,
             is_protein_protonated=is_protein_protonated,
@@ -191,7 +172,7 @@ class Complex:
         )
 
         # set this complex path as the prepared system
-        self._prepared_systems[ligand.name] = complex_path
+        self._prepared_systems[ligand.to_hash()] = complex_path
 
         # show it
         if show_prepared_system:
@@ -216,26 +197,16 @@ class Complex:
 
         files_to_upload = {}
 
-        protein_path = self.protein._remote_path_base + os.path.basename(
-            self.protein.file_path
-        )
-        self.protein._remote_path = protein_path
-        if protein_path not in remote_files:
-            files_to_upload[str(self.protein.file_path)] = protein_path
-
+        if self.protein._remote_path not in remote_files:
+            files_to_upload[str(self.protein.to_pdb())] = self.protein._remote_path
         for ligand in self.ligands:
-            if ligand.file_path is None:
-                # this ligand isn't being backed by a file, so we can't upload it
-                continue
-            ligand_path = ligand._remote_path_base + os.path.basename(ligand.file_path)
-            ligand._remote_path = ligand_path
-            if ligand_path not in remote_files:
-                files_to_upload[str(ligand.file_path)] = ligand_path
+            if ligand._remote_path not in remote_files:
+                files_to_upload[str(ligand.to_sdf())] = ligand._remote_path
 
         file_api.upload_files(files_to_upload)
 
     def _repr_pretty_(self, p, cycle):
-        """pretty print a Docking object"""
+        """pretty print a Complex object"""
 
         if cycle:
             p.text("Complex(...)")

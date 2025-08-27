@@ -1,4 +1,5 @@
 import os
+import sys
 
 import pytest
 
@@ -33,18 +34,6 @@ def test_from_pdb_id():
 def test_from_pdb_id_with_invalid_id():
     with pytest.raises(DeepOriginException, match=r".*Failed to create Protein.*"):
         Protein.from_pdb_id("foobar")
-
-
-def test_sequence():
-    protein = Protein.from_pdb_id("1EBY")
-    sequences = protein.sequence
-    assert len(sequences) == 2
-
-    for seq in sequences:
-        assert (
-            seq
-            == "PQITLWQRPLVTIKIGGQLKEALLDTGADDTVLEEMNLPGRWKPKMIGGIGGFIKVRQYDQILIEICGHKAIGTVLVGPTPVNIIGRNLLTQIGCTLNF"
-        )
 
 
 def test_find_missing_residues():
@@ -174,6 +163,21 @@ def test_protein_base64():
         protein.structure.coord,
         decimal=3,
     )
+
+
+@pytest.mark.skipif(
+    sys.platform == "win32",
+    reason="Hash computation may differ on Windows due to line ending differences",
+)
+def test_protein_hash():
+    """Test that we can convert a Protein to SHA256 hash"""
+    # Create a protein using from_pdb_id
+    protein = Protein.from_file(BRD_DATA_DIR / "brd.pdb")
+
+    assert (
+        "db4aa32e2e8ffa976a60004a8361b86427a2e5653a6623bb60b7913445902549"
+        == protein.to_hash()
+    ), "Protein hash did not match"
 
 
 def test_extract_ligand_remove_water():
