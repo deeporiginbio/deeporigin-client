@@ -9,6 +9,7 @@ from box import Box
 
 from deeporigin.auth import get_tokens
 from deeporigin.config import get_value
+from deeporigin.platform import Client
 from deeporigin.utils.core import _get_method
 
 warnings.filterwarnings(
@@ -19,45 +20,6 @@ warnings.filterwarnings(
 # we're importing this here after the warnings are suppressed
 # because importing this raises UserWarnings we don't want to show
 import do_sdk_platform  # noqa: E402
-
-
-class PlatformClients:
-    """
-    A container for all DeepOrigin platform API clients, instantiated with a token, base_url, and org_key.
-
-    Each API client is available as an attribute of this class, e.g., self.FilesApi, self.ToolsApi, etc.
-
-    Args:
-        token (str): The authentication token to use for all API clients.
-        base_url (str): The base URL of the DeepOrigin platform (e.g., 'https://api.deeporigin.io').
-        org_key (str): The organization-friendly ID to use for API requests.
-    """
-
-    def __init__(
-        self,
-        *,
-        token: str,
-        api_endpoint: str,
-        org_key: str,
-    ) -> None:
-        self.org_key = org_key
-
-        apis = [attr for attr in do_sdk_platform.__dir__() if attr.endswith("Api")]
-
-        for api in apis:
-            setattr(
-                self,
-                api,
-                _get_api_client(
-                    api_name=api,
-                    token=token,
-                    api_endpoint=api_endpoint,
-                ),
-            )
-
-    def list_clients(self) -> list:
-        """Return a list of all API client attribute names available on this instance."""
-        return [attr for attr in self.__dict__.keys() if attr.endswith("Api")]
 
 
 @beartype
@@ -190,22 +152,41 @@ def _create_function(
 
     def dynamic_function(
         *,
-        client=None,
+        client: Client = None,
         **kwargs,
     ):
         """dynamic function that wraps low-level functions in the DeepOrigin platform API"""
 
         if client is None:
+            # no client was provided, so we'll create a new one
+            # using config and api tokens cached on disk
             client = _get_api_client(
                 api_name=api_name,
             )
+            use_config = True
+        else:
+            if not isinstance(client, Client):
+                raise ValueError(
+                    "client must be a Client instance. Create a client instance from deeporigin.platform.Client"
+                )
+            # convert the DO Client to the low-level client
+            client = _get_api_client(
+                api_name=api_name,
+                token=client.token,
+                api_endpoint=client.api_endpoint,
+            )
+            use_config = False
+
         method = _get_method(client, method_path)
 
         # Insert org_key if not present in kwargs, and
         # if it's required by the method
         method_sig = inspect.signature(method)
         if "org_key" in method_sig.parameters and (kwargs.get("org_key") is None):
-            kwargs["org_key"] = get_value()["organization_id"]
+            if use_config:
+                kwargs["org_key"] = get_value()["organization_id"]
+            else:
+                kwargs["org_key"] = client.org_key
 
         # call the low level API method
         response = method(**kwargs)

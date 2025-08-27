@@ -53,3 +53,5 @@ class PREFIXES:
 
 
 number = int | float
+
+ENVS = Literal["edge", "prod", "staging"]
