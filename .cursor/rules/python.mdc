@@ -1,0 +1,48 @@
+---
+description: Python code
+globs: *.py
+alwaysApply: true
+---
+
+# Architecture
+
+# Code Style
+
+
+- Use beartype for runtime type validation 
+- Prefer string literals over Enums
+- Prefer union types using `|` to the `Union` type
+- Type lists and dicts using `list` and `dict` (lowercase)
+- Force kwargs using * when a function has more than 3 arguments, or if arguments have the same type
+- Write pytest-style functions for tests. Don't use unittest. Use fixtures if needed. 
+- Use Google-style docstrings
+- Every function must have a docstring
+- Every module must have a docstring 
+- Prefer dict literals `{"foo": "bar"}` to `dict(foo="bar")`
+
+# Writing a new function
+
+When writing a new function, make the following three changes together:
+
+1. write the new function. Follow code style
+2. Write tests for that function in tests/. Follow test code style
+3. Write documentation for that function in docs/
+
+Run that test to ensure the function you wrote works
+
+
+# Editing an existing function
+
+When modifying an existing function, make the following changes together:
+
+1. Modify the function as needed. Follow code style
+2. Update tests for that function and verify that tests pass
+3. Update documentation if needed. 
+
+# Running tests
+
+- Before running tests, run `ruff format .` and `ruff check --select I . --fix` to ensure that code is formatted correctly
+- Run tests by activating the venv and then running `pytest`
+- To test a specific function, use `pytest -k` 
+
+
