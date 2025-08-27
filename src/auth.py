@@ -1,7 +1,6 @@
 """this module handles authentication actions and interactions
 with tokens"""
 
-import functools
 import json
 import os
 import time
@@ -26,18 +25,17 @@ __all__ = [
     "refresh_tokens",
 ]
 
+AUTH_DOMAIN = {
+    "prod": "https://formicbio.us.auth0.com",
+    "staging": "https://formicbio.us.auth0.com",
+    "edge": "https://edge.login.deeporigin.io",
+}
 
+AUTH_DEVICE_CODE_ENDPOINT = "/oauth/device/code"
+AUTH_TOKEN_ENDPOINT = "/oauth/token"
 AUTH_AUDIENCE = "https://os.deeporigin.io/api"
-AUTH_DEVICE_CODE_ENDPOINT = {
-    "prod": "https://formicbio.us.auth0.com/oauth/device/code",
-    "staging": "https://formicbio.us.auth0.com/oauth/device/code",
-    "edge": "https://edge.login.deeporigin.io/oauth/device/code",
-}
-AUTH_TOKEN_ENDPOINT = {
-    "prod": "https://formicbio.us.auth0.com/oauth/token",
-    "staging": "https://formicbio.us.auth0.com/oauth/token",
-    "edge": "https://edge.login.deeporigin.io/oauth/token",
-}
+
+
 AUTH_GRANT_TYPE = "urn:ietf:params:oauth:grant-type:device_code"
 
 AUTH_CLIENT_ID = {
@@ -144,7 +142,7 @@ def authenticate(
         "audience": AUTH_AUDIENCE,
     }
 
-    response = requests.post(AUTH_DEVICE_CODE_ENDPOINT[env], json=body)
+    response = requests.post(AUTH_DOMAIN[env] + AUTH_DEVICE_CODE_ENDPOINT, json=body)
     response.raise_for_status()
     response_json = response.json()
     device_code = response_json["device_code"]
@@ -169,7 +167,7 @@ def authenticate(
     }
     # Wait for the user to sign into the Deep Origin platform
     while True:
-        response = requests.post(AUTH_TOKEN_ENDPOINT[env], json=body)
+        response = requests.post(AUTH_DOMAIN[env] + AUTH_TOKEN_ENDPOINT, json=body)
         if response.status_code == 200:
             break
         if (
@@ -217,7 +215,7 @@ def refresh_tokens(api_refresh_token: str, *, env: Optional[ENVS] = None) -> str
         "client_secret": config.auth_client_secret,
         "refresh_token": api_refresh_token,
     }
-    response = requests.post(AUTH_TOKEN_ENDPOINT[env], json=body)
+    response = requests.post(AUTH_DOMAIN[env] + AUTH_TOKEN_ENDPOINT, json=body)
     response.raise_for_status()
     response_json = response.json()
     api_access_token = response_json["access_token"]
@@ -244,12 +242,14 @@ def is_token_expired(token: dict) -> bool:
     return current_time > exp_time
 
 
-@functools.cache
 @beartype
-def get_public_keys() -> list[dict]:
+def get_public_keys(env: Optional[ENVS] = None) -> list[dict]:
     """get public keys from public endpoint"""
 
-    jwks_url = urljoin(get_config()["auth_domain"], ".well-known/jwks.json")
+    if env is None:
+        env = get_config()["env"]
+
+    jwks_url = urljoin(AUTH_DOMAIN[env], ".well-known/jwks.json")
     data = requests.get(jwks_url).json()
     return data["keys"]
 

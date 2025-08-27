@@ -10,6 +10,7 @@ from box import Box
 from deeporigin.auth import get_tokens
 from deeporigin.config import get_value
 from deeporigin.platform import Client
+from deeporigin.utils.constants import API_ENDPOINT
 from deeporigin.utils.core import _get_method
 
 warnings.filterwarnings(
@@ -93,7 +94,8 @@ def _get_api_client(
 
     if configure:
         if api_endpoint is None:
-            api_endpoint = get_value()["api_endpoint"]
+            env = get_value()["env"]
+            api_endpoint = API_ENDPOINT[env]
             print(f"Setting api_endpoint to {api_endpoint}")
 
         if token is None:
