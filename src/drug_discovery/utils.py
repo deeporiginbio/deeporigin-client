@@ -9,8 +9,7 @@ from beartype import beartype
 import pandas as pd
 
 from deeporigin.drug_discovery.constants import tool_mapper, valid_tools
-from deeporigin.platform import tools_api
-from deeporigin.platform.utils import PlatformClients
+from deeporigin.platform import Client, tools_api
 from deeporigin.utils.core import PrettyDict
 
 PROVIDER_KEY = "$provider"
@@ -42,7 +41,7 @@ def _start_tool_run(
     ligand1_path: Optional[str] = None,
     ligand2_path: Optional[str] = None,
     provider: tools_api.PROVIDER = "ufa",
-    _platform_clients: Optional[PlatformClients] = None,
+    client: Optional[Client] = None,
     _output_dir_path: Optional[str] = None,
 ) -> str:
     """
@@ -161,22 +160,12 @@ def _start_tool_run(
             "⚠️ Warning: test_run=1 in these parameters. Results will not be accurate."
         )
 
-    tools_client = getattr(_platform_clients, "ToolsApi", None)
-
-    if _platform_clients is None:
-        from deeporigin.config import get_value
-
-        org_key = get_value()["organization_id"]
-    else:
-        org_key = _platform_clients.org_key
-
     job_id = tools_api._process_job(
         inputs=params,
         outputs=outputs,
         tool_key=tool_mapper[tool],
         metadata=metadata,
-        client=tools_client,
-        org_key=org_key,
+        client=client,
     )
 
     # print(f"Job started with Job ID: {job_id}")

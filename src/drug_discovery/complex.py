@@ -11,7 +11,7 @@ from deeporigin.drug_discovery.docking import Docking
 from deeporigin.drug_discovery.rbfe import RBFE
 from deeporigin.drug_discovery.structures import Ligand, LigandSet, Protein
 from deeporigin.exceptions import DeepOriginException
-from deeporigin.platform.utils import PlatformClients
+from deeporigin.platform import Client
 
 
 @dataclass
@@ -22,7 +22,7 @@ class Complex:
 
     # Use a private attribute for ligands
     _ligands: LigandSet = field(default_factory=LigandSet, repr=False)
-    _platform_clients: Optional[PlatformClients] = None
+    client: Optional[Client] = None
     _prepared_systems: dict[str, str] = field(default_factory=dict, repr=False)
 
     def __init__(
@@ -30,7 +30,7 @@ class Complex:
         *,
         protein: Protein,
         ligands: Optional[LigandSet | list[Ligand] | Ligand] = None,
-        _platform_clients: Optional[PlatformClients] = None,
+        client: Optional[Client] = None,
     ):
         """Initialize a Complex object.
 
@@ -40,7 +40,7 @@ class Complex:
         """
         self.protein = protein
         self.ligands = ligands
-        self._platform_clients = _platform_clients
+        self.client = client
 
         # assign references to the complex in the
         # various child classes
@@ -75,7 +75,7 @@ class Complex:
         cls,
         directory: str,
         *,
-        _platform_clients: Optional[PlatformClients] = None,
+        client: Optional[client] = None,
     ) -> "Complex":
         """Initialize a Complex from a directory containing protein and ligand files.
 
@@ -115,7 +115,7 @@ class Complex:
         instance = cls(
             protein=protein,
             ligands=ligands,
-            _platform_clients=_platform_clients,
+            client=client,
         )
 
         return instance
