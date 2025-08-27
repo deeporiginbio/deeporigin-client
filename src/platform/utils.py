@@ -163,20 +163,20 @@ def _create_function(
             client = _get_api_client(
                 api_name=api_name,
             )
-            use_config = True
+            client_org_key = None
+
         else:
             if not isinstance(client, Client):
                 raise ValueError(
                     "client must be a Client instance. Create a client instance from deeporigin.platform.Client"
                 )
             # convert the DO Client to the low-level client
+            client_org_key = client.org_key
             client = _get_api_client(
                 api_name=api_name,
                 token=client.token,
                 api_endpoint=client.api_endpoint,
             )
-            use_config = False
-            client_org_key = client.org_key
 
         method = _get_method(client, method_path)
 
@@ -184,7 +184,7 @@ def _create_function(
         # if it's required by the method
         method_sig = inspect.signature(method)
         if "org_key" in method_sig.parameters and (kwargs.get("org_key") is None):
-            if use_config:
+            if client_org_key is None:
                 kwargs["org_key"] = get_value()["organization_id"]
             else:
                 kwargs["org_key"] = client_org_key

@@ -22,11 +22,6 @@ TEMPLATE = {
     "bench_id": confuse.Optional(confuse.String()),
     "env": confuse.String(),
     "api_endpoint": confuse.Optional(confuse.String()),
-    "auth_domain": confuse.String(),
-    "auth_device_code_endpoint": confuse.String(),
-    "auth_token_endpoint": confuse.String(),
-    "auth_audience": confuse.String(),
-    "auth_grant_type": confuse.String(),
     "auth_client_id": confuse.String(),
     "auth_client_secret": confuse.String(),
 }
