@@ -413,14 +413,14 @@ class Ligand(Entity):
         conf = self.get_conformer(i)
         return conf.GetPositions()
 
-
     def get_species(self) -> list[str]:
-         """
+        """
         Get the atomic symbols of all atoms in the molecule.
 
         Returns:
             list: List of atomic symbols
         """
+
         return [a.GetSymbol() for a in self.mol.GetAtoms()]
 
     @beartype
@@ -443,9 +443,6 @@ class Ligand(Entity):
             filter_percentage=filter_percentage,
         )
         self.mol = Chem.MolFromSmiles(data["protonation_states"]["smiles_list"][0])
-
-
-        
 
     def to_molblock(self) -> str:
         """
