@@ -277,6 +277,28 @@
   
   
   
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../dev/install.html" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Developing
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
     <li class="md-tabs__item">
       <a href="../../changelog.html" class="md-tabs__link">
         
@@ -1295,6 +1317,15 @@
   <a href="#src.drug_discovery.complex.Complex.abfe" class="md-nav__link">
     <span class="md-ellipsis">
       abfe
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.drug_discovery.complex.Complex.client" class="md-nav__link">
+    <span class="md-ellipsis">
+      client
     </span>
   </a>
   
@@ -2516,6 +2547,108 @@
   
   
   
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Developing
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Developing
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dev/install.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Installing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dev/clients.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Clients
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
     <li class="md-nav__item">
       <a href="../../changelog.html" class="md-nav__link">
         
@@ -2596,6 +2729,15 @@
   <a href="#src.drug_discovery.complex.Complex.abfe" class="md-nav__link">
     <span class="md-ellipsis">
       abfe
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.drug_discovery.complex.Complex.client" class="md-nav__link">
+    <span class="md-ellipsis">
+      client
     </span>
   </a>
   
@@ -2750,6 +2892,29 @@
 
 
 
+<h3 id="src.drug_discovery.complex.Complex.client" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-attribute"></code>            <span class="doc doc-object-name doc-attribute-name">client</span>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+<a href="#src.drug_discovery.complex.Complex.client" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="n">client</span><span class="p">:</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n"><span title="deeporigin.platform.Client">Client</span></span><span class="p">]</span> <span class="o">=</span> <span class="n"><span title="src.drug_discovery.complex.Complex(client)">client</span></span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
 <h3 id="src.drug_discovery.complex.Complex.docking" class="doc doc-heading">
 <code class="doc-symbol doc-symbol-heading doc-symbol-attribute"></code>            <span class="doc doc-object-name doc-attribute-name">docking</span>
 
@@ -2850,9 +3015,7 @@
 
 <a href="#src.drug_discovery.complex.Complex.from_dir" class="headerlink" title="Permanent link">&para;</a></h3>
 <div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">from_dir</span><span class="p">(</span>
-    <span class="n">directory</span><span class="p">:</span> <span class="n"><span title="str">str</span></span><span class="p">,</span>
-    <span class="o">*</span><span class="p">,</span>
-    <span class="n">_platform_clients</span><span class="p">:</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n"><span title="deeporigin.platform.utils.PlatformClients">PlatformClients</span></span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">directory</span><span class="p">:</span> <span class="n"><span title="str">str</span></span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">client</span><span class="p">:</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n"><span title="deeporigin.platform.Client">Client</span></span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><span title="src.drug_discovery.complex.Complex">Complex</span></span>
 </code></pre></div>
 
