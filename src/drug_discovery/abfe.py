@@ -375,7 +375,7 @@ class ABFE(WorkflowStep):
         files_to_download.append(remote_xtc_file)
         files_to_download = dict.fromkeys(map(str, files_to_download), None)
 
-        file_api.download_files(files_to_download, client=files_client)
+        file_api.download_files(files_to_download, client=self.parent.client)
 
         from deeporigin_molstar.src.viewers import ProteinViewer
 
