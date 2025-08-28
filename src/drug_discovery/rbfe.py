@@ -43,12 +43,10 @@ class RBFE(WorkflowStep):
 
         This method returns a dataframe showing the results of RBFE runs associated with this simulation session. The ligand file name and ΔG are shown, together with user-supplied properties"""
 
-        files_client = getattr(self.parent._platform_clients, "FilesApi", None)
-
         files = utils.find_files_on_ufa(
             tool="RBFE",
             protein=self.parent.protein.file_path.name,
-            client=files_client,
+            client=self.parent.client,
         )
 
         results_files = [file for file in files if file.endswith("/results.csv")]
@@ -60,7 +58,7 @@ class RBFE(WorkflowStep):
 
         file_api.download_files(
             results_files,
-            client=files_client,
+            client=self.parent.client,
         )
 
         # read all the CSV files using pandas and
@@ -202,12 +200,12 @@ class RBFE(WorkflowStep):
             params=self._params.end_to_end,
             tool="RBFE",
             tool_version=self.tool_version,
-            _platform_clients=self.parent._platform_clients,
+            client=self.parent.client,
             _output_dir_path=_output_dir_path,
         )
 
         if return_job:
-            job = Job.from_id(job_id, _platform_clients=self.parent._platform_clients)
+            job = Job.from_id(job_id, client=self.parent.client)
 
             self.jobs.append(job)
             return job
@@ -272,7 +270,7 @@ class RBFE(WorkflowStep):
 
             job_ids.append(job_id)
 
-        return Job.from_ids(job_ids, _platform_clients=self.parent._platform_clients)
+        return Job.from_ids(job_ids, client=self.parent.client)
 
     def get_jobs(self) -> None:
         """Get the jobs for jobs corresponding to this network and save to self.jobs"""
@@ -303,6 +301,6 @@ class RBFE(WorkflowStep):
 
         job = Job.from_ids(
             valid_job_ids,
-            _platform_clients=self.parent._platform_clients,
+            client=self.parent.client,
         )
         self.jobs = [job]

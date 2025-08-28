@@ -59,7 +59,7 @@ def _start_tool_run(
         tool (valid_tools): The tool to run (e.g., 'ABFE', 'RBFE').
         tool_version (str): Version of the tool to use.
         provider (tools_api.PROVIDER, optional): File provider for input/output files. Defaults to 'ufa'.
-        _platform_clients (Optional[PlatformClients]): Platform client objects for API access.
+        client (Client): Client to use for the job.
         _output_dir_path (Optional[str]): Custom output directory path (on remote storage). If None, a default is constructed.
 
     Returns:
