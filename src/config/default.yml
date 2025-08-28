@@ -1,11 +1,8 @@
 env: prod
 organization_id: null
 bench_id: null
-api_endpoint: https://api.deeporigin.io/
-auth_domain: https://formicbio.us.auth0.com 
 auth_device_code_endpoint: oauth/device/code/
 auth_token_endpoint: oauth/token/
 auth_audience: https://os.deeporigin.io/api
-auth_grant_type: urn:ietf:params:oauth:grant-type:device_code
 auth_client_id: m3iyUcrANcIap2ogzWKpnYxCNujOrW3s
 auth_client_secret: cQcZclTqMHMuovyXV-DD15tEiL-KH_2XD36vsppULRBuq7AjwyI4dh5ag11O_K1S

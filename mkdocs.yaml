@@ -101,7 +101,9 @@ nav:
       - High-level API: data-hub/ref/high-level-api.md
       - Low-level API: data-hub/ref/low-level-api.md
       - Classes & constants: data-hub/ref/types.md
-
+- Developing: 
+  - Installing: dev/install.md
+  - Clients: dev/clients.md
 - Changelog: changelog.md
 - Support: https://www.support.deeporigin.com/servicedesk/customer/portals
 

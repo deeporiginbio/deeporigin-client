@@ -1,7 +1,6 @@
 """this module handles authentication actions and interactions
 with tokens"""
 
-import functools
 import json
 import os
 import time
@@ -15,6 +14,7 @@ import requests
 
 from deeporigin.config import get_value as get_config
 from deeporigin.exceptions import DeepOriginException
+from deeporigin.utils.constants import ENVS
 from deeporigin.utils.core import _get_api_tokens_filepath, read_cached_tokens
 
 __all__ = [
@@ -24,6 +24,25 @@ __all__ = [
     "authenticate",
     "refresh_tokens",
 ]
+
+AUTH_DOMAIN = {
+    "prod": "https://formicbio.us.auth0.com",
+    "staging": "https://formicbio.us.auth0.com",
+    "edge": "https://edge.login.deeporigin.io",
+}
+
+AUTH_DEVICE_CODE_ENDPOINT = "/oauth/device/code"
+AUTH_TOKEN_ENDPOINT = "/oauth/token"
+AUTH_AUDIENCE = "https://os.deeporigin.io/api"
+
+
+AUTH_GRANT_TYPE = "urn:ietf:params:oauth:grant-type:device_code"
+
+AUTH_CLIENT_ID = {
+    "prod": "m3iyUcrANcIap2ogzWKpnYxCNujOrW3s",
+    "staging": "2AMGd2bJnKjMtd7QBvJYlGPqb9vtntsY",
+    "edge": "jbYq4bkeX2UJb1bePH1ci172KbUMVyak",
+}
 
 
 @beartype
@@ -100,7 +119,11 @@ def remove_cached_tokens() -> None:
 
 
 @beartype
-def authenticate() -> dict:
+def authenticate(
+    *,
+    env: Optional[ENVS] = None,
+    save_tokens: bool = True,
+) -> dict:
     """Get an access token for use with the Deep Origin API.
     The tokens are also cached to file
 
@@ -108,17 +131,18 @@ def authenticate() -> dict:
         :obj:`tuple`: API access token, API refresh token
     """
 
-    config = get_config()
+    if env is None:
+        env = get_config()["env"]
 
     # Get a link for the user to sign into the Deep Origin platform
-    endpoint = urljoin(config.auth_domain, config.auth_device_code_endpoint)
+
     body = {
-        "client_id": config.auth_client_id,
+        "client_id": AUTH_CLIENT_ID[env],
         "scope": "offline_access",
-        "audience": config.auth_audience,
+        "audience": AUTH_AUDIENCE,
     }
 
-    response = requests.post(endpoint, json=body)
+    response = requests.post(AUTH_DOMAIN[env] + AUTH_DEVICE_CODE_ENDPOINT, json=body)
     response.raise_for_status()
     response_json = response.json()
     device_code = response_json["device_code"]
@@ -129,22 +153,21 @@ def authenticate() -> dict:
     # Prompt the user to sign into the Deep Origin platform
     print(
         (
-            "To connect to the Deep Origin OS, "
+            "To connect to the Deep Origin Platform API, "
             f"navigate your browser to \n\n{verification_url}\n\n"
             f'and verify the confirmation code is "{user_code}", '
             'and click the "Confirm" button.'
         )
     )
 
-    # Wait for the user to sign into the Deep Origin platform
-    endpoint = urljoin(config.auth_domain, config.auth_token_endpoint)
     body = {
-        "grant_type": config.auth_grant_type,
+        "grant_type": AUTH_GRANT_TYPE,
         "device_code": device_code,
-        "client_id": config.auth_client_id,
+        "client_id": AUTH_CLIENT_ID[env],
     }
+    # Wait for the user to sign into the Deep Origin platform
     while True:
-        response = requests.post(endpoint, json=body)
+        response = requests.post(AUTH_DOMAIN[env] + AUTH_TOKEN_ENDPOINT, json=body)
         if response.status_code == 200:
             break
         if (
@@ -160,15 +183,19 @@ def authenticate() -> dict:
     api_access_token = response_json["access_token"]
     api_refresh_token = response_json["refresh_token"]
 
-    tokens = dict(access=api_access_token, refresh=api_refresh_token)
+    tokens = {
+        "access": api_access_token,
+        "refresh": api_refresh_token,
+    }
 
-    cache_tokens(tokens)
+    if save_tokens:
+        cache_tokens(tokens)
 
     return tokens
 
 
 @beartype
-def refresh_tokens(api_refresh_token: str) -> str:
+def refresh_tokens(api_refresh_token: str, *, env: Optional[ENVS] = None) -> str:
     """Refresh the access token for the Deep Origin OS
 
     Args:
@@ -179,14 +206,16 @@ def refresh_tokens(api_refresh_token: str) -> str:
     """
     config = get_config()
 
-    endpoint = urljoin(config.auth_domain, config.auth_token_endpoint)
+    if env is None:
+        env = get_config()["env"]
+
     body = {
         "grant_type": "refresh_token",
         "client_id": config.auth_client_id,
         "client_secret": config.auth_client_secret,
         "refresh_token": api_refresh_token,
     }
-    response = requests.post(endpoint, json=body)
+    response = requests.post(AUTH_DOMAIN[env] + AUTH_TOKEN_ENDPOINT, json=body)
     response.raise_for_status()
     response_json = response.json()
     api_access_token = response_json["access_token"]
@@ -213,12 +242,14 @@ def is_token_expired(token: dict) -> bool:
     return current_time > exp_time
 
 
-@functools.cache
 @beartype
-def get_public_keys() -> list[dict]:
+def get_public_keys(env: Optional[ENVS] = None) -> list[dict]:
     """get public keys from public endpoint"""
 
-    jwks_url = urljoin(get_config()["auth_domain"], ".well-known/jwks.json")
+    if env is None:
+        env = get_config()["env"]
+
+    jwks_url = urljoin(AUTH_DOMAIN[env], ".well-known/jwks.json")
     data = requests.get(jwks_url).json()
     return data["keys"]
 
