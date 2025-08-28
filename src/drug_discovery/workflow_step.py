@@ -31,7 +31,7 @@ class WorkflowStep:
     ) -> pd.DataFrame:
         """Get the jobs for this workflow step as a dataframe"""
         df = get_dataframe(
-            _platform_clients=self.parent._platform_clients,
+            client=self.parent.client,
             resolve_user_names=False,
             include_metadata=True,
             include_outputs=include_outputs,
@@ -66,14 +66,14 @@ class WorkflowStep:
             self.jobs = [
                 Job.from_ids(
                     job_ids,
-                    _platform_clients=self.parent._platform_clients,
+                    client=self.parent.client,
                 )
             ]
         else:
             self.jobs = [
                 Job.from_id(
                     job_id,
-                    _platform_clients=self.parent._platform_clients,
+                    client=self.parent.client,
                 )
                 for job_id in job_ids
             ]

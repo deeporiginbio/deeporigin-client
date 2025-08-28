@@ -357,13 +357,9 @@ class Job:
             The result of the cancellation operation from utils.cancel_runs.
         """
 
-        org_key = getattr(self._platform_clients, "org_key", None)
-        tools_client = getattr(self._platform_clients, "ToolsApi", None)
-
         tools_api.cancel_runs(
             self._ids,
-            client=tools_client,
-            org_key=org_key,
+            client=self.client,
         )
 
 

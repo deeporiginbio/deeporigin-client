@@ -52,11 +52,9 @@ class ABFE(WorkflowStep):
 
         return results_files
 
-        files_client = getattr(self.parent._platform_clients, "FilesApi", None)
-
         files = file_api.list_files_in_dir(
             file_path=f"tool-runs/ABFE/{self.parent.protein.to_hash()}.pdb/",
-            client=files_client,
+            client=self.parent.client,
         )
 
         results_files = [file for file in files if file.endswith("/results.csv")]
@@ -68,7 +66,7 @@ class ABFE(WorkflowStep):
 
         results_files = file_api.download_files(
             results_files,
-            client=files_client,
+            client=self.parent.client,
         )
 
         # read all the CSV files using pandas and
@@ -200,7 +198,7 @@ class ABFE(WorkflowStep):
             only_with_status=["Succeeded", "Running", "Queued", "Created"],
             include_metadata=True,
             resolve_user_names=False,
-            _platform_clients=self.parent._platform_clients,
+            client=self.parent.client,
         )
 
         # Build set of ligand names that have already been run
@@ -299,11 +297,11 @@ class ABFE(WorkflowStep):
                 params=self._params.end_to_end,
                 tool="ABFE",
                 tool_version=self.tool_version,
-                _platform_clients=self.parent._platform_clients,
+                client=self.parent.client,
                 _output_dir_path=_output_dir_path,
             )
 
-            job = Job.from_id(job_id, _platform_clients=self.parent._platform_clients)
+            job = Job.from_id(job_id, client=self.parent.client)
 
             self.jobs.append(job)
             jobs_for_this_run.append(job)
@@ -335,8 +333,6 @@ class ABFE(WorkflowStep):
         )
         files_to_download = [remote_pdb_file]
 
-        files_client = getattr(self.parent._platform_clients, "FilesApi", None)
-
         if step == "binding":
             # Check for valid windows
 
@@ -345,7 +341,7 @@ class ABFE(WorkflowStep):
                 tool="ABFE",
                 protein=self.parent.protein.file_path.name,
                 ligand=Path(ligand.file_path).name,
-                client=files_client,
+                client=self.parent.client,
             )
             xtc_files = [
                 file
@@ -379,7 +375,7 @@ class ABFE(WorkflowStep):
         files_to_download.append(remote_xtc_file)
         files_to_download = dict.fromkeys(map(str, files_to_download), None)
 
-        file_api.download_files(files_to_download, client=files_client)
+        file_api.download_files(files_to_download, client=self.parent.client)
 
         from deeporigin_molstar.src.viewers import ProteinViewer
 

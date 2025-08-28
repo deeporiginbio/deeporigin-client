@@ -119,12 +119,10 @@ class Docking(WorkflowStep):
     def get_results(self, *, file_type: str = "csv") -> pd.DataFrame | None | list[str]:
         """return a list of paths to CSV files that contain the results from docking"""
 
-        files_client = getattr(self.parent._platform_clients, "FileApi", None)
-
         files = utils.find_files_on_ufa(
             tool="Docking",
             protein=self.parent.protein.file_path.name,
-            client=files_client,
+            client=self.parent.client,
         )
 
         if file_type == "csv":
@@ -143,7 +141,7 @@ class Docking(WorkflowStep):
 
         file_api.download_files(
             results_files_dict,
-            client=files_client,
+            client=self.parent.client,
         )
 
         all_df = []
@@ -314,7 +312,7 @@ class Docking(WorkflowStep):
                 protein_path=self.parent.protein._remote_path,
                 tool="Docking",
                 tool_version=self.tool_version,
-                _platform_clients=self.parent._platform_clients,
+                client=self.parent.client,
                 _output_dir_path=this_output_dir_path,
             )
 
