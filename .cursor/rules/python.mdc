@@ -8,6 +8,8 @@ alwaysApply: true
 
 
 - Use beartype for runtime type validation 
+- Use type hints for all function arguments and return types
+- Use f-strings for string formatting
 - Prefer string literals over Enums
 - Prefer union types using `|` to the `Union` type
 - Type lists and dicts using `list` and `dict` (lowercase)
