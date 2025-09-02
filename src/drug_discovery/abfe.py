@@ -71,7 +71,7 @@ class ABFE(WorkflowStep):
             df = pd.read_csv(file)
 
             # extract ligand hash from file path
-            ligand_hash = str(Path(file).parent.name).replace(".sdf", "")
+            ligand_hash = str(Path(file).parent.stem)
             df["SMILES"] = ligand_mapper[ligand_hash]
 
             dfs.append(df)
