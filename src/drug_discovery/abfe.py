@@ -74,8 +74,6 @@ class ABFE(WorkflowStep):
             ligand_hash = str(Path(file).parent.name).replace(".sdf", "")
             df["SMILES"] = ligand_mapper[ligand_hash]
 
-            # ligand_name = os.path.basename(os.path.dirname(file))
-            # df["File"] = ligand_name
             dfs.append(df)
         df1 = pd.concat(dfs)
 
