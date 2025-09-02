@@ -2,7 +2,6 @@
 
 The ABFE object instantiated here is contained in the Complex class is meant to be used within that class."""
 
-import os
 from pathlib import Path
 from typing import Literal, Optional
 
@@ -50,55 +49,43 @@ class ABFE(WorkflowStep):
             file_path = row["user_outputs"]["abfe_results_summary"]["key"]
             results_files.append(file_path)
 
-        return results_files
-
-        files = file_api.list_files_in_dir(
-            file_path=f"tool-runs/ABFE/{self.parent.protein.to_hash()}.pdb/",
-            client=self.parent.client,
-        )
-
-        results_files = [file for file in files if file.endswith("/results.csv")]
-        results_files = dict.fromkeys(results_files, None)
-
         if len(results_files) == 0:
             print("No ABFE results found for this protein.")
             return None
+
+        results_files = dict.fromkeys(results_files, None)
 
         results_files = file_api.download_files(
             results_files,
             client=self.parent.client,
         )
 
+        ligand_mapper = {}
+        for ligand in self.parent.ligands:
+            ligand_mapper[ligand.to_hash()] = ligand.smiles
+
         # read all the CSV files using pandas and
         # set Ligand1 column to ligand name (parent dir of results.csv)
         dfs = []
         for file in results_files:
-            df = pd.read_csv(LOCAL_BASE / file)
-            ligand_name = os.path.basename(os.path.dirname(file))
-            df["File"] = ligand_name
+            df = pd.read_csv(file)
+
+            # extract ligand hash from file path
+            ligand_hash = str(Path(file).parent.name).replace(".sdf", "")
+            df["SMILES"] = ligand_mapper[ligand_hash]
+
+            # ligand_name = os.path.basename(os.path.dirname(file))
+            # df["File"] = ligand_name
             dfs.append(df)
         df1 = pd.concat(dfs)
 
-        df1.drop(columns=["Ligand1", "Ligand2"], inplace=True)
+        df1.drop(columns=["Protein", "Ligand1", "Ligand2"], inplace=True)
 
         df2 = self.parent.ligands.to_dataframe()
         df2["SMILES"] = df2["Ligand"]
         df2.drop(columns=["Ligand", "initial_smiles"], inplace=True)
 
-        return df1, df2
-
-        df = pd.merge(
-            df1,
-            df2,
-            on="File",
-            how="inner",
-            validate="one_to_one",
-        )
-
-        # rename the File column to Ligand
-        df.rename(columns={"File": "Ligand"}, inplace=True)
-
-        df["Protein"] = self.parent.protein.file_path.name
+        df = pd.merge(df1, df2, on="SMILES", how="inner")
 
         return df
 
