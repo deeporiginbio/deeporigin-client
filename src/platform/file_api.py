@@ -78,7 +78,7 @@ def download_file(
     remote_path: str,
     local_path: Optional[str] = None,
     client=None,
-):
+) -> str:
     """download a single file from UFA to ~/.deeporigin/, or some other local path
 
     Args:
@@ -99,6 +99,8 @@ def download_file(
     from deeporigin.utils.network import download_sync
 
     download_sync(response.url, save_path=local_path)
+
+    return local_path
 
 
 @beartype

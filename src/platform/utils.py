@@ -96,7 +96,6 @@ def _get_api_client(
         if api_endpoint is None:
             env = get_value()["env"]
             api_endpoint = API_ENDPOINT[env]
-            print(f"Setting api_endpoint to {api_endpoint}")
 
         if token is None:
             token = get_tokens()["access"]
