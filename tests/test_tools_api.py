@@ -3,6 +3,7 @@
 import pytest
 
 from deeporigin.platform import Client, tools_api
+from tests.utils import config  # noqa: F401
 
 try:
     client = Client()
