@@ -1,6 +1,0 @@
-env: prod
-organization_id: null
-bench_id: null
-auth_device_code_endpoint: oauth/device/code/
-auth_token_endpoint: oauth/token/
-
