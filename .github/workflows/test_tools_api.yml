@@ -12,7 +12,7 @@ on:
 
 
 jobs:
-  test:
+  test_tools_api:
     # automatically pulls env vars & secrets from the chosen environment
     environment: ${{ inputs.env }}
     runs-on: ubuntu-latest
