@@ -24,7 +24,7 @@ def test_get_all_functions(config):  # noqa: F811
     if config["mock"]:
         pytest.skip("test skipped with mock client")
 
-    functions = tools_api.get_all_functions(client=Client())
+    functions = tools_api.get_functions(client=Client())
     assert len(functions) > 0
 
     print(f"Found {len(functions)} functions")
