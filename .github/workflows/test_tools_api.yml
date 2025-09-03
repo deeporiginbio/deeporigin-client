@@ -7,12 +7,12 @@ on:
         description: "Target environment"
         type: choice
         required: true
-        default: staging
-        options: [edge, prod]
+        default: prod
+        options: [edge, staging,prod]
 
 
 jobs:
-  test:
+  test_tools_api:
     # automatically pulls env vars & secrets from the chosen environment
     environment: ${{ inputs.env }}
     runs-on: ubuntu-latest
@@ -25,13 +25,26 @@ jobs:
       - name: Select API token
         run: |
           if [ "${{ inputs.env }}" = "prod" ]; then
-            echo "API_TOKEN=${{ secrets.TOKEN_PROD_ACCESS }}" >> "$GITHUB_ENV"
+            echo "DEEPORIGIN_TOKEN=${{ secrets.TOKEN_PROD_ACCESS }}" >> "$GITHUB_ENV"
           elif [ "${{ inputs.env }}" = "staging" ]; then
-            echo "API_TOKEN=${{ secrets.TOKEN_STAGING_ACCESS }}" >> "$GITHUB_ENV"
+            echo "DEEPORIGIN_TOKEN=${{ secrets.TOKEN_STAGING_ACCESS }}" >> "$GITHUB_ENV"
+          elif [ "${{ inputs.env }}" = "edge" ]; then
+            echo "DEEPORIGIN_TOKEN=${{ secrets.TOKEN_EDGE_ACCESS }}" >> "$GITHUB_ENV"
           fi
+      - name: Verifying basic API functionality using cURL
+        run: |
+          curl -X 'GET' \
+            'https://api.deeporigin.io/tools/protected/tools/definitions' \
+            -H 'accept: application/json' \
+            -H "Authorization: Bearer $DEEPORIGIN_TOKEN"
+      - name: Set environment variables for Client
+        run: |
+          echo "DEEPORIGIN_ORG_KEY=deeporigin" >> "$GITHUB_ENV"
+          echo "DEEPORIGIN_ENV=${{ inputs.env }}" >> "$GITHUB_ENV"
       - uses: actions/setup-python@v5
         with: { python-version: "3.13" }
-      - run: pip install .
+      - run: pip install .[tools,test,plots]
       - name: Run tests
         run: |
-          pytest -v -k test_tools_api
+          pytest -v -k test_tools_api --client "default"
+

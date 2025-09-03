@@ -186,7 +186,7 @@ def _create_function(
         method_sig = inspect.signature(method)
         if "org_key" in method_sig.parameters and (kwargs.get("org_key") is None):
             if client_org_key is None:
-                kwargs["org_key"] = get_value()["organization_id"]
+                kwargs["org_key"] = get_value()["org_key"]
             else:
                 kwargs["org_key"] = client_org_key
 
