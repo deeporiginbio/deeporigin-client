@@ -31,7 +31,7 @@ jobs:
           fi
       - uses: actions/setup-python@v5
         with: { python-version: "3.13" }
-      - run: pip install .
+      - run: pip install .[tools,test,plots]
       - name: Run tests
         run: |
           pytest -v -k test_tools_api
