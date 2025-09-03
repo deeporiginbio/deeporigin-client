@@ -39,3 +39,14 @@ def test_get_all_executions(config):  # noqa: F811
     executions = tools_api.get_tool_executions(client=Client())
 
     print(f"Found {len(executions)} executions")
+
+
+def test_health(config):  # noqa: F811
+    """test the health API"""
+
+    if config["mock"]:
+        pytest.skip("test skipped with mock client")
+
+    data = tools_api.check(client=Client())
+    assert data["status"] == "ok"
+    assert data["info"]["mikroOrm"]["status"] == "up"
