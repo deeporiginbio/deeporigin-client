@@ -27,4 +27,15 @@ def test_get_all_functions(config):  # noqa: F811
     functions = tools_api.get_all_functions(client=Client())
     assert len(functions) > 0
 
-    print(f"Found {len(functions)} functions")tools_api.get_functions()
+    print(f"Found {len(functions)} functions")
+
+
+def test_get_all_executions(config):  # noqa: F811
+    """test the executions API"""
+
+    if config["mock"]:
+        pytest.skip("test skipped with mock client")
+
+    executions = tools_api.get_tool_executions(client=Client())
+
+    print(f"Found {len(executions)} executions")
