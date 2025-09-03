@@ -31,9 +31,16 @@ jobs:
           elif [ "${{ inputs.env }}" = "edge" ]; then
             echo "API_TOKEN=${{ secrets.TOKEN_EDGE_ACCESS }}" >> "$GITHUB_ENV"
           fi
+      - name: Debug API call (curl)
+        run: |
+          curl -X 'GET' \
+            'https://api.deeporigin.io/tools/protected/tools/definitions' \
+            -H 'accept: application/json' \
+            -H "Authorization: Bearer $API_TOKEN"
       - uses: actions/setup-python@v5
         with: { python-version: "3.13" }
       - run: pip install .[tools,test,plots]
       - name: Run tests
         run: |
           pytest -v -k test_tools_api --client "default"
+
