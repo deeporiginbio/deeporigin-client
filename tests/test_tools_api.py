@@ -6,19 +6,25 @@ from deeporigin.platform import Client, tools_api
 from tests.utils import config  # noqa: F401
 
 
-def test_tools_api(config):  # noqa: F811
+def test_get_all_tools(config):  # noqa: F811
     """test the tools API"""
 
     if config["mock"]:
         pytest.skip("test skipped with mock client")
 
-    # Create client inside the test function to avoid hanging at import time
-    try:
-        client = Client()
-    except Exception as e:
-        pytest.skip(f"Could not create client: {e}")
-
-    tools = tools_api.get_all_tools(client=client)
+    tools = tools_api.get_all_tools(client=Client())
     assert len(tools) > 0
 
     print(f"Found {len(tools)} tools")
+
+
+def test_get_all_functions(config):  # noqa: F811
+    """test the functions API"""
+
+    if config["mock"]:
+        pytest.skip("test skipped with mock client")
+
+    functions = tools_api.get_all_functions(client=Client())
+    assert len(functions) > 0
+
+    print(f"Found {len(functions)} functions")tools_api.get_functions()

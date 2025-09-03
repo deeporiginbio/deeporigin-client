@@ -31,13 +31,7 @@ jobs:
           elif [ "${{ inputs.env }}" = "edge" ]; then
             echo "DEEPORIGIN_TOKEN=${{ secrets.TOKEN_EDGE_ACCESS }}" >> "$GITHUB_ENV"
           fi
-      - name: Debug environment
-        run: |
-          echo "DEEPORIGIN_TOKEN is set: $([ -n "$DEEPORIGIN_TOKEN" ] && echo "yes" || echo "no")"
-          echo "DEEPORIGIN_TOKEN is set: $([ -n "$DEEPORIGIN_TOKEN" ] && echo "yes" || echo "no")"
-          echo "DEEPORIGIN_ORG_KEY is set: $([ -n "$DEEPORIGIN_ORG_KEY" ] && echo "yes" || echo "no")"
-          echo "DEEPORIGIN_ENV is set: $([ -n "$DEEPORIGIN_ENV" ] && echo "yes" || echo "no")"
-      - name: Debug API call (curl)
+      - name: Verifying basic API functionality using cURL
         run: |
           curl -X 'GET' \
             'https://api.deeporigin.io/tools/protected/tools/definitions' \
