@@ -12,29 +12,22 @@ import requests
 from deeporigin import __version__
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.utils.config import _get_domain_name
-from deeporigin.utils.core import (
-    _ensure_do_folder,
-    _get_api_tokens_filepath,
-    in_aws_lambda,
-)
+from deeporigin.utils.core import _ensure_do_folder, _get_api_tokens_filepath
 
 
 @functools.cache
 def check_for_updates():
     """check if a new version is available. If so, print an message"""
-    if not in_aws_lambda():
-        try:
-            latest_pypi_version = Version(_get_pypi_version())
-            if (
-                Version(__version__) < latest_pypi_version
-                and __version__ != "0.0.0.dev0"
-            ):
-                print(
-                    f"🎈 A new version of Deep Origin is available. You have version {__version__}. The latest version is {latest_pypi_version}. Please update to the newest version."
-                )
 
-        except Exception:
-            pass
+    try:
+        latest_pypi_version = Version(_get_pypi_version())
+        if Version(__version__) < latest_pypi_version and __version__ != "0.0.0.dev0":
+            print(
+                f"🎈 A new version of Deep Origin is available. You have version {__version__}. The latest version is {latest_pypi_version}. Please update to the newest version."
+            )
+
+    except Exception:
+        pass
 
 
 @beartype

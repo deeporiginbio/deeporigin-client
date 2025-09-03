@@ -366,12 +366,6 @@ def sha256_checksum(file_path):
     return base64.b64encode(sha256_hash.digest()).decode()
 
 
-def in_aws_lambda():
-    """Returns True if running in AWS Lambda"""
-
-    return "AWS_LAMBDA_FUNCTION_NAME" in os.environ
-
-
 @beartype
 def find_last_updated_row(rows: list[dict]) -> dict | None:
     """utility function to find the most recently updated row and return that object"""
@@ -480,13 +474,9 @@ def expand_user(path, user_home_dirname: str = os.path.expanduser("~")) -> str:
 def _ensure_do_folder() -> Path:
     """makes sure that the deeporigin scratch folder exists
 
-    If it doesn't exist, the folder is created. The location of this folder is typically in the home directory, but may be elsewhere if running in AWS Lambda"""
+    If it doesn't exist, the folder is created. The location of this folder is typically in the home directory"""
 
-    if in_aws_lambda():
-        deeporigin_path = Path("/tmp/.deeporigin")
-    else:
-        deeporigin_path = Path.home() / ".deeporigin"
-
+    deeporigin_path = Path.home() / ".deeporigin"
     deeporigin_path.mkdir(parents=True, exist_ok=True)
 
     return deeporigin_path

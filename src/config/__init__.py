@@ -1,124 +1,84 @@
-import functools
-import os
-import pathlib
-from typing import Optional
+"""Simplified configuration management for Deep Origin CLI/client.
 
-import confuse
+This module stores and retrieves only two configuration values:
+`env` and `org_key`.
+
+Behavior:
+- If the config file does not exist, it is created with `env=prod` and an
+  empty `org_key`.
+- If the config file exists, it is read and a dictionary is returned.
+"""
+
+import os
+
 import yaml
 
-from deeporigin.exceptions import DeepOriginException
-from deeporigin.utils.core import _ensure_do_folder, in_aws_lambda
+from deeporigin.utils.core import _ensure_do_folder
 
-CONFIG_DIR = pathlib.Path(__file__).parent
-DEFAULT_CONFIG_FILENAME = os.path.join(CONFIG_DIR, "default.yml")
 CONFIG_YML_LOCATION = _ensure_do_folder() / "config.yml"
 
-__all__ = ["get_value", "set_value"]
+__all__ = ["get_value", "set_value", "CONFIG_YML_LOCATION"]
 
 
-# validate configuration
-TEMPLATE = {
-    "organization_id": confuse.String(),
-    "bench_id": confuse.Optional(confuse.String()),
-    "env": confuse.String(),
-    "api_endpoint": confuse.Optional(confuse.String()),
-    "auth_client_id": confuse.String(),
-    "auth_client_secret": confuse.String(),
-}
+def _ensure_config_file_exists() -> None:
+    """Ensure the configuration file exists; create with defaults if missing."""
+
+    if not os.path.isfile(CONFIG_YML_LOCATION):
+        default_data: dict = {"env": "prod", "org_key": ""}
+        os.makedirs(os.path.dirname(CONFIG_YML_LOCATION), exist_ok=True)
+        with open(CONFIG_YML_LOCATION, "w") as file:
+            yaml.safe_dump(default_data, file, default_flow_style=False)
 
 
-@functools.cache
-def get_value(
-    config_file_location: Optional[str] = None, override_values: tuple = None
-) -> confuse.templates.AttrDict:
-    """Get the configuration for the Deep Origin CLI
+def get_value() -> dict:
+    """Get the configuration values.
+
+    Creates the file with defaults if it doesn't exist, then returns a dict
+    with keys `env` and `org_key`.
 
     Args:
-        user_config_filename: path to the user's configuration file
-        override_values: values to use to override the default value
+        config_file_location: Optional custom path for the config file.
 
     Returns:
-        :obj:`confuse.templates.AttrDict`: configuration for the Deep Origin CLI
+        A dictionary with keys `env` and `org_key`.
     """
 
-    # if we're running on AWS lambda, read config values
-    # from env and return those.
-    if in_aws_lambda():
-        return confuse.AttrDict(
-            {
-                "organization_id": os.environ.get("DEEP_ORIGIN_ORGANIZATION_ID"),
-                "api_endpoint": os.environ.get("DEEP_ORIGIN_API_ENDPOINT"),
-                "env": os.environ.get("DEEP_ORIGIN_ENV"),
-            }
-        )
+    _ensure_config_file_exists()
 
-    # read the default configuration
-    value = confuse.Configuration("deep_origin", __name__)
+    with open(CONFIG_YML_LOCATION, "r") as file:
+        data = yaml.safe_load(file) or {}
 
-    # read the default configuration
-    value.set_file(DEFAULT_CONFIG_FILENAME, base_for_paths=True)
+    # Fill defaults if missing
+    env = data.get("env", "prod")
+    org_key = data.get("org_key", "")
 
-    # read configuration overrides from the user
-    if config_file_location is None:
-        config_file_location = CONFIG_YML_LOCATION
-    if os.path.isfile(config_file_location):
-        value.set_file(
-            config_file_location,
-            base_for_paths=True,
-        )
-
-    # read configuration from environment variables
-    value.set_env(sep="__")
-
-    # set overriding values
-    if override_values is not None:
-        for k, v in override_values:
-            value.set({k: v})
-
-    try:
-        validated_value = value.get(TEMPLATE)
-    except confuse.exceptions.ConfigTypeError as exception:
-        detail = str(exception).replace("\n", "\n  ")
-        key = detail.split(":")[0].strip()
-        raise DeepOriginException(
-            title="Invalid configuration",
-            message=f"The Deep Origin CLI and Python client requires a valid configuration. The {key} field is not valid:\n {detail}",
-            fix=f"To fix this issue, run `deeporigin config set {key} <value>`",
-        ) from exception
-
-    return validated_value
+    return {"env": env, "org_key": org_key}
 
 
 def set_value(key: str, value) -> None:
-    """set a value in the config
+    """Set a configuration value.
+
+    Only `env` and `org_key` are supported keys.
 
     Args:
-        key: key to set
-        value: value to set
-
+        key: Configuration key to set (must be `env` or `org_key`).
+        value: Value to set.
     """
 
-    # check that key exists in the confuse template
-    if key not in TEMPLATE.keys():
-        raise DeepOriginException(
-            message=f"{key} is not a valid configuration key.",
-            fix=f"The following configuration keys are supported: {', '.join(list(TEMPLATE.keys()))}",
+    if key not in {"env", "org_key"}:
+        raise ValueError(
+            f"{key} is not a valid configuration key. Supported keys are: env, org_key"
         )
 
-    # check if config file exists
-    if os.path.isfile(CONFIG_YML_LOCATION):
-        with open(CONFIG_YML_LOCATION, "r") as file:
-            data = yaml.safe_load(file)
-    else:
-        # no file.
-        data = {}
+    _ensure_config_file_exists()
+
+    with open(CONFIG_YML_LOCATION, "r") as file:
+        data = yaml.safe_load(file) or {}
+
     data[key] = value
 
-    # check that this is valid
-    get_value(override_values=tuple(data.items()))
-
-    # save configuration
+    # Persist updated data
     with open(CONFIG_YML_LOCATION, "w") as file:
-        yaml.dump(data, file, default_flow_style=False)
+        yaml.safe_dump(data, file, default_flow_style=False)
 
     print(f"✔︎ {key} → {value}")

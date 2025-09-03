@@ -44,6 +44,12 @@ AUTH_CLIENT_ID = {
     "edge": "jbYq4bkeX2UJb1bePH1ci172KbUMVyak",
 }
 
+AUTH_CLIENT_SECRET = {
+    "prod": "cQcZclTqMHMuovyXV-DD15tEiL-KH_2XD36vsppULRBuq7AjwyI4dh5ag11O_K1S",
+    "staging": "WNoSHfEIBfM8cSpwhU2k30uGaCD3Uo6KhyklSYsWecrPKHjR9MEdeP3YF094GvZt",
+    "edge": "dyXkC91flTvTrqnFDAheysQeUHMT97B8Ah47OssdMjTFDTSdkYq8cqhCASb_fTBK",
+}
+
 
 @beartype
 def tokens_exist() -> bool:
@@ -204,15 +210,14 @@ def refresh_tokens(api_refresh_token: str, *, env: Optional[ENVS] = None) -> str
     Returns:
         new API access token
     """
-    config = get_config()
 
     if env is None:
         env = get_config()["env"]
 
     body = {
         "grant_type": "refresh_token",
-        "client_id": config.auth_client_id,
-        "client_secret": config.auth_client_secret,
+        "client_id": AUTH_CLIENT_ID[env],
+        "client_secret": AUTH_CLIENT_SECRET[env],
         "refresh_token": api_refresh_token,
     }
     response = requests.post(AUTH_DOMAIN[env] + AUTH_TOKEN_ENDPOINT, json=body)
