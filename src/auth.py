@@ -58,10 +58,7 @@ def tokens_exist() -> bool:
     return os.path.isfile(_get_api_tokens_filepath())
 
 
-def get_tokens(
-    *,
-    refresh: bool = False,
-) -> dict:
+def get_tokens() -> dict:
     """Get access token for accessing the Deep Origin API
 
     Gets tokens to access Deep Origin API.
@@ -80,28 +77,29 @@ def get_tokens(
 
     tokens = {}
 
-    if ENV_VARIABLES["access_token"] in os.environ:
-        tokens["access"] = os.environ[ENV_VARIABLES["access_token"]]
-
-    if ENV_VARIABLES["refresh_token"] in os.environ:
-        tokens["refresh"] = os.environ[ENV_VARIABLES["refresh_token"]]
-
     if tokens_exist():
         # tokens exist on disk
         tokens = read_cached_tokens()
 
-        if refresh:
-            tokens["access"] = refresh_tokens(tokens["refresh"])
-            cache_tokens(tokens)
+    # tokens in env override tokens on disk
+    # try to read from env
+    if ENV_VARIABLES["access_token"] in os.environ:
+        tokens["access"] = os.environ[ENV_VARIABLES["access_token"]]
+    if ENV_VARIABLES["refresh_token"] in os.environ:
+        tokens["refresh"] = os.environ[ENV_VARIABLES["refresh_token"]]
 
-    elif "access" not in tokens.keys():
-        # no tokens on disk. tokens not read from env.have to sign into the platform to get tokens
+    if "access" not in tokens.keys():
+        # no tokens in env. have to sign into the platform to get tokens
         tokens = authenticate()
 
     # check if the access token is expired
-    if is_token_expired(decode_access_token(tokens["access"])):
-        tokens["access"] = refresh_tokens(tokens["refresh"])
-        cache_tokens(tokens)
+    try:
+        if is_token_expired(decode_access_token(tokens["access"])):
+            tokens["access"] = refresh_tokens(tokens["refresh"])
+            cache_tokens(tokens)
+    except jwt.DecodeError:
+        # token decoding failed. issue a warning
+        print("⚠️ Token decoding failed. Please sign in again.")
 
     return tokens
 

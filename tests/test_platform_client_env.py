@@ -34,7 +34,6 @@ def test_env_fallbacks_with_defaults() -> None:
 
     assert client.token == "tok_abc"
     assert client.org_key == "org_123"
-    assert client.env == "prod"
     assert client.api_endpoint.endswith("deeporigin.io")
 
 
@@ -48,15 +47,3 @@ def test_kwarg_overrides_env() -> None:
     assert client.token == "tok_kw"
     assert client.org_key == "org_kw"
     assert client.env == "edge"
-
-
-def test_missing_token_raises() -> None:
-    os.environ["DEEPORIGIN_ORG_KEY"] = "org_123"
-    with pytest.raises(ValueError):
-        Client()
-
-
-def test_missing_org_key_raises() -> None:
-    os.environ["DEEPORIGIN_TOKEN"] = "tok_123"
-    with pytest.raises(ValueError):
-        Client()

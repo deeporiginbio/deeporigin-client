@@ -10,8 +10,6 @@ environment variables when keywords are omitted:
 - `DEEPORIGIN_ORG_KEY`
 """
 
-import os
-
 from beartype import beartype
 
 from deeporigin.auth import get_tokens
@@ -45,6 +43,7 @@ class Client:
         """
 
         tokens = get_tokens()
+        resolved_token = token or tokens["access"]
         resolved_env = env or get_value()["env"]
         resolved_org_key = org_key or get_value()["org_key"]
 
@@ -54,7 +53,7 @@ class Client:
             )
 
         # Assign resolved values
-        self.token = tokens["access"]
+        self.token = resolved_token
         self.org_key = resolved_org_key
         self.env = resolved_env
         self.api_endpoint = API_ENDPOINT[resolved_env]
