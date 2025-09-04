@@ -250,6 +250,7 @@ def _process_job(
         client=client,
         org_key=org_key,
     )
+    print(response)
     job_id = response.id
 
     return job_id

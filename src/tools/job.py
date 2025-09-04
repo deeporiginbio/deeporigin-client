@@ -430,7 +430,7 @@ def get_dataframe(
     data = {
         "id": [],
         "created_at": [],  # converting some fields to snake_case
-        "execution_id": [],
+        "resource_id": [],
         "completed_at": [],
         "started_at": [],
         "status": [],
@@ -452,9 +452,9 @@ def get_dataframe(
 
     for job in jobs:
         # Add basic fields
-        data["id"].append(job["id"])
+        data["id"].append(job["executionId"])
         data["created_at"].append(job["createdAt"])
-        data["execution_id"].append(job["executionId"])
+        data["resource_id"].append(job["resourceId"])
         data["completed_at"].append(job["completedAt"])
         data["started_at"].append(job["startedAt"])
         data["status"].append(job["status"])
