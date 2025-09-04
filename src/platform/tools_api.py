@@ -250,6 +250,7 @@ def _process_job(
         client=client,
         org_key=org_key,
     )
-    job_id = response.id
+
+    job_id = response.executionId
 
     return job_id

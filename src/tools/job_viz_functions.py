@@ -221,7 +221,7 @@ def _name_func_docking(job) -> str:
         unique_smiles.update(inputs["smiles_list"])
     num_ligands = len(unique_smiles)
 
-    protein_file = os.path.basename(job._inputs[0]["protein"]["key"])
+    protein_file = os.path.basename(job._metadata[0]["protein_file"])
 
     return f"Docking <code>{protein_file}</code> to {num_ligands} ligands."
 

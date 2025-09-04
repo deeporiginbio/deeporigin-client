@@ -19,7 +19,7 @@ from deeporigin.drug_discovery.constants import tool_mapper
 from deeporigin.drug_discovery.structures.pocket import Pocket
 from deeporigin.drug_discovery.workflow_step import WorkflowStep
 from deeporigin.exceptions import DeepOriginException
-from deeporigin.platform import file_api, tools_api
+from deeporigin.platform import Client, file_api, tools_api
 from deeporigin.tools.job import Job, get_dataframe
 
 Number = float | int
@@ -199,10 +199,17 @@ class Docking(WorkflowStep):
             df = df[mask]
 
         # filter to only keep jobs that match this protein.
-        protein_basename = os.path.basename(self.parent.protein.file_path)
-
         if "metadata" in df.columns and len(df) > 0:
-            mask = df["metadata"].apply(lambda x: x["protein_file"] == protein_basename)
+            # first, drop rows where metadata has no protein_hash key
+            has_protein_hash = df["metadata"].apply(
+                lambda x: isinstance(x, dict) and ("protein_hash" in x)
+            )
+            df = df[has_protein_hash]
+
+            # then, keep only rows matching this protein hash
+            mask = df["metadata"].apply(
+                lambda x: x["protein_hash"] == self.parent.protein.to_hash()
+            )
             df = df[mask]
 
         if "user_inputs" in df.columns and len(df) > 0:
@@ -226,6 +233,8 @@ class Docking(WorkflowStep):
         n_workers: Optional[int] = None,
         _output_dir_path: Optional[str] = None,
         use_parallel: bool = True,
+        re_run: bool = False,
+        client: Optional[Client] = None,
     ):
         """Run bulk docking on Deep Origin. Ligands will be split into batches based on the batch_size argument, and will run in parallel on Deep Origin clusters.
 
@@ -235,16 +244,22 @@ class Docking(WorkflowStep):
             batch_size (int, optional): batch size. Defaults to 30.
             n_workers (int, optional): number of workers. Defaults to None.
             use_parallel (bool, optional): whether to run jobs in parallel. Defaults to True.
+            re_run (bool, optional): whether to re-run jobs. Defaults to False.
         """
 
         protein_basename = os.path.basename(self.parent.protein.file_path)
 
         if _output_dir_path is None:
-            _output_dir_path = "tool-runs/Docking/" + protein_basename + "/"
+            _output_dir_path = (
+                "tool-runs/Docking/" + self.parent.protein.to_hash() + "/"
+            )
 
         self.parent._sync_protein_and_ligands()
 
-        metadata = dict(protein_file=protein_basename)
+        metadata = {
+            "protein_file": protein_basename,
+            "protein_hash": self.parent.protein.to_hash(),
+        }
 
         if batch_size is None and n_workers is None:
             raise DeepOriginException(
@@ -276,9 +291,11 @@ class Docking(WorkflowStep):
         df = self._get_jobs(pocket_center=pocket_center, box_size=box_size)
 
         already_docked_ligands = []
-        for _, row in df.iterrows():
-            this_smiles = row["user_inputs"]["smiles_list"]
-            already_docked_ligands.extend(this_smiles)
+
+        if not re_run:
+            for _, row in df.iterrows():
+                this_smiles = row["user_inputs"]["smiles_list"]
+                already_docked_ligands.extend(this_smiles)
 
         smiles_strings = set(smiles_strings) - set(already_docked_ligands)
         smiles_strings = list(smiles_strings)
@@ -343,7 +360,7 @@ class Docking(WorkflowStep):
         else:
             print("No new ligands to dock")
 
-        job = Job.from_ids(job_ids)
+        job = Job.from_ids(job_ids, client=self.parent.client)
         # for docking, we always have a single job
         self.jobs = [job]
 

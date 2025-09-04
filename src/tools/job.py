@@ -57,7 +57,7 @@ class Job:
     _outputs: list = field(default_factory=list)
     _task = None
     _attributes: list = field(default_factory=list)
-    _execution_ids: list = field(default_factory=list)
+    _resource_ids: list = field(default_factory=list)
     _metadata: list = field(default_factory=list)
     _tool: dict = field(default_factory=dict)
 
@@ -143,7 +143,7 @@ class Job:
         self._attributes = results
         self._status = [result["status"] for result in results]
         self._progress_reports = [result["progressReport"] for result in results]
-        self._execution_ids = [result["executionId"] for result in results]
+        self._resource_ids = [result["resourceId"] for result in results]
         self._inputs = [result["userInputs"] for result in results]
         self._outputs = [result["userOutputs"] for result in results]
         self._metadata = [result["metadata"] for result in results]
@@ -222,7 +222,7 @@ class Job:
             "outputs_json": json.dumps(self._outputs, indent=2),
             "inputs_json": json.dumps(self._inputs, indent=2),
             "job_ids": self._ids,
-            "execution_ids": self._execution_ids,
+            "resource_ids": self._resource_ids,
             "statuses": self._status,
             "started_at": started_at,
             "running_time": running_time,
@@ -362,6 +362,8 @@ class Job:
             client=self.client,
         )
 
+        self.sync()
+
 
 # @beartype
 def get_dataframe(
@@ -430,7 +432,7 @@ def get_dataframe(
     data = {
         "id": [],
         "created_at": [],  # converting some fields to snake_case
-        "execution_id": [],
+        "resource_id": [],
         "completed_at": [],
         "started_at": [],
         "status": [],
@@ -452,9 +454,9 @@ def get_dataframe(
 
     for job in jobs:
         # Add basic fields
-        data["id"].append(job["id"])
+        data["id"].append(job["executionId"])
         data["created_at"].append(job["createdAt"])
-        data["execution_id"].append(job["executionId"])
+        data["resource_id"].append(job["resourceId"])
         data["completed_at"].append(job["completedAt"])
         data["started_at"].append(job["startedAt"])
         data["status"].append(job["status"])

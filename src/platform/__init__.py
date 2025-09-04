@@ -10,10 +10,10 @@ environment variables when keywords are omitted:
 - `DEEPORIGIN_ORG_KEY`
 """
 
-import os
-
 from beartype import beartype
 
+from deeporigin.auth import get_tokens
+from deeporigin.config import get_value
 from deeporigin.utils.constants import API_ENDPOINT, ENVS
 
 
@@ -42,14 +42,10 @@ class Client:
             KeyError: If the resolved environment is not a known API endpoint.
         """
 
-        resolved_token = token or os.environ.get("DEEPORIGIN_TOKEN")
-        resolved_env: ENVS = env or os.environ.get("DEEPORIGIN_ENV") or "prod"  # type: ignore[assignment]
-        resolved_org_key = org_key or os.environ.get("DEEPORIGIN_ORG_KEY")
-
-        if not resolved_token:
-            raise ValueError(
-                "Missing token. Provide `token` or set DEEPORIGIN_TOKEN in the environment."
-            )
+        tokens = get_tokens()
+        resolved_token = token or tokens["access"]
+        resolved_env = env or get_value()["env"]
+        resolved_org_key = org_key or get_value()["org_key"]
 
         if not resolved_org_key:
             raise ValueError(
