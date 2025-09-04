@@ -13,6 +13,7 @@ import os
 
 import yaml
 
+from deeporigin.utils.constants import ENV_VARIABLES
 from deeporigin.utils.core import _ensure_do_folder
 
 CONFIG_YML_LOCATION = _ensure_do_folder() / "config.yml"
@@ -50,7 +51,13 @@ def get_value() -> dict:
 
     # Fill defaults if missing
     env = data.get("env", "prod")
-    org_key = data.get("org_key", "")
+    org_key = data.get("org_key", None)
+
+    # env variables override config file
+    if ENV_VARIABLES["env"] in os.environ:
+        env = os.environ[ENV_VARIABLES["env"]]
+    if ENV_VARIABLES["org_key"] in os.environ:
+        org_key = os.environ[ENV_VARIABLES["org_key"]]
 
     return {"env": env, "org_key": org_key}
 

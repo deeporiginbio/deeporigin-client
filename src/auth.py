@@ -14,7 +14,7 @@ import requests
 
 from deeporigin.config import get_value as get_config
 from deeporigin.exceptions import DeepOriginException
-from deeporigin.utils.constants import ENVS
+from deeporigin.utils.constants import ENV_VARIABLES, ENVS
 from deeporigin.utils.core import _get_api_tokens_filepath, read_cached_tokens
 
 __all__ = [
@@ -78,10 +78,13 @@ def get_tokens(
         API access and refresh tokens
     """
 
-    if "DEEP_ORIGIN_ACCESS_TOKEN" in os.environ:
-        return dict(
-            access=os.environ["DEEP_ORIGIN_ACCESS_TOKEN"],
-        )
+    tokens = {}
+
+    if ENV_VARIABLES["access_token"] in os.environ:
+        tokens["access"] = os.environ[ENV_VARIABLES["access_token"]]
+
+    if ENV_VARIABLES["refresh_token"] in os.environ:
+        tokens["refresh"] = os.environ[ENV_VARIABLES["refresh_token"]]
 
     if tokens_exist():
         # tokens exist on disk
@@ -91,8 +94,8 @@ def get_tokens(
             tokens["access"] = refresh_tokens(tokens["refresh"])
             cache_tokens(tokens)
 
-    else:
-        # no tokens on disk. have to sign into the platform to get tokens
+    elif "access" not in tokens.keys():
+        # no tokens on disk. tokens not read from env.have to sign into the platform to get tokens
         tokens = authenticate()
 
     # check if the access token is expired

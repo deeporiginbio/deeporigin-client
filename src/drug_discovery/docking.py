@@ -19,7 +19,7 @@ from deeporigin.drug_discovery.constants import tool_mapper
 from deeporigin.drug_discovery.structures.pocket import Pocket
 from deeporigin.drug_discovery.workflow_step import WorkflowStep
 from deeporigin.exceptions import DeepOriginException
-from deeporigin.platform import file_api, tools_api
+from deeporigin.platform import Client, file_api, tools_api
 from deeporigin.tools.job import Job, get_dataframe
 
 Number = float | int
@@ -234,6 +234,7 @@ class Docking(WorkflowStep):
         _output_dir_path: Optional[str] = None,
         use_parallel: bool = True,
         re_run: bool = False,
+        client: Optional[Client] = None,
     ):
         """Run bulk docking on Deep Origin. Ligands will be split into batches based on the batch_size argument, and will run in parallel on Deep Origin clusters.
 
@@ -359,7 +360,7 @@ class Docking(WorkflowStep):
         else:
             print("No new ligands to dock")
 
-        job = Job.from_ids(job_ids)
+        job = Job.from_ids(job_ids, client=self.parent.client)
         # for docking, we always have a single job
         self.jobs = [job]
 
