@@ -13,7 +13,7 @@ To make actions in multiple organizations, or as multiple users, a `client` can 
 First, construct a client using:
 
 
-```python
+```{.python notest}
 from deeporigin.platform import Client
 
 client = Client(token="my-secret-token", org_key="my-org")
