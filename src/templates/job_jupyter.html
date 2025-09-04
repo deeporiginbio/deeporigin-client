@@ -156,8 +156,8 @@
                         <table class="table table-bordered table-striped mb-0">
                             <thead>
                                 <tr>
-                                    <th>jobID</th>
                                     <th>executionID</th>
+                                    <th>resourceID</th>
                                     <th>Status</th>
                                     <th>Started At</th>
                                     <th>Running Time</th>
@@ -167,7 +167,7 @@
                                 {% for i in range(job_ids|length) %}
                                 <tr>
                                     <td>{{ job_ids[i] }}</td>
-                                    <td>{{ execution_ids[i] }}</td>
+                                    <td>{{ resource_ids[i] }}</td>
                                     <td>{{ statuses[i] }}</td>
                                     <td>{{ started_at[i] }}</td>
                                     <td>{{ running_time[i] }}</td>

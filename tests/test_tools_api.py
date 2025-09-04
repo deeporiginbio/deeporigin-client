@@ -1,5 +1,7 @@
 """this module tests the tools API"""
 
+import time
+
 import pytest
 
 from deeporigin.platform import Client, tools_api
@@ -50,3 +52,42 @@ def test_health(config):  # noqa: F811
     data = tools_api.check(client=Client())
     assert data["status"] == "ok"
     assert data["info"]["mikroOrm"]["status"] == "up"
+
+
+def test_run_docking_and_cancel(config):  # noqa: F811
+    if config["mock"]:
+        pytest.skip("test skipped with mock client")
+
+    from deeporigin.drug_discovery import (
+        BRD_DATA_DIR,
+        Complex,
+    )
+
+    sim = Complex.from_dir(BRD_DATA_DIR)
+
+    pockets = sim.protein.find_pockets(pocket_count=1)
+    pocket = pockets[0]
+
+    job = sim.docking.run(
+        pocket=pocket,
+        re_run=True,
+        use_parallel=False,
+        client=Client(),
+    )
+
+    # wait for a bit to start
+    time.sleep(10)
+
+    # check that it's running
+    job.sync()
+    assert "Running" in job._status
+
+    # now cancel it
+    job.cancel()
+
+    # wait for a bit to cancel
+    time.sleep(10)
+
+    # check that it's cancelled
+    job.sync()
+    assert "Cancelled" in job._status
