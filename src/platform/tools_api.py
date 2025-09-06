@@ -26,7 +26,7 @@ PROVIDER = Literal["ufa", "s3"]
 
 @beartype
 def get_statuses_and_progress(
-    job_ids: list[str],
+    execution_ids: list[str],
     *,
     client=None,
     org_key: Optional[str] = None,
@@ -42,23 +42,23 @@ def get_statuses_and_progress(
 
     with concurrent.futures.ThreadPoolExecutor() as executor:
         # Submit all jobs and create a mapping from future to job_id
-        future_to_job_id = {
+        future_to_execution_id = {
             executor.submit(
                 get_tool_execution,  # noqa: F821
-                execution_id=job_id,
+                execution_id=execution_id,
                 client=client,
                 org_key=org_key,
-            ): job_id
-            for job_id in job_ids
+            ): execution_id
+            for execution_id in execution_ids
         }
 
         # As each future completes, store the result in the status dictionary
-        for future in concurrent.futures.as_completed(future_to_job_id):
-            job_id = future_to_job_id[future]
+        for future in concurrent.futures.as_completed(future_to_execution_id):
+            execution_id = future_to_execution_id[future]
             try:
                 results.append(future.result())
             except Exception as e:
-                errors.append((job_id, e))
+                errors.append((execution_id, e))
 
     if errors:
         error_msgs = "\n".join([f"Job {jid}: {str(err)}" for jid, err in errors])

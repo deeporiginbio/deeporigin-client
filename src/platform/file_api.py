@@ -37,9 +37,7 @@ def list_files_in_dir(
         List[str]: A list of file paths found in the specified UFA directory.
     """
 
-    from deeporigin.platform import file_api
-
-    files = file_api.get_object_directory(
+    files = get_object_directory(  # noqa: F821
         file_path=file_path,
         recursive=True,
         client=client,
@@ -142,7 +140,12 @@ def upload_files(
 
 
 @beartype
-def download_files(files: dict[str, str | None], *, client=None):
+def download_files(
+    files: dict[str, str | None],
+    *,
+    client=None,
+    raise_on_error: bool = True,
+):
     """Download multiple files in parallel. files: {remote_path: local_path or None}. If local_path is None, use default. Raises RuntimeError if any download fails."""
     results = []
     errors = []
@@ -159,7 +162,7 @@ def download_files(files: dict[str, str | None], *, client=None):
                 results.append(future.result())
             except Exception as e:
                 errors.append((rp, lp, e))
-    if errors:
+    if errors and raise_on_error:
         error_msgs = "\n".join(
             [
                 f"Download failed for remote_path={rp}, local_path={lp}: {str(err)}"

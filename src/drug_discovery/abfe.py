@@ -58,6 +58,7 @@ class ABFE(WorkflowStep):
         results_files = file_api.download_files(
             results_files,
             client=self.parent.client,
+            raise_on_error=False,
         )
 
         ligand_mapper = {}
@@ -310,22 +311,17 @@ class ABFE(WorkflowStep):
         """
 
         remote_base = Path(
-            f"tool-runs/ABFE/{self.parent.protein.file_path.name}/{Path(ligand.file_path).name}"
+            f"tool-runs/ABFE/{self.parent.protein.to_hash()}.pdb/{ligand.to_hash()}.sdf"
         )
 
-        remote_pdb_file = (
-            remote_base / "output/protein/ligand/systems/complex/complex.pdb"
-        )
-        files_to_download = [remote_pdb_file]
+        files_to_download = []
 
         if step == "binding":
             # Check for valid windows
 
             # figure out valid windows
-            files = utils.find_files_on_ufa(
-                tool="ABFE",
-                protein=self.parent.protein.file_path.name,
-                ligand=Path(ligand.file_path).name,
+            files = file_api.list_files_in_dir(
+                str(remote_base),
                 client=self.parent.client,
             )
             xtc_files = [
@@ -364,9 +360,7 @@ class ABFE(WorkflowStep):
 
         from deeporigin_molstar.src.viewers import ProteinViewer
 
-        protein_viewer = ProteinViewer(
-            data=str(LOCAL_BASE / remote_pdb_file), format="pdb"
-        )
+        protein_viewer = ProteinViewer(data=self.parent.protein.to_pdb(), format="pdb")
         html_content = protein_viewer.render_trajectory(
             str(LOCAL_BASE / remote_xtc_file)
         )
