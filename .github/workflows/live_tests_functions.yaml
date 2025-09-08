@@ -52,9 +52,6 @@ jobs:
             "access": "'$ACCESS_TOKEN'"
           }' > ~/.deeporigin/api_tokens
 
-      - name: Refresh API tokens using deeporigin.auth
-        run: |
-          uv run scripts/refresh_tokens.py
 
       - name: Run tests against a live instance
         run: uv run pytest  -s --log-cli-level=ERROR --client default -k functions
