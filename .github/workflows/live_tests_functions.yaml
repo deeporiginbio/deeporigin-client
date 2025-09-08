@@ -15,14 +15,10 @@ on:
 
 jobs:
   test-functions-on-production:
+    environment: ${{ inputs.env }}
     runs-on: ubuntu-latest
     env:
-      # Secrets for API and organization
-      REFRESH_TOKEN: ${{ secrets.DEEP_ORIGIN_REFRESH_TOKEN }}
-      ACCESS_TOKEN: ${{ secrets.DEEP_ORIGIN_ACCESS_TOKEN }}
-      DEEP_ORIGIN_ORGANIZATION_ID: ${{ secrets.DEEP_ORIGIN_ORGANIZATION_ID }}
-      DEEP_ORIGIN_API_ENDPOINT: ${{ secrets.DEEP_ORIGIN_API_ENDPOINT }}
-      DEEP_ORIGIN_NUCLEUS_API_ROUTE: ${{ secrets.DEEP_ORIGIN_NUCLEUS_API_ROUTE }}
+      DEEP_ORIGIN_ENV: ${{ inputs.env }}
 
     steps:
       - uses: actions/checkout@v4
