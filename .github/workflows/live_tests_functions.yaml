@@ -1,8 +1,15 @@
-name: Test DO Functions on production
+name: Test DO Functions 
 
 on:
-  # Allow manual runs
   workflow_dispatch:
+    inputs:
+      env:
+        description: "Target environment"
+        type: choice
+        required: true
+        default: prod
+        options: [edge, staging,prod]
+
 
   # Run every day
   schedule:
