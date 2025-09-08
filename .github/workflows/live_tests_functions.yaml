@@ -25,32 +25,27 @@ jobs:
       DEEP_ORIGIN_NUCLEUS_API_ROUTE: ${{ secrets.DEEP_ORIGIN_NUCLEUS_API_ROUTE }}
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Check API endpoint connectivity
-        run: curl -v $DEEP_ORIGIN_API_ENDPOINT || true
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v5
-        with:
-          version: "0.7.13"
-          enable-cache: true
-
-      - name: Set up Python
-        run: uv python install
-
-      - name: Install the project
-        run: uv sync --all-extras --dev
-
-
-      - name: Create API Tokens File
+      - uses: actions/checkout@v4
+      - name: Select API token
         run: |
-          mkdir -p ~/.deeporigin
-          echo '{
-            "refresh": "'$REFRESH_TOKEN'",
-            "access": "'$ACCESS_TOKEN'"
-          }' > ~/.deeporigin/api_tokens
+          if [ "${{ inputs.env }}" = "prod" ]; then
+            echo "DEEPORIGIN_TOKEN=${{ secrets.DEEPORIGIN_TOKEN_PROD }}" >> "$GITHUB_ENV"
+            echo "DEEPORIGIN_REFRESH_TOKEN=${{ secrets.DEEPORIGIN_REFRESH_TOKEN_PROD }}" >> "$GITHUB_ENV"
+          elif [ "${{ inputs.env }}" = "staging" ]; then
+            echo "DEEPORIGIN_TOKEN=${{ secrets.DEEPORIGIN_TOKEN_STAGING }}" >> "$GITHUB_ENV"
+            echo "DEEPORIGIN_REFRESH_TOKEN=${{ secrets.DEEPORIGIN_REFRESH_TOKEN_STAGING }}" >> "$GITHUB_ENV"
+          elif [ "${{ inputs.env }}" = "edge" ]; then
+            echo "DEEPORIGIN_TOKEN=${{ secrets.DEEPORIGIN_TOKEN_EDGE }}" >> "$GITHUB_ENV"
+            echo "DEEPORIGIN_REFRESH_TOKEN=${{ secrets.DEEPORIGIN_REFRESH_TOKEN_EDGE }}" >> "$GITHUB_ENV"
+          fi
+
+      - name: Set environment variables for Client
+        run: |
+          echo "DEEPORIGIN_ORG_KEY=deeporigin" >> "$GITHUB_ENV"
+          echo "DEEPORIGIN_ENV=${{ inputs.env }}" >> "$GITHUB_ENV"
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.13" }
+      - run: pip install .[tools,test,plots]
 
 
       - name: Run tests against a live instance
