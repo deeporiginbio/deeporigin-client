@@ -61,6 +61,7 @@ class Job:
     _metadata: list = field(default_factory=list)
     _tool: dict = field(default_factory=dict)
     _display_id: Optional[str] = None
+    _last_html: Optional[str] = None
 
     # clients
     client: Optional[Client] = None
@@ -265,6 +266,24 @@ class Job:
         # Render the template
         return template.render(**template_vars)
 
+    @beartype
+    def _compose_error_overlay_html(self, *, message: str) -> str:
+        """Compose an error overlay banner HTML for transient failures.
+
+        Args:
+            message: Error message to display.
+
+        Returns:
+            HTML string for an overlay banner indicating a temporary issue.
+        """
+        timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
+        return (
+            "<div style='background: #fff4f4; border: 1px solid #f0b5b5; color: #8a1f1f;"
+            " padding: 8px 12px; margin-bottom: 8px; border-radius: 6px;'>"
+            f"Network/update issue at {timestamp}. Will retry automatically. Error: {message}"
+            "</div>"
+        )
+
     def show(self):
         """Display the job view in a Jupyter notebook.
 
@@ -309,18 +328,37 @@ class Job:
             with the latest job status and progress every 5 seconds.
             It automatically stops when all jobs reach a terminal state.
             """
+            backoff_seconds = 2
             while True:
-                self.sync()
-                html = self._render_job_view(will_auto_update=True)
+                try:
+                    # Run sync in a worker thread with a timeout to avoid indefinite blocking
+                    await asyncio.wait_for(asyncio.to_thread(self.sync), timeout=10)
 
-                update_display(HTML(html), display_id=self._display_id)
+                    html = self._render_job_view(will_auto_update=True)
+                    update_display(HTML(html), display_id=self._display_id)
+                    self._last_html = html
 
-                # Check if all jobs are in terminal states
-                if all(status in ["Failed", "Succeeded"] for status in self._status):
-                    self.stop_watching()
-                    break
+                    # Check if all jobs are in terminal states
+                    if all(
+                        status in ["Failed", "Succeeded"] for status in self._status
+                    ):
+                        self.stop_watching()
+                        break
 
-                await asyncio.sleep(5)
+                    # On success, reset backoff and sleep the normal interval
+                    backoff_seconds = 2
+                    await asyncio.sleep(5)
+                except Exception as e:
+                    # Show a transient error banner and back off, but keep the task alive
+                    banner = self._compose_error_overlay_html(message=str(e))
+                    fallback = (
+                        self._last_html
+                        or "<div style='color: gray;'>No data yet.</div>"
+                    )
+                    update_display(HTML(banner + fallback), display_id=self._display_id)
+
+                    await asyncio.sleep(backoff_seconds)
+                    backoff_seconds = min(backoff_seconds * 2, 60)
 
         # Schedule the task.
         self._task = asyncio.create_task(update_progress_report())

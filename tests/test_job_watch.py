@@ -74,3 +74,13 @@ def test_stop_watching_triggers_final_non_auto_render(
     last = capture_update_display[-1]
     # After stop_watching, _display_id is cleared; compare before clear by allowing None
     assert last["html"] == "auto=False"
+
+
+def test_compose_error_overlay_html_contains_message(monkeypatch: pytest.MonkeyPatch):
+    # Avoid side effects in __post_init__
+    monkeypatch.setattr(Job, "sync", lambda self: None)
+    job = Job.from_id("job-1")
+
+    html = job._compose_error_overlay_html(message="boom")
+    assert "boom" in html
+    assert "Will retry automatically" in html
