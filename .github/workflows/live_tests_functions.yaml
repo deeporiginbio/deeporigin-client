@@ -49,4 +49,4 @@ jobs:
 
 
       - name: Run tests against a live instance
-        run: uv run pytest  -s --log-cli-level=ERROR --client default -k functions
+        run: pytest -v -s --log-cli-level=ERROR --client default -k functions
