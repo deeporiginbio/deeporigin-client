@@ -122,23 +122,20 @@ class Pocket:
             chain_id (str) : Chain ID that the residue is in
             cutoff (float) : Minimum distance cuttoff (Angstroms) from target residue to be included in pocket
         Returns:
-            List of Pockets matching the above design.
+            A List of pocket objects matching the above design.
         """
 
         structure = protein.structure
-
-        # Filter by chain if specified
-
-        if chain_id is not None and chain_id not in structure.chain_id:
-            raise ValueError(f"Chain {chain_id} not found in structure.")
-        if chain_id is not None:
-            structure = structure[structure.chain_id == chain_id]
 
         if residue_number not in structure.res_id:
             raise ValueError(f"Residue number {residue_number} not found in structure.")
 
         target_mask = structure.res_id == residue_number
+
+        # Filter by chain if specified
         if chain_id is not None:
+            if chain_id not in structure.chain_id:
+                raise ValueError(f"Chain {chain_id} not found in structure.")
             target_mask &= structure.chain_id == chain_id
 
         # Select the targeted residue
