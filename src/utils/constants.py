@@ -69,3 +69,6 @@ ENV_VARIABLES = {
     "org_key": "DEEPORIGIN_ORG_KEY",
     "env": "DEEPORIGIN_ENV",
 }
+
+POCKETS_BASE_DIR = "~/.deeporigin/pockets"
+"""Base directory for storing pocket files."""
