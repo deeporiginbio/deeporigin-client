@@ -65,6 +65,28 @@ def test_job_df(config):  # noqa: F811
     df = get_dataframe()
 
 
+def test_job_df_filtering(config):  # noqa: F811
+    if config["mock"]:
+        pytest.skip("test skipped with mock client")
+
+    from deeporigin.drug_discovery.constants import tool_mapper
+    from deeporigin.tools.job import get_dataframe
+
+    tool_key = tool_mapper["Docking"]
+
+    df = get_dataframe(
+        tool_key=tool_key,
+    )
+
+    assert len(df["tool_key"].unique()) == 1, (
+        f"should only be one tool key. Instead there were {len(df['tool_key'].unique())}"
+    )
+
+    assert df["tool_key"].unique()[0] == tool_key, (
+        f"Expected to get back jobs for {tool_key}. Instead got {df['tool_key'].unique()[0]}"
+    )
+
+
 def test_health(config):  # noqa: F811
     """test the health API"""
 
@@ -87,7 +109,7 @@ def test_run_docking_and_cancel(config):  # noqa: F811
 
     sim = Complex.from_dir(BRD_DATA_DIR)
 
-    pockets = sim.protein.find_pockets(pocket_count=1)
+    pockets = sim.protein.find_pockets(pocket_count=1, use_cache=False)
     pocket = pockets[0]
 
     job = sim.docking.run(
