@@ -151,9 +151,6 @@ class Pocket:
             # Get atoms for current residue
             res_mask = structure.res_id == res_id
 
-            if chain_id is not None:
-                res_mask &= structure.chain_id == chain_id
-
             current_res_atoms = structure[res_mask]
             current_coords = current_res_atoms.coord
 
