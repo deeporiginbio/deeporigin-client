@@ -56,6 +56,15 @@ def test_job(config):  # noqa: F811
     assert execution_id in job._ids
 
 
+def test_job_df(config):  # noqa: F811
+    if config["mock"]:
+        pytest.skip("test skipped with mock client")
+
+    from deeporigin.tools.job import get_dataframe
+
+    df = get_dataframe()
+
+
 def test_health(config):  # noqa: F811
     """test the health API"""
 
