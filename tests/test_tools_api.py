@@ -77,7 +77,7 @@ def test_job_df(config):  # noqa: F811
 
     from deeporigin.tools.job import get_dataframe
 
-    df = get_dataframe()
+    _ = get_dataframe()
 
 
 @pytest.mark.dependency()
