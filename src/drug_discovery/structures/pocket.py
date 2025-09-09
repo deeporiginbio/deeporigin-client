@@ -155,7 +155,7 @@ class Pocket:
                 res_mask &= structure.chain_id == chain_id
 
             current_res_atoms = structure[res_mask]
-            current_coords = current_res_atoms.coord  # Shape: (n_current_atoms, 3)
+            current_coords = current_res_atoms.coord
 
             # Get the acutal distances
             diff = target_coords[:, np.newaxis, :] - current_coords[np.newaxis, :, :]
