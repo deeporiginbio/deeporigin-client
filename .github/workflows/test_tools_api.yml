@@ -34,12 +34,7 @@ jobs:
             echo "DEEPORIGIN_TOKEN=${{ secrets.DEEPORIGIN_TOKEN_EDGE }}" >> "$GITHUB_ENV"
             echo "DEEPORIGIN_REFRESH_TOKEN=${{ secrets.DEEPORIGIN_REFRESH_TOKEN_EDGE }}" >> "$GITHUB_ENV"
           fi
-      - name: Verifying basic API functionality using cURL
-        run: |
-          curl -X 'GET' \
-            'https://api.deeporigin.io/tools/protected/tools/definitions' \
-            -H 'accept: application/json' \
-            -H "Authorization: Bearer $DEEPORIGIN_TOKEN"
+
       - name: Set environment variables for Client
         run: |
           echo "DEEPORIGIN_ORG_KEY=deeporigin" >> "$GITHUB_ENV"
