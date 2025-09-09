@@ -43,6 +43,19 @@ def test_get_all_executions(config):  # noqa: F811
     print(f"Found {len(executions)} executions")
 
 
+def test_job(config):  # noqa: F811
+    if config["mock"]:
+        pytest.skip("test skipped with mock client")
+
+    from deeporigin.tools.job import Job
+
+    jobs = tools_api.get_tool_executions()
+    execution_id = jobs[0].executionId
+    job = Job.from_id(execution_id)
+
+    assert execution_id in job._ids
+
+
 def test_health(config):  # noqa: F811
     """test the health API"""
 
