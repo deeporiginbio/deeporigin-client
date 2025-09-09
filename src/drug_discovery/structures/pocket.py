@@ -122,7 +122,7 @@ class Pocket:
             chain_id (str) : Chain ID that the residue is in
             cutoff (float) : Minimum distance cuttoff (Angstroms) from target residue to be included in pocket
         Returns:
-            A List of pocket objects matching the above design.
+            A List containing a pocket object matching the above design.
         """
 
         structure = protein.structure
