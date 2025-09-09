@@ -60,6 +60,8 @@ class Job:
     _resource_ids: list = field(default_factory=list)
     _metadata: list = field(default_factory=list)
     _tool: dict = field(default_factory=dict)
+    _display_id: Optional[str] = None
+    _last_html: Optional[str] = None
 
     # clients
     client: Optional[Client] = None
@@ -264,6 +266,24 @@ class Job:
         # Render the template
         return template.render(**template_vars)
 
+    @beartype
+    def _compose_error_overlay_html(self, *, message: str) -> str:
+        """Compose an error overlay banner HTML for transient failures.
+
+        Args:
+            message: Error message to display.
+
+        Returns:
+            HTML string for an overlay banner indicating a temporary issue.
+        """
+        timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
+        return (
+            "<div style='background: #fff4f4; border: 1px solid #f0b5b5; color: #8a1f1f;"
+            " padding: 8px 12px; margin-bottom: 8px; border-radius: 6px;'>"
+            f"Network/update issue at {timestamp}. Will retry automatically. Error: {message}"
+            "</div>"
+        )
+
     def show(self):
         """Display the job view in a Jupyter notebook.
 
@@ -297,7 +317,8 @@ class Job:
         # for reasons i don't understand, removing this breaks the display rendering
         # when we do job.watch()
         initial_html = HTML("<div style='color: gray;'>Initializing...</div>")
-        display_id = "timestamp_display"
+        display_id = str(uuid.uuid4())
+        self._display_id = display_id
         display(initial_html, display_id=display_id)
 
         async def update_progress_report():
@@ -308,16 +329,31 @@ class Job:
             It automatically stops when all jobs reach a terminal state.
             """
             while True:
-                self.sync()
-                html = self._render_job_view(will_auto_update=True)
+                try:
+                    # Run sync in a worker thread with a timeout to avoid indefinite blocking
+                    await asyncio.wait_for(asyncio.to_thread(self.sync), timeout=10)
 
-                update_display(HTML(html), display_id=display_id)
+                    html = self._render_job_view(will_auto_update=True)
+                    update_display(HTML(html), display_id=self._display_id)
+                    self._last_html = html
 
-                # Check if all jobs are in terminal states
-                if all(status in ["Failed", "Succeeded"] for status in self._status):
-                    self.stop_watching()
-                    break
+                    # Check if all jobs are in terminal states
+                    if all(
+                        status in ["Failed", "Succeeded"] for status in self._status
+                    ):
+                        self.stop_watching()
+                        break
 
+                except Exception as e:
+                    # Show a transient error banner, but keep the task alive
+                    banner = self._compose_error_overlay_html(message=str(e))
+                    fallback = (
+                        self._last_html
+                        or "<div style='color: gray;'>No data yet.</div>"
+                    )
+                    update_display(HTML(banner + fallback), display_id=self._display_id)
+
+                # Always sleep 5 seconds before next attempt
                 await asyncio.sleep(5)
 
         # Schedule the task.
@@ -333,6 +369,21 @@ class Job:
         if self._task is not None:
             self._task.cancel()  # note that this is not job.cancel() -- we're cancelling the asyncio task
             self._task = None
+
+        # Perform a final non-auto-updating render to clear any spinner
+        if self._display_id is not None:
+            try:
+                self.sync()
+            except Exception:
+                pass
+
+            try:
+                final_html = self._render_job_view(will_auto_update=False)
+                update_display(HTML(final_html), display_id=self._display_id)
+            except Exception:
+                pass
+
+            self._display_id = None
 
     def _repr_html_(self) -> str:
         """Return HTML representation for Jupyter notebooks.
