@@ -328,7 +328,6 @@ class Job:
             with the latest job status and progress every 5 seconds.
             It automatically stops when all jobs reach a terminal state.
             """
-            backoff_seconds = 2
             while True:
                 try:
                     # Run sync in a worker thread with a timeout to avoid indefinite blocking
@@ -345,11 +344,8 @@ class Job:
                         self.stop_watching()
                         break
 
-                    # On success, reset backoff and sleep the normal interval
-                    backoff_seconds = 2
-                    await asyncio.sleep(5)
                 except Exception as e:
-                    # Show a transient error banner and back off, but keep the task alive
+                    # Show a transient error banner, but keep the task alive
                     banner = self._compose_error_overlay_html(message=str(e))
                     fallback = (
                         self._last_html
@@ -357,8 +353,8 @@ class Job:
                     )
                     update_display(HTML(banner + fallback), display_id=self._display_id)
 
-                    await asyncio.sleep(backoff_seconds)
-                    backoff_seconds = min(backoff_seconds * 2, 60)
+                # Always sleep 5 seconds before next attempt
+                await asyncio.sleep(5)
 
         # Schedule the task.
         self._task = asyncio.create_task(update_progress_report())
