@@ -8,6 +8,19 @@ from deeporigin.platform import Client, tools_api
 from tests.utils import config  # noqa: F401
 
 
+@pytest.mark.dependency()
+def test_health(config):  # noqa: F811
+    """test the health API"""
+
+    if config["mock"]:
+        pytest.skip("test skipped with mock client")
+
+    data = tools_api.check(client=Client())
+    assert data["status"] == "ok"
+    assert data["info"]["mikroOrm"]["status"] == "up"
+
+
+@pytest.mark.dependency(depends=["test_health"])
 def test_get_all_tools(config):  # noqa: F811
     """test the tools API"""
 
@@ -20,6 +33,7 @@ def test_get_all_tools(config):  # noqa: F811
     print(f"Found {len(tools)} tools")
 
 
+@pytest.mark.dependency(depends=["test_health"])
 def test_get_all_functions(config):  # noqa: F811
     """test the functions API"""
 
@@ -32,6 +46,7 @@ def test_get_all_functions(config):  # noqa: F811
     print(f"Found {len(functions)} functions")
 
 
+@pytest.mark.dependency(depends=["test_health"])
 def test_get_all_executions(config):  # noqa: F811
     """test the executions API"""
 
@@ -65,6 +80,7 @@ def test_job_df(config):  # noqa: F811
     df = get_dataframe()
 
 
+@pytest.mark.dependency()
 def test_job_df_filtering(config):  # noqa: F811
     if config["mock"]:
         pytest.skip("test skipped with mock client")
@@ -87,17 +103,7 @@ def test_job_df_filtering(config):  # noqa: F811
     )
 
 
-def test_health(config):  # noqa: F811
-    """test the health API"""
-
-    if config["mock"]:
-        pytest.skip("test skipped with mock client")
-
-    data = tools_api.check(client=Client())
-    assert data["status"] == "ok"
-    assert data["info"]["mikroOrm"]["status"] == "up"
-
-
+@pytest.mark.dependency(depends=["test_job_df_filtering"])
 def test_run_docking_and_cancel(config):  # noqa: F811
     if config["mock"]:
         pytest.skip("test skipped with mock client")
