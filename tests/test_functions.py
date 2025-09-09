@@ -2,14 +2,20 @@
 
 import pytest
 
+from deeporigin.drug_discovery import (
+    BRD_DATA_DIR,
+    DATA_DIR,
+    Complex,
+    Ligand,
+    LigandSet,
+    Protein,
+)
 from tests.utils import config  # noqa: F401
 
 
 def test_molprops(config):  # noqa: F811
     if config["mock"]:
         pytest.skip("test skipped with mock client")
-
-    from deeporigin.drug_discovery import Ligand
 
     ligand = Ligand.from_identifier("serotonin")
 
@@ -24,7 +30,6 @@ def test_molprops(config):  # noqa: F811
 def test_pocket_finder(config):  # noqa: F811
     if config["mock"]:
         pytest.skip("test skipped with mock client")
-    from deeporigin.drug_discovery import Protein
 
     protein = Protein.from_pdb_id("1EBY")
     pockets = protein.find_pockets(
@@ -38,7 +43,6 @@ def test_pocket_finder(config):  # noqa: F811
 def test_docking(config):  # noqa: F811
     if config["mock"]:
         pytest.skip("test skipped with mock client")
-    from deeporigin.drug_discovery import Ligand, Protein
 
     protein = Protein.from_pdb_id("1EBY")
     pockets = protein.find_pockets(pocket_count=1)
@@ -46,22 +50,19 @@ def test_docking(config):  # noqa: F811
 
     ligand = Ligand.from_smiles("CN(C)C(=O)c1cccc(-c2cn(C)c(=O)c3[nH]ccc23)c1")
 
-    poses_sdf = protein.dock(
+    poses = protein.dock(
         ligand=ligand,
         pocket=pocket,
         use_cache=False,
     )
 
-    assert isinstance(poses_sdf, str), (
-        "Expected a string to be returned by dock function"
-    )
+    assert isinstance(poses, LigandSet), "Expected protien.dock() to return a LigandSet"
 
 
 def test_sysprep(config):  # noqa: F811
     if config["mock"]:
         pytest.skip("test skipped with mock client")
 
-    from deeporigin.drug_discovery import BRD_DATA_DIR, Complex
     from deeporigin.functions.sysprep import run_sysprep
 
     sim = Complex.from_dir(BRD_DATA_DIR)
@@ -79,8 +80,6 @@ def test_loop_modelling(config):  # noqa: F811
     if config["mock"]:
         pytest.skip("test skipped with mock client")
 
-    from deeporigin.drug_discovery import Protein
-
     protein = Protein.from_pdb_id("5QSP")
     assert len(protein.find_missing_residues()) > 0, "Missing residues should be > 0"
     protein.model_loops(use_cache=False)
@@ -93,8 +92,6 @@ def test_loop_modelling(config):  # noqa: F811
 def test_konnektor(config):  # noqa: F811
     if config["mock"]:
         pytest.skip("test skipped with mock client")
-
-    from deeporigin.drug_discovery import DATA_DIR, LigandSet
 
     ligands = LigandSet.from_sdf(DATA_DIR / "ligands" / "ligands-brd-all.sdf")
 
