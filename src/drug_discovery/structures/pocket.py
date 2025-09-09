@@ -22,6 +22,7 @@ import pandas as pd
 from tabulate import tabulate
 from termcolor import colored
 
+from deeporigin.drug_discovery.structures.ligand import Ligand
 from deeporigin.drug_discovery.utilities.visualize import jupyter_visualization
 
 
@@ -306,6 +307,14 @@ class Pocket:
         pocket = cls(structure=structure, name=name, **kwargs)
         pocket._initialize_from_structure()
         return pocket
+
+    @classmethod
+    def from_ligand(cls, ligand: "Ligand", name: Optional[str] = None) -> "Pocket":
+        """
+        Create a Pocket instance from a Ligand instance.
+        """
+
+        return cls.from_file(str(ligand.to_pdb()), name=name)
 
     def _initialize_from_block(self):
         """Initialize the pocket from block content."""
