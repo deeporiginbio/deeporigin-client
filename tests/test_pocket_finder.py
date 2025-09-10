@@ -1,8 +1,9 @@
 import os
 
+import numpy as np
 import pytest
 
-from deeporigin.drug_discovery import BRD_DATA_DIR, Protein, Pocket
+from deeporigin.drug_discovery import BRD_DATA_DIR, Pocket, Protein
 from deeporigin.exceptions import DeepOriginException
 
 
@@ -16,4 +17,6 @@ def test_from_residue_num():
     # Create custom pocket
     custom_pocket = Pocket.from_residue_number(protein, residue_number=77, cutoff=5)
 
-    assert len(custom_pocket) == 1, "Incorrect number of pockets generated."
+    assert isinstance(
+        custom_pocket.get_center(), np.ndarray
+    ) and custom_pocket.get_center().shape == (3,)

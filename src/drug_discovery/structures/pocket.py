@@ -112,7 +112,7 @@ class Pocket:
         residue_number: int,
         chain_id: str = None,
         cutoff: float = 5.0,
-    ) -> List["Pocket"]:
+    ) -> "Pocket":
         """
         Creates a pocket centered on a given residue (by number)
 
@@ -122,7 +122,7 @@ class Pocket:
             chain_id (str) : Chain ID that the residue is in
             cutoff (float) : Minimum distance cuttoff (Angstroms) from target residue to be included in pocket
         Returns:
-            A List containing a pocket object matching the above design.
+            A Pocket object matching the above design.
         """
 
         structure = protein.structure
@@ -179,7 +179,7 @@ class Pocket:
         # Close the buffer
         string_buffer.close()
 
-        return [self.from_block(block_content=pdb_string, block_type="pdb")]
+        return self.from_block(block_content=pdb_string, block_type="pdb")
 
     @classmethod
     def from_pocket_finder_results(
@@ -470,7 +470,7 @@ class Pocket:
         """
         if block_type == "pdb":
             pdb_file = PDBFile.read(io.StringIO(block_content))
-            structure = pdb_file.get_structure()
+            structure = pdb_file.get_structure(model=1)
         else:
             raise ValueError(f"Unsupported block type: {block_type}")
         return structure
