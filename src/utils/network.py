@@ -1,9 +1,8 @@
 """this module contains network related utility functions"""
 
 import functools
-import json
 from pathlib import Path
-from urllib.parse import parse_qs, urljoin, urlparse
+from urllib.parse import parse_qs, urlparse
 
 from beartype import beartype
 from packaging.version import Version
@@ -11,8 +10,18 @@ import requests
 
 from deeporigin import __version__
 from deeporigin.exceptions import DeepOriginException
-from deeporigin.utils.config import _get_domain_name
-from deeporigin.utils.core import _ensure_do_folder, _get_api_tokens_filepath
+
+
+def _get_domain_name() -> str:
+    """utility function to get domain name based on env"""
+
+    from deeporigin.utils.config import get_value
+
+    env = get_value()["env"]
+    if env == "prod":
+        return "https://os.deeporigin.io"
+    else:
+        return f"https://os.{env}.deeporigin.io"
 
 
 @functools.cache
@@ -85,30 +94,3 @@ def _parse_params_from_url(url: str) -> dict:
     params = parse_qs(query)
     params = {key: value[0] for key, value in params.items()}
     return params
-
-
-@beartype
-def _download_nucleus_api_spec() -> None:
-    """downloads the data hub API spec and saves to disk"""
-
-    deeporigin_path = _ensure_do_folder()
-
-    url = urljoin(_get_domain_name(), "data-hub/api/openapi.json")
-
-    spec_file = deeporigin_path / "nucleus_spec.json"
-
-    with open(_get_api_tokens_filepath(), "r") as file:
-        data = json.loads(file.read())
-    token = data["access"]
-
-    headers = {
-        "accept": "application/json",
-        "authorization": f"Bearer {token}",
-        "content-type": "application/json",
-    }
-
-    response = requests.get(url, headers=headers)
-
-    # Write the dictionary to a JSON file
-    with open(spec_file, "w") as json_file:
-        json.dump(response.json(), json_file, indent=2)
