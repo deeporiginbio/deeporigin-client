@@ -19,6 +19,7 @@ on:
 
 jobs:
   test_platform_api:
+    name: Test ${{ inputs.service }} API on ${{ inputs.env }}
     # automatically pulls env vars & secrets from the chosen environment
     environment: ${{ inputs.env }}
     runs-on: ubuntu-latest
