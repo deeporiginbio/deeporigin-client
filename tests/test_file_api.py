@@ -35,7 +35,7 @@ def test_get_all_files(config):  # noqa: F811
 
 @pytest.mark.dependency(depends=["test_health"])
 def test_download_file(config):  # noqa: F811
-    """test the functions API"""
+    """test the file download API"""
 
     if config["mock"]:
         pytest.skip("test skipped with mock client")
