@@ -18,7 +18,7 @@ on:
 
 
 jobs:
-  test_tools_api:
+  test_platform_api:
     # automatically pulls env vars & secrets from the chosen environment
     environment: ${{ inputs.env }}
     runs-on: ubuntu-latest
@@ -48,7 +48,7 @@ jobs:
       - uses: actions/setup-python@v5
         with: { python-version: "3.13" }
       - run: pip install .[tools,test,plots]
-      - name: Run tests
+      - name: Run tests for ${{ inputs.service }} API
         run: |
           pytest -v -k test_${{ inputs.service }}_api --client "default"
 
