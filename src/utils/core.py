@@ -218,37 +218,6 @@ def hash_strings(strings: list[str]) -> str:
     return hash_obj.hexdigest()
 
 
-@beartype
-def _redact_responses(data: dict | list) -> dict | list:
-    """utility function to redact responses of identifying information"""
-
-    patterns = ["https://s3", "s3://data", "drn:identity::"]
-    for pattern in patterns:
-        data = _redact_data_in_dict(data, pattern)
-
-    return data
-
-
-def _redact_data_in_dict(
-    data: dict | list,
-    pattern: str = "https://s3",
-):
-    """Utility function to redacts patterns in a list or dict"""
-    if isinstance(data, dict):
-        return {
-            key: _redact_data_in_dict(value, pattern) for key, value in data.items()
-        }
-    elif isinstance(data, list):
-        return [_redact_data_in_dict(item, pattern) for item in data]
-    elif isinstance(data, str) and pattern in data:
-        return "<redacted>"
-
-    else:
-        # Leave other data types untouched
-
-        return data
-
-
 class PersistentDict:
     """
     A class that behaves like a dictionary but persists its data to a JSON file.
@@ -364,27 +333,6 @@ def sha256_checksum(file_path):
         for byte_block in iter(lambda: f.read(4096), b""):
             sha256_hash.update(byte_block)
     return base64.b64encode(sha256_hash.digest()).decode()
-
-
-@beartype
-def find_last_updated_row(rows: list[dict]) -> dict | None:
-    """utility function to find the most recently updated row and return that object"""
-
-    if len(rows) == 0:
-        return None
-
-    most_recent_date = None
-    most_recent_row = rows[0]
-
-    # Iterate over the list of objects
-    for row in rows:
-        current_date = datetime.strptime(row.dateUpdated, "%Y-%m-%d %H:%M:%S.%f")
-
-        if most_recent_date is None or current_date > most_recent_date:
-            most_recent_date = current_date
-            most_recent_row = row
-
-    return most_recent_row
 
 
 @beartype

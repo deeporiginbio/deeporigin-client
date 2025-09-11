@@ -1,4 +1,4 @@
-name: Tools API Tests
+name: Platform API Tests
 
 on:
   workflow_dispatch:
@@ -9,10 +9,17 @@ on:
         required: true
         default: prod
         options: [edge, staging,prod]
+      service:
+        description: "Service to test"
+        type: choice
+        required: true
+        default: tools
+        options: [tools,file]
 
 
 jobs:
-  test_tools_api:
+  test_platform_api:
+    name: Test ${{ inputs.service }} API on ${{ inputs.env }}
     # automatically pulls env vars & secrets from the chosen environment
     environment: ${{ inputs.env }}
     runs-on: ubuntu-latest
@@ -42,7 +49,7 @@ jobs:
       - uses: actions/setup-python@v5
         with: { python-version: "3.13" }
       - run: pip install .[tools,test,plots]
-      - name: Run tests
+      - name: Run tests for ${{ inputs.service }} API
         run: |
-          pytest -v -k test_tools_api --client "default"
+          pytest -v -k test_${{ inputs.service }}_api --client "default"
 

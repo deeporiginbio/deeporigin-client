@@ -52,6 +52,7 @@ test = [
     "interrogate",
     "pytest-xdist",
     "pytest-markdown-docs",
+    "pytest-dependency",
 ]
 dev = ["ipykernel", "jupyter-black"]
 docs = [
