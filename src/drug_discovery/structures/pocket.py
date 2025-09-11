@@ -14,10 +14,12 @@ Attributes:
 """
 
 from dataclasses import dataclass, field
+from io import StringIO
 import os
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+import biotite.structure.io.pdb as pdb
 from biotite.structure.io.pdb import PDBFile
 from deeporigin_molstar import ProteinViewer
 import numpy as np
@@ -166,6 +168,82 @@ class Pocket:
         if self.coordinates is None:
             raise ValueError("No coordinates loaded for this pocket")
         return self.coordinates.mean(axis=0)
+
+    @classmethod
+    def from_residue_number(
+        self,
+        protein,
+        residue_number: int,
+        chain_id: str = None,
+        cutoff: float = 5.0,
+    ) -> "Pocket":
+        """
+        Creates a pocket centered on a given residue (by number)
+
+        Args:
+            protein (Protein) : A DeepOrigin Protein Object
+            residue_number (int) : Residue number of the target residue
+            chain_id (str) : Chain ID that the residue is in
+            cutoff (float) : Minimum distance cuttoff (Angstroms) from target residue to be included in pocket
+        Returns:
+            A Pocket object matching the above design.
+        """
+
+        structure = protein.structure
+
+        if residue_number not in structure.res_id:
+            raise ValueError(f"Residue number {residue_number} not found in structure.")
+
+        target_mask = structure.res_id == residue_number
+
+        # Filter by chain if specified
+        if chain_id is not None:
+            if chain_id not in structure.chain_id:
+                raise ValueError(f"Chain {chain_id} not found in structure.")
+            target_mask &= structure.chain_id == chain_id
+
+        # Select the targeted residue
+        target_atoms = structure[target_mask]
+        target_coords = target_atoms.coord
+
+        # Get all unique residues in the structure to compare against
+        all_residue_ids = np.unique(structure.res_id)
+
+        selected_residues = []
+
+        for res_id in all_residue_ids:
+            # Get atoms for current residue
+            res_mask = structure.res_id == res_id
+
+            current_res_atoms = structure[res_mask]
+            current_coords = current_res_atoms.coord
+
+            # Get the acutal distances
+            diff = target_coords[:, np.newaxis, :] - current_coords[np.newaxis, :, :]
+            distances = np.sqrt(np.sum(diff**2, axis=2))
+            min_distance = np.min(distances)
+
+            if min_distance <= cutoff:
+                selected_residues.append(int(res_id))
+
+        # Mask the pocket itself
+        pocket_mask = np.isin(structure.res_id, selected_residues)
+        pocket_atoms = structure[pocket_mask]
+
+        # No built in AtomSet -> Block, so do it va StringIO
+        string_buffer = StringIO()
+        pdb_file = pdb.PDBFile()
+
+        # Set the structure
+        pdb_file.set_structure(pocket_atoms)
+
+        pdb_file.write(string_buffer)
+        pdb_string = string_buffer.getvalue()
+
+        # Close the buffer
+        string_buffer.close()
+
+        return self.from_block(block_content=pdb_string, block_type="pdb")
 
     @classmethod
     def from_pocket_finder_results(
