@@ -1,10 +1,8 @@
 import os
 
 import numpy as np
-import pytest
 
 from deeporigin.drug_discovery import BRD_DATA_DIR, Pocket, Protein
-from deeporigin.exceptions import DeepOriginException
 
 
 def test_from_residue_num():

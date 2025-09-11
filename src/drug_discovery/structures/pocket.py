@@ -14,19 +14,12 @@ Attributes:
 """
 
 from dataclasses import dataclass, field
-
-import io
 from io import StringIO
-
 import os
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-
-import biotite.structure as struc
-from biotite.structure import AtomArrayStack
 import biotite.structure.io.pdb as pdb
-
 from biotite.structure.io.pdb import PDBFile
 from deeporigin_molstar import ProteinViewer
 import numpy as np
