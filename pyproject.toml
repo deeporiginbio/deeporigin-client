@@ -12,19 +12,13 @@ classifiers = [
 ]
 requires-python = ">=3.10"
 dependencies = [
-    "cement >= 3",
     "pydantic >= 2.5.0",
-    "python-crontab",
-    "python-dotenv",
-    "pyyaml",
     "requests",
     "termcolor",
-    "validators",
     "pandas",
     "beartype",
     "tabulate",
     "httpx",
-    "deeporigin-data-sdk==0.1.0a35",
     "humanize",
     "packaging",
     "diskcache",

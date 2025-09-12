@@ -168,19 +168,20 @@ class Pocket:
     @classmethod
     def from_residue_number(
         cls,
-        protein,
+        protein: "Protein",
         residue_number: int,
-        chain_id: str = None,
+        chain_id: str | None = None,
         cutoff: float = 5.0,
     ) -> "Pocket":
         """
         Creates a pocket centered on a given residue (by number)
 
         Args:
-            protein (Protein) : A DeepOrigin Protein Object
-            residue_number (int) : Residue number of the target residue
-            chain_id (str) : Chain ID that the residue is in
-            cutoff (float) : Minimum distance cuttoff (Angstroms) from target residue to be included in pocket
+            protein (Protein): A DeepOrigin Protein Object
+            residue_number (int): Residue number of the target residue
+            chain_id (str): Chain ID that the residue is in
+            cutoff (float): Minimum distance cutoff (Angstroms) from target residue to be included in pocket
+
         Returns:
             A Pocket object matching the above design.
         """
@@ -325,7 +326,11 @@ class Pocket:
         return pockets
 
     @classmethod
-    def from_ligand(cls, ligand: "Ligand", name: Optional[str] = None) -> "Pocket":
+    def from_ligand(
+        cls,
+        ligand: "Ligand",
+        name: Optional[str] = None,
+    ) -> "Pocket":
         """
         Create a Pocket instance from a Ligand instance.
         """

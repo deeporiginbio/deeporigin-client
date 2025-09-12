@@ -3,24 +3,18 @@
 !!! tip "Configure if running locally"
     If you're running this code on your local computer (outside of a Deep Origin Workstation), make sure to [configure](../configure.md#on-your-local-computer) it first.
 
-To use most of the functionality of the CLI or Python client, you must first run one of the following commands to sign into Deep Origin.
+To use most of the functionality of the Python client, you must first run the following commands to sign into Deep Origin.
 
 
 
-=== "Python"
 
-    ```python
-    from deeporigin import auth
-    auth.authenticate()
-    ```
 
-=== "CLI"
+```python
+from deeporigin import auth
+auth.authenticate()
+```
 
-    ```bash
-    deeporigin authenticate
-    ```
-
-In either case, you will be presented with a prompt similar to below:
+You will be presented with a prompt similar to below:
 
 ```shell
 To connect to the Deep Origin OS, navigate your browser to 
