@@ -1,6 +1,5 @@
 import os
 from pathlib import Path
-import sys
 
 import numpy as np
 import pytest
@@ -214,10 +213,6 @@ def test_ligand_base64():
         single_ligand_hashes,
         strict=True,
     ),
-)
-@pytest.mark.skipif(
-    sys.platform == "win32",
-    reason="Hash computation may differ on Windows due to line ending differences",
 )
 def test_ligand_hash(sdf_file, hash_value):
     """Test the to_hash method that returns SHA256 hash of SDF content"""
