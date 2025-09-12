@@ -117,8 +117,13 @@ class Protein(Entity):
                 block_content=block_content,
             )
         except Exception as e:
+            # if something goes wrong, delete the file, because it did not lead to a valid protein
+            try:
+                file_path.unlink()
+            except Exception:
+                pass
             raise DeepOriginException(
-                f"Failed to create Protein from PDB ID `{pdb_id}`: {str(e)}",
+                f"Failed to create Protein from PDB ID `{pdb_id}`: {str(e)}. The RCSB API appears to be down.",
                 title="Failed to download protein from PDB",
             ) from None
 
