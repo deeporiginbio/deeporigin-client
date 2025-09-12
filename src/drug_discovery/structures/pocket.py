@@ -168,7 +168,7 @@ class Pocket:
     @classmethod
     def from_residue_number(
         cls,
-        protein: "Protein",
+        protein,
         residue_number: int,
         chain_id: str | None = None,
         cutoff: float = 5.0,
