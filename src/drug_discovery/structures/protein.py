@@ -117,8 +117,13 @@ class Protein(Entity):
                 block_content=block_content,
             )
         except Exception as e:
+            # if something goes wrong, delete the file, because it did not lead to a valid protein
+            try:
+                file_path.unlink()
+            except Exception:
+                pass
             raise DeepOriginException(
-                f"Failed to create Protein from PDB ID `{pdb_id}`: {str(e)}",
+                f"Failed to create Protein from PDB ID `{pdb_id}`: {str(e)}. The RCSB API appears to be down.",
                 title="Failed to download protein from PDB",
             ) from None
 
@@ -923,10 +928,15 @@ class Protein(Entity):
             # Write the protein to the temporary file
             self.to_pdb(temp_file_path)
 
-            # Read the file and compute SHA256 hash
-            with open(temp_file_path, "rb") as f:
-                pdb_content = f.read()
-                hash_object = hashlib.sha256(pdb_content)
+            # Read the file in text mode, normalize newlines, and compute SHA256
+            with open(temp_file_path, "r", newline="") as f:
+                pdb_text = f.read()
+                # Normalize all line endings to \n for OS-agnostic hashing
+                normalized_text = pdb_text.replace("\r\n", "\n").replace("\r", "\n")
+                # Ensure file ends with a single newline to avoid platform differences
+                if not normalized_text.endswith("\n"):
+                    normalized_text = f"{normalized_text}\n"
+                hash_object = hashlib.sha256(normalized_text.encode("utf-8"))
                 hash_hex = hash_object.hexdigest()
 
             return hash_hex

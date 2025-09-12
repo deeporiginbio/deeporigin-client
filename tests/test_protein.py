@@ -1,5 +1,4 @@
 import os
-import sys
 
 import pytest
 
@@ -165,10 +164,6 @@ def test_protein_base64():
     )
 
 
-@pytest.mark.skipif(
-    sys.platform == "win32",
-    reason="Hash computation may differ on Windows due to line ending differences",
-)
 def test_protein_hash():
     """Test that we can convert a Protein to SHA256 hash"""
     # Create a protein using from_pdb_id

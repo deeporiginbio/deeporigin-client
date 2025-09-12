@@ -680,10 +680,15 @@ class Ligand(Entity):
         # Create a temporary SDF file
         temp_sdf_path = self.to_sdf("__ligand_hash__.sdf")
 
-        # Read the file and compute SHA256 hash
-        with open(temp_sdf_path, "rb") as f:
-            sdf_content = f.read()
-            hash_object = hashlib.sha256(sdf_content)
+        # Read the file in text mode, normalize newlines, and compute SHA256
+        with open(temp_sdf_path, "r", newline="") as f:
+            sdf_text = f.read()
+            # Normalize all line endings to \n for OS-agnostic hashing
+            normalized_text = sdf_text.replace("\r\n", "\n").replace("\r", "\n")
+            # Ensure file ends with a single newline to avoid platform differences
+            if not normalized_text.endswith("\n"):
+                normalized_text = f"{normalized_text}\n"
+            hash_object = hashlib.sha256(normalized_text.encode("utf-8"))
             hash_hex = hash_object.hexdigest()
 
         # Clean up the temporary file

@@ -18,7 +18,11 @@ def dummy_task(monkeypatch: pytest.MonkeyPatch) -> _DummyTask:
     task = _DummyTask()
 
     def _create_task(_coro):
-        # Do not run the coroutine in tests; just return a dummy task
+        # Do not run the coroutine in tests; close it to avoid warnings and return a dummy task
+        try:
+            _coro.close()
+        except Exception:
+            pass
         return task
 
     monkeypatch.setattr("deeporigin.tools.job.asyncio.create_task", _create_task)

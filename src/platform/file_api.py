@@ -43,6 +43,7 @@ def list_files_in_dir(
         file_path=file_path,
         recursive=True,
         client=client,
+        last_count=99999,  # just get all the files
     )
     files = [file.Key for file in files]
 
@@ -142,14 +143,22 @@ def upload_files(
 
 
 @beartype
-def download_files(files: dict[str, str | None], *, client=None):
+def download_files(
+    files: dict[str, str | None],
+    *,
+    client=None,
+    skip_errors: bool = False,
+):
     """Download multiple files in parallel. files: {remote_path: local_path or None}. If local_path is None, use default. Raises RuntimeError if any download fails."""
     results = []
     errors = []
     with concurrent.futures.ThreadPoolExecutor() as executor:
         future_to_pair = {
             executor.submit(
-                download_file, remote_path=rp, local_path=lp, client=client
+                download_file,
+                remote_path=rp,
+                local_path=lp,
+                client=client,
             ): (rp, lp)
             for rp, lp in files.items()
         }
@@ -159,7 +168,7 @@ def download_files(files: dict[str, str | None], *, client=None):
                 results.append(future.result())
             except Exception as e:
                 errors.append((rp, lp, e))
-    if errors:
+    if errors and not skip_errors:
         error_msgs = "\n".join(
             [
                 f"Download failed for remote_path={rp}, local_path={lp}: {str(err)}"

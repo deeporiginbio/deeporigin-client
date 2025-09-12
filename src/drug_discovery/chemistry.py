@@ -1,8 +1,9 @@
 """Contains functions for working with SDF files."""
 
+from collections.abc import Sequence
 from pathlib import Path
 import re
-from typing import Literal, Optional, Sequence, Tuple
+from typing import Literal, Optional, Tuple
 
 from beartype import beartype
 import numpy as np

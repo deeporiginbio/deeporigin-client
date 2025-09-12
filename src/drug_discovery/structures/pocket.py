@@ -14,12 +14,10 @@ Attributes:
 """
 
 from dataclasses import dataclass, field
-from io import StringIO
 import os
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-import biotite.structure.io.pdb as pdb
 from biotite.structure.io.pdb import PDBFile
 from deeporigin_molstar import ProteinViewer
 import numpy as np
@@ -42,8 +40,6 @@ class Pocket:
     """
 
     file_path: Optional[Path] = None
-    block_type: str = ""
-    block_content: str = ""
     color: str = "red"
     name: Optional[str] = None
     pdb_id: Optional[str] = None
@@ -171,20 +167,21 @@ class Pocket:
 
     @classmethod
     def from_residue_number(
-        self,
+        cls,
         protein,
         residue_number: int,
-        chain_id: str = None,
+        chain_id: str | None = None,
         cutoff: float = 5.0,
     ) -> "Pocket":
         """
         Creates a pocket centered on a given residue (by number)
 
         Args:
-            protein (Protein) : A DeepOrigin Protein Object
-            residue_number (int) : Residue number of the target residue
-            chain_id (str) : Chain ID that the residue is in
-            cutoff (float) : Minimum distance cuttoff (Angstroms) from target residue to be included in pocket
+            protein (Protein): A DeepOrigin Protein Object
+            residue_number (int): Residue number of the target residue
+            chain_id (str): Chain ID that the residue is in
+            cutoff (float): Minimum distance cutoff (Angstroms) from target residue to be included in pocket
+
         Returns:
             A Pocket object matching the above design.
         """
@@ -230,20 +227,11 @@ class Pocket:
         pocket_mask = np.isin(structure.res_id, selected_residues)
         pocket_atoms = structure[pocket_mask]
 
-        # No built in AtomSet -> Block, so do it va StringIO
-        string_buffer = StringIO()
-        pdb_file = pdb.PDBFile()
+        pocket = cls()
+        pocket.coordinates = pocket_atoms.coord
+        pocket.name = f"Pocket_{residue_number}"
 
-        # Set the structure
-        pdb_file.set_structure(pocket_atoms)
-
-        pdb_file.write(string_buffer)
-        pdb_string = string_buffer.getvalue()
-
-        # Close the buffer
-        string_buffer.close()
-
-        return self.from_block(block_content=pdb_string, block_type="pdb")
+        return pocket
 
     @classmethod
     def from_pocket_finder_results(
@@ -338,7 +326,11 @@ class Pocket:
         return pockets
 
     @classmethod
-    def from_ligand(cls, ligand: "Ligand", name: Optional[str] = None) -> "Pocket":
+    def from_ligand(
+        cls,
+        ligand: "Ligand",
+        name: Optional[str] = None,
+    ) -> "Pocket":
         """
         Create a Pocket instance from a Ligand instance.
         """

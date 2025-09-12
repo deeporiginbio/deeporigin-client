@@ -58,6 +58,7 @@ class ABFE(WorkflowStep):
         results_files = file_api.download_files(
             results_files,
             client=self.parent.client,
+            skip_errors=True,
         )
 
         ligand_mapper = {}
@@ -310,11 +311,11 @@ class ABFE(WorkflowStep):
         """
 
         remote_base = Path(
-            f"tool-runs/ABFE/{self.parent.protein.file_path.name}/{Path(ligand.file_path).name}"
+            f"tool-runs/ABFE/{self.parent.protein.to_hash()}.pdb/{ligand.to_hash()}.sdf"
         )
 
         remote_pdb_file = (
-            remote_base / "output/protein/ligand/systems/complex/complex.pdb"
+            remote_base / "output/protein/ligand/systems/complex/system.pdb"
         )
         files_to_download = [remote_pdb_file]
 
@@ -322,10 +323,8 @@ class ABFE(WorkflowStep):
             # Check for valid windows
 
             # figure out valid windows
-            files = utils.find_files_on_ufa(
-                tool="ABFE",
-                protein=self.parent.protein.file_path.name,
-                ligand=Path(ligand.file_path).name,
+            files = file_api.list_files_in_dir(
+                file_path=str(remote_base),
                 client=self.parent.client,
             )
             xtc_files = [
