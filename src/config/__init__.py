@@ -10,6 +10,7 @@ Behavior:
 """
 
 import os
+import sys
 
 import yaml
 
@@ -29,6 +30,21 @@ def _ensure_config_file_exists() -> None:
         os.makedirs(os.path.dirname(CONFIG_YML_LOCATION), exist_ok=True)
         with open(CONFIG_YML_LOCATION, "w") as file:
             yaml.safe_dump(default_data, file, default_flow_style=False)
+
+
+def _supports_unicode_output() -> bool:
+    """Return True if stdout likely supports Unicode glyphs.
+
+    Uses the encoding reported by `sys.stdout.encoding` and falls back to
+    `utf-8` heuristic. On Windows default code pages (e.g., cp1252), returns
+    False to avoid `UnicodeEncodeError`.
+    """
+
+    encoding: str | None = getattr(sys.stdout, "encoding", None)
+    if not encoding:
+        return False
+    encoding_lower = encoding.lower()
+    return "utf" in encoding_lower
 
 
 def get_value() -> dict:
@@ -88,4 +104,9 @@ def set_value(key: str, value) -> None:
     with open(CONFIG_YML_LOCATION, "w") as file:
         yaml.safe_dump(data, file, default_flow_style=False)
 
-    print(f"✔︎ {key} → {value}")
+    # Prefer Unicode on capable terminals; fall back to ASCII-safe symbols
+    if _supports_unicode_output():
+        check, arrow = "✔︎", "→"
+    else:
+        check, arrow = "OK", "->"
+    print(f"{check} {key} {arrow} {value}")
