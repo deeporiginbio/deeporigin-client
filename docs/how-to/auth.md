@@ -9,7 +9,7 @@ To use most of the functionality of the Python client, you must first run the fo
 
 
 
-```python
+```{.python notest}
 from deeporigin import auth
 auth.authenticate()
 ```
