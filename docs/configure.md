@@ -10,7 +10,7 @@ To run this package outside of a Deep Origin workstation (for example, on your o
 
 
 
-```python
+```{.python notest}
 from deeporigin import config
 config.set_value("org_key", "your-org-key")
 config.set_value("env", "prod")  # or "staging" / "edge"
