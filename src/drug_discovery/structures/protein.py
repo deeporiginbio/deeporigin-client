@@ -316,14 +316,16 @@ class Protein(Entity):
             args = [
                 {
                     "protein": self,
-                    "ligand": ligand,
                     "pocket": pocket,
+                    "ligand": ligand,
                     "use_cache": use_cache,
                 }
                 for ligand in ligands
             ]
 
             data = run_func_in_parallel(func=dock, args=args)
+
+            print(data)
 
             return LigandSet.from_sdf_files(data["results"])
 

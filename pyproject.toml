@@ -1,6 +1,6 @@
 [project]
 name = "deeporigin"
-description = "Command line tool and Python client for working with Deep Origin"
+description = "Deep Origin Python client"
 authors = [{ name = "Deep Origin", email = "support@deeporigin.com" }]
 readme = "README.md"
 classifiers = [
