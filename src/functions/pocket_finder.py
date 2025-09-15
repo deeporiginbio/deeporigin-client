@@ -36,6 +36,11 @@ def find_pockets(
         str | None: Path to the cache directory if successful, None if the request failed.
     """
 
+    if pocket_count < 1:
+        raise ValueError("pocket_count must be at least 1") from None
+    if pocket_min_size < 1:
+        raise ValueError("pocket_min_size must be at least 1") from None
+
     # Prepare the request payload
     payload = {
         "protein": protein.to_base64(),
