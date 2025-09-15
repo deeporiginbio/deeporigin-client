@@ -316,8 +316,8 @@ class Protein(Entity):
             args = [
                 {
                     "protein": self,
-                    "ligand": ligand,
                     "pocket": pocket,
+                    "ligand": ligand,
                     "use_cache": use_cache,
                 }
                 for ligand in ligands
