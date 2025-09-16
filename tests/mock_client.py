@@ -3,10 +3,18 @@
 import json
 from pathlib import Path
 
+from deeporigin.platform import Client
+from deeporigin.platform.recording import RequestRecorder
 
-class MockClient:
-    """mock client to respond with static data for testing
-    purposes"""
+
+class MockClient(Client):
+    """mock client to respond using recorded data stored in SQLite or JSON fixtures.
+
+    If a SQLite database exists at tests/fixtures/requests.sqlite (default),
+    responses will be served from there using sequencing (0,1,2,...) per
+    request signature. Otherwise, falls back to legacy JSON fixtures in
+    tests/fixtures/responses/<method>.json.
+    """
 
     def __getattr__(self, name):
         """general purpose catch all for all methods"""
@@ -18,6 +26,28 @@ class MockClient:
 
     def _return_response(self, name, *args, **kwargs):
         """return stashed values, mimicking responses from the live instance exactly"""
+
+        # Prefer SQLite recordings when available
+        sqlite_path = (
+            Path(__file__).resolve().parent.parent
+            / "tests"
+            / "fixtures"
+            / "requests.sqlite"
+        )
+
+        if sqlite_path.exists():
+            recorder = RequestRecorder(sqlite_path)
+            # Maintain per-process state for sequencing
+            if not hasattr(self, "_seq_state"):
+                self._seq_state = {}
+            try:
+                data = recorder.fetch_next(
+                    method=name, kwargs=kwargs, state=self._seq_state
+                )
+                return dict(data=data)
+            except KeyError:
+                # If SQLite has no matching interaction, fall back to JSON fixtures for compatibility
+                pass
 
         stash_loc = (
             Path(__file__).resolve().parent.parent
