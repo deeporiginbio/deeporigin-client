@@ -20,10 +20,24 @@ import pandas as pd
 from deeporigin.drug_discovery.constants import tool_mapper
 from deeporigin.platform import Client, tools_api
 from deeporigin.tools import job_viz_functions
+from deeporigin.utils.constants import TERMINAL_STATES
 from deeporigin.utils.core import elapsed_minutes
 
 # Enable nested event loops for Jupyter
 nest_asyncio.apply()
+
+
+# Get the template directory
+template_dir = Path(__file__).parent.parent / "templates"
+# Create Jinja2 environment with auto-escaping disabled
+# Note: Auto-escaping is disabled because the template needs to render HTML content
+# from _viz_func and properly formatted JSON data. The |safe filter is used
+# only for trusted content (JSON data and HTML from _viz_func).
+# All other template variables are properly escaped by the template itself.
+env = Environment(
+    loader=FileSystemLoader(str(template_dir)),
+    autoescape=False,  # Disabled for proper HTML and JSON rendering
+)
 
 
 class JobFunc(Protocol):
@@ -173,17 +187,6 @@ class Job:
         This method renders and displays the current state of all jobs
         using the visualization function if set, or a default HTML representation.
         """
-        # Get the template directory
-        template_dir = Path(__file__).parent.parent / "templates"
-        # Create Jinja2 environment with auto-escaping disabled
-        # Note: Auto-escaping is disabled because the template needs to render HTML content
-        # from _viz_func and properly formatted JSON data. The |safe filter is used
-        # only for trusted content (JSON data and HTML from _viz_func).
-        # All other template variables are properly escaped by the template itself.
-        env = Environment(
-            loader=FileSystemLoader(str(template_dir)),
-            autoescape=False,  # Disabled for proper HTML and JSON rendering
-        )
 
         from deeporigin.utils.notebook import get_notebook_environment
 
@@ -301,8 +304,8 @@ class Job:
         active jobs to monitor, it will display a message and show the current
         state once.
         """
-        # Check if there are any active jobs (not Failed or Succeeded)
-        if not any(status not in ["Failed", "Succeeded"] for status in self._status):
+        # Check if there are any active jobs (not terminal states)
+        if not any(status not in TERMINAL_STATES for status in self._status):
             display(
                 HTML(
                     "<div style='color: gray;'>No active jobs to monitor. This display will not update.</div>"
@@ -328,33 +331,49 @@ class Job:
             with the latest job status and progress every 5 seconds.
             It automatically stops when all jobs reach a terminal state.
             """
-            while True:
-                try:
-                    # Run sync in a worker thread with a timeout to avoid indefinite blocking
-                    await asyncio.wait_for(asyncio.to_thread(self.sync), timeout=10)
+            try:
+                while True:
+                    try:
+                        # Run sync in a worker thread with a timeout to avoid indefinite blocking
+                        await asyncio.wait_for(asyncio.to_thread(self.sync), timeout=4)
 
-                    html = self._render_job_view(will_auto_update=True)
-                    update_display(HTML(html), display_id=self._display_id)
-                    self._last_html = html
+                        html = self._render_job_view(will_auto_update=True)
+                        update_display(HTML(html), display_id=self._display_id)
+                        self._last_html = html
 
-                    # Check if all jobs are in terminal states
-                    if all(
-                        status in ["Failed", "Succeeded"] for status in self._status
-                    ):
-                        self.stop_watching()
-                        break
+                        # Check if all jobs are in terminal states
+                        if all(status in TERMINAL_STATES for status in self._status):
+                            break
 
-                except Exception as e:
-                    # Show a transient error banner, but keep the task alive
-                    banner = self._compose_error_overlay_html(message=str(e))
-                    fallback = (
-                        self._last_html
-                        or "<div style='color: gray;'>No data yet.</div>"
-                    )
-                    update_display(HTML(banner + fallback), display_id=self._display_id)
+                    except asyncio.CancelledError:
+                        # Propagate cancellation so the task stops immediately
+                        raise
+                    except Exception as e:
+                        # Show a transient error banner, but keep the task alive
+                        banner = self._compose_error_overlay_html(message=str(e))
+                        fallback = (
+                            self._last_html
+                            or "<div style='color: gray;'>No data yet.</div>"
+                        )
+                        update_display(
+                            HTML(banner + fallback), display_id=self._display_id
+                        )
 
-                # Always sleep 5 seconds before next attempt
-                await asyncio.sleep(5)
+                    # Always sleep 5 seconds before next attempt
+                    await asyncio.sleep(5)
+            finally:
+                # Perform a final non-blocking refresh and render to clear spinner
+                if self._display_id is not None:
+                    try:
+                        await asyncio.wait_for(asyncio.to_thread(self.sync), timeout=5)
+                    except Exception:
+                        pass
+                    try:
+                        final_html = self._render_job_view(will_auto_update=False)
+                        update_display(HTML(final_html), display_id=self._display_id)
+                    except Exception:
+                        pass
+                    self._display_id = None
 
         # Schedule the task.
         self._task = asyncio.create_task(update_progress_report())
@@ -367,23 +386,13 @@ class Job:
         or can be called manually to stop monitoring.
         """
         if self._task is not None:
-            self._task.cancel()  # note that this is not job.cancel() -- we're cancelling the asyncio task
-            self._task = None
-
-        # Perform a final non-auto-updating render to clear any spinner
-        if self._display_id is not None:
+            # Cancel the task; its finally block performs the final render and cleanup
             try:
-                self.sync()
+                self._task.cancel()
             except Exception:
                 pass
-
-            try:
-                final_html = self._render_job_view(will_auto_update=False)
-                update_display(HTML(final_html), display_id=self._display_id)
-            except Exception:
-                pass
-
-            self._display_id = None
+            finally:
+                self._task = None
 
     def _repr_html_(self) -> str:
         """Return HTML representation for Jupyter notebooks.
