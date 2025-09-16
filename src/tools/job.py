@@ -34,7 +34,7 @@ template_dir = Path(__file__).parent.parent / "templates"
 # from _viz_func and properly formatted JSON data. The |safe filter is used
 # only for trusted content (JSON data and HTML from _viz_func).
 # All other template variables are properly escaped by the template itself.
-env = Environment(  # NOSONAR: Trusted templates; we explicitly mark safe HTML only
+env = Environment(  # NOSONAR
     loader=FileSystemLoader(str(template_dir)),
     autoescape=False,
 )
