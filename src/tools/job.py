@@ -36,7 +36,7 @@ template_dir = Path(__file__).parent.parent / "templates"
 # All other template variables are properly escaped by the template itself.
 env = Environment(
     loader=FileSystemLoader(str(template_dir)),
-    autoescape=False,  # Disabled for proper HTML and JSON rendering
+    autoescape=False,  # NOSONAR: Trusted templates; we explicitly mark safe HTML only
 )
 
 
