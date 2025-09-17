@@ -5,36 +5,20 @@ uname=$(shell uname -s)
 
 repo=$(shell basename $(CURDIR))
 
-# determines how tests are run. if "mock", tests are run
-# using mocked responses. if "default", tests run against
-# a live instance 
-client="mock"
-chosen_tests=""
-responses="pass"
 
+chosen_tests=""
+org_key="deeporigin"
 
 test: 
-	ruff check .
-	ruff check --select I --fix
-ifeq ($(client), "mock")
-	$(eval n_workers=1)
-else 
-	$(eval n_workers="auto")
-endif 
-	@source $(CURDIR)/venv/bin/activate && \
-	interrogate -c pyproject.toml -vv . -f 100 --omit-covered-files && \
-	python3 -m coverage run --source="src" -m pytest -x -n $(n_workers) --failed-first -k $(chosen_tests) --client $(client) --responses $(responses) --dist loadfile && \
-	python3 -m coverage html && \
-	python3 -m pytest -x docs --markdown-docs --markdown-docs-syntax=superfences && \
-	deactivate
+	venv/bin/ruff format .
+	venv/bin/ruff check --select I . --fix
+	venv/bin/interrogate -c pyproject.toml -vv . -f 100 --omit-covered-files
+	venv/bin/python -m coverage run --source="src" -m pytest -x -n "auto" --failed-first -k $(chosen_tests) --mock --org_key $(org_key) --dist loadfile
+	venv/bin/python -m coverage html
+	venv/bin/pytest -x docs --markdown-docs --markdown-docs-syntax=superfences
 
 
-coverage:
-	@source $(CURDIR)/venv/bin/activate && \
-	python3 -m coverage run -m pytest -x --client $(client)  && \
-	python3 -m coverage html && \
-	open htmlcov/index.html && \
-	deactivate
+
 
 # set up jupyter dev kernel
 jupyter:
@@ -72,10 +56,10 @@ docs-deploy:
 	    deactivate
 
 test-github:
-	pytest -v --client $(client)
+	pytest -v --mock --org_key $(org_key)
 
 test-github-live:
-	pytest -v --ignore=tests/test_config.py --ignore=tests/test_context.py --client default -n "auto" --dist loadfile
+	pytest -v --ignore=tests/test_config.py --ignore=tests/test_context.py -n "auto" --dist loadfile
 
 
 notebooks-html:

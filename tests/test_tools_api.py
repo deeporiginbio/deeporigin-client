@@ -13,6 +13,52 @@ from deeporigin.platform import tools_api
 from deeporigin.tools.job import Job, get_dataframe
 from tests.utils import config  # noqa: F401
 
+"""this module tests various GET routes on the platform API. it is meant to be run against a live instance"""
+
+
+def test_get_tool_executions(config):  # noqa: F811
+    jobs = tools_api.get_tool_executions(
+        org_key="deeporigin",
+        filter={},
+        client=config["client"],
+    )
+
+    assert isinstance(jobs, list), "Expected a list"
+    assert len(jobs) > 0, "Expected at least one job"
+
+
+def test_get_functions(config):  # noqa: F811
+    functions = tools_api.get_functions(client=config["client"])
+
+    assert isinstance(functions, list), "Expected a list"
+    assert len(functions) > 0, "Expected at least one function"
+
+
+def test_get_executions(config):  # noqa: F811
+    jobs = tools_api.get_tool_executions(client=config["client"])
+    assert isinstance(jobs, list), "Expected a list"
+    assert len(jobs) > 0, "Expected at least one job"
+
+
+def test_get_functions_bykey(config):  # noqa: F811
+    functions = tools_api.get_functions(client=config["client"])
+
+    assert isinstance(functions, list), "Expected a list"
+    assert len(functions) > 0, "Expected at least one function"
+
+    functions = tools_api.get_functions_bykey(key=functions[0].key)
+
+    assert isinstance(functions, list), "Expected a list"
+    assert len(functions) > 0, "Expected at least one function"
+
+
+def test_get_job_df(config):  # noqa: F811
+    import pandas as pd
+
+    df = get_dataframe(client=config["client"])
+    assert isinstance(df, pd.DataFrame), "Expected a dataframe"
+    assert len(df) > 0, "Expected at least one job"
+
 
 @pytest.mark.dependency()
 def test_tools_api_health(config):  # noqa: F811
@@ -28,7 +74,7 @@ def test_get_all_tools(config):  # noqa: F811
     """test the tools API"""
 
     tools = tools_api.get_all_tools(client=config["client"])
-    assert len(tools) > 0
+    assert len(tools) > 0, "Expected at least one tool"
 
     print(f"Found {len(tools)} tools")
 
@@ -38,7 +84,7 @@ def test_get_all_functions(config):  # noqa: F811
     """test the functions API"""
 
     functions = tools_api.get_functions(client=config["client"])
-    assert len(functions) > 0
+    assert len(functions) > 0, "Expected at least one function"
 
     print(f"Found {len(functions)} functions")
 

@@ -12,9 +12,6 @@ from tests.utils import config  # noqa: F401
 def test_health(config):  # noqa: F811
     """test the health API"""
 
-    # if config["mock"]:
-    #     pytest.skip("test skipped with mock client")
-
     data = file_api.check(client=config["client"])
     assert data["status"] == "ok"
     assert data["info"]["file-service"]["status"] == "up"
@@ -23,9 +20,6 @@ def test_health(config):  # noqa: F811
 @pytest.mark.dependency(depends=["test_health"])
 def test_get_all_files(config):  # noqa: F811
     """check that there are some files in entities/"""
-
-    # if config["mock"]:
-    #     pytest.skip("test skipped with mock client")
 
     files = file_api.get_object_directory(
         file_path="entities/",
@@ -40,9 +34,6 @@ def test_get_all_files(config):  # noqa: F811
 @pytest.mark.dependency(depends=["test_health"])
 def test_download_file(config):  # noqa: F811
     """test the file download API"""
-
-    # if config["mock"]:
-    #     pytest.skip("test skipped with mock client")
 
     files = file_api.get_object_directory(
         file_path="entities/",
