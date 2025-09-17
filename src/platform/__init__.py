@@ -25,6 +25,8 @@ class Client:
             will be recorded to a SQLite file for later replay in tests.
     """
 
+    is_mock = False
+
     @beartype
     def __init__(
         self,

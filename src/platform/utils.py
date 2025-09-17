@@ -184,18 +184,21 @@ def _create_function(
             client_org_key = client.org_key
             recording_enabled = getattr(client, "recording", False)
             recording_db_path = None
-            client = _get_api_client(
-                api_name=api_name,
-                token=client.token,
-                api_endpoint=client.api_endpoint,
-            )
+
+            if not client.is_mock:
+                # convert the DO Client to the low-level client
+                client = _get_api_client(
+                    api_name=api_name,
+                    token=client.token,
+                    api_endpoint=client.api_endpoint,
+                )
+                client.is_mock = False
 
         method = _get_method(client, method_path)
 
         # Insert org_key if not present in kwargs, and
         # if it's required by the method
-        method_sig = inspect.signature(method)
-        if "org_key" in method_sig.parameters and (kwargs.get("org_key") is None):
+        if "org_key" in signature.parameters and (kwargs.get("org_key") is None):
             if client_org_key is None:
                 kwargs["org_key"] = get_value()["org_key"]
             else:
@@ -210,45 +213,46 @@ def _create_function(
         t0 = _time.perf_counter_ns()
         response = method(**kwargs)
 
-        if 400 <= response.status < 600:
-            content = response.read().decode("utf-8", errors="replace")
+        if not client.is_mock:
+            if 400 <= response.status < 600:
+                content = response.read().decode("utf-8", errors="replace")
 
-            raise ValueError(
-                f"HTTP request failed with status: {response.status} - {response.reason} - {content}"
-            )
-
-        if not isinstance(response, dict):
-            response = response.json()
-
-        # Prepare payload for recording before Box wrapping
-        if isinstance(response, bool):
-            payload_for_record = response
-        elif isinstance(response, dict):
-            if "data" in response.keys():
-                payload_for_record = response["data"]
-            else:
-                payload_for_record = response
-        elif isinstance(response, list):
-            payload_for_record = response
-        else:
-            payload_for_record = None
-
-        if recording_enabled:
-            t1 = _time.perf_counter_ns()
-            duration_ms = (t1 - t0) / 1_000_000
-            try:
-                method_name = method_path
-                _RECORDER.record(
-                    method=method_name,
-                    kwargs=kwargs,
-                    response=payload_for_record,
-                    duration_ms=int(duration_ms),
-                    db_path=recording_db_path,
+                raise ValueError(
+                    f"HTTP request failed with status: {response.status} - {response.reason} - {content}"
                 )
-            except Exception:
-                # Recording failures must not impact normal execution
-                print("Recording failed")
-                pass
+
+            if not isinstance(response, dict):
+                response = response.json()
+
+            # Prepare payload for recording before Box wrapping
+            if isinstance(response, bool):
+                payload_for_record = response
+            elif isinstance(response, dict):
+                if "data" in response.keys():
+                    payload_for_record = response["data"]
+                else:
+                    payload_for_record = response
+            elif isinstance(response, list):
+                payload_for_record = response
+            else:
+                payload_for_record = None
+
+            if recording_enabled:
+                t1 = _time.perf_counter_ns()
+                duration_ms = (t1 - t0) / 1_000_000
+                try:
+                    method_name = method_path
+                    _RECORDER.record(
+                        method=method_name,
+                        kwargs=kwargs,
+                        response=payload_for_record,
+                        duration_ms=int(duration_ms),
+                        db_path=recording_db_path,
+                    )
+                except Exception:
+                    # Recording failures must not impact normal execution
+                    print("Recording failed")
+                    pass
 
         if isinstance(response, bool):
             return response

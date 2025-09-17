@@ -15,8 +15,6 @@ import threading
 import time
 from typing import Any
 
-from beartype import beartype
-
 DEFAULT_DB_PATH = (
     Path(__file__).parent.parent.parent / "tests" / "fixtures" / "requests.sqlite"
 )
@@ -65,7 +63,6 @@ def _json_canonical_dumps(value: Any) -> str:
     return json.dumps(normalized, sort_keys=True, separators=(",", ":"))
 
 
-@beartype
 def compute_request_hash(method: str, kwargs: dict) -> str:
     """Compute a stable SHA-256 hash for a request based on method and kwargs."""
 
@@ -118,7 +115,6 @@ class RequestRecorder:
                 """
             )
 
-    @beartype
     def record(
         self,
         *,
@@ -137,8 +133,6 @@ class RequestRecorder:
             duration_ms: Duration of the call in milliseconds.
             db_path: Optional override DB path for this call.
         """
-
-        print(self.db_path)
 
         if db_path and Path(db_path) != self.db_path:
             # If an override is provided, write to that DB lazily via a separate recorder
@@ -177,9 +171,12 @@ class RequestRecorder:
             )
             self._conn.commit()
 
-    @beartype
     def fetch_next(
-        self, *, method: str, kwargs: dict, state: dict[str, int] | None = None
+        self,
+        *,
+        method: str,
+        kwargs: dict,
+        state: dict[str, int] | None = None,
     ) -> Any:
         """Fetch the next recorded response for the given request.
 

@@ -42,6 +42,7 @@
         "protonated",
         "protonation",
         "pytest",
+        "pytestconfig",
         "rbfe",
         "rcsb",
         "rcsbapi",
