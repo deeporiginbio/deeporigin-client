@@ -135,11 +135,9 @@ def test_run_docking_and_cancel(config):  # noqa: F811
     sim = Complex.from_dir(BRD_DATA_DIR)
     sim.client = config["client"]
 
-    pockets = sim.protein.find_pockets(pocket_count=1, use_cache=True)
-    pocket = pockets[0]
-
     job = sim.docking.run(
-        pocket=pocket,
+        box_size=(14.094597464129786, 14.094597464129786, 14.094597464129786),
+        pocket_center=(-13.215283393859863, -6.083978652954102, 14.214159965515137),
         re_run=True,
         use_parallel=False,
     )

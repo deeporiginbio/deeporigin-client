@@ -17,7 +17,7 @@ def pytest_addoption(parser):
     parser.addoption(
         "--org_key",
         action="store",
-        default=None,
+        default="deeporigin",
         help="Organization key to use for Client/MockClient",
     )
 
