@@ -74,17 +74,17 @@ jobs:
           cache: 'pip'
           cache-dependency-path: pyproject.toml
 
-      - name: "run tests without ~/.deeporigin/"
+      - name: "run tests using a mock client"
         run: |
           pip install --upgrade pip
           pip install --upgrade setuptools
           pip install -e .[test,tools,plots]
-          make test-github 
+          pytest -x --mock 
 
 
       - name: "test docs with pytest markdown-docs"
         run: |
-          pytest -x --markdown-docs --markdown-docs-syntax=superfences 
+          pytest -x docs --mock --markdown-docs --markdown-docs-syntax=superfences 
 
 
 

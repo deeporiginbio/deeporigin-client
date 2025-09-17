@@ -55,8 +55,6 @@ docs-deploy:
 	    mkdocs gh-deploy && \
 	    deactivate
 
-test-github:
-	pytest -v --mock --org_key $(org_key)
 
 test-github-live:
 	pytest -v --ignore=tests/test_config.py --ignore=tests/test_context.py -n "auto" --dist loadfile
