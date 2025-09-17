@@ -46,7 +46,10 @@ def test_get_functions_bykey(config):  # noqa: F811
     assert isinstance(functions, list), "Expected a list"
     assert len(functions) > 0, "Expected at least one function"
 
-    functions = tools_api.get_functions_bykey(key=functions[0].key)
+    functions = tools_api.get_functions_bykey(
+        key=functions[0].key,
+        client=config["client"],
+    )
 
     assert isinstance(functions, list), "Expected a list"
     assert len(functions) > 0, "Expected at least one function"
