@@ -319,7 +319,7 @@ class Docking(WorkflowStep):
 
             # Create a stable hash for the chunk
             chunk_str = ",".join(chunk)
-            chunk_hash = hashlib.md5(chunk_str.encode("utf-8")).hexdigest()
+            chunk_hash = hashlib.md5(chunk_str.encode("utf-8")).hexdigest()  # NOSONAR
             this_output_dir_path = os.path.join(_output_dir_path, chunk_hash) + "/"
 
             return utils._start_tool_run(
