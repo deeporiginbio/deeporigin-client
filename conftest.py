@@ -14,6 +14,12 @@ def pytest_addoption(parser):
     parser.addoption(
         "--record", action="store_true", default=False, help="Set to record responses"
     )
+    parser.addoption(
+        "--org_key",
+        action="store",
+        default=None,
+        help="Organization key to use for Client/MockClient",
+    )
 
 
 def pytest_generate_tests(metafunc):
@@ -25,3 +31,7 @@ def pytest_generate_tests(metafunc):
     option_value = metafunc.config.option.record
     if "record" in metafunc.fixturenames and option_value is not None:
         metafunc.parametrize("record", [option_value])
+
+    option_value = getattr(metafunc.config.option, "org_key", None)
+    if "org_key" in metafunc.fixturenames and option_value is not None:
+        metafunc.parametrize("org_key", [option_value])

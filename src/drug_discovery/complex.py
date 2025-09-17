@@ -190,7 +190,7 @@ class Complex:
         from deeporigin.platform import file_api
 
         remote_files = file_api.get_object_directory(
-            file_path="/entities/",
+            file_path="entities/",
             recursive=True,
             client=self.client,
         )

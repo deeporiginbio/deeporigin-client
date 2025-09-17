@@ -14,12 +14,13 @@ def config(pytestconfig):
     data = {}
 
     # set up client
+    org_key = pytestconfig.getoption("org_key")
     if pytestconfig.getoption("mock"):
-        client = MockClient()
+        client = MockClient(org_key=org_key)
         data["mock"] = True
 
     else:
-        client = Client()
+        client = Client(org_key=org_key) if org_key else Client()
         data["mock"] = False
         if pytestconfig.getoption("record"):
             client.recording = True

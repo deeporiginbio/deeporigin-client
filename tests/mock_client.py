@@ -56,5 +56,7 @@ class MockClient(Client):
             )
             return {"data": data}
         except KeyError:
-            # If SQLite has no matching interaction, fall back to JSON fixtures for compatibility
-            pass
+            # If SQLite has no matching interaction
+            raise KeyError(
+                f"No matching interaction found for {name} with kwargs: {kwargs}"
+            ) from None

@@ -174,6 +174,7 @@ def _create_function(
             client_org_key = None
             recording_enabled = False
             recording_db_path = None
+            client.is_mock = False
 
         else:
             if not isinstance(client, Client):

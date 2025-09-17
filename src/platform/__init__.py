@@ -49,6 +49,16 @@ class Client:
             KeyError: If the resolved environment is not a known API endpoint.
         """
 
+        # When used as a mock (e.g., tests' MockClient), avoid any environment
+        # or token resolution that could trigger network or filesystem access.
+        if getattr(self, "is_mock", False):
+            self.token = token or "mock-token"
+            self.org_key = org_key or "mock-org"
+            self.env = env or "prod"
+            self.api_endpoint = "mock"
+            self.recording: bool = False
+            return
+
         tokens = get_tokens()
         resolved_token = token or tokens["access"]
         resolved_env = env or get_value()["env"]

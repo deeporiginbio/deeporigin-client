@@ -6,7 +6,6 @@ request/response pairs for later replay in tests via a mock client.
 
 from __future__ import annotations
 
-from dataclasses import asdict, is_dataclass
 import hashlib
 import json
 from pathlib import Path
@@ -26,47 +25,14 @@ def _ensure_parent_dir(path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
 
 
-def _json_canonical_dumps(value: Any) -> str:
-    """Serialize a Python object to a canonical JSON string.
-
-    - Dataclasses converted via asdict
-    - Sets converted to sorted lists
-    - Path/UUID/datetime converted to string via str()
-    - Non-JSON-serializable objects attempted via __dict__ then str()
-    """
-
-    def normalize(obj: Any) -> Any:
-        if is_dataclass(obj):
-            return normalize(asdict(obj))
-        if isinstance(obj, dict):
-            return {
-                str(k): normalize(v)
-                for k, v in sorted(obj.items(), key=lambda i: str(i[0]))
-            }
-        if isinstance(obj, (list, tuple)):
-            return [normalize(i) for i in obj]
-        if isinstance(obj, set):
-            return [normalize(i) for i in sorted(obj, key=lambda x: str(x))]
-        if isinstance(obj, (Path,)):
-            return str(obj)
-        try:
-            json.dumps(obj)
-            return obj
-        except TypeError:
-            if hasattr(obj, "to_dict"):
-                return normalize(obj.to_dict())
-            if hasattr(obj, "__dict__"):
-                return normalize(obj.__dict__)
-            return str(obj)
-
-    normalized = normalize(value)
-    return json.dumps(normalized, sort_keys=True, separators=(",", ":"))
-
-
 def compute_request_hash(method: str, kwargs: dict) -> str:
     """Compute a stable SHA-256 hash for a request based on method and kwargs."""
 
-    payload = f"{method}\n{_json_canonical_dumps(kwargs)}".encode("utf-8")
+    payload = (
+        f"{method}\n{json.dumps(kwargs, sort_keys=True, separators=(',', ':'))}".encode(
+            "utf-8"
+        )
+    )
     return hashlib.sha256(payload).hexdigest()
 
 
@@ -142,9 +108,9 @@ class RequestRecorder:
             )
             return
 
-        request_json = _json_canonical_dumps(kwargs)
+        request_json = json.dumps(kwargs, sort_keys=True, separators=(",", ":"))
         request_hash = compute_request_hash(method, kwargs)
-        response_json = _json_canonical_dumps(response)
+        response_json = json.dumps(response, sort_keys=True, separators=(",", ":"))
         now_iso = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime())
 
         with self._lock:
