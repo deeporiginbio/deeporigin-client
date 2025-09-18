@@ -23,7 +23,7 @@ from tqdm import tqdm
 from deeporigin.drug_discovery.constants import LIGANDS_DIR
 from deeporigin.drug_discovery.utilities.visualize import jupyter_visualization
 from deeporigin.exceptions import DeepOriginException
-from deeporigin.utils.constants import number
+from deeporigin.utils.constants import SUPPORTED_ATOM_SYMBOLS, number
 
 from .entity import Entity
 
@@ -345,6 +345,58 @@ class Ligand(Entity):
             raise DeepOriginException("Kekulization failed.") from e
 
         self.mol = stripped_mol
+
+    @beartype
+    def prepare(self) -> "Ligand":
+        """Prepare the ligand for downstream workflows.
+
+        The routine performs the following using RDKit and internal utilities:
+        - Salt removal
+        - Kekulization
+        - Validation of atom types against supported symbols
+
+        Returns:
+            Ligand: The prepared ligand (self), for chaining.
+
+        Raises:
+            DeepOriginException: If preparation fails or unsupported atom types are present.
+        """
+        # Start from current molecule
+        if self.mol is None:
+            raise DeepOriginException("Ligand has no molecule to prepare.")
+
+        # 1) Salt removal and kekulization (reuse process_mol)
+        self.process_mol()
+
+        # 2) Sanity sanitize and generate 2D coords if missing
+        try:
+            Chem.SanitizeMol(self.mol)
+        except Exception:
+            # Attempt to re-kekulize and sanitize again
+            try:
+                Chem.Kekulize(self.mol, clearAromaticFlags=False)
+                Chem.SanitizeMol(self.mol)
+            except Exception as e:
+                raise DeepOriginException(f"Sanitization failed: {str(e)}") from e
+
+        if not self.mol.GetConformers():
+            AllChem.Compute2DCoords(self.mol)
+
+        # 3) Validate atom types
+        atom_symbols = [atom.GetSymbol() for atom in self.mol.GetAtoms()]
+        unsupported = sorted(
+            {sym for sym in atom_symbols if sym not in SUPPORTED_ATOM_SYMBOLS}
+        )
+        if unsupported:
+            raise DeepOriginException(
+                f"Unsupported atom types found in ligand: {', '.join(unsupported)}"
+            )
+
+        # Update smiles and properties to reflect prepared state
+        self.smiles = Chem.MolToSmiles(Chem.RemoveHs(self.mol), canonical=True)
+        self.set_property("prepared", True)
+
+        return self
 
     def get_heavy_atom_count(self) -> int:
         """

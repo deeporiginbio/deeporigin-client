@@ -15,3 +15,19 @@
       show_signature_annotations: true
       show_if_no_docstring: true
       group_by_category: true
+
+## Preparation
+
+Use `Ligand.prepare()` to perform common preparation steps before docking:
+
+- salt removal, kekulization
+- validation of atom symbols against supported types
+
+Example:
+
+```python
+from deeporigin.drug_discovery.structures import Ligand
+
+lig = Ligand.from_smiles("CCO", name="Ethanol")
+lig.prepare()
+```
