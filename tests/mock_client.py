@@ -1,15 +1,30 @@
 """this module provides a mock client for testing purposes"""
 
-import json
 from pathlib import Path
 
+from deeporigin.platform import Client
+from deeporigin.platform.recording import RequestRecorder
 
-class MockClient:
-    """mock client to respond with static data for testing
-    purposes"""
+
+class MockClient(Client):
+    """mock client to respond using recorded data stored in SQLite or JSON fixtures.
+
+    If a SQLite database exists at tests/fixtures/requests.sqlite (default),
+    responses will be served from there using sequencing (0,1,2,...) per
+    request signature. Otherwise, falls back to legacy JSON fixtures in
+    tests/fixtures/responses/<method>.json.
+    """
+
+    is_mock = True
 
     def __getattr__(self, name):
         """general purpose catch all for all methods"""
+
+        # Don't intercept private attributes that should be handled normally
+        if name.startswith("_"):
+            raise AttributeError(
+                f"'{self.__class__.__name__}' object has no attribute '{name}'"
+            )
 
         def method(*args, **kwargs):
             return self._return_response(name, *args, **kwargs)
@@ -19,29 +34,29 @@ class MockClient:
     def _return_response(self, name, *args, **kwargs):
         """return stashed values, mimicking responses from the live instance exactly"""
 
-        stash_loc = (
+        print(f"Returning response for {name} with kwargs: {kwargs}")
+
+        # Prefer SQLite recordings when available
+        sqlite_path = (
             Path(__file__).resolve().parent.parent
             / "tests"
             / "fixtures"
-            / "responses"
-            / f"{name}.json"
+            / "requests.sqlite"
         )
 
-        if not stash_loc.exists():
-            raise FileNotFoundError(
-                f"Stash file for method: {name} not found. You may need to generate it by running tests against a live instance."
+        recorder = RequestRecorder(sqlite_path)
+        # Maintain per-process state for sequencing
+        if not hasattr(self, "_seq_state"):
+            self._seq_state = {}
+        try:
+            data = recorder.fetch_next(
+                method=name,
+                kwargs=kwargs,
+                state=self._seq_state,
             )
-
-        with open(stash_loc) as f:
-            data = json.load(f)
-
-        key = json.dumps(kwargs, sort_keys=True)
-        if key in data.keys():
-            return dict(data=data[key])
-        else:
-            print("Available keys are: ")
-            for _key in data.keys():
-                print(_key)
+            return {"data": data}
+        except KeyError:
+            # If SQLite has no matching interaction
             raise KeyError(
-                f"Could not find key called `{key}` for function `{name}`. You may need to generate it by running tests against a live instance using the same arguments."
-            )
+                f"No matching interaction found for {name} with kwargs: {kwargs}"
+            ) from None

@@ -91,14 +91,14 @@ class WorkflowStep:
 
         if self._fuse_jobs:
             # fuse all job IDs into a single job
-            job = Job.from_ids(job_ids)
+            job = Job.from_ids(job_ids, client=self.parent.client)
             self.jobs = [job]
 
         else:
             # make a new job for each job ID
             jobs = []
             for job_id in job_ids:
-                job = Job.from_ids([job_id])
+                job = Job.from_ids([job_id], client=self.parent.client)
                 jobs.append(job)
 
             self.jobs = jobs

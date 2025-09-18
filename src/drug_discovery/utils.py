@@ -168,8 +168,6 @@ def _start_tool_run(
         client=client,
     )
 
-    # print(f"Job started with Job ID: {job_id}")
-
     return job_id
 
 

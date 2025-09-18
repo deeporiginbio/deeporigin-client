@@ -190,8 +190,9 @@ class Complex:
         from deeporigin.platform import file_api
 
         remote_files = file_api.get_object_directory(
-            file_path="/entities/",
+            file_path="entities/",
             recursive=True,
+            client=self.client,
         )
         remote_files = [file.Key for file in remote_files]
 
@@ -203,7 +204,7 @@ class Complex:
             if ligand._remote_path not in remote_files:
                 files_to_upload[str(ligand.to_sdf())] = ligand._remote_path
 
-        file_api.upload_files(files_to_upload)
+        file_api.upload_files(files_to_upload, client=self.client)
 
     def _repr_pretty_(self, p, cycle):
         """pretty print a Complex object"""

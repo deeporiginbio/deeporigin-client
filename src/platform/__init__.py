@@ -18,7 +18,14 @@ from deeporigin.utils.constants import API_ENDPOINT, ENVS
 
 
 class Client:
-    """Deep Origin client, to interact with the Deep Origin platform"""
+    """Deep Origin client, to interact with the Deep Origin platform
+
+    Attributes:
+        recording: When True, successful requests made via high-level wrappers
+            will be recorded to a SQLite file for later replay in tests.
+    """
+
+    is_mock = False
 
     @beartype
     def __init__(
@@ -42,6 +49,16 @@ class Client:
             KeyError: If the resolved environment is not a known API endpoint.
         """
 
+        # When used as a mock (e.g., tests' MockClient), avoid any environment
+        # or token resolution that could trigger network or filesystem access.
+        if getattr(self, "is_mock", False):
+            self.token = token or "mock-token"
+            self.org_key = org_key or "mock-org"
+            self.env = env or "prod"
+            self.api_endpoint = "mock"
+            self.recording: bool = False
+            return
+
         tokens = get_tokens()
         resolved_token = token or tokens["access"]
         resolved_env = env or get_value()["env"]
@@ -57,6 +74,9 @@ class Client:
         self.org_key = resolved_org_key
         self.env = resolved_env
         self.api_endpoint = API_ENDPOINT[resolved_env]
+
+        # Recording is off by default; toggle at runtime as needed
+        self.recording: bool = False
 
     def __repr__(self):
         return f"DeepOrigin Platform Client(token={self.token[:5]}..., org_key={self.org_key}, env={self.env})"
