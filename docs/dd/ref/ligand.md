@@ -29,5 +29,6 @@ Example:
 from deeporigin.drug_discovery.structures import Ligand
 
 lig = Ligand.from_smiles("CCO", name="Ethanol")
-lig.prepare()
+lig.prepare()  # Preserves hydrogens by default
+lig.prepare(remove_hydrogens=True)  # Remove hydrogens from SMILES
 ```

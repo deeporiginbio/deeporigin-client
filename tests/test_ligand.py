@@ -318,6 +318,29 @@ def test_ligand_prepare_basic():
     assert ligand.get_property("prepared"), "Ligand should be prepared"
 
 
+def test_ligand_prepare_remove_hydrogens():
+    """Test prepare with remove_hydrogens parameter"""
+
+    ligand = Ligand.from_smiles("CCO", name="Ethanol")
+    ligand.add_hydrogens()  # Add hydrogens first
+
+    # Test with remove_hydrogens=True
+    ligand.prepare(remove_hydrogens=True)
+    assert "H" not in ligand.smiles  # Should not contain explicit hydrogens
+
+    # Test with remove_hydrogens=False (default)
+    ligand2 = Ligand.from_smiles("CCO", name="Ethanol")
+    ligand2.add_hydrogens()
+    ligand2.prepare(remove_hydrogens=False)
+    assert "H" in ligand2.smiles  # Should contain explicit hydrogens
+
+    # Test default behavior (should preserve hydrogens)
+    ligand3 = Ligand.from_smiles("CCO", name="Ethanol")
+    ligand3.add_hydrogens()
+    ligand3.prepare()  # Default should be remove_hydrogens=False
+    assert "H" in ligand3.smiles  # Should contain explicit hydrogens
+
+
 def test_ligand_prepare_rejects_unsupported_atoms():
     """Ligands with unsupported atoms should be rejected by prepare()."""
 

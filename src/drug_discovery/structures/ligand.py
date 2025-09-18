@@ -347,13 +347,17 @@ class Ligand(Entity):
         self.mol = stripped_mol
 
     @beartype
-    def prepare(self) -> "Ligand":
+    def prepare(self, *, remove_hydrogens: bool = False) -> "Ligand":
         """Prepare the ligand for downstream workflows.
 
         The routine performs the following using RDKit and internal utilities:
         - Salt removal
         - Kekulization
         - Validation of atom types against supported symbols
+
+        Args:
+            remove_hydrogens (bool): Whether to remove hydrogens from the SMILES representation.
+                                   Defaults to False (preserve hydrogens).
 
         Returns:
             Ligand: The prepared ligand (self), for chaining.
@@ -393,7 +397,10 @@ class Ligand(Entity):
             )
 
         # Update smiles and properties to reflect prepared state
-        self.smiles = Chem.MolToSmiles(Chem.RemoveHs(self.mol), canonical=True)
+        if remove_hydrogens:
+            self.smiles = Chem.MolToSmiles(Chem.RemoveHs(self.mol), canonical=True)
+        else:
+            self.smiles = Chem.MolToSmiles(self.mol, canonical=True)
         self.set_property("prepared", True)
 
         return self
