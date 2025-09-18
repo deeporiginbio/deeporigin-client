@@ -42,6 +42,12 @@ def test_download_file(config):  # noqa: F811
     )
     assert len(files) > 0, "should be some files in entities/"
 
+    if config["mock"]:
+        return
+
+    # can't run this part of the test in mock mode
+    # because file downloads aren't mocked
+
     local_path = file_api.download_file(
         remote_path=files[0].Key,
         client=config["client"],
