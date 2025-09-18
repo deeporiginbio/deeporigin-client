@@ -1091,7 +1091,7 @@ class LigandSet:
                 f"Cannot sample {n} ligands from a set of {len(self.ligands)} ligands"
             )
 
-        sampled_ligands = random.sample(self.ligands, n)
+        sampled_ligands = random.sample(self.ligands, n)  # NOSONAR
         return LigandSet(ligands=sampled_ligands)
 
     def _repr_html_(self):
