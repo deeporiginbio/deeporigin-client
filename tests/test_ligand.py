@@ -6,6 +6,7 @@ import pytest
 
 from deeporigin.drug_discovery.structures import Ligand
 from deeporigin.exceptions import DeepOriginException
+from deeporigin.utils.constants import SUPPORTED_ATOM_SYMBOLS
 
 # Import shared test fixtures
 from tests.utils_ligands import (
@@ -300,6 +301,53 @@ def test_ligand_process_mol():
     # The process_mol method is called in __post_init__, so the molecule should already be processed
     assert ligand.mol is not None
     assert ligand.mol.GetNumAtoms() == 3
+
+
+def test_ligand_prepare_basic():
+    """Prepare should salt-strip, kekulize, and validate atom types"""
+
+    ligand = Ligand.from_smiles("CCO", name="Ethanol")
+    # Ensure prepare runs and sets properties
+    prepared = ligand.prepare()
+
+    assert prepared is ligand
+    assert ligand.mol is not None
+    # All atoms supported
+    assert all(a in SUPPORTED_ATOM_SYMBOLS for a in ligand.atom_types)
+    # Prepared prop
+    assert ligand.get_property("prepared"), "Ligand should be prepared"
+
+
+def test_ligand_prepare_remove_hydrogens():
+    """Test prepare with remove_hydrogens parameter"""
+
+    ligand = Ligand.from_smiles("CCO", name="Ethanol")
+    ligand.add_hydrogens()  # Add hydrogens first
+
+    # Test with remove_hydrogens=True
+    ligand.prepare(remove_hydrogens=True)
+    assert "H" not in ligand.smiles  # Should not contain explicit hydrogens
+
+    # Test with remove_hydrogens=False (default)
+    ligand2 = Ligand.from_smiles("CCO", name="Ethanol")
+    ligand2.add_hydrogens()
+    ligand2.prepare(remove_hydrogens=False)
+    assert "H" in ligand2.smiles  # Should contain explicit hydrogens
+
+    # Test default behavior (should preserve hydrogens)
+    ligand3 = Ligand.from_smiles("CCO", name="Ethanol")
+    ligand3.add_hydrogens()
+    ligand3.prepare()  # Default should be remove_hydrogens=False
+    assert "H" in ligand3.smiles  # Should contain explicit hydrogens
+
+
+def test_ligand_prepare_rejects_unsupported_atoms():
+    """Ligands with unsupported atoms should be rejected by prepare()."""
+
+    # Include boron (unsupported) in a simple fragment
+    lig = Ligand.from_smiles("B")
+    with pytest.raises(DeepOriginException, match="Unsupported atom types"):
+        lig.prepare()
 
 
 def test_ligand_conformer_management():

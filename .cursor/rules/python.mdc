@@ -43,7 +43,7 @@ When modifying an existing function, make the following changes together:
 # Running tests
 
 - Before running tests, run `ruff format .` and `ruff check --select I . --fix` to ensure that code is formatted correctly
-- Run tests by activating the venv and then running `pytest`
-- To test a specific function, use `pytest -k` 
+- Run tests by activating the venv and then running `pytest --mock`
+- To test a specific function, use `pytest -k --mock` 
 
 

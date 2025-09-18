@@ -13,8 +13,7 @@ test:
 	venv/bin/ruff format .
 	venv/bin/ruff check --select I . --fix
 	venv/bin/interrogate -c pyproject.toml -vv . -f 100 --omit-covered-files
-	venv/bin/python -m coverage run --source="src" -m pytest -x -n "auto" --failed-first -k $(chosen_tests) --mock --org_key $(org_key) --dist loadfile
-	venv/bin/python -m coverage html
+	venv/bin/pytest -x -n "auto" --failed-first -k $(chosen_tests) --mock --org_key $(org_key) --dist loadfile
 	venv/bin/pytest -x docs --markdown-docs --markdown-docs-syntax=superfences
 
 
