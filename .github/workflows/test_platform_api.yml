@@ -51,5 +51,5 @@ jobs:
       - run: pip install .[tools,test,plots]
       - name: Run tests for ${{ inputs.service }} API
         run: |
-          pytest -v -k test_${{ inputs.service }}_api --client "default"
+          pytest -v -k test_${{ inputs.service }}_api 
 
