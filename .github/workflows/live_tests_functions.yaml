@@ -52,4 +52,4 @@ jobs:
 
 
       - name: Run tests against a live instance
-        run: pytest -v -s --log-cli-level=ERROR --client default -k test_functions
+        run: pytest -v -s --log-cli-level=ERROR -k test_functions
