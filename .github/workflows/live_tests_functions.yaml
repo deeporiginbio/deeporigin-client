@@ -22,22 +22,23 @@ on:
 
 jobs:
   test-functions-on-production:
-    environment: ${{ inputs.env }}
+    environment: ${{ inputs.env || 'prod' }}
     runs-on: ubuntu-latest
     env:
-      DEEP_ORIGIN_ENV: ${{ inputs.env }}
+      DEEP_ORIGIN_ENV: ${{ inputs.env || 'prod' }}
 
     steps:
       - uses: actions/checkout@v4
       - name: Select API token
         run: |
-          if [ "${{ inputs.env }}" = "prod" ]; then
+          ENV="${{ inputs.env || 'prod' }}"
+          if [ "$ENV" = "prod" ]; then
             echo "DEEPORIGIN_TOKEN=${{ secrets.DEEPORIGIN_TOKEN_PROD }}" >> "$GITHUB_ENV"
             echo "DEEPORIGIN_REFRESH_TOKEN=${{ secrets.DEEPORIGIN_REFRESH_TOKEN_PROD }}" >> "$GITHUB_ENV"
-          elif [ "${{ inputs.env }}" = "staging" ]; then
+          elif [ "$ENV" = "staging" ]; then
             echo "DEEPORIGIN_TOKEN=${{ secrets.DEEPORIGIN_TOKEN_STAGING }}" >> "$GITHUB_ENV"
             echo "DEEPORIGIN_REFRESH_TOKEN=${{ secrets.DEEPORIGIN_REFRESH_TOKEN_STAGING }}" >> "$GITHUB_ENV"
-          elif [ "${{ inputs.env }}" = "edge" ]; then
+          elif [ "$ENV" = "edge" ]; then
             echo "DEEPORIGIN_TOKEN=${{ secrets.DEEPORIGIN_TOKEN_EDGE }}" >> "$GITHUB_ENV"
             echo "DEEPORIGIN_REFRESH_TOKEN=${{ secrets.DEEPORIGIN_REFRESH_TOKEN_EDGE }}" >> "$GITHUB_ENV"
           fi
@@ -45,7 +46,7 @@ jobs:
       - name: Set environment variables for Client
         run: |
           echo "DEEPORIGIN_ORG_KEY=deeporigin" >> "$GITHUB_ENV"
-          echo "DEEPORIGIN_ENV=${{ inputs.env }}" >> "$GITHUB_ENV"
+          echo "DEEPORIGIN_ENV=${{ inputs.env || 'prod' }}" >> "$GITHUB_ENV"
       - uses: actions/setup-python@v5
         with: { python-version: "3.13" }
       - run: pip install .[tools,test,plots]
