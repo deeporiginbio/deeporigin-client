@@ -119,9 +119,8 @@ class Docking(WorkflowStep):
     def get_results(self, *, file_type: str = "csv") -> pd.DataFrame | None | list[str]:
         """return a list of paths to CSV files that contain the results from docking"""
 
-        files = utils.find_files_on_ufa(
-            tool="Docking",
-            protein=self.parent.protein.file_path.name,
+        files = file_api.list_files_in_dir(
+            file_path="tool-runs/Docking/" + self.parent.protein.to_hash() + "/",
             client=self.parent.client,
         )
 
