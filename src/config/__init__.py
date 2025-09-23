@@ -11,6 +11,7 @@ Behavior:
 
 import os
 import sys
+from typing import Literal
 
 import yaml
 
@@ -78,7 +79,7 @@ def get_value() -> dict:
     return {"env": env, "org_key": org_key}
 
 
-def set_value(key: str, value) -> None:
+def set_value(key: Literal["env", "org_key"], value) -> None:
     """Set a configuration value.
 
     Only `env` and `org_key` are supported keys.
