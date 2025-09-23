@@ -411,6 +411,13 @@ class Ligand(Entity):
         """
         return self.mol.GetNumHeavyAtoms()
 
+    def is_charged(self) -> bool:
+        """
+        Check if the molecule is charged.
+        """
+        total_charge = sum(atom.GetFormalCharge() for atom in self.mol.GetAtoms())
+        return total_charge != 0
+
     def get_conformer(self, conformer_id: int = 0):
         """
         Get a specific conformer of the molecule.
