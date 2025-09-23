@@ -231,6 +231,12 @@ class ABFE(WorkflowStep):
         if isinstance(ligands, LigandSet):
             ligands = ligands.ligands
 
+        for ligand in ligands:
+            if ligand.is_charged():
+                raise DeepOriginException(
+                    f"Ligand {ligand.name} with SMILES {ligand.smiles} is charged. ABFE does not currently support charged ligands."
+                ) from None
+
         # check that there is a prepared system for each ligand
         for ligand in ligands:
             if ligand.to_hash() not in self.parent._prepared_systems:

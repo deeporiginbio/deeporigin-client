@@ -45,6 +45,12 @@ def test_ligand_hash_stable(ligand_file):
     assert hash_before == hash_after
 
 
+def test_ligand_is_charged():
+    """Test that the is_charged method returns the correct value"""
+    ligand = Ligand.from_smiles("C[N+]1=CCCC1", name="Ethanol")
+    assert ligand.is_charged(), "Expected this ligand to be charged"
+
+
 @pytest.mark.parametrize(
     "smiles,name,expected_atoms,equivalent_smiles",
     [
