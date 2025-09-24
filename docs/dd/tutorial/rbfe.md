@@ -1,5 +1,9 @@
 # RBFE
 
+!!! danger "RBFE API is in development"
+    RBFE functionality is still under development. 
+
+
 This document describes how to run a [RBFE :octicons-link-external-16:](https://en.wikipedia.org/wiki/Free-energy_perturbation) simulation using Deep Origin tools. 
 
 ## Prerequisites

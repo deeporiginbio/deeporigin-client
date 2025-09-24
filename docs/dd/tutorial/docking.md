@@ -173,9 +173,25 @@ Use the `get_poses` function to return a [`LigandSet`](../ref/ligandset.md) with
 poses = sim.docking.get_poses()
 ```
 
-and use a `LigandSet` method to write to SDF:
+You typically want to filter these poses to only retain the top pose for each ligand. To do that, use:
+
 
 ```{.python notest}
-poses.to_sdf("/path/to/docked/ligands.sdf")
+poses = poses.filter_top_poses()
 ```
+
+Finally, to visualize these top poses, use:
+
+
+```{.python notest}
+sim.docking.show_poses()
+```
+
+<iframe 
+    src="../../images/docked-poses.html" 
+    width="100%" 
+    height="650" 
+    style="border:none;"
+    title="Protein visualization"
+></iframe>
 

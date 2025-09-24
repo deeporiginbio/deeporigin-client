@@ -44,21 +44,6 @@ Second, run the code below to create a virtual environment and install this pack
 make install
 ```
 
-## Testing
-
-### Running the tests locally
-
-To run the tests locally, execute the following:
-
-```bash
-make test
-```
-
-By default, the tests are run using mocked responses. To run the tests against the live Deep Origin API, execute the following:
-
-```bash
-make test client=default
-```
 
 ### Automated tests on GitHub Actions
 
