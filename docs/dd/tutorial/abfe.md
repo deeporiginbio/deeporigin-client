@@ -47,7 +47,7 @@ To run an end-to-end ABFE workflow on a single ligand, we use:
 
 
 ```{.python notest}
-jobs = sim.abfe.run_end_to_end(ligands=[sim.ligands[0]]) # for example
+jobs = sim.abfe.run(ligands=[sim.ligands[0]]) # for example
 job = jobs[0]
 ```
 
@@ -59,15 +59,15 @@ This queues up a task on Deep Origin. When it completes, outputs will be written
 To run an end-to-end ABFE workflow on multiple ligands, we use:
 
 ```{.python notest}
-jobs = sim.abfe.run_end_to_end(ligands=[sim.ligands[0],sim.ligands[1]]) 
+jobs = sim.abfe.run(ligands=[sim.ligands[0],sim.ligands[1]]) 
 job = jobs[0]
 ```
 
-Omitting the ligand IDs will run ABFE on all ligands in the `Complex` object.
+Omitting the ligand will run ABFE on all ligands in the `Complex` object.
 
 
 ```{.python notest}
-jobs = sim.abfe.run_end_to_end() 
+jobs = sim.abfe.run() 
 ```
 
 Each ligand will be run in parallel on a separate instance. 

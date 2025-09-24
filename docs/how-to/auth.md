@@ -37,7 +37,7 @@ be used in subsequent interactions with Deep Origin.
 
 !!! info "Authenticating"
     In most cases, you only need to authenticate to the Deep Origin OS once.
-    You do not need to authenticate every time you use the client or the CLI.
+    You do not need to authenticate every time you use the client.
 
 !!! question "Authenticating on Deep Origin workstations"
     Presently, workstation users must authenticate (once) to the Deep Origin OS. We plan to develop the capability to automatically authenticate workstation users.
