@@ -213,9 +213,13 @@ def run_tool(
 
     if "clusterId" not in data.keys():
         clusters = list_clusters(client=client, org_key=org_key)  # noqa: F821
-        if len(clusters) == 0:
-            raise RuntimeError("No clusters found.")
-        cluster_id = clusters[0].id
+        # Filter out clusters with hostnames containing "dev"
+        filtered_clusters = [
+            cluster for cluster in clusters if "dev" not in cluster.hostname
+        ]
+        if len(filtered_clusters) == 0:
+            raise RuntimeError("No clusters found (excluding dev clusters).")
+        cluster_id = filtered_clusters[0].id
         data["clusterId"] = cluster_id
 
     return execute_tool(  # noqa: F821
