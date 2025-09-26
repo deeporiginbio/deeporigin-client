@@ -272,7 +272,7 @@ def scatter(
         smiles_list: List of SMILES strings corresponding to each point. Must be the same length as x and y.
         x_label: Label for the x-axis. Defaults to "X".
         y_label: Label for the y-axis. Defaults to "Y".
-        title: Title for the plot. Defaults to "Scatter Plot with Molecule Images".
+        title: Title for the plot. Defaults to "Scatter Plot".
 
     Raises:
         ValueError: If the input arrays have different lengths or no valid SMILES strings found.
