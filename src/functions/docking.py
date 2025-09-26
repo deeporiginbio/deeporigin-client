@@ -97,24 +97,21 @@ def dock(
     # Check if cached result exists
     if os.path.exists(sdf_file) and use_cache:
         return sdf_file
-    else:
-        # Make the API request
-        response = requests.post(
-            URL,
-            json=payload,
-            headers={"Content-Type": "application/json"},
-        )
 
-        # Raise an exception for bad status codes
-        response.raise_for_status()
+    from deeporigin.platform import tools_api
 
-        response = response.json()
+    body = {"params": payload, "clusterId": tools_api.get_default_cluster_id()}
+    response = tools_api.run_function(
+        key="deeporigin.docking",
+        version="0.1.0",
+        body=body,
+    )
 
-        # Write SDF file to cache
-        Path(sdf_file).parent.mkdir(parents=True, exist_ok=True)
-        with open(sdf_file, "w") as file:
-            for solution in response[0]["solutions"]:
-                file.write(solution["output_sdf_content"])
+    # Write SDF file to cache
+    Path(sdf_file).parent.mkdir(parents=True, exist_ok=True)
+    with open(sdf_file, "w") as file:
+        for solution in response[0]["solutions"]:
+            file.write(solution["output_sdf_content"])
 
     return sdf_file
 
