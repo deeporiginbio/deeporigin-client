@@ -300,7 +300,7 @@ def scatter(
         x, y, smiles_list
     )
 
-    # create cds
+    # Create ColumnDataSource for Bokeh plot
     source = ColumnDataSource(
         {
             "x": valid_x,
