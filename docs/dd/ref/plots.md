@@ -4,7 +4,7 @@ The `deeporigin.plots` module provides visualization functions for drug discover
 
 ## Functions
 
-::: deeporigin.plots.scatter
+::: src.plots.scatter
     options:
       show_signature_annotations: true
       show_root_heading: true
