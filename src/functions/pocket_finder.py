@@ -4,17 +4,15 @@ import base64
 import os
 import zipfile
 
-from beartype import beartype
-import requests
-
 from deeporigin.drug_discovery.structures import Protein
+from deeporigin.platform import tools_api
 from deeporigin.utils.core import hash_dict
 
 URL = "http://pocketfinder.default.jobs.edge.deeporigin.io/find_pockets"
 CACHE_DIR = os.path.expanduser("~/.deeporigin/pocket-finder")
 
 
-@beartype
+# @beartype
 def find_pockets(
     *,
     protein: Protein,
@@ -55,8 +53,16 @@ def find_pockets(
     if use_cache and os.path.exists(cache_path):
         return cache_path
 
+    body = {"params": payload, "clusterId": "d638d3cd-833f-476b-87fe-ca6d76e66049"}
+
     # Send the request to the server
-    response = requests.post(URL, json=payload)
+    response = tools_api.run_function(
+        key="deeporigin.pocketfinder",
+        version="0.1.0",
+        body=body,
+    )
+    return response
+    # response = requests.post(URL, json=payload)
 
     # Check if the request was successful
     if response.status_code == 200:
