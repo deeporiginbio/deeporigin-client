@@ -1718,3 +1718,18 @@ class LigandSet:
         from deeporigin.drug_discovery import chemistry
 
         return chemistry.pairwise_pose_rmsd(self.to_rdkit_mols())
+
+    def plot(self, *, x: str = "POSE SCORE", y: str = "Binding Energy"):
+        """make a scatter plot of ligands, using attributes"""
+        from deeporigin.plots import scatter
+
+        df = self.to_dataframe()
+
+        return scatter(
+            x=df[x],
+            y=df[y],
+            smiles_list=df["SMILES"],
+            x_label=x,
+            y_label=y,
+            title="Binding Energy vs POSE SCORE",
+        )

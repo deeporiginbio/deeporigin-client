@@ -62,6 +62,7 @@ nav:
     - Job control: dd/how-to/job.md
   - Reference: 
     - chemistry: dd/ref/chemistry.md
+    - plots: dd/ref/plots.md
     - structures: 
       - Ligand: dd/ref/ligand.md
       - LigandSet: dd/ref/ligandset.md

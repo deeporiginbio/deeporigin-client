@@ -160,3 +160,175 @@ def plot_heatmap(
     p.grid.visible = False
 
     show(p)
+
+
+def _generate_molecule_image(smiles: str) -> str | None:
+    """Generate a base64-encoded image from a SMILES string.
+
+    Args:
+        smiles: SMILES string to render.
+
+    Returns:
+        Base64-encoded image data URL, or None if rendering fails.
+    """
+    import base64
+    from io import BytesIO
+
+    from rdkit import Chem
+    from rdkit.Chem import Draw
+
+    try:
+        mol = Chem.MolFromSmiles(smiles)
+        if mol is None:
+            return None
+
+        img = Draw.MolToImage(mol, size=(200, 200))
+        buffer = BytesIO()
+        img.save(buffer, format="PNG")
+        img_str = base64.b64encode(buffer.getvalue()).decode()
+        return f"data:image/png;base64,{img_str}"
+    except Exception:
+        return None
+
+
+def _process_smiles_data(
+    x: np.ndarray,
+    y: np.ndarray,
+    smiles_list: list[str],
+) -> tuple[list, list, list, list, list]:
+    """Process SMILES data and generate images for valid molecules.
+
+    Args:
+        x: X-coordinates for the scatter plot points.
+        y: Y-coordinates for the scatter plot points.
+        smiles_list: List of SMILES strings corresponding to each point.
+
+    Returns:
+        Tuple containing (valid_x, valid_y, valid_smiles, image_data, valid_idx).
+
+    Raises:
+        ValueError: If no valid SMILES strings are found.
+    """
+    image_data = []
+    valid_smiles = []
+    valid_x = []
+    valid_y = []
+    valid_idx = []
+
+    for i, smiles in enumerate(smiles_list):
+        image_str = _generate_molecule_image(smiles)
+        if image_str is not None:
+            image_data.append(image_str)
+            valid_smiles.append(smiles)
+            valid_x.append(x[i])
+            valid_y.append(y[i])
+            valid_idx.append(i)
+
+    if not valid_x:
+        raise ValueError("No valid SMILES strings found")
+
+    return valid_x, valid_y, valid_smiles, image_data, valid_idx
+
+
+def _create_hover_tooltip() -> str:
+    """Create HTML template for hover tooltip showing molecule images.
+
+    Returns:
+        HTML template string for the hover tooltip.
+    """
+    return """
+    <div>
+        <img src="@image" width="200" height="200" style="float: left; margin: 0px 15px 15px 0px;" border="2"></img>
+        <div style="float: left; width: 200px;">
+            <div style="font-size: 12px; font-weight: bold;">Index:</div>
+            <div style="font-size: 10px; font-family: monospace;">@index</div>
+            <div style="font-size: 12px; font-weight: bold;">SMILES:</div>
+            <div style="font-size: 10px; font-family: monospace;">@smiles</div>
+            <div style="font-size: 12px; font-weight: bold; margin-top: 10px;">Coordinates:</div>
+            <div style="font-size: 10px;">X: @x</div>
+            <div style="font-size: 10px;">Y: @y</div>
+        </div>
+    </div>
+    """
+
+
+def scatter(
+    *,
+    x: np.ndarray,
+    y: np.ndarray,
+    smiles_list: list[str],
+    x_label: str = "X",
+    y_label: str = "Y",
+    title: str = "Scatter Plot",
+):
+    """Create and display a Bokeh scatter plot with molecule images displayed on hover.
+
+    The function automatically detects the environment (notebook vs script) and displays
+    the plot appropriately - inline in notebooks or in a browser window for scripts.
+
+    Args:
+        x: X-coordinates for the scatter plot points.
+        y: Y-coordinates for the scatter plot points.
+        smiles_list: List of SMILES strings corresponding to each point. Must be the same length as x and y.
+        x_label: Label for the x-axis. Defaults to "X".
+        y_label: Label for the y-axis. Defaults to "Y".
+        title: Title for the plot. Defaults to "Scatter Plot with Molecule Images".
+
+    Raises:
+        ValueError: If the input arrays have different lengths or no valid SMILES strings found.
+        ImportError: If RDKit is not available (required for molecule rendering).
+    """
+    # Validate input lengths
+    if len(x) != len(y) or len(x) != len(smiles_list):
+        raise ValueError("x, y, and smiles_list must all have the same length")
+
+    # Convert to numpy arrays for consistency
+    x = np.asarray(x)
+    y = np.asarray(y)
+
+    # Configure output for notebook environment
+    from deeporigin.utils.notebook import get_notebook_environment
+
+    environment = get_notebook_environment()
+    if environment in ["marimo", "jupyter"]:
+        from bokeh.io import output_notebook
+
+        output_notebook(hide_banner=True)
+
+    # Process SMILES data and generate images
+    valid_x, valid_y, valid_smiles, image_data, valid_idx = _process_smiles_data(
+        x, y, smiles_list
+    )
+
+    # create cds
+    source = ColumnDataSource(
+        {
+            "x": valid_x,
+            "y": valid_y,
+            "smiles": valid_smiles,
+            "image": image_data,
+            "index": valid_idx,
+        }
+    )
+
+    # Create figure
+    p = figure(
+        title=title,
+        x_axis_label=x_label,
+        y_axis_label=y_label,
+        tools="pan,wheel_zoom,box_zoom,reset,save,hover",
+        toolbar_location="right",
+        width=800,
+        height=800,
+    )
+
+    # Add scatter points
+    p.scatter(x="x", y="y", source=source, size=8, alpha=0.7, color="blue")
+
+    # Configure hover tool to show molecule images
+    hover = p.select_one(HoverTool)
+    hover.tooltips = _create_hover_tooltip()
+    hover.point_policy = "follow_mouse"
+
+    # Show the figure
+    show(p, notebook_handle=True)
