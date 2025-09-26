@@ -20,7 +20,7 @@ def test_scatter_basic_functionality():
         "CC(C)O",  # isopropanol
     ]
 
-    with patch("src.plots.show") as mock_show:
+    with patch("deeporigin.plots.show") as mock_show:
         scatter(x=x, y=y, smiles_list=smiles_list)
 
         # Verify show was called with a figure
@@ -50,7 +50,7 @@ def test_scatter_invalid_smiles():
     y = np.array([1, 2, 3])
     smiles_list = ["invalid_smiles", "CCO", "another_invalid"]
 
-    with patch("src.plots.show") as mock_show:
+    with patch("deeporigin.plots.show") as mock_show:
         scatter(x=x, y=y, smiles_list=smiles_list)
 
         # Verify show was called with a figure
@@ -85,7 +85,7 @@ def test_scatter_with_lists():
     y = [1, 2, 3]
     smiles_list = ["CCO", "CC(=O)O", "c1ccccc1"]
 
-    with patch("src.plots.show") as mock_show:
+    with patch("deeporigin.plots.show") as mock_show:
         scatter(x=x, y=y, smiles_list=smiles_list)
 
         # Verify show was called with a figure
@@ -100,7 +100,7 @@ def test_scatter_figure_properties():
     y = np.array([1, 2, 3])
     smiles_list = ["CCO", "CC(=O)O", "c1ccccc1"]
 
-    with patch("src.plots.show") as mock_show:
+    with patch("deeporigin.plots.show") as mock_show:
         scatter(x=x, y=y, smiles_list=smiles_list)
 
         # Get the figure that was passed to show
@@ -126,7 +126,7 @@ def test_scatter_custom_labels():
     y = np.array([1, 2])
     smiles_list = ["CCO", "CC(=O)O"]
 
-    with patch("src.plots.show") as mock_show:
+    with patch("deeporigin.plots.show") as mock_show:
         scatter(
             x=x,
             y=y,
@@ -149,7 +149,7 @@ def test_scatter_custom_title():
     y = np.array([1, 2])
     smiles_list = ["CCO", "CC(=O)O"]
 
-    with patch("src.plots.show") as mock_show:
+    with patch("deeporigin.plots.show") as mock_show:
         scatter(x=x, y=y, smiles_list=smiles_list, title="My Custom Plot Title")
 
         # Get the figure that was passed to show
@@ -165,7 +165,7 @@ def test_scatter_data_source_structure():
     y = np.array([1, 2])
     smiles_list = ["CCO", "CC(=O)O"]
 
-    with patch("src.plots.show") as mock_show:
+    with patch("deeporigin.plots.show") as mock_show:
         scatter(x=x, y=y, smiles_list=smiles_list)
 
         # Get the figure that was passed to show
@@ -201,7 +201,7 @@ def test_scatter_molecule_images():
     y = np.array([1, 2])
     smiles_list = ["CCO", "CC(=O)O"]
 
-    with patch("src.plots.show") as mock_show:
+    with patch("deeporigin.plots.show") as mock_show:
         scatter(x=x, y=y, smiles_list=smiles_list)
 
         # Get the figure that was passed to show
@@ -231,7 +231,7 @@ def test_scatter_hover_tooltip():
     y = np.array([1, 2])
     smiles_list = ["CCO", "CC(=O)O"]
 
-    with patch("src.plots.show") as mock_show:
+    with patch("deeporigin.plots.show") as mock_show:
         scatter(x=x, y=y, smiles_list=smiles_list)
 
         # Get the figure that was passed to show
@@ -283,7 +283,7 @@ def test_scatter_hover_tooltip_custom_labels():
     y = np.array([1, 2])
     smiles_list = ["CCO", "CC(=O)O"]
 
-    with patch("src.plots.show") as mock_show:
+    with patch("deeporigin.plots.show") as mock_show:
         scatter(
             x=x,
             y=y,
