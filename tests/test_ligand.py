@@ -101,7 +101,7 @@ def test_ligand_from_smiles_invalid():
         Ligand.from_smiles(smiles="InvalidSMILES")
 
 
-@pytest.mark.flaky
+@pytest.mark.xfail(reason="Depends on external data sources and can be unreliable")
 @pytest.mark.parametrize(
     "identifier,expected_atoms",
     [
