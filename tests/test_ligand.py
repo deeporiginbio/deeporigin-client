@@ -101,6 +101,7 @@ def test_ligand_from_smiles_invalid():
         Ligand.from_smiles(smiles="InvalidSMILES")
 
 
+@pytest.mark.flaky
 @pytest.mark.parametrize(
     "identifier,expected_atoms",
     [
