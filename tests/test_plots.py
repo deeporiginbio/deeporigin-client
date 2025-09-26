@@ -5,7 +5,7 @@ from unittest.mock import patch
 import numpy as np
 import pytest
 
-from src.plots import scatter
+from deeporigin.plots import _create_hover_tooltip, scatter
 
 
 def test_scatter_basic_functionality():
@@ -251,3 +251,62 @@ def test_scatter_hover_tooltip():
         assert "@smiles" in tooltips
         assert "@x" in tooltips
         assert "@y" in tooltips
+
+
+def test_create_hover_tooltip_default_labels():
+    """Test that _create_hover_tooltip uses default labels when none provided."""
+    tooltip = _create_hover_tooltip()
+
+    # Check that default labels are used
+    assert "X: @x" in tooltip
+    assert "Y: @y" in tooltip
+    assert "@image" in tooltip
+    assert "@smiles" in tooltip
+    assert "@index" in tooltip
+
+
+def test_create_hover_tooltip_custom_labels():
+    """Test that _create_hover_tooltip uses custom labels when provided."""
+    tooltip = _create_hover_tooltip("Molecular Weight", "LogP")
+
+    # Check that custom labels are used
+    assert "Molecular Weight: @x" in tooltip
+    assert "LogP: @y" in tooltip
+    assert "@image" in tooltip
+    assert "@smiles" in tooltip
+    assert "@index" in tooltip
+
+
+def test_scatter_hover_tooltip_custom_labels():
+    """Test that scatter plot hover tooltip uses custom axis labels."""
+    x = np.array([1, 2])
+    y = np.array([1, 2])
+    smiles_list = ["CCO", "CC(=O)O"]
+
+    with patch("src.plots.show") as mock_show:
+        scatter(
+            x=x,
+            y=y,
+            smiles_list=smiles_list,
+            x_label="Molecular Weight",
+            y_label="LogP",
+        )
+
+        # Get the figure that was passed to show
+        figure = mock_show.call_args[0][0]
+
+        # Find the hover tool
+        hover_tools = [
+            tool for tool in figure.tools if tool.__class__.__name__ == "HoverTool"
+        ]
+        assert len(hover_tools) == 1
+
+        hover_tool = hover_tools[0]
+        tooltips = hover_tool.tooltips
+
+        # Verify tooltip uses custom labels
+        assert "Molecular Weight: @x" in tooltips
+        assert "LogP: @y" in tooltips
+        assert "@image" in tooltips
+        assert "@smiles" in tooltips
+        assert "@index" in tooltips

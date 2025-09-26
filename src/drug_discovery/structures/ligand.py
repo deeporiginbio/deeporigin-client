@@ -1719,7 +1719,14 @@ class LigandSet:
 
         return chemistry.pairwise_pose_rmsd(self.to_rdkit_mols())
 
-    def plot(self, *, x: str = "POSE SCORE", y: str = "Binding Energy"):
+    def plot(
+        self,
+        *,
+        x_label: str = "Pose Score",
+        y_label: str = "Binding Energy (kcal/mol)",
+        x="POSE SCORE",
+        y="Binding Energy",
+    ):
         """
         Create a scatter plot of ligands using specified attributes for the axes.
 
@@ -1742,7 +1749,7 @@ class LigandSet:
             x=df[x],
             y=df[y],
             smiles_list=df["SMILES"],
-            x_label=x,
-            y_label=y,
+            x_label=x_label,
+            y_label=y_label,
             title="Binding Energy vs POSE SCORE",
         )

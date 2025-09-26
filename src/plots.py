@@ -230,13 +230,17 @@ def _process_smiles_data(
     return valid_x, valid_y, valid_smiles, image_data, valid_idx
 
 
-def _create_hover_tooltip() -> str:
+def _create_hover_tooltip(x_label: str = "X", y_label: str = "Y") -> str:
     """Create HTML template for hover tooltip showing molecule images.
+
+    Args:
+        x_label: Label for the x-axis coordinate.
+        y_label: Label for the y-axis coordinate.
 
     Returns:
         HTML template string for the hover tooltip.
     """
-    return """
+    return f"""
     <div>
         <img src="@image" width="200" height="200" style="float: left; margin: 0px 15px 15px 0px;" border="2"></img>
         <div style="float: left; width: 200px;">
@@ -245,8 +249,8 @@ def _create_hover_tooltip() -> str:
             <div style="font-size: 12px; font-weight: bold;">SMILES:</div>
             <div style="font-size: 10px; font-family: monospace;">@smiles</div>
             <div style="font-size: 12px; font-weight: bold; margin-top: 10px;">Coordinates:</div>
-            <div style="font-size: 10px;">X: @x</div>
-            <div style="font-size: 10px;">Y: @y</div>
+            <div style="font-size: 10px;">{x_label}: @x</div>
+            <div style="font-size: 10px;">{y_label}: @y</div>
         </div>
     </div>
     """
@@ -327,7 +331,7 @@ def scatter(
 
     # Configure hover tool to show molecule images
     hover = p.select_one(HoverTool)
-    hover.tooltips = _create_hover_tooltip()
+    hover.tooltips = _create_hover_tooltip(x_label, y_label)
     hover.point_policy = "follow_mouse"
 
     # Show the figure
