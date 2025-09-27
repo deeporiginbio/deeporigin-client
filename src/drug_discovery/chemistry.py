@@ -7,8 +7,8 @@ from typing import Literal, Optional, Tuple
 
 from beartype import beartype
 import numpy as np
-from rdkit import Chem
-from rdkit.Chem import AllChem, rdFMCS, rdMolAlign
+from rdkit import Chem, RDLogger
+from rdkit.Chem import AllChem, SDWriter, rdFMCS, rdMolAlign
 
 KeyType = Literal["smiles", "inchi"]
 
@@ -25,8 +25,6 @@ def count_molecules_in_sdf_file(sdf_file: str | Path) -> int:
     Returns:
         int: The number of molecules successfully read in the SDF file.
     """
-
-    from rdkit import Chem, RDLogger
 
     # Disable RDKit error logging to suppress messages about kekulization/sanitization.
     RDLogger.DisableLog("rdApp.error")
@@ -57,7 +55,6 @@ def read_property_values(sdf_file: str | Path, key: str):
 
 
     """
-    from rdkit import Chem
 
     suppl = Chem.SDMolSupplier(
         str(sdf_file),
@@ -99,8 +96,6 @@ def split_sdf_file(
     Returns:
         list[Path]: A list of paths to the generated SDF files.
     """
-
-    from rdkit import Chem
 
     values = read_property_values(input_sdf_path, name_by_property)
     n_mols = count_molecules_in_sdf_file(input_sdf_path)
@@ -161,9 +156,6 @@ def smiles_to_sdf(smiles: str, sdf_path: str) -> None:
 
     """
 
-    from rdkit import Chem
-    from rdkit.Chem import SDWriter
-
     mol = Chem.MolFromSmiles(smiles)
     if mol is None:
         print(f"Invalid SMILES: {smiles}")
@@ -193,7 +185,6 @@ def sdf_to_smiles(sdf_file: str | Path) -> list[str]:
     Returns:
         list[str]: A list of SMILES strings for all valid molecules in the file.
     """
-    from rdkit import Chem
 
     if isinstance(sdf_file, Path):
         sdf_file = str(sdf_file)
@@ -222,6 +213,7 @@ def canonicalize_smiles(smiles: str) -> str:
     Returns:
         str: Canonicalized SMILES string.
     """
+
     mol = Chem.MolFromSmiles(smiles)
     if mol is None:
         raise ValueError(f"Invalid SMILES: {smiles}")
@@ -245,6 +237,7 @@ def group_by_prop_smiles_to_multiconf(
     -------
     dict[str, Chem.Mol]: {prop_smiles_value -> Mol with N conformers}
     """
+
     suppl = Chem.SDMolSupplier(sdf_path, sanitize=True, removeHs=False)
     entries = [m for m in suppl if m is not None]
     if not entries:
@@ -423,6 +416,7 @@ def pose_rmsd(
     Tries full-graph mapping; if that fails and use_mcs_if_needed=True, uses MCS subset mapping.
     Returns None if no mapping found.
     """
+
     # Sanity: need 3D confs
     if (
         mol_a.GetNumConformers() <= conf_id_a

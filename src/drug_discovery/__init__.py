@@ -10,8 +10,6 @@ calculations.
 import asyncio  # noqa: F401
 from importlib.resources import files
 
-import nest_asyncio  # we need this for asyncio  # noqa: F401
-
 from . import chemistry
 
 __all__ = ["chemistry", "Complex", "Protein", "Ligand", "Pocket", "LigandSet"]
