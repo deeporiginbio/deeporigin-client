@@ -3,11 +3,9 @@
 import copy
 
 import numpy as np
-from rdkit import Chem
-from rdkit.Chem import AllChem, rdFMCS
 
 
-def randomize_mol_pose(mol: Chem.Mol, seed: int = None) -> Chem.Mol:
+def randomize_mol_pose(mol, seed: int = None):
     """
     Takes a 3D RDKit molecule and returns a copy with a randomly rotated and translated conformation.
 
@@ -54,9 +52,9 @@ def randomize_mol_pose(mol: Chem.Mol, seed: int = None) -> Chem.Mol:
 
 def compute_constraints(
     *,
-    mols: list[Chem.Mol],
-    reference: Chem.Mol,
-    mcs_mol: Chem.Mol,
+    mols: list,
+    reference,
+    mcs_mol,
     energy: float = 5,
 ) -> list[list[dict]]:
     """
@@ -71,6 +69,7 @@ def compute_constraints(
     Returns:
         list[list[dict]]: Constraints for each molecule.
     """
+    from rdkit.Chem import AllChem
 
     ref = preprocess_mol(reference)
     mcs_match_ref = safe_substruct_match(ref, mcs_mol, "reference")
@@ -105,7 +104,7 @@ def compute_constraints(
     return all_constraints
 
 
-def preprocess_mol(mol: Chem.Mol) -> Chem.Mol:
+def preprocess_mol(mol):
     """
     Preprocess a molecule for MCS
 
@@ -115,14 +114,16 @@ def preprocess_mol(mol: Chem.Mol) -> Chem.Mol:
     Returns:
         Chem.Mol: Preprocessed molecule
     """
+    from rdkit import Chem
+
     mol = Chem.RemoveHs(mol)
     Chem.SanitizeMol(mol)
     return mol
 
 
 def safe_substruct_match(
-    mol: Chem.Mol,
-    query: Chem.Mol,
+    mol,
+    query,
     label: str,
 ) -> list[int]:
     """
@@ -136,6 +137,8 @@ def safe_substruct_match(
     Returns:
         list[int]: List of atom indices that match the query
     """
+    from rdkit import Chem
+
     match = mol.GetSubstructMatch(query)
     if not match:
         raise ValueError(
@@ -146,7 +149,7 @@ def safe_substruct_match(
     return match
 
 
-def mcs(mols: list[Chem.Mol], *, timeout: int = 10) -> Chem.Mol:
+def mcs(mols: list, *, timeout: int = 10):
     """
     Generate the Maximum Common Substructure (MCS) for molecules
 
@@ -154,6 +157,8 @@ def mcs(mols: list[Chem.Mol], *, timeout: int = 10) -> Chem.Mol:
         Mol: MCS molecule constructed from the smarts string
 
     """
+    from rdkit import Chem
+    from rdkit.Chem import rdFMCS
 
     prepped = [preprocess_mol(m) for m in mols]
 
