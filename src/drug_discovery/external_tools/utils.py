@@ -32,9 +32,6 @@ from beartype import beartype
 from Bio.PDB import PDBParser
 from Bio.PDB.MMCIFParser import MMCIFParser
 from Bio.PDB.PDBIO import PDBIO
-import biotite.database.rcsb as rcsb
-import biotite.structure as struc
-import biotite.structure.io.pdb as pdb
 import nest_asyncio
 
 
@@ -114,6 +111,8 @@ def download_struct(pid, path=None, format="cif", overwrite=False):
     Returns:
         str: The path to the downloaded file.
     """
+    import biotite.database.rcsb as rcsb
+
     if path is None:
         path = gettempdir()
     return rcsb.fetch(pid, format, target_path=path, overwrite=overwrite)
@@ -134,6 +133,9 @@ def read_structure(file_name, model=1, use_author_fields_flag=True):
     Raises:
         None
     """
+    import biotite.structure as struc
+    import biotite.structure.io.pdb as pdb
+
     if file_name.endswith(".cif"):
         file = pdb.PDBFile.read(file_name)
         structure = pdb.get_structure(
@@ -161,6 +163,8 @@ def get_structure_sequence(structure):
     Returns:
         The sequence of the structure.
     """
+    import biotite.structure as struc
+
     return three2one(struc.get_residues(structure)[1])
 
 
