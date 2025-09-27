@@ -18,7 +18,6 @@ import os
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from biotite.structure.io.pdb import PDBFile
 from deeporigin_molstar import ProteinViewer
 import numpy as np
 import pandas as pd
@@ -48,6 +47,8 @@ class Pocket:
     coordinates: Optional[np.ndarray] = None
 
     def __post_init__(self):
+        from biotite.structure.io.pdb import PDBFile
+
         if self.file_path is not None:
             # Load coordinates directly from PDB file
             structure_file = PDBFile.read(str(self.file_path))
@@ -99,6 +100,8 @@ class Pocket:
             raise FileNotFoundError(f"The file {pdb_file_path} does not exist.")
 
         # Load coordinates directly from PDB file
+        from biotite.structure.io.pdb import PDBFile
+
         structure_file = PDBFile.read(str(pdb_file_path))
         structure = structure_file.get_structure()
 

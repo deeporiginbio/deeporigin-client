@@ -27,12 +27,7 @@ import pathlib
 from pathlib import Path
 from tempfile import gettempdir
 
-import aiohttp
 from beartype import beartype
-from Bio.PDB import PDBParser
-from Bio.PDB.MMCIFParser import MMCIFParser
-from Bio.PDB.PDBIO import PDBIO
-import nest_asyncio
 
 
 @beartype
@@ -45,6 +40,7 @@ def count_atoms_in_pdb_file(pdb_file_path: str | Path) -> int:
     Returns:
         int: The number of atoms in the PDB file.
     """
+    from Bio.PDB import PDBParser
 
     parser = PDBParser(QUIET=True)
     structure = parser.get_structure("complex", str(pdb_file_path))
@@ -256,7 +252,10 @@ def cif_to_pdb(input_file_path, output_file_path):
     Returns:
         None
     """
-    directory, file_name = os.path.split(input_file_path)
+    from Bio.PDB.MMCIFParser import MMCIFParser
+    from Bio.PDB.PDBIO import PDBIO
+
+    _, file_name = os.path.split(input_file_path)
     base_name = os.path.splitext(file_name)[0]
 
     parser = MMCIFParser(QUIET=True)  # Use QUIET=True to suppress warnings
@@ -365,6 +364,8 @@ async def aget_protein_info_dict(pdb_id):
     payload = {"query": query_protein, "variables": {"id": pdb_id}}
 
     info = {}
+    import aiohttp
+
     async with aiohttp.ClientSession() as session:
         async with session.post(url, json=payload) as response:
             if response.status == 200:
@@ -639,6 +640,8 @@ def get_protein_info_dict(pdb_id: str):
     Raises:
     - Any exceptions raised by the underlying `aload_protein_from_pdb` function.
     """
+    import nest_asyncio
+
     nest_asyncio.apply()
     data = asyncio.get_event_loop().run_until_complete(aget_protein_info_dict(pdb_id))
 

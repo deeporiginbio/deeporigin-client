@@ -14,7 +14,6 @@ from dateutil import parser
 import humanize
 from IPython.display import HTML, display, update_display
 from jinja2 import Environment, FileSystemLoader
-import nest_asyncio
 import pandas as pd
 
 from deeporigin.drug_discovery.constants import tool_mapper
@@ -22,10 +21,6 @@ from deeporigin.platform import Client, tools_api
 from deeporigin.tools import job_viz_functions
 from deeporigin.utils.constants import TERMINAL_STATES
 from deeporigin.utils.core import elapsed_minutes
-
-# Enable nested event loops for Jupyter
-nest_asyncio.apply()
-
 
 # Get the template directory
 template_dir = Path(__file__).parent.parent / "templates"
@@ -304,6 +299,12 @@ class Job:
         active jobs to monitor, it will display a message and show the current
         state once.
         """
+
+        # Enable nested event loops for Jupyter
+        import nest_asyncio
+
+        nest_asyncio.apply()
+
         # Check if there are any active jobs (not terminal states)
         if not any(status not in TERMINAL_STATES for status in self._status):
             display(
