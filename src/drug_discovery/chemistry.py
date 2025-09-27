@@ -7,6 +7,8 @@ from typing import Literal, Optional, Tuple
 
 from beartype import beartype
 import numpy as np
+from rdkit import Chem, RDLogger
+from rdkit.Chem import AllChem, SDWriter, rdFMCS, rdMolAlign
 
 KeyType = Literal["smiles", "inchi"]
 
@@ -23,8 +25,6 @@ def count_molecules_in_sdf_file(sdf_file: str | Path) -> int:
     Returns:
         int: The number of molecules successfully read in the SDF file.
     """
-
-    from rdkit import Chem, RDLogger
 
     # Disable RDKit error logging to suppress messages about kekulization/sanitization.
     RDLogger.DisableLog("rdApp.error")
@@ -55,7 +55,6 @@ def read_property_values(sdf_file: str | Path, key: str):
 
 
     """
-    from rdkit import Chem
 
     suppl = Chem.SDMolSupplier(
         str(sdf_file),
@@ -97,8 +96,6 @@ def split_sdf_file(
     Returns:
         list[Path]: A list of paths to the generated SDF files.
     """
-
-    from rdkit import Chem
 
     values = read_property_values(input_sdf_path, name_by_property)
     n_mols = count_molecules_in_sdf_file(input_sdf_path)
@@ -159,9 +156,6 @@ def smiles_to_sdf(smiles: str, sdf_path: str) -> None:
 
     """
 
-    from rdkit import Chem
-    from rdkit.Chem import AllChem, SDWriter
-
     mol = Chem.MolFromSmiles(smiles)
     if mol is None:
         print(f"Invalid SMILES: {smiles}")
@@ -191,7 +185,6 @@ def sdf_to_smiles(sdf_file: str | Path) -> list[str]:
     Returns:
         list[str]: A list of SMILES strings for all valid molecules in the file.
     """
-    from rdkit import Chem
 
     if isinstance(sdf_file, Path):
         sdf_file = str(sdf_file)
@@ -220,7 +213,6 @@ def canonicalize_smiles(smiles: str) -> str:
     Returns:
         str: Canonicalized SMILES string.
     """
-    from rdkit import Chem
 
     mol = Chem.MolFromSmiles(smiles)
     if mol is None:
@@ -235,7 +227,7 @@ def group_by_prop_smiles_to_multiconf(
     keep_hs: bool = False,
     align_conformers: bool = True,
     skip_no_coords: bool = True,
-) -> dict[str, "rdkit.Chem.Mol"]:
+) -> dict[str, Chem.Mol]:
     """
     Read an SDF that contains many poses (possibly for multiple ligands) and group them by
     an SDF property (default: <SMILES>). For each unique value, return one RDKit Mol
@@ -243,10 +235,8 @@ def group_by_prop_smiles_to_multiconf(
 
     Returns
     -------
-    dict[str, "rdkit.Chem.Mol"]: {prop_smiles_value -> Mol with N conformers}
+    dict[str, Chem.Mol]: {prop_smiles_value -> Mol with N conformers}
     """
-    from rdkit import Chem
-    from rdkit.Chem import rdMolAlign
 
     suppl = Chem.SDMolSupplier(sdf_path, sanitize=True, removeHs=False)
     entries = [m for m in suppl if m is not None]
@@ -254,9 +244,7 @@ def group_by_prop_smiles_to_multiconf(
         raise ValueError("No valid molecules found in SDF.")
 
     grouped = {}
-    ref_graph_by_key: dict[
-        str, "rdkit.Chem.Mol"
-    ] = {}  # heavy-atom reference used for mapping
+    ref_graph_by_key: dict[str, Chem.Mol] = {}  # heavy-atom reference used for mapping
 
     for i, m in enumerate(entries):
         if not m.HasProp(smiles_prop_name):
@@ -337,8 +325,8 @@ def group_by_prop_smiles_to_multiconf(
 
 
 def raw_rmsd_from_map(
-    mol_a: "rdkit.Chem.Mol",
-    mol_b: "rdkit.Chem.Mol",
+    mol_a: Chem.Mol,
+    mol_b: Chem.Mol,
     atom_map: list[Tuple[int, int]],
     conf_id_a: int = 0,
     conf_id_b: int = 0,
@@ -354,12 +342,11 @@ def raw_rmsd_from_map(
 
 
 def full_graph_map(
-    mol_a: "rdkit.Chem.Mol",
-    mol_b: "rdkit.Chem.Mol",
+    mol_a: Chem.Mol,
+    mol_b: Chem.Mol,
     ignore_hs: bool = True,
 ) -> Optional[list[Tuple[int, int]]]:
     """Return atom map for identical graphs (isomorphic)."""
-    from rdkit import Chem
 
     A = Chem.RemoveHs(mol_a) if ignore_hs else mol_a
     B = Chem.RemoveHs(mol_b) if ignore_hs else mol_b
@@ -373,8 +360,8 @@ def full_graph_map(
 
 
 def mcs_map(
-    mol_a: "rdkit.Chem.Mol",
-    mol_b: "rdkit.Chem.Mol",
+    mol_a: Chem.Mol,
+    mol_b: Chem.Mol,
     ignore_hs: bool = True,
     ring_matches_ring_only: bool = True,
     complete_rings_only: bool = True,
@@ -383,8 +370,6 @@ def mcs_map(
     timeout: int = 10,
 ) -> Optional[list[Tuple[int, int]]]:
     """Return an atom map for the maximum common substructure (subset comparison)."""
-    from rdkit import Chem
-    from rdkit.Chem import rdFMCS
 
     A = Chem.RemoveHs(mol_a) if ignore_hs else mol_a
     B = Chem.RemoveHs(mol_b) if ignore_hs else mol_b
@@ -418,8 +403,8 @@ def mcs_map(
 
 
 def pose_rmsd(
-    mol_a: "rdkit.Chem.Mol",
-    mol_b: "rdkit.Chem.Mol",
+    mol_a: Chem.Mol,
+    mol_b: Chem.Mol,
     *,
     conf_id_a: int = 0,
     conf_id_b: int = 0,
@@ -431,7 +416,6 @@ def pose_rmsd(
     Tries full-graph mapping; if that fails and use_mcs_if_needed=True, uses MCS subset mapping.
     Returns None if no mapping found.
     """
-    from rdkit import Chem
 
     # Sanity: need 3D confs
     if (
@@ -460,7 +444,7 @@ def pose_rmsd(
 
 @beartype
 def pairwise_pose_rmsd(
-    mols: Sequence["rdkit.Chem.Mol"],
+    mols: Sequence[Chem.Mol],
     *,
     conf_id: int = 0,
     ignore_hs: bool = True,
