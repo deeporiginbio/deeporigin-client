@@ -17,7 +17,6 @@ import tempfile
 from typing import Any, Optional, Tuple
 
 from beartype import beartype
-from deeporigin_molstar import DockingViewer, JupyterViewer, ProteinViewer
 import numpy as np
 
 from deeporigin.drug_discovery.constants import (
@@ -1083,8 +1082,11 @@ class Protein(Entity):
                 ligands = LigandSet(ligands)
             sdf_file = ligands.to_sdf()
 
+        from deeporigin_molstar import ProteinViewer
+
         if pockets is None and sdf_file is None:
             # we're only showing the protein, use ProteinViewer
+
             protein_viewer = ProteinViewer(
                 data=current_protein_file,
                 format="pdb",
@@ -1151,55 +1153,3 @@ class Protein(Entity):
         """update coordinates of the protein structure"""
 
         self.structure.coord = coords
-
-    def get_center_by_residues(self, residues: list[str]) -> np.ndarray:
-        """
-        Get the center of the protein structure based on specific residues.
-
-        Args:
-            residues (list[str]): List of residue names to include in the calculation.
-        """
-        if not (1 <= len(residues) <= 3):
-            print("Please provide 1-3 residue IDs")
-            raise ValueError("Invalid number of residue IDs")
-
-        for res_id in residues:
-            if not isinstance(res_id, int):
-                raise ValueError(f"Residue IDs must be integers. Got: {res_id}")
-
-        mask = np.isin(self.structure.res_id, residues)
-        pocket_atoms = self.structure[mask]
-        if len(pocket_atoms) == 0:
-            raise ValueError(
-                f"No atoms found for the specified residue IDs: {residues}"
-            )
-
-        warning = ""
-        missing_residue_ids = set(residues) - set(pocket_atoms.res_id)
-        if missing_residue_ids:
-            warning = f"Residue IDs {missing_residue_ids} not found in the structure"
-
-        res_name_id_mapping = {}
-        for atom in pocket_atoms:
-            res_name_id_mapping[atom.res_name] = atom.res_id
-
-        from biotite.structure.geometry import centroid
-
-        center = centroid(pocket_atoms)
-
-        with tempfile.TemporaryDirectory() as temp_dir:
-            protein_format = "pdb"
-            protein_path = os.path.join(temp_dir, "protein.pdb")
-            self.to_pdb(protein_path)
-
-            docking_viewer = DockingViewer()
-            html = docking_viewer.render_highligh_residues(
-                protein_data=protein_path,
-                protein_format=protein_format,
-                residue_ids=residues,
-            )
-
-            if "ATOM" not in html:
-                html = ""
-
-        return list(center), warning, JupyterViewer.visualize(html)
