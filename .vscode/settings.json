@@ -7,6 +7,15 @@
     "[python]": {
         "editor.defaultFormatter": "charliermarsh.ruff"
     },
+    "python.analysis.typeCheckingMode": "off",
+    "python.analysis.diagnosticMode": "openFilesOnly",
+    "python.analysis.diagnosticSeverityOverrides": {
+        "reportMissingImports": "none",
+        "reportMissingModuleSource": "none"
+    },
+    "python.analysis.extraPaths": [
+        "./src"
+    ],
     "sonarlint.connectedMode.project": {
         "connectionId": "formiclabs",
         "projectKey": "formiclabs_deeporigin-client"
