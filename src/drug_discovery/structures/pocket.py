@@ -16,7 +16,7 @@ Attributes:
 from dataclasses import dataclass, field
 import os
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from deeporigin_molstar import ProteinViewer
 import numpy as np
@@ -43,7 +43,7 @@ class Pocket:
     name: Optional[str] = None
     pdb_id: Optional[str] = None
     index: Optional[int] = 0
-    props: Optional[Dict[str, Any]] = field(default_factory=dict)
+    props: Optional[dict[str, Any]] = field(default_factory=dict)
     coordinates: Optional[np.ndarray] = None
 
     def __post_init__(self):
@@ -240,7 +240,7 @@ class Pocket:
     def from_pocket_finder_results(
         cls,
         pocket_finder_results_dir: str | Path,
-    ) -> List["Pocket"]:
+    ) -> list["Pocket"]:
         """Create a list of Pocket objects from pocket finder results directory.
 
         Args:
