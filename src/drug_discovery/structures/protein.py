@@ -17,9 +17,6 @@ import tempfile
 from typing import Any, Optional, Tuple
 
 from beartype import beartype
-from biotite.structure import filter_solvent
-from biotite.structure.geometry import centroid
-from biotite.structure.io.pdb import PDBFile
 from deeporigin_molstar import DockingViewer, JupyterViewer, ProteinViewer
 import numpy as np
 
@@ -173,6 +170,8 @@ class Protein(Entity):
     def load_structure_from_block(block_content: str, block_type: str) -> np.ndarray:
         """Load a protein structure from block content."""
         if block_type in ["pdb", "pdbqt"]:
+            from biotite.structure.io.pdb import PDBFile
+
             pdb_file = PDBFile.read(io.StringIO(block_content))
             structure = pdb_file.get_structure()
         else:
@@ -553,6 +552,8 @@ class Protein(Entity):
         Remove water molecules from the protein structure in place.
 
         """
+        from biotite.structure import filter_solvent
+
         self.structure = self.structure[~filter_solvent(self.structure)]
 
     def find_missing_residues(self) -> dict[str, list[tuple[int, int]]]:
@@ -845,6 +846,8 @@ class Protein(Entity):
             os.remove(new_file_path)
 
         try:
+            from biotite.structure.io.pdb import PDBFile
+
             pdb_file = PDBFile()
             pdb_file.set_structure(new_structure)
             pdb_file.write(str(new_file_path))
@@ -869,6 +872,8 @@ class Protein(Entity):
             file_path = PROTEINS_DIR / (self.to_hash() + ".pdb")
 
         try:
+            from biotite.structure.io.pdb import PDBFile
+
             pdb_file = PDBFile()
             pdb_file.set_structure(self.structure)
             pdb_file.write(str(file_path))
@@ -1177,6 +1182,8 @@ class Protein(Entity):
         res_name_id_mapping = {}
         for atom in pocket_atoms:
             res_name_id_mapping[atom.res_name] = atom.res_id
+
+        from biotite.structure.geometry import centroid
 
         center = centroid(pocket_atoms)
 

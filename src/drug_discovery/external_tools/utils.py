@@ -27,15 +27,7 @@ import pathlib
 from pathlib import Path
 from tempfile import gettempdir
 
-import aiohttp
 from beartype import beartype
-from Bio.PDB import PDBParser
-from Bio.PDB.MMCIFParser import MMCIFParser
-from Bio.PDB.PDBIO import PDBIO
-import biotite.database.rcsb as rcsb
-import biotite.structure as struc
-import biotite.structure.io.pdb as pdb
-import nest_asyncio
 
 
 @beartype
@@ -48,6 +40,7 @@ def count_atoms_in_pdb_file(pdb_file_path: str | Path) -> int:
     Returns:
         int: The number of atoms in the PDB file.
     """
+    from Bio.PDB import PDBParser
 
     parser = PDBParser(QUIET=True)
     structure = parser.get_structure("complex", str(pdb_file_path))
@@ -114,6 +107,8 @@ def download_struct(pid, path=None, format="cif", overwrite=False):
     Returns:
         str: The path to the downloaded file.
     """
+    import biotite.database.rcsb as rcsb
+
     if path is None:
         path = gettempdir()
     return rcsb.fetch(pid, format, target_path=path, overwrite=overwrite)
@@ -134,6 +129,9 @@ def read_structure(file_name, model=1, use_author_fields_flag=True):
     Raises:
         None
     """
+    import biotite.structure as struc
+    import biotite.structure.io.pdb as pdb
+
     if file_name.endswith(".cif"):
         file = pdb.PDBFile.read(file_name)
         structure = pdb.get_structure(
@@ -161,6 +159,8 @@ def get_structure_sequence(structure):
     Returns:
         The sequence of the structure.
     """
+    import biotite.structure as struc
+
     return three2one(struc.get_residues(structure)[1])
 
 
@@ -252,7 +252,10 @@ def cif_to_pdb(input_file_path, output_file_path):
     Returns:
         None
     """
-    directory, file_name = os.path.split(input_file_path)
+    from Bio.PDB.MMCIFParser import MMCIFParser
+    from Bio.PDB.PDBIO import PDBIO
+
+    _, file_name = os.path.split(input_file_path)
     base_name = os.path.splitext(file_name)[0]
 
     parser = MMCIFParser(QUIET=True)  # Use QUIET=True to suppress warnings
@@ -361,6 +364,8 @@ async def aget_protein_info_dict(pdb_id):
     payload = {"query": query_protein, "variables": {"id": pdb_id}}
 
     info = {}
+    import aiohttp
+
     async with aiohttp.ClientSession() as session:
         async with session.post(url, json=payload) as response:
             if response.status == 200:
@@ -635,6 +640,8 @@ def get_protein_info_dict(pdb_id: str):
     Raises:
     - Any exceptions raised by the underlying `aload_protein_from_pdb` function.
     """
+    import nest_asyncio
+
     nest_asyncio.apply()
     data = asyncio.get_event_loop().run_until_complete(aget_protein_info_dict(pdb_id))
 

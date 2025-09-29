@@ -1,0 +1,20 @@
+{
+  "include": [
+    "src",
+    "tests"
+  ],
+  "extraPaths": [
+    "./src"
+  ],
+  "reportMissingImports": "none",
+  "reportMissingModuleSource": "none",
+  "typeCheckingMode": "off",
+  "executionEnvironments": [
+    {
+      "root": ".",
+      "extraPaths": [
+        "./src"
+      ]
+    }
+  ]
+}
