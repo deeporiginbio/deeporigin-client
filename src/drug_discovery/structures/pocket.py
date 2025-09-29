@@ -96,7 +96,7 @@ class Pocket:
             Pocket: A new Pocket instance.
         """
         pdb_file_path = Path(pdb_file_path)
-        if not pdb_file_path.exists():
+        if not pdb_file_path.exists():  # NOSONAR sonar is incorrectly flagging this
             raise FileNotFoundError(f"The file {pdb_file_path} does not exist.")
 
         # Load coordinates directly from PDB file
