@@ -88,6 +88,7 @@ nav:
 - Developing: 
   - Installing: dev/install.md
   - Clients: dev/clients.md
+  - Job widget: dev/job-widget.md
 - Changelog: changelog.md
 - Support: https://www.support.deeporigin.com/servicedesk/customer/portals
 
