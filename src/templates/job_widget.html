@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self' https://cdn.jsdelivr.net; style-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; script-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'">
+    <title>Job Widget</title>
+    <script>
+        class DOJobWidget extends HTMLElement {
+            connectedCallback() {
+                const shadow = this.attachShadow({ mode: 'open' });
+
+                // Build Shadow DOM content
+                const wrapper = document.createElement('div');
+
+                // Bootstrap CSS inside shadow for isolation
+                const bsLink = document.createElement('link');
+                bsLink.rel = 'stylesheet';
+                bsLink.href = 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css';
+                shadow.appendChild(bsLink);
+
+                const style = document.createElement('style');
+                style.textContent = `:host{--bs-border-color:#dee2e6;--bs-card-cap-bg:#f8f9fa}.do-pre,.do-mono{background:#f8f9fa;border:1px solid #e3e3e3;border-radius:.25rem;padding:1rem;font-family:monospace;white-space:pre-wrap}.do-card{margin-bottom:1rem}.do-card-title{font-size:1.5rem;font-weight:500}.do-tabpanel:not(.active){display:none}.card-footer{background-color:var(--bs-card-cap-bg)}.card-footer .badge{padding:.4rem .65rem}`;
+                shadow.appendChild(style);
+
+                // Grab templated light-DOM content and clone
+                const tpl = this.querySelector('template[data-role="content"]');
+                if (tpl) {
+                    wrapper.appendChild(tpl.content.cloneNode(true));
+                }
+
+                shadow.appendChild(wrapper);
+
+                const tabButtons = shadow.querySelectorAll('[data-do-tab]');
+                const tabPanels = shadow.querySelectorAll('[data-do-panel]');
+                const setActive = (name) => {
+                    tabButtons.forEach(btn => {
+                        const isActive = btn.getAttribute('data-do-tab') === name;
+                        btn.classList.toggle('active', isActive);
+                        btn.classList.toggle('show', isActive);
+                        btn.setAttribute('aria-selected', String(isActive));
+                    });
+                    tabPanels.forEach(panel => {
+                        const isActive = panel.getAttribute('data-do-panel') === name;
+                        panel.classList.toggle('active', isActive);
+                        panel.classList.toggle('show', isActive);
+                    });
+                };
+                tabButtons.forEach(btn => btn.addEventListener('click', () => setActive(btn.getAttribute('data-do-tab'))));
+                if (tabButtons.length > 0) setActive(tabButtons[0].getAttribute('data-do-tab'));
+
+                const ensureBootstrap = () => new Promise((resolve, reject) => {
+                    if (window.bootstrap && window.bootstrap.Tab) { resolve(window.bootstrap); return; }
+                    if (document.querySelector('script[data-do-bs]')) {
+                        const wait = () => { if (window.bootstrap && window.bootstrap.Tab) resolve(window.bootstrap); else setTimeout(wait, 50); };
+                        wait();
+                        return;
+                    }
+                    const s = document.createElement('script');
+                    s.src = 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js';
+                    s.defer = true;
+                    s.setAttribute('data-do-bs', '');
+                    s.onload = () => resolve(window.bootstrap);
+                    s.onerror = (e) => reject(e);
+                    document.head.appendChild(s);
+                });
+
+                const initBootstrapTabs = (bootstrap) => {
+                    try {
+                        const bsTabs = shadow.querySelectorAll('[data-do-tab]');
+                        bsTabs.forEach(btn => {
+                            btn.setAttribute('data-bs-toggle', 'tab');
+                            const target = btn.getAttribute('data-do-tab');
+                            const panel = shadow.querySelector(`[data-do-panel="${target}"]`);
+                            if (panel) {
+                                const panelId = `tab-panel-${target}-${Date.now()}`;
+                                panel.id = panelId;
+                                btn.setAttribute('data-bs-target', `#${panelId}`);
+                            }
+                            const tab = new bootstrap.Tab(btn, {});
+                            btn.addEventListener('click', (e) => {
+                                e.preventDefault();
+                                tab.show();
+                            });
+                        });
+                    } catch (_) { /* noop */ }
+                };
+
+                const ensureMermaid = () => new Promise((resolve, reject) => {
+                    if (window.mermaid && window.mermaid.render) {
+                        resolve(window.mermaid);
+                        return;
+                    }
+                    if (document.querySelector('script[data-do-mermaid]')) {
+                        const wait = () => {
+                            if (window.mermaid && window.mermaid.render) resolve(window.mermaid);
+                            else setTimeout(wait, 50);
+                        };
+                        wait();
+                        return;
+                    }
+                    const s = document.createElement('script');
+                    s.src = 'https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js';
+                    s.async = true;
+                    s.defer = true;
+                    s.setAttribute('data-do-mermaid', '');
+                    s.onload = () => resolve(window.mermaid);
+                    s.onerror = (e) => reject(e);
+                    document.head.appendChild(s);
+                });
+
+                const coerceRawMermaidBlocks = () => {
+                    const candidates = shadow.querySelectorAll('div,pre,p');
+                    candidates.forEach(node => {
+                        if (node.children.length === 0) {
+                            const text = (node.textContent || '').trim();
+                            if (text.startsWith('graph ') || text.startsWith('flowchart ')) {
+                                const m = document.createElement('div');
+                                m.className = 'mermaid';
+                                m.textContent = text;
+                                node.replaceWith(m);
+                            }
+                        }
+                    });
+                };
+
+                const renderMermaidInShadow = async (mermaid) => {
+                    try { mermaid.initialize({ startOnLoad: false, securityLevel: 'loose' }); } catch (_) {}
+                    coerceRawMermaidBlocks();
+                    const nodes = shadow.querySelectorAll('.mermaid');
+                    if (!nodes || nodes.length === 0) return;
+                    let counter = 0;
+                    for (const node of nodes) {
+                        const code = node.textContent || '';
+                        const targetId = `do-mermaid-${Date.now()}-${counter++}`;
+                        const container = document.createElement('div');
+                        container.id = targetId;
+                        node.replaceWith(container);
+                        try {
+                            const result = mermaid.render(targetId + '-svg', code);
+                            if (result && typeof result.then === 'function') {
+                                const out = await result;
+                                container.innerHTML = out.svg || '';
+                                if (out.bindFunctions) out.bindFunctions(container);
+                            } else if (result && result.svg) {
+                                container.innerHTML = result.svg;
+                                if (result.bindFunctions) result.bindFunctions(container);
+                            } else {
+                                mermaid.render(targetId + '-svg', code, (svgCode) => {
+                                    container.innerHTML = svgCode;
+                                });
+                            }
+                        } catch (e) {
+                            container.textContent = code;
+                        }
+                    }
+                };
+
+                ensureMermaid().then(renderMermaidInShadow).catch(() => {});
+                ensureBootstrap().then(initBootstrapTabs).catch(() => {});
+                
+            }
+        }
+        if (!customElements.get('do-job-widget')) {
+            customElements.define('do-job-widget', DOJobWidget);
+        }
+    </script>
+</head>
+
+<body>
+    <do-job-widget>
+        <template data-role="content">
+            <div class="container-fluid py-3">
+                <div class="card do-card w-100">
+                    <div class="card-header do-card-header">
+                        <h2 class="card-title do-card-title">{{ card_title }}</h2>
+                        <ul class="nav nav-tabs card-header-tabs" role="tablist" id="jobTabs-{{ unique_id }}">
+                            <li class="nav-item" role="presentation"><button class="nav-link active" data-do-tab="status" type="button" role="tab" aria-selected="true">Status</button></li>
+                            <li class="nav-item" role="presentation"><button class="nav-link" data-do-tab="details" type="button" role="tab" aria-selected="false">Details</button></li>
+                            <li class="nav-item" role="presentation"><button class="nav-link" data-do-tab="inputs" type="button" role="tab" aria-selected="false">Inputs</button></li>
+                            <li class="nav-item" role="presentation"><button class="nav-link" data-do-tab="outputs" type="button" role="tab" aria-selected="false">Outputs</button></li>
+                            <li class="nav-item" role="presentation"><button class="nav-link" data-do-tab="raw" type="button" role="tab" aria-selected="false">Raw Progress Reports</button></li>
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <div class="do-tabpanel tab-pane active show" data-do-panel="status">
+                            {{ status_html|safe }}
+                        </div>
+                        <div class="do-tabpanel tab-pane" data-do-panel="details">
+                            <table class="table table-bordered table-striped mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>executionID</th>
+                                        <th>resourceID</th>
+                                        <th>Status</th>
+                                        <th>Started At</th>
+                                        <th>Running Time</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for i in range(job_ids|length) %}
+                                    <tr>
+                                        <td>{{ job_ids[i] }}</td>
+                                        <td>{{ resource_ids[i] }}</td>
+                                        <td>{{ statuses[i] }}</td>
+                                        <td>{{ started_at[i] }}</td>
+                                        <td>{{ running_time[i] }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="do-tabpanel tab-pane" data-do-panel="inputs">
+                            <pre class="do-pre">{{ inputs_json|safe }}</pre>
+                        </div>
+                        <div class="do-tabpanel tab-pane" data-do-panel="outputs">
+                            <pre class="do-pre">{{ outputs_json|safe }}</pre>
+                        </div>
+                        <div class="do-tabpanel tab-pane" data-do-panel="raw">
+                            <div class="do-mono">{{ raw_progress_json|safe }}</div>
+                        </div>
+                    </div>
+                    <div class="card-footer d-flex justify-content-between align-items-center">
+                        <span class="badge {% if status == 'Running' %}bg-primary{% elif status == 'Failed' %}bg-danger{% elif status == 'Cancelled' %}bg-dark{% elif status == 'Succeeded' %}bg-success{% elif status == 'Created' %}bg-secondary{% endif %}">{{ status|e }}</span>
+                        <span class="text-muted" style="font-size: 0.9rem;">
+                            {% if will_auto_update %}
+                            ✅ This widget will auto-update.
+                            {% else %}
+                            ⚠️ This widget will not auto-update.
+                            {% endif %}
+                            Last updated: {{ last_updated|e }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </do-job-widget>
+</body>
+
+</html>
+
