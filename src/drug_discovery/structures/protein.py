@@ -25,10 +25,6 @@ from deeporigin.drug_discovery.constants import (
     PROTEINS_DIR,
     STATE_DUMP_PATH,
 )
-from deeporigin.drug_discovery.external_tools.utils import (
-    generate_html_output,
-    get_protein_info_dict,
-)
 from deeporigin.exceptions import DeepOriginException
 
 from .entity import Entity
@@ -88,6 +84,10 @@ class Protein(Entity):
             from pathlib import Path
 
             from biotite.database.rcsb import fetch
+
+            from deeporigin.drug_discovery.external_tools.utils import (
+                get_protein_info_dict,
+            )
 
             pdb_id_lower = pdb_id.lower()
             # Get directory for storing protein files
@@ -1138,6 +1138,10 @@ class Protein(Entity):
         """
         try:
             if self.info:
+                from deeporigin.drug_discovery.external_tools.utils import (
+                    generate_html_output,
+                )
+
                 return generate_html_output(self.info)
             return self.visualize()
         except Exception:
