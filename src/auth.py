@@ -58,7 +58,7 @@ def tokens_exist() -> bool:
     return os.path.isfile(_get_api_tokens_filepath())
 
 
-def get_tokens() -> dict:
+def get_tokens(never_prompt: bool = False) -> dict:
     """Get access token for accessing the Deep Origin API
 
     Gets tokens to access Deep Origin API.
@@ -69,7 +69,7 @@ def get_tokens() -> dict:
     checked for access tokens, and used if they exist.
 
     Args:
-        refresh: whether to refresh the token (default: `False`)
+        never_prompt: when True, will not prompt the user to sign in
 
     Returns:
         API access and refresh tokens
@@ -88,9 +88,14 @@ def get_tokens() -> dict:
     if ENV_VARIABLES["refresh_token"] in os.environ:
         tokens["refresh"] = os.environ[ENV_VARIABLES["refresh_token"]]
 
-    if "access" not in tokens.keys():
+    if "access" not in tokens.keys() and not never_prompt:
         # no tokens in env. have to sign into the platform to get tokens
         tokens = authenticate()
+
+    if "access" not in tokens.keys():
+        raise DeepOriginException(
+            "No access token found. Failed to get a token from the environment or disk."
+        )
 
     # check if the access token is expired
     try:

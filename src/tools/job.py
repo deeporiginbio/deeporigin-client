@@ -185,10 +185,13 @@ class Job:
 
         from deeporigin.utils.notebook import get_notebook_environment
 
-        if get_notebook_environment() == "marimo":
-            template = env.get_template("job.html")
+        if get_notebook_environment() == "jupyter":
+            # this template uses shadow DOM to avoid CSS/JS conflicts with jupyter
+            # however, for reasons i don't understand, it doesn't work in marimo/browser
+            template = env.get_template("job_widget.html")
         else:
-            template = env.get_template("job_jupyter.html")
+            # this one is more straightforward, and works in marimo/browser
+            template = env.get_template("job.html")
 
         try:
             status_html = self._viz_func(self)
@@ -424,7 +427,7 @@ class Job:
 
 
 # @beartype
-def get_dataframe(
+def get_dataframe(  #
     *,
     tool_key: Optional[str] = None,
     only_with_status: Optional[list[str] | set[str]] = None,

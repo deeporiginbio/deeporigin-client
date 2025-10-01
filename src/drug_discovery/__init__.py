@@ -10,9 +10,7 @@ calculations.
 import asyncio  # noqa: F401
 from importlib.resources import files
 
-from . import chemistry
-
-__all__ = ["chemistry", "Complex", "Protein", "Ligand", "Pocket", "LigandSet"]
+__all__ = ["Complex", "Protein", "Ligand", "Pocket", "LigandSet"]
 
 DATA_DIR = files("deeporigin.data")
 BRD_DATA_DIR = DATA_DIR / "brd"

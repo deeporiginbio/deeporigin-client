@@ -18,7 +18,6 @@ import os
 from pathlib import Path
 from typing import Any, Optional
 
-from deeporigin_molstar import ProteinViewer
 import numpy as np
 import pandas as pd
 from tabulate import tabulate
@@ -363,6 +362,8 @@ class Pocket:
 
         pocket_paths = [str(self.file_path)]
         pocket_names = ["Name: " + self.name + " | " + str(self.props)]
+
+        from deeporigin_molstar import ProteinViewer
 
         viewer = ProteinViewer("", format="pdb")
 
