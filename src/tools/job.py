@@ -188,7 +188,7 @@ class Job:
         if get_notebook_environment() == "jupyter":
             # this template uses shadow DOM to avoid CSS/JS conflicts with jupyter
             # however, for reasons i don't understand, it doesn't work in marimo/browser
-            template = env.get_template("job_widget.html")
+            template = env.get_template("job_jupyter.html")
         else:
             # this one is more straightforward, and works in marimo/browser
             template = env.get_template("job.html")
@@ -234,22 +234,13 @@ class Job:
             "will_auto_update": will_auto_update,
         }
 
-        # Determine overall status based on priority: Failed > Cancelled > Succeeded
-        if not self._status:
-            template_vars["status"] = "Unknown"
-        elif any(status == "Failed" for status in self._status):
-            template_vars["status"] = "Failed"
-            template_vars["will_auto_update"] = False  # job in terminal state
-        elif any(status == "Cancelled" for status in self._status):
-            template_vars["status"] = "Cancelled"
-            template_vars["will_auto_update"] = False  # job in terminal state
-        elif all(status == "Succeeded" for status in self._status):
-            template_vars["status"] = "Succeeded"
-            template_vars["will_auto_update"] = False  # job in terminal state
-        elif all(status == "Created" for status in self._status):
-            template_vars["status"] = "Created"
-        else:
-            template_vars["status"] = "Running"
+        # Get unique statuses (avoid duplicates) and determine auto-update behavior
+        unique_statuses = list(set(self._status)) if self._status else ["Unknown"]
+        template_vars["unique_statuses"] = unique_statuses
+
+        # Determine if auto-update should continue based on terminal states
+        if self._status and all(status in TERMINAL_STATES for status in self._status):
+            template_vars["will_auto_update"] = False  # all jobs in terminal state
 
         # Try to parse progress reports as JSON, fall back to raw text if it fails
         try:

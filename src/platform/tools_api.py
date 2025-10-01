@@ -16,7 +16,14 @@ __all__ = _add_functions_to_module(
 )
 
 
-TERMINAL_STATES = {"Succeeded", "Failed", "Cancelled"}
+TERMINAL_STATES = {
+    "Succeeded",
+    "Failed",
+    "Cancelled",
+    "Quoted",
+    "InsufficientFunds",
+    "FailedQuotation",
+}
 NON_TERMINAL_STATES = {"Created", "Queued", "Running"}
 
 NON_FAILED_STATES = ["Succeeded", "Running", "Queued", "Created"]
@@ -145,7 +152,7 @@ def cancel_run(
         client=client,
         org_key=org_key,
     )
-    if data["status"] in ["Cancelled", "Failed", "Succeeded"]:
+    if data["status"] in TERMINAL_STATES:
         return
 
     action_tool_execution(  # noqa: F821
