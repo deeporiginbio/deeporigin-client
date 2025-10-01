@@ -200,11 +200,14 @@
                     </div>
                 </div>
             </div>
-            <!-- Card Footer with a Badge and Last Updated Timestamp -->
+            <!-- Card Footer with Status Badges and Last Updated Timestamp -->
             <div class="card-footer d-flex justify-content-between align-items-center">
-                <span
-                    class="badge {% if status == 'Running' %}bg-primary{% elif status == 'Failed' %}bg-danger{% elif status == 'Cancelled' %}bg-dark{% elif status == 'Succeeded' %}bg-success{% elif status == 'Created' %}bg-secondary{% endif %}">{{
-                    status|e }}</span>
+                <div class="d-flex flex-wrap gap-1">
+                    {% for status in unique_statuses %}
+                    <span class="badge {% if status == 'Running' %}bg-primary{% elif status == 'Failed' %}bg-danger{% elif status == 'FailedQuotation' %}bg-danger{% elif status == 'Cancelled' %}bg-dark{% elif status == 'Succeeded' %}bg-success{% elif status == 'Created' %}bg-secondary{% elif status == 'Queued' %}bg-info{% elif status == 'Quoted' %}bg-warning{% elif status == 'InsufficientFunds' %}bg-danger{% else %}bg-light text-dark{% endif %}">{{
+                        status|e }}</span>
+                    {% endfor %}
+                </div>
                 <span id="last-updated" class="text-muted" style="font-size: 0.9rem;">
                     {% if will_auto_update %}
                     ✅ This widget will auto-update.

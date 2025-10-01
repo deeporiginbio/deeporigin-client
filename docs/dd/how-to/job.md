@@ -23,7 +23,7 @@ A dataframe with the following columns will be returned:
 | execution_id | (internal) execution ID. | 
 | completed_at | Time stamp of when the Job was completed |
 | started_at | Time stamp of when the Job was started |
-| status | One of `Succeeded` `Cancelled` `Failed` `Running` or `Queued`|
+| status | One of `Succeeded` `Cancelled` `Failed` `Running` `Queued` `Created` `FailedQuotation` `Quoted` or `InsufficientFunds`|
 | tool_key | Key of tool corresponding to this Job |
 | tool_version | Version of tool |
 | user_name | Name (or ID) of user that started this job |
@@ -147,6 +147,23 @@ To to stop watching, use:
 ```{.python notest}
 job.stop_watching()
 ```
+
+### Job Status Display
+
+When viewing a job, the status is displayed as badges in the footer of the job widget. The status display has been simplified to show all unique statuses for jobs with multiple executions:
+
+- **Multiple Statuses**: If a job has multiple executions with different statuses, all unique statuses are displayed as separate badges
+- **Status Colors**: Each status has a distinct color:
+  - `Running`: Blue (primary)
+  - `Succeeded`: Green (success)  
+  - `Failed`/`FailedQuotation`/`InsufficientFunds`: Red (danger)
+  - `Cancelled`: Dark gray
+  - `Created`: Gray (secondary)
+  - `Queued`: Light blue (info)
+  - `Quoted`: Yellow (warning)
+  - Other statuses: Light gray
+
+- **Auto-update Behavior**: The widget automatically stops updating when all job executions reach terminal states (`Succeeded`, `Failed`, `Cancelled`, `FailedQuotation`, `Quoted`, or `InsufficientFunds`)
 
 
 ### Cancelling jobs

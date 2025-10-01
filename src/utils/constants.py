@@ -35,7 +35,14 @@ ENV_VARIABLES = {
 POCKETS_BASE_DIR = "~/.deeporigin/pockets"
 """Base directory for storing pocket files."""
 
-TERMINAL_STATES = ["Failed", "Succeeded", "Cancelled"]
+TERMINAL_STATES = [
+    "Failed",
+    "FailedQuotation",
+    "Succeeded",
+    "Cancelled",
+    "Quoted",
+    "InsufficientFunds",
+]
 """Terminal states for a job."""
 
 

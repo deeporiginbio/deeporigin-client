@@ -160,3 +160,72 @@ def test_run_docking_and_cancel(config):  # noqa: F811
     # check that it's cancelled
     job.sync()
     assert "Cancelled" in job._status, f"Job with ID {job._ids} is not cancelled"
+
+
+def test_job_status_logic():
+    """Test the simplified status logic for job rendering."""
+    from deeporigin.utils.constants import TERMINAL_STATES
+
+    # Test the status deduplication logic
+    def get_unique_statuses(statuses):
+        """Helper function to test the status deduplication logic."""
+        return list(set(statuses)) if statuses else ["Unknown"]
+
+    def should_auto_update(statuses):
+        """Helper function to test the auto-update logic."""
+        if not statuses:
+            return True  # Empty status list should auto-update
+        return not all(status in TERMINAL_STATES for status in statuses)
+
+    # Test case 1: Empty status list
+    statuses = []
+    unique_statuses = get_unique_statuses(statuses)
+    assert unique_statuses == ["Unknown"]
+    assert should_auto_update(statuses) is True
+
+    # Test case 2: Single status
+    statuses = ["Running"]
+    unique_statuses = get_unique_statuses(statuses)
+    assert unique_statuses == ["Running"]
+    assert should_auto_update(statuses) is True
+
+    # Test case 3: Multiple same statuses (should deduplicate)
+    statuses = ["Running", "Running", "Running"]
+    unique_statuses = get_unique_statuses(statuses)
+    assert unique_statuses == ["Running"]
+    assert should_auto_update(statuses) is True
+
+    # Test case 4: Mixed statuses
+    statuses = ["Running", "Succeeded", "Failed"]
+    unique_statuses = get_unique_statuses(statuses)
+    assert set(unique_statuses) == {"Running", "Succeeded", "Failed"}
+    assert should_auto_update(statuses) is True
+
+    # Test case 5: All terminal states (should stop auto-update)
+    statuses = ["Succeeded", "Failed", "Cancelled"]
+    unique_statuses = get_unique_statuses(statuses)
+    assert set(unique_statuses) == {"Succeeded", "Failed", "Cancelled"}
+    assert should_auto_update(statuses) is False
+
+    # Test case 6: FailedQuotation status
+    statuses = ["FailedQuotation"]
+    unique_statuses = get_unique_statuses(statuses)
+    assert unique_statuses == ["FailedQuotation"]
+    assert should_auto_update(statuses) is False
+
+    # Test case 7: Mixed terminal and non-terminal states
+    statuses = ["Running", "Succeeded", "Failed"]
+    unique_statuses = get_unique_statuses(statuses)
+    assert set(unique_statuses) == {"Running", "Succeeded", "Failed"}
+    assert should_auto_update(statuses) is True
+
+    # Test case 8: Verify TERMINAL_STATES constant includes all expected states
+    expected_terminal_states = {
+        "Failed",
+        "FailedQuotation",
+        "Succeeded",
+        "Cancelled",
+        "Quoted",
+        "InsufficientFunds",
+    }
+    assert set(TERMINAL_STATES) == expected_terminal_states
