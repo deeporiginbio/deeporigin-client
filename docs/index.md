@@ -1,13 +1,8 @@
 
 # Deep Origin Python client
 
-<iframe 
-src="./images/1eby.html" 
-width="100%" 
-height="650" 
-style="border:none;"
-title="1EBY"
-></iframe>
+Welcome to the DeepOrigin Client documentation. Use the menu on the left/above for the instructions
+on how to to install, configure and use this SDK for drug discovery.
 
 <div class="grid cards" markdown>
 
@@ -20,4 +15,13 @@ title="1EBY"
 <br>Lightweight, written in pure Python. Works on any system that can run Python.
 
 </div>
+
+<iframe 
+src="./images/1eby.html" 
+width="100%" 
+height="650" 
+style="border:none;"
+title="1EBY"
+></iframe>
+
 
