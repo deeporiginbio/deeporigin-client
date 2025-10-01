@@ -26,7 +26,15 @@ PROVIDER = Literal["ufa", "s3"]
 
 
 @functools.lru_cache
-def get_default_cluster_id(*, client=None, org_key: Optional[str] = None) -> str:
+def get_default_cluster_id(
+    *,
+    client=None,
+    org_key: Optional[str] = None,
+) -> str:
+    """get the default cluster id for a client
+
+    We default to using the first cluster that does not have "dev" in the hostname.
+    """
     clusters = list_clusters(client=client, org_key=org_key)  # noqa: F821
     # Filter out clusters with hostnames containing "dev"
     filtered_clusters = [
