@@ -67,7 +67,6 @@ def dock(
         str: path to the SDF file containing the docking results
     """
 
-    URL = "http://docking.default.jobs.edge.deeporigin.io/dock"
     CACHE_DIR = os.path.expanduser("~/.deeporigin/docking")
 
     if pocket is not None or pocket_center is not None:

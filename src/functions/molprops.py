@@ -49,23 +49,34 @@ def molprops(
         with open(response_file, "r") as file:
             response = json.load(file)
 
-    else:
-        # Prepare the request payload
+        return response
 
-        # Make the API request
-        response = requests.post(
-            URL,
-            json=payload,
-            headers={"Content-Type": "application/json"},
-        )
+    # Prepare the request payload
 
-        # Raise an exception for bad status codes
-        response.raise_for_status()
+    # from deeporigin.platform import tools_api
 
-        response = response.json()
+    # body = {"params": payload, "clusterId": tools_api.get_default_cluster_id()}
 
-        # Write JSON response to cache
-        with open(response_file, "w") as file:
-            json.dump(response, file)
+    # response = tools_api.run_function(
+    #     key="deeporigin.mol-props",
+    #     version="0.1.0",
+    #     body=body,
+    # )
+
+    #  Make the API request
+    response = requests.post(
+        URL,
+        json=payload,
+        headers={"Content-Type": "application/json"},
+    )
+
+    # Raise an exception for bad status codes
+    response.raise_for_status()
+
+    response = response.json()
+
+    # Write JSON response to cache
+    with open(response_file, "w") as file:
+        json.dump(response, file)
 
     return response
