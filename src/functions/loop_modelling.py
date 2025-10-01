@@ -50,7 +50,7 @@ def model_loops(
     os.makedirs(cache_path, exist_ok=True)
     # Save the result to the cache
 
-    if response.status >= 200 and response.status <= 300:
+    if response.status >= 200 and response.status < 300:
         with open(output_pdb_path, "wb") as f:
             f.write(response.data)
             return output_pdb_path
@@ -58,5 +58,5 @@ def model_loops(
     else:
         # If the server request fails, raise an error
         raise RuntimeError(
-            f"Server returned status code {response.status_code}: {response.text}"
+            f"Server returned status code {response.status}: {response.text}"
         ) from None
