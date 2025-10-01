@@ -2,16 +2,12 @@
 
 import os
 
-from beartype import beartype
-import requests
-
 from deeporigin.utils.core import hash_dict
 
 URL = "http://loop-modelling.default.jobs.edge.deeporigin.io/model_loops"
 CACHE_DIR = os.path.expanduser("~/.deeporigin/model_loops")
 
 
-@beartype
 def model_loops(
     *,
     pdb_id: str,
@@ -40,19 +36,27 @@ def model_loops(
     if use_cache and os.path.exists(output_pdb_path):
         return output_pdb_path
 
-    response = requests.post(URL, json=payload, stream=True)
+    from deeporigin.platform import tools_api
 
-    if response.status_code == 200:
-        # Create cache directory if it doesn't exist
-        os.makedirs(cache_path, exist_ok=True)
-        # Save the result to the cache
+    body = {"params": payload, "clusterId": tools_api.get_default_cluster_id()}
+
+    response = tools_api.run_function(
+        key="deeporigin.loop-modelling",
+        version="0.1.0",
+        body=body,
+    )
+
+    # Create cache directory if it doesn't exist
+    os.makedirs(cache_path, exist_ok=True)
+    # Save the result to the cache
+
+    if response.status >= 200 and response.status <= 300:
         with open(output_pdb_path, "wb") as f:
-            for chunk in response.iter_content(chunk_size=8192):
-                if chunk:
-                    f.write(chunk)
-        return output_pdb_path
+            f.write(response.data)
+            return output_pdb_path
 
-    # If the server request fails, raise an error
-    raise RuntimeError(
-        f"Server returned status code {response.status_code}: {response.text}"
-    ) from None
+    else:
+        # If the server request fails, raise an error
+        raise RuntimeError(
+            f"Server returned status code {response.status_code}: {response.text}"
+        ) from None

@@ -223,7 +223,10 @@ def _create_function(
                 )
 
             if not isinstance(response, dict):
-                response = response.json()
+                try:
+                    response = response.json()
+                except Exception:
+                    pass
 
             # Prepare payload for recording before Box wrapping
             if isinstance(response, bool):
@@ -253,7 +256,6 @@ def _create_function(
                 except Exception:
                     # Recording failures must not impact normal execution
                     print("Recording failed")
-                    pass
 
         if isinstance(response, bool):
             return response
@@ -271,7 +273,7 @@ def _create_function(
         elif isinstance(response, list):
             response = [Box(item) for item in response]
         else:
-            raise NotImplementedError(f"Unexpected response type: {type(response)}")
+            return response
 
         return response
 
