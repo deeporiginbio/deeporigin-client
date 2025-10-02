@@ -255,7 +255,6 @@ class ABFE(WorkflowStep):
             ) from None
 
     @beartype
-    @beartype
     def run(
         self,
         *,
