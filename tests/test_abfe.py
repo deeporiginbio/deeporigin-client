@@ -27,3 +27,31 @@ def test_abfe_prepared_system():
     sim = Complex(protein=protein, ligands=ligand)
     with pytest.raises(DeepOriginException, match="Please prepare the system using"):
         sim.abfe.run()
+
+
+def test_check_dt_defaults_valid():
+    """default parameters should have in-range dt everywhere"""
+
+    ligand = Ligand.from_smiles("CCO")
+    protein = Protein.from_file(BRD_DATA_DIR / "brd.pdb")
+    sim = Complex(protein=protein, ligands=ligand)
+
+    # Should not raise
+    sim.abfe.check_dt()
+
+
+def test_check_dt_raises_on_out_of_range():
+    """setting any nested dt out of range should raise an error"""
+
+    ligand = Ligand.from_smiles("CCO")
+    protein = Protein.from_file(BRD_DATA_DIR / "brd.pdb")
+    sim = Complex(protein=protein, ligands=ligand)
+
+    # Deliberately set an out-of-range dt deep inside the params
+    sim.abfe._params.end_to_end["binding"]["prod_md_options"]["dt"] = 0.01
+
+    with pytest.raises(
+        DeepOriginException,
+        match=r"out-of-range dt; allowed range is \[0.001, 0.004\]",
+    ):
+        sim.abfe.check_dt()
