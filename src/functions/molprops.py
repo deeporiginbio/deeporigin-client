@@ -7,7 +7,6 @@ import os
 from pathlib import Path
 
 from beartype import beartype
-import requests
 
 from deeporigin.utils.core import hash_dict
 
@@ -53,27 +52,29 @@ def molprops(
 
     # Prepare the request payload
 
-    # from deeporigin.platform import tools_api
+    from deeporigin.platform import tools_api
 
-    # body = {"params": payload, "clusterId": tools_api.get_default_cluster_id()}
+    body = {"params": payload, "clusterId": tools_api.get_default_cluster_id()}
 
-    # response = tools_api.run_function(
-    #     key="deeporigin.mol-props",
-    #     version="0.1.0",
-    #     body=body,
-    # )
+    print(body)
 
-    #  Make the API request
-    response = requests.post(
-        URL,
-        json=payload,
-        headers={"Content-Type": "application/json"},
+    response = tools_api.run_function(
+        key="deeporigin.mol-props",
+        version="0.1.0",
+        body=body,
     )
 
-    # Raise an exception for bad status codes
-    response.raise_for_status()
+    # #  Make the API request
+    # response = requests.post(
+    #     URL,
+    #     json=payload,
+    #     headers={"Content-Type": "application/json"},
+    # )
 
-    response = response.json()
+    # Raise an exception for bad status codes
+    # response.raise_for_status()
+
+    # response = response.json()
 
     # Write JSON response to cache
     with open(response_file, "w") as file:
