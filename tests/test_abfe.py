@@ -52,6 +52,6 @@ def test_check_dt_raises_on_out_of_range():
 
     with pytest.raises(
         DeepOriginException,
-        match=r"out-of-range dt; allowed range is \[0.001, 0.004\]",
+        match=r"Found invalid dt values; must be numeric and within range \[0.001, 0.004\]",
     ):
         sim.abfe.check_dt()

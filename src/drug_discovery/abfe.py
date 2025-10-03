@@ -211,16 +211,16 @@ class ABFE(WorkflowStep):
 
     @beartype
     def check_dt(self):
-        """Validate that every "dt" in params is within allowed bounds.
+        """Validate that every "dt" in params is numeric and within allowed bounds.
 
         Traverses the nested parameters dictionary and validates that each
         occurrence of a key named "dt" has a numeric value within the
-        inclusive range [min_dt, max_dt]. If any out-of-range values are
-        found, an error is raised listing all offending paths.
+        inclusive range [min_dt, max_dt]. If any non-numeric or out-of-range
+        values are found, an error is raised listing all offending paths.
 
         Raises:
-            DeepOriginException: If any "dt" value is outside the allowed
-                range.
+            DeepOriginException: If any "dt" value is non-numeric or outside
+                the allowed range.
         """
         min_dt = 0.001
         max_dt = 0.004
@@ -229,14 +229,15 @@ class ABFE(WorkflowStep):
             return isinstance(value, (int, float))
 
         def find_dt_violations(obj, path: list[str]) -> list[str]:
-            """Return list of JSON-like paths with out-of-range dt values."""
+            """Return list of JSON-like paths with invalid dt values."""
             violations: list[str] = []
             if isinstance(obj, dict):
                 for key, value in obj.items():
                     next_path = path + [str(key)]
-                    if key == "dt" and is_number(value):
-                        if not (min_dt <= float(value) <= max_dt):
-                            violations.append(".".join(next_path))
+                    if key == "dt" and (
+                        not is_number(value) or not (min_dt <= float(value) <= max_dt)
+                    ):
+                        violations.append(".".join(next_path))
                     # Recurse into nested structures
                     if isinstance(value, (dict, list, tuple)):
                         violations.extend(find_dt_violations(value, next_path))
@@ -251,7 +252,7 @@ class ABFE(WorkflowStep):
         if violations:
             paths = ", ".join(violations)
             raise DeepOriginException(
-                f"Found out-of-range dt; allowed range is [{min_dt}, {max_dt}]. Offending paths: {paths}"
+                f"Found invalid dt values; must be numeric and within range [{min_dt}, {max_dt}]. Offending paths: {paths}"
             ) from None
 
     @beartype
