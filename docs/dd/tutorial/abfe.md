@@ -358,6 +358,9 @@ sim = Complex.from_dir(BRD_DATA_DIR)
 sim.abfe._params.end_to_end.md.steps = 500000
 ```
 
+!!! danger "Changing parameters may lead to simulation failures"
+    Some parameters, like `dt` are restricted to certain ranges. You will not be allowed to start a simulation run if these parameters exceed those ranges. 
+
 ### Using `test_run`
 
 The test run parameter can be used to run ABFE for a short number of steps, to verify that all steps execute without consuming too many CPU cycles. This should not be used to run production simulations.

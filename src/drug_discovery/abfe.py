@@ -210,6 +210,52 @@ class ABFE(WorkflowStep):
         return ligands_to_run
 
     @beartype
+    def check_dt(self):
+        """Validate that every "dt" in params is numeric and within allowed bounds.
+
+        Traverses the nested parameters dictionary and validates that each
+        occurrence of a key named "dt" has a numeric value within the
+        inclusive range [min_dt, max_dt]. If any non-numeric or out-of-range
+        values are found, an error is raised listing all offending paths.
+
+        Raises:
+            DeepOriginException: If any "dt" value is non-numeric or outside
+                the allowed range.
+        """
+        min_dt = 0.001
+        max_dt = 0.004
+
+        def is_number(value) -> bool:
+            return isinstance(value, (int, float))
+
+        def find_dt_violations(obj, path: list[str]) -> list[str]:
+            """Return list of JSON-like paths with invalid dt values."""
+            violations: list[str] = []
+            if isinstance(obj, dict):
+                for key, value in obj.items():
+                    next_path = path + [str(key)]
+                    if key == "dt" and (
+                        not is_number(value) or not (min_dt <= float(value) <= max_dt)
+                    ):
+                        violations.append(".".join(next_path))
+                    # Recurse into nested structures
+                    if isinstance(value, (dict, list, tuple)):
+                        violations.extend(find_dt_violations(value, next_path))
+            elif isinstance(obj, (list, tuple)):
+                for idx, value in enumerate(obj):
+                    next_path = path + [str(idx)]
+                    if isinstance(value, (dict, list, tuple)):
+                        violations.extend(find_dt_violations(value, next_path))
+            return violations
+
+        violations = find_dt_violations(self._params, ["_params"])
+        if violations:
+            paths = ", ".join(violations)
+            raise DeepOriginException(
+                f"Found invalid dt values; must be numeric and within range [{min_dt}, {max_dt}]. Offending paths: {paths}"
+            ) from None
+
+    @beartype
     def run(
         self,
         *,
@@ -222,6 +268,9 @@ class ABFE(WorkflowStep):
 
         Args:
             ligands: List of ligand to run. Defaults to None. When None, all ligands in the object will be run. To view a list of valid ligands, use the `.show_ligands()` method"""
+
+        # check that dt in params is valid
+        self.check_dt()
 
         if ligands is None and ligand is None:
             ligands = self.parent.ligands
