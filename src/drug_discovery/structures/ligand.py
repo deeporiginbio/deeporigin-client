@@ -1111,12 +1111,7 @@ class LigandSet:
     def _repr_html_(self):
         """Return an HTML representation of the LigandSet."""
 
-        from deeporigin.utils.notebook import get_notebook_environment
-
-        if get_notebook_environment() == "marimo":
-            return self.show_df()
-        else:
-            return self.show_df().to_html()
+        return self.show_df().to_html()
 
     def to_dataframe(self) -> pd.DataFrame:
         """Convert the LigandSet to a pandas DataFrame."""
@@ -1146,14 +1141,7 @@ class LigandSet:
         # re‑index your DataFrame
         df = df[new_order]
 
-        from deeporigin.utils.notebook import get_notebook_environment
-
-        if get_notebook_environment() == "marimo":
-            import marimo as mo
-
-            return mo.plain(df)
-        else:
-            return df
+        return df
 
     @classmethod
     def from_rdkit_mols(cls, mols: list[Chem.rdchem.Mol]):
