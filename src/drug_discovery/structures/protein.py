@@ -323,8 +323,6 @@ class Protein(Entity):
 
             data = run_func_in_parallel(func=dock, args=args)
 
-            print(data)
-
             return LigandSet.from_sdf_files(data["results"])
 
     @property

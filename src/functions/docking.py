@@ -12,7 +12,6 @@ from pathlib import Path
 from typing import Optional
 import zipfile
 
-from beartype import beartype
 import requests
 
 from deeporigin.drug_discovery.structures import Ligand, Pocket, Protein
@@ -40,7 +39,6 @@ def _get_pocket_center(
     return list(pocket_center)
 
 
-@beartype
 def dock(
     *,
     protein: Protein,
@@ -84,12 +82,11 @@ def dock(
 
     # Prepare the request payload
     payload = {
-        "protein": protein.to_base64(),
-        "smiles_list": [smiles_string],
+        "protein_path": protein._remote_path,
+        "ligand_smiles": smiles_string,
         "box_size": list(box_size),
         "pocket_center": list(pocket_center),
     }
-
     cache_hash = hash_dict(payload)
     sdf_file = str(Path(CACHE_DIR) / f"{cache_hash}.sdf")
 
@@ -102,15 +99,16 @@ def dock(
     body = {"params": payload, "clusterId": tools_api.get_default_cluster_id()}
     response = tools_api.run_function(
         key="deeporigin.docking",
-        version="0.1.0",
+        version="0.2.1",
         body=body,
     )
 
-    # Write SDF file to cache
-    Path(sdf_file).parent.mkdir(parents=True, exist_ok=True)
-    with open(sdf_file, "w") as file:
-        for solution in response[0]["solutions"]:
-            file.write(solution["output_sdf_content"])
+    from deeporigin.platform import file_api
+
+    sdf_file = file_api.download_file(
+        remote_path=response.sdf_path,
+        local_path=sdf_file,
+    )
 
     return sdf_file
 

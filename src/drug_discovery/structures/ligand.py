@@ -1110,7 +1110,13 @@ class LigandSet:
 
     def _repr_html_(self):
         """Return an HTML representation of the LigandSet."""
-        return self.show_df().to_html()
+
+        from deeporigin.utils.notebook import get_notebook_environment
+
+        if get_notebook_environment() == "marimo":
+            return self.show_df()
+        else:
+            return self.show_df().to_html()
 
     def to_dataframe(self) -> pd.DataFrame:
         """Convert the LigandSet to a pandas DataFrame."""
