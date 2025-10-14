@@ -94,14 +94,23 @@ def dock(
     if os.path.exists(sdf_file) and use_cache:
         return sdf_file
 
+    protein.upload()
+
     from deeporigin.platform import tools_api
 
     body = {"params": payload, "clusterId": tools_api.get_default_cluster_id()}
-    response = tools_api.run_function(
-        key="deeporigin.docking",
-        version="0.2.1",
-        body=body,
-    )
+
+    try:
+        response = tools_api.run_function(
+            key="deeporigin.docking",
+            version="0.2.1",
+            body=body,
+        )
+    except Exception as e:
+        print(f"Error running docking: {e}")
+        print(f"Response: {response}")
+        print(f"Body: {body}")
+        raise e
 
     from deeporigin.platform import file_api
 

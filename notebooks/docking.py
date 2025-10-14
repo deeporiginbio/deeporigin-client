@@ -1,18 +1,25 @@
 import marimo
 
-__generated_with = "0.13.6"
+__generated_with = "0.16.3"
 app = marimo.App(width="medium")
 
 with app.setup:
     import marimo as mo
     from deeporigin.drug_discovery import Protein, Ligand
+    from deeporigin import config
+    from deeporigin import auth
+
+    config.set_value("env", "edge")
+    config.set_value("org_key", "deeporigin")
+    _ = auth.get_tokens()
+
 
 
 @app.cell(hide_code=True)
 def _():
     mo.md(
         """
-    /// attention | Work in progress
+    /// danger | FOR INTERNAL USE ONLY
 
     Functionality shown here is under active development. 
     ///
@@ -39,11 +46,13 @@ def _():
 
 @app.cell(hide_code=True)
 def _():
-    mo.md("""
+    mo.md(
+        """
     ### Visualizing the Protein
 
     We can visualize the 3D structure of the protein using the `show` method:
-    """)
+    """
+    )
     return
 
 
@@ -170,6 +179,13 @@ def _(ligand):
     return
 
 
+@app.cell
+def _(ligand):
+    from deeporigin.functions.molprops import molprops
+    molprops(ligand.smiles)
+    return
+
+
 @app.cell(hide_code=True)
 def _():
     mo.md(
@@ -192,17 +208,31 @@ def _():
 
 @app.cell
 def _(ligand, pocket, protein):
-    poses_sdf = protein.dock(ligand=ligand,pocket=pocket)
-    protein.show(sdf_file=poses_sdf)
-    return (poses_sdf,)
+    poses = protein.dock(ligand=ligand,pocket=pocket, use_cache=False)
+    protein.show(poses=poses)
+    return (poses,)
 
 
 @app.cell
-def _(poses_sdf):
-    from deeporigin.drug_discovery.structures.ligand import ligands_to_dataframe
+def _():
+    return
 
-    df = ligands_to_dataframe(Ligand.from_sdf(poses_sdf))
-    df.loc[:,["POSE SCORE", "Binding Energy"]]
+
+@app.cell
+def _(poses):
+    poses.to_dataframe()
+    return
+
+
+@app.cell
+def _(protein):
+    protein.upload()
+
+    return
+
+
+@app.cell
+def _():
     return
 
 
