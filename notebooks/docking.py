@@ -208,13 +208,14 @@ def _():
 
 @app.cell
 def _(ligand, pocket, protein):
-    poses = protein.dock(ligand=ligand,pocket=pocket, use_cache=False)
+    poses = protein.dock(ligand=ligand,pocket=pocket)
     protein.show(poses=poses)
     return (poses,)
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _():
+    mo.md(r"""We can show a dataframe of all poses, with their binding energy and pose score:""")
     return
 
 
@@ -224,15 +225,15 @@ def _(poses):
     return
 
 
-@app.cell
-def _(protein):
-    protein.upload()
-
+@app.cell(hide_code=True)
+def _():
+    mo.md(r"""We can also filter to find the top pose:""")
     return
 
 
 @app.cell
-def _():
+def _(poses):
+    poses.filter_top_poses()
     return
 
 
