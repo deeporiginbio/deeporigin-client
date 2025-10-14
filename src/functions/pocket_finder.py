@@ -4,8 +4,6 @@ import base64
 import os
 import zipfile
 
-import requests
-
 from deeporigin.drug_discovery.structures import Protein
 from deeporigin.utils.core import hash_dict
 
@@ -54,35 +52,29 @@ def find_pockets(
     if use_cache and os.path.exists(cache_path):
         return cache_path
 
-    # body = {"params": payload, "clusterId": tools_api.get_default_cluster_id()}
+    from deeporigin.platform import tools_api
 
-    # # Send the request to the server
-    # response = tools_api.run_function(
-    #     key="deeporigin.pocketfinder",
-    #     version="0.1.0",
-    #     body=body,
-    # )
-    # return response
-    response = requests.post(URL, json=payload)
+    body = {"params": payload, "clusterId": tools_api.get_default_cluster_id()}
 
-    # Check if the request was successful
-    if response.status_code == 200:
-        # Create cache directory if it doesn't exist
-        os.makedirs(cache_path, exist_ok=True)
+    # Send the request to the server
+    response = tools_api.run_function(
+        key="deeporigin.pocketfinder",
+        version="0.1.0",
+        body=body,
+    )
 
-        # Decode base64 content and save as zip file
-        zip_path = os.path.join(cache_path, "results.zip")
-        with open(zip_path, "wb") as f:
-            f.write(base64.b64decode(response.text))
+    os.makedirs(cache_path, exist_ok=True)
 
-        # Extract the zip file to the cache directory
-        with zipfile.ZipFile(zip_path, "r") as zip_ref:
-            zip_ref.extractall(cache_path)
+    # Decode base64 content and save as zip file
+    zip_path = os.path.join(cache_path, "results.zip")
+    with open(zip_path, "wb") as f:
+        f.write(base64.b64decode(response.text))
 
-        # Remove the zip file
-        os.remove(zip_path)
+    # Extract the zip file to the cache directory
+    with zipfile.ZipFile(zip_path, "r") as zip_ref:
+        zip_ref.extractall(cache_path)
 
-        return cache_path
-    print(f"Error: Server returned status code {response.status_code}")
-    print(response.text)
-    return None
+    # Remove the zip file
+    os.remove(zip_path)
+
+    return cache_path

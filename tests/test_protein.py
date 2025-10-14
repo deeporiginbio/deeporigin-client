@@ -17,9 +17,9 @@ def test_from_file():
 
 def test_from_name():
     protein = Protein.from_name("conotoxin")
-    assert protein.pdb_id == "1P1P"
+    assert protein.pdb_id == "1FU3"
 
-    assert str(protein.sequence[0]) == "GCCGSYPNAACHPCSCKDR"
+    assert str(protein.sequence[0]) == "WCKQSGEMCNLLDQNCCDGYCIVLVCT"
 
 
 def test_from_pdb_id():

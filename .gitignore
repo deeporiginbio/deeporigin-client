@@ -3,6 +3,8 @@ github_token
 bench.pid
 *.csv
 
+scratch-notebooks/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

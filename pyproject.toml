@@ -112,7 +112,7 @@ omit = ["src/data_hub/client.py", "tests/*.py"]
 
 
 [tool.pytest.ini_options]
-norecursedirs = ["notebooks"]
+norecursedirs = ["notebooks", "scratch-notebooks"]
 
 [tool.interrogate]
 fail-under = 100
@@ -126,6 +126,7 @@ exclude = [
     "conftest.py",
     "src/files",
     "notebooks/*",
+    "scratch-notebooks/*",
     "scripts/*",
 ]
 ignore-init-method = true
