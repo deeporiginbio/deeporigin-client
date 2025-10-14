@@ -64,18 +64,6 @@ def molprops(
         body=body,
     )
 
-    # #  Make the API request
-    # response = requests.post(
-    #     URL,
-    #     json=payload,
-    #     headers={"Content-Type": "application/json"},
-    # )
-
-    # Raise an exception for bad status codes
-    # response.raise_for_status()
-
-    # response = response.json()
-
     # Write JSON response to cache
     with open(response_file, "w") as file:
         json.dump(response, file)

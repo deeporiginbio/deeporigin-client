@@ -62,12 +62,7 @@ def find_pockets(
         version="0.1.0",
         body=body,
     )
-    # return response
-    # response = requests.post(URL, json=payload)
 
-    # # Check if the request was successful
-    # if response.status_code == 200:
-    # Create cache directory if it doesn't exist
     os.makedirs(cache_path, exist_ok=True)
 
     # Decode base64 content and save as zip file
@@ -83,6 +78,3 @@ def find_pockets(
     os.remove(zip_path)
 
     return cache_path
-    # print(f"Error: Server returned status code {response.status_code}")
-    # print(response.text)
-    # return None
