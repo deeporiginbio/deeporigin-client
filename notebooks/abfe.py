@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.13.6"
+__generated_with = "0.16.3"
 app = marimo.App(width="medium")
 
 with app.setup:
@@ -49,9 +49,7 @@ def _():
         r"""
     ## System preparation
 
-    Before we start a ABFE run, we can prepare the system using `sim.prepare`. Doing so shows a preview of the prepared system. 
-
-
+    Before we start a ABFE run, we can prepare the system using `sim.prepare`. Doing so shows a preview of the prepared system.
     """
     )
     return
