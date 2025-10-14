@@ -179,13 +179,6 @@ def _(ligand):
     return
 
 
-@app.cell
-def _(ligand):
-    from deeporigin.functions.molprops import molprops
-    molprops(ligand.smiles)
-    return
-
-
 @app.cell(hide_code=True)
 def _():
     mo.md(
