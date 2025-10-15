@@ -29,6 +29,13 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.5.27"
+      
+      - name: Set up Python
+        run: uv python install
       - name: Select API token
         run: |
           ENV="${{ inputs.env || 'prod' }}"
@@ -47,10 +54,9 @@ jobs:
         run: |
           echo "DEEPORIGIN_ORG_KEY=deeporigin" >> "$GITHUB_ENV"
           echo "DEEPORIGIN_ENV=${{ inputs.env || 'prod' }}" >> "$GITHUB_ENV"
-      - uses: actions/setup-python@v5
-        with: { python-version: "3.13" }
-      - run: pip install .[tools,test,plots]
+      - name: Install dependencies
+        run: uv sync --extra tools --extra test --extra plots
 
 
       - name: Run tests against a live instance
-        run: pytest -v -s --log-cli-level=ERROR -k test_functions
+        run: uv run pytest -v -s --log-cli-level=ERROR -k test_functions

@@ -68,7 +68,7 @@ def find_pockets(
     # Decode base64 content and save as zip file
     zip_path = os.path.join(cache_path, "results.zip")
     with open(zip_path, "wb") as f:
-        f.write(base64.b64decode(response.text))
+        f.write(base64.b64decode(response.data))
 
     # Extract the zip file to the cache directory
     with zipfile.ZipFile(zip_path, "r") as zip_ref:

@@ -100,9 +100,23 @@ def _():
 
 @app.cell
 def _(protein):
-    pockets = protein.find_pockets(pocket_count=1)
+    pockets = protein.find_pockets(pocket_count=1, use_cache=False)
     pocket = pockets[0]
     return pocket, pockets
+
+
+@app.cell
+def _(protein):
+    from deeporigin.functions.pocket_finder import find_pockets
+
+    data = find_pockets(pocket_count=1, protein=protein, use_cache=False)
+    return (data,)
+
+
+@app.cell
+def _(data):
+    data
+    return
 
 
 @app.cell(hide_code=True)
@@ -226,6 +240,18 @@ def _():
 @app.cell
 def _():
     #poses.filter_top_poses()
+    return
+
+
+@app.cell
+def _():
+    from pathlib import Path
+    Path("/Users/srinivas/code/cli/src/data/brd/brd.pdb").stem
+    return
+
+
+@app.cell
+def _():
     return
 
 
