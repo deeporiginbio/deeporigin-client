@@ -233,7 +233,6 @@ class Protein(Entity):
         protein = Protein.from_file(file_path)
         self.structure = protein.structure
 
-    @beartype
     def dock(
         self,
         *,
