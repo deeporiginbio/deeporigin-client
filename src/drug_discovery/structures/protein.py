@@ -1050,7 +1050,8 @@ class Protein(Entity):
             - When an SDF file is provided, the visualization includes both the protein and
               the docked ligands in their respective binding poses
         """
-        from deeporigin_molstar import JupyterViewer
+
+        from deeporigin.utils.notebook import render_html
 
         current_protein_file = self._dump_state()
 
@@ -1090,7 +1091,7 @@ class Protein(Entity):
                 format="pdb",
             )
             html_content = protein_viewer.render_protein()
-            JupyterViewer.visualize(html_content)
+            return render_html(html_content)
         elif pockets is not None and sdf_file is None:
             # need to show pockets
             pocket_surface_alpha: float = 0.7
@@ -1114,7 +1115,8 @@ class Protein(Entity):
                 pocket_config=pocket_config,
                 protein_config=protein_config,
             )
-            JupyterViewer.visualize(html_content)
+
+            return render_html(html_content)
         elif sdf_file is not None:
             from deeporigin_molstar import DockingViewer
 
@@ -1125,7 +1127,8 @@ class Protein(Entity):
                 ligands_data=[sdf_file],
                 ligand_format="sdf",
             )
-            JupyterViewer.visualize(html_content)
+
+            return render_html(html_content)
 
     def _repr_html_(self):
         """
@@ -1134,13 +1137,15 @@ class Protein(Entity):
         Returns:
             str: The HTML content.
         """
+
         try:
             if self.info:
                 from deeporigin.drug_discovery.external_tools.utils import (
                     generate_html_output,
                 )
 
-                return generate_html_output(self.info)
+                html_content = generate_html_output(self.info)
+                return html_content
             return self.visualize()
         except Exception:
             return self.__str__()

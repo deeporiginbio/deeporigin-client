@@ -794,7 +794,6 @@ class Ligand(Entity):
 
         return MolToImage(self.mol)
 
-    @jupyter_visualization
     def show(self) -> str:
         """
         Visualize the current state of the ligand molecule.
@@ -814,7 +813,9 @@ class Ligand(Entity):
             ligand_config = viewer.get_ligand_visualization_config()
             html = viewer.render_ligand(ligand_config=ligand_config)
 
-            return html
+            from deeporigin.utils.notebook import render_html
+
+            return render_html(html)
         except Exception as e:
             raise DeepOriginException(f"Visualization failed: {str(e)}") from e
 
@@ -1407,7 +1408,9 @@ class LigandSet:
             ligand_config = viewer.get_ligand_visualization_config()
             html = viewer.render_ligand(ligand_config=ligand_config)
 
-            return html
+            from deeporigin.utils.notebook import render_html
+
+            return render_html(html)
         except Exception as e:
             raise DeepOriginException(f"Visualization failed: {str(e)}") from e
 

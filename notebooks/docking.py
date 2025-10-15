@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.16.3"
+__generated_with = "0.16.5"
 app = marimo.App(width="medium")
 
 with app.setup:
@@ -14,14 +14,13 @@ with app.setup:
     _ = auth.get_tokens()
 
 
-
 @app.cell(hide_code=True)
 def _():
     mo.md(
         """
-    /// danger | FOR INTERNAL USE ONLY
+    /// danger | API under active development.
 
-    Functionality shown here is under active development. 
+    Functionality shown here is under active development. Functions may be renamed, deleted or changed. 
     ///
 
 
@@ -174,8 +173,8 @@ def _():
 
 
 @app.cell
-def _(ligand):
-    ligand.admet_properties()
+def _():
+    #ligand.admet_properties()
     return
 
 
@@ -225,8 +224,8 @@ def _():
 
 
 @app.cell
-def _(poses):
-    poses.filter_top_poses()
+def _():
+    #poses.filter_top_poses()
     return
 
 

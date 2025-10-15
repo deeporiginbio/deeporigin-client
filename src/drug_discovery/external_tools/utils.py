@@ -281,39 +281,6 @@ def write_file(path, content):
         file.write(content)
 
 
-def clear_stdout(stdout_str):
-    """
-    Removes the portion of the stdout string that indicates an existing execution.
-
-    Parameters:
-    stdout_str (str): The stdout string to be cleared.
-
-    Returns:
-    str: The cleared stdout string.
-    """
-    ind = stdout_str.find("Existed execution")
-    return stdout_str[:ind]
-
-
-def clear_std_err(stderr_str):
-    """
-    Clears the standard error message by removing unnecessary information and formatting it.
-
-    Args:
-        stderr_str (str): The standard error message to be cleared.
-
-    Returns:
-        str: The cleared standard error message.
-    """
-    ind = stderr_str.find("This program is part of the")
-    stderr_str = stderr_str[:ind]  # removing info about pdbtools lib
-    stderr_str = stderr_str.replace(".py", "")
-    stderr_str = stderr_str.replace("python ", "")
-    if "ERROR!! File not found or not readable" in stderr_str:
-        stderr_str += "\n\nMaybe you forgot to download the protein file fist before calling this tool?"
-    return stderr_str
-
-
 def extract_dict_field(json, json_keys, default_return="N/A"):
     """
     Extract a field from a nested dictionary using a list of keys.
@@ -648,7 +615,7 @@ def get_protein_info_dict(pdb_id: str):
     return data
 
 
-def generate_html_output(info):
+def generate_html_output(info) -> str:
     """
     Generate an interactive HTML report for protein information.
 
@@ -1145,10 +1112,4 @@ def generate_html_output(info):
     </html>
     """
 
-    iframe_code = f"""
-        <iframe srcdoc="{html_content.replace('"', "&quot;")}" 
-                width="800" height="600" 
-                style="width:100%; height:900px; border:0;">
-        </iframe>
-    """
-    return iframe_code
+    return html_content
