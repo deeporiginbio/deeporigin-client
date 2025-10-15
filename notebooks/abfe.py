@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.16.3"
+__generated_with = "0.16.5"
 app = marimo.App(width="medium")
 
 with app.setup:
@@ -178,6 +178,26 @@ def _():
     from deeporigin.tools.job import get_dataframe
 
     get_dataframe()
+    return
+
+
+@app.cell
+def _():
+    from deeporigin.platform import Client
+
+    client = Client()
+    return (client,)
+
+
+@app.cell
+def _(client, sim):
+    sim2 = Complex(protein=sim.protein, client=client)
+    return (sim2,)
+
+
+@app.cell
+def _(sim2):
+    sim2.client
     return
 
 

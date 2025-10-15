@@ -1,6 +1,7 @@
 """utility functions for working in Jupyter notebooks"""
 
 from beartype import beartype
+from IPython import get_ipython
 from IPython.display import HTML, display
 
 
@@ -152,3 +153,37 @@ def get_notebook_environment() -> str:
         pass
 
     return "other"
+
+
+def render_html(
+    html: str,
+    *,
+    height: int = 600,
+):
+    """Render HTML in a Jupyter or marimo Notebook cell with configurable height.
+
+    Args:
+        html (str): Raw HTML content to display.
+        height (int): Height of the iframe in pixels.
+    """
+
+    if get_notebook_environment() == "marimo":
+        import base64
+
+        import marimo as mo
+
+        src = "data:text/html;base64," + base64.b64encode(html.encode("utf-8")).decode(
+            "ascii"
+        )
+
+        return mo.Html(f"""
+        <iframe src="{src}" style="width:100%;height:{height}px;border:0"
+                loading="lazy" referrerpolicy="no-referrer"></iframe>
+        """)
+    else:
+        iframe_code = f"""
+            <iframe srcdoc="{html.replace('"', "&quot;")}" 
+                    style="width:100%; height:{height}px; border:0;">
+            </iframe>
+        """
+        return display(HTML(iframe_code))
