@@ -59,8 +59,10 @@ class Client:
             self.recording: bool = False
             return
 
-        tokens = get_tokens()
-        resolved_token = token or tokens["access"]
+        if token is None:
+            tokens = get_tokens()
+            token = tokens["access"]
+
         resolved_env = env or get_value()["env"]
         resolved_org_key = org_key or get_value()["org_key"]
 
@@ -70,7 +72,7 @@ class Client:
             )
 
         # Assign resolved values
-        self.token = resolved_token
+        self.token = token
         self.org_key = resolved_org_key
         self.env = resolved_env
         self.api_endpoint = API_ENDPOINT[resolved_env]
