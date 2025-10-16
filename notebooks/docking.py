@@ -100,23 +100,9 @@ def _():
 
 @app.cell
 def _(protein):
-    pockets = protein.find_pockets(pocket_count=1, use_cache=False)
+    pockets = protein.find_pockets(pocket_count=1)
     pocket = pockets[0]
     return pocket, pockets
-
-
-@app.cell
-def _(protein):
-    from deeporigin.functions.pocket_finder import find_pockets
-
-    data = find_pockets(pocket_count=1, protein=protein, use_cache=False)
-    return (data,)
-
-
-@app.cell
-def _(data):
-    data
-    return
 
 
 @app.cell(hide_code=True)
