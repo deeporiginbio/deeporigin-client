@@ -1,8 +1,6 @@
 """this module implements a low level function to find pockets in a protein determined by a PDB file"""
 
-import base64
 import os
-import zipfile
 
 from deeporigin.drug_discovery.structures import Protein
 from deeporigin.utils.core import hash_dict
@@ -40,7 +38,7 @@ def find_pockets(
 
     # Prepare the request payload
     payload = {
-        "protein": protein.to_base64(),
+        "protein_path": protein._remote_path,
         "pocket_count": pocket_count,
         "pocket_min_size": pocket_min_size,
     }
@@ -52,29 +50,24 @@ def find_pockets(
     if use_cache and os.path.exists(cache_path):
         return cache_path
 
-    from deeporigin.platform import tools_api
+    protein.upload()
+    os.makedirs(cache_path, exist_ok=True)
+
+    from deeporigin.platform import file_api, tools_api
 
     body = {"params": payload, "clusterId": tools_api.get_default_cluster_id()}
 
     # Send the request to the server
     response = tools_api.run_function(
         key="deeporigin.pocketfinder",
-        version="0.1.0",
+        version="0.2.0",
         body=body,
     )
 
-    os.makedirs(cache_path, exist_ok=True)
-
-    # Decode base64 content and save as zip file
-    zip_path = os.path.join(cache_path, "results.zip")
-    with open(zip_path, "wb") as f:
-        f.write(base64.b64decode(response.text))
-
-    # Extract the zip file to the cache directory
-    with zipfile.ZipFile(zip_path, "r") as zip_ref:
-        zip_ref.extractall(cache_path)
-
-    # Remove the zip file
-    os.remove(zip_path)
+    for file in response.files:
+        file_api.download_file(
+            remote_path=file,
+            local_path=os.path.join(cache_path, file.split("/")[-1]),
+        )
 
     return cache_path

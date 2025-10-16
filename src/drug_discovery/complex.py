@@ -4,8 +4,6 @@ from dataclasses import dataclass, field
 import os
 from typing import Optional
 
-from beartype import beartype
-
 from deeporigin.drug_discovery.abfe import ABFE
 from deeporigin.drug_discovery.docking import Docking
 from deeporigin.drug_discovery.rbfe import RBFE
@@ -120,7 +118,6 @@ class Complex:
 
         return instance
 
-    @beartype
     def prepare(
         self,
         ligand: Optional[Ligand] = None,
@@ -131,7 +128,7 @@ class Complex:
         is_protein_protonated: bool = True,
         use_cache: bool = True,
         show_prepared_system: bool = True,
-    ) -> None:
+    ):
         """run system preparation on the protein and one ligand from the Complex
 
         Args:
@@ -176,7 +173,7 @@ class Complex:
 
         # show it
         if show_prepared_system:
-            Protein.from_file(complex_path).show()
+            return Protein.from_file(complex_path)
 
     def _sync_protein_and_ligands(self) -> None:
         """Ensure that the protein and ligands are uploaded to Deep Origin
