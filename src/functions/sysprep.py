@@ -3,12 +3,10 @@
 import os
 
 from beartype import beartype
-import requests
 
 from deeporigin.drug_discovery.structures import Ligand, Protein
 from deeporigin.utils.core import hash_dict
 
-URL = "http://sysprep.default.jobs.edge.deeporigin.io/sysprep"
 CACHE_DIR = os.path.expanduser("~/.deeporigin/sysprep")
 
 
@@ -39,8 +37,8 @@ def run_sysprep(
     """
 
     payload = {
-        "protein": protein.to_base64(),
-        "ligand": ligand.to_base64(),
+        "protein_path": protein._remote_path,
+        "ligand_path": ligand._remote_path,
         "is_lig_protonated": is_lig_protonated,
         "is_protein_protonated": is_protein_protonated,
         "keep_waters": keep_waters,
@@ -57,21 +55,24 @@ def run_sysprep(
     if os.path.exists(output_pdb_path) and use_cache:
         return output_pdb_path
 
+    protein.upload()
+    ligand.upload()
+
     # If no cached results, proceed with server call
+    from deeporigin.platform import file_api, tools_api
 
-    response = requests.post(URL, json=payload, stream=True)
+    body = {"params": payload, "clusterId": tools_api.get_default_cluster_id()}
 
-    if response.status_code == 200:
-        # Create cache directory if it doesn't exist
-        os.makedirs(cache_path, exist_ok=True)
-        # Save the result to the cache
-        with open(output_pdb_path, "wb") as f:
-            for chunk in response.iter_content(chunk_size=8192):
-                if chunk:
-                    f.write(chunk)
-        return output_pdb_path
+    # Send the request to the server
+    response = tools_api.run_function(
+        key="deeporigin.system-prep",
+        version="0.2.0",
+        body=body,
+    )
 
-    # If the server request fails, raise an error
-    raise RuntimeError(
-        f"Server returned status code {response.status_code}: {response.text}"
-    ) from None
+    file_api.download_file(
+        remote_path=response.system_pdb_path,
+        local_path=output_pdb_path,
+    )
+
+    return output_pdb_path
