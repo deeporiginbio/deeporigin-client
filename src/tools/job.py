@@ -54,6 +54,7 @@ class Job:
 
     name: str
     _ids: list[str]
+    _current_ids: list[str]
 
     # functions
     _viz_func: Optional[JobFunc] = None
@@ -100,6 +101,7 @@ class Job:
         cls,
         ids: list[str],
         *,
+        current_ids: Optional[list[str]] = None,
         client: Optional[Client] = None,
     ) -> "Job":
         """Create a Job instance from a list of IDs.
@@ -113,6 +115,7 @@ class Job:
         return cls(
             name="job",
             _ids=ids,
+            _current_ids=current_ids or [],
             client=client,
         )
 

@@ -39,7 +39,7 @@ import time
 from typing import Callable
 
 from deeporigin import auth
-from deeporigin.utils.config import get_value
+from deeporigin.config import get_value
 from deeporigin.utils.network import _get_domain_name
 
 from .file_service import generated_api as genapi
