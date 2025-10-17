@@ -330,7 +330,7 @@ class Docking(WorkflowStep):
                 client=self.parent.client,
                 _output_dir_path=this_output_dir_path,
             )
-
+        current_job_ids = []
         if len(smiles_strings) > 0:
             if use_parallel:
                 with concurrent.futures.ThreadPoolExecutor() as executor:
@@ -347,18 +347,19 @@ class Docking(WorkflowStep):
                     ):
                         job_id = future.result()
                         if job_id is not None:
-                            job_ids.append(job_id)
+                            current_job_ids.append(job_id)
             else:
                 for chunk in tqdm(
                     chunks, total=len(chunks), desc="Starting docking jobs"
                 ):
                     job_id = process_chunk(chunk)
                     if job_id is not None:
-                        job_ids.append(job_id)
+                        current_job_ids.append(job_id)
         else:
             print("No new ligands to dock")
 
-        job = Job.from_ids(job_ids, client=self.parent.client)
+        all_job_ids = job_ids + current_job_ids
+        job = Job.from_ids(ids=all_job_ids, current_ids=current_job_ids, client=self.parent.client)
         # for docking, we always have a single job
         self.jobs = [job]
 
