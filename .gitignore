@@ -59,28 +59,12 @@ coverage.xml
 .pytest_cache/
 /coverage
 
-# Translations
-*.mo
-*.pot
 
-# Django stuff:
-*.log
-local_settings.py
-db.sqlite3
-db.sqlite3-journal
 
-# Flask stuff:
-instance/
-.webassets-cache
-
-# Scrapy stuff:
-.scrapy
 
 # Sphinx documentation
 docs/_build/
 
-# PyBuilder
-target/
 
 # notebooks
 *__marimo__/*
@@ -94,22 +78,12 @@ ipython_config.py
 # pyenv
 .python-version
 
-# pipenv
-#   According to pypa/pipenv#598, it is recommended to include Pipfile.lock in version control.
-#   However, in case of collaboration, if having platform-specific dependencies or dependencies
-#   having no cross-platform support, pipenv may install dependencies that don't work, or not
-#   install all needed dependencies.
-#Pipfile.lock
+
 
 # PEP 582; used by e.g. github.com/David-OConnor/pyflow
 __pypackages__/
 
-# Celery stuff
-celerybeat-schedule
-celerybeat.pid
 
-# SageMath parsed files
-*.sage.py
 
 # Environments
 .env
@@ -120,9 +94,7 @@ ENV/
 env.bak/
 venv.bak/
 
-# Spyder project settings
-.spyderproject
-.spyproject
+
 
 # Rope project settings
 .ropeproject
@@ -178,22 +150,8 @@ project.json.bak
 !.vscode/launch.json
 !.vscode/extensions.json
 
-# Files for docker image building
-*.tar.gz
 
-# nextflow and nf-test
-.git
-work
-.nextflow*
-.nf-test*
-git push -u origin main
 
-# Windows Subsystem for Linux (WSL) files
-*:Zone.Identifier
-
-# dependencies graph
-bench-software-blueprints/dependencies.svg
-dependencies.svg
 
 # temporary files
 libs/
