@@ -263,6 +263,7 @@ class ABFE(WorkflowStep):
         ligand: Optional[Ligand] = None,
         re_run: bool = False,
         _output_dir_path: Optional[str] = None,
+        approve_amount: Optional[int] = 0,
     ) -> list[Job] | None:
         """Method to run an end-to-end ABFE run.
 
@@ -340,6 +341,7 @@ class ABFE(WorkflowStep):
                 tool_version=self.tool_version,
                 client=self.parent.client,
                 _output_dir_path=_output_dir_path,
+                approve_amount=approve_amount,
             )
 
             job = Job.from_id(job_id, client=self.parent.client)

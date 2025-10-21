@@ -139,14 +139,6 @@ def confirm(
         execution_id (str): execution ID
     """
 
-    data = get_tool_execution(  # noqa: F821
-        execution_id=execution_id,
-        client=client,
-        org_key=org_key,
-    )
-    if data["status"] in TERMINAL_STATES:
-        return
-
     action_tool_execution(  # noqa: F821
         execution_id=execution_id,
         action="confirm",
@@ -239,39 +231,12 @@ def run_tool(
     if "clusterId" not in data.keys():
         data["clusterId"] = get_default_cluster_id(client=client, org_key=org_key)
 
+    if "approveAmount" not in data.keys():
+        data["approveAmount"] = 0
+
     return execute_tool(  # noqa: F821
         tool_key=tool_key,
         execute_tool_schema_dto=data,
         client=client,
         org_key=org_key,
     )
-
-
-@beartype
-def _process_job(
-    *,
-    inputs: dict,
-    outputs: dict,
-    tool_key: str,
-    metadata: Optional[dict] = None,
-    client=None,
-    org_key: Optional[str] = None,
-) -> str:
-    """helper function that uses inputs and outputs to construct a payload and run a tool"""
-
-    payload = dict(
-        outputs=outputs,
-        inputs=inputs,
-        metadata=metadata,
-    )
-
-    response = run_tool(
-        data=payload,
-        tool_key=tool_key,
-        client=client,
-        org_key=org_key,
-    )
-
-    job_id = response.executionId
-
-    return job_id

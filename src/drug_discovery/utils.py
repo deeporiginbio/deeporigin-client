@@ -42,6 +42,7 @@ def _start_tool_run(
     ligand2_path: Optional[str] = None,
     provider: tools_api.PROVIDER = "ufa",
     client: Optional[Client] = None,
+    approve_amount: Optional[int] = 0,
     _output_dir_path: Optional[str] = None,
 ) -> str:
     """
@@ -160,15 +161,20 @@ def _start_tool_run(
             "⚠️ Warning: test_run=1 in these parameters. Results will not be accurate."
         )
 
-    job_id = tools_api._process_job(
+    payload = dict(
         inputs=params,
         outputs=outputs,
-        tool_key=tool_mapper[tool],
         metadata=metadata,
+        approveAmount=approve_amount,
+    )
+
+    response = tools_api.run_tool(
+        data=payload,
+        tool_key=tool_mapper[tool],
         client=client,
     )
 
-    return job_id
+    return response.executionId
 
 
 @beartype
