@@ -358,7 +358,7 @@ class Docking(WorkflowStep):
         else:
             print("No new ligands to dock")
 
-        job = Job.from_ids(job_ids, client=self.parent.client)
+        job = Job.from_id(job_ids[0], client=self.parent.client)
         # for docking, we always have a single job
         self.jobs = [job]
 

@@ -6,7 +6,6 @@ import sys
 from typing import Literal, Optional
 
 from beartype import beartype
-import pandas as pd
 
 from deeporigin.platform.utils import _add_functions_to_module
 
@@ -99,43 +98,7 @@ def get_statuses_and_progress(
 
 
 @beartype
-def cancel_runs(
-    job_ids: list[str] | pd.core.series.Series | pd.core.frame.DataFrame,
-    *,
-    client=None,
-    org_key: Optional[str] = None,
-) -> None:
-    """Cancel multiple jobs in parallel.
-
-    Args:
-        job_ids: List of job IDs to cancel.
-    """
-
-    if isinstance(job_ids, pd.core.series.Series):
-        job_ids = job_ids.tolist()
-    elif isinstance(job_ids, pd.core.frame.DataFrame):
-        job_ids = job_ids["id"].tolist()
-
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = [
-            executor.submit(
-                cancel_run,
-                execution_id=job_id,
-                client=client,
-                org_key=org_key,
-            )
-            for job_id in job_ids
-        ]
-        concurrent.futures.wait(futures)
-        # Raise the first exception encountered
-        for future in futures:
-            exc = future.exception()
-            if exc is not None:
-                raise exc
-
-
-@beartype
-def cancel_run(
+def cancel(
     execution_id: str,
     *,
     client=None,
@@ -158,6 +121,35 @@ def cancel_run(
     action_tool_execution(  # noqa: F821
         execution_id=execution_id,
         action="cancel",
+        client=client,
+        org_key=org_key,
+    )
+
+
+@beartype
+def confirm(
+    execution_id: str,
+    *,
+    client=None,
+    org_key: Optional[str] = None,
+) -> None:
+    """cancel a run
+
+    Args:
+        execution_id (str): execution ID
+    """
+
+    data = get_tool_execution(  # noqa: F821
+        execution_id=execution_id,
+        client=client,
+        org_key=org_key,
+    )
+    if data["status"] in TERMINAL_STATES:
+        return
+
+    action_tool_execution(  # noqa: F821
+        execution_id=execution_id,
+        action="confirm",
         client=client,
         org_key=org_key,
     )

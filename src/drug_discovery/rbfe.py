@@ -270,7 +270,7 @@ class RBFE(WorkflowStep):
 
             job_ids.append(job_id)
 
-        return Job.from_ids(job_ids, client=self.parent.client)
+        return Job.from_id(job_ids[0], client=self.parent.client)
 
     def get_jobs(self) -> None:
         """Get the jobs for jobs corresponding to this network and save to self.jobs"""
@@ -299,8 +299,8 @@ class RBFE(WorkflowStep):
             if edge in edges:
                 valid_job_ids.append(row["id"])
 
-        job = Job.from_ids(
-            valid_job_ids,
+        job = Job.from_id(
+            valid_job_ids[0],
             client=self.parent.client,
         )
         self.jobs = [job]

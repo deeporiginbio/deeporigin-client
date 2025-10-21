@@ -106,7 +106,7 @@ def test_job(config):  # noqa: F811
     execution_id = jobs[0].executionId
     job = Job.from_id(execution_id, client=config["client"])
 
-    assert execution_id in job._ids
+    assert execution_id == job._id
 
 
 def test_job_df(config):  # noqa: F811

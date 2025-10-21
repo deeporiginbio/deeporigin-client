@@ -94,15 +94,12 @@ Typically, tools will return `Job` objects when you run them. For example, start
 job = sim.docking.run(pocket=pockets[0])
 ```
 
-#### From Job IDs
+#### From execution IDs
 
-Jobs can also be constructed from one or more Job IDs:
+A `Job` can also be constructed from a single execution ID:
 
 ```{.python notest}
 from deeporigin.tools.job import Job
-
-# construct a single job from many IDs
-job = Job.from_ids(["...", "..."])
 
 # construct a job from a single ID
 job = Job.from_id("job-id")
@@ -150,9 +147,8 @@ job.stop_watching()
 
 ### Job Status Display
 
-When viewing a job, the status is displayed as badges in the footer of the job widget. The status display has been simplified to show all unique statuses for jobs with multiple executions:
+When viewing a job, the status is displayed as a badge in the footer of the job widget:
 
-- **Multiple Statuses**: If a job has multiple executions with different statuses, all unique statuses are displayed as separate badges
 - **Status Colors**: Each status has a distinct color:
   - `Running`: Blue (primary)
   - `Succeeded`: Green (success)  
@@ -163,7 +159,7 @@ When viewing a job, the status is displayed as badges in the footer of the job w
   - `Quoted`: Yellow (warning)
   - Other statuses: Light gray
 
-- **Auto-update Behavior**: The widget automatically stops updating when all job executions reach terminal states (`Succeeded`, `Failed`, `Cancelled`, `FailedQuotation`, `Quoted`, or `InsufficientFunds`)
+- **Auto-update Behavior**: The widget automatically stops updating when the job reaches a terminal state (`Succeeded`, `Failed`, `Cancelled`, `FailedQuotation`, `Quoted`, or `InsufficientFunds`)
 
 
 ### Cancelling jobs

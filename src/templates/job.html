@@ -63,6 +63,13 @@
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="billing-tab-{{ unique_id }}" data-bs-toggle="tab"
+                            data-bs-target="#billing-{{ unique_id }}" type="button" role="tab"
+                            aria-controls="billing-{{ unique_id }}" aria-selected="false">
+                            Billing
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
                         <button class="nav-link" id="raw-progress-tab-{{ unique_id }}" data-bs-toggle="tab"
                             data-bs-target="#raw-progress-{{ unique_id }}" type="button" role="tab"
                             aria-controls="raw-progress-{{ unique_id }}" aria-selected="false">
@@ -93,27 +100,30 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for i in range(job_ids|length) %}
                                 <tr>
-                                    <td>{{ resource_ids[i] }}</td>
-                                    <td>{{ job_ids[i] }}</td>
-                                    <td>{{ statuses[i] }}</td>
-                                    <td>{{ started_at[i] }}</td>
-                                    <td>{{ running_time[i] }}</td>
+                                    <td>{{ job_id }}</td>
+                                    <td>{{ resource_id }}</td>
+                                    <td>{{ status }}</td>
+                                    <td>{{ started_at }}</td>
+                                    <td>{{ running_time }}</td>
                                 </tr>
-                                {% endfor %}
                             </tbody>
                         </table>
                     </div>
-                    <!-- Inputs Tab with JSON (no extra text or collapsible behavior) -->
+                    <!-- Inputs Tab with Interactive JSON Viewer -->
                     <div class="tab-pane fade" id="inputs-{{ unique_id }}" role="tabpanel"
                         aria-labelledby="inputs-tab-{{ unique_id }}">
-                        <pre>{{ inputs_json|safe }}</pre>
+                        {{ inputs_json_viewer|safe }}
                     </div>
-                    <!-- Outputs Tab with JSON (no extra text or collapsible behavior) -->
+                    <!-- Outputs Tab with Interactive JSON Viewer -->
                     <div class="tab-pane fade" id="outputs-{{ unique_id }}" role="tabpanel"
                         aria-labelledby="outputs-tab-{{ unique_id }}">
-                        <pre>{{ outputs_json|safe }}</pre>
+                        {{ outputs_json_viewer|safe }}
+                    </div>
+                    <!-- Billing Tab with Interactive JSON Viewer -->
+                    <div class="tab-pane fade" id="billing-{{ unique_id }}" role="tabpanel"
+                        aria-labelledby="billing-tab-{{ unique_id }}">
+                        {{ billing_json_viewer|safe }}
                     </div>
                     <!-- Raw Progress Reports Tab -->
                     <div class="tab-pane fade" id="raw-progress-{{ unique_id }}" role="tabpanel"
@@ -125,9 +135,7 @@
             <!-- Card Footer with a Badge and Last Updated Timestamp -->
             <div class="card-footer d-flex justify-content-between align-items-center">
                 <div class="d-flex flex-wrap gap-1">
-                    {% for status in unique_statuses %}
                     <span class="badge {% if status == 'Running' %}bg-primary{% elif status == 'Failed' %}bg-danger{% elif status == 'FailedQuotation' %}bg-danger{% elif status == 'Cancelled' %}bg-dark{% elif status == 'Succeeded' %}bg-success{% elif status == 'Created' %}bg-secondary{% elif status == 'Queued' %}bg-info{% elif status == 'Quoted' %}bg-warning{% elif status == 'InsufficientFunds' %}bg-danger{% else %}bg-light text-dark{% endif %}">{{ status|e }}</span>
-                    {% endfor %}
                 </div>
                 <span id="last-updated" class="text-muted" style="font-size: 0.9rem;">Last updated: {{ last_updated|e }}</span>
             </div>
