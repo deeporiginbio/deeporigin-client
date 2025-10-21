@@ -6,8 +6,6 @@ molecule manipulation, protein-ligand interactions, and computational chemistry
 calculations.
 """
 
-# example data
-import asyncio  # noqa: F401
 from importlib.resources import files
 
 __all__ = ["Complex", "Protein", "Ligand", "Pocket", "LigandSet"]

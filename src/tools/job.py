@@ -375,8 +375,8 @@ class Job:
             try:
                 while True:
                     try:
-                        # Run sync in a worker thread with a timeout to avoid indefinite blocking
-                        await asyncio.wait_for(asyncio.to_thread(self.sync), timeout=4)
+                        # Run sync in a worker thread without timeout to avoid the timeout issue
+                        await asyncio.to_thread(self.sync)
 
                         html = self._render_job_view(will_auto_update=True)
                         update_display(HTML(html), display_id=self._display_id)
@@ -403,7 +403,7 @@ class Job:
                 # Perform a final non-blocking refresh and render to clear spinner
                 if self._display_id is not None:
                     try:
-                        await asyncio.wait_for(asyncio.to_thread(self.sync), timeout=5)
+                        await asyncio.to_thread(self.sync)
                     except Exception:
                         pass
                     try:
@@ -413,8 +413,13 @@ class Job:
                         pass
                     self._display_id = None
 
-        # Schedule the task.
-        self._task = asyncio.create_task(update_progress_report())
+        # Schedule the task using the current event loop
+        try:
+            loop = asyncio.get_event_loop()
+            self._task = loop.create_task(update_progress_report())
+        except RuntimeError:
+            # If no event loop is running, create a new one
+            self._task = asyncio.create_task(update_progress_report())
 
     def stop_watching(self):
         """Stop the background monitoring task.
