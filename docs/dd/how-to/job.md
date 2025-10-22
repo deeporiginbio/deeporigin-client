@@ -161,6 +161,22 @@ When viewing a job, the status is displayed as a badge in the footer of the job 
 
 - **Auto-update Behavior**: The widget automatically stops updating when the job reaches a terminal state (`Succeeded`, `Failed`, `Cancelled`, `FailedQuotation`, `Quoted`, or `InsufficientFunds`)
 
+- **Quoted Status**: When a job has a "Quoted" status, the status tab displays a special message showing the estimated cost and instructions to approve the job. The message includes:
+  - A "Job Quoted" heading
+  - The estimated cost in bold
+  - Instructions to look at the Billing tab for details
+  - Instructions to call the `confirm()` method to approve and start the run
+
+
+### Confirming quoted jobs
+
+When a job has a "Quoted" status, you can approve and start the job by calling the `confirm()` method:
+
+```{python notest}
+job.confirm()
+```
+
+This will approve the quoted job and start the execution.
 
 ### Cancelling jobs
 

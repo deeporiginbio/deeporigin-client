@@ -232,12 +232,29 @@ class Job:
             # this one is more straightforward, and works in marimo/browser
             template = env.get_template("job.html")
 
-        try:
-            status_html = self._viz_func(self)
-        except Exception as e:
-            status_html = (
-                f"No visualization function provided, or there was an error. Error: {e}"
-            )
+        # Handle "Quoted" status with custom message
+        if self._status == "Quoted":
+            try:
+                estimated_cost = self._quotation_result.successfulQuotations[
+                    0
+                ].priceTotal
+                status_html = (
+                    "<h3>Job Quoted</h3>"
+                    f"<p>This job has been quoted. It is estimated to cost <strong>${estimated_cost}</strong>. "
+                    "For details look at the Billing tab. To approve and start the run, call the "
+                    "<code style='font-family: monospace; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px;'>confirm()</code> method.</p>"
+                )
+            except (AttributeError, IndexError, KeyError):
+                status_html = (
+                    "<h3>Job Quoted</h3>"
+                    "<p>This job has been quoted. For details look at the Billing tab. To approve and start the run, call the "
+                    "<code style='font-family: monospace; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px;'>confirm()</code> method.</p>"
+                )
+        else:
+            try:
+                status_html = self._viz_func(self)
+            except Exception as e:
+                status_html = f"No visualization function provided, or there was an error. Error: {e}"
 
         try:
             card_title = self._name_func(self)

@@ -255,6 +255,27 @@ class ABFE(WorkflowStep):
                 f"Found invalid dt values; must be numeric and within range [{min_dt}, {max_dt}]. Offending paths: {paths}"
             ) from None
 
+    def quote(
+        self,
+        *,
+        ligands: Optional[list[Ligand] | LigandSet] = None,
+        ligand: Optional[Ligand] = None,
+    ):
+        """Generate a quote for an ABFE run. Calling this method will not actually run the ABFE run, but will return a quote amount that can be used to estimate the cost of the run, and a job object that can be used to run the ABFE run after approval and confirmation.
+
+        Args:
+            ligands: List of ligand to run. Defaults to None. When None, all ligands in the object will be run.
+            ligand: A single ligand to run. Defaults to None. When None, all ligands in the object will be run.
+
+        """
+
+        return self.run(
+            approve_amount=0,
+            ligands=ligands,
+            ligand=ligand,
+            re_run=True,
+        )
+
     @beartype
     def run(
         self,
