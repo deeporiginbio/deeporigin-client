@@ -157,6 +157,19 @@ class Job:
             )
 
     def _render_json_viewer(self, obj: dict) -> str:
+        """
+        Create an interactive JSON viewer HTML snippet for the given dictionary.
+
+        This method generates HTML and JavaScript code that renders the provided
+        dictionary as an interactive JSON viewer in a web environment (e.g., Jupyter notebook).
+        It uses the @textea/json-viewer library via CDN to display the JSON data.
+
+        Args:
+            obj (dict): The dictionary to display in the JSON viewer.
+
+        Returns:
+            str: HTML and JavaScript code to render the interactive JSON viewer.
+        """
         import json
         import uuid
 
