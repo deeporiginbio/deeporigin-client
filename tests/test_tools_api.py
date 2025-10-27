@@ -106,7 +106,7 @@ def test_job(config):  # noqa: F811
     execution_id = jobs[0].executionId
     job = Job.from_id(execution_id, client=config["client"])
 
-    assert execution_id in job._ids
+    assert execution_id == job._id
 
 
 def test_job_df(config):  # noqa: F811
@@ -134,6 +134,9 @@ def test_job_df_filtering(config):  # noqa: F811
 def test_run_docking_and_cancel(config):  # noqa: F811
     sim = Complex.from_dir(BRD_DATA_DIR)
     sim.client = config["client"]
+
+    if config["mock"]:
+        pytest.skip("test skipped with mock client")
 
     job = sim.docking.run(
         box_size=(14.094597464129786, 14.094597464129786, 14.094597464129786),

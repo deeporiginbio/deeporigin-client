@@ -6,7 +6,6 @@ import sys
 from typing import Literal, Optional
 
 from beartype import beartype
-import pandas as pd
 
 from deeporigin.platform.utils import _add_functions_to_module
 
@@ -26,7 +25,7 @@ TERMINAL_STATES = {
 }
 NON_TERMINAL_STATES = {"Created", "Queued", "Running"}
 
-NON_FAILED_STATES = ["Succeeded", "Running", "Queued", "Created"]
+NON_FAILED_STATES = {"Succeeded", "Running", "Queued", "Created"}
 
 # possible providers for files that work with the tools API
 PROVIDER = Literal["ufa", "s3"]
@@ -99,43 +98,7 @@ def get_statuses_and_progress(
 
 
 @beartype
-def cancel_runs(
-    job_ids: list[str] | pd.core.series.Series | pd.core.frame.DataFrame,
-    *,
-    client=None,
-    org_key: Optional[str] = None,
-) -> None:
-    """Cancel multiple jobs in parallel.
-
-    Args:
-        job_ids: List of job IDs to cancel.
-    """
-
-    if isinstance(job_ids, pd.core.series.Series):
-        job_ids = job_ids.tolist()
-    elif isinstance(job_ids, pd.core.frame.DataFrame):
-        job_ids = job_ids["id"].tolist()
-
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = [
-            executor.submit(
-                cancel_run,
-                execution_id=job_id,
-                client=client,
-                org_key=org_key,
-            )
-            for job_id in job_ids
-        ]
-        concurrent.futures.wait(futures)
-        # Raise the first exception encountered
-        for future in futures:
-            exc = future.exception()
-            if exc is not None:
-                raise exc
-
-
-@beartype
-def cancel_run(
+def cancel(
     execution_id: str,
     *,
     client=None,
@@ -158,6 +121,27 @@ def cancel_run(
     action_tool_execution(  # noqa: F821
         execution_id=execution_id,
         action="cancel",
+        client=client,
+        org_key=org_key,
+    )
+
+
+@beartype
+def confirm(
+    execution_id: str,
+    *,
+    client=None,
+    org_key: Optional[str] = None,
+) -> None:
+    """cancel a run
+
+    Args:
+        execution_id (str): execution ID
+    """
+
+    action_tool_execution(  # noqa: F821
+        execution_id=execution_id,
+        action="confirm",
         client=client,
         org_key=org_key,
     )
@@ -232,6 +216,7 @@ def run_tool(
     *,
     data: dict,
     tool_key: str,
+    tool_version: str,
     client=None,
     org_key: Optional[str] = None,
 ):
@@ -247,39 +232,13 @@ def run_tool(
     if "clusterId" not in data.keys():
         data["clusterId"] = get_default_cluster_id(client=client, org_key=org_key)
 
-    return execute_tool(  # noqa: F821
+    if "approveAmount" not in data.keys():
+        data["approveAmount"] = 0
+
+    return execute_tool_with_version(  # noqa: F821
         tool_key=tool_key,
         execute_tool_schema_dto=data,
+        tool_version=tool_version,
         client=client,
         org_key=org_key,
     )
-
-
-@beartype
-def _process_job(
-    *,
-    inputs: dict,
-    outputs: dict,
-    tool_key: str,
-    metadata: Optional[dict] = None,
-    client=None,
-    org_key: Optional[str] = None,
-) -> str:
-    """helper function that uses inputs and outputs to construct a payload and run a tool"""
-
-    payload = dict(
-        outputs=outputs,
-        inputs=inputs,
-        metadata=metadata,
-    )
-
-    response = run_tool(
-        data=payload,
-        tool_key=tool_key,
-        client=client,
-        org_key=org_key,
-    )
-
-    job_id = response.executionId
-
-    return job_id

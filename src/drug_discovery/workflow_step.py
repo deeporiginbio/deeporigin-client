@@ -64,8 +64,8 @@ class WorkflowStep:
 
         if self._fuse_jobs:
             self.jobs = [
-                Job.from_ids(
-                    job_ids,
+                Job.from_id(
+                    job_ids[0],
                     client=self.parent.client,
                 )
             ]

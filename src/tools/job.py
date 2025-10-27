@@ -44,31 +44,31 @@ class JobFunc(Protocol):
 @dataclass
 class Job:
     """
-    Represents one or more computational jobs that can be monitored and managed.
+    Represents a single computational job that can be monitored and managed.
 
-    This class provides methods to track, visualize, and parse the status and progress of jobs, with optional real-time updates (e.g., in Jupyter notebooks).
+    This class provides methods to track, visualize, and parse the status and progress of a job, with optional real-time updates (e.g., in Jupyter notebooks).
 
     Attributes:
-        name (str): Name of the job or job group.
+        name (str): Name of the job.
     """
 
     name: str
-    _ids: list[str]
+    _id: str
 
     # functions
     _viz_func: Optional[JobFunc] = None
     _parse_func: Optional[JobFunc] = None
     _name_func: Optional[JobFunc] = field(default_factory=lambda: lambda job: "Job")
 
-    _progress_reports: list = field(default_factory=list)
-    _status: list = field(default_factory=list)
-    _inputs: list = field(default_factory=list)
-    _outputs: list = field(default_factory=list)
+    _progress_report: Optional[str] = None
+    _status: Optional[str] = None
+    _inputs: Optional[dict] = None
+    _outputs: Optional[dict] = None
     _task = None
-    _attributes: list = field(default_factory=list)
-    _resource_ids: list = field(default_factory=list)
-    _metadata: list = field(default_factory=list)
-    _tool: dict = field(default_factory=dict)
+    _attributes: Optional[dict] = None
+    _resource_id: Optional[str] = None
+    _metadata: Optional[dict] = None
+    _tool: Optional[dict] = None
     _display_id: Optional[str] = None
     _last_html: Optional[str] = None
 
@@ -79,42 +79,16 @@ class Job:
         self.sync()
 
         if self._viz_func is None:
-            if (
-                isinstance(self._tool, list)
-                and len(self._tool) > 0
-                and isinstance(self._tool[0], dict)
-                and "key" in self._tool[0]
-            ):
-                if self._tool[0]["key"] == tool_mapper["Docking"]:
+            if isinstance(self._tool, dict) and "key" in self._tool:
+                if self._tool["key"] == tool_mapper["Docking"]:
                     self._viz_func = job_viz_functions._viz_func_docking
                     self._name_func = job_viz_functions._name_func_docking
-                elif self._tool[0]["key"] == tool_mapper["ABFE"]:
+                elif self._tool["key"] == tool_mapper["ABFE"]:
                     self._viz_func = job_viz_functions._viz_func_abfe
                     self._name_func = job_viz_functions._name_func_abfe
-                elif self._tool[0]["key"] == tool_mapper["RBFE"]:
+                elif self._tool["key"] == tool_mapper["RBFE"]:
                     self._viz_func = job_viz_functions._viz_func_rbfe
                     self._name_func = job_viz_functions._name_func_rbfe
-
-    @classmethod
-    def from_ids(
-        cls,
-        ids: list[str],
-        *,
-        client: Optional[Client] = None,
-    ) -> "Job":
-        """Create a Job instance from a list of IDs.
-
-        Args:
-            ids: List of job IDs to track.
-
-        Returns:
-            A new Job instance with the given IDs.
-        """
-        return cls(
-            name="job",
-            _ids=ids,
-            client=client,
-        )
 
     @classmethod
     def from_id(
@@ -127,65 +101,125 @@ class Job:
 
         Args:
             id: Job ID to track.
+            client: Optional client for API calls.
 
         Returns:
             A new Job instance with the given ID.
         """
         return cls(
             name="job",
-            _ids=[id],
+            _id=id,
             client=client,
         )
 
     def sync(self):
-        """Synchronize the job status and progress reports.
+        """Synchronize the job status and progress report.
 
         This method updates the internal state by fetching the latest status
-        and progress reports for each job ID. It skips jobs that have already
+        and progress report for the job ID. It skips jobs that have already
         reached a terminal state (Succeeded or Failed).
         """
 
         # use
         results = tools_api.get_statuses_and_progress(
-            self._ids,
+            [self._id],
             client=self.client,
         )
 
-        self._attributes = results
-        self._status = [result["status"] for result in results]
-        self._progress_reports = [result["progressReport"] for result in results]
-        self._resource_ids = [result["resourceId"] for result in results]
-        self._inputs = [result["userInputs"] for result in results]
-        self._outputs = [result["userOutputs"] for result in results]
-        self._metadata = [result["metadata"] for result in results]
-        self._tool = [result["tool"] for result in results]
+        if results:
+            result = results[0]
+            self._attributes = result
+            self._status = result["status"]
+            self._progress_report = result["progressReport"]
+            self._resource_id = result["resourceId"]
+            self._inputs = result["userInputs"]
+            self._outputs = result["userOutputs"]
+            self._metadata = result["metadata"]
+            self._tool = result["tool"]
+            self._billing_transaction = result["billingTransaction"]
+            self._quotation_result = result["quotationResult"]
 
-    def _get_running_time(self) -> list:
+    def _get_running_time(self) -> Optional[int]:
         """Get the running time of the job.
 
         Returns:
-            The running time of the job in minutes.
+            The running time of the job in minutes, or None if not available.
         """
-        running_time = []
-        for item in self._attributes:
-            if item.completedAt is None or item.startedAt is None:
-                running_time.append(0)
-            else:
-                running_time.append(elapsed_minutes(item.startedAt, item.completedAt))
+        if (
+            self._attributes is None
+            or self._attributes.completedAt is None
+            or self._attributes.startedAt is None
+        ):
+            return None
+        else:
+            return elapsed_minutes(
+                self._attributes.startedAt, self._attributes.completedAt
+            )
 
-        return running_time
+    def _render_json_viewer(self, obj: dict) -> str:
+        """
+        Create an interactive JSON viewer HTML snippet for the given dictionary.
+
+        This method generates HTML and JavaScript code that renders the provided
+        dictionary as an interactive JSON viewer in a web environment (e.g., Jupyter notebook).
+        It uses the @textea/json-viewer library via CDN to display the JSON data.
+
+        Args:
+            obj (dict): The dictionary to display in the JSON viewer.
+
+        Returns:
+            str: HTML and JavaScript code to render the interactive JSON viewer.
+        """
+        import json
+        import uuid
+
+        uid = f"json_viewer_{uuid.uuid4().hex}"
+        data = json.dumps(obj)
+
+        html = f"""
+        <div id="{uid}" style="padding:10px;border:1px solid #ddd;"></div>
+        <script>
+        (function() {{
+        const mountSelector = "#{uid}";
+        function render() {{
+            new JsonViewer({{ value: {data}, showCopy: true, rootName: false }})
+            .render(mountSelector);
+        }}
+
+        // If JsonViewer is already present, render immediately; otherwise load it then render.
+        if (window.JsonViewer) {{
+            render();
+        }} else {{
+            const s = document.createElement('script');
+            s.src = "https://cdn.jsdelivr.net/npm/@textea/json-viewer@3";
+            s.onload = render;
+            document.head.appendChild(s);
+        }}
+        }})();
+        </script>
+        """
+
+        return html
 
     @beartype
-    def _render_job_view(self, *, will_auto_update: bool = False):
-        """Display the current job status and progress reports.
+    def _render_job_view(
+        self,
+        *,
+        will_auto_update: bool = False,
+        notebook_environment: Optional[str] = None,
+    ):
+        """Display the current job status and progress report.
 
-        This method renders and displays the current state of all jobs
+        This method renders and displays the current state of the job
         using the visualization function if set, or a default HTML representation.
         """
 
         from deeporigin.utils.notebook import get_notebook_environment
 
-        if get_notebook_environment() == "jupyter":
+        if notebook_environment is None:
+            notebook_environment = get_notebook_environment()
+
+        if notebook_environment == "jupyter":
             # this template uses shadow DOM to avoid CSS/JS conflicts with jupyter
             # however, for reasons i don't understand, it doesn't work in marimo/browser
             template = env.get_template("job_jupyter.html")
@@ -193,40 +227,71 @@ class Job:
             # this one is more straightforward, and works in marimo/browser
             template = env.get_template("job.html")
 
-        try:
-            status_html = self._viz_func(self)
-        except Exception as e:
-            status_html = (
-                f"No visualization function provided, or there was an error. Error: {e}"
-            )
+        # Handle "Quoted" status with custom message
+        if self._status == "Quoted":
+            try:
+                estimated_cost = self._quotation_result.successfulQuotations[
+                    0
+                ].priceTotal
+                status_html = (
+                    "<h3>Job Quoted</h3>"
+                    f"<p>This job has been quoted. It is estimated to cost <strong>${estimated_cost}</strong>. "
+                    "For details look at the Billing tab. To approve and start the run, call the "
+                    "<code style='font-family: monospace; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px;'>confirm()</code> method.</p>"
+                )
+            except (AttributeError, IndexError, KeyError):
+                status_html = (
+                    "<h3>Job Quoted</h3>"
+                    "<p>This job has been quoted. For details look at the Billing tab. To approve and start the run, call the "
+                    "<code style='font-family: monospace; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px;'>confirm()</code> method.</p>"
+                )
+        else:
+            try:
+                status_html = self._viz_func(self)
+            except Exception as e:
+                status_html = f"No visualization function provided, or there was an error. Error: {e}"
 
         try:
             card_title = self._name_func(self)
         except Exception:
             card_title = "No name function provided."
 
-        started_at = []
-        for item in self._attributes:
-            if item.startedAt is None:
-                started_at.append(None)
-                continue
-            dt = parser.isoparse(item.startedAt).astimezone(timezone.utc)
-
+        started_at = None
+        if self._attributes is not None and self._attributes.startedAt is not None:
+            dt = parser.isoparse(self._attributes.startedAt).astimezone(timezone.utc)
             # Compare to now (also in UTC)
             now = datetime.now(timezone.utc)
-            started_at.append(humanize.naturaltime(now - dt))
+            started_at = humanize.naturaltime(now - dt)
 
         running_time = self._get_running_time()
+
+        # Generate interactive JSON viewer HTML for inputs and outputs
+        inputs_json_viewer = self._render_json_viewer(
+            self._inputs.to_dict() if self._inputs is not None else ""
+        )
+        outputs_json_viewer = self._render_json_viewer(
+            self._outputs.to_dict() if self._outputs is not None else ""
+        )
+        combined_billing_data = {
+            "billingTransaction": self._billing_transaction,
+            "quotationResult": self._quotation_result,
+        }
+        billing_json_viewer = self._render_json_viewer(combined_billing_data)
 
         # Prepare template variables
         template_vars = {
             "status_html": status_html,
             "last_updated": time.strftime("%Y-%m-%d %H:%M:%S"),
-            "outputs_json": json.dumps(self._outputs, indent=2),
-            "inputs_json": json.dumps(self._inputs, indent=2),
-            "job_ids": self._ids,
-            "resource_ids": self._resource_ids,
-            "statuses": self._status,
+            "outputs_json": json.dumps(self._outputs, indent=2)
+            if self._outputs
+            else "{}",
+            "inputs_json": json.dumps(self._inputs, indent=2) if self._inputs else "{}",
+            "inputs_json_viewer": inputs_json_viewer,
+            "outputs_json_viewer": outputs_json_viewer,
+            "billing_json_viewer": billing_json_viewer,
+            "job_id": self._id,
+            "resource_id": self._resource_id,
+            "status": self._status,
             "started_at": started_at,
             "running_time": running_time,
             "card_title": card_title,
@@ -234,25 +299,22 @@ class Job:
             "will_auto_update": will_auto_update,
         }
 
-        # Get unique statuses (avoid duplicates) and determine auto-update behavior
-        unique_statuses = list(set(self._status)) if self._status else ["Unknown"]
-        template_vars["unique_statuses"] = unique_statuses
+        # Determine auto-update behavior based on terminal states
+        if self._status and self._status in TERMINAL_STATES:
+            template_vars["will_auto_update"] = False  # job in terminal state
 
-        # Determine if auto-update should continue based on terminal states
-        if self._status and all(status in TERMINAL_STATES for status in self._status):
-            template_vars["will_auto_update"] = False  # all jobs in terminal state
-
-        # Try to parse progress reports as JSON, fall back to raw text if it fails
+        # Try to parse progress report as JSON, fall back to raw text if it fails
         try:
-            # Try to parse each item in the list as JSON
-            parsed_reports = []
-            for report in self._progress_reports:
-                parsed_reports.append(json.loads(str(report)))
-
-            template_vars["raw_progress_json"] = json.dumps(parsed_reports, indent=2)
+            if self._progress_report:
+                parsed_report = json.loads(str(self._progress_report))
+                template_vars["raw_progress_json"] = json.dumps(parsed_report, indent=2)
+            else:
+                template_vars["raw_progress_json"] = "{}"
         except Exception:
-            # If something goes wrong with the list processing, fall back to raw text
-            template_vars["raw_progress_json"] = str(self._progress_reports)
+            # If something goes wrong with the parsing, fall back to raw text
+            template_vars["raw_progress_json"] = (
+                str(self._progress_report) if self._progress_report else "{}"
+            )
             template_vars["raw_progress_json"].replace("\n", "<br>")
 
         # Render the template
@@ -288,9 +350,9 @@ class Job:
         """Start monitoring job progress in real-time.
 
         This method initiates a background task that periodically updates
-        and displays the job status. It will automatically stop when all
-        jobs reach a terminal state (Succeeded or Failed). If there are no
-        active jobs to monitor, it will display a message and show the current
+        and displays the job status. It will automatically stop when the
+        job reaches a terminal state (Succeeded or Failed). If there is no
+        active job to monitor, it will display a message and show the current
         state once.
         """
 
@@ -299,11 +361,11 @@ class Job:
 
         nest_asyncio.apply()
 
-        # Check if there are any active jobs (not terminal states)
-        if not any(status not in TERMINAL_STATES for status in self._status):
+        # Check if there is any active job (not terminal state)
+        if self._status and self._status in TERMINAL_STATES:
             display(
                 HTML(
-                    "<div style='color: gray;'>No active jobs to monitor. This display will not update.</div>"
+                    "<div style='color: gray;'>No active job to monitor. This display will not update.</div>"
                 )
             )
             self.show()
@@ -324,20 +386,20 @@ class Job:
 
             This coroutine runs in the background, updating the display
             with the latest job status and progress every 5 seconds.
-            It automatically stops when all jobs reach a terminal state.
+            It automatically stops when the job reaches a terminal state.
             """
             try:
                 while True:
                     try:
-                        # Run sync in a worker thread with a timeout to avoid indefinite blocking
-                        await asyncio.wait_for(asyncio.to_thread(self.sync), timeout=4)
+                        # Run sync in a worker thread without timeout to avoid the timeout issue
+                        await asyncio.to_thread(self.sync)
 
                         html = self._render_job_view(will_auto_update=True)
                         update_display(HTML(html), display_id=self._display_id)
                         self._last_html = html
 
-                        # Check if all jobs are in terminal states
-                        if all(status in TERMINAL_STATES for status in self._status):
+                        # Check if job is in terminal state
+                        if self._status and self._status in TERMINAL_STATES:
                             break
 
                     except Exception as e:
@@ -357,7 +419,7 @@ class Job:
                 # Perform a final non-blocking refresh and render to clear spinner
                 if self._display_id is not None:
                     try:
-                        await asyncio.wait_for(asyncio.to_thread(self.sync), timeout=5)
+                        await asyncio.to_thread(self.sync)
                     except Exception:
                         pass
                     try:
@@ -367,8 +429,13 @@ class Job:
                         pass
                     self._display_id = None
 
-        # Schedule the task.
-        self._task = asyncio.create_task(update_progress_report())
+        # Schedule the task using the current event loop
+        try:
+            loop = asyncio.get_event_loop()
+            self._task = loop.create_task(update_progress_report())
+        except RuntimeError:
+            # If no event loop is running, create a new one
+            self._task = asyncio.create_task(update_progress_report())
 
     def stop_watching(self):
         """Stop the background monitoring task.
@@ -400,17 +467,30 @@ class Job:
         return self._render_job_view()
 
     def cancel(self):
-        """Cancel all jobs being tracked by this instance.
+        """Cancel the job being tracked by this instance.
 
-        This method sends cancellation requests for all job IDs tracked by this instance
+        This method sends a cancellation request for the job ID tracked by this instance
         using the utils.cancel_runs function.
 
         Returns:
             The result of the cancellation operation from utils.cancel_runs.
         """
 
-        tools_api.cancel_runs(
-            self._ids,
+        tools_api.cancel(
+            execution_id=self._id,
+            client=self.client,
+        )
+
+        self.sync()
+
+    def confirm(self):
+        """Confirm the job being tracked by this instance.
+
+        This method confirms the job being tracked by this instance, and requests the job to be started.
+        """
+
+        tools_api.confirm(
+            execution_id=self._id,
             client=self.client,
         )
 

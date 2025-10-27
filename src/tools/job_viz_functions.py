@@ -19,11 +19,11 @@ def _abfe_parse_progress(job) -> dict:
         "delta_g",
     ]
 
-    if len(job._progress_reports) == 0:
+    if job._progress_report is None:
         return dict.fromkeys(steps, "NotStarted")
 
     try:
-        data = job._progress_reports[0]
+        data = job._progress_report
 
         if data is None:
             progress = dict.fromkeys(steps, "NotStarted")
@@ -40,7 +40,7 @@ def _abfe_parse_progress(job) -> dict:
             progress["init"] = "Running"
             return progress
 
-        status_value = job._status[0]
+        status_value = job._status
 
         # If the overall status is Succeeded, return a dictionary with every key set to "Succeeded".
         if status_value == "Succeeded":
@@ -65,7 +65,7 @@ def _abfe_parse_progress(job) -> dict:
                 progress[step] = "Succeeded"
 
         # if the job failed, mark the step that is running as failed
-        if job._status[0] == "Failed":
+        if job._status == "Failed":
             progress[current_step] = "Failed"
 
     except Exception:
@@ -83,31 +83,33 @@ def _viz_func_rbfe(job) -> str:
     """
     import json
 
-    steps = []
-    sub_steps = []
-    ligand1 = []
-    ligand2 = []
+    # For single job, we have single metadata and progress report
+    metadata = job._metadata
+    report = job._progress_report
 
-    for metadata, report in zip(job._metadata, job._progress_reports, strict=False):
-        ligand1.append(metadata.get("ligand1_file", "Unknown ligand"))
-        ligand2.append(metadata.get("ligand2_file", "Unknown ligand"))
-        if report is None:
-            steps.append("")
-            sub_steps.append("")
+    ligand1 = (
+        metadata.get("ligand1_file", "Unknown ligand") if metadata else "Unknown ligand"
+    )
+    ligand2 = (
+        metadata.get("ligand2_file", "Unknown ligand") if metadata else "Unknown ligand"
+    )
 
-        else:
-            data = json.loads(report)
-            steps.append(data.get("cmd", ""))
-            sub_steps.append(data.get("sub_step", ""))
+    if report is None:
+        step = ""
+        sub_step = ""
+    else:
+        data = json.loads(report)
+        step = data.get("cmd", "")
+        sub_step = data.get("sub_step", "")
 
     import pandas as pd
 
     df = pd.DataFrame(
         {
-            "ligand1": ligand1,
-            "ligand2": ligand2,
-            "steps": steps,
-            "sub_steps": sub_steps,
+            "ligand1": [ligand1],
+            "ligand2": [ligand2],
+            "steps": [step],
+            "sub_steps": [sub_step],
         }
     )
     return df.to_html()
@@ -186,19 +188,17 @@ graph LR;
 def _viz_func_docking(job) -> str:
     """Render progress visualization for a docking job."""
 
-    data = job._progress_reports
+    data = job._progress_report
 
-    total_ligands = sum([len(inputs["smiles_list"]) for inputs in job._inputs])
+    total_ligands = len(job._inputs["smiles_list"]) if job._inputs else 0
     total_docked = 0
     total_failed = 0
 
-    for item in data:
-        if item is None:
-            continue
-        total_docked += item.count("ligand docked")
-        total_failed += item.count("ligand failed")
+    if data is not None:
+        total_docked += data.count("ligand docked")
+        total_failed += data.count("ligand failed")
 
-    total_running_time = sum(job._get_running_time())
+    total_running_time = job._get_running_time() or 0
     speed = total_docked / total_running_time if total_running_time > 0 else 0
 
     from deeporigin.utils.notebook import render_progress_bar
@@ -217,11 +217,15 @@ def _name_func_docking(job) -> str:
     """Generate a name for a docking job."""
 
     unique_smiles = set()
-    for inputs in job._inputs:
-        unique_smiles.update(inputs["smiles_list"])
+    if job._inputs:
+        unique_smiles.update(job._inputs["smiles_list"])
     num_ligands = len(unique_smiles)
 
-    protein_file = os.path.basename(job._metadata[0]["protein_file"])
+    protein_file = (
+        os.path.basename(job._metadata["protein_file"])
+        if job._metadata
+        else "Unknown protein"
+    )
 
     return f"Docking <code>{protein_file}</code> to {num_ligands} ligands."
 
@@ -230,7 +234,7 @@ def _name_func_docking(job) -> str:
 def _name_func_abfe(job) -> str:
     """utility function to name a job using inputs to that job"""
     try:
-        return f"ABFE run using <code>{job._metadata[0]['protein_name']}</code> and <code>{job._metadata[0]['ligand_name']}</code>"
+        return f"ABFE run using <code>{job._metadata['protein_name']}</code> and <code>{job._metadata['ligand_name']}</code>"
     except Exception:
         return "ABFE run"
 
@@ -240,11 +244,7 @@ def _name_func_rbfe(job) -> str:
     """utility function to name a job using inputs to that job"""
 
     try:
-        if len(job._metadata) == 1:
-            # single ligand pair
-            return f"RBFE run using <code>{job._metadata[0]['protein_file']}</code> and <code>{job._metadata[0]['ligand_file']}</code>"
-        else:
-            return f"RBFE network run using <code>{job._metadata[0]['protein_file']}</code> and {len(job._metadata)} ligand pairs"
-
+        # For single job, we always have single ligand pair
+        return f"RBFE run using <code>{job._metadata['protein_file']}</code> and <code>{job._metadata['ligand_file']}</code>"
     except Exception:
         return "RBFE run"

@@ -263,14 +263,26 @@ class ABFE(WorkflowStep):
         ligand: Optional[Ligand] = None,
         re_run: bool = False,
         _output_dir_path: Optional[str] = None,
+        approve_amount: Optional[int] = 0,
+        quote: bool = False,
     ) -> list[Job] | None:
         """Method to run an end-to-end ABFE run.
 
         Args:
-            ligands: List of ligand to run. Defaults to None. When None, all ligands in the object will be run. To view a list of valid ligands, use the `.show_ligands()` method"""
+            ligands: List of ligand to run. Defaults to None. When None, all ligands in the object will be run. To view a list of valid ligands, use the `.show_ligands()` method
+            ligand: A single ligand to run. Defaults to None. When None, all ligands in the object will be run.
+            re_run: Whether to re-run the job if it already exists.
+            _output_dir_path: Path to the output directory.
+            approve_amount: Dollar amount under which a job will be approved automatically.
+            quote: Whether to run or quote the job. When True, the job will be quoted and not run.
+        """
 
         # check that dt in params is valid
         self.check_dt()
+
+        if quote:
+            approve_amount = 0
+            re_run = True  # if we want a quote, it's irrelevant whether this has already been run or not
 
         if ligands is None and ligand is None:
             ligands = self.parent.ligands
@@ -340,6 +352,7 @@ class ABFE(WorkflowStep):
                 tool_version=self.tool_version,
                 client=self.parent.client,
                 _output_dir_path=_output_dir_path,
+                approve_amount=approve_amount,
             )
 
             job = Job.from_id(job_id, client=self.parent.client)
