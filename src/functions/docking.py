@@ -104,11 +104,10 @@ def dock(
         response = tools_api.run_function(
             key="deeporigin.docking",
             version="0.2.1",
-            body=body,
+            function_execution_params_schema_dto=body,
         )
     except Exception as e:
         print(f"Error running docking: {e}")
-        print(f"Response: {response}")
         print(f"Body: {body}")
         raise e
 

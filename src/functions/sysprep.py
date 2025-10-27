@@ -67,7 +67,7 @@ def run_sysprep(
     response = tools_api.run_function(
         key="deeporigin.system-prep",
         version="0.2.0",
-        body=body,
+        function_execution_params_schema_dto=body,
     )
 
     file_api.download_file(
