@@ -103,7 +103,7 @@ def dock(
     try:
         response = tools_api.run_function(
             key="deeporigin.docking",
-            version="0.2.1",
+            version="0.2.3",
             function_execution_params_schema_dto=body,
         )
     except Exception as e:
