@@ -188,34 +188,13 @@ class Job:
 
         return html
 
-    def _create_json_viewer_html(self, data: Optional[dict], container_id: str) -> str:
-        """Create interactive JSON viewer HTML using @textea/json-viewer.
-
-        Args:
-            data: JSON data to display.
-            container_id: Unique ID for the container div.
-
-        Returns:
-            HTML string containing the interactive JSON viewer.
-        """
-        if not data:
-            return "<div style='padding: 1rem; color: #666; font-style: italic;'>No data available</div>"
-
-        # Convert data to JSON string for JavaScript
-        json_str = json.dumps(data)
-
-        html = f"""
-        <div id="{container_id}" style="padding: 10px; border: 1px solid #ddd; border-radius: 0.25rem; background-color: #f8f9fa;"></div>
-        <script src="https://cdn.jsdelivr.net/npm/@textea/json-viewer@3"></script>
-        <script>
-            new JsonViewer({{ value: {json_str}, showCopy: true, rootName: false }})
-                .render('#{container_id}');
-        </script>
-        """
-        return html
-
     @beartype
-    def _render_job_view(self, *, will_auto_update: bool = False):
+    def _render_job_view(
+        self,
+        *,
+        will_auto_update: bool = False,
+        notebook_environment: Optional[str] = None,
+    ):
         """Display the current job status and progress report.
 
         This method renders and displays the current state of the job
@@ -224,7 +203,10 @@ class Job:
 
         from deeporigin.utils.notebook import get_notebook_environment
 
-        if get_notebook_environment() == "jupyter":
+        if notebook_environment is None:
+            notebook_environment = get_notebook_environment()
+
+        if notebook_environment == "jupyter":
             # this template uses shadow DOM to avoid CSS/JS conflicts with jupyter
             # however, for reasons i don't understand, it doesn't work in marimo/browser
             template = env.get_template("job_jupyter.html")
@@ -271,8 +253,12 @@ class Job:
         running_time = self._get_running_time()
 
         # Generate interactive JSON viewer HTML for inputs and outputs
-        inputs_json_viewer = self._render_json_viewer(self._inputs.to_dict())
-        outputs_json_viewer = self._render_json_viewer(self._outputs.to_dict())
+        inputs_json_viewer = self._render_json_viewer(
+            self._inputs.to_dict() if self._inputs is not None else ""
+        )
+        outputs_json_viewer = self._render_json_viewer(
+            self._outputs.to_dict() if self._outputs is not None else ""
+        )
         combined_billing_data = {
             "billingTransaction": self._billing_transaction,
             "quotationResult": self._quotation_result,

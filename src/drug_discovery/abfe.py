@@ -255,27 +255,6 @@ class ABFE(WorkflowStep):
                 f"Found invalid dt values; must be numeric and within range [{min_dt}, {max_dt}]. Offending paths: {paths}"
             ) from None
 
-    def quote(
-        self,
-        *,
-        ligands: Optional[list[Ligand] | LigandSet] = None,
-        ligand: Optional[Ligand] = None,
-    ):
-        """Generate a quote for an ABFE run. Calling this method will not actually run the ABFE run, but will return a quote amount that can be used to estimate the cost of the run, and a job object that can be used to run the ABFE run after approval and confirmation.
-
-        Args:
-            ligands: List of ligand to run. Defaults to None. When None, all ligands in the object will be run.
-            ligand: A single ligand to run. Defaults to None. When None, all ligands in the object will be run.
-
-        """
-
-        return self.run(
-            approve_amount=0,
-            ligands=ligands,
-            ligand=ligand,
-            re_run=True,
-        )
-
     @beartype
     def run(
         self,
@@ -285,14 +264,24 @@ class ABFE(WorkflowStep):
         re_run: bool = False,
         _output_dir_path: Optional[str] = None,
         approve_amount: Optional[int] = 0,
+        quote: bool = False,
     ) -> list[Job] | None:
         """Method to run an end-to-end ABFE run.
 
         Args:
-            ligands: List of ligand to run. Defaults to None. When None, all ligands in the object will be run. To view a list of valid ligands, use the `.show_ligands()` method"""
+            ligands: List of ligand to run. Defaults to None. When None, all ligands in the object will be run. To view a list of valid ligands, use the `.show_ligands()` method
+            ligand: A single ligand to run. Defaults to None. When None, all ligands in the object will be run.
+            re_run: Whether to re-run the job if it already exists.
+            _output_dir_path: Path to the output directory.
+            approve_amount: Dollar amount under which a job will be approved automatically.
+            quote: Whether to run or quote the job. When True, the job will be quoted and not run.
+        """
 
         # check that dt in params is valid
         self.check_dt()
+
+        if quote:
+            approve_amount = 0
 
         if ligands is None and ligand is None:
             ligands = self.parent.ligands
