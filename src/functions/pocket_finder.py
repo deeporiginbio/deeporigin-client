@@ -61,7 +61,7 @@ def find_pockets(
     response = tools_api.run_function(
         key="deeporigin.pocketfinder",
         version="0.2.0",
-        body=body,
+        function_execution_params_schema_dto=body,
     )
 
     for file in response.files:

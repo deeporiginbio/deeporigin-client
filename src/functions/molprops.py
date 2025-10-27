@@ -61,7 +61,7 @@ def molprops(
     response = tools_api.run_function(
         key="deeporigin.mol-props",
         version="0.1.2",
-        body=body,
+        function_execution_params_schema_dto=body,
     )
 
     # Write JSON response to cache

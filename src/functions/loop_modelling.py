@@ -43,7 +43,7 @@ def model_loops(
     response = tools_api.run_function(
         key="deeporigin.loop-modelling",
         version="0.1.0",
-        body=body,
+        function_execution_params_schema_dto=body,
     )
 
     # Create cache directory if it doesn't exist
