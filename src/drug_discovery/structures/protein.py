@@ -83,25 +83,27 @@ class Protein(Entity):
             # Download logic (merged from download_protein_by_pdb_id)
             from pathlib import Path
 
-            from biotite.database.rcsb import fetch
-
-            from deeporigin.drug_discovery.external_tools.utils import (
-                get_protein_info_dict,
-            )
+            from deeporigin.utils.network import download_sync
 
             pdb_id_lower = pdb_id.lower()
+
             # Get directory for storing protein files
             home_dir = Path.home()
             proteins_dir = home_dir / ".deeporigin" / "proteins"
             proteins_dir.mkdir(parents=True, exist_ok=True)
             file_path = proteins_dir / f"{pdb_id_lower}.pdb"
             if not file_path.exists():
-                fetch(pdb_id_lower, "pdb", proteins_dir)
+                pdb_url = f"https://files.rcsb.org/download/{pdb_id_lower}.pdb"
+                download_sync(pdb_url, file_path)
 
             file_path = file_path.absolute()
             block_content = file_path.read_text()
             structure = cls.load_structure_from_block(block_content, "pdb")
             structure = cls.select_structure(structure, struct_ind)
+
+            from deeporigin.drug_discovery.external_tools.utils import (
+                get_protein_info_dict,
+            )
 
             return cls(
                 structure=structure,

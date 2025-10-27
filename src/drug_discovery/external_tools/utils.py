@@ -21,13 +21,12 @@ The module integrates with various bioinformatics tools and databases to provide
 a comprehensive set of utilities for protein structure analysis and drug discovery.
 """
 
-import asyncio
 import os
 import pathlib
 from pathlib import Path
-from tempfile import gettempdir
 
 from beartype import beartype
+import requests
 
 
 @beartype
@@ -92,26 +91,6 @@ def three2one(prot) -> str:
         # newprot += seq.ProteinSequence.convert_letter_3to1(a)
 
     return newprot
-
-
-def download_struct(pid, path=None, format="cif", overwrite=False):
-    """
-    Downloads a structure file from the RCSB Protein Data Bank (PDB) using the given PDB ID.
-
-    Args:
-        pid (str): The PDB ID of the structure to download.
-        path (str, optional): The path where the downloaded file should be saved. If not provided, the system's temporary directory will be used.
-        format (str, optional): The format of the downloaded file. Defaults to "cif".
-        overwrite (bool, optional): Whether to overwrite the file if it already exists. Defaults to False.
-
-    Returns:
-        str: The path to the downloaded file.
-    """
-    import biotite.database.rcsb as rcsb
-
-    if path is None:
-        path = gettempdir()
-    return rcsb.fetch(pid, format, target_path=path, overwrite=overwrite)
 
 
 def read_structure(file_name, model=1, use_author_fields_flag=True):
@@ -302,9 +281,9 @@ def extract_dict_field(json, json_keys, default_return="N/A"):
     return default_return if result is None else result
 
 
-async def aget_protein_info_dict(pdb_id):
+def get_protein_info_dict(pdb_id: str):
     """
-    Asynchronously retrieve protein information from RCSB PDB using GraphQL API.
+    Retrieve protein information from RCSB PDB using GraphQL API.
 
     Args:
         pdb_id (str): The PDB ID of the protein.
@@ -331,288 +310,253 @@ async def aget_protein_info_dict(pdb_id):
     payload = {"query": query_protein, "variables": {"id": pdb_id}}
 
     info = {}
-    import aiohttp
 
-    async with aiohttp.ClientSession() as session:
-        async with session.post(url, json=payload) as response:
-            if response.status == 200:
-                data = await response.json()
+    response = requests.post(url, json=payload)
+    if response.status_code == 200:
+        data = response.json()
 
-                info = {}
-                info["title"] = extract_dict_field(
-                    data, ["data", "entry", "struct", "title"]
-                )
-                info["method"] = extract_dict_field(
-                    data, ["data", "entry", "exptl", 0, "method"]
-                )
-                info["resolution"] = extract_dict_field(
-                    data, ["data", "entry", "refine", 0, "ls_d_res_high"]
-                )
-                info["r_factor_work"] = extract_dict_field(
-                    data, ["data", "entry", "refine", 0, "ls_R_factor_R_work"]
-                )
-                info["r_factor_free"] = extract_dict_field(
-                    data, ["data", "entry", "refine", 0, "ls_R_factor_R_free"]
-                )
-                info["classification"] = extract_dict_field(
-                    data, ["data", "entry", "struct_keywords", "pdbx_keywords"]
-                )
-                info["source_organism"] = extract_dict_field(
-                    data,
+        info = {}
+        info["title"] = extract_dict_field(data, ["data", "entry", "struct", "title"])
+        info["method"] = extract_dict_field(
+            data, ["data", "entry", "exptl", 0, "method"]
+        )
+        info["resolution"] = extract_dict_field(
+            data, ["data", "entry", "refine", 0, "ls_d_res_high"]
+        )
+        info["r_factor_work"] = extract_dict_field(
+            data, ["data", "entry", "refine", 0, "ls_R_factor_R_work"]
+        )
+        info["r_factor_free"] = extract_dict_field(
+            data, ["data", "entry", "refine", 0, "ls_R_factor_R_free"]
+        )
+        info["classification"] = extract_dict_field(
+            data, ["data", "entry", "struct_keywords", "pdbx_keywords"]
+        )
+        info["source_organism"] = extract_dict_field(
+            data,
+            [
+                "data",
+                "entry",
+                "polymer_entities",
+                0,
+                "rcsb_entity_source_organism",
+                0,
+                "scientific_name",
+            ],
+        )
+        info["n_mutations"] = extract_dict_field(
+            data,
+            [
+                "data",
+                "entry",
+                "polymer_entities",
+                0,
+                "entity_poly",
+                "rcsb_mutation_count",
+            ],
+        )
+        info["sequence_length"] = extract_dict_field(
+            data,
+            [
+                "data",
+                "entry",
+                "polymer_entities",
+                0,
+                "entity_poly",
+                "rcsb_sample_sequence_length",
+            ],
+        )
+        info["canonical_sequence"] = extract_dict_field(
+            data,
+            [
+                "data",
+                "entry",
+                "polymer_entities",
+                0,
+                "entity_poly",
+                "pdbx_seq_one_letter_code_can",
+            ],
+        )
+
+        info["pubmed_abstract"] = extract_dict_field(
+            data, ["data", "entry", "pubmed", "rcsb_pubmed_abstract_text"]
+        )
+
+        info["citations"] = []
+        citations = extract_dict_field(data, ["data", "entry", "citation"], [])
+        for citation in citations:
+            citation_info = {
+                "title": extract_dict_field(citation, ["title"]),
+                "doi": extract_dict_field(citation, ["pdbx_database_id_DOI"]),
+                "authors": extract_dict_field(citation, ["rcsb_authors"]),
+                "journal": extract_dict_field(citation, ["rcsb_journal_abbrev"]),
+                "volume": extract_dict_field(citation, ["journal_volume"]),
+                "pages": f"{extract_dict_field(citation, ['page_first'])}-{extract_dict_field(citation, ['page_last'])}",
+                "year": extract_dict_field(citation, ["year"]),
+            }
+            info["citations"].append(citation_info)
+
+        info["macromols"] = []
+        polymer_entities = extract_dict_field(
+            data, ["data", "entry", "polymer_entities"], []
+        )
+
+        for entity in polymer_entities:
+            macromol_info = {
+                "molecule": extract_dict_field(
+                    entity, ["rcsb_polymer_entity", "pdbx_description"]
+                ),
+                "sequence_length": extract_dict_field(
+                    entity, ["entity_poly", "rcsb_sample_sequence_length"]
+                ),
+                "organism": extract_dict_field(
+                    entity,
+                    ["rcsb_entity_source_organism", 0, "scientific_name"],
+                ),
+                "chains": extract_dict_field(
+                    entity,
                     [
-                        "data",
-                        "entry",
-                        "polymer_entities",
-                        0,
-                        "rcsb_entity_source_organism",
-                        0,
-                        "scientific_name",
+                        "rcsb_polymer_entity_container_identifiers",
+                        "asym_ids",
                     ],
-                )
-                info["n_mutations"] = extract_dict_field(
-                    data,
+                ),
+            }
+            info["macromols"].append(macromol_info)
+
+        info["uniprot_id"] = extract_dict_field(
+            data,
+            [
+                "data",
+                "entry",
+                "polymer_entities",
+                0,
+                "uniprots",
+                0,
+                "rcsb_id",
+            ],
+        )
+        info["source_organism_sci_name"] = extract_dict_field(
+            data,
+            [
+                "data",
+                "entry",
+                "polymer_entities",
+                0,
+                "uniprots",
+                0,
+                "rcsb_uniprot_protein",
+                "source_organism",
+                "scientific_name",
+            ],
+        )
+        info["uniprot_link"] = (
+            f"https://www.uniprot.org/uniprotkb/{info['uniprot_id']}/entry"
+        )
+
+        info["small_mols"] = []
+        nonpolymer_entities = extract_dict_field(
+            data, ["data", "entry", "nonpolymer_entities"], []
+        )
+        for entity in nonpolymer_entities:
+            small_mol_info = {
+                "mol_id": extract_dict_field(
+                    entity, ["nonpolymer_comp", "chem_comp", "id"]
+                ),
+                "mol_name": extract_dict_field(
+                    entity, ["nonpolymer_comp", "chem_comp", "name"]
+                ),
+                "mol_formula": extract_dict_field(
+                    entity, ["nonpolymer_comp", "chem_comp", "formula"]
+                ),
+                "mol_inchi_key": extract_dict_field(
+                    entity,
                     [
-                        "data",
-                        "entry",
-                        "polymer_entities",
-                        0,
-                        "entity_poly",
-                        "rcsb_mutation_count",
+                        "nonpolymer_comp",
+                        "rcsb_chem_comp_descriptor",
+                        "InChIKey",
                     ],
-                )
-                info["sequence_length"] = extract_dict_field(
-                    data,
+                ),
+                "chains": extract_dict_field(
+                    entity,
                     [
-                        "data",
-                        "entry",
-                        "polymer_entities",
+                        "nonpolymer_entity_instances",
                         0,
-                        "entity_poly",
-                        "rcsb_sample_sequence_length",
+                        "rcsb_nonpolymer_entity_instance_container_identifiers",
+                        "asym_id",
                     ],
-                )
-                info["canonical_sequence"] = extract_dict_field(
-                    data,
+                ),
+                "author_identified_chains": extract_dict_field(
+                    entity,
                     [
-                        "data",
-                        "entry",
-                        "polymer_entities",
+                        "nonpolymer_entity_instances",
                         0,
-                        "entity_poly",
-                        "pdbx_seq_one_letter_code_can",
+                        "rcsb_nonpolymer_entity_instance_container_identifiers",
+                        "auth_asym_id",
                     ],
-                )
-
-                info["pubmed_abstract"] = extract_dict_field(
-                    data, ["data", "entry", "pubmed", "rcsb_pubmed_abstract_text"]
-                )
-
-                info["citations"] = []
-                citations = extract_dict_field(data, ["data", "entry", "citation"], [])
-                for citation in citations:
-                    citation_info = {
-                        "title": extract_dict_field(citation, ["title"]),
-                        "doi": extract_dict_field(citation, ["pdbx_database_id_DOI"]),
-                        "authors": extract_dict_field(citation, ["rcsb_authors"]),
-                        "journal": extract_dict_field(
-                            citation, ["rcsb_journal_abbrev"]
-                        ),
-                        "volume": extract_dict_field(citation, ["journal_volume"]),
-                        "pages": f"{extract_dict_field(citation, ['page_first'])}-{extract_dict_field(citation, ['page_last'])}",
-                        "year": extract_dict_field(citation, ["year"]),
-                    }
-                    info["citations"].append(citation_info)
-
-                info["macromols"] = []
-                polymer_entities = extract_dict_field(
-                    data, ["data", "entry", "polymer_entities"], []
-                )
-
-                for entity in polymer_entities:
-                    macromol_info = {
-                        "molecule": extract_dict_field(
-                            entity, ["rcsb_polymer_entity", "pdbx_description"]
-                        ),
-                        "sequence_length": extract_dict_field(
-                            entity, ["entity_poly", "rcsb_sample_sequence_length"]
-                        ),
-                        "organism": extract_dict_field(
-                            entity,
-                            ["rcsb_entity_source_organism", 0, "scientific_name"],
-                        ),
-                        "chains": extract_dict_field(
-                            entity,
-                            [
-                                "rcsb_polymer_entity_container_identifiers",
-                                "asym_ids",
-                            ],
-                        ),
-                    }
-                    info["macromols"].append(macromol_info)
-
-                info["uniprot_id"] = extract_dict_field(
-                    data,
-                    [
-                        "data",
-                        "entry",
-                        "polymer_entities",
-                        0,
-                        "uniprots",
-                        0,
-                        "rcsb_id",
-                    ],
-                )
-                info["source_organism_sci_name"] = extract_dict_field(
-                    data,
-                    [
-                        "data",
-                        "entry",
-                        "polymer_entities",
-                        0,
-                        "uniprots",
-                        0,
-                        "rcsb_uniprot_protein",
-                        "source_organism",
-                        "scientific_name",
-                    ],
-                )
-                info["uniprot_link"] = (
-                    f"https://www.uniprot.org/uniprotkb/{info['uniprot_id']}/entry"
-                )
-
-                info["small_mols"] = []
-                nonpolymer_entities = extract_dict_field(
-                    data, ["data", "entry", "nonpolymer_entities"], []
-                )
-                for entity in nonpolymer_entities:
-                    small_mol_info = {
-                        "mol_id": extract_dict_field(
-                            entity, ["nonpolymer_comp", "chem_comp", "id"]
-                        ),
-                        "mol_name": extract_dict_field(
-                            entity, ["nonpolymer_comp", "chem_comp", "name"]
-                        ),
-                        "mol_formula": extract_dict_field(
-                            entity, ["nonpolymer_comp", "chem_comp", "formula"]
-                        ),
-                        "mol_inchi_key": extract_dict_field(
-                            entity,
-                            [
-                                "nonpolymer_comp",
-                                "rcsb_chem_comp_descriptor",
-                                "InChIKey",
-                            ],
-                        ),
-                        "chains": extract_dict_field(
-                            entity,
-                            [
-                                "nonpolymer_entity_instances",
-                                0,
-                                "rcsb_nonpolymer_entity_instance_container_identifiers",
-                                "asym_id",
-                            ],
-                        ),
-                        "author_identified_chains": extract_dict_field(
-                            entity,
-                            [
-                                "nonpolymer_entity_instances",
-                                0,
-                                "rcsb_nonpolymer_entity_instance_container_identifiers",
-                                "auth_asym_id",
-                            ],
-                        ),
-                        "binding_affinities": [],
-                    }
-                    binding_affinities = extract_dict_field(
-                        data, ["data", "entry", "rcsb_binding_affinity"], []
-                    )
-                    for affinity in binding_affinities:
-                        affinity_info = {
-                            "comp_id": extract_dict_field(affinity, ["comp_id"]),
-                            "type": extract_dict_field(affinity, ["type"]),
-                            "value": extract_dict_field(affinity, ["value"]),
-                            "unit": extract_dict_field(affinity, ["unit"]),
-                            "link": extract_dict_field(affinity, ["link"]),
-                        }
-                        small_mol_info["binding_affinities"].append(affinity_info)
-
-                    info["small_mols"].append(small_mol_info)
-
-                info["assemblies"] = []
-                assemblies = extract_dict_field(
-                    data, ["data", "entry", "assemblies"], []
-                )
-                for assembly in assemblies:
-                    assembly_info = {
-                        "symmetry_kind": extract_dict_field(
-                            assembly, ["rcsb_struct_symmetry", 0, "kind"]
-                        ),
-                        "symmetry_type": extract_dict_field(
-                            assembly, ["rcsb_struct_symmetry", 0, "type"]
-                        ),
-                        "symmetry_symbol": extract_dict_field(
-                            assembly, ["rcsb_struct_symmetry", 0, "symbol"]
-                        ),
-                        "oligomeric_state": extract_dict_field(
-                            assembly,
-                            ["rcsb_struct_symmetry", 0, "oligomeric_state"],
-                        ),
-                        "modeled_polymer_monomer_count": extract_dict_field(
-                            assembly,
-                            ["rcsb_assembly_info", "modeled_polymer_monomer_count"],
-                        ),
-                    }
-                    info["assemblies"].append(assembly_info)
-
-                mol_ids = [mol["mol_id"] for mol in info["small_mols"]]
-                with open(f"{assets}/molecule_smiles.gql", "r") as e:
-                    query_molecule = e.read()
-
-                smiles_payload = {
-                    "query": query_molecule,
-                    "variables": {"comp_ids": mol_ids},
+                ),
+                "binding_affinities": [],
+            }
+            binding_affinities = extract_dict_field(
+                data, ["data", "entry", "rcsb_binding_affinity"], []
+            )
+            for affinity in binding_affinities:
+                affinity_info = {
+                    "comp_id": extract_dict_field(affinity, ["comp_id"]),
+                    "type": extract_dict_field(affinity, ["type"]),
+                    "value": extract_dict_field(affinity, ["value"]),
+                    "unit": extract_dict_field(affinity, ["unit"]),
+                    "link": extract_dict_field(affinity, ["link"]),
                 }
+                small_mol_info["binding_affinities"].append(affinity_info)
 
-                async with aiohttp.ClientSession() as session:
-                    async with session.post(url, json=smiles_payload) as response:
-                        if response.status == 200:
-                            smiles_data = await response.json()
-                            for i, small_mol in enumerate(
-                                smiles_data["data"]["chem_comps"]
-                            ):
-                                info["small_mols"][i]["mol_smiles"] = (
-                                    extract_dict_field(
-                                        small_mol,
-                                        [
-                                            "rcsb_chem_comp_descriptor",
-                                            "SMILES_stereo",
-                                        ],
-                                    )
-                                )
+            info["small_mols"].append(small_mol_info)
+
+        info["assemblies"] = []
+        assemblies = extract_dict_field(data, ["data", "entry", "assemblies"], [])
+        for assembly in assemblies:
+            assembly_info = {
+                "symmetry_kind": extract_dict_field(
+                    assembly, ["rcsb_struct_symmetry", 0, "kind"]
+                ),
+                "symmetry_type": extract_dict_field(
+                    assembly, ["rcsb_struct_symmetry", 0, "type"]
+                ),
+                "symmetry_symbol": extract_dict_field(
+                    assembly, ["rcsb_struct_symmetry", 0, "symbol"]
+                ),
+                "oligomeric_state": extract_dict_field(
+                    assembly,
+                    ["rcsb_struct_symmetry", 0, "oligomeric_state"],
+                ),
+                "modeled_polymer_monomer_count": extract_dict_field(
+                    assembly,
+                    ["rcsb_assembly_info", "modeled_polymer_monomer_count"],
+                ),
+            }
+            info["assemblies"].append(assembly_info)
+
+        mol_ids = [mol["mol_id"] for mol in info["small_mols"]]
+        with open(f"{assets}/molecule_smiles.gql", "r") as e:
+            query_molecule = e.read()
+
+        smiles_payload = {
+            "query": query_molecule,
+            "variables": {"comp_ids": mol_ids},
+        }
+
+        response = requests.post(url, json=smiles_payload)
+        if response.status_code == 200:
+            smiles_data = response.json()
+            for i, small_mol in enumerate(smiles_data["data"]["chem_comps"]):
+                info["small_mols"][i]["mol_smiles"] = extract_dict_field(
+                    small_mol,
+                    [
+                        "rcsb_chem_comp_descriptor",
+                        "SMILES_stereo",
+                    ],
+                )
 
     return info
-
-
-def get_protein_info_dict(pdb_id: str):
-    """
-    Load a protein from the Protein Data Bank (PDB) using the given ID and save it to the specified output path.
-
-    Parameters:
-    - id (str): The ID of the protein in the PDB database.
-    - out_path (str): The path where the protein file should be saved.
-
-    Returns:
-    - str: The path of the saved protein file.
-
-    Raises:
-    - Any exceptions raised by the underlying `aload_protein_from_pdb` function.
-    """
-    import nest_asyncio
-
-    nest_asyncio.apply()
-    data = asyncio.get_event_loop().run_until_complete(aget_protein_info_dict(pdb_id))
-
-    return data
 
 
 def generate_html_output(info) -> str:
