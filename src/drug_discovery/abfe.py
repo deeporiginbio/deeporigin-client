@@ -282,6 +282,7 @@ class ABFE(WorkflowStep):
 
         if quote:
             approve_amount = 0
+            re_run = True  # if we want a quote, it's irrelevant whether this has already been run or not
 
         if ligands is None and ligand is None:
             ligands = self.parent.ligands

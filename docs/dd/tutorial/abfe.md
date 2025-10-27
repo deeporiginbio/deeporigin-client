@@ -48,7 +48,7 @@ Before starting a ABFE run, you can estimate costs using:
 ```
 # assuming we want to perform a single ABFE run on a single ligand
 ligand = sim.ligands[0]
-jobs = sim.abfe.quote(ligand=ligand)
+jobs = sim.abfe.run(ligand=ligand, quote=True)
 job = jobs[0]
 ```
 
@@ -80,7 +80,7 @@ This will start the ABFE run and the job widget will now display:
 <iframe 
     src="./abfe-running.html" 
     width="100%" 
-    height="300" 
+    height="500" 
     style="border:none;"
     title="Quoted ABFE Job"
 ></iframe>
@@ -98,7 +98,7 @@ jobs = sim.abfe.run(ligands=[sim.ligands[0]]) # for example
 job = jobs[0]
 ```
 
-This queues up a task on Deep Origin. When it completes, outputs will be written to the appropriate column in this database. 
+This queues up a task on Deep Origin. 
 
 
 ### Multiple ligands
@@ -117,7 +117,7 @@ Omitting the ligand will run ABFE on all ligands in the `Complex` object.
 jobs = sim.abfe.run() 
 ```
 
-Each ligand will be run in parallel on a separate instance, and each Job can be monitored and controlled independently. 
+Each ligand will be run in parallel on a separate instance, and each `Job` can be monitored and controlled independently. 
 
 
 
@@ -125,7 +125,7 @@ Each ligand will be run in parallel on a separate instance, and each Job can be 
 
 ### Visualize Job
 
-Once a job has been submitted, you can track its status by inspecting the Job object:
+Once a job has been submitted, you can track its status by inspecting the `Job` object:
 
 ```{.python notest} 
 job 
@@ -136,7 +136,7 @@ This shows a Job widget with information about the job, such as:
 !!! success "Expected output" 
     ![ABFE Job Tracking](../../images/tools/ABFE_Status_Report.png)
 
-### Watch jobs
+### Watch Jobs
 
 To monitor the status of this job, use:
 
@@ -146,24 +146,24 @@ job.watch()
 
 This makes the widget auto-update, and monitor the status of the job till it reaches a terminal state (Cancelled, Succeeded, or Failed). 
 
-### Stop watching jobs
+### Stop watching Jobs
 
-To manually stop watching a job, do:
+To manually stop watching a `Job`, do:
 
 ```{.python notest} 
 job.stop_watching() 
 ```
 
-### Cancel jobs
+### Cancel Jobs
 
-To cancel a job, use:
+To cancel a `Job`, use:
 
 
 ```{.python notest} 
 job.cancel() 
 ```
 
-!!! tip "Monitoring jobs"
+!!! tip "Monitoring Jobs"
     For more details about how to monitor jobs, look at this [How To section](../how-to/job.md).
 
 
