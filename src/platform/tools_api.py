@@ -216,6 +216,7 @@ def run_tool(
     *,
     data: dict,
     tool_key: str,
+    tool_version: str,
     client=None,
     org_key: Optional[str] = None,
 ):
@@ -234,9 +235,10 @@ def run_tool(
     if "approveAmount" not in data.keys():
         data["approveAmount"] = 0
 
-    return execute_tool(  # noqa: F821
+    return execute_tool_with_version(  # noqa: F821
         tool_key=tool_key,
         execute_tool_schema_dto=data,
+        tool_version=tool_version,
         client=client,
         org_key=org_key,
     )
