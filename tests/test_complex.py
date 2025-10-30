@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-from deeporigin.drug_discovery import BRD_DATA_DIR, Complex, Ligand, Protein
+from deeporigin.drug_discovery import BRD_DATA_DIR, Complex, Ligand, LigandSet, Protein
 from deeporigin.exceptions import DeepOriginException
 
 
@@ -86,3 +86,16 @@ def test_construct_complex():
         assert isinstance(ligand, Ligand)
         assert ligand.smiles is not None
         assert ligand.name is not None
+
+
+def test_prepare_missing_residues():
+    """Test preparing a Complex with missing residues"""
+    # Create a Complex with a protein with missing residues
+    protein = Protein.from_pdb_id("5QSP")
+    protein.find_missing_residues()
+    sim = Complex(protein=protein, ligands=LigandSet.from_dir(BRD_DATA_DIR))
+    with pytest.raises(
+        DeepOriginException,
+        match="Protein has missing residues. Please use the loop modelling tool to fill in the missing residues.",
+    ):
+        sim.prepare()
