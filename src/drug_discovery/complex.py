@@ -157,6 +157,14 @@ class Complex:
                 )
             return
 
+        # make sure there are no missing residues in the protein
+        data = self.protein.find_missing_residues()
+        if len(data.keys()) > 0:
+            raise DeepOriginException(
+                "Protein has missing residues. Please use the loop modelling tool to fill in the missing residues.",
+                title="Protein has missing residues",
+            ) from None
+
         # run sysprep on the ligand
         complex_path = run_sysprep(
             protein=self.protein,
