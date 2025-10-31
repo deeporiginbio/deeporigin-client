@@ -16,9 +16,9 @@ def run_sysprep(
     protein: Protein,
     ligand: Ligand,
     padding: float = 1.0,
-    keep_waters: bool = False,
-    is_lig_protonated: bool = True,
-    is_protein_protonated: bool = True,
+    retain_waters: bool = False,
+    add_H_atoms: bool = True,
+    protonate_protein: bool = True,
     use_cache: bool = True,
 ) -> str:
     """
@@ -39,10 +39,11 @@ def run_sysprep(
     payload = {
         "protein_path": protein._remote_path,
         "ligand_path": ligand._remote_path,
-        "is_lig_protonated": is_lig_protonated,
-        "is_protein_protonated": is_protein_protonated,
-        "keep_waters": keep_waters,
+        "add_H_atoms": add_H_atoms,
+        "protonate_protein": protonate_protein,
+        "retain_waters": retain_waters,
         "padding": padding,
+        "use_cache": use_cache,
     }
 
     # Create a hash of the input parameters for caching
@@ -64,14 +65,40 @@ def run_sysprep(
     body = {"params": payload, "clusterId": tools_api.get_default_cluster_id()}
 
     # Send the request to the server
-    response = tools_api.run_function(
-        key="deeporigin.system-prep",
-        version="0.2.0",
-        function_execution_params_schema_dto=body,
-    )
+    # response = tools_api.run_function(
+    #     key="deeporigin.system-prep",
+    #     version="0.3.2",
+    #     function_execution_params_schema_dto=body,
+    # )
+
+    # mock it for now
+    # TODO -- remove once function is deployed
+    response = {
+        "status": "success",
+        "message": "System preparation completed successfully",
+        "protein_path": "entities/proteins/db4aa32e2e8ffa976a60004a8361b86427a2e5653a6623bb60b7913445902549.pdb",
+        "ligand_path": "entities/ligands/bac7b4d01c1a7ab102b1c9955a1839730a5099b08eba93807e12f6ab22adfb67.sdf",
+        "output_files": [
+            "function-runs/system-prep/586a55e3205e7b807c49b32d085700e55e4c159b672f32f7a276ad1b1cc1e9d1/bsm_system.xml",
+            "function-runs/system-prep/586a55e3205e7b807c49b32d085700e55e4c159b672f32f7a276ad1b1cc1e9d1/system.pdb",
+            "function-runs/system-prep/586a55e3205e7b807c49b32d085700e55e4c159b672f32f7a276ad1b1cc1e9d1/solvation.xml",
+        ],
+        "function_key": "deeporigin.system-prep",
+        "function_version": "0.3.2",
+        "parameters": {
+            "add_H_atoms": False,
+            "protonate_protein": False,
+            "retain_waters": True,
+            "padding": 1.5,
+        },
+    }
+
+    prepared_system_pdb_path = [
+        file for file in response["output_files"] if file.endswith(".pdb")
+    ][0]
 
     file_api.download_file(
-        remote_path=response.system_pdb_path,
+        remote_path=prepared_system_pdb_path,
         local_path=output_pdb_path,
     )
 

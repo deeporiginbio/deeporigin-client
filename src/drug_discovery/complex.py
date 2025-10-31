@@ -123,9 +123,9 @@ class Complex:
         ligand: Optional[Ligand] = None,
         *,
         padding: float = 1.0,
-        keep_waters: bool = False,
-        is_lig_protonated: bool = True,
-        is_protein_protonated: bool = True,
+        retain_waters: bool = False,
+        add_H_atoms: bool = True,  # this nonstandard capitalization is to match the name in the underlying function
+        protonate_protein: bool = True,
         use_cache: bool = True,
         show_prepared_system: bool = True,
     ):
@@ -149,9 +149,9 @@ class Complex:
                 self.prepare(
                     ligand=ligand,
                     padding=padding,
-                    keep_waters=keep_waters,
-                    is_lig_protonated=is_lig_protonated,
-                    is_protein_protonated=is_protein_protonated,
+                    retain_waters=retain_waters,
+                    add_H_atoms=add_H_atoms,
+                    protonate_protein=protonate_protein,
                     use_cache=use_cache,
                     show_prepared_system=False,
                 )
@@ -170,9 +170,9 @@ class Complex:
             protein=self.protein,
             padding=padding,
             ligand=ligand,
-            keep_waters=keep_waters,
-            is_lig_protonated=is_lig_protonated,
-            is_protein_protonated=is_protein_protonated,
+            retain_waters=retain_waters,
+            add_H_atoms=add_H_atoms,
+            protonate_protein=protonate_protein,
             use_cache=use_cache,
         )
 
