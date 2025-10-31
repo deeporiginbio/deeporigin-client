@@ -24,6 +24,8 @@
         "ABFE",
         "admet",
         "allatom",
+        "BAOAB",
+        "Barostat",
         "cbrt",
         "cheminformatics",
         "cofactors",
@@ -31,6 +33,7 @@
         "dateutil",
         "deeporigin",
         "drugability",
+        "emeq",
         "FMCS",
         "HETATM",
         "inchi",
@@ -42,6 +45,7 @@
         "Konnektor",
         "ligandset",
         "marimo",
+        "mbar",
         "molblock",
         "molprops",
         "molstar",
@@ -58,10 +62,12 @@
         "rcsbapi",
         "rdchem",
         "rdkit",
+        "replex",
         "resnames",
         "rmsd",
         "sanitizable",
         "SASA",
+        "softcore",
         "Substruct"
     ]
 }
