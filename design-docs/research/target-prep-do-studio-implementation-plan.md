@@ -5,9 +5,9 @@
 
 **Primary sources**
 
-- `platform-toolbox` — `tools/target-preparation/` holds the `deeporigin.target-prep`
+- `platform-toolbox` — `tools/target-preparation/` holds the `deeporigin.target-preparation`
   tool definition (**located but not read for this document**; see §7.0)
-- `do-dd-client` — source of truth for the contracts of the tools `target-prep` wraps:
+- `do-dd-client` — source of truth for the contracts of the tools `target-preparation` wraps:
   `src/drug_discovery/protein_prep.py`, `src/drug_discovery/structure_report.py`,
   `src/drug_discovery/pocket_finder.py`, `src/platform/constants.py`,
   `src/platform/executions.py`, `tests/fixtures/executions/protein-prep-*.json`
@@ -19,15 +19,15 @@ Scope of this document is **UI**: what DO Studio has to build, which tools-API c
 makes at each step, and which data-platform records get read or written. Backend asks are
 called out explicitly where the UI cannot proceed without them.
 
-> **Status.** The workflow tool this app submits to — `deeporigin.target-prep` — has
+> **Status.** The workflow tool this app submits to — `deeporigin.target-preparation` — has
 > shipped. §3 is therefore settled, not a proposal, and the phase-1 fallback that built
 > the app against `deeporigin.protein-prep` alone is gone.
 >
-> **The `target-prep` input/output shapes in §3 and §8 are still placeholders.** They are
+> **The `target-preparation` input/output shapes in §3 and §8 are still placeholders.** They are
 > written from the PRD and from what the underlying tools take today; they have *not* been
 > reconciled against the merged tool definition (that definition is not in `do-dd-client`,
 > `platform-ui` or `platform` — see §7.0). Every field name marked `⚠` below must be
-> checked against `GET /tools/protected/tools/deeporigin.target-prep/{version}/definitions`
+> checked against `GET /tools/protected/tools/deeporigin.target-preparation/{version}/definitions`
 > before the manifest is written, because `buildToolPayload` emits exactly the keys the
 > `inputSchema` declares and a mismatch fails at execution time, not at build time.
 
@@ -174,7 +174,7 @@ must carry the stamp, and the Mol\* viewer already surfaces it
 
 ---
 
-## 2. Why the app submits to `target-prep` and not to `protein-prep`
+## 2. Why the app submits to `target-preparation` and not to `protein-prep`
 
 The PRD asks for one button that runs, *in this order*:
 
@@ -186,13 +186,13 @@ The PRD asks for one button that runs, *in this order*:
 
 Steps 1–3 all live inside `protein-prep`'s `prepare` action. Steps 4 and 5 are separate
 tools. So the PRD's single button is **three tool executions** — which is exactly what
-`deeporigin.target-prep` now wraps.
+`deeporigin.target-preparation` now wraps.
 
 That also decides the four "Advanced Parameters" checkboxes. None of them can be driven
 from `protein-prep` directly: three have no input at all on it, and the fourth is a
-different tool. They have to be inputs on `target-prep`:
+different tool. They have to be inputs on `target-preparation`:
 
-| PRD checkbox | On `protein-prep` | Expected on `target-prep` ⚠ |
+| PRD checkbox | On `protein-prep` | Expected on `target-preparation` ⚠ |
 | --- | --- | --- |
 | Add missing atoms & residues | none — always on inside `prepare` | a boolean input |
 | Add missing loops | `model_missing_loops` | passthrough of the same flag |
@@ -214,17 +214,17 @@ long-running executions after submit. There is no post-submit orchestration in t
 and building one would mean the UI owns retry, partial failure and three Activity rows for
 one user action.
 
-**`deeporigin.target-prep` is that workflow tool, and it has shipped.** It is the same
+**`deeporigin.target-preparation` is that workflow tool, and it has shipped.** It is the same
 shape as `deeporigin.abfe-end-to-end` (which already chains `system-prep` → `abfe` via a
 `steps` array; see `apps/uui/src/app-schemas/abfe.json`): one execution, one Activity row,
 one billing transaction, one results view. The app's `manifest.toolKey` is
-`deeporigin.target-prep` from day one.
+`deeporigin.target-preparation` from day one.
 
 The shapes below are **⚠ placeholders pending the merged definition** (§7.0) — they say
 what the app needs to send and receive, not what the tool is known to accept.
 
 ```jsonc
-// deeporigin.target-prep inputs — ⚠ UNVERIFIED
+// deeporigin.target-preparation inputs — ⚠ UNVERIFIED
 {
   "protein":   { "file_path": "…", "id": "…" },
   "selection": { "source_sha256": "…", "analyzer_version": "…", "decisions": { … } },
@@ -249,18 +249,18 @@ what the app needs to send and receive, not what the tool is known to accept.
 The `selection` is produced in the UI from a **`protein-prep` `recommend` step run before
 submit** — that part *does* fit `manifest.steps`, because recommend is synchronous and
 cheap. Note this means the app talks to **two** tool keys: `protein-prep` (recommend) and
-`structure-report` as pre-submit steps, and `target-prep` on submit. That is supported —
+`structure-report` as pre-submit steps, and `target-preparation` on submit. That is supported —
 `manifest.steps[].toolKey` is independent of `manifest.toolKey`, which is how RBFE calls
 Konnektor.
 
-One thing to confirm with the tool owner: whether `target-prep` re-runs recommend
+One thing to confirm with the tool owner: whether `target-preparation` re-runs recommend
 internally. If it does, the `selection` the UI sends must still be honoured verbatim — the
 digest binding (`source_sha256`) is what makes the user's keep/skip choices meaningful, and
 a re-analysis that overrides them would silently discard the whole filtering UI.
 
 ### 3.1 Which tools the app actually calls
 
-`target-prep` is the only tool the **Run** button submits to. But the app is not a
+`target-preparation` is the only tool the **Run** button submits to. But the app is not a
 single-tool client, because two things have to happen *before* the user can press Run — the
 structure has to be graded, and its components have to be inventoried — and those are
 separate executions by definition: they run on selection, not on submit.
@@ -269,9 +269,9 @@ separate executions by definition: they run on selection, not on submit.
 | --- | --- | --- | --- |
 | Grade the selected structure | `deeporigin.structure-report` | on row select | **Yes** — PRD requirement 1 is a report *on selection*, before any run |
 | Inventory components | `deeporigin.protein-prep` `action: "recommend"` | on row select | **Yes, unless superseded** — see below |
-| Prepare + pockets + final report | `deeporigin.target-prep` | on submit | Yes — the whole run |
-| `deeporigin.protein-prep` `action: "prepare"` | — | never | **No.** This is inside `target-prep`. The UI must not call it directly. |
-| `deeporigin.pocket-finder` | — | never | **No.** Inside `target-prep`. |
+| Prepare + pockets + final report | `deeporigin.target-preparation` | on submit | Yes — the whole run |
+| `deeporigin.protein-prep` `action: "prepare"` | — | never | **No.** This is inside `target-preparation`. The UI must not call it directly. |
+| `deeporigin.pocket-finder` | — | never | **No.** Inside `target-preparation`. |
 
 So: **prepare, no. Recommend, probably yes.**
 
@@ -281,7 +281,7 @@ built from the user's edits to it. Recommend is also the only known producer of
 `source_sha256`, the digest that binds a Selection to the exact bytes it was computed
 against. Without an inventory there is nothing to toggle and nothing to send.
 
-`target-prep` re-running its own analysis internally does not remove this need: the user
+`target-preparation` re-running its own analysis internally does not remove this need: the user
 has to see and edit the components *before* submitting, so the inventory must be available
 pre-submit regardless of what the workflow does with it afterwards.
 
@@ -300,7 +300,7 @@ different in the engine:
 | --- | --- |
 | `protein-prep` `action: "recommend"` | a `manifest.steps` entry, as sketched in §8 — no new engine capability beyond gap #1 |
 | the preflight service | **not** a `manifest.steps` entry — `useRunStep` only speaks to the tools-execution endpoint. The Structure Filtering tile fetches it directly (its own hook + react-query), the way `csv-table` and `patent-wrapper` already fetch their own data |
-| `target-prep` itself, via a `recommend`-style action | a `manifest.steps` entry pointing at `target-prep` with an action discriminator — same shape as the `protein-prep` case, different `toolKey` |
+| `target-preparation` itself, via a `recommend`-style action | a `manifest.steps` entry pointing at `target-preparation` with an action discriminator — same shape as the `protein-prep` case, different `toolKey` |
 
 Either way the *tile* and its state contract are identical; only the fetch differs. Build
 the tile against a fixture first (§10) and the choice stays a one-file change.
@@ -312,7 +312,7 @@ the tile against a fixture first (§10) and the choice stays a one-file change.
 ### Step 0 — route and shell
 
 `/target-prep` renders `AppPage` → `AppEngineProvider` → mosaic layout + form sidebar.
-No API calls beyond the manifest fetch (`/app-manifests/deeporigin.target-prep/{major}.json`
+No API calls beyond the manifest fetch (`/app-manifests/deeporigin.target-preparation/{major}.json`
 in staging/prod; the bundled `src/app-schemas/target-prep.json` locally and on PR previews).
 
 ### Step 1 — proteins table
@@ -455,7 +455,7 @@ screenshot:
 resolves through `x-from-state` with no engine change.
 
 ```
-POST /tools/{orgKey}/tools/deeporigin.target-prep/{major}/executions
+POST /tools/{orgKey}/tools/deeporigin.target-preparation/{major}/executions
 body: {
   inputs: {
     protein:  { id, file_path },              // x-data-type: Protein
@@ -489,7 +489,7 @@ Route `/activity/{executionId}` → `appMode: 'results'`. Use a dedicated `resul
 | Structure file bytes (UFA `file_path`) | read | Mol\* viewer | no |
 | `results__pocket` rows (`result_type: "pocket"`) | write | pocket-finder step of the workflow tool | no |
 | `results__preparedprotein` rows | write | protein-prep step | no (already emitted) |
-| **`proteins` row for the prepared structure** | write | **`target-prep` — confirm ⚠** | **yes** |
+| **`proteins` row for the prepared structure** | write | **`target-preparation` — confirm ⚠** | **yes** |
 | **`results__structurereport` rows** | write | structure-report tool | **yes** |
 | `executions` row | write | tools-service, automatic | no |
 
@@ -502,11 +502,11 @@ with `id is None` and only `remote_path` set; the caller has to `sync()` or `upd
 a cleaned structure to Docking / ABFE / HTVS, and those apps' tables read `proteins`. So
 one of:
 
-- **Preferred, and the likely intent of the "Output Property Name" field** — `target-prep`
+- **Preferred, and the likely intent of the "Output Property Name" field** — `target-preparation`
   registers the prepared protein as a new `proteins` row (carrying `pdb_id`,
   `protein_name` from `output_name`, `project_id`, and the `DO_PREPARED` stamp in the
   file), mirroring how docking indexes poses. The UI then needs nothing. **Confirm this
-  against the merged definition** — if `target-prep` only emits `preparedprotein` result
+  against the merged definition** — if `target-preparation` only emits `preparedprotein` result
   rows, the app produces a structure no other app can select, and the whole feature stops
   short of its purpose.
 - Fallback — the UI POSTs `/data-platform/{orgKey}/proteins` after the run completes.
@@ -572,7 +572,7 @@ None of these introduce tool-specific logic into the engine — that invariant h
 - pick an `identityHue` ≥10° from existing tools (current cluster ~197–323; pocket-finder
   is 185)
 - tool display name in `components/data-platform-tables/job-manager-table/index.tsx`
-- add `deeporigin.target-prep` to `ALL_RESULTS_TOOL_KEYS` (`hooks/use-manifest.tsx:14`)
+- add `deeporigin.target-preparation` to `ALL_RESULTS_TOOL_KEYS` (`hooks/use-manifest.tsx:14`)
   once (b) above lands, so the column manager offers its results
 - publish the manifest to S3 via `.github/workflows/register-tool-manifest.yml`
   (major version only; `latest` for the first release)
@@ -581,14 +581,19 @@ None of these introduce tool-specific logic into the engine — that invariant h
 
 ## 7. Loose ends the UI can't answer alone
 
-0. **Reconcile the `target-prep` schema — blocking, do this first.** The definition lives
+0. **Reconcile the `target-preparation` schema — blocking, do this first.** A ready-made
+   research prompt for an agent with `platform-toolbox` read access lives alongside this
+   document: [`target-preparation-schema-introspection-prompt.md`](./target-preparation-schema-introspection-prompt.md).
+   Its report resolves every ⚠ in §3, §8 and §9.
+
+   The definition lives
    in `deeporiginbio/platform-toolbox` at `tools/target-preparation/`, specifically:
 
    - `workflow/tool-definition.json` — the input/output JSON Schema the manifest must mirror
    - `workflow/workflow.yaml` — the step graph (confirms the tool ordering and what each
      step emits)
    - `workflow/preflight-service.yaml` + `images/preflight/src/preflight_service/routes/target_preparation.py`
-     — a preflight route, which suggests `target-prep` validates or pre-resolves inputs
+     — a preflight route, which suggests `target-preparation` validates or pre-resolves inputs
      before dispatch; worth reading for what it rejects, since those become client-side
      validations the sidebar should enforce first
    - `tests/test_target_preparation_schema.py` — the schema contract in executable form,
@@ -599,11 +604,12 @@ None of these introduce tool-specific logic into the engine — that invariant h
    modelling is on, the major version to pin, and the `jobOutputs` key names the results
    view reads. Everything marked ⚠ resolves here.
 
-   `deeporigin.target-prep` is also worth confirming as the registered tool key — the
-   toolbox directory is `target-preparation`, and the two do not have to match.
+   The registered tool key is **`deeporigin.target-preparation`** (matching the toolbox
+   directory), not `deeporigin.target-prep`. Confirm the major version to pin from
+   `RELEASE-NOTES.MD`.
 
    **Also settle where the pre-submit component inventory comes from** (§3.1): the
-   `protein-prep` `recommend` action, the preflight route, or a `target-prep` action of its
+   `protein-prep` `recommend` action, the preflight route, or a `target-preparation` action of its
    own. Read `routes/target_preparation.py` — if it already returns the inventory, the app
    should use it and stop creating a tool execution on every row click. This changes
    whether the fetch is a `manifest.steps` entry or a hook inside the tile, so it wants
@@ -626,7 +632,7 @@ None of these introduce tool-specific logic into the engine — that invariant h
 4. **Re-prep of an already-prepared protein.** The `DO_PREPARED` stamp means downstream
    tools skip cleanup; running Target Prep on a prepared protein should probably warn.
 5. **Billing.** protein-prep is not billable; pocket-finder and structure-report are.
-   Confirm `target-prep` quotes as a single line item, so the existing
+   Confirm `target-preparation` quotes as a single line item, so the existing
    `price-confirmation-panel` → `insufficient-funds-modal` path works unchanged.
 6. **Partial failure.** If the pocket-finder or structure-report step fails after the
    protein was successfully prepared, does the execution report `Failed` with the prepared
@@ -636,14 +642,23 @@ None of these introduce tool-specific logic into the engine — that invariant h
 
 ## 8. Manifest sketch
 
-`toolKey` is settled. The `inputSchema` and the `steps[].inputSchema` bodies are **⚠
-placeholders** until §7.0 is done — treat the annotations (`x-data-type`, `x-from-state`,
+`toolKey` is settled: **`deeporigin.target-preparation`**.
+
+The app's own `id` / `url` / manifest filename are sketched as `target-prep` and are
+independent of the tool key — the engine does not require them to match, and two shipped
+apps already differ (`abfe` → `deeporigin.abfe-end-to-end`, `do-patent` →
+`deeporigin.draco`). `/target-prep` versus `/target-preparation` is a product naming call,
+not a technical constraint; pick one before the route ships, because changing it later
+breaks bookmarks and any saved Activity links.
+
+The `inputSchema` and the `steps[].inputSchema` bodies are **⚠ placeholders** until §7.0 is
+done — treat the annotations (`x-data-type`, `x-from-state`,
 `x-user-input`) as correct and the *key names* as provisional.
 
 ```jsonc
 {
   "id": "target-prep",
-  "toolKey": "deeporigin.target-prep",
+  "toolKey": "deeporigin.target-preparation",
   "toolVersion": "1",
   "identityHue": 210,
   "url": "/target-prep",
@@ -763,7 +778,7 @@ rendered by whatever comes back, and given a fallback branch — hardcoding it m
 release silently drops values on the floor. A **closed** set is safe to switch on
 exhaustively.
 
-### 9.1 `deeporigin.target-prep` — inputs ⚠ UNVERIFIED
+### 9.1 `deeporigin.target-preparation` — inputs ⚠ UNVERIFIED
 
 Placeholders until §7.0. Types are what the app needs to send.
 
@@ -873,7 +888,7 @@ blank or a zero.
 
 ### 9.5 `deeporigin.pocket-finder` — inputs
 
-Called only inside `target-prep`, but the results tile reads its output.
+Called only inside `target-preparation`, but the results tile reads its output.
 
 | Field | Type | Enum | Closed? |
 | --- | --- | --- | --- |
@@ -955,7 +970,7 @@ All **closed**, all already defined in `platform-ui`:
   populate; toggle a component, assert the viewer recolours; assert Run stays disabled
   while a `review` remains.
 - **Contract** — a fixture check that the manifest's `inputSchema` matches the published
-  `deeporigin.target-prep` tool definition, so a backend schema change fails CI rather
+  `deeporigin.target-preparation` tool definition, so a backend schema change fails CI rather
   than production.
 
 ---
@@ -965,7 +980,7 @@ All **closed**, all already defined in `platform-ui`:
 **Phase 0 — reconcile the schema (§7.0).** Half a day, blocking. Nothing below is safe to
 write until the manifest's `inputSchema` matches the merged tool definition.
 
-**Phase 1 — the whole app against `deeporigin.target-prep`.** Manifest + registration,
+**Phase 1 — the whole app against `deeporigin.target-preparation`.** Manifest + registration,
 the proteins table, both pre-submit steps, both new tiles, the Mol\* keep/exclude renderer,
 and all four engine gaps (§6). This is the PRD's priority-0 scope end to end: select a
 protein → report + filtering appear → toggle components → Run Target Preparation.
@@ -983,6 +998,6 @@ Sequence inside phase 1, so work can run in parallel:
 (§5b). Adds `results.detailColumns` / `aggregates` to the manifest; the table renders them
 with no new component work.
 
-**Backend critical path:** the merged `target-prep` schema (§7.0) gates phase 1; the
+**Backend critical path:** the merged `target-preparation` schema (§7.0) gates phase 1; the
 prepared-protein `proteins` row (§5a) gates Target Prep being useful to Docking/ABFE at
 all; the `structurereport` result type gates phase 2.
