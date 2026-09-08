@@ -5,8 +5,8 @@
 
 **Primary sources**
 
-- toolbox repo — the `deeporigin.target-prep` tool definition (**not read for this
-  document**; see §7.0)
+- `platform-toolbox` — `tools/target-preparation/` holds the `deeporigin.target-prep`
+  tool definition (**located but not read for this document**; see §7.0)
 - `do-dd-client` — source of truth for the contracts of the tools `target-prep` wraps:
   `src/drug_discovery/protein_prep.py`, `src/drug_discovery/structure_report.py`,
   `src/drug_discovery/pocket_finder.py`, `src/platform/constants.py`,
@@ -534,14 +534,26 @@ None of these introduce tool-specific logic into the engine — that invariant h
 
 ## 7. Loose ends the UI can't answer alone
 
-0. **Reconcile the `target-prep` schema — blocking, do this first.** The merged tool
-   definition is not in any repo this plan was written against (`do-dd-client` `main`,
-   `platform-ui`, `platform`); it lives in the toolbox repo. Pull it — from the toolbox PR,
-   or from `GET /tools/protected/tools/deeporigin.target-prep/{version}/definitions` on a
-   dev org — and reconcile it against §3 and §8. Specifically: the exact key for the
-   selection object, whether the four parameter flags exist and what they are called,
-   whether `pdb_id` is required when loop modelling is on, the major version to pin, and
-   the `jobOutputs` key names the results view reads. Everything marked ⚠ resolves here.
+0. **Reconcile the `target-prep` schema — blocking, do this first.** The definition lives
+   in `deeporiginbio/platform-toolbox` at `tools/target-preparation/`, specifically:
+
+   - `workflow/tool-definition.json` — the input/output JSON Schema the manifest must mirror
+   - `workflow/workflow.yaml` — the step graph (confirms the tool ordering and what each
+     step emits)
+   - `workflow/preflight-service.yaml` + `images/preflight/src/preflight_service/routes/target_preparation.py`
+     — a preflight route, which suggests `target-prep` validates or pre-resolves inputs
+     before dispatch; worth reading for what it rejects, since those become client-side
+     validations the sidebar should enforce first
+   - `tests/test_target_preparation_schema.py` — the schema contract in executable form,
+     the fastest read for exact key names
+
+   Reconcile against §3 and §8: the exact key for the selection object, whether the four
+   parameter flags exist and what they are called, whether `pdb_id` is required when loop
+   modelling is on, the major version to pin, and the `jobOutputs` key names the results
+   view reads. Everything marked ⚠ resolves here.
+
+   `deeporigin.target-prep` is also worth confirming as the registered tool key — the
+   toolbox directory is `target-preparation`, and the two do not have to match.
 1. **Residue count / coverage denominator.** The PRD card shows `1,036 Residues`.
    `structure_reports` returns `coverage` (a fraction) but no residue count. Either add it
    to the tool output or read `proteins.protein_length` off the entity row.
