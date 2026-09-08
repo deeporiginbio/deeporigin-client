@@ -5,305 +5,279 @@
 
 **Primary sources**
 
-- `platform-toolbox` — `tools/target-preparation/` holds the `deeporigin.target-preparation`
-  tool definition (**located but not read for this document**; see §7.0)
-- `do-dd-client` — source of truth for the contracts of the tools `target-preparation` wraps:
-  `src/drug_discovery/protein_prep.py`, `src/drug_discovery/structure_report.py`,
-  `src/drug_discovery/pocket_finder.py`, `src/platform/constants.py`,
-  `src/platform/executions.py`, `tests/fixtures/executions/protein-prep-*.json`
-- `platform-ui` — the App Engine that Studio apps are built on:
-  `apps/uui/src/app-engine/**`, `apps/uui/src/app-schemas/**`,
-  `packages/molstar/**`
+- **[`target-preparation-backend-report.md`](./target-preparation-backend-report.md)** — verified
+  contract for `deeporigin.target-preparation` v1.0.0, read out of
+  `deeporiginbio/platform-toolbox`. Every backend claim in this plan is cited to it.
+- `do-dd-client` — the tools `target-preparation` wraps:
+  `src/drug_discovery/protein_prep.py`, `structure_report.py`, `pocket_finder.py`,
+  `src/platform/constants.py`, `src/platform/executions.py`
+- `platform-ui` — the App Engine Studio apps are built on:
+  `apps/uui/src/app-engine/**`, `apps/uui/src/app-schemas/**`, `packages/molstar/**`
 
-Scope of this document is **UI**: what DO Studio has to build, which tools-API calls it
-makes at each step, and which data-platform records get read or written. Backend asks are
-called out explicitly where the UI cannot proceed without them.
+Scope is **UI**: what DO Studio builds, which API calls it makes at each step, and which
+data-platform records get read or written.
 
-> **Status.** The workflow tool this app submits to — `deeporigin.target-preparation` — has
-> shipped. §3 is therefore settled, not a proposal, and the phase-1 fallback that built
-> the app against `deeporigin.protein-prep` alone is gone.
->
-> **The `target-preparation` input/output shapes in §3 and §8 are still placeholders.** They are
-> written from the PRD and from what the underlying tools take today; they have *not* been
-> reconciled against the merged tool definition (that definition is not in `do-dd-client`,
-> `platform-ui` or `platform` — see §7.0). Every field name marked `⚠` below must be
-> checked against `GET /tools/protected/tools/deeporigin.target-preparation/{version}/definitions`
-> before the manifest is written, because `buildToolPayload` emits exactly the keys the
-> `inputSchema` declares and a mismatch fails at execution time, not at build time.
+> **Revision note.** This document was first written against the PRD plus the shipped
+> Python client, with the `target-preparation` schema unread. The backend report has since
+> landed and **contradicted several assumptions**. §2 lists every conflict. The three that
+> change the most work: the four "Advanced Parameters" checkboxes in the mockup do not
+> exist (§2.1); `keep` on a ligand means *extract to a separate file*, not *retain in the
+> receptor* (§2.3); and the keep/skip map must be **exhaustive over every component,
+> including every water** (§2.4). Two earlier claims of my own were wrong and are corrected
+> in §2.7.
 
 ---
 
-## 1. What already exists
+## 1. The verified contract
 
-### 1.1 `deeporigin.protein-prep` (version `latest`, major `2`)
+### 1.1 `deeporigin.target-preparation` v1.0.0
 
-One tool, two operations discriminated by `inputs.action`. Not billable — there is no
-quote path (`ProteinPrep` has no `run(quote=True)`).
-
-**Execution endpoint** (same for every tool):
-
-```
-POST /tools/{orgKey}/tools/deeporigin.protein-prep/{major}/executions
-body: { inputs, outputs: {}, metadata: {}, sync: <bool>, clusterId, projectId?, name? }
-```
-
-Note `sync` is a **top-level body key**, not an input — see `_make_protein_prep_payload`
-(`src/drug_discovery/protein_prep.py:1030`). The protein-prep JSON Schema has no `sync`
-property, so it must not be sent inside `inputs`.
-
-**`action: "recommend"`** — inventories the structure. Always run with `sync: true`.
-
-```jsonc
-// inputs
-{ "action": "recommend", "protein": { "file_path": "entities/proteins/<hash>.pdb", "id": "<protein_id>" } }
-```
-
-```jsonc
-// jobOutputs.recommendation
-{
-  "source_sha256": "aaaa…",           // digest of the uploaded structure bytes
-  "analyzer_version": "1.0.0",
-  "chain_id_mapping": {},
-  "components": [
-    { "id": "chain:A",           "kind": "chain",  "subtype": "protein",
-      "label": "Chain A", "recommendation": "keep",
-      "reason": "Ordinary protein chain", "reason_code": "ordinary_protein_chain",
-      "author": { "chain_id": "A" } },
-    { "id": "ligand:LIG:A:100",  "kind": "ligand", "subtype": "small_molecule",
-      "label": "LIG", "recommendation": "review",
-      "reason": "Ambiguous ligand", "reason_code": "ambiguous_ligand",
-      "author": { "chain_id": "A", "resname": "LIG", "resseq": 100 } },
-    { "id": "water:A:HOH:310:",  "kind": "water",  "subtype": "crystal",
-      "recommendation": "skip", "evidence": {} },
-    { "id": "water:A:HOH:311:",  "kind": "water",  "subtype": "coordinating",
-      "recommendation": "keep", "evidence": { "n_coord": 1 } }
-  ]
-}
-```
-
-- `kind` ∈ `chain | ligand | cofactor | water` (`PROTEIN_PREP_COMPONENT_KINDS`)
-- `recommendation` ∈ `keep | review | skip` — the analyzer's frozen tag
-- `author` carries the PDB addressing (`chain_id`, `resname`, `resseq`) — **this is what
-  the Mol\* keep/exclude renderer selects on.**
-
-**`action: "prepare"`** — applies the caller's resolved decisions, models loops, protonates.
-
-```jsonc
-// inputs
-{
-  "action": "prepare",
-  "protein": { "file_path": "…", "id": "…" },
-  "selection": {
-    "source_sha256": "aaaa…",        // must match the recommend digest
-    "analyzer_version": "1.0.0",
-    "decisions": { "chain:A": "keep", "ligand:LIG:A:100": "skip", … }
-  },
-  "model_missing_loops": false,      // omitted when true (the default)
-  "pdb_id": "1EBY"                   // REQUIRED when model_missing_loops is true
-}
-```
-
-```jsonc
-// jobOutputs.protein
-{ "protein_pdb_file_path": "…", "pdb_id": "1EBY", "protein_id": "brd",
-  "ph": 7.4, "force_field": "amber14", "protonate_protein": true }
-```
-
-Also written to result-explorer as `result_type: "preparedprotein"` with
-`data.protein_pdb_file_path` (`protein_prep.py:1318`).
-
-Hard rules the UI has to honour:
-
-- Every `review` decision must be resolved to `keep` or `skip` before prepare, or the
-  tool rejects the payload (`_validate_for_submit`).
-- The `selection` is **digest-bound**: if the protein file changes, `source_sha256` no
-  longer matches and prepare fails. Re-running recommend is the only fix.
-- `model_missing_loops: true` requires a 4-character `pdb_id`. Proteins in the project
-  without a `pdb_id` cannot use loop modelling.
-- Loops-off prepare may be synchronous (`sync: true`); loops-on must be async.
-
-### 1.2 `deeporigin.structure-report` (version `latest`)
-
-Synchronous, billable (`approveAmount` supported). Takes a protein, a PDB ID, or both.
-
-```jsonc
-// inputs (at least one of the two)
-{ "protein": { "file_path": "…", "id": "…" }, "pdb_id": "6GOG" }
-```
-
-```jsonc
-// jobOutputs.structure_reports[0]
-{
-  "grade": "A", "weighted_score": 0.83,
-  "resolution_score": …, "coverage_score": …, "rfree_score": …,
-  "inhibitor_score": …, "method_score": …, "organism_score": …,
-  "metadata_source": "rcsb" | "file_header" | "file_header+rcsb",
-  "field_status": { "<field>": "value" | "not_applicable" | "unknown" },
-  "coverage": 0.826, "has_ligand": true,
-  "method": "X-RAY DIFFRACTION", "method_class": "x-ray",
-  "organism": "Homo sapiens", "organism_class": "human",
-  "resolution": 2.31, "rfree": 0.24,
-  "pdb_id": "6GOG", "protein_id": "…", "source_sha256": "…"
-}
-```
-
-This maps 1:1 onto the PRD's report card: grade badge `A`, the pills
-`X-ray` / `Human` / `2.31Å` / `Ligand`, and the `6GOG · 1,036 Residues · 82.6% Coverage`
-line. `field_status` says which pills to render as unknown rather than fabricating a value.
-**Residue count is not in the payload** — it comes from `proteins.protein_length` on the
-entity row, or has to be added to the tool output (see §7).
-
-### 1.3 `deeporigin.pocket-finder` (version `2`)
-
-Billable, async. Auto-find mode:
-
-```jsonc
-{ "protein": { "file_path": "…", "id": "…" }, "pocket_count": 5, "pocket_min_size": 30 }
-```
-
-Results land as `result_type: "pocket"` rows and are already rendered by the existing
-`renderStructureAndPockets` Mol\* renderer (see `pocket-finder.json`).
-
-### 1.4 The prepared-protein stamp
-
-`src/drug_discovery/structures/prepared_protein_stamp.py` writes
-`REMARK  99 DO_PREPARED` (PDB) / `_deeporigin.prepared` (mmCIF). Downstream Pocket Finder,
-Docking and System Prep skip their AUTO cleanup when they see it. The Target Prep output
-must carry the stamp, and the Mol\* viewer already surfaces it
-(`packages/molstar/src/components/prepared-badge.tsx`).
-
----
-
-## 2. Why the app submits to `target-preparation` and not to `protein-prep`
-
-The PRD asks for one button that runs, *in this order*:
-
-1. Add missing atoms & residues
-2. Loop Builder
-3. Protonation
-4. Pocket Finder
-5. Structure Report
-
-Steps 1–3 all live inside `protein-prep`'s `prepare` action. Steps 4 and 5 are separate
-tools. So the PRD's single button is **three tool executions** — which is exactly what
-`deeporigin.target-preparation` now wraps.
-
-That also decides the four "Advanced Parameters" checkboxes. None of them can be driven
-from `protein-prep` directly: three have no input at all on it, and the fourth is a
-different tool. They have to be inputs on `target-preparation`:
-
-| PRD checkbox | On `protein-prep` | Expected on `target-preparation` ⚠ |
-| --- | --- | --- |
-| Add missing atoms & residues | none — always on inside `prepare` | a boolean input |
-| Add missing loops | `model_missing_loops` | passthrough of the same flag |
-| Protonate (pH 7.4) | none — always on; `jobOutputs.protein.protonate_protein` only echoes it | a boolean input |
-| Find Pockets | n/a — separate tool | gates whether the pocket-finder step runs |
-
-If the merged definition does not expose all four, the sidebar must drop or lock the
-checkboxes it cannot back — rendering a control that silently does nothing is worse than
-not rendering it.
-
----
-
-## 3. Architecture: one workflow tool, one app — settled
-
-The App Engine is deliberately **1 app ↔ 1 backend tool**
-(`apps/uui/CLAUDE.md`, "Backend Tool Integration"). `manifest.steps` exists for
-*pre-submit, synchronous* intermediate tools only (`useRunStep`) — it cannot chain
-long-running executions after submit. There is no post-submit orchestration in the engine,
-and building one would mean the UI owns retry, partial failure and three Activity rows for
-one user action.
-
-**`deeporigin.target-preparation` is that workflow tool, and it has shipped.** It is the same
-shape as `deeporigin.abfe-end-to-end` (which already chains `system-prep` → `abfe` via a
-`steps` array; see `apps/uui/src/app-schemas/abfe.json`): one execution, one Activity row,
-one billing transaction, one results view. The app's `manifest.toolKey` is
-`deeporigin.target-preparation` from day one.
-
-The shapes below are **⚠ placeholders pending the merged definition** (§7.0) — they say
-what the app needs to send and receive, not what the tool is known to accept.
-
-```jsonc
-// deeporigin.target-preparation inputs — ⚠ UNVERIFIED
-{
-  "protein":   { "file_path": "…", "id": "…" },
-  "selection": { "source_sha256": "…", "analyzer_version": "…", "decisions": { … } },
-  "pdb_id": "6GOG",
-  "add_missing_atoms": true,
-  "model_missing_loops": true,
-  "protonate": true,
-  "find_pockets": true,
-  "output_name": "Default_TargetPrep_ProteinId"
-}
-```
-
-```jsonc
-// jobOutputs — ⚠ UNVERIFIED
-{
-  "protein": { "protein_pdb_file_path": "…", "protein_id": "<new proteins row id>", … },
-  "pockets": [ … ],
-  "structure_reports": [ { "grade": "A", … } ]
-}
-```
-
-The `selection` is produced in the UI from a **`protein-prep` `recommend` step run before
-submit** — that part *does* fit `manifest.steps`, because recommend is synchronous and
-cheap. Note this means the app talks to **two** tool keys: `protein-prep` (recommend) and
-`structure-report` as pre-submit steps, and `target-preparation` on submit. That is supported —
-`manifest.steps[].toolKey` is independent of `manifest.toolKey`, which is how RBFE calls
-Konnektor.
-
-One thing to confirm with the tool owner: whether `target-preparation` re-runs recommend
-internally. If it does, the `selection` the UI sends must still be honoured verbatim — the
-digest binding (`source_sha256`) is what makes the user's keep/skip choices meaningful, and
-a re-analysis that overrides them would silently discard the whole filtering UI.
-
-### 3.1 Which tools the app actually calls
-
-`target-preparation` is the only tool the **Run** button submits to. But the app is not a
-single-tool client, because two things have to happen *before* the user can press Run — the
-structure has to be graded, and its components have to be inventoried — and those are
-separate executions by definition: they run on selection, not on submit.
-
-| Call | Tool | When | Still needed? |
-| --- | --- | --- | --- |
-| Grade the selected structure | `deeporigin.structure-report` | on row select | **Yes** — PRD requirement 1 is a report *on selection*, before any run |
-| Inventory components | `deeporigin.protein-prep` `action: "recommend"` | on row select | **Yes, unless superseded** — see below |
-| Prepare + pockets + final report | `deeporigin.target-preparation` | on submit | Yes — the whole run |
-| `deeporigin.protein-prep` `action: "prepare"` | — | never | **No.** This is inside `target-preparation`. The UI must not call it directly. |
-| `deeporigin.pocket-finder` | — | never | **No.** Inside `target-preparation`. |
-
-So: **prepare, no. Recommend, probably yes.**
-
-The reason recommend survives is that the Structure Filtering panel — the entire middle of
-the PRD's second screenshot — is rendered *from* its output, and the run's `selection` is
-built from the user's edits to it. Recommend is also the only known producer of
-`source_sha256`, the digest that binds a Selection to the exact bytes it was computed
-against. Without an inventory there is nothing to toggle and nothing to send.
-
-`target-preparation` re-running its own analysis internally does not remove this need: the user
-has to see and edit the components *before* submitting, so the inventory must be available
-pre-submit regardless of what the workflow does with it afterwards.
-
-What *would* supersede the recommend call is a cheaper pre-submit inventory endpoint. There
-is a candidate: `platform-toolbox` ships
-`images/preflight/src/preflight_service/routes/target_preparation.py` and a
-`workflow/preflight-service.yaml` alongside the tool. If that route returns the component
-inventory, the app should call it instead — a preflight HTTP call avoids creating a tool
-execution per row selection, which at one execution per click is a real cost and a real
-Activity-page noise problem (mitigated today only by `visibility: "hidden"`).
-
-**Decide this in §7.0, before writing the manifest**, because the two paths are structurally
-different in the engine:
-
-| If the inventory comes from | Then |
+| | |
 | --- | --- |
-| `protein-prep` `action: "recommend"` | a `manifest.steps` entry, as sketched in §8 — no new engine capability beyond gap #1 |
-| the preflight service | **not** a `manifest.steps` entry — `useRunStep` only speaks to the tools-execution endpoint. The Structure Filtering tile fetches it directly (its own hook + react-query), the way `csv-table` and `patent-wrapper` already fetch their own data |
-| `target-preparation` itself, via a `recommend`-style action | a `manifest.steps` entry pointing at `target-preparation` with an action discriminator — same shape as the `protein-prep` case, different `toolKey` |
+| Tool key | `deeporigin.target-preparation` (dotted form; the Argo name `deeporigin-target-preparation` is not the key) |
+| Version to pin | major **`1`** |
+| Billing code | `DO_POCKET_FINDER` |
+| Execution mode | **Argo workflow, always** — never direct, never synchronous |
+| `jobOutputs` | **none** — the executions API omits it for workflow mode by design |
+| Root `required` | `["action", "protein"]` |
+| `additionalProperties` | **`false`** at the root and on `pocket`, `protein`, `selection`, `pocket.selections[]`, `pocket.selections[].author` |
 
-Either way the *tile* and its state contract are identical; only the fetch differs. Build
-the tile against a fixture first (§10) and the choice stays a one-file change.
+Two mutually exclusive branches on `action`:
+
+**`action: "recommend"`** — runs source Structure Report + Protein Prep recommend.
+`selection`, `model_missing_loops` and `pocket` are **forbidden**.
+
+```jsonc
+{ "action": "recommend",
+  "protein": { "id": "<protein entity id>", "file_path": "<UFA path>" },
+  "pdb_id": "6GOG" }                       // optional, for RCSB metadata
+```
+
+**`action: "prepare"`** — applies the Selection, prepares, reports, finds pockets.
+`selection`, `model_missing_loops` and `pocket` are all **required**.
+
+```jsonc
+{ "action": "prepare",
+  "protein": { "id": "…", "file_path": "…" },
+  "selection": {
+    "source_sha256":    "<64 hex>",        // must match the analyzed bytes exactly
+    "analyzer_version": "1.1.0",           // must match the analyzer that ran
+    "decisions": { "chain:A": "keep", "water:A:HOH:310:": "skip", … }
+  },
+  "model_missing_loops": true,             // no default — must be sent
+  "pdb_id": "6GOG",                        // required unless model_missing_loops === false
+  "pocket": { "mode": "auto-find", "pocket_count": 5, "pocket_min_size": 30 } }
+```
+
+`protein` requires **both** `id` and `file_path`. `id` is *"required for pocket indexing"* —
+an unregistered structure cannot be run.
+
+**Outputs** are read from indexed result tables, addressed by `x-result-group`:
+
+| Output key | `x-data-type` | `x-result-group` | Notes |
+| --- | --- | --- | --- |
+| `protein` | `PreparedProtein` | `preparedproteins` | `.protein_pdb_file_path` is the prepared PDB, stamped `REMARK  99 DO_PREPARED` |
+| `pockets[]` | `Pocket` | `pockets` | carries the PCA-aligned `box` for docking |
+| `structure_reports[]` | `StructureReport` | `structurereports` | `report_role: "source"` on recommend, `"prepared"` on prepare |
+| `extracted_ligands[]` | `ExtractedLigand` | `extractedligands` | kept ligands, pulled out as separate PDBs |
+| `recommendation` | **none** | **none** | the component inventory — see §3.1 |
+| `selection_file_path` | — | — | UFA path to the frozen Selection JSON |
+| `audit_file_path` | — | — | UFA path to the transformation audit |
+
+Workflow order on `prepare`: prepare (SystemPrep) → prepared Structure Report →
+Pocket Finder. The last two have no `when:` guard — **both always run**.
+
+### 1.2 `deeporigin.protein-prep` — still needed for the inventory
+
+Same analyzer, same component ids, same Selection shape. The difference that matters:
+its `recommend` action quotes **`"direct"`**, so it executes synchronously and returns
+`jobOutputs.recommendation` in the create response. See §3.1.
+
+### 1.3 `deeporigin.structure-report` and `deeporigin.pocket-finder`
+
+Both run inside `target-preparation`. The UI calls neither directly on submit; it may call
+structure-report on selection (§3.2).
+
+---
+
+## 2. Where the mockup and the tool disagree
+
+Every row is a product decision that has to be made before the sidebar is built.
+
+### 2.1 Three of the four Advanced Parameters checkboxes do not exist
+
+| Mockup checkbox | Reality |
+| --- | --- |
+| Add missing atoms & residues | **No input.** Always on. |
+| Add missing loops | `model_missing_loops` — exists, **required on prepare, no default** |
+| Protonate (pH 7.4) | **No input.** Protonation always runs. `protonate_protein` exists only as an *output* echo. |
+| Find Pockets | **No input.** Pocket Finder always runs on prepare. Only the *mode* is choosable. |
+
+Root is `additionalProperties: false`, so inventing the three missing keys is a hard
+schema rejection at execution-create, not a warning.
+
+**Recommendation:** render only `model_missing_loops` as a control. Show the other three as
+static "always applied" text if the reassurance is wanted, but not as checkboxes — a toggle
+that silently does nothing is worse than no toggle. Take this back to the PRD owner.
+
+### 2.2 There is no run-name or output-name input
+
+No `name`, `output_name`, `run_name` or label input exists.
+
+**But the mockup's "Run Name" field is still fine**, and this is worth being precise about
+because the backend report's advice ("do not send `name`") is about `inputs`. The engine's
+`x-body-key` annotation puts a field at the **execution body** level —
+`useSubmitExecution` builds `{ inputs, outputs, clusterId, ...bodyFields }`, so `name`
+lands as a sibling of `inputs`, never inside it, and `additionalProperties: false` does not
+see it. **`run_name` with `x-body-key: "name"` stays.**
+
+What dies is the mockup's **"Output Property Name"** field — there is nothing to bind it
+to. Drop it.
+
+### 2.3 `keep` on a ligand means *extract*, not *retain*
+
+A kept ligand is routed to `extract_ligand_keys`, written out as its own PDB, and surfaces
+in `extracted_ligands[]`. It is **not** in the prepared receptor. The analyzer's own reason
+string says so: *"Recognized ligand {resname}; keep means extract"*.
+
+The PRD's two-tone palette (saturated = keep, desaturated = exclude) is therefore **wrong
+for ligands**. A user who sees a bright orange ligand labelled "Keep" will reasonably expect
+it in the output structure, and it will not be there.
+
+**Recommendation: three states, not two** — Keep (in the receptor) / Extract (separate
+file) / Skip (discarded) — with "Extract" being what `keep` means on a `ligand` component.
+Chains, cofactors and waters keep the two-state meaning. This needs a palette decision and
+a PRD conversation; it is the single most user-visible correction in this document.
+
+### 2.4 The decisions map must be exhaustive — every water included
+
+A partial map is rejected (`selection.decisions is missing components: …`), an unknown id
+is rejected, and a lingering `review` is rejected. Every water in the file is inventoried as
+its own component, and non-coordinating waters default to `review`.
+
+For a typical crystal structure that is **hundreds of rows the user must resolve** before
+the Run button can enable. A flat list of per-row toggles, as the mockup shows, does not
+survive contact with a real PDB.
+
+**Recommendation:** group the panel by `kind`, collapse waters into a single summarised
+group with bulk "keep all / skip all" plus a count, and virtualize the list. The mockup's
+one-row-per-component layout works for chains, ligands and cofactors — which is what the
+screenshot happens to show — and needs a different treatment for waters.
+
+### 2.5 Some Keep choices are illegal
+
+Both are 400s from the prepare child, so both must be blocked client-side:
+
+- Keeping a chain whose `subtype` is `nucleic`, `mixed` or `other` →
+  *"Cannot keep unsupported polymer chain"*. The inventory flags these already:
+  `recommendation: "review"`, `reason_code: "non_protein_chain"`.
+- Keeping **zero** protein chains → *"selection must keep at least one supported protein
+  chain"*.
+
+### 2.6 `prepare` requires a whole pocket configuration the mockup has no room for
+
+`pocket` is required, with three modes and mutually exclusive per-mode requirements:
+
+| `mode` | Required | Forbidden |
+| --- | --- | --- |
+| `auto-find` (default) | `pocket_count`, `pocket_min_size` | `crystal_ligand` |
+| `define-by-selection` | `selections[]` | `crystal_ligand` |
+| `from-crystal-ligand` | `crystal_ligand` | `selections`, `pocket_count`, `pocket_min_size` |
+
+`pocket_count` and `pocket_min_size` have **no schema defaults**, so the UI must supply
+numbers. Cheapest viable default: `{ "mode": "auto-find", "pocket_count": 5,
+"pocket_min_size": 30 }` — matching the shipped `pocket-finder.json` manifest defaults.
+
+Worth noting as a v2 opportunity: `from-crystal-ligand` takes a `component_id` of a ligand
+this very run extracted. A user who keeps `Ligand XO4` (as the mockup screenshot does) could
+have the pocket defined from it in one gesture. Out of scope for v1, but the schema is
+already there.
+
+### 2.7 Two corrections to earlier drafts of this plan
+
+- **Component id grammar.** An earlier draft claimed ligand and water ids use different
+  field orders. That was wrong. There is **one** residue id builder and the grammar is
+  uniform: `kind:chain:resname:resseq:icode`. The shape `ligand:LIG:A:100` in
+  `do-dd-client`'s fixtures cannot be produced by the analyzer — it is a bad fixture (as are
+  `ligand:A:120:IBP` in several `platform-toolbox` tests). The practical advice was right
+  for the wrong reason: **do not parse ids** — echo them back verbatim and use `author` for
+  addressing. See §9.3.
+- **The preflight route.** An earlier draft floated calling it for a cheaper inventory. It
+  is a create-time billing/validation gate returning `{method, counts, validations?}`,
+  cluster-internal, not browser-reachable. That option is void. Its seven validations are
+  still worth mirroring client-side (§7).
+
+---
+
+## 3. Architecture: two executions, one button press
+
+`target-preparation` cannot be driven by a single execution — `prepare` needs a
+`source_sha256`, an `analyzer_version` and an exact component id set that only a
+`recommend` run produces.
+
+That is **not** a problem for the App Engine, and does not mean a two-step wizard. The
+engine already has the shape: `manifest.steps` runs pre-submit tools, and an `ActionField`
+with `autoRun: true` fires one the moment its `requires` selection is satisfied. So the
+inventory is fetched **when the user clicks a protein row**, not when they press Run. By the
+time Run is pressed the Selection exists, and the user presses one button.
+
+```
+row select ──► [step] inventory ─────► filtering panel + viewer
+           └─► [step] structure report ─► report card
+                                              │
+                          user toggles ───────┤
+                                              ▼
+                                     [submit] target-preparation action=prepare
+```
+
+### 3.1 Which tool serves the inventory — the one open runtime question
+
+`target-preparation` `action: "recommend"` is the obvious candidate and is probably
+**unusable from the UI**:
+
+- it runs in **workflow mode**, so the create response carries no `jobOutputs`;
+- its `recommendation` output has **no `x-result-group`**, so it has no indexed result
+  table either.
+
+Between those two, there may be nowhere to read it from. `deeporigin.protein-prep`
+`action: "recommend"` quotes **`"direct"`**, executes synchronously, and returns
+`jobOutputs.recommendation` in the create response — which is exactly what
+`useRunStep`'s `bind` reads.
+
+**Plan of record: get the inventory from `deeporigin.protein-prep` `action: "recommend"`.**
+
+This is safe on identity grounds — both tools drive the same `toolbox_core` analyzer, the
+same `ANALYZER_VERSION`, the same component ids and the same Selection schema, and
+`target-preparation`'s prepare child *is* the sysprep service that `protein-prep` calls. But
+it is a cross-tool assumption, so **verify it once**: run `protein-prep recommend`, feed its
+Selection to `target-preparation prepare`, confirm the digest and analyzer checks pass.
+
+If instead the platform *does* surface a workflow-mode `recommendation`, switch the step's
+`toolKey` to `target-preparation` and add `"action": "recommend"` to the step's `inputs`.
+Nothing else changes — the tile's state contract is identical. Build the tile against a
+fixture and this stays a one-line manifest change.
+
+### 3.2 The source structure report
+
+`target-preparation recommend` emits a `report_role: "source"` row, and `prepare` emits a
+`"prepared"` row. Both are indexed (`x-result-group: structurereports`), so both are
+readable even in workflow mode.
+
+But if the inventory comes from `protein-prep` (§3.1), no `target-preparation recommend`
+execution exists, and with it no source report. So the app calls
+**`deeporigin.structure-report` directly** as a second pre-submit step — synchronous, with
+`jobOutputs.structure_reports`, exactly as the original plan had it.
+
+### 3.3 What the app calls, end to end
+
+| Call | Tool | Action | When | Mode |
+| --- | --- | --- | --- | --- |
+| Grade the structure | `deeporigin.structure-report` | — | on row select | sync, `jobOutputs` |
+| Inventory components | `deeporigin.protein-prep` | `recommend` | on row select | direct/sync, `jobOutputs`, `__SKIP`-billed |
+| The run | `deeporigin.target-preparation` | `prepare` | on submit | workflow/async, indexed results, 1 × `DO_POCKET_FINDER` |
+
+`deeporigin.pocket-finder` and `protein-prep`'s `prepare` action are **never** called
+directly — both are inside `target-preparation`.
 
 ---
 
@@ -312,26 +286,25 @@ the tile against a fixture first (§10) and the choice stays a one-file change.
 ### Step 0 — route and shell
 
 `/target-prep` renders `AppPage` → `AppEngineProvider` → mosaic layout + form sidebar.
-No API calls beyond the manifest fetch (`/app-manifests/deeporigin.target-preparation/{major}.json`
-in staging/prod; the bundled `src/app-schemas/target-prep.json` locally and on PR previews).
+Manifest from `/app-manifests/deeporigin.target-preparation/1.json` in staging/prod, from
+the bundled `src/app-schemas/target-prep.json` locally and on PR previews.
 
 ### Step 1 — proteins table
 
-`TableWrapper` with `config.entity: "proteins"`, `singleSelection: true`.
-Reads `POST /data-platform/{orgKey}/entities/proteins_with_results/search` through the
-existing server-side row model (`use-server-datasource.ts`). **No new data-platform work**
-— the same table pocket-finder and ABFE use.
+`TableWrapper`, `config.entity: "proteins"`, `singleSelection: true`. Existing server-side
+row model, no new data-platform work.
 
-The PRD screenshot shows a `Docking Score` column; that is the existing
-`showsResults: true` results-column machinery, nothing new.
+**One gate the other apps do not have:** `target-preparation` requires `protein.id` **and**
+`protein.file_path`, both non-blank after trimming (whitespace-only passes schema but fails
+preflight). Rows missing either must be unselectable or the Run button disabled with a
+reason.
 
 ### Step 2 — row selected → two synchronous steps auto-run
 
-`TableWrapper.handleSelectionChanged` → `engine.setSelectedProteins([row])` → Zustand.
-Two `manifest.steps` entries fire via hidden `ActionField`s with `autoRun: true`
-(`apps/uui/src/app-engine/form-engine/fields/action-field.tsx`). `useRunStep` handles both.
+`engine.setSelectedProteins([row])` → Zustand. Two hidden `ActionField`s with
+`autoRun: true` fire through `useRunStep`.
 
-**2a. Structure Report (initial)**
+**2a. Structure Report**
 
 ```
 POST /tools/{orgKey}/tools/deeporigin.structure-report/{major}/executions
@@ -340,7 +313,7 @@ body: { inputs: { protein: {id, file_path}, pdb_id? }, outputs: {}, clusterId,
 bind: { "structure_reports": "structureReport" }
 ```
 
-**2b. Protein Prep recommend**
+**2b. Component inventory**
 
 ```
 POST /tools/{orgKey}/tools/deeporigin.protein-prep/{major}/executions
@@ -349,135 +322,146 @@ body: { inputs: { action: "recommend", protein: {id, file_path} }, outputs: {},
 bind: { "recommendation": "recommendation" }
 ```
 
-Both land in `useAppStore.stepOutputs`. `useSelectionResets` already clears `stepOutputs`
-whenever the entity selection changes, and `ActionField` re-arms per selection — so picking
-a different protein re-runs both with no extra wiring.
+`action: "recommend"` comes from `ActionField.inputs` (merged over the schema-built inputs
+as `inputOverrides`), not from a schema annotation.
 
-`visibility: "hidden"` keeps these out of the user's Activity page
-(`AppStep.visibility`, already supported).
+`useSelectionResets` already clears `stepOutputs` when the selection changes, and
+`ActionField` re-arms per selection — changing protein re-runs both.
 
-> **Engine gap #1** — `useRunStep` builds its body as `{ inputs, outputs, clusterId, … }`
-> and never sends a top-level `sync`. Protein-prep recommend needs `sync: true` at the top
-> level. Add `AppStep.sync?: boolean` and spread it into the body
-> (`apps/uui/src/app-engine/hooks/use-run-step.tsx:135`). Precedent for a top-level `sync`
-> already exists in `renderer/table-wrapper/use-export-dataset.ts:109`.
+> **Engine gap #1** — `useRunStep` never sends a top-level `sync`. Add
+> `AppStep.sync?: boolean` and spread it into the body
+> (`apps/uui/src/app-engine/hooks/use-run-step.tsx:135`). Precedent:
+> `renderer/table-wrapper/use-export-dataset.ts:109`.
 
-### Step 3 — Structure Report tile renders
+Both steps must handle the **HTTP 200 + `status: "Failed"`** pattern `useRunStep` already
+guards, and the filtering tile must render the step's `stepErrors` entry rather than an
+empty list — a failed inventory and an empty inventory look identical otherwise.
 
-New tile reads `stepOutputs.structureReport[0]` reactively and renders the grade card.
-No API call.
+### Step 3 — Structure Report card
 
-### Step 4 — Structure Filtering tile renders
+Reads `stepOutputs.structureReport[0]`. Renders grade badge, the
+`X-ray` / `Human` / `2.31Å` / `Ligand` pills, and the coverage line. `field_status` (six
+fixed keys) says which pills are `unknown` or `not_applicable` rather than absent — render
+those states, do not blank them. Never recompute the grade.
 
-New tile reads `stepOutputs.recommendation`, seeds a local decision map from each
-component's `recommendation`, and renders one Keep/Skip row per component ordered
-chain → ligand → water → cofactor (matching the PRD screenshot). Every edit writes the
-full Selection object back to the store:
+Residue count (`1,036 Residues` in the mockup) is **not** in the report; read
+`proteins.protein_length` off the entity row.
+
+### Step 4 — Structure Filtering tile
+
+Reads `stepOutputs.recommendation`, seeds a decision map from each component's
+`recommendation`, and writes the full Selection back on every edit:
 
 ```ts
 engine.setStateValue('selection', {
   source_sha256:    recommendation.source_sha256,
   analyzer_version: recommendation.analyzer_version,
-  decisions:        { 'chain:A': 'keep', 'ligand:XO4:A:1': 'keep', … },
+  decisions:        { 'chain:A': 'keep', 'water:A:HOH:310:': 'skip', … },  // exhaustive
 });
 ```
 
-> **Engine gap #2** — `stepOutputs` is currently written only by `useRunStep`. Expose a
-> generic `engine.setStateValue(key, value)` (thin wrapper over the store's existing
-> `setStepOutputs`) on the `AppEngine` interface so a tile can contribute state that
-> `x-from-state` picks up. This stays tool-agnostic — the engine never learns what a
-> "selection" is.
+Requirements this tile carries, beyond the mockup:
 
-`review` components must render in a visually distinct state and must **not** be silently
-coerced. The Run button stays disabled while any decision is `review`.
+- **Exhaustive** — one entry per inventoried component, no exceptions (§2.4)
+- **Grouped, with bulk actions and virtualization** for waters (§2.4)
+- **Three states on ligands** — Keep / Extract / Skip (§2.3)
+- **Illegal keeps blocked** — non-protein chains, and the last protein chain (§2.5)
+- **`review` blocks submit** until resolved
 
-> **Engine gap #3** — `manifest.parameters.requiredEntities` can only gate on entity
-> selections. Add a `SubmitValidation` kind for "no unresolved value in a state key", e.g.
-> `{ type: 'state-resolved', stateKey: 'selection', path: 'decisions', disallow: 'review',
-> message: 'Resolve every component before running Target Preparation' }`, evaluated in
-> `engine.submit` alongside the existing `disjoint` rule.
+> **Engine gap #2** — `stepOutputs` is written only by `useRunStep`. Expose
+> `engine.setStateValue(key, value)` over the store's existing `setStepOutputs` so a tile
+> can contribute state that `x-from-state` reads. Stays tool-agnostic.
 
-### Step 5 — Mol\* viewer colours keep vs exclude
+> **Engine gap #3** — `requiredEntities` only gates on entity selections. Add a
+> `SubmitValidation` kind for state-shaped rules, evaluated in `engine.submit`:
+> no `review` remaining, decisions exhaustive against the inventory, ≥1 protein chain kept,
+> no unsupported chain kept.
 
-`ProteinViewerWrapper` with a new renderer. Structure file is fetched from UFA the same way
-pocket-finder does it (`use-structure-file.ts`). Component → Mol\* selection uses the
-`author` block from each recommendation component:
+### Step 5 — Mol\* viewer
+
+Per-component colouring. Build components once per structure load, swap only the colour
+theme on toggle.
 
 ```ts
 MS.struct.generator.atomGroups({
   'chain-test':   MS.core.rel.eq([MS.ammp('auth_asym_id'), author.chain_id]),
-  'residue-test': MS.core.rel.eq([MS.ammp('auth_seq_id'), author.resseq]),   // ligand/water/cofactor
+  'residue-test': MS.core.rel.eq([MS.ammp('auth_seq_id'), author.resseq]),
 })
 ```
 
-then `plugin.builders.structure.tryCreateComponentFromExpression(...)` +
-`buildUniformColor(value)`. Both primitives already exist
-(`packages/molstar/src/api/loaders.ts:448`, `packages/molstar/src/utils/color-themes.ts`).
+`tryCreateComponentFromExpression` + `buildUniformColor` already exist
+(`packages/molstar/src/api/loaders.ts:448`, `utils/color-themes.ts`).
 
-PRD palette, hex → the `number` that `buildUniformColor` takes:
+**Address from `author`, never from the id.** And apply `recommendation.chain_id_mapping`
+first — for mmCIF input, author chain ids are remapped to single-character PDB chain ids,
+so the inventory's `chain_id` may not match the file the viewer loaded.
+
+PRD palette, plus the third state §2.3 requires:
 
 | Component | Keep | Exclude |
 | --- | --- | --- |
 | Protein chain | `#2563eb` | `#bfdbfe` |
-| Ligand | `#f97316` | `#fed7aa` |
+| Ligand — **needs a third "extract" treatment** | `#f97316` | `#fed7aa` |
 | Co-factor | `#9333ea` | `#e9d5ff` |
 | Water | `#06b6d4` | `#cffafe` |
 
-The viewer re-renders on every decision toggle, so the renderer must be cheap to re-apply —
-build the components once per structure load and only swap the colour theme on toggle.
-
 ### Step 6 — sidebar
 
-Driven by `manifest.parameters.sections` (`AppFormEngine`). Three sections, matching the
-screenshot:
+| Section | Contents |
+| --- | --- |
+| Structure Components | read-only chips of kept components (engine gap #4) |
+| Preparation | `model_missing_loops` boolean; `pdb_id` string, **required and validated `^[A-Za-z0-9]{4}$` whenever loops are on** |
+| Pocket Detection | `pocket.mode` enum (default `auto-find`), `pocket_count`, `pocket_min_size` |
+| Run Details | `run_name` (`x-body-key: "name"`) |
 
-1. **Structure Components** — read-only chips of the currently-kept components
-   (`Chain A`, `Ligand XO4`, `Mn2+`), or `None` before a selection. Reads
-   `stepOutputs.selection` + `stepOutputs.recommendation` for labels.
-2. **Advanced Parameters** (collapsible, open) — four `boolean` fields:
-   `add_missing_atoms`, `model_missing_loops`, `protonate`, `find_pockets`. `helpText`
-   carries the sub-labels ("Fills incomplete residues", "Assign states @ pH 7.4", …).
-   `model_missing_loops` must be disabled with an explanatory hint when the selected
-   protein has no `pdb_id` — the tool rejects loops-on without one.
-3. **Run Details** — `output_name` string field (the screenshot's "Output Property Name",
-   placeholder `Default_TargetPrep_ProteinId`) plus the standard `run_name` with
-   `x-body-key: "name"`.
+**The `model_missing_loops` / `pdb_id` coupling is the sharpest UX edge in the app.** Loops
+default on everywhere else, and loops-on makes `pdb_id` mandatory. A structure the user
+uploaded that has no PDB entry therefore **cannot run with loop modelling at all** — they
+must turn it off. Surface that as an explanatory state on the checkbox, not as a
+post-submit error.
 
-> **Engine gap #4** — a read-only "chips from state" field type does not exist. Add a
-> `component-summary` field (or generalise `entity-ref` to a read-only multi-value display).
-> Small; alternative is to drop the chips from the sidebar and show them in the filtering
-> tile only, which loses PRD parity.
+> **Engine gap #4** — no read-only "chips from state" field type. Add `component-summary`.
 
-### Step 7 — Run Target Preparation
-
-`engine.submit()` → `useSubmitExecution`. `buildToolPayload` walks the manifest
-`inputSchema`; `stateValues` already includes everything in `stepOutputs`, so `selection`
-resolves through `x-from-state` with no engine change.
+### Step 7 — Run
 
 ```
-POST /tools/{orgKey}/tools/deeporigin.target-preparation/{major}/executions
-body: {
-  inputs: {
-    protein:  { id, file_path },              // x-data-type: Protein
-    selection: { … },                          // x-from-state: "selection"
-    pdb_id, add_missing_atoms, model_missing_loops, protonate, find_pockets, output_name,
-  },
-  outputs: {}, clusterId, projectId, name: "<run_name>"
-}
+POST /tools/{orgKey}/tools/deeporigin.target-preparation/1/executions
+body: { inputs: { action: "prepare", protein, selection, model_missing_loops, pdb_id?, pocket },
+        outputs: {}, clusterId, projectId, name: "<run_name>" }
 ```
 
-Billing: the existing quote → `price-confirmation-panel.tsx` →
-`insufficient-funds-modal.tsx` path applies unchanged, assuming the workflow tool quotes
-like ABFE does.
+`buildToolPayload` emits exactly the declared keys. `action: "prepare"` is a constant —
+supply it via an `x-from-form` with a hidden field, or a hidden `enum` field defaulted to
+`prepare`.
+
+Billing: one `DO_POCKET_FINDER` unit. The existing quote →
+`price-confirmation-panel` → `insufficient-funds-modal` path works unchanged.
+
+**Errors worth handling explicitly**, because retrying makes them worse:
+
+| Error | Cause | Right response |
+| --- | --- | --- |
+| `selection.source_sha256 does not match…` | the structure file changed since the inventory | re-run the inventory step; do not retry submit |
+| `selection.analyzer_version does not match…` | the sysprep serving was upgraded mid-session | re-run the inventory and **diff** — the user's decisions may not all map |
+| `decisions is missing/has unknown components` | a UI bug — the map drifted from the inventory | never reachable if the tile is exhaustive |
 
 ### Step 8 — results mode
 
-Route `/activity/{executionId}` → `appMode: 'results'`. Use a dedicated `resultsLayout` +
-`resultsComponents` (supported today, see `resolveManifestView` in `init-app.tsx`):
+`/activity/{executionId}` → `appMode: 'results'`, using `resultsLayout` +
+`resultsComponents`. **There are no `jobOutputs`** — every tile reads indexed result rows
+via the result-explorer, filtered by `compute_job_id` (the pattern in
+`components/pipelines/hooks/use-step-results.ts`).
 
-- Structure Report tile — final report from the run's results
+- Structure Report tile — the `report_role: "prepared"` row
 - Mol\* viewer — prepared structure + pockets, renderer `renderStructureAndPockets`
 - Pockets table
+- Extracted ligands list, if any
+
+**A FAILED execution can still have produced everything except pockets.** The prepared
+protein is written and stamped before Pocket Finder runs, and nothing rolls it back, so a
+pocket-finder failure reads FAILED with a perfectly good prepared structure in
+`results__preparedproteins`. The results view must render retained artifacts on a FAILED
+run rather than showing an empty error state. Zero pockets, separately, is a **success**.
 
 ---
 
@@ -485,46 +469,43 @@ Route `/activity/{executionId}` → `appMode: 'results'`. Use a dedicated `resul
 
 | Record | Direction | Who | New? |
 | --- | --- | --- | --- |
-| `proteins` / `proteins_with_results` rows | read | Table tile, existing datasource | no |
-| Structure file bytes (UFA `file_path`) | read | Mol\* viewer | no |
-| `results__pocket` rows (`result_type: "pocket"`) | write | pocket-finder step of the workflow tool | no |
-| `results__preparedprotein` rows | write | protein-prep step | no (already emitted) |
-| **`proteins` row for the prepared structure** | write | **`target-preparation` — confirm ⚠** | **yes** |
-| **`results__structurereport` rows** | write | structure-report tool | **yes** |
-| `executions` row | write | tools-service, automatic | no |
+| `proteins` / `proteins_with_results` | read | table tile | no |
+| Structure file bytes (UFA) | read | Mol\* viewer | no |
+| `results__preparedproteins` | write | `target-preparation` | no |
+| `results__pockets` | write | `target-preparation` | no |
+| `results__structurereports` | write | `target-preparation`, `structure-report` | no |
+| `results__extractedligands` | write | `target-preparation` | no |
+| **`proteins` row for the prepared structure** | write | **nobody** | **missing — see below** |
 
-Two genuine data-platform asks:
+### 5a. The prepared protein never becomes a selectable Protein — backend gap
 
-**(a) The prepared protein must become a `proteins` entity row.** Today the CLI is explicit
-that it does not create one — `ProteinPrep.get_results()` returns an in-memory `Protein`
-with `id is None` and only `remote_path` set; the caller has to `sync()` or `update()`
-(`src/drug_discovery/protein_prep.py:1280`). But the whole point of Target Prep is to hand
-a cleaned structure to Docking / ABFE / HTVS, and those apps' tables read `proteins`. So
-one of:
+Confirmed negative. The prepared structure is emitted with
+`x-result-group: "preparedproteins"`, a dynamic `results__*` table. The repo's authoring
+rules explicitly forbid tool rows from being typed `Protein`, and the only
+`entities.create_protein` call site in the whole toolbox belongs to a different tool
+(`deeporigin.pdb-import`). `target-preparation`'s children only call `send_result`.
 
-- **Preferred, and the likely intent of the "Output Property Name" field** — `target-preparation`
-  registers the prepared protein as a new `proteins` row (carrying `pdb_id`,
-  `protein_name` from `output_name`, `project_id`, and the `DO_PREPARED` stamp in the
-  file), mirroring how docking indexes poses. The UI then needs nothing. **Confirm this
-  against the merged definition** — if `target-preparation` only emits `preparedprotein` result
-  rows, the app produces a structure no other app can select, and the whole feature stops
-  short of its purpose.
-- Fallback — the UI POSTs `/data-platform/{orgKey}/proteins` after the run completes.
-  Rejected: it puts a write on a client that may be closed before the async run finishes.
+So after a successful prepare, the structure exists as a UFA file and a
+`results__preparedproteins` row — and **a protein picker backed by the `proteins` table
+will not offer it to Docking or ABFE.**
 
-**(b) Structure Report needs indexed result rows.** Today the report exists only in
-`jobOutputs` — `StructureReport` in the client parses `jobOutputs.structure_reports`
-directly and there is no `_RESULT_TYPE_*` for it (compare `pose`, `pocket`,
-`preparedsystem`, `abferesult`, `preparedprotein`). That is fine for the in-app card, but
-the PRD's first requirement — *"a Structure Report should be generated and displayed
-automatically"* for each structure in the table, and the child PRD's framing of the report
-as a per-protein statistic — implies grade/resolution/coverage as **columns on the proteins
-table**. That needs a `result_type: "structurereport"` joined to `protein_id`, at which
-point the manifest's `results.detailColumns` / `results.aggregates` machinery renders them
-for free (exactly as `pocket-finder.json` does with `min_volume` / `max_druggability`).
+If the point of Target Prep is a prepared receptor you can then dock against, that wiring
+does not exist. **This is a backend change, not a UI workaround** — a client-side
+`POST /data-platform/{orgKey}/proteins` would have to run after an async workflow the user
+may have navigated away from. Raise it with the tool owner; it is the largest gap between
+what ships and what the PRD is for.
 
-Without (b), each row's report can only be fetched on selection, one protein at a time —
-which is what §4 step 2a does, and is enough for v1.
+### 5b. Structure reports are already indexed — better than assumed
+
+An earlier draft asked for a new `structurereport` result type. It exists:
+`x-result-group: "structurereports"`, with `protein_id` marked `x-key: true` and
+`report_role` distinguishing `source` from `prepared`. Grade/resolution/coverage as columns
+on the proteins table is therefore feasible with the manifest's existing
+`results.detailColumns` / `aggregates` machinery — no backend work.
+
+One unknown: the literal singular `result_type` string the platform derives from the plural
+`x-result-group`. That mapping lives outside the toolbox repo. Confirm against one real
+completed execution before writing the result-explorer filters.
 
 ---
 
@@ -534,126 +515,237 @@ which is what §4 step 2a does, and is enough for v1.
 
 | Component | Purpose | Registration |
 | --- | --- | --- |
-| `StructureFiltering` | Keep/Skip list per component, writes `selection` to store | `renderer/registry.ts`, `types/tiles.ts` `LeafComponent`, `renderer/types.ts` config type |
-| `StructureReportCard` | Grade badge + pills + score breakdown | same three files |
+| `StructureFiltering` | grouped, virtualized, bulk-actioned Keep/Extract/Skip list; writes `selection` | `renderer/registry.ts`, `types/tiles.ts` `LeafComponent`, `renderer/types.ts` config |
+| `StructureReportCard` | grade badge, pills, score breakdown | same three files |
 
-Both follow the `ComponentWrapperProps` contract (`tileId`, `config`, `title`; state via
-`useAppStore` / `useEngine`, never props). `AdmetScoreCard` is the closest existing model
-for a read-only card fed by tool results.
+`StructureFiltering` is materially bigger than the mockup suggests — §2.3, §2.4 and §2.5 are
+all its responsibility. Size it accordingly.
 
 ### New Mol\* renderer (`packages/molstar/`)
 
-- `src/api/components.ts` — `renderStructureComponents(plugin, proteinContent, format, components)`
+- `src/api/components.ts` — `renderStructureComponents(plugin, content, format, components)`
 - add `'renderStructureComponents'` to `RendererName` (`src/types/index.ts:243`)
-- add the case to the `render()` dispatcher (`src/api/index.ts:526`)
-- export the keep/exclude palette as constants so the tile and the viewer agree
-
-### New form field
-
-- `component-summary` — read-only chips (engine gap #4)
+- add the dispatch case (`src/api/index.ts:526`)
+- export the palette, including the third ligand state, as shared constants
+- apply `chain_id_mapping` before addressing
 
 ### Engine changes
 
 | Gap | File | Change |
 | --- | --- | --- |
 | #1 | `hooks/use-run-step.tsx` | `AppStep.sync?: boolean` → top-level body key |
-| #2 | `engine-provider.tsx`, `engine-context.ts` | expose `setStateValue(key, value)` |
-| #3 | `engine-provider.tsx` submit path, `types/app.ts` | `SubmitValidation` kind for unresolved state |
+| #2 | `engine-provider.tsx`, `engine-context.ts` | `setStateValue(key, value)` |
+| #3 | `engine-provider.tsx`, `types/app.ts` | `SubmitValidation` kinds for state-shaped rules |
 | #4 | `form-engine/form-field.tsx`, `types/form.ts` | `component-summary` field type |
 
-None of these introduce tool-specific logic into the engine — that invariant holds.
+None of these put tool-specific logic in the engine.
 
 ### Manifest and registration
 
-- `apps/uui/src/app-schemas/target-prep.json` (sketch in §8)
+- `apps/uui/src/app-schemas/target-prep.json` (§8)
 - register in `app-schemas/index.ts` under key `target-prep`
 - nav entry in `packages/global-provider/src/containers/subscription.container.tsx`
-- app card in `apps/uui/src/pages/applications/constants.ts` + card image asset
-- pick an `identityHue` ≥10° from existing tools (current cluster ~197–323; pocket-finder
-  is 185)
+- app card in `apps/uui/src/pages/applications/constants.ts` + image asset
+- `identityHue` ≥10° from neighbours (current cluster ~185–323)
 - tool display name in `components/data-platform-tables/job-manager-table/index.tsx`
-- add `deeporigin.target-preparation` to `ALL_RESULTS_TOOL_KEYS` (`hooks/use-manifest.tsx:14`)
-  once (b) above lands, so the column manager offers its results
-- publish the manifest to S3 via `.github/workflows/register-tool-manifest.yml`
-  (major version only; `latest` for the first release)
+- add `deeporigin.target-preparation` to `ALL_RESULTS_TOOL_KEYS`
+  (`hooks/use-manifest.tsx:14`)
+- publish via `.github/workflows/register-tool-manifest.yml`, major `1`
 
 ---
 
-## 7. Loose ends the UI can't answer alone
+## 7. Client-side validations to implement
 
-0. **Reconcile the `target-preparation` schema — blocking, do this first.** A ready-made
-   research prompt for an agent with `platform-toolbox` read access lives alongside this
-   document: [`target-preparation-schema-introspection-prompt.md`](./target-preparation-schema-introspection-prompt.md).
-   Its report resolves every ⚠ in §3, §8 and §9.
+The preflight route is not browser-reachable, so every one of its checks surfaces as an
+execution-create failure unless the UI gets there first. All seven are trivially enforceable:
 
-   The definition lives
-   in `deeporiginbio/platform-toolbox` at `tools/target-preparation/`, specifically:
+| Check | Rule |
+| --- | --- |
+| `protein` | object present |
+| `protein.id` | non-blank **after trimming** — whitespace-only passes schema, fails preflight |
+| `protein.file_path` | non-blank after trimming |
+| `model_missing_loops` | present on prepare |
+| `selection` | object present on prepare |
+| `pocket` | object present on prepare |
+| `pdb_id` | present when `model_missing_loops` is true |
 
-   - `workflow/tool-definition.json` — the input/output JSON Schema the manifest must mirror
-   - `workflow/workflow.yaml` — the step graph (confirms the tool ordering and what each
-     step emits)
-   - `workflow/preflight-service.yaml` + `images/preflight/src/preflight_service/routes/target_preparation.py`
-     — a preflight route, which suggests `target-preparation` validates or pre-resolves inputs
-     before dispatch; worth reading for what it rejects, since those become client-side
-     validations the sidebar should enforce first
-   - `tests/test_target_preparation_schema.py` — the schema contract in executable form,
-     the fastest read for exact key names
-
-   Reconcile against §3 and §8: the exact key for the selection object, whether the four
-   parameter flags exist and what they are called, whether `pdb_id` is required when loop
-   modelling is on, the major version to pin, and the `jobOutputs` key names the results
-   view reads. Everything marked ⚠ resolves here.
-
-   The registered tool key is **`deeporigin.target-preparation`** (matching the toolbox
-   directory), not `deeporigin.target-prep`. Confirm the major version to pin from
-   `RELEASE-NOTES.MD`.
-
-   **Also settle where the pre-submit component inventory comes from** (§3.1): the
-   `protein-prep` `recommend` action, the preflight route, or a `target-preparation` action of its
-   own. Read `routes/target_preparation.py` — if it already returns the inventory, the app
-   should use it and stop creating a tool execution on every row click. This changes
-   whether the fetch is a `manifest.steps` entry or a hook inside the tile, so it wants
-   deciding before the manifest is written.
-
-   Two enum questions fall out of §9 and can be answered from the same files: the
-   **cofactor component id shape** (no `do-dd-client` fixture contains one, yet the PRD
-   screenshot shows `Mn2+` and `Zn2+`), and whether `component.subtype` and `reason_code`
-   have documented catalogues — §9 treats both as open on the evidence that the client
-   accepts any string, and typing them as unions would be wrong if that is deliberate.
-1. **Residue count / coverage denominator.** The PRD card shows `1,036 Residues`.
-   `structure_reports` returns `coverage` (a fraction) but no residue count. Either add it
-   to the tool output or read `proteins.protein_length` off the entity row.
-2. **`pdb_id`-less proteins.** Loop modelling is impossible without one. Decide whether the
-   UI hard-disables the checkbox (proposed) or the workflow tool resolves a template
-   another way.
-3. **Cofactor labelling.** The screenshot names `Mn2+` and `Zn2+` chips. The recommend
-   payload gives `kind: "cofactor"` and a `label`; confirm the label is already the ion
-   name with charge, or format it client-side from `author.resname`.
-4. **Re-prep of an already-prepared protein.** The `DO_PREPARED` stamp means downstream
-   tools skip cleanup; running Target Prep on a prepared protein should probably warn.
-5. **Billing.** protein-prep is not billable; pocket-finder and structure-report are.
-   Confirm `target-preparation` quotes as a single line item, so the existing
-   `price-confirmation-panel` → `insufficient-funds-modal` path works unchanged.
-6. **Partial failure.** If the pocket-finder or structure-report step fails after the
-   protein was successfully prepared, does the execution report `Failed` with the prepared
-   protein still written? The results view needs to know whether to render a partial run.
+Plus the schema and runtime rules preflight does *not* cover: `pdb_id` matches
+`^[A-Za-z0-9]{4}$`; no unknown keys; pocket mode exclusivity; decisions exhaustive, two-
+valued, no `review`; ≥1 protein chain kept; no `nucleic`/`mixed`/`other` chain kept.
 
 ---
 
-## 8. Manifest sketch
+## 8. Open questions
 
-`toolKey` is settled: **`deeporigin.target-preparation`**.
+1. **Is the tool registered on dev / staging / prod?** Not declarable from the repo; the
+   toolbox's own E2E test still skips pending publication. Ask platform to run
+   `dump-enabled-tools.yml` per environment. **Blocks any integration testing.**
+2. **Does a `protein-prep`-produced Selection validate against `target-preparation`
+   prepare?** (§3.1) Same analyzer, same ids — but verify once end to end. **Blocks the
+   architecture.**
+3. **What is the literal `result_type` for `preparedproteins` / `structurereports`?**
+   (§5b) Needed for the result-explorer filters.
+4. **Who creates the `proteins` row for the prepared structure?** (§5a) Product-blocking.
+5. **Do the three missing checkboxes get tool inputs, or does the mockup lose them?**
+   (§2.1)
+6. **Does Keep/Extract/Skip get a designed three-state treatment?** (§2.3)
+7. **How does a user get a `protein.id` for an uploaded, non-PDB structure?** Only
+   `deeporigin.pdb-import` creates Protein entities. If the answer is "they cannot", the
+   app only works on imported PDB entries.
+8. **Cofactor ids** are derived, not observed — no fixture anywhere contains one. Expect
+   `cofactor:A:MN:501:` / `cofactor:A:ZN:302:`; confirm on a real metalloprotein.
 
-The app's own `id` / `url` / manifest filename are sketched as `target-prep` and are
-independent of the tool key — the engine does not require them to match, and two shipped
-apps already differ (`abfe` → `deeporigin.abfe-end-to-end`, `do-patent` →
-`deeporigin.draco`). `/target-prep` versus `/target-preparation` is a product naming call,
-not a technical constraint; pick one before the route ships, because changing it later
-breaks bookmarks and any saved Activity links.
+---
 
-The `inputSchema` and the `steps[].inputSchema` bodies are **⚠ placeholders** until §7.0 is
-done — treat the annotations (`x-data-type`, `x-from-state`,
-`x-user-input`) as correct and the *key names* as provisional.
+## 9. Field and enum reference
+
+Verified against the tool definition. **Read the Closed/Open column before typing anything
+as a union** — an OPEN set is pinned only in producer code and can grow without a schema
+change, so accept any string and render a fallback.
+
+### 9.1 `deeporigin.target-preparation` inputs
+
+| Field | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- |
+| `action` | string | **always** | none | **Closed:** `recommend` \| `prepare` |
+| `protein` | object `{id, file_path}` | **always** | none | both sub-keys required |
+| `selection` | object | prepare only | none | forbidden on recommend |
+| `model_missing_loops` | boolean | prepare only | **none** | — |
+| `pocket` | object | prepare only | none | forbidden on recommend |
+| `pdb_id` | string | when loops on | none | `^[A-Za-z0-9]{4}$` |
+
+`pocket`:
+
+| Field | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- |
+| `mode` | string | no | `auto-find` | **Closed:** `auto-find` \| `define-by-selection` \| `from-crystal-ligand` |
+| `pocket_count` | integer ≥1 | if `auto-find` | **none** | — |
+| `pocket_min_size` | number ≥1 | if `auto-find` | **none** | — |
+| `selections[]` | array, minItems 1 | if `define-by-selection` | none | items `{kind, author}` |
+| `selections[].kind` | string | yes | — | **Closed:** `residue` \| `ligand` \| `cofactor` |
+| `crystal_ligand` | object | if `from-crystal-ligand` | none | `{component_id?, file_path?, ligand_id?}` |
+| `pocket_radius` | number >0 | no | `10.0` | — |
+| `align_to_pocket` | boolean | no | `false` | — |
+| `box_geometry` | string | no | runtime `ligand-extents` | **Closed:** `ligand-extents` \| `fixed-radius` |
+| `box_padding` | number ≥0 | no | runtime `4.0` | — |
+
+`selection`:
+
+| Field | Type | Required | Enum |
+| --- | --- | --- | --- |
+| `source_sha256` | string | yes | must equal the analyzed digest |
+| `analyzer_version` | string | yes | currently `1.1.0` |
+| `decisions` | `Record<componentId, string>` | yes | **Closed:** `keep` \| `skip` — **no `review`**, and exhaustive |
+
+### 9.2 `recommendation.components[]`
+
+| Field | Type | Enum | Closed? |
+| --- | --- | --- | --- |
+| `id` | string | §9.3 | — |
+| `kind` | string | `chain` \| `ligand` \| `cofactor` \| `water` | **Closed** |
+| `subtype` | string | chain: `protein`/`nucleic`/`mixed`/`other`/`short_peptide` · water: `coordinating`/`crystal` · cofactor: `metal`/`ion`/`organic`/`other` · ligand: `organic` | **OPEN** — bare `string` in schema. **But semantically load-bearing:** `nucleic`/`mixed`/`other` chains cannot be kept, so string-compare those three. |
+| `label` | string | — | display only |
+| `recommendation` | string | `keep` \| `skip` \| `review` | **Closed** |
+| `reason` | string | — | required; always populated; **render this** |
+| `reason_code` | string | 12 values today: `keep_chain`, `duplicate_chain`, `non_protein_chain`, `short_peptide`, `coordinating_water`, `water_review`, `coordinated_metal`, `crystallization_artifact`, `under_coordinated_metal`, `organic_cofactor`, `recognized_ligand`, `ambiguous_ligand` | **OPEN** — iconography at most |
+| `author` | object `{chain_id, resname?, resseq?, icode?, label_asym_id?}` | only `chain_id` required | **the Mol\* addressing key** |
+| `evidence` | object | free-form | tool-owned |
+
+Top level also carries `source_sha256`, `analyzer_version`, and **`chain_id_mapping`**
+(required) — author chain ids remapped to single-character PDB chain ids for mmCIF.
+
+### 9.3 Component id grammar
+
+One builder, uniform shape. `icode` is `""` in the common case, hence the trailing colon.
+
+| Kind | Grammar | Example |
+| --- | --- | --- |
+| chain | `chain:<chain_id>` | `chain:A` |
+| ligand | `<kind>:<chain>:<resname>:<resseq>:<icode>` | `ligand:A:IBP:100:` |
+| cofactor | same | `cofactor:A:MN:501:` |
+| water | same | `water:A:HOH:310:` |
+
+**Treat ids as opaque.** Echo back exactly what the inventory returned; address the viewer
+from `author`. Fixtures in both `do-dd-client` (`ligand:LIG:A:100`) and `platform-toolbox`
+(`ligand:A:120:IBP`) use shapes the analyzer cannot emit — do not copy ids out of tests.
+
+### 9.4 `structure_reports[]`
+
+| Field | Type | Enum | Closed? |
+| --- | --- | --- | --- |
+| `grade` | string | `A` \| `B` \| `C` \| `D` | **Closed** |
+| `weighted_score` | number | ≥0.8 A · 0.66–0.79 B · 0.5–0.65 C · <0.5 D | from the tool — never recompute |
+| `metadata_source` | string | `rcsb` \| `file_header` \| `file_header+rcsb` | **Closed** |
+| `field_status` | object | six fixed keys `organism`/`method`/`resolution`/`coverage`/`rfree`/`inhibitor`, each `value` \| `not_applicable` \| `unknown` | **Closed** — keys *and* values |
+| `report_role` | string | `source` \| `prepared` | **Closed** |
+| `*_score` (6) | number | — | resolution, coverage, rfree, inhibitor, method, organism |
+| `coverage` | number \| null | 0–1 fraction | render as `82.6%` |
+| `has_ligand` | boolean \| null | — | the `Ligand` pill |
+| `method` / `organism` | string \| null | raw | — |
+| `method_class` | string \| null | over the wire: `cryo-em` \| `x-ray` \| `nmr` \| `other` \| **`null`** | **OPEN in schema** — `unknown` is converted to `null` by the producer; handle null |
+| `organism_class` | string \| null | over the wire: `human` \| `mammal` \| `vertebrate` \| `other` \| **`null`** | **OPEN in schema**, same null conversion |
+| `resolution` / `rfree` | number \| null | — | rfree is X-ray only |
+| `pdb_id` / `protein_id` | string \| null | — | `protein_id` is `x-key` |
+| `source_sha256` | string | — | absent in PDB-ID-only mode |
+
+### 9.5 `pockets[]`
+
+`protein_id` (`x-key`), `file_path`, `pocket_center` (3-array), `box`
+(`{box_size_x, box_size_y, box_size_z, rotation_deg[3]}` — PCA-aligned, prefer over the
+deprecated flat `box_size_*`), `volume`, `total_SASA`, `polar_SASA`, `apolar_SASA`,
+`polar_apolar_SASA_ratio`, `hydrophobicity`, `drugability_score`, `polarity`,
+`pocket_count`, `pocket_min_size`.
+
+Every metric is **`null` for `define-by-selection` and `from-crystal-ligand`** — a pockets
+table must render nulls, not zeros.
+
+### 9.6 Platform execution status
+
+**Closed:** `Quoted` · `Created` · `Queued` · `Running` · `Completed` · `Succeeded` ·
+`Failed` · `Cancelled` · `InsufficientFunds` · `FailedQuotation`. `Succeeded` is legacy for
+`Completed`. Terminal is everything except `Created`/`Queued`/`Running`.
+
+Tools answer **HTTP 200 with `status: "Failed"`** and no outputs;
+`statusReason.message` is itself a JSON string. `useRunStep` already handles this.
+
+### 9.7 App form fields
+
+| Section | Field id | Type | Default | Notes |
+| --- | --- | --- | --- | --- |
+| structure-components | `components_summary` | `component-summary` ⚠ new | — | read-only chips |
+| preparation | `model_missing_loops` | `boolean` | `true` | disable + explain when no `pdb_id` |
+| preparation | `pdb_id` | `string` | from entity | required when loops on; `^[A-Za-z0-9]{4}$` |
+| pocket | `pocket_mode` | `enum` | `auto-find` | drives `showIf` on the next two |
+| pocket | `pocket_count` | `number` | `5` | `auto-find` only |
+| pocket | `pocket_min_size` | `number` | `30` | `auto-find` only |
+| run-details | `run_name` | `string` | — | required; `x-body-key: "name"` |
+| *(hidden)* | `action` | `enum` | `prepare` | constant into `inputs` |
+
+Existing engine `FieldType` (**closed**): `string` · `number` · `boolean` · `enum` ·
+`multi-enum` · `result` · `segmented` · `radio` · `entity-ref` · `action` · `site-select` ·
+`admet-properties` · `structure`. This app adds `component-summary`.
+
+### 9.8 Store state keys
+
+| Key | Written by | Read by |
+| --- | --- | --- |
+| `selectedProteins` | proteins table | both steps, all tiles, submit |
+| `stepOutputs.structureReport` | structure-report step | report card |
+| `stepOutputs.recommendation` | inventory step | filtering tile, viewer, sidebar chips |
+| `stepOutputs.selection` | **filtering tile** (gap #2) | sidebar chips, submit via `x-from-state` |
+| `stepErrors[stepId]` | `useRunStep` | `ActionField`, tile error states |
+
+Cleared by `useSelectionResets` on selection change.
+
+### 9.9 Engine enums (all closed, all existing)
+
+`AppMode` `edit`\|`results` · `ExecutionVisibility` `visible`\|`hidden` ·
+`ResultsMergeMode` `flat`\|`per-group`\|`aggregate` · `ResultsAppliesTo`
+`proteins`\|`ligands` · `LeafComponent` (10, +2) · `RendererName` (4, +1).
+
+---
+
+## 10. Manifest sketch
 
 ```jsonc
 {
@@ -665,37 +757,32 @@ done — treat the annotations (`x-data-type`, `x-from-state`,
   "name": "Target Preparation",
 
   "steps": [
-    {
-      "id": "structure-report",
-      "toolKey": "deeporigin.structure-report",
-      "toolVersion": "latest",
+    { "id": "structure-report",
+      "toolKey": "deeporigin.structure-report", "toolVersion": "latest",
       "visibility": "hidden",
       "inputSchema": { "type": "object", "properties": {
         "protein": { "type": "object", "x-data-type": "Protein", "properties": {
           "id":        { "type": "string", "x-data-type": "Protein.id" },
           "file_path": { "type": "string", "x-data-type": "Protein.file_path" } } },
         "pdb_id":  { "type": "string", "x-data-type": "Protein.pdb_id" } } },
-      "bind": { "structure_reports": "structureReport" }
-    },
-    {
-      "id": "recommend",
-      "toolKey": "deeporigin.protein-prep",
-      "toolVersion": "2",
-      "sync": true,                       // engine gap #1
+      "bind": { "structure_reports": "structureReport" } },
+
+    { "id": "recommend",
+      "toolKey": "deeporigin.protein-prep", "toolVersion": "2",
+      "sync": true,                        // engine gap #1
       "visibility": "hidden",
       "inputSchema": { "type": "object", "properties": {
-        "action":  { "type": "string", "x-from-form": { "field": "__const_recommend" } },
         "protein": { "type": "object", "x-data-type": "Protein", "properties": {
           "id":        { "type": "string", "x-data-type": "Protein.id" },
           "file_path": { "type": "string", "x-data-type": "Protein.file_path" } } } } },
-      "bind": { "recommendation": "recommendation" }
-    }
+      "bind": { "recommendation": "recommendation" } }
+      // `action: "recommend"` supplied via the ActionField's `inputs` override
   ],
 
   "layout": { "tiles": [
     { "id": "left", "component": "VerticalMosaic", "splitPercentage": 35, "tiles": [
-      { "id": "protein-table",     "component": "Table" },
-      { "id": "structure-filter",  "component": "StructureFiltering" } ] },
+      { "id": "protein-table",    "component": "Table" },
+      { "id": "structure-filter", "component": "StructureFiltering" } ] },
     { "id": "protein-viewer", "component": "ProteinViewer" } ] },
 
   "components": {
@@ -707,7 +794,7 @@ done — treat the annotations (`x-data-type`, `x-from-state`,
       "showsResults": true } },
     "structure-filter": { "component": "StructureFiltering", "title": "Structure Filtering",
       "config": { "recommendationKey": "recommendation", "selectionKey": "selection",
-                  "reportKey": "structureReport" } },
+                  "reportKey": "structureReport", "stepId": "recommend" } },
     "protein-viewer": { "component": "ProteinViewer", "title": "Mol* Viewer", "config": {
       "molstar": { "edit":    { "renderer": "renderStructureComponents" },
                    "results": { "renderer": "renderStructureAndPockets" } } } }
@@ -717,287 +804,112 @@ done — treat the annotations (`x-data-type`, `x-from-state`,
     "resultLabel": { "singular": "prepared structure", "plural": "prepared structures" },
     "requiredEntities": [ { "type": "Protein",
       "message": "Select a protein before running Target Preparation" } ],
-    "validations": [ { "type": "state-resolved", "stateKey": "selection",
-      "path": "decisions", "disallow": "review",
-      "message": "Resolve every reviewed component before running" } ],
+    "validations": [
+      { "type": "state-resolved", "stateKey": "selection", "path": "decisions",
+        "disallow": "review",
+        "message": "Resolve every reviewed component before running" }
+      // plus: exhaustive vs inventory, >=1 protein chain kept,
+      //       no nucleic/mixed/other chain kept  (engine gap #3)
+    ],
     "sections": [
       { "id": "structure-components", "label": "Structure Components",
         "fields": [ { "id": "components_summary", "type": "component-summary",
                       "optionsFrom": "selection", "labelsFrom": "recommendation" } ] },
-      { "id": "advanced", "label": "Advanced Parameters", "collapsible": true,
-        "fields": [
-          { "id": "add_missing_atoms",   "type": "boolean", "default": true,
-            "label": "Add missing atoms & residues", "helpText": "Fills incomplete residues" },
+      { "id": "preparation", "label": "Preparation", "fields": [
           { "id": "model_missing_loops", "type": "boolean", "default": true,
-            "label": "Add missing loops", "helpText": "Models unresolved regions" },
-          { "id": "protonate",           "type": "boolean", "default": true,
-            "label": "Protonate", "helpText": "Assign states @ pH 7.4" },
-          { "id": "find_pockets",        "type": "boolean", "default": true,
-            "label": "Find Pockets", "helpText": "Detect druggable pockets" } ] },
+            "label": "Add missing loops", "helpText": "Models unresolved regions. Requires a PDB ID." },
+          { "id": "pdb_id", "type": "string", "label": "PDB ID",
+            "showIf": { "field": "model_missing_loops", "equals": true },
+            "required": true, "pattern": "^[A-Za-z0-9]{4}$" } ] },
+      { "id": "pocket", "label": "Pocket Detection", "collapsible": true, "fields": [
+          { "id": "pocket_mode", "type": "enum", "default": "auto-find", "options": [
+              { "label": "Auto-find",           "value": "auto-find" },
+              { "label": "Define by selection", "value": "define-by-selection" },
+              { "label": "From crystal ligand", "value": "from-crystal-ligand" } ] },
+          { "id": "pocket_count", "type": "number", "default": 5,
+            "showIf": { "field": "pocket_mode", "equals": "auto-find" } },
+          { "id": "pocket_min_size", "type": "number", "default": 30,
+            "showIf": { "field": "pocket_mode", "equals": "auto-find" } } ] },
       { "id": "run-details", "label": "Run Details", "fields": [
-          { "id": "output_name", "type": "string", "label": "Output Property Name",
-            "placeholder": "Default_TargetPrep_ProteinId" },
           { "id": "run_name", "type": "string", "label": "Run Name", "required": true,
-            "x-body-key": "name", "x-run-name-default": "TargetPrep" } ] }
+            "x-body-key": "name", "x-run-name-default": "TargetPrep" },
+          { "id": "action", "type": "enum", "default": "prepare", "hidden": true,
+            "options": [ { "label": "Prepare", "value": "prepare" } ] } ] }
     ]
   },
 
   "inputSchema": { "type": "object",
-    "required": ["protein", "selection"],
+    "required": ["action", "protein", "selection", "model_missing_loops", "pocket"],
     "properties": {
-      "protein":   { "type": "object", "x-data-type": "Protein", "properties": {
+      "action":  { "type": "string",  "x-user-input": true },
+      "protein": { "type": "object", "x-data-type": "Protein", "properties": {
         "id":        { "type": "string", "x-data-type": "Protein.id" },
         "file_path": { "type": "string", "x-data-type": "Protein.file_path" } } },
-      "selection": { "type": "object", "x-from-state": "selection" },
-      "pdb_id":              { "type": "string",  "x-data-type": "Protein.pdb_id" },
-      "add_missing_atoms":   { "type": "boolean", "x-user-input": true },
+      "selection":           { "type": "object",  "x-from-state": "selection" },
       "model_missing_loops": { "type": "boolean", "x-user-input": true },
-      "protonate":           { "type": "boolean", "x-user-input": true },
-      "find_pockets":        { "type": "boolean", "x-user-input": true },
-      "output_name":         { "type": "string",  "x-user-input": true } } }
+      "pdb_id":              { "type": "string",  "x-user-input": true,
+                               "x-show-if": { "field": "model_missing_loops", "equals": true } },
+      "pocket": { "type": "object", "properties": {
+        "mode":            { "type": "string",  "x-from-form": { "field": "pocket_mode" } },
+        "pocket_count":    { "type": "integer", "x-user-input": true,
+                             "x-show-if": { "field": "pocket_mode", "equals": "auto-find" } },
+        "pocket_min_size": { "type": "number",  "x-user-input": true,
+                             "x-show-if": { "field": "pocket_mode", "equals": "auto-find" } } } } } }
 }
 ```
 
-The `action: "recommend"` constant is awkward to express with today's annotations — the
-cleanest fix is `ActionField.inputs` (`{ "action": "recommend" }`), which `useRunStep`
-already merges over the schema-built inputs as `inputOverrides`. Use that rather than the
-`x-from-form` placeholder shown above.
+Two things to watch when writing this for real:
+
+- Root `additionalProperties: false` means `buildToolPayload` must emit **exactly** these
+  keys. `x-show-if` (which drops a property entirely) is the right tool for `pdb_id` and the
+  auto-find-only pocket fields — a `null` or `""` would be rejected.
+- The app's `id` / `url` / filename (`target-prep`) are independent of the tool key.
+  `/target-prep` vs `/target-preparation` is a product call; settle it before the route
+  ships.
 
 ---
 
-## 9. Field and enum reference
+## 11. Test surface
 
-Every field and every enumerated value the app touches, in one place, so the TypeScript
-types can be written without re-deriving them from five files.
-
-**Read the Closed/Open column before typing any of these as a union.** `do-dd-client`'s
-house rule is that value catalogues are owned by the tool definition, not by the client
-(`CONTEXT.md`: *"The catalog is owned by the definition, not by the CLI"*, *"Names come
-from the tool output, not a client constant"*). An **open** set must be typed `string`,
-rendered by whatever comes back, and given a fallback branch — hardcoding it means a tool
-release silently drops values on the floor. A **closed** set is safe to switch on
-exhaustively.
-
-### 9.1 `deeporigin.target-preparation` — inputs ⚠ UNVERIFIED
-
-Placeholders until §7.0. Types are what the app needs to send.
-
-| Field | Type | Source in the UI | Notes |
-| --- | --- | --- | --- |
-| `protein` | object `{ id, file_path }` | `x-data-type: "Protein"` | from the selected table row |
-| `selection` | object (§9.2) | `x-from-state: "selection"` | the filtering tile's output |
-| `pdb_id` | string(4) | `x-data-type: "Protein.pdb_id"` | required when loop modelling is on |
-| `add_missing_atoms` | boolean | form | ⚠ may not exist |
-| `model_missing_loops` | boolean | form | ⚠ name may differ |
-| `protonate` | boolean | form | ⚠ may not exist |
-| `find_pockets` | boolean | form | ⚠ may not exist |
-| `output_name` | string | form | ⚠ purpose unconfirmed (§5a) |
-
-### 9.2 `deeporigin.protein-prep` — recommend I/O
-
-**Inputs**
-
-| Field | Type | Enum | Closed? |
-| --- | --- | --- | --- |
-| `action` | string | `recommend` \| `prepare` | **Closed** (`_VALID_ACTIONS`) |
-| `protein.file_path` | string | — | — |
-| `protein.id` | string | — | optional; sent only when registered |
-
-**`jobOutputs.recommendation`**
-
-| Field | Type | Notes |
-| --- | --- | --- |
-| `source_sha256` | string(64) | digest of the structure bytes; **binds the Selection** |
-| `analyzer_version` | string | echoed back verbatim in `selection` |
-| `chain_id_mapping` | object | seen empty in every fixture; purpose unconfirmed |
-| `components[]` | array | one row per chain / ligand / cofactor / water |
-
-**`components[]` row**
-
-| Field | Type | Enum | Closed? |
-| --- | --- | --- | --- |
-| `id` | string | see §9.3 | — |
-| `kind` | string | `chain` \| `ligand` \| `cofactor` \| `water` | **Closed** (`PROTEIN_PREP_COMPONENT_KINDS`) |
-| `subtype` | string | observed: `protein`, `small_molecule`, `crystal`, `coordinating` | **OPEN** — the client explicitly accepts any string (`_validate_component_matchers` does `del subtype`). Do not type this as a union. |
-| `label` | string | — | display only; **never an identity** |
-| `recommendation` | string | `keep` \| `review` \| `skip` | **Closed** (`_VALID_DECISIONS`) — the analyzer's frozen tag |
-| `reason` | string | — | human-readable, show as-is |
-| `reason_code` | string | observed: `ordinary_protein_chain`, `ambiguous_ligand`, `water_review`, `coordinating_water` | **OPEN** — no client constant exists. Use for grouping/telemetry at most; render `reason`. |
-| `author` | object | `{ chain_id, resname?, resseq? }` | **the Mol\* selection key** (§9.3) |
-| `evidence` | object | free-form, e.g. `{ "n_coord": 1 }` | tool-owned; render generically or not at all |
-
-**`selection` (what the UI sends back)**
-
-| Field | Type | Enum | Closed? |
-| --- | --- | --- | --- |
-| `source_sha256` | string(64) | — | must match the recommend digest exactly |
-| `analyzer_version` | string | — | echoed unchanged |
-| `decisions` | `Record<componentId, string>` | `keep` \| `review` \| `skip` | **Closed.** At submit only `keep` \| `skip` are legal (`_RESOLVED_DECISIONS`) — a lingering `review` is rejected by the tool. |
-
-### 9.3 Component id grammar — do not parse it
-
-| Kind | Observed id | Shape |
-| --- | --- | --- |
-| chain | `chain:A` | `chain:<chain_id>` |
-| ligand | `ligand:LIG:A:100` | `ligand:<resname>:<chain_id>:<resseq>` |
-| water | `water:A:HOH:310:` | `water:<chain_id>:<resname>:<resseq>:` |
-| cofactor | *not present in any fixture* ⚠ | unknown |
-
-**The ligand and water field orders are different, and water carries a trailing colon.**
-Anything that parses these to build a Mol\* selection will be subtly wrong for one of the
-two. Use `author.chain_id` / `author.resname` / `author.resseq` instead — that is what
-`author` is for. The only thing safe to read off the id is the prefix, which is exactly all
-the client does (`_kind_from_component_id`). Treat the id as an opaque key.
-
-Confirm the cofactor id shape in §7.0 — no fixture in `do-dd-client` contains one, yet the
-PRD screenshot shows two (`Mn2+`, `Zn2+`).
-
-### 9.4 `deeporigin.structure-report` — outputs
-
-| Field | Type | Enum | Closed? |
-| --- | --- | --- | --- |
-| `grade` | string | `A` \| `B` \| `C` \| `D` | **Closed** (`StructureReportGrade`) |
-| `weighted_score` | number | — | 0–1; PRD mapping ≥0.8 A, 0.66–0.79 B, 0.5–0.65 C, <0.5 D |
-| `metadata_source` | string | `rcsb` \| `file_header` \| `file_header+rcsb` | **Closed** (`MetadataSource`) |
-| `field_status` | `Record<string, string>` | values: `value` \| `not_applicable` \| `unknown` | **Closed** values (`FieldStatusValue`); **keys are OPEN** |
-| `resolution_score` | number | — | component score |
-| `coverage_score` | number | — | component score |
-| `rfree_score` | number | — | component score |
-| `inhibitor_score` | number | — | component score |
-| `method_score` | number | — | component score |
-| `organism_score` | number | — | component score |
-| `coverage` | number \| null | — | fraction 0–1 → render as `82.6%` |
-| `has_ligand` | boolean \| null | — | drives the `Ligand` pill |
-| `method` | string \| null | — | raw, e.g. `X-RAY DIFFRACTION` |
-| `method_class` | string \| null | PRD scoring buckets: `cryo-EM`, `X-ray`, `NMR`, `other` | **OPEN** — typed `str \| None` in the client. The PRD lists the *scoring* buckets, not a closed output catalogue. |
-| `organism` | string \| null | — | raw, e.g. `Homo sapiens` |
-| `organism_class` | string \| null | PRD scoring buckets: `human`, `mammal`, `vertebrate`, `other` | **OPEN** — same reasoning |
-| `resolution` | number \| null | — | Å → the `2.31Å` pill |
-| `rfree` | number \| null | — | X-ray only |
-| `pdb_id` | string \| null | — | — |
-| `protein_id` | string \| null | — | the join key if §5b lands |
-| `source_sha256` | string \| null | — | absent in remote PDB-ID-only mode |
-
-Every `*_score` and `grade` comes **from the tool**. Do not recompute the grade
-client-side even though the PRD publishes the formula — the client's own rule is *"Do not
-recompute grades in the client"* (`structure_report.py` module docstring).
-
-`field_status` is what tells the card which pills are genuinely unknown versus
-not-applicable (Rfree on a cryo-EM structure). Render those states rather than showing a
-blank or a zero.
-
-### 9.5 `deeporigin.pocket-finder` — inputs
-
-Called only inside `target-preparation`, but the results tile reads its output.
-
-| Field | Type | Enum | Closed? |
-| --- | --- | --- | --- |
-| `mode` | string | `auto-find` \| `define-by-selection` | **Closed** (`PocketFinderMode`) |
-| `pocket_count` | integer | ≥1, default 1 (CLI) / 5 (UI manifest) | auto-find only |
-| `pocket_min_size` | number | ≥1, default 30 | auto-find only |
-| `selections[].kind` | string | `residue` \| `ligand` \| `cofactor` | **Closed** (`PocketSelectionKind`) |
-| `pocket_radius` | number | >0, default 10.0 | define-by-selection only |
-| `align_to_pocket` | boolean | — | define-by-selection only |
-
-### 9.6 Platform execution status
-
-**Closed** (`PlatformStatus`), and the UI must normalize before comparing:
-
-`Quoted` · `Created` · `Queued` · `Running` · `Completed` · `Succeeded` · `Failed` ·
-`Cancelled` · `InsufficientFunds` · `FailedQuotation`
-
-`Succeeded` is legacy for `Completed` — treat them as one success state
-(`is_success_status`). Terminal: everything except `Created` / `Queued` / `Running`.
-
-Note the failure mode `useRunStep` already guards: these tools **answer HTTP 200 with
-`status: "Failed"`** and no `jobOutputs`, and `statusReason.message` is itself a JSON
-string. Both pre-submit steps inherit that handling for free; a direct preflight fetch
-(§3.1) would have to reimplement it.
-
-### 9.7 App form fields
-
-| Section | Field id | Type | Default | Notes |
-| --- | --- | --- | --- | --- |
-| structure-components | `components_summary` | `component-summary` ⚠ new | — | read-only chips |
-| advanced | `add_missing_atoms` | `boolean` | `true` | ⚠ needs a tool input |
-| advanced | `model_missing_loops` | `boolean` | `true` | disable when the protein has no `pdb_id` |
-| advanced | `protonate` | `boolean` | `true` | ⚠ needs a tool input |
-| advanced | `find_pockets` | `boolean` | `true` | ⚠ needs a tool input |
-| run-details | `output_name` | `string` | — | placeholder `Default_TargetPrep_ProteinId` |
-| run-details | `run_name` | `string` | — | required; `x-body-key: "name"` |
-
-Existing engine `FieldType` values (**closed**, in `types/form.ts`): `string` · `number` ·
-`boolean` · `enum` · `multi-enum` · `result` · `segmented` · `radio` · `entity-ref` ·
-`action` · `site-select` · `admet-properties` · `structure`. This app adds
-`component-summary`.
-
-### 9.8 Store state keys
-
-| Key | Written by | Read by |
-| --- | --- | --- |
-| `selectedProteins` | proteins table tile | every tile, both pre-submit steps, submit |
-| `stepOutputs.structureReport` | structure-report step | report card |
-| `stepOutputs.recommendation` | recommend step (or preflight fetch) | filtering tile, sidebar chips |
-| `stepOutputs.selection` | **filtering tile** (engine gap #2) | sidebar chips, submit via `x-from-state` |
-| `stepErrors[stepId]` | `useRunStep` | `ActionField`, filtering tile empty state |
-
-All of `stepOutputs` is cleared by `useSelectionResets` when the protein selection changes.
-
-### 9.9 Engine enums this app relies on
-
-All **closed**, all already defined in `platform-ui`:
-
-| Enum | Values | Where |
-| --- | --- | --- |
-| `AppMode` | `edit` \| `results` | `renderer/types.ts` |
-| `ExecutionVisibility` | `visible` \| `hidden` | `types/app.ts` — both pre-submit steps use `hidden` |
-| `ResultsMergeMode` | `flat` \| `per-group` \| `aggregate` | `types/app.ts` — §5b would use `aggregate` |
-| `ResultsAppliesTo` | `proteins` \| `ligands` | `types/app.ts` — this app is `proteins` |
-| `LeafComponent` | 10 values today | `types/tiles.ts` — this app adds 2 |
-| `RendererName` | 4 values today | `packages/molstar/src/types/index.ts` — this app adds 1 |
+- **Unit** — `buildToolPayload` emitting exactly the declared keys under each pocket mode;
+  the decision reducer (exhaustiveness, `review` never auto-resolved, illegal keeps
+  rejected); hex→Mol\*-colour mapping; `chain_id_mapping` application.
+- **Storybook** — `StructureReportCard` across A–D and every `field_status` state;
+  `StructureFiltering` with a realistic inventory (one chain, one ligand, two cofactors,
+  **300 waters**) to prove the bulk/virtualized path.
+- **E2E** — select a protein, assert both steps fire and both tiles populate; toggle a
+  component and assert the viewer recolours; assert Run stays disabled while any `review`
+  remains; assert a FAILED run with retained artifacts still renders them.
+- **Contract** — assert the manifest's `inputSchema` keys are a subset of the published
+  tool definition's `properties`, so a backend schema change fails CI rather than
+  production.
 
 ---
 
-## 10. Test surface
+## 12. Phasing
 
-- **Unit** — `build-tool-payload` with `x-from-state` carrying a full `selection`; the
-  decision reducer in the filtering tile (`review` never auto-resolves); the
-  hex→Mol\*-colour mapping.
-- **Storybook** — `StructureReportCard` across grades A–D and with
-  `field_status: "unknown"` pills; `StructureFiltering` with a mixed keep/review/skip
-  inventory.
-- **E2E** (`apps/platform-e2e`) — select a protein, assert both steps fire and both tiles
-  populate; toggle a component, assert the viewer recolours; assert Run stays disabled
-  while a `review` remains.
-- **Contract** — a fixture check that the manifest's `inputSchema` matches the published
-  `deeporigin.target-preparation` tool definition, so a backend schema change fails CI rather
-  than production.
+**Phase 0 — unblock (§8.1, §8.2).** Confirm the tool is registered in a usable environment,
+and verify end to end that a `protein-prep`-produced Selection is accepted by
+`target-preparation` `prepare`. Both are cheap; both invalidate the architecture if they
+fail. Nothing below should start before §8.2 is answered.
 
----
+**Phase 1 — the app.** Manifest + registration, proteins table, both pre-submit steps, both
+new tiles, the Mol\* renderer, all four engine gaps, and the client-side validations in §7.
 
-## 11. Phasing
+Parallelizable order:
 
-**Phase 0 — reconcile the schema (§7.0).** Half a day, blocking. Nothing below is safe to
-write until the manifest's `inputSchema` matches the merged tool definition.
-
-**Phase 1 — the whole app against `deeporigin.target-preparation`.** Manifest + registration,
-the proteins table, both pre-submit steps, both new tiles, the Mol\* keep/exclude renderer,
-and all four engine gaps (§6). This is the PRD's priority-0 scope end to end: select a
-protein → report + filtering appear → toggle components → Run Target Preparation.
-
-Sequence inside phase 1, so work can run in parallel:
-
-1. Engine gaps #1 (`AppStep.sync`) and #2 (`setStateValue`) — everything else depends on
-   them, and both are small.
+1. Engine gaps #1 and #2 — everything depends on them, both small.
 2. `StructureReportCard` and the Mol\* renderer — independent of each other and of the
-   filtering tile; both are Storybook-testable against fixtures with no backend.
-3. `StructureFiltering` tile + engine gap #3 (unresolved-`review` validation).
-4. Manifest, sidebar (engine gap #4), registration, results view.
+   filtering tile; both Storybook-testable against fixtures with no backend.
+3. `StructureFiltering` + engine gap #3. **The largest single piece** — §2.3, §2.4 and §2.5
+   all live here.
+4. Manifest, sidebar (gap #4), registration, results view (including the FAILED-with-
+   artifacts path).
 
-**Phase 2 — report as table columns.** Depends on the `structurereport` result type
-(§5b). Adds `results.detailColumns` / `aggregates` to the manifest; the table renders them
-with no new component work.
+**Phase 2 — reports as table columns.** `results.detailColumns` / `aggregates` against
+`structurereports`. No backend work; needs the `result_type` string from §8.3.
 
-**Backend critical path:** the merged `target-preparation` schema (§7.0) gates phase 1; the
-prepared-protein `proteins` row (§5a) gates Target Prep being useful to Docking/ABFE at
-all; the `structurereport` result type gates phase 2.
+**Not scheduled — backend prerequisites.** §5a (prepared protein → `proteins` row) gates
+Target Prep being useful to Docking and ABFE at all, and §2.1 / §2.3 are PRD decisions that
+change the sidebar and the palette. None of them block phase 1 from starting; all of them
+change what "done" means.

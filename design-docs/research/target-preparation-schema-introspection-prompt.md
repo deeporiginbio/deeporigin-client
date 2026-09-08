@@ -1,11 +1,13 @@
 # Agent prompt — introspect `deeporigin.target-preparation`
 
-Hand the block below to an agent that has **read access to `deeporiginbio/platform-toolbox`**
-(the session this plan was written in did not — `add_repo` requires push access there).
+> **This prompt has been run.** Its output is
+> [`target-preparation-backend-report.md`](./target-preparation-backend-report.md), and
+> [`target-prep-do-studio-implementation-plan.md`](./target-prep-do-studio-implementation-plan.md)
+> has been rewritten against it. Kept here as the reusable instrument: re-run it against a
+> later tool version, or adapt it for the next tool that needs the same treatment.
 
-Its output answers §7.0 of `target-prep-do-studio-implementation-plan.md` and unblocks the
-manifest. Paste the report back into a session that has the plan, and every ⚠ marker in
-§3, §8 and §9 can be resolved.
+Hand the block below to an agent that has **read access to `deeporiginbio/platform-toolbox`**
+(the session that wrote it did not — `add_repo` requires push access there).
 
 ---
 
