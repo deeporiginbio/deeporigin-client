@@ -258,6 +258,53 @@ internally. If it does, the `selection` the UI sends must still be honoured verb
 digest binding (`source_sha256`) is what makes the user's keep/skip choices meaningful, and
 a re-analysis that overrides them would silently discard the whole filtering UI.
 
+### 3.1 Which tools the app actually calls
+
+`target-prep` is the only tool the **Run** button submits to. But the app is not a
+single-tool client, because two things have to happen *before* the user can press Run — the
+structure has to be graded, and its components have to be inventoried — and those are
+separate executions by definition: they run on selection, not on submit.
+
+| Call | Tool | When | Still needed? |
+| --- | --- | --- | --- |
+| Grade the selected structure | `deeporigin.structure-report` | on row select | **Yes** — PRD requirement 1 is a report *on selection*, before any run |
+| Inventory components | `deeporigin.protein-prep` `action: "recommend"` | on row select | **Yes, unless superseded** — see below |
+| Prepare + pockets + final report | `deeporigin.target-prep` | on submit | Yes — the whole run |
+| `deeporigin.protein-prep` `action: "prepare"` | — | never | **No.** This is inside `target-prep`. The UI must not call it directly. |
+| `deeporigin.pocket-finder` | — | never | **No.** Inside `target-prep`. |
+
+So: **prepare, no. Recommend, probably yes.**
+
+The reason recommend survives is that the Structure Filtering panel — the entire middle of
+the PRD's second screenshot — is rendered *from* its output, and the run's `selection` is
+built from the user's edits to it. Recommend is also the only known producer of
+`source_sha256`, the digest that binds a Selection to the exact bytes it was computed
+against. Without an inventory there is nothing to toggle and nothing to send.
+
+`target-prep` re-running its own analysis internally does not remove this need: the user
+has to see and edit the components *before* submitting, so the inventory must be available
+pre-submit regardless of what the workflow does with it afterwards.
+
+What *would* supersede the recommend call is a cheaper pre-submit inventory endpoint. There
+is a candidate: `platform-toolbox` ships
+`images/preflight/src/preflight_service/routes/target_preparation.py` and a
+`workflow/preflight-service.yaml` alongside the tool. If that route returns the component
+inventory, the app should call it instead — a preflight HTTP call avoids creating a tool
+execution per row selection, which at one execution per click is a real cost and a real
+Activity-page noise problem (mitigated today only by `visibility: "hidden"`).
+
+**Decide this in §7.0, before writing the manifest**, because the two paths are structurally
+different in the engine:
+
+| If the inventory comes from | Then |
+| --- | --- |
+| `protein-prep` `action: "recommend"` | a `manifest.steps` entry, as sketched in §8 — no new engine capability beyond gap #1 |
+| the preflight service | **not** a `manifest.steps` entry — `useRunStep` only speaks to the tools-execution endpoint. The Structure Filtering tile fetches it directly (its own hook + react-query), the way `csv-table` and `patent-wrapper` already fetch their own data |
+| `target-prep` itself, via a `recommend`-style action | a `manifest.steps` entry pointing at `target-prep` with an action discriminator — same shape as the `protein-prep` case, different `toolKey` |
+
+Either way the *tile* and its state contract are identical; only the fetch differs. Build
+the tile against a fixture first (§10) and the choice stays a one-file change.
+
 ---
 
 ## 4. End-to-end flow, with the exact calls
@@ -554,6 +601,19 @@ None of these introduce tool-specific logic into the engine — that invariant h
 
    `deeporigin.target-prep` is also worth confirming as the registered tool key — the
    toolbox directory is `target-preparation`, and the two do not have to match.
+
+   **Also settle where the pre-submit component inventory comes from** (§3.1): the
+   `protein-prep` `recommend` action, the preflight route, or a `target-prep` action of its
+   own. Read `routes/target_preparation.py` — if it already returns the inventory, the app
+   should use it and stop creating a tool execution on every row click. This changes
+   whether the fetch is a `manifest.steps` entry or a hook inside the tile, so it wants
+   deciding before the manifest is written.
+
+   Two enum questions fall out of §9 and can be answered from the same files: the
+   **cofactor component id shape** (no `do-dd-client` fixture contains one, yet the PRD
+   screenshot shows `Mn2+` and `Zn2+`), and whether `component.subtype` and `reason_code`
+   have documented catalogues — §9 treats both as open on the evidence that the client
+   accepts any string, and typing them as unions would be wrong if that is deliberate.
 1. **Residue count / coverage denominator.** The PRD card shows `1,036 Residues`.
    `structure_reports` returns `coverage` (a fraction) but no residue count. Either add it
    to the tool output or read `proteins.protein_length` off the entity row.
@@ -690,7 +750,200 @@ already merges over the schema-built inputs as `inputOverrides`. Use that rather
 
 ---
 
-## 9. Test surface
+## 9. Field and enum reference
+
+Every field and every enumerated value the app touches, in one place, so the TypeScript
+types can be written without re-deriving them from five files.
+
+**Read the Closed/Open column before typing any of these as a union.** `do-dd-client`'s
+house rule is that value catalogues are owned by the tool definition, not by the client
+(`CONTEXT.md`: *"The catalog is owned by the definition, not by the CLI"*, *"Names come
+from the tool output, not a client constant"*). An **open** set must be typed `string`,
+rendered by whatever comes back, and given a fallback branch — hardcoding it means a tool
+release silently drops values on the floor. A **closed** set is safe to switch on
+exhaustively.
+
+### 9.1 `deeporigin.target-prep` — inputs ⚠ UNVERIFIED
+
+Placeholders until §7.0. Types are what the app needs to send.
+
+| Field | Type | Source in the UI | Notes |
+| --- | --- | --- | --- |
+| `protein` | object `{ id, file_path }` | `x-data-type: "Protein"` | from the selected table row |
+| `selection` | object (§9.2) | `x-from-state: "selection"` | the filtering tile's output |
+| `pdb_id` | string(4) | `x-data-type: "Protein.pdb_id"` | required when loop modelling is on |
+| `add_missing_atoms` | boolean | form | ⚠ may not exist |
+| `model_missing_loops` | boolean | form | ⚠ name may differ |
+| `protonate` | boolean | form | ⚠ may not exist |
+| `find_pockets` | boolean | form | ⚠ may not exist |
+| `output_name` | string | form | ⚠ purpose unconfirmed (§5a) |
+
+### 9.2 `deeporigin.protein-prep` — recommend I/O
+
+**Inputs**
+
+| Field | Type | Enum | Closed? |
+| --- | --- | --- | --- |
+| `action` | string | `recommend` \| `prepare` | **Closed** (`_VALID_ACTIONS`) |
+| `protein.file_path` | string | — | — |
+| `protein.id` | string | — | optional; sent only when registered |
+
+**`jobOutputs.recommendation`**
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| `source_sha256` | string(64) | digest of the structure bytes; **binds the Selection** |
+| `analyzer_version` | string | echoed back verbatim in `selection` |
+| `chain_id_mapping` | object | seen empty in every fixture; purpose unconfirmed |
+| `components[]` | array | one row per chain / ligand / cofactor / water |
+
+**`components[]` row**
+
+| Field | Type | Enum | Closed? |
+| --- | --- | --- | --- |
+| `id` | string | see §9.3 | — |
+| `kind` | string | `chain` \| `ligand` \| `cofactor` \| `water` | **Closed** (`PROTEIN_PREP_COMPONENT_KINDS`) |
+| `subtype` | string | observed: `protein`, `small_molecule`, `crystal`, `coordinating` | **OPEN** — the client explicitly accepts any string (`_validate_component_matchers` does `del subtype`). Do not type this as a union. |
+| `label` | string | — | display only; **never an identity** |
+| `recommendation` | string | `keep` \| `review` \| `skip` | **Closed** (`_VALID_DECISIONS`) — the analyzer's frozen tag |
+| `reason` | string | — | human-readable, show as-is |
+| `reason_code` | string | observed: `ordinary_protein_chain`, `ambiguous_ligand`, `water_review`, `coordinating_water` | **OPEN** — no client constant exists. Use for grouping/telemetry at most; render `reason`. |
+| `author` | object | `{ chain_id, resname?, resseq? }` | **the Mol\* selection key** (§9.3) |
+| `evidence` | object | free-form, e.g. `{ "n_coord": 1 }` | tool-owned; render generically or not at all |
+
+**`selection` (what the UI sends back)**
+
+| Field | Type | Enum | Closed? |
+| --- | --- | --- | --- |
+| `source_sha256` | string(64) | — | must match the recommend digest exactly |
+| `analyzer_version` | string | — | echoed unchanged |
+| `decisions` | `Record<componentId, string>` | `keep` \| `review` \| `skip` | **Closed.** At submit only `keep` \| `skip` are legal (`_RESOLVED_DECISIONS`) — a lingering `review` is rejected by the tool. |
+
+### 9.3 Component id grammar — do not parse it
+
+| Kind | Observed id | Shape |
+| --- | --- | --- |
+| chain | `chain:A` | `chain:<chain_id>` |
+| ligand | `ligand:LIG:A:100` | `ligand:<resname>:<chain_id>:<resseq>` |
+| water | `water:A:HOH:310:` | `water:<chain_id>:<resname>:<resseq>:` |
+| cofactor | *not present in any fixture* ⚠ | unknown |
+
+**The ligand and water field orders are different, and water carries a trailing colon.**
+Anything that parses these to build a Mol\* selection will be subtly wrong for one of the
+two. Use `author.chain_id` / `author.resname` / `author.resseq` instead — that is what
+`author` is for. The only thing safe to read off the id is the prefix, which is exactly all
+the client does (`_kind_from_component_id`). Treat the id as an opaque key.
+
+Confirm the cofactor id shape in §7.0 — no fixture in `do-dd-client` contains one, yet the
+PRD screenshot shows two (`Mn2+`, `Zn2+`).
+
+### 9.4 `deeporigin.structure-report` — outputs
+
+| Field | Type | Enum | Closed? |
+| --- | --- | --- | --- |
+| `grade` | string | `A` \| `B` \| `C` \| `D` | **Closed** (`StructureReportGrade`) |
+| `weighted_score` | number | — | 0–1; PRD mapping ≥0.8 A, 0.66–0.79 B, 0.5–0.65 C, <0.5 D |
+| `metadata_source` | string | `rcsb` \| `file_header` \| `file_header+rcsb` | **Closed** (`MetadataSource`) |
+| `field_status` | `Record<string, string>` | values: `value` \| `not_applicable` \| `unknown` | **Closed** values (`FieldStatusValue`); **keys are OPEN** |
+| `resolution_score` | number | — | component score |
+| `coverage_score` | number | — | component score |
+| `rfree_score` | number | — | component score |
+| `inhibitor_score` | number | — | component score |
+| `method_score` | number | — | component score |
+| `organism_score` | number | — | component score |
+| `coverage` | number \| null | — | fraction 0–1 → render as `82.6%` |
+| `has_ligand` | boolean \| null | — | drives the `Ligand` pill |
+| `method` | string \| null | — | raw, e.g. `X-RAY DIFFRACTION` |
+| `method_class` | string \| null | PRD scoring buckets: `cryo-EM`, `X-ray`, `NMR`, `other` | **OPEN** — typed `str \| None` in the client. The PRD lists the *scoring* buckets, not a closed output catalogue. |
+| `organism` | string \| null | — | raw, e.g. `Homo sapiens` |
+| `organism_class` | string \| null | PRD scoring buckets: `human`, `mammal`, `vertebrate`, `other` | **OPEN** — same reasoning |
+| `resolution` | number \| null | — | Å → the `2.31Å` pill |
+| `rfree` | number \| null | — | X-ray only |
+| `pdb_id` | string \| null | — | — |
+| `protein_id` | string \| null | — | the join key if §5b lands |
+| `source_sha256` | string \| null | — | absent in remote PDB-ID-only mode |
+
+Every `*_score` and `grade` comes **from the tool**. Do not recompute the grade
+client-side even though the PRD publishes the formula — the client's own rule is *"Do not
+recompute grades in the client"* (`structure_report.py` module docstring).
+
+`field_status` is what tells the card which pills are genuinely unknown versus
+not-applicable (Rfree on a cryo-EM structure). Render those states rather than showing a
+blank or a zero.
+
+### 9.5 `deeporigin.pocket-finder` — inputs
+
+Called only inside `target-prep`, but the results tile reads its output.
+
+| Field | Type | Enum | Closed? |
+| --- | --- | --- | --- |
+| `mode` | string | `auto-find` \| `define-by-selection` | **Closed** (`PocketFinderMode`) |
+| `pocket_count` | integer | ≥1, default 1 (CLI) / 5 (UI manifest) | auto-find only |
+| `pocket_min_size` | number | ≥1, default 30 | auto-find only |
+| `selections[].kind` | string | `residue` \| `ligand` \| `cofactor` | **Closed** (`PocketSelectionKind`) |
+| `pocket_radius` | number | >0, default 10.0 | define-by-selection only |
+| `align_to_pocket` | boolean | — | define-by-selection only |
+
+### 9.6 Platform execution status
+
+**Closed** (`PlatformStatus`), and the UI must normalize before comparing:
+
+`Quoted` · `Created` · `Queued` · `Running` · `Completed` · `Succeeded` · `Failed` ·
+`Cancelled` · `InsufficientFunds` · `FailedQuotation`
+
+`Succeeded` is legacy for `Completed` — treat them as one success state
+(`is_success_status`). Terminal: everything except `Created` / `Queued` / `Running`.
+
+Note the failure mode `useRunStep` already guards: these tools **answer HTTP 200 with
+`status: "Failed"`** and no `jobOutputs`, and `statusReason.message` is itself a JSON
+string. Both pre-submit steps inherit that handling for free; a direct preflight fetch
+(§3.1) would have to reimplement it.
+
+### 9.7 App form fields
+
+| Section | Field id | Type | Default | Notes |
+| --- | --- | --- | --- | --- |
+| structure-components | `components_summary` | `component-summary` ⚠ new | — | read-only chips |
+| advanced | `add_missing_atoms` | `boolean` | `true` | ⚠ needs a tool input |
+| advanced | `model_missing_loops` | `boolean` | `true` | disable when the protein has no `pdb_id` |
+| advanced | `protonate` | `boolean` | `true` | ⚠ needs a tool input |
+| advanced | `find_pockets` | `boolean` | `true` | ⚠ needs a tool input |
+| run-details | `output_name` | `string` | — | placeholder `Default_TargetPrep_ProteinId` |
+| run-details | `run_name` | `string` | — | required; `x-body-key: "name"` |
+
+Existing engine `FieldType` values (**closed**, in `types/form.ts`): `string` · `number` ·
+`boolean` · `enum` · `multi-enum` · `result` · `segmented` · `radio` · `entity-ref` ·
+`action` · `site-select` · `admet-properties` · `structure`. This app adds
+`component-summary`.
+
+### 9.8 Store state keys
+
+| Key | Written by | Read by |
+| --- | --- | --- |
+| `selectedProteins` | proteins table tile | every tile, both pre-submit steps, submit |
+| `stepOutputs.structureReport` | structure-report step | report card |
+| `stepOutputs.recommendation` | recommend step (or preflight fetch) | filtering tile, sidebar chips |
+| `stepOutputs.selection` | **filtering tile** (engine gap #2) | sidebar chips, submit via `x-from-state` |
+| `stepErrors[stepId]` | `useRunStep` | `ActionField`, filtering tile empty state |
+
+All of `stepOutputs` is cleared by `useSelectionResets` when the protein selection changes.
+
+### 9.9 Engine enums this app relies on
+
+All **closed**, all already defined in `platform-ui`:
+
+| Enum | Values | Where |
+| --- | --- | --- |
+| `AppMode` | `edit` \| `results` | `renderer/types.ts` |
+| `ExecutionVisibility` | `visible` \| `hidden` | `types/app.ts` — both pre-submit steps use `hidden` |
+| `ResultsMergeMode` | `flat` \| `per-group` \| `aggregate` | `types/app.ts` — §5b would use `aggregate` |
+| `ResultsAppliesTo` | `proteins` \| `ligands` | `types/app.ts` — this app is `proteins` |
+| `LeafComponent` | 10 values today | `types/tiles.ts` — this app adds 2 |
+| `RendererName` | 4 values today | `packages/molstar/src/types/index.ts` — this app adds 1 |
+
+---
+
+## 10. Test surface
 
 - **Unit** — `build-tool-payload` with `x-from-state` carrying a full `selection`; the
   decision reducer in the filtering tile (`review` never auto-resolves); the
@@ -707,7 +960,7 @@ already merges over the schema-built inputs as `inputOverrides`. Use that rather
 
 ---
 
-## 10. Phasing
+## 11. Phasing
 
 **Phase 0 — reconcile the schema (§7.0).** Half a day, blocking. Nothing below is safe to
 write until the manifest's `inputSchema` matches the merged tool definition.
