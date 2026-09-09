@@ -111,10 +111,6 @@ def _protein_with_remote(*, pdb_id: str | None = "1EBY") -> Protein:
     protein = Protein(name="test", pdb_id=pdb_id)
     protein.remote_path = "testing/brd.pdb"
     return protein
-    """Return a protein whose remote path avoids upload in payload tests."""
-    protein = Protein(name="test", pdb_id=pdb_id)
-    protein.remote_path = "testing/brd.pdb"
-    return protein
 
 
 def _execution_fixture(name: str) -> dict:
@@ -477,6 +473,21 @@ def test_run_requires_loops_off() -> None:
         prep.run()
 
 
+def test_run_rejects_pocket_config() -> None:
+    """Blocking prepare is unavailable when pocket is configured."""
+    from deeporigin.drug_discovery import PocketFinderConfig
+
+    prep = ProteinPrep(
+        protein=Protein(name="test"),
+        selection=_SAMPLE_SELECTION,
+        model_missing_loops=False,
+        pocket=PocketFinderConfig(pocket_count=1, pocket_min_size=30),
+    )
+
+    with pytest.raises(ValueError, match=r"Use start\(\)"):
+        prep.run()
+
+
 def test_start_requires_pdb_id_when_loops_enabled() -> None:
     """Asynchronous loops-on prepare requires a PDB ID."""
     prep = ProteinPrep(
@@ -509,15 +520,17 @@ def test_configuration_freezes_permanently_after_id() -> None:
 
 
 def test_removed_api_is_absent() -> None:
-    """The old two-object and quote-oriented surface is removed."""
+    """The old two-object surface is removed; quote kwargs remain on start/run."""
     prep = ProteinPrep(protein=Protein(name="test"))
 
     assert not hasattr(prep, "as_prepare")
     assert not hasattr(prep, "from_recommendation")
     assert not hasattr(prep, "get_recommendation")
     assert not hasattr(prep, "selection_from_recommendation")
-    assert list(inspect.signature(prep.run).parameters) == []
-    assert list(inspect.signature(prep.start).parameters) == []
+    assert "quote" in inspect.signature(prep.run).parameters
+    assert "approve_amount" in inspect.signature(prep.run).parameters
+    assert "quote" in inspect.signature(prep.start).parameters
+    assert "approve_amount" in inspect.signature(prep.start).parameters
 
 
 def test_recommend_payload_is_blocking_and_minimal() -> None:
@@ -728,3 +741,219 @@ def test_start_accepts_resolved_loops_off_prepare(
     assert prep.id is not None
     if client.env == "local":
         assert is_success_status(prep.status)
+
+
+def test_pocket_finder_config_to_tool_input_modes() -> None:
+    """Nested pocket config serializes each mode to the Target Preparation shape."""
+    from deeporigin.drug_discovery import PocketFinderConfig
+
+    auto = PocketFinderConfig(pocket_count=2, pocket_min_size=40)
+    assert auto.to_tool_input() == {
+        "mode": "auto-find",
+        "pocket_count": 2,
+        "pocket_min_size": 40.0,
+    }
+
+    selections = [{"kind": "ligand", "author": {"chain_id": "A", "resname": "LIG"}}]
+    defined = PocketFinderConfig(
+        mode="define-by-selection",
+        selections=selections,
+        pocket_radius=12.0,
+        align_to_pocket=True,
+    )
+    assert defined.to_tool_input() == {
+        "mode": "define-by-selection",
+        "selections": selections,
+        "pocket_radius": 12.0,
+        "align_to_pocket": True,
+    }
+
+    crystal = PocketFinderConfig(
+        mode="from-crystal-ligand",
+        component_id="ligand:LIG:A:100",
+        box_padding=4.0,
+    )
+    assert crystal.to_tool_input() == {
+        "mode": "from-crystal-ligand",
+        "crystal_ligand": {"component_id": "ligand:LIG:A:100"},
+        "box_padding": 4.0,
+    }
+
+
+def test_loops_off_no_pocket_payload_uses_protein_prep() -> None:
+    """Direct route keeps protein-prep action prepare and omits pocket."""
+    prep = ProteinPrep(
+        protein=_protein_with_remote(),
+        selection=_SAMPLE_SELECTION,
+        model_missing_loops=False,
+    )
+
+    assert prep._uses_composite_route() is False
+    payload = prep._make_protein_prep_payload(action="prepare", sync=True)
+    assert payload["inputs"]["action"] == "prepare"
+    assert "pocket" not in payload["inputs"]
+
+
+def test_loops_on_routes_to_target_prep_payload() -> None:
+    """Loops-on prepare builds action-less Target Preparation inputs."""
+    prep = ProteinPrep(
+        protein=_protein_with_remote(),
+        selection=_SAMPLE_SELECTION,
+        model_missing_loops=True,
+        pdb_id="1EBY",
+    )
+
+    assert prep._uses_composite_route() is True
+    payload = prep._make_target_prep_payload(approve_amount=None)
+    assert "action" not in payload["inputs"]
+    assert payload["inputs"]["model_missing_loops"] is True
+    assert "pocket" not in payload["inputs"]
+    assert "sync" not in payload
+
+
+def test_pocket_routes_to_target_prep_with_nested_pocket() -> None:
+    """Any pocket config nests under inputs.pocket on the composite payload."""
+    from deeporigin.drug_discovery import PocketFinderConfig
+
+    prep = ProteinPrep(
+        protein=_protein_with_remote(pdb_id=None),
+        selection=_SAMPLE_SELECTION,
+        model_missing_loops=False,
+        pocket=PocketFinderConfig(pocket_count=1, pocket_min_size=30),
+    )
+
+    payload = prep._make_target_prep_payload(approve_amount=12)
+    assert payload["approveAmount"] == 12
+    assert payload["inputs"]["pocket"] == {
+        "mode": "auto-find",
+        "pocket_count": 1,
+        "pocket_min_size": 30.0,
+    }
+
+
+def test_composite_start_uses_target_preparation_tool_key(
+    client: DeepOriginClient,
+    registered_protein: Protein,
+) -> None:
+    """Loops-on start binds to target-preparation major 2."""
+    prep = ProteinPrep(
+        protein=registered_protein,
+        selection=_SAMPLE_SELECTION,
+        model_missing_loops=True,
+        pdb_id="1EBY",
+        client=client,
+    )
+
+    prep.start()
+
+    assert prep.id is not None
+    assert prep.tool_key == TOOL_KEYS_AND_VERSIONS["target_prep"]["tool_key"]
+    assert prep.tool_version == "2"
+    prepared = prep.get_results()
+    assert isinstance(prepared, Protein)
+    report = prep.get_report()
+    assert report is not None
+    assert report.report_role == "prepared"
+    with pytest.raises(ValueError, match="did not request pockets"):
+        prep.get_pockets()
+
+
+def test_pocket_start_exposes_pockets_and_supports_quote(
+    client: DeepOriginClient,
+    registered_protein: Protein,
+) -> None:
+    """Pocket-bearing start returns pockets and can quote first."""
+    from deeporigin.drug_discovery import PocketFinderConfig
+
+    quoted = ProteinPrep(
+        protein=registered_protein,
+        selection=_SAMPLE_SELECTION,
+        model_missing_loops=False,
+        pocket=PocketFinderConfig(pocket_count=1, pocket_min_size=30),
+        client=client,
+    )
+    quoted.start(quote=True)
+    assert quoted.status == "Quoted"
+    assert quoted.id is not None
+
+    prep = ProteinPrep(
+        protein=registered_protein,
+        selection=_SAMPLE_SELECTION,
+        model_missing_loops=False,
+        pocket=PocketFinderConfig(pocket_count=1, pocket_min_size=30),
+        client=client,
+    )
+    prep.start()
+    assert prep.tool_key == "deeporigin.target-preparation"
+    prepared = prep.get_results()
+    assert isinstance(prepared, Protein)
+    pockets = prep.get_pockets()
+    assert pockets is not None
+    assert len(pockets) >= 1
+    assert prep.get_report() is not None
+
+
+def test_direct_get_report_and_get_pockets_raise(
+    client: DeepOriginClient,
+    registered_protein: Protein,
+) -> None:
+    """Direct protein-prep prepare excludes report and pocket getters."""
+    prep = ProteinPrep(
+        protein=registered_protein,
+        selection=_SAMPLE_SELECTION,
+        model_missing_loops=False,
+        client=client,
+    )
+    prep.start()
+
+    with pytest.raises(ValueError, match="did not request a prepared Structure Report"):
+        prep.get_report()
+    with pytest.raises(ValueError, match="did not request pockets"):
+        prep.get_pockets()
+
+
+def test_get_pockets_returns_none_when_not_published() -> None:
+    """Requested pockets that have not been published yet return None."""
+    from deeporigin.drug_discovery import PocketFinderConfig
+
+    prep = ProteinPrep(
+        protein=Protein(name="test"),
+        selection=_SAMPLE_SELECTION,
+        model_missing_loops=False,
+        pocket=PocketFinderConfig(pocket_count=1, pocket_min_size=30),
+    )
+    prep._id = "pending-pockets"
+    prep.tool_key = TOOL_KEYS_AND_VERSIONS["target_prep"]["tool_key"]
+
+    assert prep.get_pockets({"jobOutputs": {}}) is None
+
+
+def test_get_pockets_returns_empty_list_for_zero_pocket_result() -> None:
+    """A completed valid zero-pocket payload returns []."""
+    from deeporigin.drug_discovery import PocketFinderConfig
+
+    prep = ProteinPrep(
+        protein=Protein(name="test"),
+        selection=_SAMPLE_SELECTION,
+        model_missing_loops=False,
+        pocket=PocketFinderConfig(pocket_count=1, pocket_min_size=30),
+    )
+    prep._id = "zero-pockets"
+    prep.tool_key = TOOL_KEYS_AND_VERSIONS["target_prep"]["tool_key"]
+
+    assert prep.get_pockets({"jobOutputs": {"pockets": []}}) == []
+
+
+def test_configuration_freezes_pocket_after_id() -> None:
+    """Pocket mutation fails once an execution id is present."""
+    from deeporigin.drug_discovery import PocketFinderConfig
+
+    prep = ProteinPrep(
+        protein=Protein(name="test"),
+        selection=_SAMPLE_SELECTION,
+        model_missing_loops=False,
+    )
+    prep._id = "exec-locked"
+
+    with pytest.raises(AttributeError, match="execution id is already set"):
+        prep.pocket = PocketFinderConfig(pocket_count=1, pocket_min_size=30)

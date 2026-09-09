@@ -154,10 +154,23 @@ PROTEIN_PREP_RECOMMEND_NOT_PREPARE_MSG = (
 """Used by ``ProteinPrep.get_results`` on a recommend execution."""
 
 PROTEIN_PREP_RUN_REQUIRES_LOOPS_OFF_MSG = (
-    "run() requires model_missing_loops=False. Use start() when loop modelling "
-    "is enabled."
+    "run() requires model_missing_loops=False and no pocket. Use start() when "
+    "loop modelling is enabled or pocket is configured."
 )
-"""Used by ``ProteinPrep.run`` when loop modelling is enabled."""
+"""Used by ``ProteinPrep.run`` for composite (loops-on or pocket) routes."""
+
+PROTEIN_PREP_REPORT_EXCLUDED_MSG = (
+    "This ProteinPrep execution did not request a prepared Structure Report. "
+    "Reports are only produced on the target-preparation route (loops on or "
+    "pocket configured)."
+)
+"""Used by ``ProteinPrep.get_report`` when the direct protein-prep path ran."""
+
+PROTEIN_PREP_POCKETS_EXCLUDED_MSG = (
+    "This ProteinPrep execution did not request pockets. Configure "
+    "pocket=PocketFinderConfig(...) before start() to include Pocket Finder."
+)
+"""Used by ``ProteinPrep.get_pockets`` when ``pocket`` was not configured."""
 
 PROTEIN_PREP_COMPONENT_KINDS: frozenset[str] = frozenset(
     {"chain", "ligand", "cofactor", "water"}

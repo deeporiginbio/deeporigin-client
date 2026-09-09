@@ -46,6 +46,7 @@ from deeporigin.platform.constants import TOOL_KEYS_AND_VERSIONS, is_success_sta
 StructureReportGrade = Literal["A", "B", "C", "D"]
 MetadataSource = Literal["rcsb", "file_header", "file_header+rcsb"]
 FieldStatusValue = Literal["value", "not_applicable", "unknown"]
+StructureReportRole = Literal["source", "prepared"]
 
 _PDB_ID_RE = re.compile(r"^[A-Za-z0-9]{4}$")
 
@@ -91,6 +92,8 @@ class StructureReportResult:
         rfree: Rfree (X-ray).
         source_sha256: SHA-256 of uploaded structure bytes (omitted in remote
             PDB-ID-only mode).
+        report_role: Target Preparation phase, when supplied by the parent
+            workflow.
     """
 
     metadata_source: MetadataSource
@@ -114,6 +117,7 @@ class StructureReportResult:
     resolution: float | None = None
     rfree: float | None = None
     source_sha256: str | None = None
+    report_role: StructureReportRole | None = None
 
     @classmethod
     def from_json(cls, data: dict[str, Any]) -> StructureReportResult:
@@ -164,6 +168,7 @@ class StructureReportResult:
             resolution=_optional_float(data.get("resolution")),
             rfree=_optional_float(data.get("rfree")),
             source_sha256=data.get("source_sha256"),
+            report_role=data.get("report_role"),
         )
 
     def __repr__(self) -> str:

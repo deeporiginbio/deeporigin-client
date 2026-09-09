@@ -98,6 +98,7 @@ def test_structure_report_result_from_json_round_trip() -> None:
         "weighted_score": 0.7,
         "grade": "B",
         "pdb_id": "1ABC",
+        "report_role": "source",
         "resolution": 2.0,
     }
     row = StructureReportResultCls.from_json(raw)
@@ -106,6 +107,7 @@ def test_structure_report_result_from_json_round_trip() -> None:
     assert row.pdb_id == "1ABC"
     assert row.coverage is None
     assert row.source_sha256 is None
+    assert row.report_role == "source"
 
     # Sanity check: interactive-friendly representations.
     repr_str = repr(row)
