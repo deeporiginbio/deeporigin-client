@@ -74,6 +74,39 @@ def test_put_to_signed_url_refreshes_signed_url_on_retry(
     assert put_attempts["count"] == 2
 
 
+def test_put_to_signed_url_sets_content_length_for_empty_file(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Empty files must send Content-Length: 0 for presigned S3 PUTs."""
+    local_file = tmp_path / "empty.bin"
+    local_file.write_bytes(b"")
+
+    files = _files_with_mock_client()
+
+    class FakeResponse:
+        def raise_for_status(self) -> None:
+            return None
+
+    observed_headers: dict[str, str] = {}
+
+    def fake_put(*_args: object, **kwargs: object) -> FakeResponse:
+        headers = kwargs["headers"]
+        observed_headers["Content-Length"] = headers["Content-Length"]
+        _consume_upload_body(kwargs["content"])
+        return FakeResponse()
+
+    fake_client = MagicMock()
+    fake_client.put.side_effect = fake_put
+    fake_client.__enter__ = MagicMock(return_value=fake_client)
+    fake_client.__exit__ = MagicMock(return_value=False)
+    monkeypatch.setattr(httpx, "Client", MagicMock(return_value=fake_client))
+
+    files._put_to_signed_url(local_file, "/remote/empty.bin", max_retries=0)
+
+    assert observed_headers["Content-Length"] == "0"
+
+
 def test_put_to_signed_url_streams_file_without_read_bytes(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
