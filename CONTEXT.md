@@ -7,12 +7,15 @@ system preparation, and free-energy calculations.
 
 **Molprops**:
 Combined platform tool ``deeporigin.mol-props-combined`` for physicochemical
-properties (logP, logD, logS, PAINS). As of tool 0.9.3+, toxicity and metabolism
-endpoints (hERG, CYP, AMES) moved to ``deeporigin.admet-properties``. The CLI class
-``Molprops`` mutates dedicated :class:`~deeporigin.drug_discovery.structures.ligand.Ligand`
-attributes in place.
+properties (logP, logD, logS, PAINS, RDKit descriptors including ``sa_score``).
+As of tool 0.9.3+, toxicity and metabolism endpoints (hERG, CYP, AMES) moved to
+``deeporigin.admet-properties``. The CLI class ``Molprops`` mutates dedicated
+:class:`~deeporigin.drug_discovery.structures.ligand.Ligand` attributes in place
+(attrs-only; not ``properties``). Default ``props`` is the full tool input enum.
+Tool version pin is major ``"1"``.
 _Avoid_: conflating with ``Admet``; calling it "ADMET" when you mean the
-admet-properties tool
+admet-properties tool; storing molprops results only in ``properties``; local
+RDKit ``@property`` methods named like molprops fields
 
 **Admet endpoint**:
 A selectable admet-now task folder name (e.g. ``AMES_classification``) listed on

@@ -532,7 +532,7 @@ def test_ligandset_to_dataframe():
 
 
 def test_ligandset_to_dataframe_after_molprops():
-    """Molprops rows must not duplicate id/SMILES; columns are id, SMILES, then ADMET."""
+    """Molprops rows must not duplicate id/SMILES; columns are id, SMILES, then attrs."""
     from deeporigin.drug_discovery.structures.ligand import LigandSet
 
     ligand = Ligand.from_smiles("CCO")
@@ -542,17 +542,19 @@ def test_ligandset_to_dataframe_after_molprops():
             "ligand_id": "0",
             "smiles": "CCO",
             "logP": 1.2,
-            "cyp2c19": 0.5,
+            "sa_score": 2.5,
         }
     )
 
     df = LigandSet(ligands=[ligand]).to_dataframe()
 
-    assert list(df.columns) == ["id", "SMILES", "logP", "cyp2c19"]
+    assert list(df.columns) == ["id", "SMILES", "logP", "sa_score"]
     assert "ligand_id" not in df.columns
     assert "smiles" not in df.columns
     assert df.loc[0, "id"] == "0"
     assert df.loc[0, "SMILES"] == "CCO"
+    assert df.loc[0, "logP"] == pytest.approx(1.2)
+    assert df.loc[0, "sa_score"] == pytest.approx(2.5)
 
 
 def test_ligandset_indexing_and_slicing():

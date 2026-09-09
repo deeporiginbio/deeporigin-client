@@ -1,4 +1,4 @@
-"""Molprops -- synchronous ADMET / molprops runs on one or more ligands.
+"""Molprops -- synchronous molprops runs on one or more ligands.
 
 Backed by the single combined platform tool ``deeporigin.mol-props-combined``,
 which accepts a list of ``ligands`` and a ``molprops`` array selecting which
@@ -7,7 +7,7 @@ properties to compute, and returns one row per input ligand keyed by
 
 Usage::
 
-    mp = Molprops(ligands=[ligand], props=["logp", "logd"])
+    mp = Molprops(ligands=[ligand], props=["logp", "logd", "sa_score"])
     mp.run(quote=True)  # one quote for all ligands + props (ignores ``batch_size``)
     mp.run()  # mutates ligands in place; sets ``cost`` on success
 
@@ -145,13 +145,13 @@ def molprops_quote_total(
 
 
 class Molprops(Execution, SyncExecutableMixin):
-    """Predict molprops / ADMET for ligands via the combined platform tool.
+    """Predict molprops for ligands via the combined platform tool.
 
     Issues one ``client.executions.create`` per batch against
     ``deeporigin.mol-props-combined`` on a normal :meth:`run`, or a single
     quotation request for all ligands when :meth:`run` is called with
     ``quote=True``. Each request carries all selected property keys
-    (e.g. ``logp``, ``logd``). A normal ``run()`` mutates each
+    (e.g. ``logp``, ``sa_score``). A normal ``run()`` mutates each
     passed-in :class:`~deeporigin.drug_discovery.structures.ligand.Ligand`
     in place via
     :meth:`~deeporigin.drug_discovery.structures.ligand.Ligand._apply_molprops_result`.

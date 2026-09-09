@@ -667,19 +667,11 @@ def _synthesize_molprops_row(
 ) -> dict[str, Any]:
     """Build a synthetic combined-molprops output row for one ligand.
 
-    Includes only the output keys for properties named in ``requested`` (see
-    the combined tool's input schema for valid property keys: ``ames``,
-    ``cyp``, ``herg``, ``logd``, ``logp``, ``logs``, ``pains``).
+    Includes only the output keys for properties named in ``requested``
+    (``deeporigin.mol-props-combined`` input enum).
     """
     row: dict[str, Any] = {"ligand_id": ligand_id}
     seed = smiles or ligand_id
-    if "ames" in requested:
-        row["ames_probability"] = round(_stable_unit_float(seed, "ames"), 6)
-    if "herg" in requested:
-        row["herg_inhibition_probability"] = round(_stable_unit_float(seed, "herg"), 6)
-    if "cyp" in requested:
-        for iso in ("cyp1a2", "cyp2c9", "cyp2c19", "cyp2d6", "cyp3a4"):
-            row[iso] = round(_stable_unit_float(seed, iso), 6)
     if "logd" in requested:
         row["logD"] = _stable_log_value(seed, "logd", low=-2.0, high=6.0)
     if "logp" in requested:
@@ -689,6 +681,22 @@ def _synthesize_molprops_row(
     if "pains" in requested:
         row["has_pains"] = False
         row["pains_fragments"] = []
+    if "molecular_weight" in requested:
+        row["molecular_weight"] = round(
+            50.0 + 200.0 * _stable_unit_float(seed, "mw"), 3
+        )
+    if "hbond_donor_count" in requested:
+        row["hbond_donor_count"] = int(_stable_unit_float(seed, "hbd") * 5)
+    if "hbond_acceptor_count" in requested:
+        row["hbond_acceptor_count"] = int(_stable_unit_float(seed, "hba") * 8)
+    if "rotatable_bond_count" in requested:
+        row["rotatable_bond_count"] = int(_stable_unit_float(seed, "rot") * 10)
+    if "tpsa" in requested:
+        row["tpsa"] = round(10.0 + 140.0 * _stable_unit_float(seed, "tpsa"), 3)
+    if "rule_of_5_violations" in requested:
+        row["rule_of_5_violations"] = int(_stable_unit_float(seed, "ro5") * 5) % 5
+    if "sa_score" in requested:
+        row["sa_score"] = round(1.0 + 9.0 * _stable_unit_float(seed, "sa"), 4)
     return row
 
 
