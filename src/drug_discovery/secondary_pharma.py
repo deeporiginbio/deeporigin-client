@@ -61,10 +61,6 @@ _UNIPROTS_ENUM_MISSING = (
 )
 
 
-# ponytail: duplicates Admet's definition-enum fetch/validate pattern almost
-# verbatim (see _endpoints_from_definition / _validate_admet_properties in
-# admet.py). Not extracted into a shared helper in this PR -- noted in the PR
-# description as a follow-up; extract once a third caller needs the same shape.
 def _uniprots_from_definition(definition: dict[str, Any]) -> list[str]:
     """Return the panel's UniProt accessions from a platform tool definition.
 
