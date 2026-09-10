@@ -520,14 +520,16 @@ def test_ligandset_to_dataframe():
 
     ligandset = LigandSet(ligands=[ligand1, ligand2])
 
-    # Add properties
-    ligand1.set_property("logP", 0.32)
-    ligand2.set_property("logP", 0.88)
+    # Add properties. Uses a generic property name rather than "logP" since
+    # molprops keys are now sourced only from dedicated Ligand attributes
+    # (see _MOLPROPS_RESPONSE_TO_ATTR), not from arbitrary set_property calls.
+    ligand1.set_property("custom_score", 0.32)
+    ligand2.set_property("custom_score", 0.88)
 
     df = ligandset.to_dataframe()
     assert len(df) == 2
     assert "SMILES" in df.columns
-    assert "logP" in df.columns
+    assert "custom_score" in df.columns
     assert list(df.columns[:2]) == ["id", "SMILES"]
 
 
