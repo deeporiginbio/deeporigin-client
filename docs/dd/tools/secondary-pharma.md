@@ -21,17 +21,16 @@ you which to call instead:
 ```mermaid
 flowchart TD
     ctor["SecondaryPharmacology(method=...)"]
-    ctor -->|"method='ligand-ml'"| ml_run["run()"]
-    ctor -->|"method='docking'"| dock_start["start()"]
+    ctor -->|" method='ligand-ml' "| ml_run["run()"]
+    ctor -->|" method='docking' "| dock_start["start()"]
 
-    ml_run --> ml_results["get_results()\nDataFrame, returned immediately"]
+    ml_run -->|" completes "| ml_results["get_results()<br/>DataFrame, returned immediately"]
+    ml_run -.->|" start() raises "| blocked(["✗"])
 
-    dock_start --> dock_wait["wait() / watch()"]
-    dock_wait --> dock_results["get_results()\nDataFrame, from the platform"]
-    dock_results --> dock_poses["get_poses()\ndownloaded PoseSet"]
-
-    ml_run -.->|"start() raises: use run()"| blocked(["✗"])
-    dock_start -.->|"run() raises: use start()"| blocked
+    dock_start -->|" submits "| dock_wait["wait() / watch()"]
+    dock_start -.->|" run() raises "| blocked
+    dock_wait --> dock_results["get_results()<br/>DataFrame, from the platform"]
+    dock_results --> dock_poses["get_poses()<br/>downloaded PoseSet"]
 ```
 
 `get_results()` always returns a `pandas.DataFrame` regardless of method. On
