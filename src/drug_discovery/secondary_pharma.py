@@ -421,7 +421,12 @@ class SecondaryPharmacology(
             parts.append("  uniprots=full panel,")
         if self._method == "docking":
             parts.append(f"  effort={self.effort},")
-        parts.append(")")
+        hint = (
+            "call start() to execute asynchronously"
+            if self._method == "docking"
+            else "call run() to execute synchronously"
+        )
+        parts.append(f")  # {hint}")
         return "\n".join(parts)
 
     def _fetch_definition_uniprots(self) -> list[str]:

@@ -260,6 +260,24 @@ def test_secondary_pharma_start_validates_effort_before_any_sync(
     assert ligand.id is None, "sync must not have run before the effort check"
 
 
+def test_secondary_pharma_repr_names_correct_entry_point(
+    client: DeepOriginClient,
+) -> None:
+    """``repr()`` points at ``run()`` or ``start()`` matching ``method``.
+
+    Both methods are always present on the instance but only one works;
+    the repr hint is the notebook-facing cue for which one to call.
+    """
+    _assert_tool_available(client)
+    ligand = Ligand.from_smiles("CCO")
+
+    ml_job = SecondaryPharmacology(ligands=[ligand], method="ligand-ml", client=client)
+    assert repr(ml_job).endswith("# call run() to execute synchronously")
+
+    dock_job = SecondaryPharmacology(ligands=[ligand], method="docking", client=client)
+    assert repr(dock_job).endswith("# call start() to execute asynchronously")
+
+
 # --- payload building -----------------------------------------------------------
 
 
