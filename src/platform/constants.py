@@ -112,7 +112,7 @@ TOOL_KEYS_AND_VERSIONS: dict[str, dict[str, str]] = {
     },
     "mol_props": {
         "tool_key": "deeporigin.mol-props-combined",
-        "tool_version": "latest",
+        "tool_version": "1",
     },
     "protonation": {
         "tool_key": "deeporigin.mol-props-protonation",

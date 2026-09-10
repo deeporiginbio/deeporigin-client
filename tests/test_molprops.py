@@ -25,15 +25,16 @@ def test_molprops_lv1(client: DeepOriginClient) -> None:
     mp = Molprops(
         ligands=[ligand],
         client=client,
-        properties={"logs", "logd", "logp"},
+        properties={"logs", "logd", "logp", "sa_score"},
     )
     mp.run()
 
-    if ligand.log_p is None and ligand.get_property("logP") is None:
+    if ligand.log_p is None:
         pytest.skip("Molprops returned no results; platform tool may be unavailable.")
-    assert ligand.get_property("logP") is not None or ligand.log_p is not None
-    assert ligand.get_property("logD") is not None or ligand.log_d is not None
-    assert ligand.get_property("logS") is not None or ligand.log_s is not None
+    assert ligand.log_p is not None
+    assert ligand.log_d is not None
+    assert ligand.log_s is not None
+    assert ligand.sa_score is not None
 
 
 def test_molprops_run_quote_true_full_payload(
