@@ -20,15 +20,15 @@ you which to call instead:
 
 ```mermaid
 flowchart TD
-    ctor["SecondaryPharmacology(method=...)"]
-    ctor -->|" method='ligand-ml' "| ml_run["run()"]
-    ctor -->|" method='docking' "| dock_start["start()"]
+    ctor["SecondaryPharmacology(method=...)"] --> choose{"Choose method"}
+    choose -->|"&nbsp;method='ligand-ml'&nbsp;"| ml_run["run()<br/>served, synchronous scoring"]
+    choose -->|"&nbsp;method='docking'&nbsp;"| dock_start["start()<br/>async Argo workflow"]
 
-    ml_run -->|" completes "| ml_results["get_results()<br/>DataFrame, returned immediately"]
-    ml_run -.->|" start() raises "| blocked(["✗"])
+    ml_run -->|"&nbsp;completes&nbsp;"| ml_results["get_results()<br/>DataFrame, returned immediately"]
+    ml_run -.->|"&nbsp;start() raises&nbsp;"| blocked(("ValueError"))
 
-    dock_start -->|" submits "| dock_wait["wait() / watch()"]
-    dock_start -.->|" run() raises "| blocked
+    dock_start -->|"&nbsp;submits&nbsp;"| dock_wait["wait() / watch()<br/>poll until complete"]
+    dock_start -.->|"&nbsp;run() raises&nbsp;"| blocked
     dock_wait --> dock_results["get_results()<br/>DataFrame, from the platform"]
     dock_results --> dock_poses["get_poses()<br/>downloaded PoseSet"]
 ```
