@@ -22,6 +22,10 @@ from deeporigin.drug_discovery.structures.pose import (
 )
 from deeporigin.platform.client import DeepOriginClient
 from deeporigin.platform.constants import TOOL_KEYS_AND_VERSIONS
+from deeporigin.utils.constants import (
+    IMPORT_DATASET_RESULT_LANE_MIN_VERSION,
+    POSE_REGISTRATION_RESULT_LANE,
+)
 from tests.conftest import check_tool_exists
 from tests.mock_server.routers.tools import (
     MOCK_POSE_REGISTRATION_FAIL_NAME,
@@ -325,6 +329,64 @@ def test_pose_set_sync_raises_on_short_count(
     assert "1 of 3 pose(s)" in message
     assert "record 0" not in message
     assert "record 2" not in message
+
+
+def _registration_inputs(client: DeepOriginClient, pose: Pose) -> dict:
+    """Return the import-dataset inputs of the run that registered ``pose``.
+
+    Args:
+        client: Client scoped to the test project.
+        pose: A synced pose.
+
+    Returns:
+        The run's ``userInputs``.
+    """
+    compute_job_id = Pose.from_id(pose.id, client=client).compute_job_id
+    assert compute_job_id
+    return client.executions.get(compute_job_id)["userInputs"]
+
+
+def test_pose_set_sync_omits_result_lane_on_pinned_import_dataset(
+    pytestconfig: pytest.Config,
+    client: DeepOriginClient,
+    registered_protein,
+    tmp_path: Path,
+) -> None:
+    """The pinned import-dataset predates result_lane, so it is not sent."""
+    _require_local_env(pytestconfig)
+    poses = _registration_poses(
+        client,
+        protein_id=registered_protein.id,
+        tmp_path=tmp_path,
+        names=["pose-a"],
+    )
+    PoseSet(poses=poses).sync(client=client)
+    assert "result_lane" not in _registration_inputs(client, poses[0])
+
+
+def test_pose_set_sync_sends_fast_result_lane_from_4_0_2(
+    pytestconfig: pytest.Config,
+    client: DeepOriginClient,
+    registered_protein,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """With import-dataset pinned at 4.0.2, pose registration asks for the fast lane."""
+    _require_local_env(pytestconfig)
+    monkeypatch.setitem(
+        TOOL_KEYS_AND_VERSIONS["import_dataset"],
+        "tool_version",
+        IMPORT_DATASET_RESULT_LANE_MIN_VERSION,
+    )
+    poses = _registration_poses(
+        client,
+        protein_id=registered_protein.id,
+        tmp_path=tmp_path,
+        names=["pose-a"],
+    )
+    PoseSet(poses=poses).sync(client=client)
+    inputs = _registration_inputs(client, poses[0])
+    assert inputs["result_lane"] == POSE_REGISTRATION_RESULT_LANE
 
 
 def test_pose_set_sync_requires_import_execution_id(

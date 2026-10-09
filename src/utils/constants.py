@@ -447,3 +447,12 @@ ENUMERATOR_AVAILABLE_REACTIONS_COLUMNS: tuple[str, ...] = (
     "atom_indices",
 )
 """Column order for the DataFrame built from AVAILABLE_REACTIONS ``jobOutputs``."""
+
+IMPORT_DATASET_RESULT_LANE_MIN_VERSION = "4.0.2"
+"""Oldest import-dataset version that accepts the ``result_lane`` input.
+
+Older versions reject unknown inputs, so ``result_lane`` is only sent when the
+pinned import-dataset version is at least this one."""
+
+POSE_REGISTRATION_RESULT_LANE = "fast"
+"""Data-platform result lane requested for pose registration imports."""

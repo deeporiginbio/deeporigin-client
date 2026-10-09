@@ -20,8 +20,10 @@ from typing import Any
 import uuid
 
 from fastapi import APIRouter, HTTPException, Request
+from packaging.version import InvalidVersion, Version
 
 from deeporigin.utils.constants import (
+    IMPORT_DATASET_RESULT_LANE_MIN_VERSION,
     INLINE_LIGAND_CAP,
     METABOLISM_WORKFLOW_LIGAND_THRESHOLD,
 )
@@ -3664,6 +3666,25 @@ def create_tools_router(
             )
             executions[execution["executionId"]] = execution
             return _normalize_execution(execution)
+        if tool_key == "deeporigin.import-dataset" and "result_lane" in (
+            body.get("inputs") or {}
+        ):
+            # import-dataset's input schema has ``additionalProperties: false``;
+            # ``result_lane`` was added in IMPORT_DATASET_RESULT_LANE_MIN_VERSION.
+            try:
+                accepts_lane = Version(tool_version) >= Version(
+                    IMPORT_DATASET_RESULT_LANE_MIN_VERSION
+                )
+            except InvalidVersion:
+                accepts_lane = False
+            if not accepts_lane:
+                raise HTTPException(
+                    status_code=400,
+                    detail=(
+                        f"import-dataset {tool_version} does not accept input "
+                        "'result_lane'"
+                    ),
+                )
         if tool_key == "deeporigin.import-dataset" and body.get("sync") is True:
             execution = _build_pose_registration_execution(
                 org_key=org_key,

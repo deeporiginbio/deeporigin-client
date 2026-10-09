@@ -7,6 +7,8 @@ import time
 from typing import Any, Optional
 import uuid
 
+from packaging.version import InvalidVersion, Version
+
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.platform.client import DeepOriginClient
 from deeporigin.platform.constants import (
@@ -16,6 +18,7 @@ from deeporigin.platform.constants import (
     normalize_platform_status,
 )
 from deeporigin.platform.project_scope import require_client_project_id
+from deeporigin.utils.constants import IMPORT_DATASET_RESULT_LANE_MIN_VERSION
 
 MAX_SERVED_FILE_LIGAND_RECORDS = 500
 
@@ -525,6 +528,26 @@ def sync_process_pdb(
     )
 
 
+def import_dataset_supports_result_lane(tool_version: str) -> bool:
+    """Return whether an import-dataset version accepts the ``result_lane`` input.
+
+    A partial pin is read as its lowest release (``"4"`` is ``4.0.0``), since
+    the version it resolves to is not known here. A pin that is not a version
+    number (e.g. ``"latest"``) is treated as not supporting it.
+
+    Args:
+        tool_version: import-dataset version pin, e.g. ``"3"`` or ``"4.0.2"``.
+
+    Returns:
+        True when ``tool_version`` is at least
+        :data:`~deeporigin.utils.constants.IMPORT_DATASET_RESULT_LANE_MIN_VERSION`.
+    """
+    try:
+        return Version(tool_version) >= Version(IMPORT_DATASET_RESULT_LANE_MIN_VERSION)
+    except InvalidVersion:
+        return False
+
+
 def sync_process_sdf(
     *,
     client: DeepOriginClient,
@@ -534,8 +557,26 @@ def sync_process_sdf(
     protein_id: str | None = None,
     origin: str = "registered",
     tags: dict[str, Any] | None = None,
+    result_lane: str | None = None,
 ) -> dict[str, Any]:
-    """Run blocking import-dataset SDF processing and return jobOutputs."""
+    """Run blocking import-dataset SDF processing and return jobOutputs.
+
+    Args:
+        client: Platform client.
+        project_id: Project to import into; must match ``client.project_id``.
+        file_path: Remote path of the staged SDF.
+        register_poses: Also register a pose row per SDF record.
+        protein_id: Protein the registered poses belong to.
+        origin: Provenance stored on registered pose rows.
+        tags: Optional tags for created ligands.
+        result_lane: Data-platform result lane (e.g. ``"fast"``). Sent only
+            when the pinned import-dataset version accepts it (see
+            :func:`import_dataset_supports_result_lane`); otherwise left out,
+            so the tool's default lane applies.
+
+    Returns:
+        The run's ``jobOutputs`` plus ``import_execution_id``.
+    """
     inputs: dict[str, Any] = {
         "process_sdf": True,
         "file_path": file_path,
@@ -546,6 +587,10 @@ def sync_process_sdf(
         inputs["protein_id"] = protein_id
     if tags is not None:
         inputs["tags"] = tags
+    if result_lane is not None and import_dataset_supports_result_lane(
+        TOOL_KEYS_AND_VERSIONS["import_dataset"]["tool_version"]
+    ):
+        inputs["result_lane"] = result_lane
     return job_outputs_with_execution_id(
         run_import_dataset_sync(inputs=inputs, project_id=project_id, client=client)
     )

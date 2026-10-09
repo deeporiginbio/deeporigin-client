@@ -45,6 +45,11 @@ result-explorer once. The mock covers each step:
 - An SDF record named `MOCK_POSE_REJECTED_NAME` stays in `jobOutputs` but is left
   out of result-explorer while the run completes. This mimics the platform
   rejecting one record during storage and drives the short-count error.
+- A synchronous import-dataset run whose inputs include `result_lane` is rejected
+  with HTTP 400 unless the requested tool version is at least
+  `IMPORT_DATASET_RESULT_LANE_MIN_VERSION` (`src/utils/constants.py`). This mirrors
+  older import-dataset input schemas, which reject unknown keys. Pose registration
+  sends `result_lane` only when the pinned version accepts it.
 
 ## Running the Mock Server
 

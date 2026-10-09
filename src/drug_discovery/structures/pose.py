@@ -28,6 +28,7 @@ from deeporigin.drug_discovery.structures.repr_display import (
 from deeporigin.exceptions import DeepOriginException
 from deeporigin.platform.client import DeepOriginClient
 from deeporigin.platform.constants import is_success_status, normalize_platform_status
+from deeporigin.utils.constants import POSE_REGISTRATION_RESULT_LANE
 
 PoseOrigin = Literal["cocrystal", "docked", "registered", "manual"]
 
@@ -1814,6 +1815,7 @@ class PoseSet:
                 register_poses=True,
                 protein_id=str(protein_id),
                 origin=origin,
+                result_lane=POSE_REGISTRATION_RESULT_LANE,
             )
             import_execution_id = outputs.get("import_execution_id")
             if isinstance(import_execution_id, str):
