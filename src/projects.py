@@ -5,10 +5,10 @@ Requires the ``core`` optional dependency (``pandas``) for DataFrame helpers.
 
 from __future__ import annotations
 
-from typing import Any
+from collections.abc import Sequence
+from typing import Any, List
 
 from beartype import beartype
-from beartype.typing import List
 
 from deeporigin.drug_discovery.structures.ligand import LigandSet
 from deeporigin.drug_discovery.structures.protein import Protein
@@ -377,7 +377,7 @@ def get_proteins(
     *,
     limit: int | None = 100,
     **filter_kwargs: Any,
-) -> List[Protein]:
+) -> Sequence[Protein]:
     """Load proteins for the current project.
 
     Args:
@@ -403,7 +403,7 @@ def get_proteins(
         filter_dict=fd,
         limit=limit,
     )
-    out: List[Protein] = []
+    out: list[Protein] = []
     for row in raw.get("data") or []:
         row_id = row.get("id")
         if row_id is None:
@@ -429,7 +429,7 @@ def set_ligands(ligands: LigandSet) -> None:
 
 
 @beartype
-def set_proteins(proteins: List[Protein]) -> None:
+def set_proteins(proteins: Sequence[Protein]) -> None:
     """Sync proteins to the current project.
 
     Args:
