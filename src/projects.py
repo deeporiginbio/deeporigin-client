@@ -8,10 +8,9 @@ from __future__ import annotations
 from collections.abc import Sequence
 from pathlib import Path
 import tempfile
-from typing import Any
+from typing import Any, List
 
 from beartype import beartype
-from beartype.typing import List
 
 from deeporigin.drug_discovery.import_dataset_sync import (
     run_import_dataset_workflow,
@@ -400,7 +399,7 @@ def get_proteins(
     *,
     limit: int | None = 100,
     **filter_kwargs: Any,
-) -> List[Protein]:
+) -> Sequence[Protein]:
     """Load proteins for the current project.
 
     Args:
@@ -426,7 +425,7 @@ def get_proteins(
         filter_dict=fd,
         limit=limit,
     )
-    out: List[Protein] = []
+    out: list[Protein] = []
     for row in raw.get("data") or []:
         row_id = row.get("id")
         if row_id is None:
@@ -452,7 +451,7 @@ def set_ligands(ligands: LigandSet) -> None:
 
 
 @beartype
-def set_proteins(proteins: List[Protein]) -> None:
+def set_proteins(proteins: Sequence[Protein]) -> None:
     """Sync proteins to the current project.
 
     Args:
@@ -531,7 +530,7 @@ def wait_for_proteins(
     execution_id: str,
     *,
     timeout: int | float = DATA_PLATFORM_INGESTION_TIMEOUT_SECONDS,
-) -> List[Protein]:
+) -> Sequence[Protein]:
     """Wait for a :func:`sync_proteins` import to finish, then return the project's proteins.
 
     Waits on the platform's live update stream rather than holding a request
@@ -544,7 +543,7 @@ def wait_for_proteins(
         timeout: Seconds to wait before giving up.
 
     Returns:
-        List[Protein]: Every protein in the project the import ran in, metadata
+        Sequence[Protein]: Every protein in the project the import ran in, metadata
         only (no structure downloaded).
 
     Raises:
@@ -593,10 +592,10 @@ def _status_reason(client: DeepOriginClient, execution_id: str) -> str | None:
     return str(reason) if reason else None
 
 
-def _project_proteins(client: DeepOriginClient, project_id: str) -> List[Protein]:
+def _project_proteins(client: DeepOriginClient, project_id: str) -> list[Protein]:
     """Read every protein in a project as metadata-only proteins, following the search cursor."""
     project_name = fetch_project_display_name(project_id, None, client=client)[0]
-    out: List[Protein] = []
+    out: list[Protein] = []
     cursor: str | None = None
     while True:
         response = client.entities.search_proteins(  # ty: ignore[unresolved-attribute]
