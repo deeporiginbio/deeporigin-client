@@ -472,8 +472,9 @@ def sync_proteins(
     path: str | Path | Sequence[str | Path],
     *,
     recursive: bool = False,
-) -> str:
-    """Start importing a folder of protein structure files into the current project.
+    timeout: int | float = DATA_PLATFORM_INGESTION_TIMEOUT_SECONDS,
+) -> Sequence[Protein]:
+    """Import a folder of protein structure files into the current project.
 
     Each ``.pdb``, ``.cif``, ``.mmcif`` or ``.ent`` file becomes one protein
     named after its file name without extension, as with
@@ -481,23 +482,35 @@ def sync_proteins(
     proteins. A structure already in the project is reused and keeps its name.
 
     Every file is checked first, and if any can't be imported nothing is
-    uploaded and one error lists them all. The import then runs on Deep Origin,
-    and this returns at once with its execution id.
+    uploaded and one error lists them all. The import then runs on Deep Origin;
+    this waits on the platform's live update stream rather than holding a
+    request open, and returns once the proteins are saved.
 
     Args:
         path: A folder, a single file, or a list of files.
         recursive: Also import files in subfolders.
+        timeout: Seconds to wait for the import before giving up.
 
     Returns:
-        str: The import's execution id.
+        Sequence[Protein]: Every protein in the current project, not only the
+        imported files, metadata only (no structure downloaded).
 
     Raises:
-        DeepOriginException: If no current project is set, if any file can't be
-            imported, or if the platform does not start the import.
+        DeepOriginException: If no current project is set, the entities API is
+            unavailable, any file can't be imported, or the import does not
+            start or does not succeed.
+        TimeoutError: If the import has not finished within ``timeout``. The
+            message includes the import's execution id.
     """
 
     project_id = _require_project_id()
     client = DeepOriginClient()
+    if client.entities is None:
+        raise DeepOriginException(
+            title=ENTITIES_UNAVAILABLE_TITLE,
+            message=ENTITIES_UNAVAILABLE_DETAIL,
+            level="danger",
+        )
     files = find_structure_files(path, recursive=recursive)
     validate_structure_files(files)
     with tempfile.TemporaryDirectory() as tmp:
@@ -522,47 +535,17 @@ def sync_proteins(
             message="Deep Origin did not start the protein import.",
             fix="Try again. If it keeps failing, contact support.",
         )
-    return str(execution_id)
+    return _wait_for_import(client, str(execution_id), project_id, timeout=timeout)
 
 
-@beartype
-def wait_for_proteins(
+def _wait_for_import(
+    client: DeepOriginClient,
     execution_id: str,
+    project_id: str,
     *,
-    timeout: int | float = DATA_PLATFORM_INGESTION_TIMEOUT_SECONDS,
-) -> Sequence[Protein]:
-    """Wait for a :func:`sync_proteins` import to finish, then return the project's proteins.
-
-    Waits on the platform's live update stream rather than holding a request
-    open, and returns as soon as the import, including saving the proteins, has
-    finished. A structure already in the project is reused, so this returns
-    every protein in the import's project, not only the imported files.
-
-    Args:
-        execution_id: The id :func:`sync_proteins` returned.
-        timeout: Seconds to wait before giving up.
-
-    Returns:
-        Sequence[Protein]: Every protein in the project the import ran in, metadata
-        only (no structure downloaded).
-
-    Raises:
-        DeepOriginException: If the entities API is unavailable,
-            ``execution_id`` is not a known run, or the import did not succeed.
-        TimeoutError: If the import has not finished within ``timeout``.
-    """
-
-    client = DeepOriginClient()
-    if client.entities is None:
-        raise DeepOriginException(
-            title=ENTITIES_UNAVAILABLE_TITLE,
-            message=ENTITIES_UNAVAILABLE_DETAIL,
-            level="danger",
-        )
-    # Read the run first: an unknown id fails here instead of waiting out the
-    # timeout, and the wait follows the run's own project, not the current one.
-    dto = client.executions.get(execution_id)  # ty: ignore[unresolved-attribute]
-    project_id = str(dto.get("projectId") or _require_project_id())
+    timeout: int | float,
+) -> list[Protein]:
+    """Wait on SSE for a protein import, raise if it failed, else return the project's proteins."""
     row = client.executions.wait_for_ingestion(  # ty: ignore[unresolved-attribute]
         execution_id,
         project_id=project_id,
@@ -570,11 +553,12 @@ def wait_for_proteins(
     )
     status = normalize_platform_status(row.get("status"))
     if not is_success_status(status):
+        reason = _status_reason(client, execution_id) or status
         raise DeepOriginException(
             title=PROTEIN_IMPORT_FAILED_TITLE,
             message=(
                 f"The protein import (execution_id={execution_id!r}) ended with "
-                f"status {status!r}: {_status_reason(client, execution_id) or status}"
+                f"status {status!r}: {reason}"
             ),
             fix="Check the files, then run projects.sync_proteins again.",
         )
@@ -631,5 +615,4 @@ __all__ = [
     "set_ligands",
     "set_proteins",
     "sync_proteins",
-    "wait_for_proteins",
 ]

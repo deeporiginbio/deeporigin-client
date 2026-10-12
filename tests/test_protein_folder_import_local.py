@@ -175,10 +175,23 @@ def test_fixture_folders_import(client, tmp_path, folder):
         assert proteins[0]["file_path"] == _canonical_path(path)
 
 
-def test_sync_proteins_starts_a_workflow_import_on_version_4(client):
-    """sync_proteins returns at once with an id, routed to the workflow on 4."""
-    execution_id = projects.sync_proteins(PROTEIN_DIRS / "flat")
+def _import_dataset_execution_ids(client) -> set[str]:
+    """Return the ids of the project's import-dataset executions."""
+    response = client.executions.list(
+        tool_key="deeporigin.import-dataset",
+        project_id=client.project_id,
+        fetch_all_pages=True,
+    )
+    return {str(e["executionId"]) for e in response.get("data") or []}
 
+
+def test_sync_proteins_runs_a_workflow_import_on_version_4(client):
+    """sync_proteins starts one import, routed to the workflow on version 4."""
+    before = _import_dataset_execution_ids(client)
+
+    projects.sync_proteins(PROTEIN_DIRS / "flat", timeout=30)
+
+    (execution_id,) = _import_dataset_execution_ids(client) - before
     dto = client.executions.get(execution_id)
     inputs = dto["userInputs"]
     assert dto["tool"]["version"] == PROTEIN_FOLDER_IMPORT_TOOL_VERSION
@@ -189,15 +202,13 @@ def test_sync_proteins_starts_a_workflow_import_on_version_4(client):
 
 
 def test_sync_proteins_imports_every_file_named_after_it(client, tmp_path):
-    """After the wait, each file is a protein named after its file."""
+    """Each file is a protein named after its file."""
     apo = _structure(tmp_path / "apo" / "model.pdb")
     holo = _structure(tmp_path / "holo" / "model.pdb")
     top = _structure(tmp_path / "top.pdb")
 
-    execution_id = projects.sync_proteins(tmp_path, recursive=True)
-    row = client.executions.wait_for_ingestion(execution_id, timeout=30)
+    projects.sync_proteins(tmp_path, recursive=True, timeout=30)
 
-    assert row["status"] == "Completed"
     for path, name in ((apo, "model"), (holo, "model"), (top, "top")):
         assert [p["protein_name"] for p in _proteins_at(client, path)] == [name]
 
@@ -207,8 +218,7 @@ def test_sync_proteins_accepts_a_list_of_files(client, tmp_path):
     chosen = _structure(tmp_path / "chosen.pdb")
     skipped = _structure(tmp_path / "skipped.pdb")
 
-    execution_id = projects.sync_proteins([chosen])
-    client.executions.wait_for_ingestion(execution_id, timeout=30)
+    projects.sync_proteins([chosen], timeout=30)
 
     assert len(_proteins_at(client, chosen)) == 1
     assert _proteins_at(client, skipped) == []
@@ -231,17 +241,17 @@ def test_sync_proteins_stages_the_bundle(client, tmp_path):
     _structure(tmp_path / "staged.pdb")
     staged_before = set(client.files.list("imports/staging"))
 
-    projects.sync_proteins(tmp_path)
+    projects.sync_proteins(tmp_path, timeout=30)
 
     new = set(client.files.list("imports/staging")) - staged_before
     assert sorted(Path(key).suffix for key in new) == [".csv", ".zip"]
 
 
-def test_wait_for_proteins_returns_the_imported_proteins(client, tmp_path):
+def test_sync_proteins_returns_the_imported_proteins(client, tmp_path):
     """Every imported file is among the returned metadata-only proteins."""
     files = [_structure(tmp_path / f"w{i}.pdb") for i in range(3)]
 
-    proteins = projects.wait_for_proteins(projects.sync_proteins(tmp_path), timeout=30)
+    proteins = projects.sync_proteins(tmp_path, timeout=30)
 
     by_path = {p.remote_path: p for p in proteins}
     for path in files:
@@ -253,7 +263,7 @@ def test_wait_for_proteins_returns_the_imported_proteins(client, tmp_path):
     assert len({p.id for p in proteins}) == len(proteins)
 
 
-def test_wait_for_proteins_reads_every_page(client, tmp_path, monkeypatch):
+def test_sync_proteins_reads_every_page(client, tmp_path, monkeypatch):
     """With one protein per page, every page is read exactly once."""
     monkeypatch.setattr(projects, "PROTEIN_SEARCH_PAGE_SIZE", 1)
     search = client.entities.search_proteins
@@ -267,34 +277,19 @@ def test_wait_for_proteins_reads_every_page(client, tmp_path, monkeypatch):
     for i in range(2):
         _structure(tmp_path / f"page{i}.pdb")
 
-    proteins = projects.wait_for_proteins(projects.sync_proteins(tmp_path), timeout=30)
+    proteins = projects.sync_proteins(tmp_path, timeout=30)
 
     assert len(cursors) == len(proteins) >= 2
     assert cursors[0] is None
     assert len(set(cursors)) == len(cursors)
 
 
-def test_wait_for_proteins_follows_the_import_project(client, tmp_path, monkeypatch):
-    """Switching the current project after sync_proteins doesn't change what is waited on."""
-    path = _structure(tmp_path / "switch.pdb")
-    import_project = client.project_id
-    execution_id = projects.sync_proteins(tmp_path)
-    monkeypatch.setattr(client, "project_id", "09OTHERPROJECT0")
+def test_failed_import_raises_with_the_platform_reason(client, tmp_path):
+    """A failed import raises with the platform's reason and the execution id.
 
-    proteins = projects.wait_for_proteins(execution_id, timeout=30)
-
-    by_path = {p.remote_path: p for p in proteins}
-    assert by_path[_canonical_path(path)].project_id == import_project
-
-
-def test_wait_for_proteins_rejects_an_unknown_id_at_once(client):
-    """A wrong id raises instead of waiting out the timeout."""
-    with pytest.raises(DeepOriginException):
-        projects.wait_for_proteins(str(uuid.uuid4()), timeout=30)
-
-
-def test_wait_for_proteins_raises_when_the_import_fails(client, tmp_path):
-    """A failed import raises with the platform's reason."""
+    sync_proteins can't send an empty CSV (an empty folder is rejected before
+    upload), so the run is started directly and its wait is tested.
+    """
     zip_path, csv_path = _write_bundle(tmp_path, {}, [])
     inputs = {
         "csv_path": stage_local_file(client, csv_path),
@@ -308,7 +303,8 @@ def test_wait_for_proteins_raises_when_the_import_fails(client, tmp_path):
     )["executionId"]
 
     with pytest.raises(DeepOriginException) as excinfo:
-        projects.wait_for_proteins(execution_id, timeout=30)
+        projects._wait_for_import(client, execution_id, client.project_id, timeout=30)
 
     assert excinfo.value.title == "Protein import failed"
     assert "No importable protein rows" in excinfo.value.body
+    assert execution_id in excinfo.value.body
