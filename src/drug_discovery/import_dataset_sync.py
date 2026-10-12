@@ -92,13 +92,19 @@ def run_import_dataset_workflow(
     inputs: dict[str, Any],
     project_id: str,
     client: Optional[DeepOriginClient] = None,
+    tool_version: str | None = None,
 ) -> dict[str, Any]:
-    """Start a workflow import-dataset execution and return the creation DTO."""
+    """Start a workflow import-dataset execution and return the creation DTO.
+
+    ``tool_version`` overrides the import-dataset version pinned in
+    ``TOOL_KEYS_AND_VERSIONS`` for this execution only.
+    """
     return _create_import_dataset_execution(
         inputs=inputs,
         project_id=project_id,
         client=client,
         sync=False,
+        tool_version=tool_version,
     )
 
 
@@ -108,6 +114,7 @@ def _create_import_dataset_execution(
     project_id: str,
     client: Optional[DeepOriginClient] | None,
     sync: bool,
+    tool_version: str | None = None,
 ) -> dict[str, Any]:
     if client is None:
         client = DeepOriginClient()
@@ -124,7 +131,7 @@ def _create_import_dataset_execution(
     tool_meta = TOOL_KEYS_AND_VERSIONS["import_dataset"]
     raw = client.executions.create(  # ty: ignore[unresolved-attribute]
         tool_key=tool_meta["tool_key"],
-        tool_version=tool_meta["tool_version"],
+        tool_version=tool_version or tool_meta["tool_version"],
         data={
             "inputs": inputs,
             "outputs": {},
