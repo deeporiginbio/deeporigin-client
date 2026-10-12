@@ -146,6 +146,18 @@ def test_hidden_and_macos_files_are_skipped(tmp_path):
     assert _names(find_structure_files(tmp_path, recursive=True)) == ["a.pdb", "c.pdb"]
 
 
+def test_indented_mmcif_atom_rows_are_accepted(tmp_path):
+    """mmCIF loop rows may be indented; PDB records must start in column 1."""
+    cif = tmp_path / "indented.cif"
+    cif.write_text("data_x\nloop_\n_atom_site.group_PDB\n  ATOM 1 N\n")
+    validate_structure_files([cif])
+
+    pdb = tmp_path / "indented.pdb"
+    pdb.write_text("  ATOM      1  N   ALA A   1\n")
+    with pytest.raises(DeepOriginException):
+        validate_structure_files([pdb])
+
+
 def test_missing_path_raises(tmp_path):
     """A folder that does not exist is an error, not an empty import."""
     with pytest.raises(DeepOriginException) as excinfo:

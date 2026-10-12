@@ -215,19 +215,26 @@ def test_sync_proteins_accepts_a_list_of_files(client, tmp_path):
 
 
 @pytest.mark.parametrize("folder", ["invalid", "empty"])
-def test_sync_proteins_uploads_nothing_when_a_file_is_bad(client, monkeypatch, folder):
-    """Bad files are reported before any upload or execution."""
-
-    def _no_upload(*args, **kwargs):
-        raise AssertionError("uploaded despite a bad file")
-
-    monkeypatch.setattr(projects, "stage_local_file", _no_upload)
-    monkeypatch.setattr(projects, "run_import_dataset_workflow", _no_upload)
+def test_sync_proteins_uploads_nothing_when_a_file_is_bad(client, folder):
+    """Bad files are reported before anything is uploaded."""
+    staged_before = client.files.list("imports/staging")
 
     with pytest.raises(DeepOriginException) as excinfo:
         projects.sync_proteins(PROTEIN_DIRS / folder)
 
     assert excinfo.value.title == "Protein files can't be imported"
+    assert client.files.list("imports/staging") == staged_before
+
+
+def test_sync_proteins_stages_the_bundle(client, tmp_path):
+    """A good folder uploads its zip and CSV, so the check above can see uploads."""
+    _structure(tmp_path / "staged.pdb")
+    staged_before = set(client.files.list("imports/staging"))
+
+    projects.sync_proteins(tmp_path)
+
+    new = set(client.files.list("imports/staging")) - staged_before
+    assert sorted(Path(key).suffix for key in new) == [".csv", ".zip"]
 
 
 def test_wait_for_proteins_returns_the_imported_proteins(client, tmp_path):

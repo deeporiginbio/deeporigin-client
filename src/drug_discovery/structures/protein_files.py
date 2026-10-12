@@ -110,9 +110,17 @@ def _file_problem(path: Path) -> str | None:
 
 
 def _has_atom_records(path: Path) -> bool:
-    """Return True when any line is an ``ATOM`` or ``HETATM`` record (PDB or mmCIF)."""
+    """Return True when any line is an ``ATOM`` or ``HETATM`` record (PDB or mmCIF).
+
+    PDB records start in column 1. mmCIF loop rows may be indented, so leading
+    whitespace is ignored for ``.cif`` and ``.mmcif`` files.
+    """
+    is_cif = path.suffix.lower() in (".cif", ".mmcif")
     with path.open("rb") as handle:
-        return any(line.startswith((b"ATOM", b"HETATM")) for line in handle)
+        return any(
+            (line.lstrip() if is_cif else line).startswith((b"ATOM", b"HETATM"))
+            for line in handle
+        )
 
 
 def validate_structure_files(files: Sequence[Path]) -> None:

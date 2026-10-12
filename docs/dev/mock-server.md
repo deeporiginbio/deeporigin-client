@@ -247,7 +247,7 @@ client = DeepOriginClient(
 
 The mock server implements the following endpoints:
 
-- **Files API**: List, upload, download, and delete files
+- **Files API**: List, upload, download, and delete files. Listing a folder that isn't in `tests/fixtures/files` returns the files uploaded under it during the session (e.g. `imports/staging`).
 - **Tools API**: List tools and tool definitions
 - **Executions API**: List, get, cancel, confirm, and create tool executions
 - **Clusters API**: List available clusters
