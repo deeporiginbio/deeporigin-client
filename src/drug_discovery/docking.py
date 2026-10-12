@@ -4,15 +4,16 @@ import concurrent.futures
 from typing import Any, Self
 
 from beartype import beartype
-import numpy as np
 
 from deeporigin.drug_discovery.docking_common import (
     build_docking_metadata,
     build_pocket_tool_params,
     effective_docking_rotation_deg,
     load_docking_poses_from_execution,
+    normalize_rotation_deg,
     resolve_docking_box_geometry,
     resolve_pocket_docking_box,
+    restore_pocket_from_inputs,
 )
 from deeporigin.drug_discovery.execution import Execution
 from deeporigin.drug_discovery.execution_mixins import (
@@ -185,8 +186,9 @@ class Docking(Execution, SyncExecutableMixin, AsyncExecutableMixin, NotebookWatc
         """Session rotation ``[rx, ry, rz]`` from :meth:`show_box` (interactive).
 
         Set on molstar gesture-end (slider release, drag end, reset). Ephemeral
-        session state — not persisted on :attr:`pocket`. ``None`` until committed
-        or when rotation is identity.
+        session state — not persisted on :attr:`pocket`. ``None`` when no rotation
+        override is set. An explicit identity override (e.g. restored by
+        :meth:`from_dto`) is returned as ``[0.0, 0.0, 0.0]``, distinct from ``None``.
         """
         if self._rotation_deg is None:
             return None
@@ -224,18 +226,22 @@ class Docking(Execution, SyncExecutableMixin, AsyncExecutableMixin, NotebookWatc
         if hasattr(self.pocket, "id") and self.pocket.id is not None:
             parts.append(f"  pocket_id={self.pocket.id!r},")
 
-        vol = self.pocket.volume
-        if vol is not None:
-            try:
-                box_size = float(2 * np.cbrt(vol))
-                parts.append(f"  box_size={box_size:.2f},")
-            except Exception:
-                pass
+        try:
+            center, box_size = self._resolve_docking_box_geometry()
+            center_fmt = ", ".join(f"{c:.2f}" for c in center)
+            parts.append(f"  center=[{center_fmt}],")
+            size_fmt = ", ".join(f"{s:.2f}" for s in box_size)
+            parts.append(f"  box_size=[{size_fmt}],")
+        except Exception:
+            pass
 
         try:
-            center = self.pocket.get_center().tolist()
-            fmt = ", ".join(f"{c:.2f}" for c in center)
-            parts.append(f"  center=[{fmt}],")
+            rotation_deg = normalize_rotation_deg(
+                self._effective_docking_rotation_deg()
+            )
+            if rotation_deg is not None:
+                rot_fmt = ", ".join(f"{r:.2f}" for r in rotation_deg)
+                parts.append(f"  rotation_deg=[{rot_fmt}],")
         except Exception:
             pass
 
@@ -512,8 +518,9 @@ class Docking(Execution, SyncExecutableMixin, AsyncExecutableMixin, NotebookWatc
             raise RuntimeError("from_dto did not set _dto")
         inputs = execution.get("userInputs", {})
 
-        pocket_input = inputs.get("pocket", {})
-        pocket_id = pocket_input.get("id") or inputs.get("pocket_id")
+        instance._pocket, restored_rotation = restore_pocket_from_inputs(
+            inputs, client=instance.client
+        )
 
         protein_input = inputs.get("protein", {})
         protein_id = protein_input.get("id")
@@ -532,7 +539,7 @@ class Docking(Execution, SyncExecutableMixin, AsyncExecutableMixin, NotebookWatc
                 "this execution may have been created with an older input schema."
             )
 
-        with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
             fut_protein = executor.submit(
                 Protein.from_id,
                 protein_id,
@@ -547,29 +554,11 @@ class Docking(Execution, SyncExecutableMixin, AsyncExecutableMixin, NotebookWatc
                 download=False,
                 ligand_inputs=ligand_rows,
             )
-            if pocket_id is not None:
-                fut_pocket = executor.submit(
-                    Pocket.from_id,
-                    pocket_id,
-                    client=instance.client,
-                )
-            else:
-                fut_pocket = None
 
         instance._protein = fut_protein.result()
         instance._ligands = fut_ligands.result()
         raw_effort = inputs.get("effort")
         instance.effort = int(raw_effort) if raw_effort is not None else cls.effort
-        if fut_pocket is not None:
-            instance._pocket = fut_pocket.result()
-        else:
-            instance._pocket = Pocket(
-                id=None,
-                center=pocket_input.get("center"),
-                box_size_x=pocket_input.get("box_size_x"),
-                box_size_y=pocket_input.get("box_size_y"),
-                box_size_z=pocket_input.get("box_size_z"),
-            )
 
         meta = execution.get("metadata") or {}
         raw_batch = execution.get("batchSize")
@@ -580,7 +569,7 @@ class Docking(Execution, SyncExecutableMixin, AsyncExecutableMixin, NotebookWatc
         except (TypeError, ValueError):
             bs = 16
         instance._batch_size = bs if bs > 0 else 16
-        instance._rotation_deg = None
+        instance._rotation_deg = restored_rotation
 
         return instance
 
