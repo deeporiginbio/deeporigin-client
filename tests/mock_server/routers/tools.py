@@ -1327,6 +1327,7 @@ def create_tools_router(
         if inputs.get("process_pdb") or inputs.get("register_protein"):
             # Mirror create_protein: every sync maps to the canonical mock row
             # so local tests keep stable IDs while still exercising the tool path.
+            created = MOCK_CANONICAL_PROTEIN_ID not in proteins
             base = proteins.get(
                 MOCK_CANONICAL_PROTEIN_ID, _base_canonical_protein_record()
             )
@@ -1347,6 +1348,7 @@ def create_tools_router(
                 "id": MOCK_CANONICAL_PROTEIN_ID,
                 "protein_id": MOCK_CANONICAL_PROTEIN_ID,
                 "file_path": MOCK_CANONICAL_PROTEIN_FILE_PATH,
+                "created": created,
             }
             if inputs.get("protein_name"):
                 protein_row["name"] = str(inputs["protein_name"])

@@ -7,6 +7,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from deeporigin.drug_discovery import BRD_DATA_DIR
+from deeporigin.drug_discovery.import_dataset_sync import parse_protein_disposition
 from deeporigin.drug_discovery.structures.prepared_protein_stamp import (
     has_prepared_protein_stamp,
     stamp_prepared_protein,
@@ -17,6 +19,7 @@ from deeporigin.drug_discovery.structures.prepared_protein_stamp import (
 )
 from deeporigin.drug_discovery.structures.protein import Protein
 from deeporigin.exceptions import DeepOriginException
+from deeporigin.platform.client import DeepOriginClient
 from deeporigin.utils.constants import (
     PREPARED_PROTEIN_CIF_STAMP_LINE,
     PREPARED_PROTEIN_STAMP_LINE,
@@ -363,35 +366,8 @@ def test_protein_upload_uses_local_bytes_not_to_file(tmp_path: Path) -> None:
     assert str(protein.remote_path).endswith(".cif")
 
 
-def _sync_with_row(row_extra: dict, *, lazy: bool = False):
-    from deeporigin.platform.client import DeepOriginClient
-
-    protein = Protein(
-        name="prepared",
-        structure=None,
-        id="prot-existing" if lazy else None,
-        remote_path="entities/proteins/prepared.pdb",
-    )
-    client = MagicMock(spec=DeepOriginClient)
-    client.project_id = "proj-1"
-    client.executions = MagicMock()
-    client.executions.create.return_value = {
-        "jobOutputs": {
-            "proteins": [
-                {
-                    "id": "prot-1",
-                    "protein_id": "prot-1",
-                    "file_path": "entities/proteins/prepared.pdb",
-                    **row_extra,
-                }
-            ]
-        }
-    }
-    return protein.sync(lazy=lazy, client=client)
-
-
 @pytest.mark.parametrize(
-    ("row_extra", "expected"),
+    ("row", "expected"),
     [
         ({"created": True}, "created"),
         ({"created": False}, "reused"),
@@ -401,11 +377,24 @@ def _sync_with_row(row_extra: dict, *, lazy: bool = False):
         ({"created": "yes", "disposition": "weird"}, None),
     ],
 )
-def test_protein_sync_returns_disposition(row_extra: dict, expected) -> None:
-    """sync() maps the server disposition, or None when absent/unrecognized."""
-    assert _sync_with_row(row_extra) == expected
+def test_parse_protein_disposition(row: dict, expected) -> None:
+    """Maps the server disposition, or None when absent/unrecognized."""
+    assert parse_protein_disposition(row) == expected
 
 
-def test_protein_sync_lazy_returns_none() -> None:
+def test_protein_sync_returns_disposition(client: DeepOriginClient) -> None:
+    """sync() surfaces the import-dataset disposition from the server."""
+    if client.env != "local":
+        pytest.skip("server disposition field not yet shipped (DDOS-8302)")
+    protein = Protein.from_file(BRD_DATA_DIR / "brd.pdb")
+    # The mock maps every protein sync onto the seeded canonical row.
+    assert protein.sync(client=client) == "reused"
+    assert protein.id is not None
+
+
+def test_protein_sync_lazy_returns_none(client: DeepOriginClient) -> None:
     """lazy sync with an existing id makes no server call and returns None."""
-    assert _sync_with_row({"created": True}, lazy=True) is None
+    protein = Protein.from_file(BRD_DATA_DIR / "brd.pdb")
+    protein.id = "prot-existing"
+    assert protein.sync(lazy=True, client=client) is None
+    assert protein.id == "prot-existing"
