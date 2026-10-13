@@ -1193,20 +1193,14 @@ class Files:
                 response body for success.
         """
         remote_path = _normalize_remote_path(remote_path)
-        # Temporarily increase timeout if specified
-        original_timeout = None
+        delete_kwargs: dict[str, float] = {}
         if timeout is not None:
-            original_timeout = self._c._client.timeout
-            self._c._client.timeout = timeout
+            delete_kwargs["timeout"] = timeout
 
-        try:
-            # Make DELETE request
-            response = self._c._delete(
-                f"/files/{self._c.org_key}/{remote_path}",
-            )
-        finally:
-            if original_timeout is not None:
-                self._c._client.timeout = original_timeout
+        response = self._c._delete(
+            f"/files/{self._c.org_key}/{remote_path}",
+            **delete_kwargs,
+        )
 
         # Parse JSON response
         # API returns 200 even on failure, but response body indicates success
