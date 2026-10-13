@@ -2,6 +2,10 @@
 
 Notes from past merge-ready cycles. Read before starting; append after success.
 
+## 2026-10-13 — PR #674 — DDOS-8303 crystal-pocket docking docs
+
+Copilot flagged `max(..., key=lambda p: p.pose_score or -inf)` in docs/notebooks — valid `pose_score=0` must use an explicit `is None` check (benchmark script already did). When a benchmark protocol changes incompatibility with legacy CSV rows, use a new default filename instead of in-place schema migration so resume cannot mix measurements.
+
 ## 2026-10-09 — PR #669 — DDOS-8300 protein lifecycle / mark_prepared
 
 First CI failed because the shared mock `brd` protein was already `state=prepared` from earlier entities tests — do not assert mark_prepared audit fields on the canonical row. Extending mock `create_protein` for unique non-canonical paths invited Copilot rounds on leaked template `protein_name`, file_path search always returning `brd`, and exact-path shortcuts skipping other filters — route path-matched subsets through `_apply_search_filters` and clear template defaults before `set_data`.
