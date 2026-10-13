@@ -96,14 +96,17 @@ The `Job` class allows you to view jobs on Deep Origin, track and visualize thei
 
 #### From Tools
 
-Typically, tools will return `Job` objects when you run them. For example, starting a docking or ABFE run will return a job object:
-
-!!! warning "Deprecated: `sim.docking`"
-    The `docking_step` module was removed; `Complex.docking` no longer exists. Use [`Docking`](../ref/docking.md) (`start()`, `quote()`, etc.) instead of `sim.docking.run`.
+Current tool classes such as [`Docking`](../ref/docking.md) track their own
+execution instead of returning a `Job`. Start a run and follow it on the same
+object:
 
 ```{.python notest}
-# Legacy example only — sim.docking is removed; use Docking from drug_discovery.docking
-job = sim.docking.run(pocket=pockets[0])
+from deeporigin.drug_discovery import Docking
+
+docking = Docking(protein=prepared, pocket=pocket, ligands=ligands)
+docking.start()
+docking.sync()
+docking.status
 ```
 
 #### From execution IDs
