@@ -372,7 +372,6 @@ def get_ligands(
     return LigandSet.from_ids(ids, client=client)
 
 
-@beartype
 def get_proteins(
     *,
     limit: int | None = 100,
@@ -428,7 +427,6 @@ def set_ligands(ligands: LigandSet) -> None:
     ligands.sync(client=client)
 
 
-@beartype
 def set_proteins(proteins: List[Protein]) -> None:
     """Sync proteins to the current project.
 
