@@ -1193,27 +1193,72 @@ class Files:
                 response body for success.
         """
         remote_path = _normalize_remote_path(remote_path)
-        # Temporarily increase timeout if specified
-        original_timeout = None
+        delete_kwargs: dict[str, float] = {}
         if timeout is not None:
-            original_timeout = self._c._client.timeout
-            self._c._client.timeout = timeout
+            delete_kwargs["timeout"] = timeout
 
-        try:
-            # Make DELETE request
-            response = self._c._delete(
-                f"/files/{self._c.org_key}/{remote_path}",
-            )
-        finally:
-            if original_timeout is not None:
-                self._c._client.timeout = original_timeout
+        response = self._c._delete(
+            f"/files/{self._c.org_key}/{remote_path}",
+            **delete_kwargs,
+        )
 
         # Parse JSON response
         # API returns 200 even on failure, but response body indicates success
         data = response.json()
 
-        if not data:
-            raise RuntimeError(f"Failed to delete file {remote_path}")
+        if data is True:
+            return
+
+        if remote_path.endswith("/"):
+            self._delete_prefix_tree(remote_path, timeout=timeout)
+            return
+
+        raise RuntimeError(f"Failed to delete file {remote_path}")
+
+    def _delete_prefix_tree(
+        self,
+        remote_path: str,
+        *,
+        timeout: float | None,
+    ) -> None:
+        """Delete all objects under a directory prefix when bulk DELETE returns false.
+
+        The file-service returns ``false`` when no S3 keys were removed in a batch
+        (timeouts, eventual consistency, or a partial bulk delete). Fall back to
+        per-object deletes after listing the prefix.
+        """
+        remaining = self.list(remote_path, recursive=True)
+        if not remaining:
+            return
+
+        if isinstance(remaining[0], dict):
+            keys = [str(item.get("Key") or item.get("key") or "") for item in remaining]
+            keys = [k for k in keys if k]
+        else:
+            keys = [str(k) for k in remaining]
+
+        if not keys:
+            return
+
+        self.delete_many(keys, timeout=timeout, max_workers=5)
+
+        still = self.list(remote_path, recursive=True)
+        if not still:
+            return
+
+        if isinstance(still[0], dict):
+            still_keys = [
+                str(item.get("Key") or item.get("key") or "") for item in still
+            ]
+            still_keys = [k for k in still_keys if k]
+        else:
+            still_keys = [str(k) for k in still]
+
+        if still_keys:
+            raise RuntimeError(
+                f"Failed to delete prefix {remote_path}: "
+                f"{len(still_keys)} object(s) remain"
+            )
 
     def delete_many(
         self,
