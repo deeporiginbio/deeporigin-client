@@ -6,8 +6,10 @@ from collections.abc import Iterator
 import json
 import time
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import StreamingResponse
+
+from ..constants import MOCK_SSE_DISABLED_PROJECT_ID
 
 MOCK_SSE_RETRY_MS = 3000
 """``retry:`` value (milliseconds) sent when a mock stream opens."""
@@ -32,8 +34,12 @@ def create_sse_router() -> APIRouter:
         Sends the ``retry:`` line, one ``filters.dirty`` frame naming each
         ``filter=<id>=<pattern>`` query param, then closes, as the gateway does
         when its stream lifetime ends. A waiter therefore re-reads once on the
-        frame and once more on reconnect.
+        frame and once more on reconnect. The stream for
+        ``MOCK_SSE_DISABLED_PROJECT_ID`` is refused with 404, so callers can
+        test their fallback to polling.
         """
+        if project_id == MOCK_SSE_DISABLED_PROJECT_ID:
+            raise HTTPException(status_code=404, detail="SSE is not available")
         filter_ids = [
             raw.split("=", 1)[0] for raw in request.query_params.getlist("filter")
         ]

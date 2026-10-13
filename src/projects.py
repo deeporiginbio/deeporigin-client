@@ -15,6 +15,7 @@ from beartype import beartype
 from deeporigin.drug_discovery.import_dataset_sync import (
     run_import_dataset_workflow,
     stage_local_file,
+    wait_for_import_ingestion,
 )
 from deeporigin.drug_discovery.structures.ligand import LigandSet
 from deeporigin.drug_discovery.structures.protein import Protein
@@ -545,11 +546,9 @@ def _wait_for_import(
     *,
     timeout: int | float,
 ) -> list[Protein]:
-    """Wait on SSE for a protein import, raise if it failed, else return the project's proteins."""
-    row = client.executions.wait_for_ingestion(  # ty: ignore[unresolved-attribute]
-        execution_id,
-        project_id=project_id,
-        timeout=timeout,
+    """Wait for a protein import (SSE, else polling), raise if it failed, else return proteins."""
+    row = wait_for_import_ingestion(
+        client, execution_id, project_id=project_id, timeout=timeout
     )
     status = normalize_platform_status(row.get("status"))
     if not is_success_status(status):

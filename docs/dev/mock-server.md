@@ -33,6 +33,7 @@ param, then closes. `Executions.wait_for_ingestion` reads the execution row on
 connect, re-reads on that frame, and reconnects after the close, so a row that
 reads `DataIngesting` once (see `executions/search`) resolves on the second
 read.
+The stream for project `MOCK_SSE_DISABLED_PROJECT_ID` (`tests/mock_server/constants.py`) is refused with 404, as on a gateway without SSE, to test the fallback to polling in `wait_for_import_ingestion`.
 
 **Protein import (local only):** an import-dataset `csv_path` run whose mapper targets `proteins.*`, as `projects.sync_proteins` sends, is ingested at submit (`_ingest_import_dataset_protein_csv` in `routers/tools.py`). Rows are read through the mapper's `proteins.<field>` keys, with header keys and cells stripped as the import tool does. A CSV with no rows ends the run `Failed` with a `statusReason`.
 

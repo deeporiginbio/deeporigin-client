@@ -9,7 +9,7 @@ import zipfile
 import pytest
 
 from deeporigin import projects
-from deeporigin.drug_discovery import BRD_DATA_DIR
+from deeporigin.drug_discovery import BRD_DATA_DIR, import_dataset_sync
 from deeporigin.drug_discovery.import_dataset_sync import (
     run_import_dataset_workflow,
     stage_local_file,
@@ -25,6 +25,7 @@ from deeporigin.utils.constants import (
     PROTEIN_FOLDER_CSV_MAPPER,
     PROTEIN_FOLDER_IMPORT_TOOL_VERSION,
 )
+from tests.mock_server.constants import MOCK_SSE_DISABLED_PROJECT_ID
 
 PROTEIN_DIRS = Path(__file__).parent / "fixtures" / "protein_dirs"
 _BRD_LINES = (BRD_DATA_DIR / "brd.pdb").read_text().splitlines(keepends=True)
@@ -304,6 +305,52 @@ def test_failed_import_raises_with_the_platform_reason(client, tmp_path):
 
     with pytest.raises(DeepOriginException) as excinfo:
         projects._wait_for_import(client, execution_id, client.project_id, timeout=30)
+
+    assert excinfo.value.title == "Protein import failed"
+    assert "No importable protein rows" in excinfo.value.body
+    assert execution_id in excinfo.value.body
+
+
+@pytest.fixture
+def no_sse(client, monkeypatch):
+    """Work in the mock project whose SSE stream is refused, polling fast."""
+    monkeypatch.setattr(client, "project_id", MOCK_SSE_DISABLED_PROJECT_ID)
+    monkeypatch.setattr(
+        import_dataset_sync, "DATA_PLATFORM_INGESTION_POLL_SECONDS", 0.01
+    )
+    return client
+
+
+def test_sync_proteins_polls_when_sse_is_unavailable(no_sse, tmp_path):
+    """A refused SSE stream falls back to polling, with a warning."""
+    path = _structure(tmp_path / "polled.pdb")
+
+    with pytest.warns(UserWarning, match="polling"):
+        proteins = projects.sync_proteins(tmp_path, timeout=30)
+
+    by_path = {p.remote_path: p for p in proteins}
+    assert by_path[_canonical_path(path)].project_id == MOCK_SSE_DISABLED_PROJECT_ID
+
+
+def test_polling_fallback_raises_when_the_import_fails(no_sse, tmp_path):
+    """Without SSE, a failed import still raises with its reason and execution id."""
+    zip_path, csv_path = _write_bundle(tmp_path, {}, [])
+    inputs = {
+        "csv_path": stage_local_file(no_sse, csv_path),
+        "protein_zip_path": stage_local_file(no_sse, zip_path),
+        "mapper": PROTEIN_FOLDER_CSV_MAPPER,
+        "database_key": IMPORT_DATASET_PROTEINS_DATABASE_KEY,
+        "database_version": IMPORT_DATASET_PROTEINS_DATABASE_VERSION,
+    }
+    execution_id = run_import_dataset_workflow(
+        inputs=inputs, project_id=no_sse.project_id, client=no_sse
+    )["executionId"]
+
+    with (
+        pytest.warns(UserWarning, match="polling"),
+        pytest.raises(DeepOriginException) as excinfo,
+    ):
+        projects._wait_for_import(no_sse, execution_id, no_sse.project_id, timeout=30)
 
     assert excinfo.value.title == "Protein import failed"
     assert "No importable protein rows" in excinfo.value.body

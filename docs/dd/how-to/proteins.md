@@ -119,7 +119,7 @@ Each file becomes one protein, named after its file name without extension, as `
     Before uploading anything, `sync_proteins` checks every file and raises one error that lists each file it can't import: missing files, unsupported file types, compressed files such as `.pdb.gz` (decompress them first), empty files, and files with no atom records. Nothing is uploaded until every file passes.
 
 !!! note "Errors"
-    `sync_proteins` raises `DeepOriginException` if the import fails, with the reason in the message, and `TimeoutError` if it hasn't finished within `timeout` seconds (one hour by default). Both messages include the import's execution id, for support.
+    `sync_proteins` raises `DeepOriginException` if the import fails, with the reason in the message, and `TimeoutError` if it hasn't finished within `timeout` seconds (one hour by default). Both messages include the import's execution id, for support. If live updates aren't available, `sync_proteins` warns and checks the import's progress periodically instead.
 
 ## Inspecting the Protein
 
