@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 import time
-from typing import Any, Optional
+from typing import Any, Literal, Optional
 import uuid
 
 from deeporigin.exceptions import DeepOriginException
@@ -483,6 +483,26 @@ def workflow_import_smiles_csv(
     if progress is not None:
         progress.finish_step(step_ingest)
     return execution_id, dp_row
+
+
+ProteinDisposition = Literal["created", "reused"]
+
+
+def parse_protein_disposition(row: dict[str, Any]) -> Optional[ProteinDisposition]:
+    """Map a ``jobOutputs.proteins`` row to a create/reuse disposition.
+
+    Accepts ``created: bool`` or a ``disposition`` string (``"created"`` /
+    ``"reused"``). Returns None when the server did not report one (older
+    servers) or the value is unrecognized.
+    """
+    # TODO(DDOS-8302): narrow to the single field the server ships.
+    created = row.get("created")
+    if isinstance(created, bool):
+        return "created" if created else "reused"
+    disposition = row.get("disposition")
+    if disposition in ("created", "reused"):
+        return disposition
+    return None
 
 
 def sync_process_pdb(

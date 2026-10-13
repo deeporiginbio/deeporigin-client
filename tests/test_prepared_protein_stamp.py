@@ -361,3 +361,51 @@ def test_protein_upload_uses_local_bytes_not_to_file(tmp_path: Path) -> None:
     client.files.upload.assert_called_once()
     assert Path(client.files.upload.call_args.args[0]) == cif_path
     assert str(protein.remote_path).endswith(".cif")
+
+
+def _sync_with_row(row_extra: dict, *, lazy: bool = False):
+    from deeporigin.platform.client import DeepOriginClient
+
+    protein = Protein(
+        name="prepared",
+        structure=None,
+        id="prot-existing" if lazy else None,
+        remote_path="entities/proteins/prepared.pdb",
+    )
+    client = MagicMock(spec=DeepOriginClient)
+    client.project_id = "proj-1"
+    client.executions = MagicMock()
+    client.executions.create.return_value = {
+        "jobOutputs": {
+            "proteins": [
+                {
+                    "id": "prot-1",
+                    "protein_id": "prot-1",
+                    "file_path": "entities/proteins/prepared.pdb",
+                    **row_extra,
+                }
+            ]
+        }
+    }
+    return protein.sync(lazy=lazy, client=client)
+
+
+@pytest.mark.parametrize(
+    ("row_extra", "expected"),
+    [
+        ({"created": True}, "created"),
+        ({"created": False}, "reused"),
+        ({"disposition": "created"}, "created"),
+        ({"disposition": "reused"}, "reused"),
+        ({}, None),
+        ({"created": "yes", "disposition": "weird"}, None),
+    ],
+)
+def test_protein_sync_returns_disposition(row_extra: dict, expected) -> None:
+    """sync() maps the server disposition, or None when absent/unrecognized."""
+    assert _sync_with_row(row_extra) == expected
+
+
+def test_protein_sync_lazy_returns_none() -> None:
+    """lazy sync with an existing id makes no server call and returns None."""
+    assert _sync_with_row({"created": True}, lazy=True) is None
