@@ -11,6 +11,9 @@ from deeporigin.drug_discovery.structures.ligand import Ligand
 from deeporigin.drug_discovery.structures.pose import Pose
 from deeporigin.drug_discovery.structures.prepared_system import PreparedSystem
 from deeporigin.drug_discovery.structures.protein import Protein
+from deeporigin.drug_discovery.import_dataset_sync import (
+    wait_for_data_platform_ingestion,
+)
 from deeporigin.drug_discovery.system_prep import SystemPrep
 from deeporigin.platform.constants import TOOL_KEYS_AND_VERSIONS
 from deeporigin.utils.constants import SYSPREP_NO_OUTPUT_PATHS_MSG
@@ -173,6 +176,10 @@ def test_sysprep_lv2(
 
     execution_id = sysprep.id
     assert execution_id is not None
+
+    # Result-explorer rows land after data-platform ingestion (poll; staging lacks
+    # include_hidden for executions.wait_for_ingestion).
+    wait_for_data_platform_ingestion(client, execution_id, timeout=600)
 
     response = client.results.get_prepared_systems(
         compute_job_id=execution_id,
