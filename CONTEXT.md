@@ -278,7 +278,7 @@ PATCH an existing ligand or protein record by ID; the platform creates a new imm
 _Avoid_: calling it "edit in place" or conflating with `sync()`
 
 **Entity sync**:
-Link-or-create by identity (canonical SMILES for ligands, file path for proteins). Does not modify an existing record's `mol_file` or `file_path`.
+Link-or-create by identity (canonical SMILES for ligands, file path for proteins). Does not modify an existing record's `mol_file` or `file_path`. `Protein.sync()` returns `"created"` or `"reused"` (or `None` when skipped by `lazy=True` or not reported by the server).
 _Avoid_: using `sync()` when the intent is to change structure files on a known platform ID — use `update()` instead
 
 **Tool version pin**:

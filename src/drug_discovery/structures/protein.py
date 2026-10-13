@@ -14,7 +14,7 @@ import io
 import os
 from pathlib import Path
 import tempfile
-from typing import Any, Optional, Self
+from typing import Any, Literal, Optional, Self
 import uuid
 
 from beartype import beartype
@@ -1972,7 +1972,7 @@ class Protein(Entity):
         lazy: bool = False,
         client: Optional[DeepOriginClient] = None,
         remote_path: Optional[str] = None,
-    ) -> None:
+    ) -> Optional[Literal["created", "reused"]]:
         """Sync the protein to the data platform via import-dataset.
 
         Uploads local bytes to a staging UFA path when needed, then invokes the
@@ -1991,9 +1991,13 @@ class Protein(Entity):
                 default staging path.
 
         Returns:
-            None. As a side effect, uploads the protein (if necessary) and updates
-            ``self.id`` with the ID of the existing or newly created protein record,
-            and sets :attr:`project_id` to the resolved project scope.
+            ``"created"`` if a new protein record was created, ``"reused"`` if an
+            existing one was linked. ``None`` if no registration happened
+            (``lazy=True`` with an existing ID) or the server did not report a
+            disposition (older servers). As a side effect, uploads the protein
+            (if necessary), updates ``self.id`` with the ID of the existing or
+            newly created protein record, and sets :attr:`project_id` to the
+            resolved project scope.
 
         Raises:
             DeepOriginException: If no project id can be resolved, or registration
@@ -2009,7 +2013,7 @@ class Protein(Entity):
                 self.project_id = require_client_project_id(
                     client, entity_project_id=self.project_id
                 )
-            return
+            return None
 
         if client is None:
             client = DeepOriginClient()
@@ -2043,7 +2047,10 @@ class Protein(Entity):
         if self.tags is not None:
             extra["tags"] = self.tags
 
-        from deeporigin.drug_discovery.import_dataset_sync import sync_process_pdb
+        from deeporigin.drug_discovery.import_dataset_sync import (
+            parse_protein_disposition,
+            sync_process_pdb,
+        )
 
         outputs = sync_process_pdb(
             client=client,
@@ -2075,6 +2082,7 @@ class Protein(Entity):
             self.remote_path = file_path
 
         self.project_id = proj_id
+        return parse_protein_disposition(protein_row)
 
     @beartype
     def update(
