@@ -8,8 +8,10 @@ time, execution id, and best-pose RMSD vs the crystal pose, and appends each
 result to a CSV as it completes. Re-running the script skips (pdb_id, effort,
 repeat) triples already present in the CSV so you can resume after failures.
 
-Earlier versions of this script docked into the raw PDB with a locally built
-pocket; do not mix their rows with new rows in one CSV.
+Results go to ``benchmark_effort_crystal_ligand_prepared.csv``. Earlier versions
+of this script docked into the raw PDB with a locally built pocket and wrote
+``benchmark_effort_crystal_ligand.csv``; that file is never read or appended to,
+so the two protocols cannot mix.
 """
 
 from __future__ import annotations
@@ -28,65 +30,13 @@ from deeporigin.drug_discovery import (
 )
 from deeporigin.drug_discovery.structures.pose import Pose
 
-DEFAULT_CSV = Path(__file__).resolve().parent / "benchmark_effort_crystal_ligand.csv"
+DEFAULT_CSV = (
+    Path(__file__).resolve().parent / "benchmark_effort_crystal_ligand_prepared.csv"
+)
 CSV_COLUMNS = ["pdb_id", "effort", "repeat", "execution_id", "time", "rmsd"]
 PDB_IDS = ["1stp", "3ptb"]
 EFFORT_LEVELS = [1, 2, 3, 4, 5]
 REPEATS = 3
-
-
-def _migrate_csv_schema_if_needed(csv_path: Path) -> None:
-    """Rewrite legacy CSV files to the current schema (add ``pdb_id``, etc.)."""
-    if not csv_path.exists() or csv_path.stat().st_size == 0:
-        return
-    with csv_path.open(newline="") as f:
-        reader = csv.reader(f)
-        rows = list(reader)
-    if not rows:
-        return
-    header = [h.strip() for h in rows[0]]
-    if header and header[0].lower() == "pdb_id":
-        return
-
-    data_rows = rows[1:]
-    new_rows: list[list[object]] = []
-    legacy_pdb = "1eby"
-
-    if header == ["effort", "time", "rmsd"]:
-        per_effort: dict[int, int] = {}
-        for row in data_rows:
-            if len(row) < 3:
-                continue
-            e = int(row[0])
-            per_effort[e] = per_effort.get(e, 0) + 1
-            r = per_effort[e]
-            new_rows.append([legacy_pdb, e, r, "", float(row[1]), float(row[2])])
-    elif header == ["effort", "repeat", "execution_id", "time", "rmsd"]:
-        for row in data_rows:
-            if len(row) < 5:
-                continue
-            new_rows.append(
-                [
-                    legacy_pdb,
-                    int(row[0]),
-                    int(row[1]),
-                    row[2],
-                    float(row[3]),
-                    float(row[4]),
-                ]
-            )
-    else:
-        return
-
-    with csv_path.open("w", newline="") as f:
-        w = csv.writer(f)
-        w.writerow(CSV_COLUMNS)
-        w.writerows(new_rows)
-    print(
-        f"Migrated {csv_path} to schema {CSV_COLUMNS} "
-        f"(legacy rows use pdb_id={legacy_pdb!r}).",
-        flush=True,
-    )
 
 
 def load_completed_runs(csv_path: Path) -> set[tuple[str, int, int]]:
@@ -192,7 +142,6 @@ def prepare_crystal_pocket(pdb_id: str) -> tuple[Protein, Pocket, Ligand, Pose]:
 
 def main() -> None:
     csv_path = DEFAULT_CSV
-    _migrate_csv_schema_if_needed(csv_path)
     completed = load_completed_runs(csv_path)
 
     pdb_ids_norm = [p.strip().lower() for p in PDB_IDS]

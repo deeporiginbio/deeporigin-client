@@ -326,7 +326,10 @@ from deeporigin.drug_discovery import chemistry
 
 crystal_pose = prep.get_crystal_poses().poses[0]
 crystal_pose.download()
-best = max(poses.poses, key=lambda pose: pose.pose_score or float("-inf"))
+best = max(
+    poses.poses,
+    key=lambda pose: float("-inf") if pose.pose_score is None else pose.pose_score,
+)
 chemistry.pose_rmsd(best.mol, crystal_pose.mol)  # RMSD in Å, no realignment
 ```
 
