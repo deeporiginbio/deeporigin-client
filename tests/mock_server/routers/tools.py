@@ -2881,6 +2881,35 @@ def create_tools_router(
             }
         }
 
+    def _protein_prep_missing_crystal_residue(user_inputs: object) -> str | None:
+        """Return a crystal ``ligand_id`` absent from the Selection, else ``None``.
+
+        Mirrors the platform's ``SubmissionFailed`` when ``from-crystal-ligand``
+        names a residue the structure does not contain. Residue names come from
+        Selection ligand ids (``ligand:<resname>:<chain>:<resseq>``).
+        """
+        if not isinstance(user_inputs, dict):
+            return None
+        if user_inputs.get("action") != "prepare":
+            return None
+        if user_inputs.get("find_pockets") != "from-crystal-ligand":
+            return None
+        crystal = user_inputs.get("crystal_ligand")
+        ligand_id = crystal.get("ligand_id") if isinstance(crystal, dict) else None
+        if not ligand_id:
+            return None
+        selection = user_inputs.get("selection")
+        decisions = (
+            selection.get("decisions") if isinstance(selection, dict) else None
+        ) or {}
+        resnames = {
+            str(component_id).split(":")[1]
+            for component_id in decisions
+            if str(component_id).startswith("ligand:")
+            and len(str(component_id).split(":")) > 1
+        }
+        return None if str(ligand_id) in resnames else str(ligand_id)
+
     def _inject_protein_prep_tool_execution_results(
         execution: dict[str, Any],
     ) -> None:
@@ -2898,6 +2927,20 @@ def create_tools_router(
         action = user_inputs.get("action") if isinstance(user_inputs, dict) else None
         if action == "mark_prepared":
             _inject_mark_prepared_outputs(execution)
+            return
+        missing_residue = _protein_prep_missing_crystal_residue(user_inputs)
+        if missing_residue is not None:
+            execution["status"] = "Failed"
+            execution["statusReason"] = {
+                "code": "SubmissionFailed",
+                "detail": {
+                    "detail": (
+                        f"no residue named {missing_residue!r} found in the "
+                        "protein structure"
+                    )
+                },
+            }
+            execution["jobOutputs"] = {}
             return
         fixture_name = (
             "tool-runs/deeporigin.protein-prep/recommend"
