@@ -32,7 +32,7 @@ again (sent to the tool as its ``recompute`` input).
 
 from __future__ import annotations
 
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from typing import Any, Literal, Self
 import warnings
 
@@ -213,6 +213,41 @@ def _merge_records_by_ligand(records: list[Any]) -> list[dict[str, Any]]:
     return list(merged.values())
 
 
+def _timed_rows(
+    records: list[Any],
+    expand: Callable[[dict[str, Any]], list[Any]],
+) -> Iterator[tuple[str, dict[str, Any]]]:
+    """Yield ``(measured_at, row)`` for each row with a ``ligand_id`` in *records*."""
+
+    for record in records:
+        data = record.get("data") if isinstance(record, dict) else None
+        if not isinstance(data, dict):
+            continue
+        at = str(record.get("measured_at") or "")
+        for row in expand(data):
+            if isinstance(row, dict) and isinstance(row.get("ligand_id"), str):
+                yield at, row
+
+
+def _failure_payload_rows(payload: dict[str, Any]) -> list[Any]:
+    """Return ``AdmetFailure`` rows from a result-explorer ``data`` payload."""
+
+    nested = payload.get("admetfailures")
+    return nested if isinstance(nested, list) else [payload]
+
+
+def _newest_value_times(records: list[Any]) -> dict[tuple[str, str], str]:
+    """Return the newest ``measured_at`` per ``(ligand_id, property)`` with a value."""
+
+    newest: dict[tuple[str, str], str] = {}
+    for at, row in _timed_rows(records, _expand_admet_payload):
+        for name, value in row.items():
+            if value is not None and _is_admet_property(name):
+                key = (row["ligand_id"], name)
+                newest[key] = max(newest.get(key, ""), at)
+    return newest
+
+
 def _failed_properties(
     *,
     value_records: list[Any],
@@ -225,39 +260,68 @@ def _failed_properties(
     ``measured_at``, so a later run that predicted it (e.g. ``force=True``) wins.
     """
 
-    newest_value: dict[tuple[str, str], str] = {}
-    for record in value_records:
-        if not isinstance(record, dict) or not isinstance(record.get("data"), dict):
-            continue
-        at = str(record.get("measured_at") or "")
-        for row in _expand_admet_payload(record["data"]):
-            ligand_id = row.get("ligand_id")
-            if not isinstance(ligand_id, str):
-                continue
-            for name, value in row.items():
-                if value is not None and _is_admet_property(name):
-                    key = (ligand_id, name)
-                    newest_value[key] = max(newest_value.get(key, ""), at)
-
+    newest_value = _newest_value_times(value_records)
     failed: dict[str, set[str]] = {}
-    for record in failure_records:
-        if not isinstance(record, dict) or not isinstance(record.get("data"), dict):
-            continue
-        at = str(record.get("measured_at") or "")
-        data = record["data"]
-        nested = data.get("admetfailures")
-        for row in nested if isinstance(nested, list) else [data]:
-            ligand_id = row.get("ligand_id") if isinstance(row, dict) else None
-            names = row.get("properties") if isinstance(row, dict) else None
-            if not isinstance(ligand_id, str) or not isinstance(names, list):
-                continue
-            for name in names:
-                key = (ligand_id, name)
-                if isinstance(name, str) and (
-                    key not in newest_value or at > newest_value[key]
-                ):
-                    failed.setdefault(ligand_id, set()).add(name)
+    for at, row in _timed_rows(failure_records, _failure_payload_rows):
+        names = row.get("properties")
+        for name in names if isinstance(names, list) else []:
+            key = (row["ligand_id"], name)
+            if isinstance(name, str) and (
+                key not in newest_value or at > newest_value[key]
+            ):
+                failed.setdefault(row["ligand_id"], set()).add(name)
     return failed
+
+
+def _fetch_problems(
+    *,
+    ligand_list: list[Ligand],
+    ligand_ids: list[str],
+    rows: list[dict[str, Any]],
+    properties: list[str] | tuple[str, ...] | None,
+    failed: dict[str, set[str]],
+    failed_hint: str,
+) -> list[str]:
+    """Return the warning clauses :meth:`Admet.fetch_results` reports, if any."""
+
+    found = {row["ligand_id"] for row in rows}
+    problems: list[str] = []
+    no_id = len(ligand_list) - len(platform_ligand_ids(ligand_list))
+    if no_id:
+        problems.append(f"{no_id} ligand(s) have no platform id")
+    # A ligand with only failures is "never predicted" unless they cover
+    # every requested property.
+    not_found = [
+        lig
+        for lig in ligand_ids
+        if lig not in found
+        and not (
+            lig in failed and (properties is None or set(properties) <= failed[lig])
+        )
+    ]
+    if not_found:
+        problems.append(
+            f"{len(not_found)} ligand(s) have no stored predictions ({not_found[:5]})"
+        )
+    missing = {
+        row["ligand_id"]: props
+        for row in rows
+        if (
+            props := [
+                p
+                for p in properties or ()
+                if row.get(p) is None and p not in failed.get(row["ligand_id"], set())
+            ]
+        )
+    }
+    if missing:
+        problems.append(
+            f"{len(missing)} ligand(s) lack some requested properties "
+            f"({dict(list(missing.items())[:5])}); those values are NaN"
+        )
+    if failed:
+        problems.append(failed_hint)
+    return problems
 
 
 def _admet_dataframe(
@@ -906,46 +970,14 @@ class Admet(
                 title="ADMET predictions missing", message=message
             )
 
-        found = {row["ligand_id"] for row in rows}
-        problems: list[str] = []
-        no_id = len(ligand_list) - len(platform_ligand_ids(ligand_list))
-        if no_id:
-            problems.append(f"{no_id} ligand(s) have no platform id")
-        # A ligand with only failures is "never predicted" unless they cover
-        # every requested property.
-        not_found = [
-            lig
-            for lig in ligand_ids
-            if lig not in found
-            and not (
-                lig in failed and (properties is None or set(properties) <= failed[lig])
-            )
-        ]
-        if not_found:
-            problems.append(
-                f"{len(not_found)} ligand(s) have no stored predictions "
-                f"({not_found[:5]})"
-            )
-        if properties is not None:
-            missing = {
-                row["ligand_id"]: props
-                for row in rows
-                if (
-                    props := [
-                        p
-                        for p in properties
-                        if row.get(p) is None
-                        and p not in failed.get(row["ligand_id"], set())
-                    ]
-                )
-            }
-            if missing:
-                problems.append(
-                    f"{len(missing)} ligand(s) lack some requested properties "
-                    f"({dict(list(missing.items())[:5])}); those values are NaN"
-                )
-        if failed:
-            problems.append(failed_hint)
+        problems = _fetch_problems(
+            ligand_list=ligand_list,
+            ligand_ids=ligand_ids,
+            rows=rows,
+            properties=properties,
+            failed=failed,
+            failed_hint=failed_hint,
+        )
         if problems:
             warnings.warn(
                 "ADMET predictions incomplete: " + "; ".join(problems) + ".",
