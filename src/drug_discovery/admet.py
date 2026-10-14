@@ -214,6 +214,7 @@ def _merge_records_by_ligand(records: list[Any]) -> list[dict[str, Any]]:
 
 
 def _failed_properties(
+    *,
     value_records: list[Any],
     failure_records: list[Any],
 ) -> dict[str, set[str]]:
@@ -283,21 +284,23 @@ def _admet_dataframe(
     return df.reindex(columns=ordered + extra)
 
 
-def _skipped_ligand_count(dto: dict[str, Any]) -> int:
-    """Return the total ``toolProgress.skipped_ligands`` in the progress tree, else 0.
+def _skipped_ligand_count(dto: dict[str, Any], key: str = "skipped_ligands") -> int:
+    """Return the total ``toolProgress[key]`` in the progress tree, else 0.
 
-    Inline runs report at ``progressReport.toolProgress``; workflow runs report
-    per chunk pod under ``children``, so sum across nodes.
+    The tool reports ligands skipped for already having predictions as
+    ``skipped_ligands`` and ligands skipped after an earlier failed attempt as
+    ``known_failures``. Inline runs report at ``progressReport.toolProgress``;
+    workflow runs report per chunk pod under ``children``, so sum across nodes.
     """
 
     # ponytail: a retried pod would be counted twice; dedupe by displayName if retries show up.
     def counts(node: Any) -> Iterator[int]:
-        """Yield ``skipped_ligands`` from *node* and its descendants."""
+        """Yield ``key`` from *node* and its descendants."""
         if not isinstance(node, dict):
             return
         tool_progress = node.get("toolProgress")
         if isinstance(tool_progress, dict):
-            skipped = tool_progress.get("skipped_ligands")
+            skipped = tool_progress.get(key)
             if isinstance(skipped, int):
                 yield skipped
         children = node.get("children")
@@ -755,9 +758,10 @@ class Admet(
     def get_results(self, dto: dict[str, Any] | None = None) -> pd.DataFrame:
         """Return the predictions computed by this execution as a DataFrame.
 
-        Ligands the tool skipped because they already had predictions are not
-        included (a warning names how many); load those with
-        :meth:`fetch_results`.
+        Ligands the tool skipped are not included, and a warning names how
+        many: load those that already had predictions with
+        :meth:`fetch_results`; rerun with ``force=True`` to retry those an
+        earlier run got no prediction for.
 
         Raises:
             DeepOriginException: If this execution produced no prediction rows.
@@ -767,15 +771,24 @@ class Admet(
             dto = self.client.executions.get(self.id)  # ty:ignore[unresolved-attribute]
         rows = self._fetch_output_rows(dto=dto)
         skipped = _skipped_ligand_count(dto or {})
+        known_failures = _skipped_ligand_count(dto or {}, key="known_failures")
         # Project runs have no job.ligands to pass back.
         ligands_arg = "job.ligands" if self._ligands else "<the ligands you ran>"
-        fetch_hint = (
-            f"{skipped} ligand(s) were skipped because they already have "
-            f"predictions. Load them with Admet.fetch_results({ligands_arg}, "
-            f"properties=job.properties), or rerun with force=True."
-        )
+        hints: list[str] = []
+        if skipped:
+            hints.append(
+                f"{skipped} ligand(s) were skipped because they already have "
+                f"predictions. Load them with Admet.fetch_results({ligands_arg}, "
+                f"properties=job.properties)."
+            )
+        if known_failures:
+            hints.append(
+                f"{known_failures} ligand(s) were skipped because an earlier run "
+                f"got no prediction for them. Rerun with force=True to retry them."
+            )
+        fetch_hint = " ".join(hints)
         if not rows:
-            if skipped:
+            if fetch_hint:
                 message = (
                     f"Admet execution {self.id!r} computed no new predictions: "
                     f"{fetch_hint}"
@@ -788,7 +801,7 @@ class Admet(
             raise DeepOriginException(
                 title="ADMET predictions missing", message=message
             )
-        if skipped:
+        if fetch_hint:
             warnings.warn(f"Results are incomplete: {fetch_hint}", stacklevel=2)
 
         return _admet_dataframe(rows, self._properties)
@@ -808,8 +821,9 @@ class Admet(
         without an id are skipped) and merges every stored prediction into one
         row per ligand; when an endpoint was predicted more than once, the
         newest value wins regardless of tool version. Recorded failures
-        (``admetfailure`` rows) are read too: a property whose newest attempt
-        came back empty is reported separately, since ``force=True`` retries it.
+        (``admetfailure`` rows, from any method or admet-now version) are read
+        too: a property whose newest attempt came back empty is reported
+        separately, since ``force=True`` retries it.
 
         Args:
             ligands: A ligand, list, or :class:`LigandSet`.
@@ -859,7 +873,9 @@ class Admet(
             page_size=ADMET_RESULT_EXPLORER_PAGE_SIZE,
             select=["data", "measured_at"],
         )
-        failed = _failed_properties(records, failure_records)
+        failed = _failed_properties(
+            value_records=records, failure_records=failure_records
+        )
         if properties is not None:
             failed = {
                 lid: names & set(properties)
@@ -871,8 +887,8 @@ class Admet(
         }
         failed_hint = (
             f"{len(failed)} ligand(s) got no prediction for some properties on "
-            f"their last attempt ({failed_examples}); rerun with force=True to "
-            f"retry them"
+            f"their last attempt ({failed_examples}); a plain rerun retries them "
+            f"after an admet-now update, force=True retries them now"
         )
 
         rows = backfill_smiles_from_ligands(
@@ -895,8 +911,15 @@ class Admet(
         no_id = len(ligand_list) - len(platform_ligand_ids(ligand_list))
         if no_id:
             problems.append(f"{no_id} ligand(s) have no platform id")
+        # A ligand with only failures is "never predicted" unless they cover
+        # every requested property.
         not_found = [
-            lig for lig in ligand_ids if lig not in found and lig not in failed
+            lig
+            for lig in ligand_ids
+            if lig not in found
+            and not (
+                lig in failed and (properties is None or set(properties) <= failed[lig])
+            )
         ]
         if not_found:
             problems.append(
@@ -922,7 +945,7 @@ class Admet(
                     f"({dict(list(missing.items())[:5])}); those values are NaN"
                 )
         if failed:
-            problems.append(f"{failed_hint}; those values are NaN")
+            problems.append(failed_hint)
         if problems:
             warnings.warn(
                 "ADMET predictions incomplete: " + "; ".join(problems) + ".",

@@ -283,7 +283,18 @@ def test_failed_properties_newest_attempt_wins() -> None:
         },
     ]
 
-    assert _failed_properties(values, failures) == {
+    assert _failed_properties(value_records=values, failure_records=failures) == {
         "L1": {"AMES_classification"},
         "L2": {"hERG_classification"},
     }
+
+
+def test_skipped_ligand_count_reads_known_failures() -> None:
+    """Already-predicted and previously-failed skips are separate keys."""
+    dto = {
+        "progressReport": {
+            "toolProgress": {"skipped_ligands": 2, "known_failures": 3},
+        }
+    }
+    assert _skipped_ligand_count(dto) == 2
+    assert _skipped_ligand_count(dto, key="known_failures") == 3

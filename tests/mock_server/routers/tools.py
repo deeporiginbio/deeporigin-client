@@ -745,8 +745,10 @@ def _synthesize_molprops_row(
     return row
 
 
-MOCK_ADMET_FAILURE_SMILES = "ClC(Cl)(Cl)C(Cl)(Cl)Cl"
-"""SMILES the mock admet tool predicts nothing for (recorded as an ``admet_failures`` row)."""
+MOCK_ADMET_FAILURE_SMILES = ("ClC(Cl)(Cl)C(Cl)(Cl)Cl", "ClC(Cl)(Cl)Cl")
+"""SMILES the mock admet tool predicts nothing for (recorded as ``admet_failures`` rows).
+
+Tests share one mock store, so each test uses its own entry."""
 MOCK_ADMET_NOW_VERSION = "v0.0.0-mock"
 """admet-now tag the mock records on ``admet_failures`` rows."""
 
@@ -1678,7 +1680,7 @@ def create_tools_router(
         ligands_in = _admet_ligands_from_inputs(inputs)
         for i, lig in enumerate(ligands_in):
             smiles = str(lig.get("smiles") or "")
-            if smiles == MOCK_ADMET_FAILURE_SMILES:
+            if smiles in MOCK_ADMET_FAILURE_SMILES:
                 continue
             lid = str(lig.get("id") if lig.get("id") is not None else i)
             rows.append(
@@ -1708,7 +1710,7 @@ def create_tools_router(
                 "properties": requested,
             }
             for lig in _admet_ligands_from_inputs(inputs)
-            if lig.get("smiles") == MOCK_ADMET_FAILURE_SMILES
+            if lig.get("smiles") in MOCK_ADMET_FAILURE_SMILES
             and lig.get("id") is not None
         ]
 

@@ -506,7 +506,7 @@ def test_admet_fetch_results_names_failed_ligands(client: DeepOriginClient) -> N
     """Ligands whose last attempt failed get a ``force=True`` hint, not "never run"."""
     _assert_tool_available(client)
     good = Ligand.from_smiles("CCCO")
-    bad = Ligand.from_smiles(MOCK_ADMET_FAILURE_SMILES)
+    bad = Ligand.from_smiles(MOCK_ADMET_FAILURE_SMILES[0])
     job = Admet(ligands=[good, bad], client=client)
     job.properties = list(_ADMET_PROPERTIES)
     job.run()
@@ -520,6 +520,43 @@ def test_admet_fetch_results_names_failed_ligands(client: DeepOriginClient) -> N
     message = str(record[0].message)
     assert bad.id in message
     assert "no stored predictions" not in message
+
+
+def test_admet_get_results_points_failed_skips_to_force(
+    client: DeepOriginClient,
+) -> None:
+    """Ligands skipped after a failed attempt get a force=True hint, not fetch_results."""
+    _assert_tool_available(client)
+    dto = {
+        **_historical_omit_dto(),
+        "executionId": "__no_result_rows__",
+        "jobOutputs": {"admet_properties": []},
+        "progressReport": {"toolProgress": {"skipped_ligands": 0, "known_failures": 1}},
+    }
+    job = Admet.from_dto(dto, client=client)
+
+    with pytest.raises(DeepOriginException, match="force=True") as excinfo:
+        job.get_results(dto)
+    assert "fetch_results" not in str(excinfo.value)
+
+
+def test_admet_fetch_results_failure_on_subset_reports_other_properties(
+    client: DeepOriginClient,
+) -> None:
+    """A failure for one property does not hide properties that were never run."""
+    _assert_tool_available(client)
+    good = Ligand.from_smiles("CCCCO")
+    bad = Ligand.from_smiles(MOCK_ADMET_FAILURE_SMILES[1])
+    job = Admet(ligands=[good, bad], client=client)
+    job.properties = ["hERG_classification"]
+    job.run()
+
+    with pytest.warns(UserWarning) as record:
+        Admet.fetch_results([good, bad], properties=_ADMET_PROPERTIES, client=client)
+
+    message = str(record[0].message)
+    assert "no stored predictions" in message
+    assert "force=True" in message
 
 
 def test_admet_fetch_results_warns_on_ligand_without_predictions(
