@@ -745,6 +745,14 @@ def _synthesize_molprops_row(
     return row
 
 
+MOCK_ADMET_FAILURE_SMILES = ("ClC(Cl)(Cl)C(Cl)(Cl)Cl", "ClC(Cl)(Cl)Cl")
+"""SMILES the mock admet tool predicts nothing for (recorded as ``admet_failures`` rows).
+
+Tests share one mock store, so each test uses its own entry."""
+MOCK_ADMET_NOW_VERSION = "v0.0.0-mock"
+"""admet-now tag the mock records on ``admet_failures`` rows."""
+
+
 def _synthesize_admet_prediction_row(
     *, smiles: str, ligand_id: str, requested: list[str]
 ) -> dict[str, Any]:
@@ -1672,6 +1680,8 @@ def create_tools_router(
         ligands_in = _admet_ligands_from_inputs(inputs)
         for i, lig in enumerate(ligands_in):
             smiles = str(lig.get("smiles") or "")
+            if smiles in MOCK_ADMET_FAILURE_SMILES:
+                continue
             lid = str(lig.get("id") if lig.get("id") is not None else i)
             rows.append(
                 _synthesize_admet_prediction_row(
@@ -1682,6 +1692,28 @@ def create_tools_router(
             )
         return rows
 
+    def _admet_failure_rows_from_inputs(
+        inputs: dict[str, Any],
+    ) -> list[dict[str, Any]]:
+        """Return ``admet_failures`` rows for ligands the mock predicts nothing for."""
+
+        requested_raw = inputs.get("properties")
+        if isinstance(requested_raw, list) and requested_raw:
+            requested = [p for p in requested_raw if isinstance(p, str)]
+        else:
+            requested = list(MOCK_ADMET_ENDPOINTS)
+        return [
+            {
+                "ligand_id": str(lig["id"]),
+                "method": str(inputs.get("method") or "togo"),
+                "admet_now_version": MOCK_ADMET_NOW_VERSION,
+                "properties": requested,
+            }
+            for lig in _admet_ligands_from_inputs(inputs)
+            if lig.get("smiles") in MOCK_ADMET_FAILURE_SMILES
+            and lig.get("id") is not None
+        ]
+
     def _inject_admet_result_explorer_records(
         *,
         tool_key: str,
@@ -1689,15 +1721,31 @@ def create_tools_router(
         execution_id: str,
         job_outputs: dict[str, Any],
     ) -> None:
-        """Mirror ADMET ``admet_properties`` rows into result-explorer."""
+        """Mirror ADMET ``admet_properties`` and ``admet_failures`` into result-explorer."""
 
         if any(
             r.get("compute_job_id") == execution_id
-            and r.get("result_type") == "admetproperty"
+            and r.get("result_type") in ("admetproperty", "admetfailure")
             for r in results
         ):
             return
 
+        for failure in job_outputs.get("admet_failures") or []:
+            results.append(
+                {
+                    "id": "08" + str(uuid.uuid4()).replace("-", "").upper()[:11],
+                    "tool_key": tool_key,
+                    "tool_version": tool_version,
+                    "result_type": "admetfailure",
+                    "data": {
+                        "ligand_id": failure["ligand_id"],
+                        "admetfailures": [dict(failure)],
+                    },
+                    "compute_job_id": execution_id,
+                    "ligand_id": failure["ligand_id"],
+                    "measured_at": datetime.now(timezone.utc).isoformat(),
+                }
+            )
         items = job_outputs.get("admet_properties")
         if not isinstance(items, list):
             return
@@ -1735,7 +1783,10 @@ def create_tools_router(
         if not isinstance(user_inputs, dict):
             user_inputs = {}
         rows = _admet_prediction_rows_from_inputs(user_inputs)
-        job_outputs = {"admet_properties": rows}
+        job_outputs = {
+            "admet_properties": rows,
+            "admet_failures": _admet_failure_rows_from_inputs(user_inputs),
+        }
         execution["jobOutputs"] = {"admet_properties": []}
         _inject_admet_result_explorer_records(
             tool_key=tkey,
@@ -1799,7 +1850,10 @@ def create_tools_router(
         inputs = body.get("inputs", {}) or {}
         rows = _admet_prediction_rows_from_inputs(inputs)
 
-        execution["jobOutputs"] = {"admet_properties": rows}
+        execution["jobOutputs"] = {
+            "admet_properties": rows,
+            "admet_failures": _admet_failure_rows_from_inputs(inputs),
+        }
         n_billable = max(len(rows), 1)
         price_each = 1.0
         price_total = float(n_billable) * price_each
