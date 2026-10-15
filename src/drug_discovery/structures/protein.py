@@ -58,6 +58,24 @@ from .repr_display import (
 )
 
 _PROTEIN_STRUCTURE_NOT_LOADED_MSG = "Protein structure is not loaded."
+_STRUCTURE_BLOCK_TYPES = ("pdb", "pdbqt", "cif")
+
+
+def _structure_block_type_from_path(file_path: Path) -> str:
+    """Return the structure format for *file_path* (``pdb``, ``pdbqt``, or ``cif``).
+
+    ``pathlib.Path.suffix`` is empty for names like ``.pdb`` (treated as a
+    hidden file with no extension). Fall back to the filename so prepared
+    protein paths such as ``entities/proteins/prepared/.pdb`` still resolve.
+    """
+    suffix = file_path.suffix.lstrip(".").lower()
+    if suffix in _STRUCTURE_BLOCK_TYPES:
+        return suffix
+    name = file_path.name.lower()
+    for ext in _STRUCTURE_BLOCK_TYPES:
+        if name == f".{ext}" or name.endswith(f".{ext}"):
+            return ext
+    return suffix
 
 
 @dataclass
@@ -429,8 +447,8 @@ class Protein(Entity):
         if not file_path.exists():
             raise FileNotFoundError(f"The file {file_path} does not exist.")
 
-        block_type = file_path.suffix.lstrip(".").lower()
-        if block_type not in ["pdb", "pdbqt", "cif"]:
+        block_type = _structure_block_type_from_path(file_path)
+        if block_type not in _STRUCTURE_BLOCK_TYPES:
             raise ValueError(
                 f"Unsupported file type: {block_type}. Supported types are: pdb, pdbqt, cif"
             )
