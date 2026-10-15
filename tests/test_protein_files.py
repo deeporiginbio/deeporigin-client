@@ -2,6 +2,7 @@
 
 import csv
 from pathlib import Path
+import sys
 import zipfile
 
 import pytest
@@ -215,7 +216,9 @@ def test_bundle_csv_quotes_awkward_names(tmp_path):
     """Names with commas, quotes, spaces or extra dots survive the CSV."""
     src = tmp_path / "src"
     src.mkdir()
-    names = ["7DH5 (1).pdb", "1AKI..pdb", 'a,b "c".pdb']
+    names = ["7DH5 (1).pdb", "1AKI..pdb", "a,b c.pdb"]
+    if sys.platform != "win32":  # Windows filenames cannot contain a double quote
+        names.append('a,b "c".pdb')
     for name in names:
         (src / name).write_text("ATOM\n")
     out = tmp_path / "out"
