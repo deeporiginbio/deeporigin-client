@@ -378,7 +378,11 @@ def get_proteins(
     limit: int | None = 100,
     **filter_kwargs: Any,
 ) -> Sequence[Protein]:
-    """Load proteins for the current project.
+    """Load proteins for the current project as metadata-only Protein objects.
+
+    Structures are not downloaded; call :meth:`~deeporigin.drug_discovery.structures.protein.Protein.download`
+    to hydrate a protein. This keeps listing resilient when a remote PDB is
+    missing or unparseable.
 
     Args:
         limit: Max proteins to fetch.
@@ -408,7 +412,7 @@ def get_proteins(
         row_id = row.get("id")
         if row_id is None:
             continue
-        out.append(Protein.from_id(str(row_id), client=client))
+        out.append(Protein.from_id(str(row_id), client=client, download=False))
     return out
 
 
