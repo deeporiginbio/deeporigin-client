@@ -274,7 +274,9 @@ ligands, pass `ligands=` and call `start()` instead; see
 [Docking many ligands](../tools/docking.md#docking-many-ligands).
 
 !!! tip "Monitoring jobs"
-    For more details about how to monitor jobs, look at this [How To section](../how-to/job.md).
+    In notebooks, use [`Docking.watch()`](../ref/docking.md) on a started job. To
+    list or inspect executions across tools, see the
+    [Executions API](../../platform/ref/executions.md).
 
 ## Results
 
