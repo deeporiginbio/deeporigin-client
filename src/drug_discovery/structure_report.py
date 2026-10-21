@@ -200,7 +200,9 @@ class StructureReportResult:
 
     def _repr_html_(self) -> str:
         """Return a Structure Report summary card for Jupyter (platform-ui parity)."""
-        from deeporigin.viz.structure_report_html import render_structure_report_result_html
+        from deeporigin.viz.structure_report_html import (
+            render_structure_report_result_html,
+        )
 
         return render_structure_report_result_html(self)
 

@@ -62,6 +62,12 @@ def test_render_summary_card_layout() -> None:
     assert "<table" not in html
 
 
+def test_render_result_invalid_grade_mapping() -> None:
+    html = render_structure_report_result_html({"grade": "Z"})
+    assert "Structure grade:" in html
+    assert ">Z<" in html
+
+
 def test_render_result_row() -> None:
     from deeporigin.drug_discovery.structure_report import StructureReportResult
 

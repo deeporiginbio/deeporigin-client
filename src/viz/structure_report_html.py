@@ -23,13 +23,14 @@ _METHOD_LABELS: dict[StructureMethod, str] = {
     "predicted": "Predicted",
 }
 
-# Mantine palette index 5 from platform-ui/packages/theme/src/theme-values.ts
+# Mantine palette index 6 from platform-ui/packages/theme/src/theme-values.ts
+# (grade letter on white needs stronger contrast than filled-badge index 5).
 _GRADE_HEX: dict[StructureGrade, str] = {
-    "A": "#14C17B",
-    "B": "#3A9CFF",
-    "C": "#FFC825",
-    "D": "#FD7E14",
-    "F": "#EE443F",
+    "A": "#11A468",
+    "B": "#1786F5",
+    "C": "#F4B516",
+    "D": "#E8590C",
+    "F": "#D93E39",
 }
 
 _GREY_3 = "#D2D5DB"
@@ -66,6 +67,15 @@ class _StructureReportRow(Protocol):
     field_status: Mapping[str, str]
 
 
+def _row_get(
+    report: _StructureReportRow | Mapping[str, object],
+    key: str,
+) -> object | None:
+    if isinstance(report, Mapping):
+        return report.get(key)
+    return getattr(report, key, None)
+
+
 def _to_method(raw: str | None) -> StructureMethod | None:
     value = (raw or "").lower()
     if not value:
@@ -91,17 +101,12 @@ def adapt_structure_report_summary(
     if report is None:
         return None
 
-    def _get(key: str) -> object | None:
-        if isinstance(report, Mapping):
-            return report.get(key)
-        return getattr(report, key, None)
-
-    grade_raw = _get("grade")
+    grade_raw = _row_get(report, "grade")
     grade = str(grade_raw).upper() if grade_raw is not None else ""
     if not grade or grade not in _GRADES:
         return None
 
-    field_status_obj = _get("field_status")
+    field_status_obj = _row_get(report, "field_status")
     field_status: dict[str, str] = {}
     if isinstance(field_status_obj, Mapping):
         field_status = {str(k): str(v) for k, v in field_status_obj.items()}
@@ -112,11 +117,16 @@ def adapt_structure_report_summary(
             return None
         return value
 
-    method_raw = reported("method", _get("method_class") or _get("method"))
-    organism_raw = reported("organism", _get("organism") or _get("organism_class"))
-    resolution_raw = reported("resolution", _get("resolution"))
-    has_ligand_raw = reported("inhibitor", _get("has_ligand"))
-    coverage_raw = reported("coverage", _get("coverage"))
+    method_raw = reported(
+        "method", _row_get(report, "method_class") or _row_get(report, "method")
+    )
+    organism_raw = reported(
+        "organism",
+        _row_get(report, "organism") or _row_get(report, "organism_class"),
+    )
+    resolution_raw = reported("resolution", _row_get(report, "resolution"))
+    has_ligand_raw = reported("inhibitor", _row_get(report, "has_ligand"))
+    coverage_raw = reported("coverage", _row_get(report, "coverage"))
 
     coverage_percent: float | None = None
     if isinstance(coverage_raw, (int, float)):
@@ -139,7 +149,7 @@ def adapt_structure_report_summary(
         organism = organism_raw
 
     pdb_id: str | None = None
-    pdb_raw = _get("pdb_id")
+    pdb_raw = _row_get(report, "pdb_id")
     if isinstance(pdb_raw, str) and pdb_raw:
         pdb_id = pdb_raw
 
@@ -164,7 +174,9 @@ def _badge_outline(text: str) -> str:
     )
 
 
-def _badge_filled(text: str, *, bg: str, fg: str = "#131927", bold: bool = False) -> str:
+def _badge_filled(
+    text: str, *, bg: str, fg: str = "#131927", bold: bool = False
+) -> str:
     safe = html_escape(text)
     weight = "600" if bold else "500"
     return (
@@ -191,7 +203,7 @@ def _attribute_badges_html(summary: StructureGradeSummary) -> str:
         )
     if summary.has_ligand is not None:
         if summary.has_ligand:
-            parts.append(_badge_filled("Ligand", bg=_GREEN_5, fg="#fff", bold=True))
+            parts.append(_badge_filled("Ligand", bg=_GREEN_5, bold=True))
         else:
             parts.append(_badge_outline("No ligand"))
     if not parts:
@@ -236,9 +248,7 @@ def render_structure_report_summary_html(
       <div style="font-size:14px;color:{_DIMMED};text-align:center;margin-bottom:4px;">
         Structure Grade
       </div>
-      <div style="font-size:48px;font-weight:700;line-height:1;color:{grade_color};text-align:center;">
-        {grade_letter}
-      </div>
+      <div style="font-size:48px;font-weight:700;line-height:1;color:{grade_color};text-align:center;">{grade_letter}</div>
     </div>
     <div style="width:1px;background:{_GREY_3};flex-shrink:0;"></div>
     <div style="flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:4px;">
@@ -259,7 +269,8 @@ def render_structure_report_result_html(
     """Render the read-only summary card for a Structure Report result row."""
     summary = adapt_structure_report_summary(row)
     if summary is None:
-        grade = html_escape(str(getattr(row, "grade", "") or "?"))
+        grade_raw = _row_get(row, "grade")
+        grade = html_escape(str(grade_raw) if grade_raw is not None else "?")
         return (
             f'<div style="font-family: sans-serif;padding:8px;">'
             f"Structure grade: <strong>{grade}</strong></div>"
